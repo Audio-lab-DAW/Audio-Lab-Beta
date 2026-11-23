@@ -30,6 +30,7 @@
   <div class="row"><span>Cross-origin isolated</span><b id="iso">…</b></div>
   <div class="row"><span>SharedArrayBuffer</span><b id="sab">…</b></div>
   <div class="row"><span>Engine state</span><b id="state">stopped</b></div>
+  <div class="row"><span>Audio context state</span><b id="ctxs">–</b></div>
   <div class="row"><span>Sample rate</span><b id="sr">–</b></div>
   <div class="row"><span>baseLatency</span><b id="bl">–</b></div>
   <div class="row"><span>outputLatency</span><b id="ol">–</b></div>
@@ -63,6 +64,7 @@
   <div class="row"><span>Audio blocks per second</span><b id="rate">–</b></div>
   <div class="row"><span>Expected at this sample rate</span><b id="exp">–</b></div>
   <div class="row"><span>Producer chunks written</span><b id="chunks">0</b></div>
+  <div class="row"><span>Audio thread heartbeat (process calls)</span><b id="beat">0</b></div>
 </div>
 
 <script>
@@ -97,6 +99,7 @@ class RingPlayer extends AudioWorkletProcessor {
     this.starved = false;
   }
   process(inputs, outputs) {
+    Atomics.add(this.S, 7, 1);
     const out = outputs[0];
     const L = out[0], Rr = out[1] || out[0], n = L.length;
     if (!Atomics.load(this.S, 4)) {
@@ -182,12 +185,14 @@ $('start').onclick = async () => {
       processorOptions: { ring: RING, state: STATE, cap: CAP }
     });
     node.connect(ctx.destination);
+    await ctx.resume();
     worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP, sr: ctx.sampleRate });
 
     $('state').textContent = 'running'; $('state').className = 'ok';
     $('start').disabled = true; $('stop').disabled = false; $('freq').disabled = false;
     $('stall').disabled = false; $('pause').disabled = false;
     $('sr').textContent = ctx.sampleRate + ' Hz';
+    $('ctxs').textContent = ctx.state;
     $('exp').textContent = (ctx.sampleRate / 128).toFixed(0) + ' blocks/s';
     $('bl').textContent = ctx.baseLatency == null ? 'not reported' : (ctx.baseLatency * 1000).toFixed(1) + ' ms';
     $('ol').textContent = ctx.outputLatency == null ? 'not reported' : (ctx.outputLatency * 1000).toFixed(1) + ' ms';
@@ -239,6 +244,8 @@ function ui() {
   $('under').textContent = under;
   $('under').className = under ? 'bad' : 'ok';
   $('chunks').textContent = Atomics.load(S, 3).toLocaleString();
+  $('beat').textContent = Atomics.load(S, 7).toLocaleString();
+  $('ctxs').textContent = ctx.state;
   const blocks = Atomics.load(S, 6), now = performance.now();
   $('rate').textContent = Math.round((blocks - lastBlocks) * 1000 / (now - lastTime)) + ' /s';
   lastBlocks = blocks; lastTime = now;
