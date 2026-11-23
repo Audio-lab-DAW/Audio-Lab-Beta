@@ -27,3 +27,6 @@ Projects are kept per website. Save a project as a `.audiolab` file in one place
 
 ## Desktop app
 Mac and Windows apps live in [`desktop/`](desktop/README.md). Build them from the Actions tab (*Build desktop apps*).
+
+## Install as an app (no download, no Mac security prompts)
+Open the site in Chrome, then use the install icon at the right of the address bar (or ⋮ ▸ Cast, save and share ▸ Install page as app). AudioLab Studio then opens in its own window and Dock icon, with direct output-device selection.
