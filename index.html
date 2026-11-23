@@ -91,9 +91,10 @@ const WORKLET = `
 class RingPlayer extends AudioWorkletProcessor {
   constructor(o) {
     super();
-    this.S = new Int32Array(o.state);
-    this.R = new Float32Array(o.ring);
-    this.mask = o.cap - 1;
+    const po = o.processorOptions;
+    this.S = new Int32Array(po.state);
+    this.R = new Float32Array(po.ring);
+    this.mask = po.cap - 1;
     this.rd = 0;
     this.played = false;
     this.starved = false;
