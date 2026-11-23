@@ -44,6 +44,10 @@
   <div style="margin-top:12px">
     <div class="row"><span>Speed (re-pitch: pitch follows speed)</span><b id="fval">1.00 speed · 120 BPM</b></div>
     <input id="ratio" type="range" min="0.5" max="2" step="0.01" value="1" disabled>
+    <div style="margin-top:10px"><select id="mode" disabled style="background:#1f2430;color:#e8ebf3;border:1px solid #3a4152;border-radius:8px;padding:6px 10px;font-size:14px">
+      <option value="0">Re-pitch (speed changes pitch)</option>
+      <option value="1">Keep pitch (WSOLA time-stretch)</option>
+    </select></div>
   </div>
   <div style="margin-top:14px">
     <div class="row"><span>Ring buffer fill</span><b id="fill">–</b></div>
@@ -84,8 +88,8 @@ const ringF = new Float32Array(RING);
 //        4 running flag, 5 target fill (frames), 6 audio blocks
 const STATE = new SharedArrayBuffer(8 * 4);
 const S = new Int32Array(STATE);
-// Control: 0 unused, 1 level, 2 producer pause flag (1 = paused), 3 playback speed
-const CTRL = new SharedArrayBuffer(4 * 4);
+// Control: 0 unused, 1 level, 2 producer pause flag (1 = paused), 3 playback speed, 4 mode (1 = keep pitch)
+const CTRL = new SharedArrayBuffer(5 * 4);
 const C = new Float32Array(CTRL);
 
 const WORKLET = `
@@ -136,6 +140,13 @@ registerProcessor('ring-player', RingPlayer);
 
 const PRODUCER = `
 let S, R, F, CAP, SR = 44100, timer = null, paused = false, src = null, L = 0, pos = 0;
+// WSOLA time-stretch state. Grains are 1024 samples, hop 512, search +-256 samples.
+const W = 1024, H = 512, D = 256, QN = 1 << 15;
+const hann = new Float32Array(W);
+for (let i = 0; i < W; i++) hann[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / W);
+const acc = new Float32Array(W);
+const Q = new Float32Array(QN);
+let qw = 0, qr = 0, anaPos = 0, prevStart = 0, wsMode = false;
 onmessage = e => {
   const m = e.data;
   if (m.init) {
@@ -159,6 +170,24 @@ function buildLoop() {
     src[i] = v;
   }
 }
+function at(i) { i %= L; return src[i < 0 ? i + L : i]; }
+// Produce one hop of output at the given speed (source frames per output frame).
+function wsolaFrame(rate) {
+  const nominal = Math.round(anaPos);
+  const cont = prevStart + H;
+  let best = nominal, bestC = -Infinity;
+  for (let k = -D; k <= D; k++) {
+    const cand = nominal + k;
+    let c = 0;
+    for (let i = 0; i < H; i++) c += at(cand + i) * at(cont + i);
+    if (c > bestC) { bestC = c; best = cand; }
+  }
+  for (let i = 0; i < W; i++) acc[i] += at(best + i) * hann[i];
+  for (let i = 0; i < H; i++) { Q[qw & (QN - 1)] = acc[i]; qw++; }
+  acc.copyWithin(0, H); acc.fill(0, W - H);
+  prevStart = best;
+  anaPos = (anaPos + H * rate) % L;
+}
 function tick() {
   if (!Atomics.load(S, 4) || paused || F[2]) return;
   const wr = Atomics.load(S, 0), rd = Atomics.load(S, 1);
@@ -166,13 +195,28 @@ function tick() {
   const n = Math.min(Atomics.load(S, 5) - fill, CAP - fill);
   if (n <= 0) return;
   const rate = F[3] || 1, lvl = F[1];
-  for (let k = 0; k < n; k++) {
-    const i = Math.floor(pos), f = pos - i;
-    const j = i + 1 < L ? i + 1 : 0;
-    const v = (src[i] * (1 - f) + src[j] * f) * lvl;
-    const p = ((wr + k) & (CAP - 1)) * 2;
-    R[p] = v; R[p + 1] = v;
-    pos += rate; if (pos >= L) pos -= L;
+  const ws = F[4] > 0.5;
+  if (ws !== wsMode) {
+    wsMode = ws;
+    if (ws) { anaPos = pos; prevStart = pos; acc.fill(0); qw = qr = 0; }
+    else { pos = anaPos; }
+  }
+  if (ws) {
+    while (qw - qr < n) wsolaFrame(rate);
+    for (let k = 0; k < n; k++) {
+      const v = Q[qr & (QN - 1)] * lvl; qr++;
+      const p = ((wr + k) & (CAP - 1)) * 2;
+      R[p] = v; R[p + 1] = v;
+    }
+  } else {
+    for (let k = 0; k < n; k++) {
+      const i = Math.floor(pos), f = pos - i;
+      const j = i + 1 < L ? i + 1 : 0;
+      const v = (src[i] * (1 - f) + src[j] * f) * lvl;
+      const p = ((wr + k) & (CAP - 1)) * 2;
+      R[p] = v; R[p + 1] = v;
+      pos += rate; if (pos >= L) pos -= L;
+    }
   }
   Atomics.store(S, 0, wr + n);
   Atomics.add(S, 3, 1);
@@ -194,7 +238,7 @@ $('start').onclick = async () => {
     S.fill(0);
     S[5] = Math.round(ctx.sampleRate * 0.5);   // keep about half a second ahead
     S[4] = 1;
-    C[1] = 0.2; C[2] = 0; C[3] = +$('ratio').value;
+    C[1] = 0.2; C[2] = 0; C[3] = +$('ratio').value; C[4] = +$('mode').value;
 
     node = new AudioWorkletNode(ctx, 'ring-player', {
       numberOfOutputs: 1, outputChannelCount: [2],
@@ -208,7 +252,7 @@ $('start').onclick = async () => {
     worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP, sr: ctx.sampleRate });
 
     $('state').textContent = 'running'; $('state').className = 'ok';
-    $('start').disabled = true; $('stop').disabled = false; $('ratio').disabled = false;
+    $('start').disabled = true; $('stop').disabled = false; $('ratio').disabled = false; $('mode').disabled = false;
     $('stall').disabled = false; $('pause').disabled = false;
     $('sr').textContent = ctx.sampleRate + ' Hz';
     $('ctxs').textContent = ctx.state;
@@ -230,11 +274,12 @@ $('stop').onclick = async () => {
     if (ctx) await ctx.close();
     ctx = null;
     $('state').textContent = 'stopped'; $('state').className = '';
-    $('start').disabled = false; $('stop').disabled = true; $('ratio').disabled = true;
+    $('start').disabled = false; $('stop').disabled = true; $('ratio').disabled = true; $('mode').disabled = true;
     $('stall').disabled = true; $('pause').disabled = true;
   }, 150);
 };
 
+$('mode').onchange = e => { C[4] = +e.target.value; };
 $('ratio').oninput = e => {
   const r = +e.target.value;
   C[3] = r;
