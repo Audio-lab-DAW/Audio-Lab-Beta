@@ -251,6 +251,23 @@ function checkUpdates(manual) {
   autoUpdater.checkForUpdates().catch(() => {});
 }
 ipcMain.handle('al:version', () => app.getVersion());
+
+/* ---------- DAC hardware volume (macOS Core Audio helper) ---------- */
+const { execFile } = require('child_process');
+function alvolPath() {
+  return app.isPackaged ? path.join(process.resourcesPath, 'bin', 'alvol') : path.join(__dirname, 'bin', 'alvol');
+}
+function alvol(args) {
+  return new Promise((resolve) => {
+    if (!isMac || !fs.existsSync(alvolPath())) return resolve({ error: 'unavailable' });
+    execFile(alvolPath(), args, { timeout: 4000 }, (err, stdout) => {
+      try { resolve(JSON.parse(String(stdout).trim() || '{}')); } catch (e) { resolve({ error: String(err || e) }); }
+    });
+  });
+}
+ipcMain.handle('al:dac-list', () => alvol(['list']));
+ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]));
+ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
 
 /* ---------- lifecycle ---------- */

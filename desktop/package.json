@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Studio",
-  "version": "0.115.0",
+  "version": "0.116.0",
   "description": "AudioLab Studio - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -73,7 +73,13 @@
       "hardenedRuntime": false,
       "extendInfo": {
         "NSMicrophoneUsageDescription": "AudioLab Studio needs audio input access to record and to list your audio output devices."
-      }
+      },
+      "extraResources": [
+        {
+          "from": "bin/alvol",
+          "to": "bin/alvol"
+        }
+      ]
     },
     "dmg": {
       "title": "AudioLab Studio ${version}"
