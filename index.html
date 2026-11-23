@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Audio Lab engine test</title>
+<link rel="icon" href="data:,">
 <style>
   body{font-family:system-ui,sans-serif;background:#0b0c10;color:#dfe4f0;margin:0;padding:32px;max-width:720px}
   h1{font-size:20px;margin:0 0 4px} .sub{color:#7d8296;font-size:13px;margin-bottom:24px}
@@ -41,8 +42,8 @@
   <button id="start">Start engine</button>
   <button id="stop" disabled>Stop</button>
   <div style="margin-top:12px">
-    <div class="row"><span>Frequency</span><b id="fval">220 Hz</b></div>
-    <input id="freq" type="range" min="110" max="880" value="220" disabled>
+    <div class="row"><span>Speed (re-pitch: pitch follows speed)</span><b id="fval">1.00 speed · 120 BPM</b></div>
+    <input id="ratio" type="range" min="0.5" max="2" step="0.01" value="1" disabled>
   </div>
   <div style="margin-top:14px">
     <div class="row"><span>Ring buffer fill</span><b id="fill">–</b></div>
@@ -83,8 +84,8 @@ const ringF = new Float32Array(RING);
 //        4 running flag, 5 target fill (frames), 6 audio blocks
 const STATE = new SharedArrayBuffer(8 * 4);
 const S = new Int32Array(STATE);
-// Control: 0 frequency, 1 level, 2 producer pause flag (1 = paused)
-const CTRL = new SharedArrayBuffer(3 * 4);
+// Control: 0 unused, 1 level, 2 producer pause flag (1 = paused), 3 playback speed
+const CTRL = new SharedArrayBuffer(4 * 4);
 const C = new Float32Array(CTRL);
 
 const WORKLET = `
@@ -134,31 +135,44 @@ registerProcessor('ring-player', RingPlayer);
 `;
 
 const PRODUCER = `
-let S, R, F, CAP, SR = 44100, phase = 0, timer = null, paused = false;
+let S, R, F, CAP, SR = 44100, timer = null, paused = false, src = null, L = 0, pos = 0;
 onmessage = e => {
   const m = e.data;
   if (m.init) {
     S = new Int32Array(m.state); R = new Float32Array(m.ring); F = new Float32Array(m.ctrl);
-    CAP = m.cap; SR = m.sr; timer = setInterval(tick, 10);
+    CAP = m.cap; SR = m.sr; buildLoop(); timer = setInterval(tick, 10);
   } else if (m.stop) {
     clearInterval(timer);
   } else if (m.pause) {
     paused = true; setTimeout(() => { paused = false; }, m.ms);
   }
 };
+// A four-beat loop at 120 BPM: a 440 Hz tone with a click on every beat.
+function buildLoop() {
+  const beat = 0.5;
+  L = Math.round(SR * beat * 4);
+  src = new Float32Array(L);
+  for (let i = 0; i < L; i++) {
+    const t = i / SR, inBeat = t % beat;
+    let v = 0.25 * Math.sin(2 * Math.PI * 440 * t);
+    if (inBeat < 0.02) v += 0.6 * Math.sin(2 * Math.PI * 1000 * inBeat) * (1 - inBeat / 0.02);
+    src[i] = v;
+  }
+}
 function tick() {
   if (!Atomics.load(S, 4) || paused || F[2]) return;
   const wr = Atomics.load(S, 0), rd = Atomics.load(S, 1);
   const fill = wr - rd;
   const n = Math.min(Atomics.load(S, 5) - fill, CAP - fill);
   if (n <= 0) return;
-  const inc = 2 * Math.PI * F[0] / SR;
-  const lvl = F[1];
+  const rate = F[3] || 1, lvl = F[1];
   for (let k = 0; k < n; k++) {
-    const v = Math.sin(phase) * lvl;
-    phase += inc; if (phase > 6.283185307179586) phase -= 6.283185307179586;
+    const i = Math.floor(pos), f = pos - i;
+    const j = i + 1 < L ? i + 1 : 0;
+    const v = (src[i] * (1 - f) + src[j] * f) * lvl;
     const p = ((wr + k) & (CAP - 1)) * 2;
     R[p] = v; R[p + 1] = v;
+    pos += rate; if (pos >= L) pos -= L;
   }
   Atomics.store(S, 0, wr + n);
   Atomics.add(S, 3, 1);
@@ -180,7 +194,7 @@ $('start').onclick = async () => {
     S.fill(0);
     S[5] = Math.round(ctx.sampleRate * 0.5);   // keep about half a second ahead
     S[4] = 1;
-    C[0] = +$('freq').value; C[1] = 0.2; C[2] = 0;
+    C[1] = 0.2; C[2] = 0; C[3] = +$('ratio').value;
 
     node = new AudioWorkletNode(ctx, 'ring-player', {
       numberOfOutputs: 1, outputChannelCount: [2],
@@ -194,7 +208,7 @@ $('start').onclick = async () => {
     worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP, sr: ctx.sampleRate });
 
     $('state').textContent = 'running'; $('state').className = 'ok';
-    $('start').disabled = true; $('stop').disabled = false; $('freq').disabled = false;
+    $('start').disabled = true; $('stop').disabled = false; $('ratio').disabled = false;
     $('stall').disabled = false; $('pause').disabled = false;
     $('sr').textContent = ctx.sampleRate + ' Hz';
     $('ctxs').textContent = ctx.state;
@@ -216,14 +230,15 @@ $('stop').onclick = async () => {
     if (ctx) await ctx.close();
     ctx = null;
     $('state').textContent = 'stopped'; $('state').className = '';
-    $('start').disabled = false; $('stop').disabled = true; $('freq').disabled = true;
+    $('start').disabled = false; $('stop').disabled = true; $('ratio').disabled = true;
     $('stall').disabled = true; $('pause').disabled = true;
   }, 150);
 };
 
-$('freq').oninput = e => {
-  C[0] = +e.target.value;
-  $('fval').textContent = e.target.value + ' Hz';
+$('ratio').oninput = e => {
+  const r = +e.target.value;
+  C[3] = r;
+  $('fval').textContent = r.toFixed(2) + ' speed · ' + (120 * r).toFixed(0) + ' BPM';
 };
 
 // Freeze the main thread on purpose: the page stops responding for one second.
