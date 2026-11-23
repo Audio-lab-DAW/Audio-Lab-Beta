@@ -95,6 +95,7 @@ class RingPlayer extends AudioWorkletProcessor {
     this.S = new Int32Array(po.state);
     this.R = new Float32Array(po.ring);
     this.mask = po.cap - 1;
+    this.port.postMessage({ info: true, stateLen: this.S.length, ringLen: this.R.length, keys: Object.keys(o), poKeys: po ? Object.keys(po) : null });
     this.rd = 0;
     this.played = false;
     this.starved = false;
@@ -186,6 +187,7 @@ $('start').onclick = async () => {
       processorOptions: { ring: RING, state: STATE, cap: CAP }
     });
     node.onprocessorerror = e => { $('state').textContent = 'audio processor error (see console)'; $('state').className = 'bad'; console.error('worklet', e); };
+    node.port.onmessage = e => { if (e.data && e.data.info) console.log('worklet info', JSON.stringify(e.data)); };
     node.connect(ctx.destination);
     await ctx.resume();
     setTimeout(() => { if (ctx && Atomics.load(S, 7) === 0) { $('state').textContent = 'running, but the audio thread has not started (heartbeat 0)'; $('state').className = 'bad'; } }, 1500);
