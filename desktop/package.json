@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Studio",
-  "version": "0.114.0",
+  "version": "0.115.0",
   "description": "AudioLab Studio - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -93,6 +93,7 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "perMachine": false
-    }
+    },
+    "afterPack": "scripts/afterPack.js"
   }
 }
