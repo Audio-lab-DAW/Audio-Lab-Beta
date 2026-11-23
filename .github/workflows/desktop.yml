@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14          # Apple Silicon runner
+          - os: macos-latest      # Apple Silicon runner
             script: release:mac
           - os: windows-latest
             script: release:win
