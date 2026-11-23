@@ -129,12 +129,12 @@ registerProcessor('ring-player', RingPlayer);
 `;
 
 const PRODUCER = `
-let S, R, F, CAP, phase = 0, timer = null, paused = false;
+let S, R, F, CAP, SR = 44100, phase = 0, timer = null, paused = false;
 onmessage = e => {
   const m = e.data;
   if (m.init) {
     S = new Int32Array(m.state); R = new Float32Array(m.ring); F = new Float32Array(m.ctrl);
-    CAP = m.cap; timer = setInterval(tick, 10);
+    CAP = m.cap; SR = m.sr; timer = setInterval(tick, 10);
   } else if (m.stop) {
     clearInterval(timer);
   } else if (m.pause) {
@@ -147,7 +147,7 @@ function tick() {
   const fill = wr - rd;
   const n = Math.min(Atomics.load(S, 5) - fill, CAP - fill);
   if (n <= 0) return;
-  const inc = 2 * Math.PI * F[0] / F.sampleRate;
+  const inc = 2 * Math.PI * F[0] / SR;
   const lvl = F[1];
   for (let k = 0; k < n; k++) {
     const v = Math.sin(phase) * lvl;
@@ -182,9 +182,7 @@ $('start').onclick = async () => {
       processorOptions: { ring: RING, state: STATE, cap: CAP }
     });
     node.connect(ctx.destination);
-    worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP });
-    // the worker needs the sample rate for the oscillator
-    C.sampleRate = ctx.sampleRate;
+    worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP, sr: ctx.sampleRate });
 
     $('state').textContent = 'running'; $('state').className = 'ok';
     $('start').disabled = true; $('stop').disabled = false; $('freq').disabled = false;
