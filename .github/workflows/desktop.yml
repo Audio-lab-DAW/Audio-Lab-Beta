@@ -23,13 +23,20 @@ jobs:
       run:
         working-directory: desktop
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: desktop/package-lock.json
       - run: npm ci
+      - name: Build the Core Audio volume helper (Mac)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p bin
+          swiftc -O -target arm64-apple-macos11 native/alvol.swift -o bin/alvol
+          codesign --force --sign - bin/alvol
+          file bin/alvol
       - name: Build and publish to the GitHub release
         run: npm run ${{ matrix.script }}
         env:
