@@ -7,6 +7,7 @@
   navigator.serviceWorker.register('coi-serviceworker.js').then(function(reg){if(navigator.serviceWorker.controller){if(!sessionStorage.getItem('al-coi')){sessionStorage.setItem('al-coi','1');location.reload()}return}
     var w=reg.installing||reg.waiting;if(w)w.addEventListener('statechange',function(){if(w.state==='activated'&&!sessionStorage.getItem('al-coi')){sessionStorage.setItem('al-coi','1');location.reload()}})}).catch(function(){})}catch(e){}})();
 </script>
+<link rel="manifest" href="manifest.webmanifest">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AudioLab Studio</title>
