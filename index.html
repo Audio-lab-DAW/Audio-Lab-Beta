@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Audio Lab host test</title>
+<style>body{font-family:system-ui,sans-serif;background:#0b0c10;color:#dfe4f0;padding:40px}b{color:#4cc9f0}</style>
+</head>
+<body>
+<h1>Audio Lab host test</h1>
+<p>Cross-origin isolated: <b id="iso">checking…</b></p>
+<p>SharedArrayBuffer available: <b id="sab">checking…</b></p>
+<p>AudioWorklet available: <b id="awl">checking…</b></p>
+<script>
+document.getElementById('iso').textContent = crossOriginIsolated ? 'yes' : 'no';
+document.getElementById('sab').textContent = typeof SharedArrayBuffer !== 'undefined' ? 'yes' : 'no';
+document.getElementById('awl').textContent = typeof AudioWorkletNode !== 'undefined' ? 'yes' : 'no';
+</script>
+</body>
+</html>
