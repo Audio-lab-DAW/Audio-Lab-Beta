@@ -23,3 +23,7 @@ The first visit reloads the page once while the service worker starts. That's no
 In the repository on GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main`, folder `/ (root)` → Save.** The site is live at the link above about a minute later.
 
 Projects are kept per website. Save a project as a `.audiolab` file in one place and open it in the other.
+
+
+## Desktop app
+Mac and Windows apps live in [`desktop/`](desktop/README.md). Build them from the Actions tab (*Build desktop apps*).
