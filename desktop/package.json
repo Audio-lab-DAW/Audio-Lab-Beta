@@ -50,7 +50,7 @@
         "name": "AudioLab Studio project",
         "description": "AudioLab Studio project",
         "role": "Editor",
-        "icon": "build/icon"
+        "icon": "build/doc"
       }
     ],
     "mac": {
