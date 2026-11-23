@@ -7,48 +7,62 @@
 <style>
   body{font-family:system-ui,sans-serif;background:#0b0c10;color:#dfe4f0;margin:0;padding:32px;max-width:720px}
   h1{font-size:20px;margin:0 0 4px} .sub{color:#7d8296;font-size:13px;margin-bottom:24px}
+  h2{font-size:14px;margin:0 0 10px;color:#8a8e99;font-weight:500}
   .card{background:#14161d;border:1px solid #262a36;border-radius:12px;padding:16px 18px;margin-bottom:14px}
   .row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
   .row span:first-child{color:#8a8e99} b{color:#4cc9f0;font-weight:600}
-  .ok{color:#3ecf8e} .bad{color:#ff6b6b}
-  button{background:#1f2430;color:#e8ebf3;border:1px solid #3a4152;border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer}
+  .ok{color:#3ecf8e} .bad{color:#ff6b6b} .warn{color:#f5c84c}
+  button{background:#1f2430;color:#e8ebf3;border:1px solid #3a4152;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;margin:4px 6px 4px 0}
   button:disabled{opacity:.5;cursor:default}
+  button.danger{border-color:#7a3340;background:#2a1a1f}
   input[type=range]{width:100%}
   .meter{height:10px;background:#1c1f29;border-radius:5px;overflow:hidden;margin-top:6px}
-  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ecf8e,#4cc9f0)}
+  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f5c84c,#3ecf8e)}
+  .note{color:#7d8296;font-size:12px;margin-top:8px}
 </style>
 </head>
 <body>
 <h1>Audio Lab engine test</h1>
-<div class="sub">Tone generated inside an AudioWorklet. Controls travel over a SharedArrayBuffer, not postMessage.</div>
+<div class="sub">Audio is produced in a Worker, passed through a SharedArrayBuffer ring, and played in an AudioWorklet.</div>
 
 <div class="card">
+  <h2>Environment</h2>
   <div class="row"><span>Cross-origin isolated</span><b id="iso">…</b></div>
   <div class="row"><span>SharedArrayBuffer</span><b id="sab">…</b></div>
   <div class="row"><span>Engine state</span><b id="state">stopped</b></div>
+  <div class="row"><span>Sample rate</span><b id="sr">–</b></div>
+  <div class="row"><span>baseLatency</span><b id="bl">–</b></div>
+  <div class="row"><span>outputLatency</span><b id="ol">–</b></div>
 </div>
 
 <div class="card">
+  <h2>Playback</h2>
   <button id="start">Start engine</button>
   <button id="stop" disabled>Stop</button>
-  <div style="margin-top:14px">
+  <div style="margin-top:12px">
     <div class="row"><span>Frequency</span><b id="fval">220 Hz</b></div>
     <input id="freq" type="range" min="110" max="880" value="220" disabled>
   </div>
-  <div style="margin-top:10px">
-    <div class="row"><span>Output level (peak)</span><b id="peak">–</b></div>
+  <div style="margin-top:14px">
+    <div class="row"><span>Ring buffer fill</span><b id="fill">–</b></div>
     <div class="meter"><i id="bar"></i></div>
   </div>
 </div>
 
 <div class="card">
-  <div class="row"><span>Audio blocks processed</span><b id="blocks">0</b></div>
-  <div class="row"><span>Block rate (should be about 375/s at 48 kHz)</span><b id="rate">–</b></div>
-  <div class="row"><span>Sample rate</span><b id="sr">–</b></div>
-  <div class="row"><span>baseLatency</span><b id="bl">–</b></div>
-  <div class="row"><span>outputLatency</span><b id="ol">–</b></div>
-  <div class="row"><span>Underruns (playbackStats)</span><b id="under">not reported</b></div>
-  <div class="row"><span>Max worklet block time</span><b id="maxms">–</b></div>
+  <h2>Stress tests</h2>
+  <button id="stall" disabled>Freeze the page for 1 s</button>
+  <button id="pause" class="danger" disabled>Stop the producer for 2 s</button>
+  <p class="note">Freezing the page blocks the main thread. The sound should continue without a gap, because audio runs in its own threads. Stopping the producer should cause underruns, which shows the buffer is doing its job.</p>
+</div>
+
+<div class="card">
+  <h2>Counters</h2>
+  <div class="row"><span>Underruns (silent gaps)</span><b id="under">0</b></div>
+  <div class="row"><span>Browser-reported underruns (playbackStats)</span><b id="pbs">not reported</b></div>
+  <div class="row"><span>Audio blocks per second</span><b id="rate">–</b></div>
+  <div class="row"><span>Expected at this sample rate</span><b id="exp">–</b></div>
+  <div class="row"><span>Producer chunks written</span><b id="chunks">0</b></div>
 </div>
 
 <script>
@@ -59,113 +73,185 @@ const hasSAB = typeof SharedArrayBuffer !== 'undefined';
 $('sab').textContent = hasSAB ? 'yes' : 'no';
 $('sab').className = hasSAB ? 'ok' : 'bad';
 
-// Shared control and meter memory. Layout:
-// control: [0]=frequency Hz, [1]=gain, [2]=running flag, Int32 [3]=sequence
-// meter:   [0]=peak, [1]=max block ms, Int32 [2]=blocks processed
-const CTRL = new SharedArrayBuffer(16);
-const METER = new SharedArrayBuffer(16);
-const ctrlF = new Float32Array(CTRL), ctrlI = new Int32Array(CTRL);
-const meterF = new Float32Array(METER), meterI = new Int32Array(METER);
+// Ring of stereo frames. Capacity must be a power of two.
+const CAP = 1 << 16;
+const RING = new SharedArrayBuffer(CAP * 2 * 4);
+const ringF = new Float32Array(RING);
+// State: 0 write frame, 1 read frame, 2 underruns, 3 producer chunks,
+//        4 running flag, 5 target fill (frames), 6 audio blocks
+const STATE = new SharedArrayBuffer(8 * 4);
+const S = new Int32Array(STATE);
+// Control: 0 frequency, 1 level, 2 producer pause flag (1 = paused)
+const CTRL = new SharedArrayBuffer(3 * 4);
+const C = new Float32Array(CTRL);
 
 const WORKLET = `
-class ToneEngine extends AudioWorkletProcessor {
-  constructor(opts) {
+class RingPlayer extends AudioWorkletProcessor {
+  constructor(o) {
     super();
-    const o = opts.processorOptions;
-    this.ctrlF = new Float32Array(o.ctrl);
-    this.ctrlI = new Int32Array(o.ctrl);
-    this.meterF = new Float32Array(o.meter);
-    this.meterI = new Int32Array(o.meter);
-    this.phase = 0;
-    this.gain = 0;
-    this.maxMs = 0;
-    this.peakHold = 0;
+    this.S = new Int32Array(o.state);
+    this.R = new Float32Array(o.ring);
+    this.mask = o.cap - 1;
+    this.rd = 0;
+    this.played = false;
+    this.starved = false;
   }
   process(inputs, outputs) {
-    const t0 = currentTime;
     const out = outputs[0];
-    const L = out[0], R = out[1] || out[0];
-    const freq = this.ctrlF[0];
-    const on = this.ctrlF[2] > 0.5 ? 1 : 0;
-    const target = on ? 0.2 : 0;
-    const inc = 2 * Math.PI * freq / sampleRate;
-    let peak = 0;
-    for (let i = 0; i < L.length; i++) {
-      this.gain += (target - this.gain) * 0.002;
-      const s = Math.sin(this.phase) * this.gain;
-      this.phase += inc;
-      if (this.phase > 6.283185307179586) this.phase -= 6.283185307179586;
-      L[i] = s; R[i] = s;
-      const a = s < 0 ? -s : s;
-      if (a > peak) peak = a;
+    const L = out[0], Rr = out[1] || out[0], n = L.length;
+    if (!Atomics.load(this.S, 4)) {
+      for (let k = 0; k < n; k++) { L[k] = 0; Rr[k] = 0; }
+      return true;
     }
-    this.meterF[0] = peak;
-    this.meterI[2] = this.meterI[2] + 1;
-    const ms = (currentTime - t0) * 1000;
-    if (ms > this.maxMs) this.maxMs = ms;
-    this.meterF[1] = this.maxMs;
+    const wr = Atomics.load(this.S, 0);
+    if (wr - this.rd < n) {
+      for (let k = 0; k < n; k++) { L[k] = 0; Rr[k] = 0; }
+      if (this.played && !this.starved) Atomics.add(this.S, 2, 1);
+      this.starved = true;
+      this.rd = wr;
+      Atomics.store(this.S, 1, this.rd);
+      return true;
+    }
+    this.starved = false;
+    this.played = true;
+    for (let k = 0; k < n; k++) {
+      const p = ((this.rd + k) & this.mask) * 2;
+      L[k] = this.R[p];
+      Rr[k] = this.R[p + 1];
+    }
+    this.rd += n;
+    Atomics.store(this.S, 1, this.rd);
+    Atomics.add(this.S, 6, 1);
     return true;
   }
 }
-registerProcessor('tone-engine', ToneEngine);
+registerProcessor('ring-player', RingPlayer);
 `;
 
-let ctx = null, node = null, lastBlocks = 0, lastT = 0, raf = 0;
+const PRODUCER = `
+let S, R, F, CAP, phase = 0, timer = null, paused = false;
+onmessage = e => {
+  const m = e.data;
+  if (m.init) {
+    S = new Int32Array(m.state); R = new Float32Array(m.ring); F = new Float32Array(m.ctrl);
+    CAP = m.cap; timer = setInterval(tick, 10);
+  } else if (m.stop) {
+    clearInterval(timer);
+  } else if (m.pause) {
+    paused = true; setTimeout(() => { paused = false; }, m.ms);
+  }
+};
+function tick() {
+  if (!Atomics.load(S, 4) || paused || F[2]) return;
+  const wr = Atomics.load(S, 0), rd = Atomics.load(S, 1);
+  const fill = wr - rd;
+  const n = Math.min(Atomics.load(S, 5) - fill, CAP - fill);
+  if (n <= 0) return;
+  const inc = 2 * Math.PI * F[0] / F.sampleRate;
+  const lvl = F[1];
+  for (let k = 0; k < n; k++) {
+    const v = Math.sin(phase) * lvl;
+    phase += inc; if (phase > 6.283185307179586) phase -= 6.283185307179586;
+    const p = ((wr + k) & (CAP - 1)) * 2;
+    R[p] = v; R[p + 1] = v;
+  }
+  Atomics.store(S, 0, wr + n);
+  Atomics.add(S, 3, 1);
+}
+`;
+
+let ctx = null, node = null, worker = null, uiTimer = null;
+let lastBlocks = 0, lastTime = 0, lastUnder = 0;
 
 $('start').onclick = async () => {
   try {
     ctx = new AudioContext({ latencyHint: 'interactive' });
-    const url = URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' }));
-    await ctx.audioWorklet.addModule(url);
-    node = new AudioWorkletNode(ctx, 'tone-engine', {
+    const wlUrl = URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' }));
+    await ctx.audioWorklet.addModule(wlUrl);
+    const prUrl = URL.createObjectURL(new Blob([PRODUCER], { type: 'text/javascript' }));
+    worker = new Worker(prUrl);
+
+    // reset shared state
+    S.fill(0);
+    S[5] = Math.round(ctx.sampleRate * 0.5);   // keep about half a second ahead
+    S[4] = 1;
+    C[0] = +$('freq').value; C[1] = 0.2; C[2] = 0;
+
+    node = new AudioWorkletNode(ctx, 'ring-player', {
       numberOfOutputs: 1, outputChannelCount: [2],
-      processorOptions: { ctrl: CTRL, meter: METER }
+      processorOptions: { ring: RING, state: STATE, cap: CAP }
     });
     node.connect(ctx.destination);
-    ctrlF[0] = +$('freq').value; ctrlF[2] = 1; Atomics.add(ctrlI, 3, 1);
+    worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP });
+    // the worker needs the sample rate for the oscillator
+    C.sampleRate = ctx.sampleRate;
+
     $('state').textContent = 'running'; $('state').className = 'ok';
     $('start').disabled = true; $('stop').disabled = false; $('freq').disabled = false;
+    $('stall').disabled = false; $('pause').disabled = false;
     $('sr').textContent = ctx.sampleRate + ' Hz';
+    $('exp').textContent = (ctx.sampleRate / 128).toFixed(0) + ' blocks/s';
     $('bl').textContent = ctx.baseLatency == null ? 'not reported' : (ctx.baseLatency * 1000).toFixed(1) + ' ms';
     $('ol').textContent = ctx.outputLatency == null ? 'not reported' : (ctx.outputLatency * 1000).toFixed(1) + ' ms';
-    if (!ctx.playbackStats) $('under').textContent = 'not reported by this browser';
-    loop();
+    lastBlocks = 0; lastTime = performance.now(); lastUnder = 0;
+    uiTimer = setInterval(ui, 250);
   } catch (e) {
     $('state').textContent = 'error: ' + e.message; $('state').className = 'bad';
   }
 };
 
 $('stop').onclick = async () => {
-  ctrlF[2] = 0; Atomics.add(ctrlI, 3, 1);
-  setTimeout(async () => { await ctx.close(); cancelAnimationFrame(raf); ctx = null;
+  S[4] = 0;
+  if (worker) { worker.postMessage({ stop: true }); worker.terminate(); worker = null; }
+  clearInterval(uiTimer);
+  setTimeout(async () => {
+    if (ctx) await ctx.close();
+    ctx = null;
     $('state').textContent = 'stopped'; $('state').className = '';
-    $('start').disabled = false; $('stop').disabled = true; $('freq').disabled = true; }, 300);
+    $('start').disabled = false; $('stop').disabled = true; $('freq').disabled = true;
+    $('stall').disabled = true; $('pause').disabled = true;
+  }, 150);
 };
 
 $('freq').oninput = e => {
-  const f = +e.target.value;
-  ctrlF[0] = f; Atomics.add(ctrlI, 3, 1);
-  $('fval').textContent = f + ' Hz';
+  C[0] = +e.target.value;
+  $('fval').textContent = e.target.value + ' Hz';
 };
 
-function loop(now) {
+// Freeze the main thread on purpose: the page stops responding for one second.
+$('stall').onclick = () => {
+  const end = performance.now() + 1000;
+  while (performance.now() < end) {}
+  $('state').textContent = 'running (page was frozen 1 s)';
+};
+
+// Stop the producer for two seconds, so the buffer drains and gaps appear.
+$('pause').onclick = () => {
+  C[2] = 1;
+  setTimeout(() => { C[2] = 0; }, 2000);
+};
+
+function ui() {
   if (!ctx) return;
-  const blocks = Atomics.load(meterI, 2);
-  const t = performance.now();
-  if (lastT) $('rate').textContent = Math.round((blocks - lastBlocks) * 1000 / (t - lastT)) + ' /s';
-  lastBlocks = blocks; lastT = t;
-  $('blocks').textContent = blocks.toLocaleString();
-  const pk = meterF[0];
-  $('peak').textContent = pk > 0 ? (20 * Math.log10(pk)).toFixed(1) + ' dBFS' : '–';
-  $('bar').style.width = Math.min(100, pk * 400) + '%';
-  $('maxms').textContent = meterF[1].toFixed(3) + ' ms';
+  const wr = Atomics.load(S, 0), rd = Atomics.load(S, 1);
+  const fillMs = Math.max(0, wr - rd) / ctx.sampleRate * 1000;
+  $('fill').textContent = fillMs.toFixed(0) + ' ms';
+  $('bar').style.width = Math.min(100, fillMs / 500 * 100) + '%';
+  const under = Atomics.load(S, 2);
+  $('under').textContent = under;
+  $('under').className = under ? 'bad' : 'ok';
+  $('chunks').textContent = Atomics.load(S, 3).toLocaleString();
+  const blocks = Atomics.load(S, 6), now = performance.now();
+  $('rate').textContent = Math.round((blocks - lastBlocks) * 1000 / (now - lastTime)) + ' /s';
+  lastBlocks = blocks; lastTime = now;
   if (ctx.playbackStats) {
-    const s = ctx.playbackStats;
-    $('under').textContent = s.underrunEvents + ' events, ' + (s.totalDuration || 0).toFixed(3) + ' s';
-    $('under').className = s.underrunEvents ? 'bad' : 'ok';
+    const p = ctx.playbackStats;
+    $('pbs').textContent = p.underrunEvents + ' events';
+    $('pbs').className = p.underrunEvents ? 'bad' : 'ok';
   }
-  raf = requestAnimationFrame(loop);
 }
+
+if (!hasSAB) $('start').disabled = true;
 </script>
 </body>
 </html>
