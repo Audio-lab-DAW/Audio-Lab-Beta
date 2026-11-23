@@ -184,8 +184,10 @@ $('start').onclick = async () => {
       numberOfOutputs: 1, outputChannelCount: [2],
       processorOptions: { ring: RING, state: STATE, cap: CAP }
     });
+    node.onprocessorerror = e => { $('state').textContent = 'audio processor error (see console)'; $('state').className = 'bad'; console.error('worklet', e); };
     node.connect(ctx.destination);
     await ctx.resume();
+    setTimeout(() => { if (ctx && Atomics.load(S, 7) === 0) { $('state').textContent = 'running, but the audio thread has not started (heartbeat 0)'; $('state').className = 'bad'; } }, 1500);
     worker.postMessage({ init: true, ring: RING, state: STATE, ctrl: CTRL, cap: CAP, sr: ctx.sampleRate });
 
     $('state').textContent = 'running'; $('state').className = 'ok';
