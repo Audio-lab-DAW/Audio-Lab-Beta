@@ -1,0 +1,98 @@
+{
+  "name": "audiolab-studio",
+  "productName": "AudioLab Studio",
+  "version": "0.114.0",
+  "description": "AudioLab Studio - a Digital Audio Workstation",
+  "author": "Audio-lab-DAW",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "sync": "node scripts/sync-app.js",
+    "start": "npm run sync && electron .",
+    "dist:mac": "npm run sync && electron-builder --mac --arm64 --publish never",
+    "dist:win": "npm run sync && electron-builder --win --x64 --publish never",
+    "release:mac": "npm run sync && electron-builder --mac --arm64 --publish always",
+    "release:win": "npm run sync && electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.audiolab.studio",
+    "productName": "AudioLab Studio",
+    "copyright": "AudioLab Studio",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "package.json"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Audio-lab-DAW",
+        "repo": "Audio-Lab-Beta",
+        "releaseType": "release"
+      }
+    ],
+    "fileAssociations": [
+      {
+        "ext": "audiolab",
+        "name": "AudioLab Studio project",
+        "description": "AudioLab Studio project",
+        "role": "Editor",
+        "icon": "build/icon"
+      }
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.music",
+      "identity": null,
+      "hardenedRuntime": false,
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "AudioLab Studio needs audio input access to record and to list your audio output devices."
+      }
+    },
+    "dmg": {
+      "title": "AudioLab Studio ${version}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  }
+}
