@@ -1,17 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Audio Lab host test</title>
-<style>body{font-family:system-ui,sans-serif;background:#0b0c10;color:#dfe4f0;padding:40px}b{color:#4cc9f0}</style>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audio Lab engine test</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#0b0c10;color:#dfe4f0;margin:0;padding:32px;max-width:720px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#7d8296;font-size:13px;margin-bottom:24px}
+  .card{background:#14161d;border:1px solid #262a36;border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
+  .row span:first-child{color:#8a8e99} b{color:#4cc9f0;font-weight:600}
+  .ok{color:#3ecf8e} .bad{color:#ff6b6b}
+  button{background:#1f2430;color:#e8ebf3;border:1px solid #3a4152;border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  input[type=range]{width:100%}
+  .meter{height:10px;background:#1c1f29;border-radius:5px;overflow:hidden;margin-top:6px}
+  .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ecf8e,#4cc9f0)}
+</style>
 </head>
 <body>
-<h1>Audio Lab host test</h1>
-<p>Cross-origin isolated: <b id="iso">checking…</b></p>
-<p>SharedArrayBuffer available: <b id="sab">checking…</b></p>
-<p>AudioWorklet available: <b id="awl">checking…</b></p>
+<h1>Audio Lab engine test</h1>
+<div class="sub">Tone generated inside an AudioWorklet. Controls travel over a SharedArrayBuffer, not postMessage.</div>
+
+<div class="card">
+  <div class="row"><span>Cross-origin isolated</span><b id="iso">…</b></div>
+  <div class="row"><span>SharedArrayBuffer</span><b id="sab">…</b></div>
+  <div class="row"><span>Engine state</span><b id="state">stopped</b></div>
+</div>
+
+<div class="card">
+  <button id="start">Start engine</button>
+  <button id="stop" disabled>Stop</button>
+  <div style="margin-top:14px">
+    <div class="row"><span>Frequency</span><b id="fval">220 Hz</b></div>
+    <input id="freq" type="range" min="110" max="880" value="220" disabled>
+  </div>
+  <div style="margin-top:10px">
+    <div class="row"><span>Output level (peak)</span><b id="peak">–</b></div>
+    <div class="meter"><i id="bar"></i></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row"><span>Audio blocks processed</span><b id="blocks">0</b></div>
+  <div class="row"><span>Block rate (should be about 375/s at 48 kHz)</span><b id="rate">–</b></div>
+  <div class="row"><span>Sample rate</span><b id="sr">–</b></div>
+  <div class="row"><span>baseLatency</span><b id="bl">–</b></div>
+  <div class="row"><span>outputLatency</span><b id="ol">–</b></div>
+  <div class="row"><span>Underruns (playbackStats)</span><b id="under">not reported</b></div>
+  <div class="row"><span>Max worklet block time</span><b id="maxms">–</b></div>
+</div>
+
 <script>
-document.getElementById('iso').textContent = crossOriginIsolated ? 'yes' : 'no';
-document.getElementById('sab').textContent = typeof SharedArrayBuffer !== 'undefined' ? 'yes' : 'no';
-document.getElementById('awl').textContent = typeof AudioWorkletNode !== 'undefined' ? 'yes' : 'no';
+const $ = id => document.getElementById(id);
+$('iso').textContent = crossOriginIsolated ? 'yes' : 'no';
+$('iso').className = crossOriginIsolated ? 'ok' : 'bad';
+const hasSAB = typeof SharedArrayBuffer !== 'undefined';
+$('sab').textContent = hasSAB ? 'yes' : 'no';
+$('sab').className = hasSAB ? 'ok' : 'bad';
+
+// Shared control and meter memory. Layout:
+// control: [0]=frequency Hz, [1]=gain, [2]=running flag, Int32 [3]=sequence
+// meter:   [0]=peak, [1]=max block ms, Int32 [2]=blocks processed
+const CTRL = new SharedArrayBuffer(16);
+const METER = new SharedArrayBuffer(16);
+const ctrlF = new Float32Array(CTRL), ctrlI = new Int32Array(CTRL);
+const meterF = new Float32Array(METER), meterI = new Int32Array(METER);
+
+const WORKLET = `
+class ToneEngine extends AudioWorkletProcessor {
+  constructor(opts) {
+    super();
+    const o = opts.processorOptions;
+    this.ctrlF = new Float32Array(o.ctrl);
+    this.ctrlI = new Int32Array(o.ctrl);
+    this.meterF = new Float32Array(o.meter);
+    this.meterI = new Int32Array(o.meter);
+    this.phase = 0;
+    this.gain = 0;
+    this.maxMs = 0;
+    this.peakHold = 0;
+  }
+  process(inputs, outputs) {
+    const t0 = currentTime;
+    const out = outputs[0];
+    const L = out[0], R = out[1] || out[0];
+    const freq = this.ctrlF[0];
+    const on = this.ctrlF[2] > 0.5 ? 1 : 0;
+    const target = on ? 0.2 : 0;
+    const inc = 2 * Math.PI * freq / sampleRate;
+    let peak = 0;
+    for (let i = 0; i < L.length; i++) {
+      this.gain += (target - this.gain) * 0.002;
+      const s = Math.sin(this.phase) * this.gain;
+      this.phase += inc;
+      if (this.phase > 6.283185307179586) this.phase -= 6.283185307179586;
+      L[i] = s; R[i] = s;
+      const a = s < 0 ? -s : s;
+      if (a > peak) peak = a;
+    }
+    this.meterF[0] = peak;
+    this.meterI[2] = this.meterI[2] + 1;
+    const ms = (currentTime - t0) * 1000;
+    if (ms > this.maxMs) this.maxMs = ms;
+    this.meterF[1] = this.maxMs;
+    return true;
+  }
+}
+registerProcessor('tone-engine', ToneEngine);
+`;
+
+let ctx = null, node = null, lastBlocks = 0, lastT = 0, raf = 0;
+
+$('start').onclick = async () => {
+  try {
+    ctx = new AudioContext({ latencyHint: 'interactive' });
+    const url = URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' }));
+    await ctx.audioWorklet.addModule(url);
+    node = new AudioWorkletNode(ctx, 'tone-engine', {
+      numberOfOutputs: 1, outputChannelCount: [2],
+      processorOptions: { ctrl: CTRL, meter: METER }
+    });
+    node.connect(ctx.destination);
+    ctrlF[0] = +$('freq').value; ctrlF[2] = 1; Atomics.add(ctrlI, 3, 1);
+    $('state').textContent = 'running'; $('state').className = 'ok';
+    $('start').disabled = true; $('stop').disabled = false; $('freq').disabled = false;
+    $('sr').textContent = ctx.sampleRate + ' Hz';
+    $('bl').textContent = ctx.baseLatency == null ? 'not reported' : (ctx.baseLatency * 1000).toFixed(1) + ' ms';
+    $('ol').textContent = ctx.outputLatency == null ? 'not reported' : (ctx.outputLatency * 1000).toFixed(1) + ' ms';
+    if (!ctx.playbackStats) $('under').textContent = 'not reported by this browser';
+    loop();
+  } catch (e) {
+    $('state').textContent = 'error: ' + e.message; $('state').className = 'bad';
+  }
+};
+
+$('stop').onclick = async () => {
+  ctrlF[2] = 0; Atomics.add(ctrlI, 3, 1);
+  setTimeout(async () => { await ctx.close(); cancelAnimationFrame(raf); ctx = null;
+    $('state').textContent = 'stopped'; $('state').className = '';
+    $('start').disabled = false; $('stop').disabled = true; $('freq').disabled = true; }, 300);
+};
+
+$('freq').oninput = e => {
+  const f = +e.target.value;
+  ctrlF[0] = f; Atomics.add(ctrlI, 3, 1);
+  $('fval').textContent = f + ' Hz';
+};
+
+function loop(now) {
+  if (!ctx) return;
+  const blocks = Atomics.load(meterI, 2);
+  const t = performance.now();
+  if (lastT) $('rate').textContent = Math.round((blocks - lastBlocks) * 1000 / (t - lastT)) + ' /s';
+  lastBlocks = blocks; lastT = t;
+  $('blocks').textContent = blocks.toLocaleString();
+  const pk = meterF[0];
+  $('peak').textContent = pk > 0 ? (20 * Math.log10(pk)).toFixed(1) + ' dBFS' : '–';
+  $('bar').style.width = Math.min(100, pk * 400) + '%';
+  $('maxms').textContent = meterF[1].toFixed(3) + ' ms';
+  if (ctx.playbackStats) {
+    const s = ctx.playbackStats;
+    $('under').textContent = s.underrunEvents + ' events, ' + (s.totalDuration || 0).toFixed(3) + ' s';
+    $('under').className = s.underrunEvents ? 'bad' : 'ok';
+  }
+  raf = requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>
