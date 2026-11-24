@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Studio",
-  "version": "0.122.0",
+  "version": "0.123.0",
   "description": "AudioLab Studio - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -33,6 +33,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "dock-icon.png",
       "app/**/*",
       "package.json"
     ],
