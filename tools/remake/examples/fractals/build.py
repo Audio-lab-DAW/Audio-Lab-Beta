@@ -48,10 +48,23 @@ def recipe(mix=None,parts=None):
     tr.append({'name':'Open hat','preset':'zhat','color':'#3ecf8e','inst':oh,'vol':V('Open hat',.5),'fx':FX('Open hat'),'clips':clips_from_steps(S['ohat'],60,.2,'Open hat')})
     tr.append({'name':'Clap','preset':'zclap','color':'#ff9a3c','inst':mix.get('Clap',{}).get('inst',{}),'vol':V('Clap',.5),'fx':FX('Clap'),'clips':clips_from_steps(S['clap'],60,.2,'Clap')})
     tr.append({'name':'Snare & fills','preset':'zsnare','color':'#ff7ac8','inst':mix.get('Snare & fills',{}).get('inst',{}),'vol':V('Snare & fills',.5),'fx':FX('Snare & fills'),'clips':clips_from_steps(S['snare'],60,.15,'Fill')})
+    if os.path.exists('melody.json') and not os.environ.get('NOMEL'):
+        MEL=json.load(open('melody.json'));MP=json.load(open('melpatch.json')) if os.path.exists('melpatch.json') else {}
+        for nm,lo,hi,col in [('Mel low',52,60,'#b583ff'),('Mel mid',61,71,'#7a8bff'),('Mel high',72,99,'#4cc9f0')]:
+            by={}
+            for p,st,l,v in MEL:
+                if lo<=p<=hi:by.setdefault(st//128,[]).append((p,st,l,v))
+            cl=[]
+            for k in sorted(by):
+                s0=k*128;cl.append({'start':k*32,'len':32,'name':f'{nm} {k*8+1}','notes':[{'p':p,'s':round((st-s0)/4,4),'l':round(max(.2,l/4*.95),4),'v':round(v,3)} for p,st,l,v in by[k]]})
+            inst=dict(w1='sawtooth',w2='sawtooth',morph=0,uni=2,det=10,width=70,cut=4200,res=.25,fenv=0,a=.004,d=.2,s=.7,r=.08,lfo=.3,lamt=0,space=0,sub=0,noise=0,fm=0,ratio=2,gain=.5)
+            inst.update(MP.get(nm,{}))
+            tr.append({'name':nm,'preset':'plant','color':col,'inst':inst,'vol':V(nm,.5),'fx':FX(nm),'clips':cl})
     if os.path.exists('followers.json'):
         F=json.load(open('followers.json'))
         BG=json.load(open('blockgain.json')) if os.path.exists('blockgain.json') else {}
         for t in F['tracks']:
+            if os.path.exists('melody.json') and not os.environ.get('NOMEL') and t['name']!='Sub drone':continue
             t=dict(t);t['vol']=V(t['name'],t.get('vol',.8));bg=BG.get(t['name'],{})
             if bg:
                 cl=[]
