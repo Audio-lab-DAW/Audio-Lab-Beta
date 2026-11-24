@@ -919,7 +919,6 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 .bpcard.lite .bpic{color:#4cc9f0;background:rgba(76,201,240,.12);border-color:rgba(76,201,240,.35)}
 .bpcard.lite.on{background:linear-gradient(135deg,rgba(76,201,240,.22),rgba(76,141,255,.16));border-color:#4cc9f0;box-shadow:0 0 18px rgba(76,201,240,.22)}.bpcard.lite.on .bpic{background:#4cc9f0;color:#04121a}
 .bpcard.lite .bpsw input:checked+i{background:#4cc9f0}
-body.lite .lg,body.lite .sheet,body.lite #tr,body.lite #fx,body.lite #hglass,body.lite #ctxm,body.lite #mPop,body.lite #presWin,body.lite .fwin,body.lite .pop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 body.lite .fwin,body.lite .sheet,body.lite .pop{box-shadow:0 6px 18px rgba(0,0,0,.5)!important}
 #cdlg{z-index:9600}.cdw{width:min(440px,92vw);padding:22px 22px 18px;display:grid;gap:8px;justify-items:start;max-height:none!important}
 .cdi{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:rgba(76,141,255,.14);color:#7fb0ff;border:1px solid rgba(76,141,255,.35);margin-bottom:4px}.cdi svg{width:24px;height:24px}
@@ -1751,7 +1750,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
       <section data-page="general">
         <h4>Performance</h4>
         <div class="bpcard lite smallcard" id="liteCard"><div class="bpic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22a11 11 0 1 1 22 0"/><path d="M16 22l-6-6"/><circle cx="16" cy="22" r="1.8" fill="currentColor"/><path d="M8.5 22h-1M24.5 22h-1M16 13v-1" opacity=".6"/></svg></div>
-          <div class="bptx"><b>Light mode</b><span>For slower computers: no glass blur, calmer screen updates (30 fps), still logo, leaner synth voices and a bigger safety margin for note timing.</span></div>
+          <div class="bptx"><b>Light mode</b><span>For slower computers: calmer screen updates (30 fps), still logo, leaner synth voices and a bigger safety margin for note timing.</span></div>
           <label class="bpsw"><input type="checkbox" id="liteChk"><i></i></label></div>
         <div class="fpsrow"><label for="fpsSel">Screen updates</label><select id="fpsSel"><option value="0">As fast as the screen (up to 240 fps)</option><option value="120">120 fps</option><option value="60">60 fps (saves battery)</option></select><output id="fpsNow">–</output></div><div class="fpshint" id="fpsHint" hidden><span></span><button type="button" id="fpsFix">Make it smooth</button></div>
         <h4>Help while you work</h4>
@@ -4919,7 +4918,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.148',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.149',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6074,7 +6073,7 @@ function applyTheme(){const H=UI.tintH??215,A=(UI.tintA??25)/100,b=12*((UI.bgL??
   TH={bg:L(b),lane0:L(b+1),lane1:L(b+2),laneSel:L(b+6),sep:L(b-3),g16:L(b+15),g4:L(b+10),g1:L(b+5),ruler:L(b+5),rulerLine:L(b+18),rulerTxt:L(Math.max(70,b+55)),mapBg:L(b-6),mapIn:L(b-3)};
   const r=document.documentElement.style;r.setProperty('--bg',L(b-5));r.setProperty('--gtr',hsl2rgb(H,sat,clamp(b+3,4,80)));r.setProperty('--gtr2',hsl2rgb(H,sat,clamp(b-2,2,70)));dirty=true}
 function applyScale(){ZOOM=(UI.scale??100)/100;document.documentElement.style.zoom=String(ZOOM);document.body.style.height=`calc(100dvh / ${ZOOM})`;dirty=true;setTimeout(rfAll,50)}
-function applyTrans(){const t=(UI.trans??50)/100,b=UI.lite?0:UI.blur??18,r=document.documentElement.style;r.setProperty('--ga',(UI.lite?Math.max(.93,1-t):1-t).toFixed(3));
+function applyTrans(){const t=(UI.trans??50)/100,b=UI.blur??18,r=document.documentElement.style;r.setProperty('--ga',(1-t).toFixed(3));
   r.setProperty('--blur',b>0?`blur(${b}px) saturate(${(1+b/30).toFixed(2)})`:'none');r.setProperty('--blur2',b>0?`blur(${Math.round(b*1.5)}px) saturate(${(1+b/22).toFixed(2)})`:'none');r.setProperty('--edge',((UI.edge??60)/100).toFixed(2));rfAll()}
 const LOOK=[['#setGrid','gridB',50,v=>v+'%'],['#setTrans','trans',50,v=>v+'%'],['#setBlur','blur',18,v=>v+' px'],['#setEdge','edge',60,v=>v+'%'],['#setRefr','refr',40,v=>v+'%'],['#setBg','bgL',40,v=>v+'%'],['#setHue','tintH',215,v=>v+'°'],['#setTint','tintA',25,v=>v+'%'],['#setScale','scale',100,v=>v+'%'],['#setClipA','clipA',36,v=>v+'%']];
 function syncLook(){renderLogo();$('#setSplash').checked=UI.splash!==false;$('#setSub').checked=UI.subTicks!==false;$('#setBars').checked=UI.bars4!==false;for(const[id,k,d,f] of LOOK){$(id).value=UI[k]??d;$(id+'O').textContent=f(UI[k]??d)}}
@@ -6087,16 +6086,26 @@ function rfMap(w,h,r,band){const c=document.createElement('canvas');c.width=w;c.
   for(let y=0;y<h;y++){const dt=y+.5,db=h-y-.5;for(let x=0;x<w;x++){const dl=x+.5,dr=w-x-.5,dm=Math.min(dl,dr,dt,db),el=Math.exp(-(dl-dm)/k),er=Math.exp(-(dr-dm)/k),et=Math.exp(-(dt-dm)/k),eb=Math.exp(-(db-dm)/k),S=el+er+et+eb,dist=dm-k*Math.log(S)+k*Math.log(1);
     const nx=(er-el)/S,ny=(eb-et)/S,t=clamp(1-(dist+k*.6)/band,0,1),m=t*t*(3-2*t),i=(y*w+x)*4;d[i]=128+nx*m*127;d[i+1]=128+ny*m*127;d[i+2]=128;d[i+3]=255}}
   g.putImageData(img,0,0);return c.toDataURL()}
-function rfUpdate(el){const o=RFX.get(el);if(!o)return;const amt=UI.lite?0:(UI.refr??40)/100;
-  if(!amt||!isChromium){el.style.backdropFilter='';el.style.webkitBackdropFilter='';return}
+/* Glass rebuild (v0.149), from the research in claude/audiolab-liquid-glass-research.md:
+   - Chromium copies every feImage bitmap of a backdrop filter into EVERY frame it sends to the screen, so the bending map is now made at a quarter of the panel size
+     (1/16 of the bytes) and stretched; it is smooth, so nothing is lost.
+   - One filter list per panel: the lens (map + displacement) and then the browser's own blur() and saturate(), which run in one pass. The two extra blurs and the colour step inside the SVG filter are gone.
+   - The map depends on size only. While a panel is being resized the old map is stretched; a new one is made once, after the size has settled, under a new filter name (Chromium caches filters by name).
+   - The same glass for everyone: light mode no longer switches the glass off. */
+function rfBuild(el,o){o.tm=0;if(!el.isConnected)return;const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);if(w<8||h<8)return;
+  const q=Math.min(w,h)>=48?4:2,mw=Math.max(4,Math.ceil(w/q)),mh=Math.max(4,Math.ceil(h/q)),r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;
+  o.img.setAttribute('href',rfMap(mw,mh,r/q,Math.min(24,Math.min(w,h)/3)/q));o.built=w+'x'+h;o.id='rf'+(rfN++);o.f.setAttribute('id',o.id);rfStyle(el,o)}
+function rfStyle(el,o){const amt=(UI.refr??40)/100,b=UI.blur??18;o.dm.setAttribute('scale',(-amt*80).toFixed(1));
+  const v=`url(#${o.id}) blur(${(b/2).toFixed(1)}px) saturate(${(1+b/25).toFixed(2)})`;if(o.v!==v){o.v=v;el.style.backdropFilter=v;el.style.webkitBackdropFilter=v}}
+function rfUpdate(el){const o=RFX.get(el);if(!o)return;const amt=(UI.refr??40)/100;
+  if(!amt||!isChromium){if(o.v){o.v='';el.style.backdropFilter='';el.style.webkitBackdropFilter=''}return}
   const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);if(w<8||h<8)return;
-  const key=w+'x'+h;if(o.key!==key){o.key=key;const r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;o.img.setAttribute('href',rfMap(w,h,r,Math.min(24,Math.min(w,h)/3)));for(const n of[o.img,o.f]){n.setAttribute('width',w);n.setAttribute('height',h)}}
-  const b=UI.blur??18;o.bl.setAttribute('stdDeviation',(b/2).toFixed(1));o.dm.setAttribute('scale',(-amt*80).toFixed(1));o.b2.setAttribute('stdDeviation',b>=6?'0':'0.6');o.cm.setAttribute('values',(1+b/25).toFixed(2));
-  el.style.backdropFilter=`url(#${o.id})`;el.style.webkitBackdropFilter=`url(#${o.id})`}
+  const key=w+'x'+h;if(o.key!==key){const first=!o.key;o.key=key;for(const n of[o.img,o.f]){n.setAttribute('width',w);n.setAttribute('height',h)}clearTimeout(o.tm);if(first)rfBuild(el,o);else o.tm=setTimeout(()=>rfBuild(el,o),160)}
+  if(o.built)rfStyle(el,o)}
 function rfAttach(el){if(!el||RFX.has(el))return;if(!rfSvg){rfSvg=document.createElementNS(NS,'svg');rfSvg.setAttribute('width','0');rfSvg.setAttribute('height','0');rfSvg.setAttribute('aria-hidden','true');rfSvg.style.position='absolute';document.body.appendChild(rfSvg);rfRO=new ResizeObserver(es=>{for(const e of es)rfUpdate(e.target)})}
   const id='rf'+(rfN++),mk=(t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n};
-  const f=mk('filter',{id,x:0,y:0,filterUnits:'userSpaceOnUse',primitiveUnits:'userSpaceOnUse','color-interpolation-filters':'sRGB'}),bl=mk('feGaussianBlur',{in:'SourceGraphic',result:'b'}),img=mk('feImage',{x:0,y:0,preserveAspectRatio:'none',result:'m'}),dm=mk('feDisplacementMap',{in:'b',in2:'m',xChannelSelector:'R',yChannelSelector:'G',result:'d'}),b2=mk('feGaussianBlur',{in:'d',result:'d2'}),cm=mk('feColorMatrix',{in:'d2',type:'saturate'});
-  f.append(bl,img,dm,b2,cm);rfSvg.appendChild(f);RFX.set(el,{id,f,bl,img,dm,b2,cm,key:''});rfRO.observe(el);rfUpdate(el)}
+  const f=mk('filter',{id,x:0,y:0,filterUnits:'userSpaceOnUse',primitiveUnits:'userSpaceOnUse','color-interpolation-filters':'sRGB'}),img=mk('feImage',{x:0,y:0,preserveAspectRatio:'none',result:'m'}),dm=mk('feDisplacementMap',{in:'SourceGraphic',in2:'m',xChannelSelector:'R',yChannelSelector:'G'});
+  f.append(img,dm);rfSvg.appendChild(f);RFX.set(el,{id,f,img,dm,key:'',built:'',v:'',tm:0});rfRO.observe(el);rfUpdate(el)}
 function rfAll(){for(const el of RFX.keys())rfUpdate(el)}
 
 const DACS={gryphon:{n:'iFi xDSD Gryphon',rates:[44100,48000,88200,96000,176400,192000,352800,384000,705600,768000],html:`<b>iFi xDSD Gryphon</b>Over USB-C it plays PCM up to 32-bit / 768 kHz, plus DSD512 and DXD. The browser always sends PCM, so DSD is not used here.<ul>
@@ -6965,7 +6974,7 @@ const lf=v=>v>-69?v.toFixed(1):'–';
 /* a small stereo level meter beside the loudness readout (peak, with a short hold) */
 const MMH={l:-90,r:-90,hl:-90,hr:-90,t:0};function miniMeter(){const cv=document.querySelector('#lufsB .lfmt');if(!cv||!cv.offsetParent)return;const now=performance.now(),dt=Math.min(.1,(now-(MMH.t||now))/1000);MMH.t=now;
   const live=ctx&&typeof anL!=='undefined'&&anL&&(play.on||LIVE.size>0||ctx.currentTime-LHIT<3);const db=v=>v>1e-6?20*Math.log10(v):-90;const L=live?db(peakOf(anL)):-90,R=live?db(peakOf(anR)):-90;
-  MMH.l=Math.max(L,MMH.l-dt*28);MMH.r=Math.max(R,MMH.r-dt*28);MMH.hl=Math.max(L,MMH.hl-dt*8);MMH.hr=Math.max(R,MMH.hr-dt*8);const{g,w,h}=fit(cv);g.clearRect(0,0,w,h);const bw=(w-1)/2;
+  MMH.l=Math.max(L,MMH.l-dt*28);MMH.r=Math.max(R,MMH.r-dt*28);MMH.hl=Math.max(L,MMH.hl-dt*8);MMH.hr=Math.max(R,MMH.hr-dt*8);{/* silent and already drawn empty: don't repaint (it sits inside the glass top bar) */const idle=MMH.l<=-89&&MMH.r<=-89&&MMH.hl<=-89&&MMH.hr<=-89;if(idle&&MMH.z)return;MMH.z=idle}const{g,w,h}=fit(cv);g.clearRect(0,0,w,h);const bw=(w-1)/2;
   for(const[k,v,hv] of[[0,MMH.l,MMH.hl],[1,MMH.r,MMH.hr]]){const x=k*(bw+1),f=clamp((v+48)/48,0,1),fh=clamp((hv+48)/48,0,1);g.fillStyle='#1b1e26';g.fillRect(x,0,bw,h);g.fillStyle=v>=-.1?'#ff1d6e':heatCol(f);g.fillRect(x,h-f*h,bw,f*h);if(hv>-47){g.fillStyle=hv>=-.1?'#ff1d6e':'rgba(240,244,250,.85)';g.fillRect(x,h-fh*h,bw,1)}}}
 function lmPaint(){const T=lmTarget(),b=$('#lufsB');{const e=document.getElementById('mxLu');if(e){const s=LM.S;e.textContent=s>-69?s.toFixed(1):'–'}}if(b){const s=LM.S,d=s-T[2];b.querySelector('span').textContent=(s>-69?s.toFixed(1):'–')+' LUFS';b.classList.toggle('ok',s>-69&&Math.abs(d)<=1);b.classList.toggle('hot',s>-69&&d>1&&d<=3);b.classList.toggle('over',s>-69&&d>3);
     {const cv=b.querySelector('.lfgr');if(cv&&cv.offsetParent){const{g,w,h}=fit(cv),yy=v=>1+(1-clamp((v+36)/36,0,1))*(h-2);g.clearRect(0,0,w,h);g.fillStyle='rgba(62,207,142,.22)';g.fillRect(0,yy(T[2]+1),w,Math.max(1,yy(T[2]-1)-yy(T[2]+1)));const H=LM.hist;if(H.length>1){const n=Math.min(H.length,120);g.strokeStyle=s>-69&&d>3?'#ff8a8a':s>-69&&d>1?'#f5c84c':'#4cc9f0';g.lineWidth=1.3;g.beginPath();for(let i=0;i<n;i++){const v=H[H.length-n+i],x=w-(n-1-i)*(w/119);i?g.lineTo(x,yy(v)):g.moveTo(x,yy(v))}g.stroke()}}}
@@ -8659,7 +8668,7 @@ function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);if(UI.lite&&now-L
   if(SUBPX!==SUBAP){SUBAP=SUBPX;arr.style.transform=SUBPX?`translate3d(${(-SUBPX).toFixed(3)}px,0,0)`:''}
   if(dirty||phd){const full=dirty;dirty=false;drawArr(!full);drawMap(!full);drawPR();const b=curDisp(),bar=Math.floor(b/4)+1,bt=Math.floor(b%4)+1,six=Math.floor((b%1)*4)+1,tk=Math.floor(((b*4)%1)*120),sec=secOf(b);
     $('#posBars').textContent=barsStr(b);$('#locL').textContent=barsStr(loopA());$('#locR').textContent=barsStr(loopB());locSecs();$('#posTime').textContent=`${Math.floor(sec/3600)}:${String(Math.floor(sec/60)%60).padStart(2,'0')}:${(Math.floor(sec%60*1000)/1000).toFixed(3).padStart(6,'0')}`}
-  const busy=play.on||LIVE.size>0||now-LACT<2500||(ctx&&ctx.currentTime-LHIT<3),vz=now-LVZ>=(UI.lite?48:busy?15:31);if(vz)LVZ=now;/* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;drawAtom(performance.now());hxTick()}if(vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}meters(dt);trackMeters(dt);miniMeter();patNow();playGlow();if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
+  const busy=play.on||LIVE.size>0||now-LACT<2500||(ctx&&ctx.currentTime-LHIT<3),calm=!busy&&now-LACT>6000,vz=now-LVZ>=(UI.lite?48:busy?15:calm?500:31);if(vz)LVZ=now;/* calm = nothing plays and the mouse has rested for 6 s: the visualisers and the logo stop repainting, so the glass above and around them is not recalculated 30 times a second for a picture that does not change *//* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;if(!calm)drawAtom(performance.now());hxTick()}if(vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}meters(dt);trackMeters(dt);miniMeter();patNow();playGlow();if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
   {const wk=performance.now()-_w0;FPS.js=FPS.js==null?wk:FPS.js*.95+wk*.05;cpuFrame(wk)}
 }
 (function boxSettings(){document.querySelectorAll('#setBody section').forEach(sec=>{let box=null;for(const el of [...sec.children]){if(el.tagName==='H4'&&box&&/^(Blur|Edge light|Refraction|File name|Format)$/.test(el.textContent)){el.classList.add('sub');box.appendChild(el)}else if(el.tagName==='H4'){box=document.createElement('div');if(el.textContent==='Transparency'){const t=document.createElement('div');t.className='sboxT';t.textContent='Glass';box.appendChild(t);el.classList.add('sub')}box.className='sbox';sec.insertBefore(box,el);box.appendChild(el)}else if(box)box.appendChild(el)}})})();
