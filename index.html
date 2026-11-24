@@ -1857,7 +1857,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
       <section data-page="glass" hidden>
         <div class="gprev" aria-hidden="true"><i class="gb1"></i><i class="gb2"></i><i class="gb3"></i><div class="gpane lg"><b>Glass preview</b><span>Changes show here live</span></div></div>
         <div class="gcards"><div class="gcard gt"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l6-6 12 12" opacity=".5"/></svg></span><div class="gbd"><b>Transparency</b><small>How much of the background shows through panels</small><div class="row trow"><span>Solid</span><input type="range" id="setTrans" min="0" max="100" step="1" aria-label="Transparency"><span>Clear</span><output id="setTransO"></output></div></div></div><div class="gcard gbl"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".55"/><circle cx="12" cy="12" r="10" opacity=".25"/></svg></span><div class="gbd"><b>Blur</b><small>Softens what is behind the glass</small><div class="row trow"><span>Sharp</span><input type="range" id="setBlur" min="0" max="40" step="1" aria-label="Blur amount"><span>Soft</span><output id="setBlurO"></output></div></div></div><div class="gcard ge"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V8a4 4 0 0 1 4-4h12"/><path d="M14 4h6v6" opacity=".5"/></svg></span><div class="gbd"><b>Edge light</b><small>The bright rim along the top edges</small><div class="row trow"><span>Off</span><input type="range" id="setEdge" min="0" max="100" step="1" aria-label="Edge light"><span>Bright</span><output id="setEdgeO"></output></div></div></div><div class="gcard gr"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/><path d="M3 17c3-4 6-4 9 0s6 4 9 0" opacity=".45"/></svg></span><div class="gbd"><b>Refraction</b><small>Bends the background near the edges, like a thick pane</small><div class="row trow"><span>Off</span><input type="range" id="setRefr" min="0" max="100" step="1" aria-label="Refraction"><span>Strong</span><output id="setRefrO"></output></div></div></div></div>
-        <h4>Performance</h4><label class="chk"><input type="checkbox" id="glPlay"> Lighter glass while the song plays (smoother playback; the blur is softer only while playing)</label><label class="chk"><input type="checkbox" id="glBack"> Efficient glass: what shows through the panels is refreshed 20 times a second instead of every frame. The arrangement itself still moves at the full screen rate.</label>
+        <h4>Performance</h4><label class="chk"><input type="checkbox" id="glPlay"> Lighter glass while the song plays (smoother playback; the blur is softer only while playing)</label><label class="chk"><input type="checkbox" id="glBack"> Efficient glass: what shows through the panels is refreshed 20 times a second instead of every frame. The arrangement itself still moves at the full screen rate.</label><label class="chk"><input type="checkbox" id="ncOn"> Note cache: notes that repeat (same sound, pitch and length) are rendered once and played back as audio. Much lighter on the processor for dense songs; exports are not affected.</label><label class="chk"><input type="checkbox" id="slpOn"> Sleeping tracks: while the song plays, tracks with nothing to play are unplugged so their effects stop using the processor. They wake up before their next clip.</label>
         <p class="hint" id="refrHint">Refraction bends what's behind the glass near its edges, like a thick pane. Edge light adds the bright rim.</p>
       </section>
       <section data-page="colors" hidden>
@@ -2061,12 +2061,12 @@ function mkFx2(c,type){
  if(type==='phaser')return mkPhaser(c);
  if(type==='side'){const i=c.createGain(),pc=c.createDynamicsCompressor(),pg=c.createGain(),dry=c.createGain(),sc=c.createDynamicsCompressor(),sg=c.createGain(),sum=c.createGain(),duck=c.createGain(),sh=c.createWaveShaper(),an=c.createAnalyser();an.fftSize=1024;
    pc.attack.value=.03;pc.release.value=.12;pc.ratio.value=20;pc.threshold.value=-40;sc.attack.value=.001;sc.release.value=.25;sc.ratio.value=12;sc.threshold.value=-36;
-   i.connect(dry);dry.connect(sum);i.connect(pc);pc.connect(pg);pg.connect(sum);i.connect(sc);sc.connect(sg);sg.connect(sum);sum.connect(duck);duck.gain.value=0;sh.connect(duck.gain);duck.connect(an);
+   let cP=false,cS=false;i.connect(dry);dry.connect(sum);pc.connect(pg);pg.connect(sum);sc.connect(sg);sg.connect(sum);sum.connect(duck);duck.gain.value=0;sh.connect(duck.gain);duck.connect(an);
    let osc=null,cur={};const per=()=>(SYNCS[cur.sync]||1)*60/S.bpm;
    const sync=(tb0)=>{if(osc){try{osc.stop()}catch(e){}osc.disconnect()}osc=c.createOscillator();osc.type='sawtooth';osc.frequency.value=1/per();osc.connect(sh);const P=per();let s=tb0;const now=c.currentTime+.01;if(s<now)s+=Math.ceil((now-s)/P)*P;osc.start(s);reg(c,osc);
      const k=c.createConstantSource();k.offset.value=1;k.connect(duck.gain);k.start();k.stop(s);reg(c,k)};
    const self={in:i,out:duck,an,sync,set:p=>{cur=p;const d=p.depth/100,rel=Math.max(.05,p.shape/100),N=512,cv=new Float32Array(N);for(let j=0;j<N;j++){const x=j/(N-1)*2-1,ph=x>=0?x/2:1+x/2,e=ph<rel?Math.pow(1-ph/rel,2):0;cv[j]=1-d*e}sh.curve=cv;
-     const pu=p.punch/100,su=p.sustain/100;pg.gain.value=pu>0?pu*2.2:0;dry.gain.value=1+(pu<0?pu*.6:0)+(su<0?su*.5:0);sg.gain.value=su>0?su*3:0;if(osc)osc.frequency.value=1/per()}};
+     const pu=p.punch/100,su=p.sustain/100;pg.gain.value=pu>0?pu*2.2:0;dry.gain.value=1+(pu<0?pu*.6:0)+(su<0?su*.5:0);sg.gain.value=su>0?su*3:0;if(osc)osc.frequency.value=1/per();const wp=pu>0,ws=su>0;if(wp!==cP){try{if(wp)i.connect(pc);else i.disconnect(pc)}catch(e){}cP=wp}if(ws!==cS){try{if(ws)i.connect(sc);else i.disconnect(sc)}catch(e){}cS=ws}}};
    if(c===ctx)setTimeout(()=>sync(play.on?play.t0-play.b0*60/S.bpm:c.currentTime),0);else sync(-(SIDE_B0||0)*60/S.bpm);/* offline renders sync once, before rendering starts, so a timer can never shift it mid-render */return self}
  if(type==='ott'){const i=c.createGain(),out=c.createGain(),dry=c.createGain(),wet=c.createGain(),xs=[120,2500],bands=[],an=[];i.connect(dry);dry.connect(out);wet.connect(out);
    const bq=(t,f)=>{const b=c.createBiquadFilter();b.type=t;b.frequency.value=f;b.Q.value=.707;return b};
@@ -2871,7 +2871,7 @@ function clipAudioSpan(c,bFrom){const cs=c.start,dur=secSpan(cs+bFrom,cs+c.len);
 /* per-note cleanup: every node a note creates is recorded and disconnected once the note and its release are over, instead of staying wired into the clip until 14 s after the clip ends. Long clips with many notes no longer pile up thousands of idle nodes in the audio graph. Shared per-track buses are created with recording paused. */
 let NREC=null,NGC=[];
 {const P=BaseAudioContext.prototype;for(const m of['createGain','createBiquadFilter','createOscillator','createBufferSource','createStereoPanner','createWaveShaper','createDelay','createConvolver','createDynamicsCompressor','createChannelMerger','createChannelSplitter','createConstantSource','createIIRFilter','createPanner']){const o=P[m];if(typeof o!=='function')continue;P[m]=function(){const n=o.apply(this,arguments);if(NREC&&this===ctx)NREC.push(n);if(CAPTS&&(m==='createOscillator'||m==='createBufferSource'))CAPTS.push(n);return n}}}
-const noteTail=I=>{if(!I)return 4;const r=+(I.r??I.rel??I.release??0)||0;return clamp(3+r*3,3,30)};
+const NCGEN=new Set(['saw','square','sub','bass','reese','pad','strings','pluck','keys']);const noteTail=I=>{if(!I)return 4;const r=+(I.r??I.rel??I.release??0)||0;if(I.preset==='plant'||NCGEN.has(I.preset))return clamp(.35+r*3,.35,30);/* these end exactly after their release */return clamp(3+r*3,3,30)};
 function ngcSweep(all){if(!NGC.length)return;const now=ctx?ctx.currentTime:1e12;let k=0;for(const x of NGC){if(all||x.t<now){for(const n of x.L){try{n.disconnect()}catch(e){}}}else NGC[k++]=x}NGC.length=k}
 setInterval(()=>ngcSweep(false),500);
 /* scheduler clock in a worker: Chrome slows page timers in background tabs (down to once a second or less), which would starve the 0.45 s lookahead. Worker timers keep running, and the page interval stays as a backup. tick() is safe to call twice. */
@@ -4885,7 +4885,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.136',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.137',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -5172,16 +5172,17 @@ const EQPRE={flat:['Flat',()=>[]],vocal:['Vocal clarity',()=>[['highpass',90,.7,
   wide:['Wide sides',()=>[['highpass',140,.7,0,{sl:12,pl:'s'}],['highshelf',7000,.7,3,{pl:'s'}]]],tilt:['Brighter tilt',()=>[['tilt',1000,.7,3]]]};
 function eqApplyPreset(f,k){const L=EQPRE[k][1]();f.p.bands=L.map(([t,fr,q,g,o])=>({t,f:fr,q,g,on:true,sl:12,pl:'st',...(o||{})}));f.p.pre=k;eqSel(f).clear()}
 const eqStages=b=>b.t==='tilt'?2:/pass/.test(b.t)&&b.t!=='bandpass'?Math.max(1,Math.round((b.sl||12)/12)):1;
+const eqIdle=b=>!UI.eqAll&&/shelf|peak|tilt/.test(b.t)&&!b.dyn&&Math.abs(+b.g||0)<1e-4;/* a bell or shelf at 0 dB changes nothing: it used to cost a filter anyway (5 per EQ by default) */
 function mkEQ2(c){const inp=c.createGain(),pre=c.createAnalyser(),og=c.createGain(),an=c.createAnalyser();pre.fftSize=an.fftSize=4096;pre.smoothingTimeConstant=an.smoothingTimeConstant=.82;inp.connect(pre);og.connect(an);
-  const X={in:inp,out:og,an,pre,stages:[],sig:'',dets:[],nodes:[],dyn:{},auto:0,p:null};
+  const X={in:inp,out:og,an,pre,stages:[],sig:'',dets:[],nodes:[],dyn:{},auto:0,p:null,keep:new Set()};
   X.build=p=>{for(const n of X.nodes){try{n.disconnect()}catch(e){}}try{inp.disconnect()}catch(e){}inp.connect(pre);X.nodes=[];X.stages=[];X.dets=[];const mk=()=>{const q=c.createBiquadFilter();X.nodes.push(q);return q},G=v=>{const q=c.createGain();q.gain.value=v;X.nodes.push(q);return q};
-    const solo=p.bands.findIndex(b=>b.on&&b.solo),act=p.bands.map((b,i)=>[b,i]).filter(([b,i])=>b.on&&(solo<0||i===solo));const ms=act.some(([b])=>b.pl&&b.pl!=='st');
+    const solo=p.bands.findIndex(b=>b.on&&b.solo),act=p.bands.map((b,i)=>[b,i]).filter(([b,i])=>b.on&&(solo<0||i===solo)&&(solo===i||!eqIdle(b)||X.keep.has(i)));const ms=act.some(([b])=>b.pl&&b.pl!=='st');
     const chain=(src,ch)=>{let prev=src;for(const[b,i] of act){if(ms&&ch!=='st'&&b.pl&&b.pl!=='st'&&b.pl!==ch)continue;const n=solo===i?1:eqStages(b);for(let k=0;k<n;k++){const q=mk();prev.connect(q);prev=q;X.stages.push({bi:i,q,k,n,ch})}}return prev};
     if(!ms){chain(inp,'st').connect(og)}else{const sp=c.createChannelSplitter(2);X.nodes.push(sp);inp.connect(sp);const mG=G(.5),sG=G(.5),nR=G(-1);sp.connect(mG,0);sp.connect(mG,1);sp.connect(sG,0);sp.connect(nR,1);nR.connect(sG);
       const mo=chain(mG,'m'),so=chain(sG,'s'),mg=c.createChannelMerger(2);X.nodes.push(mg);const nS=G(-1);mo.connect(mg,0,0);mo.connect(mg,0,1);so.connect(mg,0,0);so.connect(nS);nS.connect(mg,0,1);mg.connect(og)}
     for(const[b,i] of act)if(b.dyn){const bp=mk();bp.type='bandpass';inp.connect(bp);const a=c.createAnalyser();a.fftSize=512;X.nodes.push(a);bp.connect(a);X.dets.push({bi:i,bp,a,buf:new Float32Array(512)})}
     if(X.dets.length)DYNEQ.add(X);else DYNEQ.delete(X)};
-  X.set=p=>{X.p=p;const sig=JSON.stringify(p.bands.map(b=>[b.on,b.t,b.sl||12,b.pl||'st',!!b.dyn,!!b.solo]));if(sig!==X.sig){X.sig=sig;X.build(p)}const ny=c.sampleRate/2-60,gs=(p.gs??100)/100,solo=p.bands.findIndex(b=>b.on&&b.solo);
+  X.set=p=>{X.p=p;p.bands.forEach((b,i)=>{if(b.on&&!eqIdle(b))X.keep.add(i)});/* a band that has been used stays in the path, so dragging it through 0 dB never rebuilds the chain */const sig=JSON.stringify(p.bands.map((b,i)=>[b.on,b.t,b.sl||12,b.pl||'st',!!b.dyn,!!b.solo,X.keep.has(i)]));if(sig!==X.sig){X.sig=sig;X.build(p)}const ny=c.sampleRate/2-60,gs=(p.gs??100)/100,solo=p.bands.findIndex(b=>b.on&&b.solo);
     for(const b of p.bands){if(!isFinite(b.f))b.f=1000;if(!isFinite(b.g))b.g=0;if(!isFinite(b.q)||b.q<=0)b.q=1}for(const S2 of X.stages){const b=p.bands[S2.bi],q=S2.q,fr=clamp(b.f,10,ny);if(solo===S2.bi){q.type='bandpass';q.frequency.value=fr;q.Q.value=Math.max(.4,b.q);continue}
       const gg=b.g*gs+(X.dyn[S2.bi]||0);if(b.t==='tilt'){q.type=S2.k?'highshelf':'lowshelf';q.frequency.value=fr;q.Q.value=.5;q.gain.value=S2.k?gg/2:-gg/2;continue}
       q.type=b.t;q.frequency.value=fr;q.Q.value=/pass/.test(b.t)&&b.t!=='bandpass'?(S2.k===S2.n-1?Math.max(.3,b.q):.707):Math.max(.1,b.q);if(/shelf|peak/.test(b.t))q.gain.value=gg}
@@ -7866,7 +7867,7 @@ function gbCopy(){GB.last=performance.now();if(!gbLayout())return;const c=GB.cv,
 function gbTick(){if(!GB.on&&!gbOn())return;const n=performance.now();if(n-GB.last>=50)gbCopy();else if(!GB.tm)GB.tm=setTimeout(()=>{GB.tm=0;gbCopy()},60)}
 {const _d=drawArr;drawArr=function(){const r=_d.apply(this,arguments);try{gbTick()}catch(e){}return r};
  setTimeout(()=>{try{const ro=new ResizeObserver(()=>requestAnimationFrame(()=>{try{gbCopy()}catch(e){}}));for(const id of['tr','fx','hglass','arr']){const e=document.getElementById(id);if(e)ro.observe(e)}}catch(e){}
-   const c=document.getElementById('glBack');if(c){c.checked=UI.glBack!==false;c.onchange=()=>{UI.glBack=c.checked;saveUI();gbCopy();dirty=true}}gbCopy()},300);
+   const c=document.getElementById('glBack');if(c){c.checked=UI.glBack!==false;c.onchange=()=>{UI.glBack=c.checked;saveUI();gbCopy();dirty=true}}const sl=document.getElementById('slpOn');if(sl){sl.checked=UI.fxSleep!==false;sl.onchange=()=>{UI.fxSleep=sl.checked;saveUI();slpTick(true)}}const nc=document.getElementById('ncOn');if(nc){nc.checked=UI.noteCache!==false;nc.onchange=()=>{UI.noteCache=nc.checked;saveUI();if(nc.checked)try{NC.scanRev=-1}catch(e){}}}gbCopy()},300);
  setInterval(()=>{if(!document.hidden)try{gbLayout();if(GB.on&&performance.now()-GB.last>650)gbCopy()}catch(e){}},700)}
 /* ===== AudioLab bridge: drive the app from a script =====
    window.AudioLab lets a script outside the app (Claude's song-remake framework, a test, the browser console) look at and change anything inside it:
@@ -7902,6 +7903,62 @@ async function openDemoFractals(){const u=Uint8Array.from(atob(DEMO_FRACTALS),c=
 setTimeout(function w(n){if(typeof openProjectBlob!=='function'||typeof PJ==='undefined'||typeof ensureCtx!=='function'||!document.getElementById('arr')){if(n<80)setTimeout(()=>w(n+1),500);return}
   let seen=0;try{seen=localStorage.getItem('al_demo_fractals5')}catch(e){}
   if(!seen){try{localStorage.setItem('al_demo_fractals5','1')}catch(e){}openDemoFractals().catch(e=>toast('Could not open the Fractals demo'))}},1500,0);
+/* ===================== NOTE CACHE (v0.137) =====================
+   Every sequenced note used to build its own synth out of fresh audio nodes (a dense song: 500+ new nodes a second, each with
+   envelopes the browser evaluates sample by sample). Identical notes (same instrument settings, pitch and length) are now rendered
+   once in the background and played back as a short audio buffer: two nodes per note, no automation.
+   Live playback only: exports and freezes still synthesise every note. Instruments whose notes depend on each other or on free-running
+   modulators (Acid, samplers, modular, wavetable, physical models) and notes longer than 3 s are left alone. */
+const NC={map:new Map(),bytes:0,max:192e6,q:[],qs:new Set(),busy:false,want:new Map(),hits:0,miss:0,rend:0,maxDur:3,raw:null,bench:false,rev:0,scanRev:-1};
+const ncOn=()=>UI.noteCache!==false;
+const ncOK=I=>I&&(I.preset==='plant'||NCGEN.has(I.preset));
+function ncSig(I){let s='';for(const k in I){if(k==='space'||k==='ipk'||k==='pp'||k==='name'||k==='cat'||k==='desc')continue;const v=I[k],ty=typeof v;if(ty==='number'||ty==='string'||ty==='boolean')s+=k+'='+v+';'}return s}
+const ncKey=(I,p,dur,sr)=>ncSig(I)+'|'+p+'|'+Math.round(dur*1000)+'|'+sr;
+function ncQueue(key,I,p,dur){if(NC.map.has(key)||NC.qs.has(key))return;const I2={};for(const k in I){const v=I[k],ty=typeof v;if(ty==='number'||ty==='string'||ty==='boolean')I2[k]=v}I2.space=0;NC.qs.add(key);NC.q.push({key,I:I2,p,dur});ncPump()}
+function ncWant(key,I,p,dur){if(NC.map.has(key)||NC.qs.has(key))return;const n=(NC.want.get(key)||0)+1;if(NC.want.size>20000)NC.want.clear();NC.want.set(key,n);if(n>=2)ncQueue(key,I,p,dur)}
+async function ncRender(j){const sr=ctx.sampleRate,I=j.I,rel=+(I.r||0),len=Math.max(j.dur,(+(I.a||0))+.005)+(I.preset==='plant'?rel*1.8:rel*3)+.08;
+  const oc=new OfflineAudioContext(2,Math.max(64,Math.ceil(len*sr)),sr);NC.raw(oc,I,oc.destination,j.p,0,j.dur,1);const b=await oc.startRendering();
+  const L=b.getChannelData(0),R=b.getChannelData(1);let n=L.length,mono=true;while(n>64&&Math.abs(L[n-1])<1e-5&&Math.abs(R[n-1])<1e-5)n--;n=Math.min(L.length,n+32);
+  for(let i=0;i<n;i+=3)if(Math.abs(L[i]-R[i])>1e-6){mono=false;break}
+  const o=new AudioBuffer({length:n,sampleRate:sr,numberOfChannels:mono?1:2});o.copyToChannel(L.subarray(0,n),0);if(!mono)o.copyToChannel(R.subarray(0,n),1);
+  const bytes=n*4*(mono?1:2);NC.map.set(j.key,{buf:o,bytes,t:performance.now()});NC.bytes+=bytes;NC.rend++;
+  if(NC.bytes>NC.max){const es=[...NC.map.entries()].sort((a,z)=>a[1].t-z[1].t);for(const[k,e] of es){if(NC.bytes<=NC.max*.8)break;NC.map.delete(k);NC.bytes-=e.bytes}}}
+async function ncPump(){if(NC.busy||!ctx)return;NC.busy=true;try{while(NC.q.length){const j=NC.q.shift();try{await ncRender(j)}catch(e){NC.map.set(j.key,{buf:null,bytes:0,t:0})}NC.qs.delete(j.key);if(play.on)await new Promise(r=>setTimeout(r,8))}}finally{NC.busy=false}}
+/* look ahead from the playhead and render the notes that repeat, nearest first, so playback starts on cached notes */
+function ncScan(){if(!ncOn()||!ctx)return;try{const sr=ctx.sampleRate,from=play.on?curBeat():pos,seen=new Map();
+  for(const t of S.tracks){const I=t.inst;if(!ncOK(I)||(t.mute&&!t.solo))continue;const ch=t.fx.find(f=>f.type==='chord'&&f.on),ps=ch?(ch.p.notes||[0]):[0];
+    for(const c of t.clips){if(c.mute||!c.notes)continue;const C=c.cc;if(C&&((C['73']&&C['73'].length)||(C['72']&&C['72'].length)||(C.pb&&C.pb.length)||(C['1']&&C['1'].length)||(C['77']&&C['77'].length)))continue;
+      for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=c.start+n.s-c.off,du=secSpan(nb,nb+Math.min(n.l,c.off+c.len-n.s));if(!(du<=NC.maxDur))continue;
+        for(const s of ps){const p=n.p+s;if(p<0||p>127)continue;const key=ncKey(I,p,du,sr);let e=seen.get(key);const d=nb>=from?nb-from:nb-from+1e6;if(!e)seen.set(key,e={I,p,du,n:0,d});e.n++;if(d<e.d)e.d=d}}}}
+  const L=[...seen.entries()].filter(([k,e])=>e.n>=2&&!NC.map.has(k)&&!NC.qs.has(k)).sort((a,z)=>a[1].d-z[1].d).slice(0,4000);for(const[k,e] of L)ncQueue(k,e.I,e.p,e.du)}catch(e){}}
+{const _s=synth0;NC.raw=_s;synth0=function(c,I,dest,p,w,dur,v){
+  if((c!==ctx&&!NC.bench)||!ncOn()||CAPTS||!(dur<=NC.maxDur)||!ncOK(I))return _s(c,I,dest,p,w,dur,v);
+  const key=ncKey(I,p,dur,c.sampleRate),e=NC.map.get(key);
+  if(e&&e.buf){e.t=performance.now();NC.hits++;const src=c.createBufferSource(),g=c.createGain();src.buffer=e.buf;g.gain.value=v;src.connect(g);g.connect(dest);
+    if(I.space>0&&I.preset==='plant'){try{const b=plantBus(c,dest,I),sg=c.createGain();sg.gain.value=I.space/100*.8;g.connect(sg);sg.connect(b.i)}catch(er){}}
+    src.start(w);reg(c,src);hitMark(c,I,w,p,dur);return}
+  NC.miss++;if(c===ctx)ncWant(key,I,p,dur);return _s(c,I,dest,p,w,dur,v)}}
+{const _st=start;start=function(){const r=_st.apply(this,arguments);try{ncScan()}catch(e){}return r}}
+{const _ch=changed;changed=function(){NC.rev++;return _ch.apply(this,arguments)}}
+setInterval(()=>{try{if(!ctx&&ncOn()&&S.tracks.some(t=>ncOK(t.inst)&&t.clips.length))ensureCtx();if(ctx&&!play.on&&NC.scanRev!==NC.rev&&!NC.q.length&&document.visibilityState==='visible'){NC.scanRev=NC.rev;ncScan()}}catch(e){}},2500);
+/* ===================== SLEEPING TRACKS (v0.137) =====================
+   A track's effect chain used to run all the time, even when the track had nothing to play: delays, sidechains, reverbs and compressors
+   kept computing silence (40 % of one core for a 40-track song before a single note). While the song plays, a track with no clip near the
+   playhead is now unplugged from the mix and plugged back in 2.5 s before its next clip. Groups sleep when all their tracks do, returns when
+   nothing awake sends to them. The selected track and armed tracks never sleep, and nothing sleeps while the transport is stopped. */
+const SLP={last:0,n:0};
+function slpNeed(t,b,spb){const pre=2.5/spb,tail=(t.fx.some(f=>/reverb|delay|conv|blur|vocoder/.test(f.type))?12:6)/spb;for(const c of t.clips){if(c.mute)continue;if(c.start-pre<=b&&c.start+c.len+tail>=b)return true}return false}
+function slpTick(force,beat){if(!ctx)return;const now=performance.now();if(!force&&now-SLP.last<200)return;SLP.last=now;
+  try{const on=play.on&&UI.fxSleep!==false,b=beat!=null?beat:(on?curBeat():0),spb=60/S.bpm,act=new Map();
+    for(const t of S.tracks)act.set(t,!on||(t.kind!=='group'&&t.kind!=='return'&&(t.id===selT||!!t.arm||!!t.rec||!!t.mon||slpNeed(t,b,spb))));
+    if(on){for(const t of S.tracks)if(t.kind!=='group'&&t.kind!=='return'&&act.get(t))for(const g of grpAnc(t))act.set(g,true);
+      for(const t of S.tracks)if(t.kind==='return'){for(const m of S.tracks)if(m!==t&&m.sends&&m.sends[t.id]>0&&act.get(m)){act.set(t,true);break}}}
+    let n=0;for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;const want=act.get(t);if(!want)n++;if(!!N.slp===!want)continue;
+      if(want){try{N.ut.out.connect(N.vol)}catch(e){}N.slp=false;for(const x of N.fxm.values()){try{if(x.resync)x.resync();else if(x.sync)x.sync(play.on?play.t0-play.b0*60/S.bpm:ctx.currentTime)}catch(e){}}}
+      else{try{N.ut.out.disconnect(N.vol)}catch(e){}N.slp=true}}
+    SLP.n=n}catch(e){}}
+setInterval(()=>slpTick(false),200);
+{const _sc=schedule;schedule=function(from,to,first){if(first)slpTick(true,from);return _sc.apply(this,arguments)}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
