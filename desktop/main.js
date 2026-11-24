@@ -2,7 +2,7 @@
 // Loads the web app from a private secure scheme so it is cross-origin isolated
 // (SharedArrayBuffer on), grants audio-device / MIDI / file permissions, and adds
 // menus, window memory, .audiolab file opening and auto-update.
-const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences } = require('electron');
+const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -21,6 +21,9 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+// Draw on the GPU and hand frames straight to the screen: smoother at 120–240 Hz.
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
 
 let win = null;
 let pendingFile = null;   // a .audiolab path waiting for the app to finish loading
@@ -35,7 +38,7 @@ function saveState() {
   if (!win || win.isDestroyed()) return;
   try {
     const b = win.getNormalBounds();
-    fs.writeFileSync(stateFile(), JSON.stringify({ ...b, max: win.isMaximized(), full: win.isFullScreen() }));
+    fs.writeFileSync(stateFile(), JSON.stringify({ ...b, max: win.isMaximized(), full: win.isFullScreen(), v120: 1 }));
   } catch (e) { /* ignore */ }
 }
 
@@ -80,11 +83,15 @@ function setupPermissions() {
 /* ---------- main window ---------- */
 function createWindow() {
   const st = loadState();
+  // First start (or a window saved before v0.120): open at about 80% of the screen, centred.
+  const wa = screen.getPrimaryDisplay().workAreaSize;
+  const fresh = !st.v120;
   win = new BrowserWindow({
-    width: st.width || 1500,
-    height: st.height || 920,
-    x: st.x,
-    y: st.y,
+    width: fresh ? Math.round(wa.width * 0.8) : (st.width || Math.round(wa.width * 0.8)),
+    height: fresh ? Math.round(wa.height * 0.8) : (st.height || Math.round(wa.height * 0.8)),
+    x: fresh ? undefined : st.x,
+    y: fresh ? undefined : st.y,
+    center: fresh,
     minWidth: 900,
     minHeight: 560,
     backgroundColor: '#0c0e14',
