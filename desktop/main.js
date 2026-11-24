@@ -295,6 +295,7 @@ function overTabs(kw) {
   const nearTop = kb.y <= cb.y + 44 && kb.y >= cb.y - 60;
   return inX && nearTop ? { x: p.x - cb.x } : null;
 }
+ipcMain.handle('al:display-hz', () => { try { const d = win && !win.isDestroyed() ? screen.getDisplayMatching(win.getBounds()) : screen.getPrimaryDisplay(); return d.displayFrequency || 0; } catch (e) { return 0; } });
 ipcMain.handle('al:is-fullscreen', () => !!(win && !win.isDestroyed() && win.isFullScreen()));
 ipcMain.handle('al:tear', (e, d) => {
   const disp = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
@@ -382,6 +383,8 @@ if (!gotLock) {
     if (f) pendingFile = f;
     // macOS only reveals audio-device names after microphone permission; ask once, quietly.
     if (isMac) { try { if (systemPreferences.getMediaAccessStatus('microphone') === 'not-determined') systemPreferences.askForMediaAccess('microphone'); } catch (e) { /* ignore */ } }
+    // Show the current icon in the Dock even if macOS cached an older one from a previous version.
+    if (isMac && app.dock) { try { const { nativeImage } = require('electron'); const im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) app.dock.setIcon(im); } catch (e) { /* ignore */ } }
     createWindow();
     setupUpdater();
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
