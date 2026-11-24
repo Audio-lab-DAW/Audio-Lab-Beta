@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Studio",
-  "version": "0.139.0",
+  "version": "0.140.0",
   "description": "AudioLab Studio - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -19,7 +19,7 @@
     "electron-updater": "^6.3.9"
   },
   "devDependencies": {
-    "electron": "^33.2.1",
+    "electron": "^45.4.1",
     "electron-builder": "^25.1.8"
   },
   "build": {
