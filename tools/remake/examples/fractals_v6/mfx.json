@@ -1,0 +1,1 @@
+[{"type": "comp", "p": {"threshold": -12, "ratio": 1.5, "attack": 30, "release": 120, "makeup": 0}}, {"type": "clip", "p": {"gain": 6.0, "thr": -4, "ceil": -1.0, "shape": "tanh", "os": "4x", "bias": 0, "mix": 100, "out": 0}}]
