@@ -103,8 +103,13 @@ function createWindow() {
   if (st.max) win.maximize();
   if (st.full) win.setFullScreen(true);
   win.once('ready-to-show', () => win.show());
-  win.on('close', saveState);
-  win.on('closed', () => { win = null; appReady = false; });
+  win.on('close', (e) => {
+    saveState();
+    if (quitOK || !appReady) return;
+    e.preventDefault();
+    askQuit(() => { quitOK = true; if (quitting) app.quit(); else if (win) win.close(); });
+  });
+  win.on('closed', () => { win = null; appReady = false; if (!quitting) quitOK = false; });
 
   // Links open in the real browser, never inside the DAW window.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -234,7 +239,7 @@ function setupUpdater() {
       type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1,
       message: `AudioLab Studio ${info.version} is ready`,
       detail: 'Save your project first, then restart to finish updating.'
-    }).then((r) => { if (r.response === 0) autoUpdater.quitAndInstall(); });
+    }).then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
   });
   autoUpdater.on('error', (e) => {
     if (manualCheck) dialog.showMessageBox(win, { type: 'warning', message: 'Could not check for updates.', detail: String(e && e.message || e) });
@@ -269,6 +274,22 @@ ipcMain.handle('al:dac-list', () => alvol(['list']));
 ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]));
 ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
+
+/* ---------- quit: ask the app to save first ---------- */
+let quitOK = false, quitting = false, asking = false;
+function askQuit(go) {
+  if (asking || !win || win.isDestroyed()) return;
+  asking = true;
+  win.show(); win.focus();
+  win.webContents.executeJavaScript('window.audiolabHost&&window.audiolabHost.quitCheck?window.audiolabHost.quitCheck():true', true)
+    .then((ok) => { asking = false; if (ok) go(); else quitting = false; })
+    .catch(() => { asking = false; go(); });
+}
+app.on('before-quit', (e) => {
+  if (quitOK || !win || win.isDestroyed() || !appReady) return;
+  e.preventDefault(); quitting = true;
+  askQuit(() => { quitOK = true; app.quit(); });
+});
 
 /* ---------- lifecycle ---------- */
 const gotLock = app.requestSingleInstanceLock();
