@@ -48,7 +48,21 @@ def recipe(mix=None,parts=None):
     tr.append({'name':'Open hat','preset':'zhat','color':'#3ecf8e','inst':oh,'vol':V('Open hat',.5),'fx':FX('Open hat'),'clips':clips_from_steps(S['ohat'],60,.2,'Open hat')})
     tr.append({'name':'Clap','preset':'zclap','color':'#ff9a3c','inst':mix.get('Clap',{}).get('inst',{}),'vol':V('Clap',.5),'fx':FX('Clap'),'clips':clips_from_steps(S['clap'],60,.2,'Clap')})
     tr.append({'name':'Snare & fills','preset':'zsnare','color':'#ff7ac8','inst':mix.get('Snare & fills',{}).get('inst',{}),'vol':V('Snare & fills',.5),'fx':FX('Snare & fills'),'clips':clips_from_steps(S['snare'],60,.15,'Fill')})
-    if os.path.exists('melody.json') and not os.environ.get('NOMEL'):
+    if os.path.exists('compose.json') and not os.environ.get('NOCOMP'):
+        for t in json.load(open('compose.json')):
+            t=dict(t);t['vol']=V(t['name'],t['vol']);t['fx']=t['fx']+FX(t['name']);tr.append(t)
+    elif os.path.exists('mono.json') and not os.environ.get('NOMONO'):
+        MO=json.load(open('mono.json'));ev=np.array(MO['env']);ev=np.clip(ev/np.percentile(ev,98),0,1)**.6
+        inst=dict(w1='sawtooth',w2='sawtooth',morph=0,uni=2,det=8,width=60,cut=5000,res=.2,fenv=0,a=.004,d=.2,s=1,r=.06,lfo=.3,lamt=0,space=0,sub=0,noise=0,fm=0,ratio=2,gain=.5)
+        inst.update(json.load(open('monopatch.json')) if os.path.exists('monopatch.json') else {})
+        by={}
+        for p,st,l,v in MO['notes']:by.setdefault(st//128,[]).append((p,st,l,v))
+        cl=[]
+        for k in sorted(by):
+            s0=k*128;pts=[{'b':round(i/4,3),'v':round(float(ev[s0+i]),3)} for i in range(128) if s0+i<len(ev)]
+            cl.append({'start':k*32,'len':32,'name':f'Lead {k*8+1}','notes':[{'p':p,'s':round((st-s0)/4,4),'l':round(l/4+.05,4),'v':1.0} for p,st,l,v in by[k]],'env':{'vol':pts},'envShow':None})
+        tr.append({'name':'Lead','preset':'plant','color':'#b583ff','inst':inst,'vol':V('Lead',1.0),'fx':FX('Lead'),'clips':cl})
+    elif os.path.exists('melody.json') and not os.environ.get('NOMEL'):
         MEL=json.load(open('melody.json'));MP=json.load(open('melpatch.json')) if os.path.exists('melpatch.json') else {}
         for nm,lo,hi,col in [('Mel low',52,60,'#b583ff'),('Mel mid',61,71,'#7a8bff'),('Mel high',72,99,'#4cc9f0')]:
             by={}
