@@ -2927,10 +2927,11 @@ function awStop(){AWL.clear();for(const t of S.tracks){if(t._awBase){t.vol=t._aw
 {const idle=window.requestIdleCallback||(f=>setTimeout(f,1));setTimeout(()=>{let k=0;const ids=['@choir','@glass'];const go=()=>{if(k<ids.length){try{sampleBuf(ids[k++])}catch(e){}idle(go)}};idle(go)},3500)}
 function warmSounds(){/* build generated samples and reverb spaces before they are needed, so the first time a section plays never stalls the scheduler */try{for(const t of S.tracks){const I=t.inst;if(!I)continue;if(I.preset==='sampler'&&I.buf){const B=sampleBuf(I.buf);if(B&&I.rev)sampRev(B)}}if(ctx)irFor(ctx,3)}catch(e){}}
 setTimeout(()=>{try{(window.requestIdleCallback||setTimeout)(()=>warmSounds())}catch(e){}},3000);
-function start(){play.past=!!(S.loop&&pos>=loopB()-1e-6&&S.loopRange);play.wrapped=false;ensureCtx();warmSounds();ctx.resume();syncGraph();play.on=true;play.pass++;const spb=60/S.bpm,ci=UI.countIn?(UI.countBars||1)*4:0,t00=ctx.currentTime+.05;play.t0=t00+ci*spb;play.counting=ci>0;play.b0=pos;play.sched=pos;play.first=true;LA.t=0;setTimeout(ndResync,0);
+const PLEAD={s:.2};/* head start between pressing Play and the first sound: 0.2 s the very first time (everything is cold), then measured */
+function start(){play.past=!!(S.loop&&pos>=loopB()-1e-6&&S.loopRange);play.wrapped=false;ensureCtx();warmSounds();ctx.resume();syncGraph();play.on=true;play.pass++;const spb=60/S.bpm,ci=UI.countIn?(UI.countBars||1)*4:0,t00=ctx.currentTime+PLEAD.s;play.t0=t00+ci*spb;play.counting=ci>0;play.b0=pos;play.sched=pos;play.first=true;LA.t=0;setTimeout(ndResync,0);
   if(ci&&UI.clickCount!==false){const P=pat(),N=P.length,st=4/N;for(let b=0;b<ci-1e-9;b+=st){const k=Math.round((b%4)/st)%N;if(P[k])clickSound(ctx,clickOut,t00+b*spb,P[k],UI.clickSnd)}}
   {const tb0=play.t0-play.b0*spb;for(const N of NODES.values())for(const x of N.fxm.values())if(x.sync)x.sync(tb0)}
-  tick();play.timer=setInterval(tick,25);sclk('go');URS.n=0;URS.last=urNow();$('#bPlay').classList.add('on');$('#bStop').classList.remove('cur')}
+  {const tq=performance.now();tick();/* how long the first round took decides how much head start the next Play gets, so the first notes are never late */PLEAD.s=clamp((performance.now()-tq)/1000*1.3+.03,.05,.4)}play.timer=setInterval(tick,25);sclk('go');URS.n=0;URS.last=urNow();$('#bPlay').classList.add('on');$('#bStop').classList.remove('cur')}
 function stop(){if(!play.on)return;LIVEN.length=0;setTimeout(awStop,0);if(REC.on)recStop();clearInterval(play.timer);sclk('stop');setTimeout(autoBufCheck,0);play.on=false;for(const v of VOICES){try{v.stop()}catch(e){}}VOICES.clear();GJ.clear();setTimeout(()=>ngcSweep(true),400);for(const I of INST.values()){try{I.out.disconnect()}catch(e){}}INST.clear();$('#bPlay').classList.remove('on');$('#bStop').classList.add('cur');dirty=true}
 function toggle(){if(play.on){pos=Math.max(0,curDisp());stop()}else start()}
 function panic(){if(!ctx||!master)return;const now=ctx.currentTime;master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(0,now,.006);
@@ -4918,7 +4919,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.147',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.148',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8085,9 +8086,9 @@ const PWL=`/* ===== AudioLab pooled voice engine (v0.145) =====
 const NVOICE=40,LIVE=32,NOSC=14,TWO=Math.PI*2,SN=4096,SIN=new Float32Array(SN+1);for(let i=0;i<=SN;i++)SIN[i]=Math.sin(TWO*i/SN);
 class Poly extends AudioWorkletProcessor{
  constructor(o){super();this.vo=[];for(let i=0;i<NVOICE;i++)this.vo.push({on:0,ph:new Float64Array(NOSC),df:new Float64Array(NOSC),ty:new Uint8Array(NOSC),gl:new Float32Array(NOSC),gr:new Float32Array(NOSC),n:0,born:0});
-  this.pend=[];this.pp=new Map();this.seed=0x2545f491;this.cnt=0;this.dead=0;this.tc=0;
+  this.pend=[];this.pp=new Map();this.wts=new Map();this.seed=0x2545f491;this.cnt=0;this.dead=0;this.tc=0;
   this.port.onmessage=e=>this.apply(e.data);const po=(o&&o.processorOptions)||{};for(const d of(po.msgs||[]))this.apply(d)}
- apply(d){if(d.P){this.pp.set(d.id,d.P);if(this.pp.size>96){const k=this.pp.keys().next().value;this.pp.delete(k)}}
+ apply(d){if(d.wt)this.wts.set(d.wt,d.T);if(d.P){this.pp.set(d.id,d.P);if(this.pp.size>96){const k=this.pp.keys().next().value;this.pp.delete(k)}}
   if(d.n)for(const q of d.n)this.pend.push(q);
   if(d.x){this.pend.length=0;for(const v of this.vo)if(v.on&&!v.kill){v.kill=1;v.kg=1}}
   if(d.off){/* [tag, fast]: a held note is let go now */const tg=d.off[0],fast=d.off[1];for(let k=this.pend.length-1;k>=0;k--)if(this.pend[k][5]===tg)this.pend.splice(k,1);for(const v of this.vo)if(v.on&&v.tag===tg&&v.st<2){v.fOff=0;if(fast)v.kr=1-Math.exp(-1/(.01*sampleRate))}}
@@ -8102,14 +8103,16 @@ class Poly extends AudioWorkletProcessor{
   const f=440*Math.pow(2,(q[2]-69)/12),s0=f0+off,dur=Math.max(q[1],P.a+.005);
   v.on=1;v.kill=0;v.kg=1;v.off=off;v.tag=q[5]||0;v.born=this.cnt++;v.st=0;v.e=0;v.pk=q[3]*P.gain;v.sus=v.pk*P.s;v.ai=v.pk/Math.max(1,P.a*sr);v.kd=1-Math.exp(-1/(P.dtc*sr));v.kr=1-Math.exp(-1/(P.rtc*sr));
   v.fOff=s0+Math.round(dur*sr);v.fEnd=v.fOff+Math.round(P.rend*sr);
-  v.c=Math.min(18000,P.fe);v.fc=P.fc;v.kc=1-Math.exp(-16/(P.ftc*sr));v.G=Math.pow(10,P.q/20);v.z1l=v.z2l=v.z1r=v.z2r=0;v.b0=v.b1=v.a1=v.a2=0;
+  v.q0=P.q;v.c=Math.min(18000,P.fe);v.fc=P.fc;v.kc=1-Math.exp(-16/(P.ftc*sr));v.G=Math.pow(10,P.q/20);v.z1l=v.z2l=v.z1r=v.z2r=0;v.b0=v.b1=v.a1=v.a2=0;
   v.lph=0;v.linc=P.lfo/sr;v.lamt=P.lamt;
   v.fm=P.fm>0?1:0;v.fph=0;v.finc=f*P.ratio/sr;v.fd=f*P.fm0/sr;v.fdT=f*P.fm1/sr;v.kfm=1-Math.exp(-1/(.3*sr));
   v.sph=0;v.sinc=f*.5/sr;v.sg=P.sub;v.ng=P.noise;
   /* extras used by Acid: slide from the previous note, a second filter stage, drive, a straight-line release */
   v.gm=1;v.gk=1;v.gn=0;if(q[6]>0&&q[7]>0){const nG=Math.max(1,Math.round(q[7]*sr));v.gm=q[6];v.gk=Math.pow(1/q[6],1/nG);v.gn=nG}
   v.f2=P.q2!=null?1:0;v.G2=v.f2?Math.pow(10,P.q2/20):1;v.z3l=v.z4l=v.z3r=v.z4r=0;v.dg=P.dg||0;v.dn=v.dg?1/Math.tanh(v.dg):1;v.rl=P.rlin>0?v.pk/Math.max(1,P.rlin*sr):0;
-  let n=0;for(const o of P.osc){if(n>=NOSC)break;v.ph[n]=o[0]===1?.5:0;v.df[n]=f*Math.pow(2,(o[1]+(this.rnd()-.5)*2)/1200)/sr;v.ty[n]=o[0];v.gl[n]=o[2];v.gr[n]=o[3];n++}v.n=n}
+  /* wavetable: 8 frames, each in 7 band-limited versions; the position moves with an LFO and an envelope */
+  v.ft=P.ft||1;v.sp=P.subPre?1:0;v.wt=null;if(P.wt){const W=this.wts.get(P.wt);if(W){const mh=Math.max(1,Math.floor(sr*.5/f));let lv=0;while(lv<6&&(64>>lv)>mh)lv++;v.wt=W[lv];v.wp0=P.pos;v.wla=P.lA;v.wlinc=P.lfoRate/sr;v.wlph=0;v.wea=P.eA;v.we=0;v.wes=0;v.wei=16/(.003*sr);v.wek=1-Math.exp(-16/(Math.max(.02,P.pd)/3*sr));v.wfi=0;v.wfr=0}}
+  let n=0;for(const o of P.osc){if(n>=NOSC)break;v.ph[n]=o[0]===1?.5:0;v.df[n]=f*Math.pow(2,(o[1]+(this.rnd()-.5)*2)/1200)/sr;v.ty[n]=o[0]===4&&!v.wt?0:o[0];v.gl[n]=o[2];v.gr[n]=o[3];n++}v.n=n}
  process(ins,outs){if(this.dead)return false;const out=outs[0],L=out[0],R=out[1]||out[0],N=L.length,sr=sampleRate,f0=currentFrame;
   if(this.pend.length){const pd=this.pend;let due=null;for(let k=pd.length-1;k>=0;k--){const s0=Math.round(pd[k][0]*sr);if(s0<f0+N){(due||(due=[])).push([s0,pd[k]]);pd.splice(k,1)}}
    if(due){if(due.length>1)due.sort((a,b)=>a[0]-b[0]);for(const d of due)this.start(d[1],Math.max(0,Math.min(N-1,d[0]-f0)),f0)}}
@@ -8118,11 +8121,13 @@ class Poly extends AudioWorkletProcessor{
   if(any&&R!==L){/* nothing */}
   return true}
  run(v,L,R,N,f0){const sr=sampleRate,n=v.n,ph=v.ph,df=v.df,ty=v.ty,gl=v.gl,gr=v.gr,nyq=sr*.49;let i=v.off;v.off=0;
-  let gm=v.gm,gn=v.gn,z3l=v.z3l,z4l=v.z4l,z3r=v.z3r,z4r=v.z4r,c0=0,c1=0,d1=0,d2=0;const gk=v.gk,f2=v.f2,G2=v.G2,dg=v.dg,dn=v.dn,rl=v.rl;
+  let bb2=v.bb2||0;let gm=v.gm,gn=v.gn,z3l=v.z3l,z4l=v.z4l,z3r=v.z3r,z4r=v.z4r,c0=0,c1=0,d1=0,d2=0;const wt=v.wt,ft=v.ft,sp=v.sp;let tA=null,tB=null,wfr=0;
+  const gk=v.gk,f2=v.f2,G2=v.G2,dg=v.dg,dn=v.dn,rl=v.rl;
   let e=v.e,st=v.st,c=v.c,z1l=v.z1l,z2l=v.z2l,z1r=v.z1r,z2r=v.z2r,b0=v.b0,b1=v.b1,a1=v.a1,a2=v.a2,lph=v.lph,fph=v.fph,fd=v.fd,sph=v.sph,kg=v.kg,seed=this.seed;
   const fm=v.fm,finc=v.finc,fdT=v.fdT,kfm=v.kfm,sinc=v.sinc,sg=v.sg,ng=v.ng,kd=v.kd,kr=v.kr,ai=v.ai,pk=v.pk,sus=v.sus,linc=v.linc,lamt=v.lamt,kc=v.kc,fc=v.fc,G=v.G,kill=v.kill;
   while(i<N){/* control rate: every 16 samples the filter is re-tuned */
-   {let cu=c;if(lamt>0){cu+=lamt*SIN[(lph*SN)|0];lph+=linc*16;lph-=Math.floor(lph)}if(cu<20)cu=20;else if(cu>nyq)cu=nyq;const w=TWO*cu/sr,cs=Math.cos(w),sn=Math.sin(w),al=sn/(2*G),ia=1/(1+al);b1=(1-cs)*ia;b0=b1*.5;a1=-2*cs*ia;a2=(1-al)*ia;if(f2){const a3=sn/(2*G2),i3=1/(1+a3);c1=(1-cs)*i3;c0=c1*.5;d1=-2*cs*i3;d2=(1-a3)*i3}c+=(fc-c)*kc}
+   {let cu=c;if(lamt>0){cu+=lamt*SIN[(lph*SN)|0];lph+=linc*16;lph-=Math.floor(lph)}if(cu<20)cu=20;else if(cu>nyq)cu=nyq;const w=TWO*cu/sr,cs=Math.cos(w),sn=Math.sin(w);if(ft===3){const al=sn/(2*Math.max(.0001,v.q0)),ia=1/(1+al);b0=al*ia;b1=0;bb2=-al*ia;a1=-2*cs*ia;a2=(1-al)*ia}else{const al=sn/(2*G),ia=1/(1+al);if(ft===2){b1=-(1+cs)*ia;b0=bb2=(1+cs)*.5*ia}else{b1=(1-cs)*ia;b0=bb2=b1*.5}a1=-2*cs*ia;a2=(1-al)*ia}
+    if(wt){let ps=v.wp0;if(v.wla>0){ps+=v.wla*SIN[(v.wlph*SN)|0];v.wlph+=v.wlinc*16;v.wlph-=Math.floor(v.wlph)}if(v.wea!==0){if(v.wes===0){v.we+=v.wei;if(v.we>=1){v.we=1;v.wes=1}}else v.we-=v.we*v.wek;ps+=v.wea*v.we}if(ps<0)ps=0;else if(ps>1)ps=1;const fp=ps*7;let fi=fp|0;if(fi>6)fi=6;wfr=fp-fi;tA=wt[fi];tB=wt[fi+1]}if(f2){const a3=sn/(2*G2),i3=1/(1+a3);c1=(1-cs)*i3;c0=c1*.5;d1=-2*cs*i3;d2=(1-a3)*i3}c+=(fc-c)*kc}
    const end=Math.min(N,i+16);
    for(;i<end;i++){const fr=f0+i;
     if(st===0){e+=ai;if(e>=pk){e=pk;st=1}}else if(st===1){e+=(sus-e)*kd}else if(rl>0){e-=rl;if(e<0)e=0}else{e-=e*kr}
@@ -8134,18 +8139,19 @@ class Poly extends AudioWorkletProcessor{
      if(T===1){s=2*t-1;if(t<ad){const x=t/ad;s-=2*x-x*x-1}else if(t>1-ad){const x=(t-1)/ad;s-=x*x+2*x+1}}
      else if(T===2){s=t<.5?1:-1;if(t<ad){const x=t/ad;s+=2*x-x*x-1}else if(t>1-ad){const x=(t-1)/ad;s+=x*x+2*x+1}let u=t+.5;if(u>=1)u-=1;if(u<ad){const x=u/ad;s-=2*x-x*x-1}else if(u>1-ad){const x=(u-1)/ad;s-=x*x+2*x+1}}
      else if(T===3){s=t<.25?4*t:t<.75?2-4*t:4*t-4}
+     else if(T===4){const q=t*1024,qi=q|0,fq=q-qi,a=tA[qi]+(tA[qi+1]-tA[qi])*fq,b=tB[qi]+(tB[qi+1]-tB[qi])*fq;s=a+(b-a)*wfr}
      else{const q=t*SN,qi=q|0;s=SIN[qi]+(SIN[qi+1]-SIN[qi])*(q-qi)}
      t+=d;if(t>=1)t-=1;else if(t<0)t+=1;ph[o]=t;xl+=s*gl[o];xr+=s*gr[o]}
     if(ng>0){seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;const nz=((seed>>>0)/2147483648-1)*ng;xl+=nz;xr+=nz}
-    let yl=b0*xl+z1l;z1l=b1*xl-a1*yl+z2l;z2l=b0*xl-a2*yl;let yr=b0*xr+z1r;z1r=b1*xr-a1*yr+z2r;z2r=b0*xr-a2*yr;
+    let sb=0;if(sg>0){const q=sph*SN,qi=q|0;sb=(SIN[qi]+(SIN[qi+1]-SIN[qi])*(q-qi))*sg;sph+=sinc;if(sph>=1)sph-=1;if(sp){xl+=sb;xr+=sb;sb=0}}
+    let yl=b0*xl+z1l;z1l=b1*xl-a1*yl+z2l;z2l=bb2*xl-a2*yl;let yr=b0*xr+z1r;z1r=b1*xr-a1*yr+z2r;z2r=bb2*xr-a2*yr;
     if(f2){const ul=c0*yl+z3l;z3l=c1*yl-d1*ul+z4l;z4l=c0*yl-d2*ul;const ur=c0*yr+z3r;z3r=c1*yr-d1*ur+z4r;z4r=c0*yr-d2*ur;yl=ul;yr=ur}
     if(dg){yl=Math.tanh((yl>1?1:yl<-1?-1:yl)*dg)*dn;yr=Math.tanh((yr>1?1:yr<-1?-1:yr)*dg)*dn}
-    let sb=0;if(sg>0){const q=sph*SN,qi=q|0;sb=(SIN[qi]+(SIN[qi+1]-SIN[qi])*(q-qi))*sg;sph+=sinc;if(sph>=1)sph-=1}
     let g=e;if(kill){kg-=.007;if(kg<=0){kg=0;v.on=0}g*=kg}
     L[i]+=(yl+sb)*g;R[i]+=(yr+sb)*g;
     if(!v.on||(st===2&&(fr>=v.fEnd||e<1e-5))){v.on=0;i=N;break}}}
   if(z1l<1e-30&&z1l>-1e-30)z1l=0;if(z2l<1e-30&&z2l>-1e-30)z2l=0;if(z1r<1e-30&&z1r>-1e-30)z1r=0;if(z2r<1e-30&&z2r>-1e-30)z2r=0;
-  if(z3l<1e-30&&z3l>-1e-30)z3l=0;if(z4l<1e-30&&z4l>-1e-30)z4l=0;if(z3r<1e-30&&z3r>-1e-30)z3r=0;if(z4r<1e-30&&z4r>-1e-30)z4r=0;v.gm=gm;v.gn=gn;v.z3l=z3l;v.z4l=z4l;v.z3r=z3r;v.z4r=z4r;
+  if(z3l<1e-30&&z3l>-1e-30)z3l=0;if(z4l<1e-30&&z4l>-1e-30)z4l=0;if(z3r<1e-30&&z3r>-1e-30)z3r=0;if(z4r<1e-30&&z4r>-1e-30)z4r=0;v.bb2=bb2;v.gm=gm;v.gn=gn;v.z3l=z3l;v.z4l=z4l;v.z3r=z3r;v.z4r=z4r;
   v.e=e;v.st=st;v.c=c;v.z1l=z1l;v.z2l=z2l;v.z1r=z1r;v.z2r=z2r;v.b0=b0;v.b1=b1;v.a1=a1;v.a2=a2;v.lph=lph;v.fph=fph;v.fd=fd;v.sph=sph;v.kg=kg;this.seed=seed}}
 registerProcessor('al-poly',Poly)})();
 `;
@@ -8156,10 +8162,16 @@ registerProcessor('al-poly',Poly)})();
    UI.poly=false turns it off. */
 const PVS=new WeakMap();let PVCH=null;const PVW={sine:0,sawtooth:1,square:2,triangle:3},PVA=[1,.847,.847,1];/* the browser's own saw and square are 0.847 of the ideal level (measured); keep presets at the level they were made for */
 const PVMONO=Math.SQRT1_2;/* a mono voice used to lose 3 dB in the first pan stage; a voice with stereo spread did not */
-const pvOK=I=>!!I&&UI.poly!==false&&(I.preset==='plant'||I.preset==='acid'||NCGEN.has(I.preset));
+const pvOK=I=>!!I&&UI.poly!==false&&(I.preset==='plant'||I.preset==='acid'||I.preset==='wtab'||NCGEN.has(I.preset));
 /* notes in a clip with pitch bend or modulation keep the old per-note path (they need their own oscillators) */
 const pvBend=c=>{const C=c&&c.cc;return!!(C&&((C.pb&&C.pb.length)||(C['1']&&C['1'].length)||(C['77']&&C['77'].length)))};
+/* wavetable for the engine: 8 frames, each as 7 band-limited tables (64, 32, 16 ... 1 harmonics) of 1024 points, levelled like the browser's own periodic waves (peak of the full table = 1) */
+const WTM=new Map();function wtMips(name){let M=WTM.get(name);if(M)return M;const T=wtTab(name);M=[];const pk=[];for(let f=0;f<WTF;f++){let mx=1e-9;for(let k=0;k<1024;k++){let v=0;for(let n=1;n<WTH;n++)v+=T.A[f][n]*Math.sin(2*Math.PI*n*k/1024);mx=Math.max(mx,Math.abs(v))}pk.push(1/mx)}
+  for(let lv=0;lv<7;lv++){const H=Math.max(1,WTH>>lv),F=[];for(let f=0;f<WTF;f++){const a=new Float32Array(1025);for(let k=0;k<1025;k++){let v=0;for(let n=1;n<=H&&n<WTH;n++)v+=T.A[f][n]*Math.sin(2*Math.PI*n*k/1024);a[k]=v*pk[f]}F.push(a)}M.push(F)}WTM.set(name,M);return M}
 function pvParams(I,c,acc){const og=I.og?Math.pow(10,I.og/20):1,osc=[];
+  if(I.preset==='wtab'){const nu=clamp(Math.round(I.uni||1),1,5),det=I.det||0,a=Math.max(.001,I.a||.01),d=Math.max(.01,I.d||.3),r=Math.max(.01,I.r||.3),cut=I.cut||6000,ft=I.ftype||'lowpass';
+    for(let u=0;u<nu;u++){const sp=nu>1?(u-(nu-1)/2)/((nu-1)/2):0,pan=sp*(I.width??70)/100;osc.push([4,sp*det,+(Math.cos((pan+1)*Math.PI/4)/Math.sqrt(nu)*1.1).toFixed(5),+(Math.sin((pan+1)*Math.PI/4)/Math.sqrt(nu)*1.1).toFixed(5)])}
+    return{osc,wt:I.wt||'basic',pos:clamp(I.pos??.2,0,1),lA:(I.lamt||0)/100*.5,lfoRate:I.lfoRate||.4,eA:(I.penv||0)/100,pd:I.pd||.5,ft:ft==='highpass'?2:ft==='bandpass'?3:1,subPre:1,gain:(I.gain??.5)*.7*og,a,dtc:d/3+.001,s:clamp(I.s??.7,0,1),rtc:r/3+.001,rend:r*3+.05,fc:cut,fe:Math.min(18000,cut*(1+(I.fenv||0)/100*4)),ftc:.04+d*.3,q:clamp(I.res??1,.1,20),lfo:0,lamt:0,fm:0,ratio:1,fm0:0,fm1:0,sub:(I.sub||0)>0?I.sub/100*.8:0,noise:(I.noise||0)>0?I.noise/100*.5:0}}
   if(I.preset==='acid'){/* one oscillator, two filter stages, drive; a loud note (velocity above 88 %) is an accent */const ty=PVW[I.wave]||1,ea=1+(acc?I.acc/100:0),k=Math.round(I.dist/100*10)/10;osc.push([ty,0,PVA[ty],PVA[ty]]);
     return{osc,gain:I.gain*(acc?1.35:.85)*.7*PVMONO*og,a:.003,dtc:1,s:1,rtc:.01,rlin:.018,rend:.03,fc:I.cut,fe:Math.min(16000,I.cut*Math.pow(2,I.env/100*5*ea)),ftc:I.dec/(acc?1.6:3),q:I.res*(acc?1.15:1),q2:.7,dg:1+k*12,lfo:0,lamt:0,fm:0,ratio:1,fm0:0,fm1:0,sub:0,noise:0}}
   if(I.preset==='plant'){const nv=Math.max(1,Math.round(I.uni)),NV0=UI.lite&&c===ctx?Math.min(nv,3):nv,mix=I.w1===I.w2?[[I.w1,1]]:[[I.w1,1-I.morph],[I.w2,I.morph]];
@@ -8178,8 +8190,9 @@ function pvState(c,key,name,M){name=name||'al-poly';M=M||PVS;let m=M.get(c);if(!
 function pvFlush(st){const nb=st.nb;if(!nb)return;st.nb=null;pvSend(st,{n:nb})}
 function pvSend(st,m){if(st.node&&!st.fin)st.node.port.postMessage(m);else st.q.push(m)}
 function pvDrop(c,st){try{const m=(st.M||PVS).get(c);if(m&&m.get(st.key)===st)m.delete(st.key);if(st.node){st.node.port.postMessage({die:1});st.node.disconnect()}st.out.disconnect();if(st.spg)st.spg.disconnect()}catch(e){}}
-const pvKey=(I,c,acc)=>I.preset==='acid'?'acid|'+I.wave+'|'+I.cut+'|'+I.res+'|'+I.env+'|'+I.dec+'|'+I.acc+'|'+I.dist+'|'+I.gain+'|'+I.og+'|'+(acc?1:0):I.preset+'|'+I.w1+'|'+I.w2+'|'+I.morph+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.lfo+'|'+I.lamt+'|'+I.sub+'|'+I.noise+'|'+I.fm+'|'+I.ratio+'|'+I.gain+'|'+I.og+'|'+I.wave+'|'+I.cutoff+'|'+(UI.lite&&c===ctx?1:0);
+const pvKey=(I,c,acc)=>I.preset==='wtab'?'wt|'+I.wt+'|'+I.pos+'|'+I.lamt+'|'+I.lfoRate+'|'+I.penv+'|'+I.pd+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.ftype+'|'+I.sub+'|'+I.noise+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.gain+'|'+I.og:I.preset==='acid'?'acid|'+I.wave+'|'+I.cut+'|'+I.res+'|'+I.env+'|'+I.dec+'|'+I.acc+'|'+I.dist+'|'+I.gain+'|'+I.og+'|'+(acc?1:0):I.preset+'|'+I.w1+'|'+I.w2+'|'+I.morph+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.lfo+'|'+I.lamt+'|'+I.sub+'|'+I.noise+'|'+I.fm+'|'+I.ratio+'|'+I.gain+'|'+I.og+'|'+I.wave+'|'+I.cutoff+'|'+(UI.lite&&c===ctx?1:0);
 function pvPlay(c,I,ch,p,w,dur,v,tag){const key=ch.triv?ch.dest:ch.in,st=pvState(c,key),acid=I.preset==='acid',acc=acid&&v>.88,sig=pvKey(I,c,acc);let id=st.ids.get(sig);
+  if(I.preset==='wtab'){const nm=I.wt||'basic';if(!st.wts)st.wts=new Set();if(!st.wts.has(nm)){st.wts.add(nm);pvSend(st,{wt:nm,T:wtMips(nm)})}}
   if(!id){if(st.ids.size>80)st.ids.clear();id=st.nid++;st.ids.set(sig,id);pvSend(st,{P:pvParams(I,c,acc),id})}
   let gr=0,gt=0;if(acid){/* overlapping notes slide */const L=st.last;if(L&&w<=L.end+.012&&w>=L.w){gr=hz(L.p)/hz(p);gt=I.slide}st.last={p,w,end:w+dur};if(!tag)dur=Math.max(.01,dur-.006)}
   if(I.space>0){const lv=I.space/100*.8;if(!st.spg){const _nr=NREC;NREC=null;try{st.spg=c.createGain();st.spg.gain.value=lv;st.out.connect(st.spg);st.spg.connect(plantBus(c,key,I).i)}catch(e){}finally{NREC=_nr}}else if(st.spv!==lv)st.spg.gain.value=lv;st.spv=lv}else if(st.spg&&st.spv!==0){st.spg.gain.value=0;st.spv=0}
@@ -9335,7 +9348,7 @@ function wtPlay(c,I,dest,p,w,dur,v){const f=hz(p),nu=clamp(Math.round(I.uni||1),
   if((I.noise||0)>0){const n=c.createBufferSource(),g=c.createGain();n.buffer=noiseFor(c);n.loop=true;g.gain.value=I.noise/100*.5;n.connect(g);g.connect(mix);n.start(w);n.stop(end);reg(c,n)}
   flt.type=I.ftype||'lowpass';flt.Q.value=clamp(I.res??1,.1,20);const cut=I.cut||6000;flt.frequency.setValueAtTime(Math.min(18000,cut*(1+(I.fenv||0)/100*4)),w);flt.frequency.setTargetAtTime(cut,w,.04+d*.3);
   mix.connect(flt);flt.connect(env);env.gain.setValueAtTime(0,w);env.gain.linearRampToValueAtTime(pk,w+a);env.gain.setTargetAtTime(pk*s,w+a,d/3+.001);env.gain.setTargetAtTime(0,off,r/3+.001);env.connect(dest);hitMark(c,I,w,p,dur)}
-{const _s0=synth0;synth0=function(c,I,dest,p,w,dur,v){return I.preset==='wtab'?wtPlay(c,I,dest,p,w,dur,v):_s0(c,I,dest,p,w,dur,v)}}
+{const _s0=synth0;synth0=function(c,I,dest,p,w,dur,v){if(I.preset!=='wtab')return _s0(c,I,dest,p,w,dur,v);if(PVCH&&!CAPTS&&pvOK(I)&&(c===ctx||c._wl))return pvPlay(c,I,PVCH,p,w,dur,v);/* scheduled notes use the voice engine */return wtPlay(c,I,dest,p,w,dur,v)}}
 const WTP={pos:[0,1,.2,'x%'],lfoRate:[.05,20,.4,'Hz',1],lamt:[0,100,0,'%'],penv:[-100,100,0,'%'],pd:[.02,4,.5,'s',1],uni:[1,5,1,''],det:[0,60,12,'ct'],width:[0,100,70,'%'],cut:[60,18000,6000,'Hz',1],res:[.1,15,1,''],fenv:[0,100,0,'%'],sub:[0,100,0,'%'],noise:[0,100,0,'%'],a:[.001,4,.01,'s',1],d:[.01,4,.3,'s',1],s:[0,1,.7,'x%'],r:[.01,6,.3,'s',1],gain:[0,1,.5,'x%']};
 const WTL={pos:'Position',lfoRate:'Scan rate',lamt:'Scan depth',penv:'Env scan',pd:'Env time',uni:'Voices',det:'Detune',width:'Stereo',cut:'Cutoff',res:'Reso',fenv:'Filter env',sub:'Sub',noise:'Noise',a:'Attack',d:'Decay',s:'Sustain',r:'Release',gain:'Level'};
 const wt0={wt:'basic',pos:.2,lfoRate:.4,lamt:0,penv:0,pd:.5,uni:1,det:12,width:70,cut:6000,res:1,fenv:0,sub:0,noise:0,a:.01,d:.3,s:.7,r:.3,gain:.5,ftype:'lowpass'};
