@@ -62,6 +62,7 @@ def recipe(mix=None,parts=None):
                     cl.append(c)
                 t['clips']=cl
             if FX(t['name']):t['fx']=t.get('fx',[])+FX(t['name'])
+            for c in t['clips']:c['envShow']=None   # the envelopes work without being drawn; thousands of points per clip would slow the arrangement down
             tr.append(t)
     for t in tr:   # output gain of a track lives in its EQ ('out', dB)
         o=mix.get(t['name'],{}).get('out')
