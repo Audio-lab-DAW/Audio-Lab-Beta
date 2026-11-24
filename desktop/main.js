@@ -282,13 +282,78 @@ ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]
 ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
 
+/* ---------- torn-off projects: each one gets a real window of its own ---------- */
+const kids = new Map();   // webContents id -> { win, data }
+function kidPrefs() {
+  return { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, spellcheck: false };
+}
+// is the window over the main window's tab bar? (top ~44 px of its content area)
+function overTabs(kw) {
+  if (!win || win.isDestroyed() || kw.isDestroyed()) return null;
+  const cb = win.getContentBounds(), kb = kw.getBounds(), p = screen.getCursorScreenPoint();
+  const inX = p.x >= cb.x && p.x <= cb.x + cb.width;
+  const nearTop = kb.y <= cb.y + 44 && kb.y >= cb.y - 60;
+  return inX && nearTop ? { x: p.x - cb.x } : null;
+}
+ipcMain.handle('al:is-fullscreen', () => !!(win && !win.isDestroyed() && win.isFullScreen()));
+ipcMain.handle('al:tear', (e, d) => {
+  const disp = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
+  const w = Math.round(disp.width * 0.7), h = Math.round(disp.height * 0.75);
+  let x = Number.isFinite(d.x) ? d.x : undefined, y = Number.isFinite(d.y) ? d.y : undefined;
+  if (x != null) x = Math.max(disp.x, Math.min(disp.x + disp.width - 200, x));
+  if (y != null) y = Math.max(disp.y, Math.min(disp.y + disp.height - 100, y));
+  const kw = new BrowserWindow({ width: w, height: h, x, y, minWidth: 700, minHeight: 420, backgroundColor: '#0c0e14', title: (d.name || 'Project') + ' · AudioLab Studio', webPreferences: kidPrefs() });
+  const id = kw.webContents.id;
+  kids.set(id, { win: kw, data: d });
+  kw.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/i.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+  kw.loadURL(`${SCHEME}://${HOST}/index.html#alchild-native`);
+  let hovering = false;
+  kw.on('move', () => {
+    const h = overTabs(kw);
+    if (h) { if (!hovering) kw.setOpacity(0.35); hovering = true; win.webContents.send('al:dock-hover', { x: h.x, name: d.name }); }
+    else if (hovering) { hovering = false; kw.setOpacity(1); win.webContents.send('al:dock-hover', null); }
+  });
+  kw.on('moved', () => {   // the drag ended: over the tab bar means "put it back"
+    const h = overTabs(kw);
+    if (hovering && win) win.webContents.send('al:dock-hover', null);
+    hovering = false; kw.setOpacity(1);
+    if (h) kw.webContents.executeJavaScript(`window.audiolabHost&&window.audiolabHost.dockOut&&window.audiolabHost.dockOut(${JSON.stringify(null)})`).catch(() => {});
+  });
+  kw.on('close', (ev) => {   // closing the window puts the project back in the tabs, so nothing is lost
+    const k = kids.get(id);
+    if (!k || k.docked || !win || win.isDestroyed()) return;
+    ev.preventDefault();
+    kw.webContents.executeJavaScript('window.audiolabHost&&window.audiolabHost.dockOut?window.audiolabHost.dockOut(null):null')
+      .catch(() => { k.docked = true; kw.close(); });
+    setTimeout(() => { if (!kw.isDestroyed()) { k.docked = true; kw.close(); } }, 6000);
+  });
+  kw.on('closed', () => kids.delete(id));
+  return true;
+});
+ipcMain.handle('al:child-data', (e) => { const k = kids.get(e.sender.id); return k ? k.data : null; });
+ipcMain.handle('al:dock', (e, d) => {
+  const k = kids.get(e.sender.id);
+  if (d && win && !win.isDestroyed()) { win.webContents.send('al:dock', d); win.show(); win.focus(); }
+  if (k) { k.docked = true; setTimeout(() => { if (!k.win.isDestroyed()) k.win.close(); }, 30); }
+  return true;
+});
+ipcMain.on('al:to-main', (e, m) => { if (win && !win.isDestroyed()) win.webContents.send('al:from-child', m); });
+async function dockAll() {   // before quitting: every torn-off project comes home first
+  const list = [...kids.values()].filter(k => !k.docked && !k.win.isDestroyed());
+  await Promise.all(list.map(k => Promise.race([
+    k.win.webContents.executeJavaScript('window.audiolabHost&&window.audiolabHost.dockOut?window.audiolabHost.dockOut(null):null').catch(() => {}),
+    new Promise(r => setTimeout(r, 4000))
+  ])));
+  await new Promise(r => setTimeout(r, 300));
+}
+
 /* ---------- quit: ask the app to save first ---------- */
 let quitOK = false, quitting = false, asking = false;
 function askQuit(go) {
   if (asking || !win || win.isDestroyed()) return;
   asking = true;
   win.show(); win.focus();
-  win.webContents.executeJavaScript('window.audiolabHost&&window.audiolabHost.quitCheck?window.audiolabHost.quitCheck():true', true)
+  dockAll().then(() => win.webContents.executeJavaScript('window.audiolabHost&&window.audiolabHost.quitCheck?window.audiolabHost.quitCheck():true', true))
     .then((ok) => { asking = false; if (ok) go(); else quitting = false; })
     .catch(() => { asking = false; go(); });
 }
