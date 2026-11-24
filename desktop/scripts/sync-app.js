@@ -14,4 +14,13 @@ if (m) {
 }
 fs.mkdirSync(dstDir, { recursive: true });
 fs.writeFileSync(path.join(dstDir, 'index.html'), html);
+// Manifest for in-app updates: the installed app compares this with what it runs, downloads ../index.html and checks its fingerprint.
+// MIN_SHELL = the oldest app (Electron wrapper) that can run this index.html. Raise it only when main.js, preload.js or Electron must be newer.
+const MIN_SHELL = '0.147.0';
+if (m) {
+  const sha = require('crypto').createHash('sha256').update(Buffer.from(html, 'utf8')).digest('hex');
+  let notes = '';
+  try { notes = fs.readFileSync(path.join(__dirname, '..', 'update-notes.txt'), 'utf8').trim(); } catch (e) { /* optional */ }
+  fs.writeFileSync(path.join(__dirname, '..', 'app-version.json'), JSON.stringify({ version: m[1], sha256: sha, size: Buffer.byteLength(html, 'utf8'), minShell: MIN_SHELL, notes }, null, 2) + '\n');
+}
 console.log('Synced index.html (' + (html.length / 1048576).toFixed(2) + ' MB)');

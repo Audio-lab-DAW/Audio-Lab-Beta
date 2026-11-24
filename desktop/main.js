@@ -44,6 +44,24 @@ function saveState() {
 
 /* ---------- local scheme with isolation headers ---------- */
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.woff2': 'font/woff2' };
+/* ---------- the AudioLab program can be newer than this app ----------
+   The whole DAW is one file (index.html). The app carries a copy, and can download a newer one into the user-data folder and run that instead,
+   so updating never needs a new download-and-replace. A new app is only needed when the manifest says so (minShell). */
+const cmpV = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d > 0 ? 1 : -1; } return 0; };
+const upDir = () => path.join(app.getPath('userData'), 'app-update');
+const upMeta = () => path.join(upDir(), 'meta.json');
+const upIndex = () => path.join(upDir(), 'index.html');
+let liveIndex = null;                 // the downloaded index.html in use, or null = the copy inside the app
+let liveVer = null;                   // version of the program that is running
+let upState = {};                     // { version, sha256, ok, bad }
+function readMeta() { try { return JSON.parse(fs.readFileSync(upMeta(), 'utf8')); } catch (e) { return {}; } }
+function writeMeta(m) { try { fs.mkdirSync(upDir(), { recursive: true }); fs.writeFileSync(upMeta(), JSON.stringify(m)); } catch (e) { /* ignore */ } }
+function pickContent() {
+  liveIndex = null; liveVer = app.getVersion(); upState = readMeta();
+  const m = upState;
+  if (m.version && !m.reverted && fs.existsSync(upIndex()) && cmpV(m.version, app.getVersion()) > 0) { liveIndex = upIndex(); liveVer = m.version; }
+  else if (m.version && cmpV(m.version, app.getVersion()) <= 0) { try { fs.rmSync(upDir(), { recursive: true, force: true }); } catch (e) { /* ignore */ } upState = {}; }   // the app itself is newer now
+}
 function registerScheme() {
   const root = path.join(__dirname, 'app');
   protocol.handle(SCHEME, async (req) => {
@@ -51,8 +69,9 @@ function registerScheme() {
       const u = new URL(req.url);
       let p = decodeURIComponent(u.pathname);
       if (p === '/' || p === '') p = '/index.html';
-      const file = path.normalize(path.join(root, p));
+      let file = path.normalize(path.join(root, p));
       if (!file.startsWith(root)) return new Response('Forbidden', { status: 403 });
+      if (p === '/index.html' && liveIndex) file = liveIndex;
       const data = await fs.promises.readFile(file);
       return new Response(data, {
         status: 200,
@@ -137,10 +156,18 @@ function waitForApp(tries = 0) {
   if (!win || win.isDestroyed()) return;
   win.webContents.executeJavaScript("!!(window.audiolabHost&&window.audiolabHost.ready())", true)
     .then((ok) => {
-      if (ok) { appReady = true; flushPending(); }
+      if (ok) { appReady = true; if (liveIndex && !upState.ok) { upState.ok = true; writeMeta(upState); } flushPending(); }
       else if (tries < 80) setTimeout(() => waitForApp(tries + 1), 250);
+      else revertContent();
     })
-    .catch(() => { if (tries < 80) setTimeout(() => waitForApp(tries + 1), 250); });
+    .catch(() => { if (tries < 80) setTimeout(() => waitForApp(tries + 1), 250); else revertContent(); });
+}
+// A downloaded version that never starts must not lock the user out: go back to the copy inside the app.
+function revertContent() {
+  if (!liveIndex || upState.ok) return;
+  const bad = upState.version;
+  upState = { version: bad, reverted: true }; writeMeta(upState); liveIndex = null; liveVer = app.getVersion();
+  if (win && !win.isDestroyed()) { win.reload(); dialog.showMessageBox(win, { type: 'warning', message: `Version ${bad} did not start`, detail: `AudioLab went back to version ${app.getVersion()}. Nothing was lost. The update will be offered again when a newer one is published.` }); }
 }
 
 /* ---------- opening .audiolab files ---------- */
@@ -216,53 +243,84 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(tpl));
 }
 
-/* ---------- auto-update ---------- */
+/* ---------- updates ---------- */
+// 1. The program (index.html): downloaded in the background, checked against its fingerprint, used after a restart of the window.
+// 2. The app around it (Electron): only when the manifest asks for a newer one. Windows installs it by itself; the Mac app is not signed, so there the download page opens.
+const UPD_BASE = process.env.AL_UPDATE_BASE || '';   // tests point this at a local server
+const UPD_API = 'https://api.github.com/repos/Audio-lab-DAW/Audio-Lab-Beta/contents/';
+const UPD_RAW = 'https://raw.githubusercontent.com/Audio-lab-DAW/Audio-Lab-Beta/main/';
 let autoUpdater = null;
 let manualCheck = false;
-function setupUpdater() {
-  if (!app.isPackaged) return;
-  try { ({ autoUpdater } = require('electron-updater')); } catch (e) { return; }
-  autoUpdater.logger = null;
-  // Windows: download and install by itself. Mac (unsigned): only tell the user and open the download page.
-  autoUpdater.autoDownload = !isMac;
-  autoUpdater.autoInstallOnAppQuit = !isMac;
-  autoUpdater.on('update-available', (info) => {
-    if (isMac) {
-      dialog.showMessageBox(win, {
-        type: 'info', buttons: ['Open download page', 'Later'], defaultId: 0, cancelId: 1,
-        message: `AudioLab Studio ${info.version} is available`,
-        detail: 'Download the new .dmg and drag it into Applications to replace this version.'
-      }).then((r) => { if (r.response === 0) shell.openExternal(RELEASES); });
-    } else if (manualCheck) {
-      dialog.showMessageBox(win, { type: 'info', message: `Downloading AudioLab Studio ${info.version}…`, detail: 'You will be asked to restart when it is ready.' });
-    }
-  });
-  autoUpdater.on('update-not-available', () => {
-    if (manualCheck) dialog.showMessageBox(win, { type: 'info', message: 'AudioLab Studio is up to date.', detail: 'Version ' + app.getVersion() });
-    manualCheck = false;
-  });
-  autoUpdater.on('update-downloaded', (info) => {
-    dialog.showMessageBox(win, {
-      type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1,
-      message: `AudioLab Studio ${info.version} is ready`,
-      detail: 'Save your project first, then restart to finish updating.'
-    }).then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
-  });
-  autoUpdater.on('error', (e) => {
-    if (manualCheck) dialog.showMessageBox(win, { type: 'warning', message: 'Could not check for updates.', detail: String(e && e.message || e) });
-    manualCheck = false;
-  });
-  setTimeout(() => checkUpdates(false), 8000);
-}
-function checkUpdates(manual) {
-  manualCheck = !!manual;
-  if (!autoUpdater) {
-    if (manual) dialog.showMessageBox(win, { type: 'info', message: 'Updates are checked in the installed app only.', detail: 'Version ' + app.getVersion() });
-    return;
+let updBusy = false;
+let updReady = null;   // a downloaded version waiting for a restart
+async function updFetch(file) {
+  const { net } = require('electron');
+  const tries = UPD_BASE ? [[UPD_BASE + file, {}]] : [[UPD_API + file + '?ref=main', { Accept: 'application/vnd.github.raw+json' }], [UPD_RAW + file + '?t=' + Date.now(), {}]];
+  let err = null;
+  for (const [url, headers] of tries) {
+    try { const r = await net.fetch(url, { headers, cache: 'no-store' }); if (r.ok) return Buffer.from(await r.arrayBuffer()); err = new Error('HTTP ' + r.status); } catch (e) { err = e; }
   }
-  autoUpdater.checkForUpdates().catch(() => {});
+  throw err || new Error('download failed');
+}
+function setupUpdater() {
+  if (!isMac && app.isPackaged) {
+    try { ({ autoUpdater } = require('electron-updater')); autoUpdater.logger = null; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
+      autoUpdater.on('update-downloaded', (info) => {
+        dialog.showMessageBox(win, { type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab Studio ${info.version} is ready`, detail: 'Save your project first, then restart to finish updating.' })
+          .then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
+      });
+      autoUpdater.on('error', () => {});
+    } catch (e) { autoUpdater = null; }
+  }
+  if (!app.isPackaged && !UPD_BASE) return;
+  setTimeout(() => checkUpdates(false), 8000);
+  setInterval(() => checkUpdates(false), 4 * 3600 * 1000);
+}
+let shellAsked = null;
+function needNewApp(m) {
+  if (!manualCheck && shellAsked === m.version) return;   // ask once per version, not at every check
+  shellAsked = m.version;
+  if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); if (manualCheck) dialog.showMessageBox(win, { type: 'info', message: `Version ${m.version} needs a newer app`, detail: 'It is being downloaded. You will be asked to restart when it is ready.' }); return; }
+  dialog.showMessageBox(win, { type: 'info', buttons: ['Open download page', 'Later'], defaultId: 0, cancelId: 1, message: `Version ${m.version} needs a newer app`, detail: 'This one time, download the new app and replace this one. After that, updates install by themselves again.' })
+    .then((r) => { if (r.response === 0) shell.openExternal(RELEASES); });
+}
+function offerRestart() {
+  if (!updReady || !win || win.isDestroyed()) return;
+  const v = updReady.version;
+  dialog.showMessageBox(win, { type: 'info', buttons: ['Restart now', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab ${v} is ready`, detail: (updReady.notes ? updReady.notes + '\n\n' : '') + 'Restarting takes a second and keeps your open projects. With "Later" it is used the next time you start AudioLab.' })
+    .then((r) => { if (r.response === 0) applyContent(); });
+}
+function applyContent() {
+  if (!updReady) return;
+  updReady = null; pickContent();
+  if (win && !win.isDestroyed()) { appReady = false; win.webContents.executeJavaScript('try{window.audiolabHost&&window.audiolabHost.beforeReload&&window.audiolabHost.beforeReload()}catch(e){}', true).catch(() => {}).then(() => setTimeout(() => { if (win && !win.isDestroyed()) win.reload(); }, 300)); }
+}
+async function checkUpdates(manual) {
+  manualCheck = !!manual;
+  if (updBusy) return;
+  if (updReady) { if (manual) offerRestart(); return; }
+  updBusy = true;
+  const say = (message, detail, type) => { if (manual && win && !win.isDestroyed()) dialog.showMessageBox(win, { type: type || 'info', message, detail }); };
+  try {
+    const m = JSON.parse((await updFetch('desktop/app-version.json')).toString('utf8'));
+    if (!m || !m.version || !m.sha256) throw new Error('bad manifest');
+    if (cmpV(m.version, liveVer || app.getVersion()) <= 0) { say('AudioLab is up to date.', 'Version ' + (liveVer || app.getVersion())); return; }
+    if (m.minShell && cmpV(m.minShell, app.getVersion()) > 0) { needNewApp(m); return; }
+    if (upState.reverted && upState.version === m.version) { say(`Version ${m.version} did not start on this computer`, 'AudioLab stays on version ' + (liveVer || app.getVersion()) + ' until a newer one is published.', 'warning'); return; }
+    const data = await updFetch('index.html');
+    const sha = require('crypto').createHash('sha256').update(data).digest('hex');
+    if (sha !== m.sha256) { say('The update is still being published.', 'Try again in a few minutes.'); return; }
+    fs.mkdirSync(upDir(), { recursive: true });
+    const tmp = upIndex() + '.part'; fs.writeFileSync(tmp, data); fs.renameSync(tmp, upIndex());
+    writeMeta({ version: m.version, sha256: sha, at: Date.now() });
+    updReady = { version: m.version, notes: m.notes || '' };
+    offerRestart();
+  } catch (e) {
+    say('Could not check for updates.', String(e && e.message || e), 'warning');
+  } finally { updBusy = false; manualCheck = false; }
 }
 ipcMain.handle('al:version', () => app.getVersion());
+ipcMain.handle('al:program-version', () => liveVer || app.getVersion());
 
 /* ---------- DAC hardware volume (macOS Core Audio helper) ---------- */
 const { execFile } = require('child_process');
@@ -376,6 +434,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(async () => {
+    pickContent();
     registerScheme();
     setupPermissions();
     buildMenu();

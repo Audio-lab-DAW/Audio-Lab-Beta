@@ -4918,7 +4918,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.146',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.147',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -4928,7 +4928,8 @@ function aboutHtml(){const sr=ctx?ctx.sampleRate:0,bl=ctx&&ctx.baseLatency?Math.
 <div class="abg"><div><span>Version</span><b>${VERSION}</b></div><div><span>Build</span><b>${BUILD}</b></div><div><span>Audio engine</span><b>Web Audio · 32-bit float</b></div><div><span>Running at</span><b>${sr?(sr/1000)+' kHz':'not started'}${bl?' · '+bl+' samples':''}</b></div>
 <div><span>Instruments</span><b>${nI}</b></div><div><span>Effects</span><b>${nF}</b></div><div><span>Platform</span><b>${/Mac/.test(ua)?'macOS':'Desktop'} · ${br?'Chrome '+br[1]:sf?'Safari '+sf[1]:'Browser'}</b></div><div><span>CPU cores</span><b>${cores}</b></div></div>
 
-<div class="abc">© 2026 Ilja V. Jakovliev. All rights reserved.</div></div>`}
+${window.audiolabDesktop?'<div style="margin:10px 0 2px"><button id="abUpd" title="Looks for a newer AudioLab and installs it inside the app: no download, nothing to replace">Check for updates</button></div>':''}<div class="abc">© 2026 Ilja V. Jakovliev. All rights reserved.</div></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#abUpd');if(b&&window.audiolabDesktop&&window.audiolabDesktop.checkForUpdates){e.preventDefault();window.audiolabDesktop.checkForUpdates()}});
 /* --- CPU / health meter --- */
 const RB={act:0,last:0,acc:0,w0:0,a0:0,cpu:0,on:false};const rbTouch=d=>{const n=performance.now();if(RB.last)RB.acc+=RB.act*(n-RB.last);RB.last=n;RB.act=Math.max(0,RB.act+d)};
 const CPU={hist:new Float32Array(120),i:0,ui:0,aud:null,late:0,lateT:-9,drop:0,dropT:-9,ref:null,rc:null,work:0,last:0};
@@ -7328,7 +7329,7 @@ async function saPick(){try{if(navigator.mediaDevices&&navigator.mediaDevices.se
   const pick=await askChoice('Choose output device','Pick where AudioLab plays:',[...ds.slice(0,6).map(d=>({label:d.label||'Device',v:d.deviceId})),{label:'Cancel',v:null}]);if(pick==null)return;await ctx.setSinkId(pick);UI.sink=pick;saveUI();toast('Output changed')}
   catch(e){askChoice('Output device not available here',self!==top?'This page runs inside claude.ai, which does not give it permission to choose speakers (Chrome blocks it in frames). Set the Gryphon as the Mac’s output in System Settings → Sound, or use the standalone AudioLab.':'Chrome did not allow choosing an output ('+(e&&e.message||e)+'). Allow microphone access once so device names show, then try again.',[{label:'OK',v:1,cls:'pri'}]).catch(()=>{})}}
 setTimeout(()=>{const a=$('#saDl'),b=$('#saPick'),en=$('#saEnv');if(a)a.onclick=saDownload;if(b)b.onclick=saPick;if(en)en.textContent=(self!==top?'Now: running inside a frame (claude.ai).':'Now: running as its own page.')+(self.crossOriginIsolated?' Shared memory: available.':'')},0);
-window.audiolabHost={quitCheck:async()=>{try{saveProjects()}catch(e){}const D=(PJ&&PJ.list||[]).filter(p=>p.dirty);if(!D.length)return true;
+window.audiolabHost={beforeReload:()=>{/* the desktop app is about to restart the window for an update: stop the sound and store everything first */try{stop()}catch(e){}try{saveProjects()}catch(e){}try{saveUINow()}catch(e){}},quitCheck:async()=>{try{saveProjects()}catch(e){}const D=(PJ&&PJ.list||[]).filter(p=>p.dirty);if(!D.length)return true;
     const many=D.length>1,names=D.map(p=>'“'+p.name+'”').join(', ');
     const v=await askChoice(many?'Save your projects before quitting?':'Save “'+D[0].name+'” before quitting?',(many?names+' have changes that are not saved to a file.':'It has changes that are not saved to a file.')+' If you don\'t save, the changes stay in AudioLab\'s own storage and the Time Machine, but not in your .audiolab file.',[{label:'Cancel',v:null},{label:'Don\'t save',v:'no'},{label:many?'Save all':'Save',v:'yes',cls:'pri'}]);
     if(!v)return false;if(v==='no')return true;
