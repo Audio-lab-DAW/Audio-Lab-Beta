@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   platform: process.platform,
   version: () => ipcRenderer.invoke('al:version'),
   checkForUpdates: () => ipcRenderer.invoke('al:check-updates'),
+  programVersion: () => ipcRenderer.invoke('al:program-version'),
   // torn-off projects in their own windows
   isFullScreen: () => ipcRenderer.invoke('al:is-fullscreen'),
   displayHz: () => ipcRenderer.invoke('al:display-hz'),
