@@ -1304,6 +1304,35 @@ body.fxstill #mixWin .mxs,body.fxstill #mixWin .mxs *:not(#splash):not(#splash *
 .chgph{display:flex;align-items:center;justify-content:center;height:100%;min-height:80px;padding:0 18px;color:var(--mut);font-size:12px;text-align:center}
 .ibc.chgwas .ibdl{position:relative}.ibc.chgwas .ibdl::after{content:'On the track before';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;padding:4px 8px;border-radius:9px;background:rgba(255,255,255,.14);color:#e6e8ee;white-space:nowrap}
 .chghint{color:var(--mut);font-size:12px}
+/* pinned devices (v0.185): a device in its own small window over the arrangement */
+:is(#fxin,.pinb) .dev>.devh>.pinbtn{width:22px;min-width:22px;height:22px;min-height:22px;padding:0!important;margin:0;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#8d93a1;background:transparent!important;border:0!important;border-radius:6px;cursor:pointer;box-shadow:none!important}
+:is(#fxin,.pinb) .dev>.devh>.pinbtn:hover{color:#fff;background:rgba(255,255,255,.09)!important}
+:is(#fxin,.pinb) .dev>.devh>.pinbtn.on{color:#ffd166;background:rgba(255,209,102,.15)!important}
+.pinbtn svg,.pinun svg,.pinphb svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.pinbtn.on svg,.pinun svg{fill:currentColor}
+:is(#fxin,.pinb) .dev.du.dushut>.devh>.pinbtn:not(.a1):not(.a2):not(.a3):not(.a4):not(.a5):not(.a6):not(.a7):not(.a8){display:inline-flex!important}
+.pinw{position:fixed;left:0;top:0}
+.pinw>.pinh{position:absolute;left:-1px;bottom:100%;height:26px;max-width:calc(100% + 2px);box-sizing:border-box;display:flex;align-items:center;gap:7px;padding:0 3px 0 9px;border-radius:9px 9px 0 0;background:rgb(var(--gtr2));border:1px solid rgba(255,255,255,.2);border-bottom:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;white-space:nowrap;font:600 11px Inter,system-ui,sans-serif;color:#e6e8ee}
+.pinw>.pinh::before{content:'';flex:none;width:16px;height:12px;border-radius:3px;background:radial-gradient(circle,rgba(255,255,255,.45) 1.1px,transparent 1.3px) 0 0/5px 4px;opacity:.8}
+.pinw.mv>.pinh{cursor:grabbing}
+.pinw>.pinh .pinn{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pinw>.pinh .pint{display:inline-flex;align-items:center;gap:4px;color:#9aa0ad;font-weight:500;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pinw>.pinh .pint i{width:7px;height:7px;border-radius:50%;background:var(--c,#888);flex:none}
+.pinw>.pinh .pinun{all:unset;box-sizing:border-box;width:22px;height:20px;display:grid;place-items:center;border-radius:6px;color:#ffd166;cursor:pointer;flex:none}
+.pinw>.pinh .pinun:hover{background:rgba(255,209,102,.16);color:#ffe199}
+.pinw>.pinh .pinun:focus-visible{outline:1px solid var(--blf,#4c8dff)}
+.pinw>.pinb{display:flex!important;align-items:stretch!important;gap:0!important;padding:0!important;margin:0!important;overflow:hidden!important;cursor:default!important;height:var(--ph,253px)!important;row-gap:0!important;flex-wrap:nowrap!important;background:#121318;border-radius:0 10px 10px 10px;border:1px solid rgba(255,255,255,.2);box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.pinw>.pinb>.dev{margin:0!important;height:auto!important;max-height:none!important;flex:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;border-radius:9px!important;box-shadow:none!important}
+.pinw.flash>.pinb{animation:pinfl .7s ease-out}@keyframes pinfl{0%{box-shadow:0 0 0 3px #ffd166,0 14px 34px rgba(0,0,0,.55)}100%{box-shadow:0 0 0 0 rgba(255,209,102,0),0 14px 34px rgba(0,0,0,.55)}}
+body.rdmo .pinw.flash>.pinb{animation:none}
+:is(#fxin) .dev.pinph{flex:none!important;width:132px!important;min-width:132px!important;display:flex;flex-direction:column;opacity:1;background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 8px,transparent 8px 16px),rgba(255,255,255,.02)!important;border:1px dashed rgba(255,255,255,.18)!important;box-shadow:none!important}
+#fxin .dev.pinph>.devh{display:flex;align-items:center;gap:6px;padding:6px 8px;min-height:0;opacity:.85}
+#fxin .dev.pinph>.devh>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-weight:600;font-size:12px;color:#c9cdd6}
+#fxin .dev.pinph>.pinphb{all:unset;box-sizing:border-box;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 10px 12px;text-align:center;cursor:pointer;color:#9aa0ad;font:500 11px/1.35 Inter,system-ui,sans-serif;border-radius:0 0 9px 9px}
+#fxin .dev.pinph>.pinphb svg{width:20px;height:20px;color:#ffd166;fill:currentColor}
+#fxin .dev.pinph>.pinphb b{color:#e6e8ee;font-weight:600;font-size:12px}
+#fxin .dev.pinph>.pinphb:hover{background:rgba(255,209,102,.06);color:#c9cdd6}
+#fxin .dev.pinph>.pinphb:focus-visible{outline:1px solid var(--blf,#4c8dff)}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2756,7 +2785,7 @@ let ctx=null,master=null,anL=null,anR=null,clickOut=null,prevIn=null;
 const play={on:false,t0:0,b0:0,sched:0,first:true,timer:null,pass:0};
 let UNDO=[],REDO=[],saveT=null;
 const arr=$('#arr'),map=$('#map'),prc=$('#prc'),hdrin=$('#hdrin'),fxin=$('#fxin'),ctxm=$('#ctxm');
-{const add=fxin.addEventListener.bind(fxin),live=$('#ibList');fxin.addEventListener=(type,fn,opt)=>{add(type,fn,opt);live.addEventListener(type,e=>{if(!ib||!ib.t||!e.target.closest||!e.target.closest('#ibLive'))return;IBCTX=ib.t;const sv=[IVZ,KVIZ,PADEL];if(IBL){IVZ=IBL.ivz;KVIZ=IBL.kviz;PADEL=IBL.pads}try{fn(e)}finally{IBCTX=null;[IVZ,KVIZ,PADEL]=sv}},opt)}}
+{const add=fxin.addEventListener.bind(fxin),live=$('#ibList');/* pinned devices: the panel's handlers are recorded so a pinned window can listen with them, and an early listener lets an event inside a pinned window run for its track */for(const ty of['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','change','input','wheel','keydown','dragover','drop'])addEventListener(ty,e=>{if(window.PINCAP)window.PINCAP(e)},true);fxin.addEventListener=(type,fn,opt)=>{add(type,fn,opt);(window.FXH=window.FXH||[]).push([type,fn,opt]);if(window.FXMIR)window.FXMIR(type,fn,opt);live.addEventListener(type,e=>{if(!ib||!ib.t||!e.target.closest||!e.target.closest('#ibLive'))return;IBCTX=ib.t;const sv=[IVZ,KVIZ,PADEL];if(IBL){IVZ=IBL.ivz;KVIZ=IBL.kviz;PADEL=IBL.pads}try{fn(e)}finally{IBCTX=null;[IVZ,KVIZ,PADEL]=sv}},opt)}}
 
 /* ---------- helpers ---------- */
 const ZF=()=>ZOOM;let ZOOM=1;
@@ -5461,7 +5490,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.184',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.185',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -12368,6 +12397,104 @@ function chsFxWatch(){if(CHSPRE.size>4000)CHSPRE.clear();const go=(t,fx)=>{let L
 {const lim=document.getElementById('limChk'),lab=lim&&lim.closest('label'),h4=lab&&lab.previousElementSibling,at=h4&&h4.tagName==='H4'?h4:lab;
   if(at){at.insertAdjacentHTML('beforebegin','<h4>Playback</h4><label class="chk" title="A note that began earlier and has not ended yet is heard at once: when you press Play in the middle of it, when the playhead jumps, at the start of a loop and after a change of preset or instrument. Switched off, a note is only heard when the playhead passes its start."><input type="checkbox" id="chaseChk"> Pick up notes that are already sounding: press Play in the middle of a long note and it carries on from there</label>');
     const c=document.getElementById('chaseChk');c.checked=UI.chase!==false;c.onchange=e=>{UI.chase=e.target.checked;saveUI()};const _ss=syncSettings;syncSettings=function(){const r=_ss.apply(this,arguments);c.checked=UI.chase!==false;return r}}}
+/* ---------- pinned devices (v0.185) ----------
+   Every device (instrument, effect, MIDI effect, analyser) has a pin button left of its remove button. A pinned device leaves the device panel
+   (a slim placeholder stays in its place) and lives in its own small window over the arrangement, with a grab handle on top like the mixer's.
+   It is the same device: the panel renders it as usual (for a track that is not selected the panel renders that track once, out of sight, and
+   the device is taken out of it), so every look, control and handler of the panel works in the window. Events inside a window run with that
+   window's track as the current track (selT is swapped for the time of the event), and its pictures are drawn once per picture frame with
+   the same swap. The pins are kept in the project (S.pins) but not in the undo history: undo and redo keep the windows that are open. */
+const PIN={list:[],S:null,wins:new Map(),cur:null,sv:null,touch:new Set(),inner:0,drawing:0,lastF:-1,gone:new Map(),undoing:0,stat:{draws:0,frames:0,cv:0},pt:0};
+const PINI='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3.5h5l-.9 5.6 3.4 3.2v1.9H7v-1.9l3.4-3.2z"/><path d="M12 14.2V21"/></svg>';
+const pinKey=(tid,fid)=>tid+'/'+fid;
+const pinTrk=tid=>tid==='__m'?MSTO:S.tracks.find(t=>t.id===tid);
+function pinObj(p){const t=pinTrk(p.tid);if(!t)return null;if(p.fid==='inst')return t.kind==='inst'&&t.inst?{t,o:t.inst}:null;const f=(t.fx||[]).find(q=>q.id===p.fid);return f?{t,o:f}:null}
+function pinSave(){S.pins=PIN.list;try{changed(false)}catch(e){}}
+/* the device panel's look is written for #fxin; the same rules are made to match a window's body (.pinb) with the same weight */
+function pinCss(){let n=0;const walk=rules=>{for(const r of rules){if(r.selectorText&&r.selectorText.includes('#fxin')&&!r.selectorText.includes('pinb')){const s=r.selectorText.replace(/#fxin(?![\w-])/g,':is(#fxin,.pinb)');if(s!==r.selectorText){r.selectorText=s;n++}}if(r.cssRules&&r.cssRules.length)walk(r.cssRules)}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}return n}
+PIN.css=pinCss();
+function pinEnter(w){if(PIN.cur===w)return;if(PIN.cur)pinLeave();if(!w||!w._set)return;PIN.sv=[selT,VIZ,IVZ,KVIZ,PADEL];selT=w._p.tid;VIZ=w._set.viz;IVZ=w._set.ivz;KVIZ=w._set.kviz;PADEL=w._set.pads;PIN.cur=w}
+function pinLeave(){if(!PIN.cur)return;[selT,VIZ,IVZ,KVIZ,PADEL]=PIN.sv;PIN.sv=null;PIN.cur=null}
+/* called first for every pointer, click, key and change event (an early listener on the window): an event inside a pinned window runs for its track */
+window.PINCAP=e=>{const tg=e.target,w=tg&&tg.closest?tg.closest('.pinw'):null;if(PIN.cur&&PIN.cur!==w)pinLeave();if(!w||!w._set||tg.closest('.pinh'))return;if(e.type==='keydown'&&!/^(INPUT|SELECT|TEXTAREA)$/.test(tg.tagName))return;if(PIN.cur!==w)pinEnter(w);if(e.type!=='pointermove'){PIN.touch.add(w.dataset.pk);setTimeout(pinLeave,0)}};
+for(const ty of['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','change','input','wheel','keydown','dragover','drop'])addEventListener(ty,()=>{pinLeave()});
+/* the panel's own event handlers also listen on every pinned window (they were recorded when they were added to the panel) */
+function pinMirror(w,ty,fn,op){if(String(fn).includes('fxPan'))return;w.addEventListener(ty,e=>{if(!e.target||!e.target.closest||e.target.closest('.pinh'))return;fn(e)},op)}
+window.FXMIR=(ty,fn,op)=>{for(const w of PIN.wins.values())pinMirror(w,ty,fn,op)};
+function pinName(D){const s=D&&D.querySelector(':scope>.devh>span');return(s&&s.textContent.trim())||'Device'}
+function pinClamp(w){const z=ZOOM||1,vw=innerWidth/z,vh=innerHeight/z,W=w.offsetWidth||200,H=w.offsetHeight||200,p=w._p;let x=+p.x||0,y=+p.y||0;x=Math.max(0,Math.min(x,vw-Math.min(W,vw)));y=Math.max(26,Math.min(y,vh-Math.min(H,vh-26)));p.x=Math.round(x);p.y=Math.round(y);w.style.left=p.x+'px';w.style.top=p.y+'px'}
+function pinFront(k,flash){const w=PIN.wins.get(k);if(!w)return;w.style.zIndex=++FWZ;if(flash){w.classList.remove('flash');void w.offsetWidth;w.classList.add('flash');setTimeout(()=>w.classList.remove('flash'),750)}}
+function pinWin(p){const k=pinKey(p.tid,p.fid);let w=PIN.wins.get(k);if(w)return w;
+  w=document.createElement('div');w.className='pinw';w.dataset.pk=k;w._p=p;
+  w.innerHTML=`<div class="pinh" title="Drag to move this window"><b class="pinn"></b><span class="pint"><i></i><em></em></span><button class="pinun" title="Unpin: put this device back in the device panel" aria-label="Unpin">${PINI}</button></div><div class="pinb"></div>`;
+  w.style.zIndex=++FWZ;document.body.appendChild(w);for(const[ty,fn,op] of(window.FXH||[]))pinMirror(w,ty,fn,op);PIN.wins.set(k,w);
+  w.addEventListener('pointerdown',()=>{if(+w.style.zIndex<FWZ)w.style.zIndex=++FWZ},true);
+  const h=w.querySelector('.pinh');let d=null;
+  h.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button'))return;e.preventDefault();e.stopPropagation();d={x0:e.clientX,y0:e.clientY,l:+p.x||0,t:+p.y||0};h.setPointerCapture(e.pointerId);w.classList.add('mv')});
+  h.addEventListener('pointermove',e=>{if(!d)return;const z=ZOOM||1;p.x=d.l+(e.clientX-d.x0)/z;p.y=d.t+(e.clientY-d.y0)/z;pinClamp(w)});
+  const up=()=>{if(!d)return;const mv=p.x!==d.l||p.y!==d.t;d=null;w.classList.remove('mv');if(mv)pinSave()};h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
+  return w}
+function pinDrop(k){const w=PIN.wins.get(k);if(w){w.remove();PIN.wins.delete(k)}if(PIN.cur===w)pinLeave();const pre='pn:'+k+':';for(const id of[...CT.keys()])if(id.startsWith(pre))CT.delete(id)}
+/* the list of pins against the project: a new project brings its own pins; undo and redo keep the open ones; a pin whose device is gone closes */
+function pinSync(){
+  if(S!==PIN.S){if(PIN.undoing&&PIN.S){S.pins=PIN.list}else{PIN.list=Array.isArray(S.pins)?S.pins.filter(p=>p&&p.tid&&p.fid):[];PIN.gone.clear()}PIN.S=S}
+  S.pins=PIN.list;
+  for(let i=PIN.list.length-1;i>=0;i--){const p=PIN.list[i];let ob=pinObj(p);
+    if(!ob&&p.fid!=='inst'){const t=pinTrk(p.tid),f=t&&t.fx&&t.fx.length===p.n?t.fx[p.ix]:null;if(f&&!PIN.list.some(q=>q.tid===p.tid&&q.fid===f.id)){const old=pinKey(p.tid,p.fid);pinDrop(old);p.fid=f.id;ob=pinObj(p)}}/* Change replaced the effect in its place: the window follows */
+    if(!ob){PIN.list.splice(i,1);PIN.gone.set(pinKey(p.tid,p.fid),p);continue}
+    if(p.fid!=='inst'){p.ix=ob.t.fx.indexOf(ob.o);p.n=ob.t.fx.length}}
+  for(const[k,p] of PIN.gone)if(pinObj(p)&&!PIN.list.some(q=>q.tid===p.tid&&q.fid===p.fid)){PIN.list.push(p);PIN.gone.delete(k)}/* undo of a removal brings the window back */
+  const keys=new Set(PIN.list.map(p=>pinKey(p.tid,p.fid)));for(const k of[...PIN.wins.keys()])if(!keys.has(k))pinDrop(k)}
+function pinButtons(root){for(const D of root.querySelectorAll(':scope>.dev[data-d=fx],:scope>.dev[data-d=inst]')){const h=D.querySelector(':scope>.devh');if(!h||h.querySelector(':scope>.pinbtn'))continue;const b=document.createElement('button');b.className='pinbtn';b.type='button';b.title='Pin: show this device in its own window over the arrangement, so you can watch and change it while you work on other tracks';b.setAttribute('aria-label','Pin this device in its own window');b.setAttribute('aria-pressed','false');b.innerHTML=PINI;const x=h.querySelector(':scope>.x');if(x)h.insertBefore(b,x);else h.appendChild(b)}}
+function pinPh(p,D,k){const e=document.createElement('div');e.className='dev pinph';e.dataset.pinph=k;e.style.cssText=D.getAttribute('style')||'';e.dataset.d='pin';
+  e.innerHTML=`<div class="devh"><button class="pinbtn on" type="button" title="Unpin: put this device back here" aria-label="Unpin" aria-pressed="true">${PINI}</button><span></span></div><button class="pinphb" type="button" title="Bring its window to the front">${PINI}<b>Pinned</b><span>Shown in its own window. Click to bring it to the front.</span></button>`;
+  e.querySelector('.devh>span').textContent=pinName(D);return e}
+/* take the pinned devices of one track out of the freshly rendered panel and put them into their windows */
+function pinHarvest(tid,real){for(const p of PIN.list){if(p.tid!==tid)continue;const k=pinKey(p.tid,p.fid),ob=pinObj(p);if(!ob)continue;
+  const D=p.fid==='inst'?fxin.querySelector(':scope>.dev[data-d=inst]'):fxin.querySelector(`:scope>.dev[data-d=fx][data-id="${CSS.escape(p.fid)}"]`);if(!D)continue;
+  const hh=D.offsetHeight;if(hh>120)p.h=hh;
+  const pre='pn:'+k+':';for(const id of[...CT.keys()])if(id.startsWith(pre))CT.delete(id);
+  for(const el of D.querySelectorAll('[data-c]')){const id=el.dataset.c;if(!id||!id.startsWith('fx:'))continue;const C=CT.get(id);if(!C)continue;CT.set(pre+id,C);el.dataset.c=pre+id}
+  if(real)D.replaceWith(pinPh(p,D,k));else D.remove();
+  const w=pinWin(p),b=w.querySelector('.pinb');b.replaceChildren(D);b.style.setProperty('--ph',(p.h||253)+'px');
+  const pb=D.querySelector(':scope>.devh>.pinbtn');if(pb){pb.classList.add('on');pb.title='Unpin: put this device back in the device panel';pb.setAttribute('aria-label','Unpin');pb.setAttribute('aria-pressed','true')}
+  w._dev=D;w._o=ob.o;w._set={viz:[...D.querySelectorAll('canvas.viz')],ivz:[...D.querySelectorAll('canvas.ivz')],kviz:D.querySelector('canvas.kviz'),pads:[...D.querySelectorAll('.pad')]};
+  if(real){VIZ=VIZ.filter(c=>!D.contains(c));IVZ=IVZ.filter(c=>!D.contains(c));if(KVIZ&&D.contains(KVIZ))KVIZ=null;PADEL=PADEL.filter(c=>!D.contains(c))}
+  w.style.setProperty('--c',ob.t.color||'#888');w.querySelector('.pinn').textContent=pinName(D);w.querySelector('.pint em').textContent=ob.t.name||'';w.querySelector('.pint').title=ob.t.name||'';
+  w.setAttribute('aria-label',pinName(D)+' on '+(ob.t.name||'')+', pinned');if(p.x==null){p.x=180;p.y=140}pinClamp(w);if(!w._rc){w._rc=1;requestAnimationFrame(()=>{w._rc=0;if(w.isConnected)pinClamp(w)})}}}
+{const _rfP=renderFx;renderFx=function(){if(IBCTX||PIN.inner)return _rfP.apply(this,arguments);
+  const w0=PIN.cur;if(w0){PIN.touch.add(w0.dataset.pk);pinLeave()}const sl=fxin.scrollLeft;let r;
+  try{pinSync()}catch(e){console.error('AudioLab pins',e)}
+  const real=selT,need=new Set();
+  for(const p of PIN.list){if(p.tid===real)continue;const k=pinKey(p.tid,p.fid),w=PIN.wins.get(k),ob=pinObj(p);if(!w||!w._dev||!ob||w._o!==ob.o||PIN.touch.has(k))need.add(p.tid)}
+  PIN.touch.clear();
+  for(const tid of need){const sv=[selT,VIZ,IVZ,KVIZ,PADEL];PIN.inner=1;selT=tid;try{_rfP.call(this);pinButtons(fxin);pinHarvest(tid,false)}catch(e){console.error('AudioLab pinned device',e)}finally{PIN.inner=0;[selT,VIZ,IVZ,KVIZ,PADEL]=sv}}
+  r=_rfP.apply(this,arguments);
+  try{pinButtons(fxin);if(PIN.list.length)pinHarvest(real,true)}catch(e){console.error('AudioLab pins',e)}
+  if(need.size&&fxin.scrollLeft!==sl)fxin.scrollLeft=sl;
+  if(w0&&w0.isConnected&&w0._set)pinEnter(w0);
+  return r}}
+{const _chP=changed;changed=function(){const w=PIN.cur;if(w){PIN.touch.add(w.dataset.pk);pinLeave()}try{return _chP.apply(this,arguments)}finally{if(w&&w.isConnected&&!PIN.cur&&w._set)pinEnter(w)}}}
+{const _rsP=restore;restore=function(){PIN.undoing=1;try{return _rsP.apply(this,arguments)}finally{PIN.undoing=0}}}
+{const _f0P=frame0;frame0=function(){if(PIN.cur)pinLeave();return _f0P.apply(this,arguments)}}
+/* the pictures of the pinned devices: once per picture frame, after the panel's own (whose pinned canvases were taken out of its lists) */
+{const _dIVP=drawIV;drawIV=function(){const r=_dIVP.apply(this,arguments);if(!PIN.drawing&&!PIN.cur&&PIN.wins.size&&PIN.lastF!==FRN){PIN.lastF=FRN;pinDraw(_dIVP)}return r}}
+function pinDraw(dIV){PIN.drawing=1;PIN.stat.frames++;try{for(const w of PIN.wins.values()){if(!w._set||!w._dev||!w.isConnected)continue;pinEnter(w);try{drawViz();drawKick();drawPads();dIV()}catch(e){}finally{pinLeave()}PIN.stat.draws++;PIN.stat.cv+=w._set.viz.length+w._set.ivz.length+(w._set.kviz?1:0)}
+    const now=performance.now();if(now-PIN.pt>120){PIN.pt=now;for(const w of PIN.wins.values())if(w._dev&&w._dev.isConnected)for(const el of w._dev.querySelectorAll('[data-c]')){const C=CT.get(el.dataset.c);if(!C)continue;let v;try{v=C.get()}catch(e){continue}if(el._pv!==v){el._pv=v;if(el!==(cd&&cd.el))paintCtl(el)}}}/* a value changed somewhere else (automation, a macro, a modulator, the same parameter shown in another place) moves the knob in the window too; only changed ones are painted */
+  }finally{PIN.drawing=0}}
+function pinOn(tid,fid,D){if(PIN.list.some(p=>p.tid===tid&&p.fid===fid))return;const z=ZOOM||1,r=D&&D.getBoundingClientRect(),h0=D?D.offsetHeight:0,H=h0>120?h0:253,W=r&&r.width?r.width/z:600,vw=innerWidth/z,vh=innerHeight/z;
+  /* a free place: above the device in the panel, moving down and right while it would cover more than a quarter of a window that is already there */
+  let x=r&&r.width?Math.round(r.left/z):180,y=r&&r.height?Math.round(Math.max(70,r.top/z-H-70)):140;x=Math.max(0,Math.min(x,vw-W));
+  const ov=(x,y)=>{let a=0;for(const w of PIN.wins.values()){const q=w.getBoundingClientRect(),ox=Math.max(0,Math.min(x+W,q.right/z)-Math.max(x,q.left/z)),oy=Math.max(0,Math.min(y+H,q.bottom/z)-Math.max(y-26,q.top/z-26));a=Math.max(a,ox*oy/Math.max(1,Math.min(W*H,q.width*q.height/(z*z))))}return a},busy=(x,y)=>{const a=ov(x,y);if(a<best.a)best={a,x,y};return a>.25};let best={a:9};
+  const fr=document.getElementById('fx'),ft=fr&&fr.getBoundingClientRect().height?fr.getBoundingClientRect().top/z:vh,bot=ft-H>70?ft:vh;/* over the arrangement, not over the device panel, when there is room */
+  y=Math.max(70,Math.min(y,bot-H));const x0=x,y0=y;let i=0;for(;i<30&&busy(x,y);i++){y+=56;if(y+H>bot){y=70;x+=90;if(x+W>vw)x=0}}if(i>=30){x=best.x;y=best.y}
+  const p={tid,fid,h:H,x,y};
+  PIN.list.push(p);PIN.gone.delete(pinKey(tid,fid));pinSave();renderFx();pinFront(pinKey(tid,fid),true)}
+function pinOff(k){const i=PIN.list.findIndex(p=>pinKey(p.tid,p.fid)===k);if(i<0)return;PIN.list.splice(i,1);PIN.gone.delete(k);pinDrop(k);pinSave();renderFx()}
+addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.pinbtn,.pinun,.pinphb');if(!b)return;e.stopImmediatePropagation();e.preventDefault();const w=b.closest('.pinw');pinLeave();
+  if(w){pinOff(w.dataset.pk);return}const ph=b.closest('.pinph');if(ph){if(b.classList.contains('pinphb'))pinFront(ph.dataset.pinph,true);else pinOff(ph.dataset.pinph);return}
+  const D=b.closest('.dev');if(!D||!fxin.contains(D))return;const t=curT();if(!t)return;const fid=D.dataset.d==='inst'?'inst':D.dataset.id;if(!fid)return;pinOn(t.id,fid,D)},true);
+addEventListener('resize',()=>{for(const w of PIN.wins.values())pinClamp(w)});
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -12784,7 +12911,7 @@ for(const ev of['copy','cut','paste'])document.addEventListener(ev,e=>{const tg=
 /* ---------- loop ---------- */
 const barsStr=b=>{if(!sigFlat()){const P=barPos(b),u=4/P.sig.d,x=P.inBar/u,bt=Math.floor(x)+1,fr=x%1,six=Math.floor(fr*4)+1,tk=Math.floor(((fr*4)%1)*120);return`${String(P.bar+1).padStart(3,' ')}. ${bt}. ${six}. ${String(tk).padStart(3,' ')}`}const bar=Math.floor(b/4)+1,bt=Math.floor(b%4)+1,six=Math.floor((b%1)*4)+1,tk=Math.floor(((b*4)%1)*120);return`${String(bar).padStart(3,' ')}. ${bt}. ${six}. ${String(tk).padStart(3,' ')}`};
 let lastSz='',lastT=performance.now();
-let LACT=0,LINT=0,LG30=0,LM30=0,LHIT=-9,LWH=0;addEventListener('wheel',()=>{LWH=performance.now()},{passive:true,capture:true});addEventListener('pointermove',e=>{LACT=performance.now();/* only real work wakes the visualisers and the logo: a pressed button, or the pointer over a device picture */if(e.buttons||(e.target&&e.target.tagName==='CANVAS'&&e.target.closest&&e.target.closest('#fx')))LINT=LACT},{passive:true,capture:true});for(const ev of['pointerdown','pointerup','keydown','wheel'])addEventListener(ev,()=>{LINT=performance.now()},{passive:true,capture:true});addEventListener('pointerdown',()=>{LACT=performance.now()},{passive:true,capture:true});addEventListener('wheel',()=>{LACT=performance.now()},{passive:true,capture:true});addEventListener('keydown',()=>{LACT=performance.now()},{passive:true,capture:true});
+let LACT=0,LINT=0,LG30=0,LM30=0,LHIT=-9,LWH=0;addEventListener('wheel',()=>{LWH=performance.now()},{passive:true,capture:true});addEventListener('pointermove',e=>{LACT=performance.now();/* only real work wakes the visualisers and the logo: a pressed button, or the pointer over a device picture */if(e.buttons||(e.target&&e.target.tagName==='CANVAS'&&e.target.closest&&e.target.closest('#fx,.pinw')))LINT=LACT},{passive:true,capture:true});for(const ev of['pointerdown','pointerup','keydown','wheel'])addEventListener(ev,()=>{LINT=performance.now()},{passive:true,capture:true});addEventListener('pointerdown',()=>{LACT=performance.now()},{passive:true,capture:true});addEventListener('wheel',()=>{LACT=performance.now()},{passive:true,capture:true});addEventListener('keydown',()=>{LACT=performance.now()},{passive:true,capture:true});
 let FRN=0,LFR=0,SUBPX=0,SUBAP=0,LVZ=0,LATM=0;
 /* frame rate: the screen's own rate (60, 120, 144, 240 Hz…) unless a cap is chosen in Settings → Performance */
 const FPS={t:0,n:0,fps:0,hz:0,last:0,iv:[]};function fpsTrack(now){if(FPS.last){const d=now-FPS.last;if(d>0&&d<100){FPS.iv.push(d);if(FPS.iv.length>120)FPS.iv.shift()}}FPS.last=now;FPS.n++;if(now-FPS.t>=500){FPS.fps=Math.round(FPS.n*1000/(now-FPS.t));{const L=FPS.lows||(FPS.lows=[]);L.push([now,FPS.fps]);while(L.length&&now-L[0][0]>10000)L.shift()}FPS.n=0;FPS.t=now;if(FPS.real)FPS.hz=FPS.real;else if(FPS.iv.length>20){const a=[...FPS.iv].sort((x,y)=>x-y),m=a[Math.floor(a.length*.25)];FPS.hz=Math.round(1000/m)}const el=document.getElementById('fpsNow');if(el&&el.isConnected){el.textContent=FPS.fps+' fps · screen '+(FPS.hz||'?')+' Hz';fpsHint()}}}

@@ -1,7 +1,7 @@
 {
-  "version": "0.184",
-  "sha256": "0fdbe440929ce04c127de5a7d9913c25ca0e1520c6857cd818e8bc3f07b88101",
-  "size": 2565915,
+  "version": "0.185",
+  "sha256": "91b6151c671482c602411149e02b0e153a49b2eab21e046ec4f1374f31cc066f",
+  "size": 2585280,
   "minShell": "0.147.0",
-  "notes": "The Change button now browses live: one click on an instrument or effect in the browser puts it on the track at once, playing or stopped, and held notes carry on with the new sound. A double-click or Enter keeps it, Escape brings the old one back with all its settings, the arrow keys move from one to the next, and the whole visit is one undo step."
+  "notes": "Changing a preset while the song plays is now clean: the old sound stops within a few milliseconds (also its notes that were already on their way, its release and its echo), and notes that are sounding carry on with the new preset. Long notes are also picked up when you press Play in the middle of them, after a jump and at the start of a loop (Settings, Audio system, Playback switches this off)."
 }

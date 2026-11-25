@@ -1204,3 +1204,60 @@ Method: the track's own output is recorded on the audio thread together with a m
 ### Release
 - v0.184: commit 7849602, artifact version 207, project doc `claude/audiolab-device-backlog-run-I.md`.
 - **Desktop build**: run 45699105826 for this commit succeeded (3 min 30 s, started 20:52 UTC).
+
+## 25 November 2026, v0.185: pinned devices (task M)
+> "Let's have a system for every single device, also effects, and it's going to be a pin button next to the X. [...] that's gonna create a window where you can have a single device just pinned over your arrangement or anywhere on the screen. It doesn't need to be resizable, but I want it to be mostly borderless. Just have like a grabbing handle in the same way that we have with the mixer. [...] It also needs to be visible that a device in the devices panel is pinned. [...] I also want that for the visual devices that show like volume and spectrogram and whatever."
+
+### What it does
+- **A pin button** in the title row of every instrument, effect, MIDI effect and analyser (also the particle devices and the master chain), just left of the remove ✕ (instruments have no ✕: at the right end). Tooltip: "Pin: show this device in its own window over the arrangement, so you can watch and change it while you work on other tracks". It stays visible when the device is slid shut.
+- **The window**: the device itself, on a solid dark body (no glass, so a moving picture never makes glass recalculate), a thin border and a shadow, not resizable. On top a slim tab in the mixer's style: dotted grip, device name, a coloured dot with the track name, and a lit pin that unpins. Drag the tab to move it; it stays inside the screen (also when the window is made smaller). A click anywhere in a window brings it to the front. Several windows at once, from one track or from many.
+- **Where a new window goes**: above the device, over the arrangement (not over the device panel when there is room), moving down and right until it covers no more than a quarter of a window that is already there; on a full screen the place with the least overlap.
+- **In the device panel** a pinned device leaves a slim placeholder (132 px, dashed, striped): its name with a lit pin (click: unpin), and "Pinned. Shown in its own window. Click to bring it to the front." Decision: a placeholder rather than the full device, so every control exists in exactly one place and nothing is drawn twice.
+- **It is the same device**: every knob, picture, preset menu, Change, on/off, the arrow and the remove ✕ work in the window. A value changed somewhere else (automation, a macro, a modulator, the bridge) moves the knob in the window too (checked every 120 ms; only changed controls are painted).
+- **Pictures keep running** while another track is selected: a spectrum or meter of the drums can be watched while working on the lead.
+- **Kept with the project** (`S.pins`: track, device, place, height), so they come back after a reload and with the project file. Not in the undo history: undo and redo keep the open windows. A pinned device whose track or device is removed closes its window; undo of that removal brings the window back. When Change replaces a pinned effect in its place, the window follows the new effect.
+
+### How it works (for the next person)
+- The look of the panel is written for `#fxin` (345 rules). At start `pinCss()` rewrites those selectors to `:is(#fxin,.pinb)`, which keeps their weight, so a window body (`.pinb`) gets the exact panel look.
+- A pinned device is rendered by the panel itself. `renderFx` is wrapped: for every track with a pinned device whose window needs a new copy (no copy yet, the device object changed, or an event in its window), the panel is rendered once for that track with `selT` swapped (`PIN.inner`), the pinned devices are taken out (`pinHarvest`) and moved into their windows, then the panel is rendered for the selected track as usual and its pinned devices are replaced by placeholders. Their controls get their own ids (`pn:<track>/<device>:fx:...`) so the next panel render does not delete them. Selecting a track renders only the panel (measured: median 31 ms with three pins on other tracks against 32 to 36 ms without pins; pin or unpin 33 to 39 ms).
+- The panel's event handlers are recorded when they are added to `#fxin` (`FXH`, a line in the existing `fxin.addEventListener` wrapper) and also listen on every window (`pinMirror`; the panel's drag-to-scroll is left out). An early capture listener on the window (`PINCAP`, registered before all others) makes an event inside a window run with that window's track as the selected track and its pictures as the picture lists; it is put back after the event (the last window listener, a timer, and the start of every frame). `changed` and `renderFx` step out of the swap while they run.
+- Pictures: `drawIV` is wrapped; once per picture frame (`FRN`) the windows are drawn with their own track and lists (`pinDraw`). The panel's lists no longer hold the canvases of its pinned devices, so nothing is drawn twice.
+- Pointing at a picture in a window wakes the pictures like a picture in the panel does.
+
+### Measured (headless Chromium, 1600 × 1000, demo song, `tools/ui-tests/pin.py` and a rate script)
+Three pinned windows (Orbit instrument from a new track; Pro EQ and Spectrum from Kick), a third track (Bass) selected:
+
+| state | picture passes per second | window redraws per second | canvases drawn per second | app frames per second |
+|---|---|---|---|---|
+| playing | 23 | 69 | 161 | 23 |
+| stopped, just clicked | 39.5 | 118.5 | 276 | 39.5 |
+| stopped, calm (no input for 10 s) | 2 | 6 | 14 | 53 |
+| playing, light mode (this machine's default) | 16 | 48 | 48 | 23 |
+
+One pass per app frame at most, three windows per pass (no double drawing). The app's work per frame while playing went from 6.8 ms (no pins) to 9.9 ms with these three windows, most of it the five pictures of the Plant (Lead) or Orbit's particles drawn in software by the headless browser; stopped and calm 0.6 ms.
+
+### Tested (`python3 tools/ui-tests/pin.py index.html <out dir>`, with Playwright's mouse)
+- Pin the Orbit instrument (new track), Pro EQ and a Spectrum (Kick) with the pin buttons; select Bass: three windows, all with their device; the Orbit picture and the Spectrum picture change while the song plays.
+- A knob in the Orbit window (Scale) dragged up: 100 % to 150 %, one undo step; the same parameter set from outside: the window shows 30 %; after unpinning, the panel shows 30 %.
+- Drag by the tab: moved by 300, 120; dragged far off: right edge 1600, bottom 1000 of a 1600 × 1000 screen; dragged to the top left: 0, 26 (the tab stays on screen).
+- The ✕ in the pinned EQ: window closes; undo: device and window back; redo: closed; undo: back.
+- Reload: the three windows come back at their places.
+- Unpin from the window's tab: the window closes and Orbit is back in the panel. Unpin from the placeholder's pin: same. A click on the placeholder brings the window to the front.
+- Also: on/off and the arrow (slide shut) in a pinned window; a preset menu in a pinned Acid window (the track's preset changes, the selected track stays Bass); Change in a pinned window opens the browser and Escape puts it back; removing the whole track of a pinned instrument closes its window, undo brings it back; a pinned master chain device; pinning with the device panel slid down (hidden) and with the panel in its own floating window.
+- No page errors (the only console line is the service worker's fetch message, also in v0.184).
+- `design.py` and `change_live.py` give the same results as v0.184 apart from live levels and timings (noise), plus the pin in the title row.
+- **Exports unchanged** (`tools/engine-tests/export_same.py`): Fractals Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96, solo), equal checksums for Kick, Bass, Saw, Pad, Acid, Wavetable and Venom (Plant, Sampler and Drum kit differ from run to run in v0.184 as well).
+- Screenshots looked at: the panel with a pinned device (placeholder), three windows over the arrangement while playing, a pinned Spectrum close up (the kick's spectrum while the Kick & Bass group is selected), the windows with the panel hidden and with the panel floating.
+
+### Not done, or different from what one might expect
+- **Modulators** (LFO, envelope, Vector Map and the others in the left column) and macro devices have no pin; the drum pads inside a kit and the Kick designer inside a pad are pinned together with their kit, not alone.
+- The panel shows a placeholder, not the full device, while it is pinned (see above). MIDI learn and the "show modulation on the knob" marks address the panel's knob ids, so a knob in a pinned window does not answer to a MIDI controller mapped before; the value itself still follows.
+- A window can cover another window's tab; click the window in front or the placeholder in the panel to bring the other one up. The floating device panel (when it is popped out) can sit above pinned windows until one is clicked.
+- Keyboard keys pressed while a button in a window has the focus act on the selected track, not on the window's track (only text fields and menus in a window type into its device).
+- Venom's own big window and the browsers are unchanged.
+
+### Not verified
+- The real desktop app on the user's Mac and Windows (frame rate with real glass, a trackpad), a real MIDI controller, very small screens.
+
+### Left
+- A pin for modulators. Task E (CPU and background freeze). The browsers in the new look.
