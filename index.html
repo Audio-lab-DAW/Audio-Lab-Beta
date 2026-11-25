@@ -843,6 +843,30 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 #mixWin.mxnotp .mxme .mxtp,#mixWin.mxnotgt .mxme .mxtg,#mixWin.mxnocorr .mxme .mxco{display:none}
 
 .mx.master .mxvw{min-height:62px!important}#mixWin.mxnov .mx.master .mxvw{min-height:0!important}.mx.master.mxtight .mxme{display:none}.mx>.mxn{flex:none!important}
+/* analyser (v0.161): glass on its own layer behind the canvases, docked strips, modules */
+.spov.anz{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0}
+.spov.anz>.spgl{position:absolute;inset:0;border-radius:inherit;background:rgba(10,11,16,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);pointer-events:none;z-index:0}
+.spov.anz.pinned>.spgl{border-color:rgba(76,201,240,.55)}
+.spov.anz>.sph,.spov.anz>.anzb{position:relative;z-index:1}.spov.anz>.sprz,.spov.anz>.spfl{z-index:5}
+.spov .anzb{display:flex;min-width:0;min-height:0;transform:translateZ(0)}.spov.anzcol .anzb{flex-direction:column}
+.spov .anzm{position:relative;flex:3 1 0;min-width:0;min-height:0;overflow:hidden}.spov .anzm canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.spov .anzm+.anzm{border-left:1px solid rgba(255,255,255,.09)}.spov.anzcol .anzm+.anzm{border-left:0;border-top:1px solid rgba(255,255,255,.09)}
+.spov:not(.anzcol) .anzm[data-m="stereo"]{flex:0 0 auto;height:100%;aspect-ratio:1;max-width:32%}.spov:not(.anzcol) .anzm[data-m="loud"]{flex:0 0 158px}.spov:not(.anzcol) .anzm[data-m="corr"]{flex:0 0 66px}
+.spov.anzcol .anzm[data-m="stereo"]{flex:0 0 auto;width:100%;aspect-ratio:1;max-height:32%}.spov.anzcol .anzm[data-m="loud"]{flex:0 0 122px}.spov.anzcol .anzm[data-m="corr"]{flex:0 0 42px}
+.spov.anz1 .anzm{flex:1 1 0!important;max-width:none!important;max-height:none!important;aspect-ratio:auto!important;width:auto!important;height:auto!important}
+.spov .anzl{position:absolute;top:1px;right:4px;z-index:2;font:600 9px Inter,system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.42);cursor:grab;padding:1px 4px;border-radius:4px;white-space:nowrap}.spov .anzl:hover{color:#fff;background:rgba(255,255,255,.1)}.spov.anz1 .anzl{display:none}.spov:not(.anz1) .anzm canvas{top:15px;height:calc(100% - 15px)}.spov.anzdrag,.spov.anzdrag .anzl{cursor:grabbing}
+.spov .anzm[data-m="corr"] .anzl{right:auto;left:50%;transform:translateX(-50%)}.spov:not(.anzcol) .anzm[data-m="corr"] .anzl{font-size:8px;letter-spacing:0;padding:1px 0}
+.spov .anzt{display:flex;gap:1px;flex:none;margin-right:4px}.spov .sph .anzt button{min-width:22px;padding:0 3px;display:grid;place-items:center;opacity:.38;cursor:pointer}.spov .sph .anzt button.on{opacity:1;background:rgba(76,141,255,.2);border-color:transparent;color:#bcd6ff}.spov .anzt svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.spov .sph [data-sp="view"],.spov .sph [data-sp="dock"]{display:grid;place-items:center}
+.spov .anzrs{display:none;position:absolute;z-index:6}
+.spov.anzd{position:relative;z-index:1;flex:none;border-radius:0;box-shadow:none;background:#0a0b10;border:0}.spov.anzd>.spgl,.spov.anzd>.sprz{display:none}.spov.anzd .sph{cursor:default;padding:2px 8px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.07)}
+.spov.anz-bottom{border-top:1px solid rgba(255,255,255,.12)}.spov.anz-top{border-bottom:1px solid rgba(255,255,255,.12)}
+.spov.anz-left,.spov.anz-right{position:fixed;z-index:60}.spov.anz-left{border-right:1px solid rgba(255,255,255,.12)}.spov.anz-right{border-left:1px solid rgba(255,255,255,.12)}
+.spov.anz-left .sph,.spov.anz-right .sph{flex-wrap:wrap;row-gap:2px}.spov.anz-left .spn,.spov.anz-right .spn{flex:1 0 100%}
+.spov.anz-bottom>.anzrs{display:block;left:0;right:0;top:0;height:5px;cursor:ns-resize}.spov.anz-top>.anzrs{display:block;left:0;right:0;bottom:0;height:5px;cursor:ns-resize}
+.spov.anz-left>.anzrs{display:block;top:0;bottom:0;right:0;width:5px;cursor:ew-resize}.spov.anz-right>.anzrs{display:block;top:0;bottom:0;left:0;width:5px;cursor:ew-resize}.spov .anzrs:hover{background:rgba(76,141,255,.45)}
+body.anz-l #stage{margin-left:var(--anzl,250px)}body.anz-r #stage{margin-right:var(--anzr,250px)}
+body.viz-l.anz-l #stage{margin-left:calc(var(--vzw,300px) + 12px + var(--anzl,250px))}body.viz-r.anz-r #stage{margin-right:calc(var(--vzw,300px) + 12px + var(--anzr,250px))}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5002,7 +5026,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.160',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.161',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -7102,7 +7126,7 @@ const SPOCSS=`.spov{position:fixed;z-index:9200;display:grid;grid-template-rows:
 .spov .sph{display:flex;align-items:center;gap:4px;padding:4px 6px;cursor:move;background:rgba(255,255,255,.04)}.spov .spn{flex:1;display:flex;gap:6px;overflow:hidden}.spov .spn b{font:600 11px Inter,system-ui,sans-serif;color:#dfe2ec;display:flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}.spov .spn b::before{content:'';width:8px;height:8px;border-radius:2px;background:var(--c)}
 .spov .sph button{min-height:22px;min-width:24px;padding:0 6px;font-size:11px;background:transparent;border-color:transparent}.spov .sph button.on{background:rgba(76,141,255,.25);border-color:#4c8dff}.spov canvas{width:100%;height:100%;display:block}.spov .sprz{position:absolute;right:0;bottom:0;width:14px;height:14px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.3) 50%)}`;
 {const st=document.createElement('style');st.textContent=SPOCSS;document.head.appendChild(st)}
-setTimeout(()=>{for(const o of UI.spov||[])if(o.pin)spoOpen(o.src[0],o)},2500);
+setTimeout(()=>{for(const o of UI.spov||[])if(o.pin||(o.dock&&o.dock!=='float'))spoOpen(o.src[0],o)},2500);
 /* piano roll: scale lock, groove pool, humanize and chords — one "Feel" panel */
 PR.lock=!!UI.prLock;
 function scSnap(p){const sc=SCALES[PR.scale];if(!PR.lock||!sc)return p;for(let d=0;d<12;d++){for(const q of[p+d,p-d]){if(sc.includes(((q-PR.root)%12+12)%12))return clamp(q,0,127)}}return p}
@@ -8574,6 +8598,171 @@ mxMenuItems=function(v){const cur=mxCol(v),sty=mxOpt(v,'sty'),it=[];
   if(v==='stereo'){const sz=mxOpt('stereo','size')||'l';it.push('-',{head:'Size'},...[['s','Small'],['m','Medium'],['l','Large (fills the strip)']].map(([k,l])=>({label:l,check:sz===k,act:()=>mxSet('stereo','size',k)})))}
   if((MXTG[v]||[]).length)it.push('-',{head:'Show'},...MXTG[v].map(([k,l])=>({label:l,sw:true,check:!!mxOpt(v,k),act:()=>mxSet(v,k,!mxOpt(v,k))})));return it};
 
+/* ---------- analyser (v0.161): the spectrum overlay gets a steady scale, a glass border on its own layer, docking to any edge and switchable modules ----------
+   Each overlay (SPO.list) now also has: dock ('float','bottom','top','left','right'), mods (ordered list of [key,on]), col (colour scheme, same keys as the mixer views),
+   rng (60, 72, 96 dB or 'auto'), dh / dw (strip height / width when docked). Canvases sit in .anzb, a layer of their own above the glass layer .spgl, never inside it. */
+const ANZM=[['spec','Spectrum','How loud each pitch is right now, bass on the left','M2 15c3 0 3-10 6-10s3 7 6 7 2-3 4-3'],
+ ['sgram','Spectrogram','Pitch over time: bass at the bottom, newest on the right','M3 16V4M7 16V7M11 16V5M15 16V9M3 16h14'],
+ ['stereo','Stereo field','Where the sound sits between left and right: a thin upright line is mono, a wide cloud is wide stereo','M10 3l7 7-7 7-7-7zM10 3v14'],
+ ['wave','Waveform','The level over time, newest on the right, with bar lines while the song plays','M2 10h2l2-5 3 10 3-8 2 6 2-3h2'],
+ ['loud','Loudness','Loudness of the master in LUFS: momentary, short-term and integrated, plus the highest true peak','M5 17V7M9 17V3M13 17V9M17 17V12'],
+ ['corr','Correlation','How well left and right fit together: near +1 is safe in mono, below 0 parts of the sound cancel out in mono','M3 10h14M10 6v8M3 7v6M17 7v6']];
+const ANZTOP=-24,ANZDOCKS=[['float','Window that floats over everything'],['bottom','Strip at the bottom'],['top','Strip at the top'],['left','Strip on the left'],['right','Strip on the right']];
+const anzName=k=>(ANZM.find(m=>m[0]===k)||[])[1]||k;
+function anzMods(ov){const have=new Map((Array.isArray(ov.mods)?ov.mods:[]).filter(m=>m&&ANZM.some(x=>x[0]===m[0])).map(m=>[m[0],m[1]?1:0])),first=!have.size;ov.mods=[...have.entries()];for(const[k] of ANZM)if(!have.has(k))ov.mods.push([k,first&&k==='spec'?1:0]);if(!ov.mods.some(m=>m[1]))ov.mods[0][1]=1;return ov.mods}
+/* the colour schemes of the mixer views, collected from MXMODES so schemes added there later show up here too */
+function anzCols(){const out=[['track','Source colour (track colour, white for the master)']],seen=new Set(['track','zones']);for(const v in MXMODES)for(const[k,l] of MXMODES[v])if(!seen.has(k)){seen.add(k);out.push([k,l])}return out}
+const anzSw=k=>k==='track'?'#3ecf8e':k==='tri'?'#ff5f46':k==='bass'?'#ffd23f':k==='rainbow'?'#b583ff':MXPAL[k]?MXPAL[k][Math.max(0,MXPAL[k].length-2)][1]:'#ddd';
+const anzLut=(cm,col)=>mxLut(cm==='track'?'track':MXPAL[cm]?cm:'heat',col);
+function anzC(cm,v,col,b3){if(cm==='track')return col;if(cm==='rainbow')cm='heat';return mxC(cm,clamp(v,0,1),col,b3,0)}
+function anzHue(pos,v){const hh=(1-pos)*4.2,x=1-Math.abs(hh%2-1);let r=0,g=0,b=0;if(hh<1){r=1;g=x}else if(hh<2){r=x;g=1}else if(hh<3){g=1;b=x}else if(hh<4){g=x;b=1}else{r=x;b=1}const k=.25+.75*v;return[r*255*k,g*255*k,b*255*k]}
+function anzPair(k){if(k==='master')return anL&&anR?[anL,anR]:null;const N=NODES.get(k);return N&&N.aL&&N.aR?[N.aL,N.aR]:null}
+function anzTD(an,now){if(an._att!==now){if(!an._atd||an._atd.length!==an.fftSize)an._atd=new Float32Array(an.fftSize);an.getFloatTimeDomainData(an._atd);an._att=now}return an._atd}
+function anzReset(ov){ov.ms={};ov.idle=0;ov.pk=null}
+
+/* build the module buttons in the title bar and the module boxes in the body (existing boxes are kept, so pictures do not restart) */
+function anzBuild(ov){const el=ov.el,on=anzMods(ov).filter(m=>m[1]);
+  el.querySelector('.anzt').innerHTML=ov.mods.map(([k,v])=>{const m=ANZM.find(x=>x[0]===k);return`<button data-am="${k}" class="${v?'on':''}" title="${m[1]}: ${m[2]}. Click to show or hide, drag to change the order." aria-label="${m[1]}" aria-pressed="${v?'true':'false'}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${m[3]}"/></svg></button>`}).join('');
+  const body=el.querySelector('.anzb'),have=new Map([...body.children].map(c=>[c.dataset.m,c]));body.textContent='';
+  for(const[k] of on){let c=have.get(k);if(!c){c=document.createElement('div');c.className='anzm';c.dataset.m=k;c.innerHTML=`<canvas></canvas><b class="anzl" data-am="${k}" title="Drag to change the order">${anzName(k)}</b>`}body.appendChild(c)}
+  el.classList.toggle('anz1',on.length<2);ov.ms=ov.ms||{};ov.idle=0;anzLay(ov)}
+function anzLay(ov){const d=ov.dock||'float';ov.el.classList.toggle('anzcol',d==='left'||d==='right'||(d==='float'&&ov.w<ov.h*1.25))}
+function anzToggle(ov,k){const m=ov.mods.find(x=>x[0]===k);if(!m)return;if(m[1]&&ov.mods.filter(x=>x[1]).length<2){toast('One module always stays on.');return}m[1]=m[1]?0:1;anzBuild(ov);spoFit(ov);spoSave()}
+/* place the overlay: floating on the page, in the zone above or below the main window, or fixed at the left or right of it */
+function anzDock(ov){const el=ov.el,d=ov.dock||'float',s=el.style;el.classList.remove('anzd','anz-bottom','anz-top','anz-left','anz-right');s.left=s.top=s.right=s.bottom=s.width=s.height='';
+  if(d==='float'){if(el.parentElement!==document.body)document.body.appendChild(el)}
+  else{el.classList.add('anzd','anz-'+d);
+    if(d==='bottom'){const z=document.getElementById('botOut');z.insertBefore(el,z.firstChild);s.height=ov.dh+'px'}
+    else if(d==='top'){document.getElementById('topOut').appendChild(el);s.height=ov.dh+'px'}
+    else{for(const o of SPO.list)if(o!==ov&&o.dock===d){o.dock='float';anzDock(o);spoHead(o)}document.body.appendChild(el);s.width=ov.dw+'px'}}
+  anzSide();spoPlace(ov);anzReset(ov);clearTimeout(anzDock.t);anzDock.t=setTimeout(()=>{dispatchEvent(new Event('resize'));anzSide()},30)}
+function anzSide(){const b=document.body,L=SPO.list.find(o=>o.dock==='left'),R=SPO.list.find(o=>o.dock==='right');b.classList.toggle('anz-l',!!L);b.classList.toggle('anz-r',!!R);
+  if(L)b.style.setProperty('--anzl',L.dw+'px');if(R)b.style.setProperty('--anzr',R.dw+'px');if(!L&&!R)return;const st=document.getElementById('stage').getBoundingClientRect(),z=ZOOM;
+  for(const o of[L,R]){if(!o)continue;const s=o.el.style,vz=UI.viz&&(UI.vizDock||'bottom')===o.dock?(UI.vizW||300)+12:0;s.top=st.top/z+'px';s.height=Math.max(120,st.height/z)+'px';s.width=o.dw+'px';s[o.dock]=vz+'px'}}
+function anzSetDock(ov,k){if((ov.dock||'float')===k)return;ov.dock=k;if(k!=='float'&&!ov.dk1){ov.dk1=1;/* first time docked: show every module, and give the master the heat colours (its own colour is plain white) */if(ov.mods.filter(m=>m[1]).length<2)ov.mods.forEach(m=>m[1]=1);if((ov.col||'track')==='track'&&ov.src[0]==='master')ov.col='heat'}anzBuild(ov);anzDock(ov);spoHead(ov);spoSave()}
+function anzDockItems(ov){return[{head:'Where the analyser sits'},...ANZDOCKS.map(([k,l])=>({label:l,check:(ov.dock||'float')===k,act:()=>anzSetDock(ov,k)}))]}
+function anzViewItems(ov){const set=(k,v)=>{ov[k]=v;if(k==='rng')ov.top=undefined;anzReset(ov);spoSave()};
+  return[{head:'Colours'},...anzCols().map(([k,l])=>({label:l,check:(ov.col||'track')===k,dot:anzSw(k),act:()=>set('col',k)})),'-',{head:'Spectrum height'},
+    ...[[60,'Steady scale, 60 dB tall'],[72,'Steady scale, 72 dB tall'],[96,'Steady scale, 96 dB tall'],['auto','Slow automatic: follows the song over several seconds']].map(([k,l])=>({label:l,check:(ov.rng||72)===k,act:()=>set('rng',k)}))]}
+function anzMenu(ov,x,y){openMenu(x,y,[{head:'Modules'},...ov.mods.map(([k,v])=>({label:anzName(k),sub:(ANZM.find(m=>m[0]===k)||[])[2],sw:true,check:!!v,act:()=>anzToggle(ov,k)})),'-',
+  {label:'Colours and spectrum height',act:()=>openMenu(x,y,anzViewItems(ov))},{label:'Where the analyser sits',sub:anzDockName(ov),act:()=>openMenu(x,y,anzDockItems(ov))},
+  {label:'Peak line on the spectrum',check:!!ov.hold,act:()=>{ov.hold=!ov.hold;ov.pk=null;spoHead(ov);spoSave()}},
+  {label:'Start the loudness measurement again',act:()=>{if(LM.w)LM.w.cmd('reset');LM.tpMax=-90;LM.hist=[]}},'-',{label:'Close the analyser',act:()=>{spoClose(ov);const m=document.getElementById('mxDev');if(m)m.classList.toggle('on',SPO.list.some(o=>o.mx))}}])}
+const anzDockName=ov=>(ANZDOCKS.find(d=>d[0]===(ov.dock||'float'))||ANZDOCKS[0])[1];
+
+const ANZIC={view:'<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3a7 7 0 1 0 0 14c1.3 0 1.7-1 1.1-1.9-.6-1 .1-2.1 1.3-2.1H14a3 3 0 0 0 3-3c0-3.9-3.1-7-7-7z"/><circle cx="6.6" cy="9" r=".8" fill="currentColor"/><circle cx="9.6" cy="6.4" r=".8" fill="currentColor"/><circle cx="13" cy="8" r=".8" fill="currentColor"/></svg>',
+  dock:'<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M3 12.2h14" /><path d="M4.2 13.6h11.6v1.4H4.2z" fill="currentColor" stroke="none"/></svg>',
+  pin:'<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.2 2.3 13.7 5.8 11.6 6.6 9.3 8.9 9.6 11.9 8.6 12.9 3.1 7.4 4.1 6.4 7.1 6.7 9.4 4.4z"/><path d="M5.6 10.4 2.4 13.6"/></svg>'};
+spoOpen=function(k,o){ensureCtx();const id=o&&o.id||'sp'+rid();if(SPO.list.some(x=>x.id===id))return;
+  const ov=Object.assign({id,x:Math.max(20,innerWidth/ZOOM-520),y:90,w:460,h:210,src:[k],pin:false,hold:true,dock:'float',col:'track',rng:72,dh:160,dw:250},o||{});
+  if(!ANZDOCKS.some(d=>d[0]===ov.dock))ov.dock='float';ov.dh=clamp(+ov.dh||160,70,520);ov.dw=clamp(+ov.dw||250,150,700);anzMods(ov);
+  const el=document.createElement('div');el.className='spov anz';
+  el.innerHTML=`<i class="spgl lg"></i><div class="sph"><span class="spn"></span><span class="anzt"></span><button data-sp="add" title="Compare: add another source to the spectrum">＋</button><button data-sp="hold" title="Peak line on the spectrum">Peak</button><button data-sp="view" title="Colours and spectrum height" aria-label="Colours and spectrum height">${ANZIC.view}</button><button data-sp="dock" title="Where the analyser sits: a floating window, or a strip at the bottom, top, left or right of the main window" aria-label="Where the analyser sits">${ANZIC.dock}</button><button data-sp="pin" title="Pin: stays on top and opens again next time">${ANZIC.pin}</button><button data-sp="x" aria-label="Close" title="Close">✕</button></div><div class="anzb"></div><div class="spfl"><button data-sp="pin" class="spfp" title="Unpin">${ANZIC.pin}</button><button data-sp="x" aria-label="Close" title="Close">✕</button></div><i class="sprz"></i><i class="anzrs" title="Drag to resize"></i>`;
+  document.body.appendChild(el);ov.el=el;SPO.list.push(ov);try{rfAttach(el.querySelector('.spgl'))}catch(e){}
+  anzBuild(ov);anzWire(ov);anzDock(ov);spoHead(ov);spoSave();if(!SPO.raf)SPO.raf=requestAnimationFrame(spoDraw);return ov};
+spoPlace=function(ov){const el=ov.el,fl=(ov.dock||'float')==='float';if(fl)Object.assign(el.style,{left:ov.x+'px',top:ov.y+'px',width:ov.w+'px',height:ov.h+'px'});el.classList.toggle('pinned',!!ov.pin&&fl);spoFit(ov)};
+spoFit=function(ov){const el=ov.el,n=el.querySelector('.spn');if(!n)return;anzLay(ov);if((ov.dock||'float')!=='float'){el.classList.remove('spc');return}el.classList.remove('spc');const need=[...n.children].reduce((a,b)=>a+b.scrollWidth+6,0)+ANZM.length*24+6*28+24;el.classList.toggle('spc',!!ov.pin||ov.w<need||ov.h<110)};
+spoSave=function(){UI.spov=SPO.list.filter(o=>o.pin||(o.dock&&o.dock!=='float')).map(({id,x,y,w,h,src,pin,hold,dock,mods,col,rng,dh,dw,dk1})=>({id,x,y,w,h,src,pin,hold,dock,mods,col,rng,dh,dw,dk1}));saveUI()};
+{const _c=spoClose;spoClose=function(ov){const dk=ov.dock&&ov.dock!=='float';_c(ov);if(dk){anzSide();setTimeout(()=>dispatchEvent(new Event('resize')),30)}};
+ const _al=applyLayout;applyLayout=function(){const r=_al.apply(this,arguments);try{const tO=document.getElementById('topOut'),bO=document.getElementById('botOut');for(const o of SPO.list){if(o.dock==='top')tO.appendChild(o.el);else if(o.dock==='bottom')bO.insertBefore(o.el,bO.firstChild)}anzSide()}catch(e){}return r};
+ addEventListener('resize',()=>{clearTimeout(anzSide.t);anzSide.t=setTimeout(anzSide,70)})}
+function anzWire(ov){const el=ov.el;let d=null;const fl=()=>(ov.dock||'float')==='float';
+  el.addEventListener('pointerdown',e=>{if(e.button)return;const am=e.target.closest('[data-am]');
+    if(am){d={k:'am',key:am.dataset.am,btn:am.tagName==='BUTTON',x:e.clientX,y:e.clientY,mv:false};el.setPointerCapture(e.pointerId);e.preventDefault();return}
+    if(e.target.closest('.anzrs')){d={k:'dk',x:e.clientX,y:e.clientY,h:ov.dh,w:ov.dw};el.setPointerCapture(e.pointerId);e.preventDefault();return}
+    if(e.target.closest('.sprz')){if(fl()){d={k:'r',x:e.clientX,y:e.clientY,ow:ov.w,oh:ov.h};el.setPointerCapture(e.pointerId)}return}
+    if(!fl()||e.target.closest('button,.spn b'))return;if(e.target.closest('.sph')||(el.classList.contains('spc')&&e.target.closest('.anzb'))){d={k:'m',x:e.clientX,y:e.clientY,ox:ov.x,oy:ov.y};el.setPointerCapture(e.pointerId)}});
+  el.addEventListener('pointermove',e=>{if(!d)return;const dx=(e.clientX-d.x)/ZOOM,dy=(e.clientY-d.y)/ZOOM;
+    if(d.k==='m'){ov.x=d.ox+dx;ov.y=Math.max(0,d.oy+dy);spoPlace(ov)}else if(d.k==='r'){ov.w=Math.max(240,d.ow+dx);ov.h=Math.max(120,d.oh+dy);spoPlace(ov)}
+    else if(d.k==='dk'){const k=ov.dock;if(k==='bottom'||k==='top'){ov.dh=clamp(d.h+(k==='bottom'?-dy:dy),70,520);el.style.height=ov.dh+'px'}else{ov.dw=clamp(d.w+(k==='left'?dx:-dx),150,700);anzSide()}}
+    else if(d.k==='am'){if(!d.mv&&Math.hypot(dx,dy)<6)return;d.mv=true;el.classList.add('anzdrag');
+      /* reorder: the module under the pointer swaps places with the dragged one (title bar buttons list every module, the labels in the body only the visible ones) */
+      const box=el.querySelector(d.btn?'.anzt':'.anzb'),vert=!d.btn&&el.classList.contains('anzcol');let hit=null;
+      for(const c of box.children){const r=c.getBoundingClientRect(),p=vert?e.clientY:e.clientX,a=vert?r.top:r.left,b=vert?r.bottom:r.right;if(p>=a&&p<b){hit=c.dataset.am||c.dataset.m;break}}
+      if(hit&&hit!==d.key){const M=ov.mods,i=M.findIndex(m=>m[0]===d.key),j=M.findIndex(m=>m[0]===hit);if(i>=0&&j>=0){const[it]=M.splice(i,1);M.splice(j,0,it);anzBuild(ov)}}}});
+  const up=()=>{if(!d)return;const was=d;d=null;el.classList.remove('anzdrag');if(was.k==='am'){if(!was.mv&&was.btn)anzToggle(ov,was.key);else if(was.mv)spoSave()}else{if(was.k==='dk'){dispatchEvent(new Event('resize'));anzSide()}spoSave()}};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();anzMenu(ov,e.clientX,e.clientY)});
+  el.addEventListener('click',e=>{const k=e.target.closest('[data-spk]');if(k){if(ov.src.length>1){ov.src=ov.src.filter(x=>x!==k.dataset.spk);spoHead(ov);anzReset(ov);spoSave()}return}const b=e.target.closest('[data-sp]');if(!b)return;const a=b.dataset.sp,r=b.getBoundingClientRect();
+    if(a==='x'){spoClose(ov);const m=document.getElementById('mxDev');if(m)m.classList.toggle('on',SPO.list.some(o=>o.mx))}
+    else if(a==='pin'){ov.pin=!ov.pin;spoPlace(ov);spoHead(ov);spoSave();toast(ov.pin?'Pinned: this analyser stays on top and opens again next time.':'Unpinned.')}
+    else if(a==='hold'){ov.hold=!ov.hold;ov.pk=null;ov.idle=0;spoHead(ov);spoSave()}
+    else if(a==='view')openMenu(r.left,r.bottom+3,anzViewItems(ov));else if(a==='dock')openMenu(r.left,r.bottom+3,anzDockItems(ov));
+    else if(a==='add')openMenu(r.left,r.bottom+3,[{head:'Compare with'},...['master',...S.tracks.map(t=>t.id)].filter(k=>!ov.src.includes(k)).map(k=>({label:spoName(k),dot:spoCol(k),act:()=>{ov.src.push(k);spoHead(ov);ov.idle=0;spoSave()}}))])})}
+
+/* drawing: every module has a canvas of its own. Nothing moves when there is no sound: after about two seconds of silence the pictures are only checked a few times a second. */
+spoDraw=function(){SPO.raf=0;if(!SPO.list.length)return;SPO.raf=requestAnimationFrame(spoDraw);const now=performance.now(),last=SPO.last||0;if(document.hidden||now-last<(UI.lite?30:14))return;const dt=Math.min(.1,last?(now-last)/1000:.016);SPO.last=now;
+  for(const ov of SPO.list){try{anzFrame(ov,now,dt)}catch(e){if(!SPO.err){SPO.err=1;console.error(e)}}}};
+function anzFrame(ov,now,dt){const el=ov.el;if(!el.isConnected)return;let sig=false;
+  if(ctx&&ctx.state==='running')for(const k of ov.src){const p=anzPair(k);if(p&&(mtrPeak(p[0])>1e-4||mtrPeak(p[1])>1e-4)){sig=true;break}}
+  if(sig)ov.act=now;const active=now-(ov.act||-1e9)<1800;if(!active){if(now-(ov.idle||0)<300)return;ov.idle=now}
+  const k0=ov.src[0],st={now,dt,active,sig,cm:ov.col||'track',col:spoCol(k0),k:k0,pair:anzPair(k0),solid:el.classList.contains('anzd')};ov.ms=ov.ms||{};
+  for(const c of el.querySelector('.anzb').children){const k=c.dataset.m,{g,w,h}=fit(c.firstChild);if(w<6||h<6||!ANZD[k])continue;let M=ov.ms[k];if(!M||M.w!==w||M.h!==h)M=ov.ms[k]={w,h};ANZD[k](ov,M,g,w,h,st)}}
+const ANZF='9px ui-monospace,Menlo,monospace';
+const ANZD={
+ /* spectrum: steady scale. The top of the picture stays at a fixed level (or, with the slow automatic choice, moves a little only after several seconds), so the curve never pumps with the music */
+ spec(ov,M,g,w,h,st){g.clearRect(0,0,w,h);const auto=ov.rng==='auto',rng=auto?72:(+ov.rng||72),top=auto?(ov.top??ANZTOP):ANZTOP,bot=top-rng,y=db=>(1-clamp((db-bot)/rng,0,1))*h;g.font=ANZF;
+   for(const f of[50,100,200,500,1e3,2e3,5e3,1e4]){const x=spoX(f,w);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x,0,1,h);g.fillStyle='rgba(255,255,255,.35)';if(w>150||f===100||f===1e3||f===1e4)g.fillText(f>=1e3?f/1e3+'k':f,x+2,h-3)}
+   for(let db=Math.floor(top/12)*12;db>bot;db-=12){g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,y(db),w,1)}
+   const np=Math.floor(w/2)+1;let mxv=-200;ov.pk=ov.pk||{};M.p=M.p||[];
+   ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;const B=SPO.an.get(k).buf;an.getFloatFrequencyData(B);const sr=ctx.sampleRate,n=B.length,col=spoCol(k);
+     if(!M.bi||M.bn!==n||M.bsr!==sr){M.bn=n;M.bsr=sr;M.bi=new Int32Array(np*2);M.tl=new Float32Array(np);for(let i=0;i<np;i++){const px=i*2,f=20*Math.pow(1000,px/w),f0=20*Math.pow(1000,(px-1)/w),f1=20*Math.pow(1000,(px+1)/w),i0=Math.max(0,Math.floor(f0/(sr/2)*n)),i1=Math.min(n-1,Math.max(i0,Math.ceil(f1/(sr/2)*n)));M.bi[i*2]=i0;M.bi[i*2+1]=i1;M.tl[i]=4.5*Math.log2(f/1000)}}
+     const P=M.p[si]&&M.p[si].length===np?M.p[si]:(M.p[si]=new Float32Array(np));let any=false;
+     /* no sound means no curve: bins the analyser reports as silent stay on the floor (this used to draw a rising straight line, the treble tilt applied to silence) */
+     for(let i=0;i<np;i++){const i0=M.bi[i*2],i1=M.bi[i*2+1];let e=0;for(let q=i0;q<=i1;q++)e+=Math.pow(10,B[q]/10);const raw=10*Math.log10(e/(i1-i0+1)+1e-14);let yy=h;if(st.active&&raw>-104){const v=raw+M.tl[i];if(v>mxv)mxv=v;yy=y(v);if(yy<h-.5)any=true}P[i]=yy}
+     if(any){let fs=col,ss=col;if(!si&&st.cm!=='track'){if(M.gk!==st.cm+col){M.gk=st.cm+col;const pos=st.cm==='tri'||st.cm==='bass'||st.cm==='rainbow',G=pos?g.createLinearGradient(0,0,w,0):g.createLinearGradient(0,0,0,h);
+           if(pos)for(let q=0;q<=12;q++){const c=st.cm==='rainbow'?anzHue(q/12,.95):mxPosRGB(st.cm,q/12,.95,col);G.addColorStop(q/12,`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`)}else{const L=anzLut(st.cm,col).css;for(let q=0;q<=6;q++)G.addColorStop(q/6,L[Math.round(255-q/6*190)])}M.gr=G}fs=ss=M.gr}
+       g.beginPath();g.moveTo(0,h);for(let i=0;i<np;i++)g.lineTo(i*2,P[i]);g.lineTo(w,h);g.closePath();g.globalAlpha=si?.1:(st.cm==='track'?.22:.3);g.fillStyle=fs;g.fill();g.globalAlpha=1;g.strokeStyle=ss;g.lineWidth=1.5;g.beginPath();for(let i=0;i<np;i++)i?g.lineTo(i*2,P[i]):g.moveTo(0,P[0]);g.stroke()}
+     if(ov.hold){let H=ov.pk[k];if(!H||H.length!==np){H=ov.pk[k]=new Float32Array(np).fill(h)}const fall=.35*st.dt*60;let vis=false;for(let i=0;i<np;i++){H[i]=Math.min(H[i]+fall,P[i],h);if(H[i]<h-1)vis=true}
+       if(vis){g.strokeStyle=col;g.globalAlpha=.45;g.setLineDash([2,3]);g.beginPath();for(let i=0;i<np;i++)i?g.lineTo(i*2,H[i]):g.moveTo(0,H[0]);g.stroke();g.setLineDash([]);g.globalAlpha=1}}});
+   if(auto&&mxv>-150){const want=Math.ceil((mxv+6)/6)*6,cur=ov.top??want;if(want>cur){ov.top=cur+(want-cur)*Math.min(1,st.dt*1.5);M.lo=0}else if(want<cur-6){M.lo=(M.lo||0)+st.dt;ov.top=M.lo>6?cur-st.dt*1.5:cur}else{M.lo=0;ov.top=cur}}
+   g.font=ANZF;for(let db=Math.floor(top/12)*12;db>bot+4;db-=12){const yy=y(db);if(yy<10)continue;g.fillStyle='rgba(255,255,255,.28)';g.fillText(db+' dB',3,yy-2)}},
+ /* spectrogram: pitch upward (bass at the bottom), time to the right. It moves by time, not by frames, so the speed is the same on every screen */
+ sgram(ov,M,g,w,h,st){const W=Math.max(8,Math.ceil(w)),R=Math.max(8,Math.min(220,Math.ceil(h)));
+   if(!M.c){M.c=document.createElement('canvas');M.c.width=W;M.c.height=R;M.x=M.c.getContext('2d');M.img=M.x.createImageData(1,R);M.acc=0}
+   const an=ctx&&spoAn(st.k);
+   if(st.active&&an){M.acc+=st.dt*60;const n=Math.min(8,M.acc|0);M.acc-=M.acc|0;if(n>0){const B=SPO.an.get(st.k).buf;an.getFloatFrequencyData(B);const sr=ctx.sampleRate,nb=B.length;
+       if(!M.rb||M.rn!==nb||M.rsr!==sr){M.rn=nb;M.rsr=sr;M.rb=new Float32Array(R*3);for(let r=0;r<R;r++){const p0=1-(r+1)/R,p1=1-r/R,f0=20*Math.pow(1000,p0),f1=20*Math.pow(1000,p1);M.rb[r*3]=Math.min(nb-1.001,f0/(sr/2)*nb);M.rb[r*3+1]=Math.min(nb-1.001,f1/(sr/2)*nb);M.rb[r*3+2]=4.5*Math.log2(Math.sqrt(f0*f1)/1000)}}
+       const d=M.img.data,cm=st.cm;for(let r=0;r<R;r++){const b0=M.rb[r*3],b1=M.rb[r*3+1];let raw;if(b1-b0<1){const m=(b0+b1)/2,i=m|0,fr=m-i;raw=B[i]*(1-fr)+B[i+1]*fr}else{raw=-200;for(let i=b0|0;i<=b1;i++)if(B[i]>raw)raw=B[i]}
+         let v=raw>-104?clamp((raw+M.rb[r*3+2]-(ANZTOP-74))/70,0,1):0;v=Math.pow(v,1.3);const pos=1-(r+.5)/R,c=cm==='rainbow'?anzHue(pos,v):mxPosRGB(cm,pos,v,st.col),kk=cm==='tri'?Math.min(1,v*1.6):1;d[r*4]=c[0]*kk;d[r*4+1]=c[1]*kk;d[r*4+2]=c[2]*kk;d[r*4+3]=v<.02?0:Math.min(255,60+v*900)}
+       const x=M.x;x.globalCompositeOperation='copy';x.drawImage(M.c,-n,0);x.globalCompositeOperation='source-over';for(let i=0;i<n;i++)x.putImageData(M.img,W-n+i,0)}}
+   g.clearRect(0,0,w,h);if(st.solid){g.fillStyle='#07080b';g.fillRect(0,0,w,h)}g.imageSmoothingEnabled=true;g.drawImage(M.c,0,0,W,R,0,0,w,h);
+   g.font=ANZF;for(const f of[100,1e3,1e4]){const yy=h-spoX(f,h);g.fillStyle='rgba(255,255,255,.14)';g.fillRect(0,yy,5,1);g.fillStyle='rgba(255,255,255,.4)';g.fillText(f>=1e3?f/1e3+'k':f,7,yy+3)}},
+ /* stereo field (goniometer): mono is a vertical line, left and right lie on the two diagonals, as on hardware and in other analysers */
+ stereo(ov,M,g,w,h,st){const fade=1-Math.pow(.03,st.dt/.22);g.globalCompositeOperation='destination-out';g.fillStyle=`rgba(0,0,0,${fade.toFixed(3)})`;g.fillRect(0,0,w,h);g.globalCompositeOperation='source-over';
+   const cx=w/2,cy=h/2,r=Math.max(8,Math.min(w,h)/2-12),ga=fade;g.strokeStyle=`rgba(255,255,255,${(.16*ga).toFixed(3)})`;g.lineWidth=1;g.beginPath();g.moveTo(cx-r,cy-r);g.lineTo(cx+r,cy+r);g.moveTo(cx+r,cy-r);g.lineTo(cx-r,cy+r);g.moveTo(cx,cy-r);g.lineTo(cx,cy+r);g.moveTo(cx-r,cy);g.lineTo(cx+r,cy);g.stroke();
+   g.font=ANZF;g.fillStyle=`rgba(255,255,255,${(.5*ga).toFixed(3)})`;g.fillText('L',cx-r-1,cy-r+1);g.fillText('R',cx+r-5,cy-r+1);
+   if(!st.active||!st.pair)return;const L=anzTD(st.pair[0],st.now),R=anzTD(st.pair[1],st.now),len=L.length,n=Math.min(len,1024),o=len-n,cm=st.cm,k=r*1.25;let b3=null;
+   if(cm==='tri'||cm==='bass'){M.H0=M.H0||{};mxBands(st.pair[0],M.H0);b3=M.H0.b3}
+   const C=M.cc&&M.ck===cm+st.col&&!b3?M.cc:(M.ck=cm+st.col,M.cc=[.3,.5,.72,.95].map(v=>anzC(cm,v,st.col,b3)));g.globalAlpha=.8;
+   for(let q=0;q<4;q++){g.fillStyle=C[q];const lo=q*.12,hi=q===3?9:(q+1)*.12;for(let i=o;i<len;i++){const l=L[i],rr=R[i],s=(rr-l)*.7071,m=(l+rr)*.7071,a=Math.max(s<0?-s:s,m<0?-m:m);if(a<lo||a>=hi||a<1e-4)continue;g.fillRect(cx+clamp(s*k,-r,r)-.6,cy-clamp(m*k,-r,r)-.6,1.3,1.3)}}g.globalAlpha=1},
+ /* scrolling waveform: the highest and lowest point of each moment, newest on the right */
+ wave(ov,M,g,w,h,st){const N=2048;if(!M.mn){M.mn=new Float32Array(N);M.mx=new Float32Array(N);M.cc=new Array(N).fill('');M.bt=new Uint8Array(N);M.br=new Uint16Array(N);M.i=0;M.n=0;M.acc=0;M.lb=-1;M.H0={}}
+   if(st.active&&st.pair&&ctx){M.acc+=st.dt*90;const n=Math.min(10,M.acc|0);M.acc-=M.acc|0;if(n>0){const L=anzTD(st.pair[0],st.now),R=anzTD(st.pair[1],st.now),len=L.length,use=Math.min(len,Math.max(64,Math.round(ctx.sampleRate*st.dt))),o=len-use,seg=use/n,cm=st.cm;
+       let b3=null;if(cm==='tri'||cm==='bass'){mxBands(st.pair[0],M.H0);b3=M.H0.b3}let beat=0,bar=0;if(play.on){const b=curDisp(),fb=Math.floor(b);if(fb!==M.lb){beat=fb%4===0?2:1;bar=Math.floor(b/4)+1}M.lb=fb}
+       for(let c=0;c<n;c++){let mn=0,mx=0;const e=Math.min(len,Math.ceil(o+(c+1)*seg));for(let i=Math.floor(o+c*seg);i<e;i++){const a=L[i],b=R[i];if(a<mn)mn=a;if(b<mn)mn=b;if(a>mx)mx=a;if(b>mx)mx=b}
+         const amp=Math.max(mx,-mn),j=M.i;M.mn[j]=mn;M.mx[j]=mx;M.cc[j]=amp>=.999?'#ff2d55':anzC(cm,Math.pow(Math.min(1,amp),.7),st.col,b3);M.bt[j]=c?0:beat;M.br[j]=c?0:bar;M.i=(j+1)%N;if(M.n<N)M.n++}}}
+   g.clearRect(0,0,w,h);const mid=h/2,cols=Math.min(M.n,Math.floor(w)),x0=Math.floor(w)-cols;g.fillStyle='rgba(255,255,255,.07)';g.fillRect(0,mid,w,1);g.font=ANZF;
+   for(let q=0;q<cols;q++){const j=(M.i-cols+q+N*2)%N,x=x0+q,bt=M.bt[j];if(bt){g.fillStyle=bt===2?'rgba(245,200,76,.4)':'rgba(255,255,255,.1)';g.fillRect(x,0,1,h);if(bt===2&&h>40){g.fillStyle='rgba(245,200,76,.8)';g.fillText(M.br[j],x+3,10)}}
+     const a=Math.min(1,M.mx[j])*mid*.94,b=Math.min(1,-M.mn[j])*mid*.94;if(a+b<.4)continue;g.fillStyle=M.cc[j];g.fillRect(x,mid-a,1,a+b+1)}},
+ /* loudness of the master: three bars (momentary, short-term, integrated) on a LUFS scale with the target marked, and the numbers beside them */
+ loud(ov,M,g,w,h,st){g.clearRect(0,0,w,h);const T=lmTarget(),lo=-42,hi=0,top=8,bot=h-14,yy=v=>top+(1-clamp((v-lo)/(hi-lo),0,1))*(bot-top),vals=[['M',LM.M],['S',LM.S],['I',LM.I]],txt=w>=118,bw=Math.max(5,Math.min(13,((txt?w*.42:w)-24)/3-3)),bx=22,L=anzLut(st.cm,st.col).css;g.font=ANZF;
+   for(const d of[0,-12,-24,-36]){const y0=yy(d);g.fillStyle='rgba(255,255,255,.3)';g.fillText(d,2,y0+3);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(bx-3,y0,3*(bw+3)+3,1)}
+   const ty=yy(T[2]);g.fillStyle='rgba(62,207,142,.16)';g.fillRect(bx-3,yy(T[2]+1),3*(bw+3)+3,yy(T[2]-1)-yy(T[2]+1));
+   vals.forEach(([nm,v],i)=>{const x=bx+i*(bw+3);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x,top,bw,bot-top);if(v>-69&&(st.active||nm==='I')){const y0=yy(v),c=st.cm==='track'?st.col:L[Math.round(70+clamp((v-lo)/(hi-lo),0,1)*185)];g.fillStyle=v>T[2]+1.5&&nm!=='M'?'#f5c84c':c;g.fillRect(x,y0,bw,bot-y0)}g.fillStyle='rgba(255,255,255,.45)';g.fillText(nm,x+bw/2-3,h-3)});
+   g.fillStyle='#3ecf8e';g.fillRect(bx-3,ty,3*(bw+3)+3,1.5);
+   if(txt){const tx=bx+3*(bw+3)+8,rows=[['Short-term',lf(LM.S),'LUFS',LM.S>-69&&LM.S>T[2]+2?'#f5c84c':'#eef1f6'],['Integrated',lf(LM.I),'LUFS',LM.I>-69?(Math.abs(LM.I-T[2])<=1?'#6fe6ae':LM.I>T[2]+1?'#f5c84c':'#eef1f6'):'#eef1f6'],['True peak',LM.tpMax>-89?LM.tpMax.toFixed(1):'–','dBTP',LM.tpMax>T[3]?'#ff8a8a':'#eef1f6'],['Range',LM.I>-69?LM.LRA.toFixed(1):'–','LU','#eef1f6']],
+       nr=h>=112?4:h>=84?3:2,rh=Math.min(27,(h-6)/nr),big=rh>=22;rows.slice(0,nr).forEach(([l,v,u,c],i)=>{const y0=4+i*rh;g.fillStyle='rgba(255,255,255,.42)';g.font=ANZF;if(big){g.fillText(l,tx,y0+8);g.fillStyle=c;g.font='700 12px ui-monospace,Menlo,monospace';g.fillText(v,tx,y0+21);const tw=g.measureText(v).width;g.font=ANZF;g.fillStyle='rgba(255,255,255,.35)';g.fillText(u,tx+tw+4,y0+21)}else{g.fillText(l,tx,y0+rh*.5+3);g.fillStyle=c;g.font='700 11px ui-monospace,Menlo,monospace';g.fillText(v,tx+60,y0+rh*.5+3)}})}},
+ /* correlation: +1 at the right (or top), red below zero, with a thin mark at the lowest value of the last few seconds */
+ corr(ov,M,g,w,h,st){g.clearRect(0,0,w,h);let c=null;if(st.active&&st.pair){const L=anzTD(st.pair[0],st.now),R=anzTD(st.pair[1],st.now);let lr=0,ll=0,rr=0;for(let i=0;i<L.length;i++){const a=L[i],b=R[i];lr+=a*b;ll+=a*a;rr+=b*b}if(ll>1e-9&&rr>1e-9)c=lr/Math.sqrt(ll*rr);else if(ll>1e-9||rr>1e-9)c=0}
+   if(c!=null){M.v=M.v==null?c:M.v+(c-M.v)*Math.min(1,st.dt*7);if(M.lo==null||M.v<M.lo){M.lo=M.v;M.lt=st.now}else if(st.now-M.lt>3000)M.lo+=(M.v-M.lo)*Math.min(1,st.dt*2)}else if(!st.active){M.v=null;M.lo=null}
+   const hz=w>=h,v=M.v,col=v==null?'rgba(255,255,255,.3)':v<0?'#ff5f6b':st.cm==='track'?st.col:anzLut(st.cm,st.col).css[Math.round(110+v*145)];g.font=ANZF;
+   if(hz){const x0=14,x1=w-14,cy=Math.round(h/2)-3,bh=Math.max(4,Math.min(10,h-22)),X=q=>x0+(q+1)/2*(x1-x0);g.fillStyle='rgba(255,95,107,.16)';g.fillRect(x0,cy-bh/2,X(0)-x0,bh);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(X(0),cy-bh/2,x1-X(0),bh);
+     if(v!=null){g.fillStyle=col;const a=X(0),b=X(v);g.fillRect(Math.min(a,b),cy-bh/2,Math.abs(b-a),bh);g.fillStyle='#fff';g.fillRect(b-1,cy-bh/2-2,2,bh+4);if(M.lo!=null){g.fillStyle='rgba(255,255,255,.5)';g.fillRect(X(M.lo),cy-bh/2,1,bh)}}
+     g.fillStyle='rgba(255,255,255,.4)';g.fillText('-1',x0-8,h-3);g.fillText('0',X(0)-3,h-3);g.fillText('+1',x1-8,h-3);if(v!=null&&w>150){g.fillStyle=col;g.fillText((v>=0?'+':'')+v.toFixed(2),X(.5)-12,h-3)}}
+   else{const y0=18,y1=h-22,cx=Math.round(w/2),bw=Math.max(4,Math.min(10,w-22)),Y=q=>y1-(q+1)/2*(y1-y0);g.fillStyle='rgba(255,95,107,.16)';g.fillRect(cx-bw/2,Y(0),bw,y1-Y(0));g.fillStyle='rgba(255,255,255,.07)';g.fillRect(cx-bw/2,y0,bw,Y(0)-y0);
+     if(v!=null){g.fillStyle=col;const a=Y(0),b=Y(v);g.fillRect(cx-bw/2,Math.min(a,b),bw,Math.abs(b-a));g.fillStyle='#fff';g.fillRect(cx-bw/2-2,b-1,bw+4,2);if(M.lo!=null){g.fillStyle='rgba(255,255,255,.5)';g.fillRect(cx-bw/2,Y(M.lo),bw,1)}}
+     g.fillStyle='rgba(255,255,255,.4)';g.fillText('+1',cx+bw/2+4,y0+6);g.fillText('0',cx+bw/2+4,Y(0)+3);g.fillText('-1',cx+bw/2+4,y1);if(v!=null){g.fillStyle=col;g.fillText((v>=0?'+':'')+v.toFixed(2),Math.max(1,cx-14),h-5)}}}};
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
