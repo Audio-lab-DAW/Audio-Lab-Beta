@@ -836,3 +836,57 @@ A ball thrown up with speed v is in the air for 2v/g and comes back with speed v
 ### Release
 - v0.180: commit cfa6d2d, artifact version 203. v0.181: commit e69fe26, artifact version 204. Project docs `claude/audiolab-device-backlog-run-A.md` and `-B.md`.
 - **Desktop builds**: the builds for v0.179, v0.180 and v0.181 failed or could not be started because GitHub answered with server errors (HTTP 500 and 502 on the releases and dispatch addresses, between 15:43 and 16:20 UTC; the page deploy failed once too). Nothing is wrong in the code. The program update inside the installed app comes from the repo and is not affected; only new installers are missing until the build is started again.
+
+## 25 November 2026: v0.182, one design language for every device (task C of `docs/device-backlog-2026-11-25.md`)
+
+### What changed for the user
+- **Title row, the same on every device**, across the whole device: arrow, on/off (effects) or the logo (instruments), name, preset menu with previous and next, Change, then the device's own buttons (play, Editor, Pitch and Amp), and remove at the far right.
+- **The arrow** (top left) slides the parameters shut and open. It replaces the Params button at the top right. Shut, a device is its title (arrow, on/off, name, remove) and its picture. A device without a picture has no arrow (only Grid, whose whole face is the picture).
+- **Change on effects** (new): opens the effect browser, titled "replace X on track"; the effect picked there takes the old one's place in the chain and keeps its on/off state. One undo step. Cancel changes nothing. This is the plain replace; live browsing is task D.
+- **Picture on the left, controls on the right, as narrow as the controls allow.** Knobs fill the height in up to three rows, so a device with three knobs is one column wide (Pluck was 444 px of mostly grey; its controls now take 380 px next to a picture). Choices that are not presets (Wave, Sync, Ping-pong, Mode and so on) sit in a row above the controls, as in Vector Delay.
+- **The device gain** is a bar at the right end of every device, the last control, drawn like Vector Delay's Gain bar. A Size or Length control stands as a bar next to it (Blur Size, Convolution Size, Kick Length, FX Length, Clap Room).
+- **One look per kind of control**: every knob 30 px in a 54 px column, every bar 44 px wide with a 16 px track, every slider 20 px high. Envelope bars have plain labels (Attack, Decay, Sustain, Release) in the same type as the knob labels; the small "ENVELOPE" heading and the cramped capitals are gone.
+- **Presets everywhere**: the nine basic instruments (Saw lead, Square lead, Soft pad, Strings, Pluck, Soft keys, Sub bass, Square bass, Reese bass) each have Default and four or five more; Drum kit has Default kit and five more (Tight and dry, Deep and long, Bright and snappy, Dark and low, Trap kit; the "Default kit" button became the first entry). Effects got previous and next buttons beside their menu. Chord's shape menu and the EQ's menu are their preset menus.
+- **A picture for the basic instruments**: the filter curve on top (dashed: where it starts when a note begins) and the envelope below; both follow the knobs, and a white dot runs along the envelope while a note sounds.
+- **Faster**: rebuilding the device strip took 106 ms for a Fractals track and 115 ms for Drum kit with three effects in the headless test browser; now 28 ms and 44 ms. The old fit of the title row (`dfFit`) measured the page over and over; the title has its own row now, so that step is switched off.
+- Fixed on the way: the gain of an effect always showed 0.0 dB in its control (it read the wrong field; the sound was right). The strip no longer jumps sideways when a device is rebuilt while scrolled to the right. The arrows between devices are drawn again once widths have settled. In the Devices window every device has the panel's height.
+
+### How it is built
+- New block before `askChoice` (search "one design language"): `duLayout()` runs as the last wrapper of `renderFx`, after `devLayout` and `devFill`. `duDev(D,t)` moves `.devh` to the top of the device, rebuilds its order, moves choices into `.ndtb`, makes the arrow (`.duar`, it keeps the old `data-kt` / `data-ikt` attribute), the Change button (`.duchg`, `data-duchg` on effects) and the gain (`.dug`, a `vb` control with the same id `fx:og:...` as before). `duFit(D)` sets knob rows and columns and widens the side when a row of choices would squeeze the knobs. Classes: `.du` on every laid-out device, `.dushut` when the parameters are shut.
+- `duInit()`: `DUBI` (presets of the basic instruments, registered in `IPRE`), `DUKIT` and `duKit()` (drum kits made from the default pads with the pad knobs and another kick), `PL2.du_basic = duBasicDraw` (the picture; `instDevHtml` is wrapped to add the canvas).
+- `chooseIB` is wrapped: with `ib.repl` set the new effect is moved to the old one's place. `duChangeFx(t,f)` opens the browser.
+- CSS before `.dacv` (search "one design language"). Everything inside a `.du` device has `transition:none`: sizes are measured right after the layout is built, and with transitions the browser still reports the old sizes (this was behind several wrong fits).
+- Particle devices: 44 px wider for the gain bar (868 px, instruments 916 px); the picture ends where the bar begins, so the drawing code and its width constants are unchanged.
+- Nothing in the sound code was touched.
+
+### Tested (headless, no page errors)
+- `tools/ui-tests/devices_all.py` (new): builds every instrument and every effect of the two browser lists, checks that nothing sticks out, prints the title order, the sizes of knobs, sliders and bars, shuts and opens the parameters, saves a screenshot of each. All 66: nothing outside; title order arrow, on/off or logo, name, preset, Change, (own buttons), remove; 65 shut to zero visible controls and open again with the same controls, Grid has no arrow.
+- `tools/ui-tests/design.py` (new): Change replaces in place (comp > delay(off) > reverb becomes comp > phaser(off) > reverb, undo restores, Cancel keeps, plain Add still adds at the end); previous and next preset on an effect; Pluck presets and Default equal to a new Pluck, three undos; drum kits and Default kit equal to `defaultPads()`; the gain bar sets `f.p.og` and `I.og`, drag and double-click; the arrow with animations on and off; shut state is saved with the project; no em dash and no button without a tooltip in the titles; the basic picture changes with the knobs.
+- `vector_delay.py`, `orbit.py`, `bounce.py`, `hdrlayout.py`, `vector_fm.py`, `vector_grain.py`, `emit.py`, `vector_map.py`, `particles_look.py`: same results as on v0.181.
+- Unchanged: Fractals Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96, solo).
+- Screenshots looked at: all 66 devices open, eight shut, the Devices window, both browsers.
+
+### Every device looked at
+Instruments (28): Venom, Plant, Wavetable, Orbit, Vector FM, Saw lead, Square lead, Soft pad, Strings, Pluck, Soft keys, Growl, Sub bass, Square bass, Reese bass, Acid, Drum kit, Kick designer, Snare designer, Clap designer, Hat designer, Tom designer, Percussion, Sampler, Emit, Vector Grain, FX, Grid.
+Effects (38): Compressor, OTT, Sidechain, Limiter, Soft Clipper, Gate, Multiband Dynamics, Transient Shaper, De-Esser, Resonance Suppressor, Echo delay, Timeless delay, Space reverb, Blur, Convolution Reverb, Tape Stop, Vector Delay, Bounce Delay, Pro EQ, Low-pass filter, Drive, Auto Filter, Bitcrusher, Pitch and Formant, Pitch Correction, Phaser, Chorus, LFO Shaper, Vocoder, Frequency Shifter, Chord, Bouncy Notes, Arpeggiator, MIDI Toolkit, Spectrum, Loudness, Tuner, Stereo Imager.
+
+### Still deviating
+- **Venom**: its green sliders keep their own colour and grouping (same height as the others now). **Sampler**: Filter and Amp keep their own panels with pictures in the controls area. **Growl**: knobs in five named groups, no bars. **Grid**: the patch is the device, only title and gain follow. **Pro EQ**: band editor instead of knobs; its own Scale and Out sliders keep their look.
+- **The Kick designer inside a Drum kit pad** (the second device that appears when a pad is a Kick designer) still has the old slider look and a low picture; the old layout steps skip it too.
+- **Two bars called Gain** on Vector Delay and Soft Clipper: their own Gain parameter and the device gain stand side by side. One of them needs another name; left for the user to choose.
+- **Instruments have no on/off** (there is none in the engine); the logo stands in that place.
+- **Devices in the two browsers** (the tiles and the live device) keep the old look with the Params button; task D reworks the browsers.
+- Some long labels are cut with dots in a 54 px knob column (Downsample, Max reduction, Pitch (semitones)); the tooltip has the full name.
+- Low-pass filter: its title is 15 px wider than picture plus controls.
+- The slide of the parameters is a short width and fade animation on ordinary devices; particle devices switch at once.
+- Modulators, the track device and macros were not part of this task.
+
+### Not verified
+- **Nobody has seen it on a real screen or tried it with a mouse**; the Mac build; touch.
+- The new presets of the basic instruments and the drum kits were set by reasoning from the knobs, **nobody has listened to them**.
+- Old projects with shut devices were tested only through the saved `kOpen` flag, not with a real old file.
+- MIDI learn, modulators and automation on the gain bar (the control id is the same as before, so they should hold).
+
+### Left
+- Task D (Change with live browsing; the browsers in the new look), task E (CPU and background freeze).
+

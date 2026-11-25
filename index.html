@@ -1227,6 +1227,79 @@ body.fxstill #mixWin .mxs,body.fxstill #mixWin .mxs *:not(#splash):not(#splash *
 .dev.pbx-vdelay .ndtb::before,.dev.pbx-bnotes .ndtb::before{content:"";order:0;flex-basis:100%;height:0}
 .dev.pbx-vdelay .ndtb label,.dev.pbx-bnotes .ndtb label{order:1}
 .dev.pbx-vdelay .ndtb select,.dev.pbx-bnotes .ndtb select{max-width:104px}
+/* ===== one design language for every device (task C, v0.182): title row across the top, picture left, controls right, gain last ===== */
+#fxin .dev.du{padding:0;gap:0;overflow:hidden}
+#fxin .dev.du>.devh{position:static!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center;gap:6px;height:30px;min-height:30px;flex:none;padding:0 6px 0 5px;margin:0;width:auto!important;min-width:0!important;inset:auto;background:rgba(255,255,255,.03);border:0;border-bottom:1px solid rgba(255,255,255,.07);border-radius:0;box-shadow:none;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:auto;font-size:12.5px;z-index:2}
+#fxin .dev.du>.devh>*{order:0!important;flex:none;margin:0}
+#fxin .dev.du>.devh>span{flex:none!important;display:block!important;overflow:visible;white-space:nowrap;writing-mode:horizontal-tb!important;font-size:12.5px;font-weight:700;color:inherit;margin:0 4px 0 1px;min-width:0}
+#fxin .dev.du>.devh>.dusp{flex:1 1 auto!important;min-width:2px;height:1px}
+#fxin .dev.du>.devh>svg{display:block}
+#fxin .dev.du>.devh button,#fxin .dev.du>.devh select{min-height:22px;height:22px;font-size:11px}
+#fxin .dev.du>.devh .kpre{display:flex!important;align-items:center;gap:2px;width:auto}
+#fxin .dev.du>.devh .kpre select{width:136px;max-width:136px;min-width:0}
+#fxin .dev.du>.devh .kpre button{min-width:18px;width:18px;padding:0}
+#fxin .dev.du>.devh>.duar{width:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;color:#cfd3db}
+#fxin .dev.du>.devh>.duar svg{width:13px;height:13px;display:block}
+#fxin .dev.du>.devh>.duar:hover{color:#fff}
+#fxin .dev.du>.devh>.duchg{padding:0 8px}
+#fxin .dev.du>.devh>.x{display:inline-flex!important}
+#fxin .dev.du>.devb{padding:6px 7px;flex:1 1 auto;min-height:0;gap:9px}
+#fxin .dev.du.pbx>.devb{padding:0;gap:0}
+#fxin .dev.du .dfs{min-width:0;gap:4px}
+#fxin .dev.du.dushut>.devb>.dfs,#fxin .dev.du.dushut>.devb>.dug,#fxin .dev.du.dushut>.devb>.eqside{display:none!important}
+#fxin .dev.du .dfs>.dfc{gap:8px}
+#fxin .dev.du>.devb>.dug{flex:none!important;display:flex;align-items:stretch;height:auto!important;min-height:0;padding:0 0 0 6px;border-left:1px solid rgba(255,255,255,.07)}
+#fxin .dev.du .dug .vb{height:auto;min-height:60px}
+/* the row of choices above the controls */
+#fxin .dev.du .dutb{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;font-size:10.5px;color:var(--mut);flex:none;width:0;min-width:100%}
+#fxin .dev.du .dutb label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+#fxin .dev.du .dutb select{min-height:20px;height:20px;font-size:10.5px;max-width:120px}
+/* one knob, one bar, one slider */
+#fxin .dev.du .pgrid{gap:10px;justify-content:flex-start;padding:0}
+#fxin .dev.du .pg-kn{--dukw:54px;display:grid;gap:6px 0;align-content:space-evenly;justify-content:center;flex:none}
+#fxin .dev.du .pg-kn .kn,#fxin .dev.du .pgrid.pgbig .pg-kn .kn{width:54px!important}
+#fxin .dev.du .pg-kn .kn svg,#fxin .dev.du .pgrid.pgbig .pg-kn .kn svg{width:30px;height:30px}
+#fxin .dev.du .pg-kn .kn span,#fxin .dev.du .pgrid.pgbig .pg-kn .kn span{font-size:9.5px;max-width:54px}
+#fxin .dev.du .pg-kn .kn output{font-size:9.5px}
+#fxin .dev.du .pgl{display:none}
+#fxin .dev.du .pg-env>div,#fxin .dev.du .pg-lv{gap:0}
+#fxin .dev.du .vb{width:44px;gap:3px}
+#fxin .dev.du .vb .vl{font:500 9.5px Inter,system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#a9abb6;max-width:44px;overflow:hidden;text-overflow:ellipsis;line-height:12px}
+#fxin .dev.du .vb .vt{width:16px;flex:1 1 auto;min-height:36px;border-radius:5px}
+#fxin .dev.du .vb output{font:600 9.5px Inter,sans-serif;color:#e9eaf0;line-height:12px}
+#fxin .dev.du .pg-hb{flex:none;width:150px;min-width:0;gap:5px;justify-content:center;padding:0}
+#fxin .dev.du .pg-hb .hb{flex:none;height:20px;max-height:20px;width:100%!important;min-width:0}
+#fxin .dev.du .pg-hb.duc{gap:2px}
+#fxin .dev.du .pg-hb.du2{display:grid;grid-auto-flow:column;width:270px;gap:4px 6px;align-content:center}
+#fxin .dev.du .pg-lv .vb .vt{width:16px}
+/* the picture of the basic instruments */
+#fxin .dfv>canvas.duviz{width:230px;border-radius:6px;background:#07080c}
+/* sliding the parameters */
+/* sizes are measured right after the layout is built, so nothing in it may still be easing towards its place */
+#fxin .dev.du,#fxin .dev.du .dfs,#fxin .dev.du .dfs *,#fxin .dev.du .dfv,#fxin .dev.du .dfv>*,#fxin .dev.du>.devh,#fxin .dev.du>.devh *,#fxin .dev.du>.devb,#fxin .dev.du>.devb>*{transition:none!important}
+#fxin .dev.du .duout{transition:width .16s ease,opacity .16s ease!important;opacity:0}
+@keyframes duin{from{max-width:0;opacity:0}to{max-width:var(--duw,600px);opacity:1}}
+#fxin .dev.du .duin{animation:duin .18s ease;overflow:hidden}
+/* particle look: the picture lies under the controls, the device is 44 px wider for the gain bar */
+#fxin .dev.pbx.du,.dev.pbx.du{width:868px}
+#fxin .dev.pbx.du>.devh{background:rgba(5,6,10,.55);border-bottom-color:rgba(255,255,255,.06)}
+#fxin .dev.pbx.emd.du,.dev.pbx.emd.du{width:916px}
+#fxin .dev.pbx.du.dushut,#fxin .dev.pbx.emd.du.dushut{width:408px}
+#fxin .dev.pbx.du>.devb>.dfs{margin-left:auto}
+/* the picture ends where the gain bar begins, so it is as wide as it was and its drawing code needs no change */
+#fxin .dev.pbx.du:not(.dushut) .dfv{right:44px}
+#fxin .dev.pbx.du>.devb>.dug{position:relative;z-index:1;width:44px;padding:6px 0 6px 0;border-left:0;justify-content:center;box-sizing:border-box}
+#fxin .dev.du>.devb>.dug{padding-left:7px}
+#fxin .dev.du .pg-kn{gap:4px 0}
+/* shut: only the arrow, on/off, the name and remove stay in the title, so the device is as narrow as its picture */
+#fxin .dev.du.dushut>.devh>:not(.duar):not(.pw):not(svg):not(span):not(.x):not(.dusp){display:none!important}
+#fxin .dev.du .dfs>.ndtb>*{flex:none}
+#fxin .dev.du .dfs .hb{height:20px}#fxin .dev.du .dfs .hb .hl{line-height:18px}
+#fxin .dev.du .dfs .kn svg{width:30px!important;height:30px!important}
+#fxin .dev.du .hb{height:20px}
+#fxin .dev.du .vb .vl{font-size:9px;max-width:none;overflow:visible}
+/* in the Devices window the rows have no height of their own, so every device gets the height it has in the panel */
+#fxin.wrap .dev.du{height:253px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5384,7 +5457,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.181',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.182',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -12000,6 +12073,115 @@ function bn2Init(){
   draw:bdDraw});
  const DTIP={time:'How long the first gap is, in milliseconds. Choosing a note length next to First gap replaces it.',bounce:'How much of its height the ball keeps on each bounce. Each gap is this much of the one before: 50% halves it every time.',taps:'How many times the ball lands. Every landing is one repeat of the sound.',decay:'How much softer every repeat is than the one before.',pan:'Lets the repeats travel from one side to the other, like a ball crossing the room.',fb:'Sends the last repeat back in, so the whole round starts again, softer. It cannot run away.',tone:'Takes brightness away from the repeats.',mix:'How much of the repeats you hear next to the sound going in. Up to 50% the sound going in stays at full level.'};
  const _dlD=devLayout;devLayout=function(){const r=_dlD.apply(this,arguments);try{for(const el of fxin.querySelectorAll('.dev.pbx-bdelay [data-c]')){const k=(el.dataset.c||'').split(':').pop();if(DTIP[k]&&el.dataset.c.indexOf('fx:og:')<0)el.title=DTIP[k]}}catch(e){}return r}}
+/* ===== one design language for every device (task C of the device backlog, v0.182) =====
+   Every instrument and effect is laid out the same way, after all the older layout steps have run:
+   - a title row across the device: arrow (slides the parameters shut and open; only where there is a picture), on/off or the logo, name, preset menu, Change, and remove at the far right
+   - below it the picture on the left and the controls on the right, as narrow as the controls allow
+   - the device gain is the last control, a bar at the right end; a Size or Length control stands next to it
+   - one look for knobs, envelope bars, level bars and sliders (see the CSS under "one design language")
+   Nothing here changes how sound is calculated: it only moves and redraws controls. duInit() adds presets where a device had none. */
+const DUBI=(()=>{const P=(n,wave,det,cutoff,res,a,d,s,r,gain)=>({n,wave,det,cutoff,res,a,d,s,r,gain}),W='sawtooth',Q='square',T='triangle',N='sine';return{
+ saw:{bright:P('Bright lead',W,9,6000,3,.003,.2,.7,.2,.3),soft:P('Soft lead',W,5,1500,1.5,.02,.3,.6,.35,.38),stab:P('Short stab',W,7,4000,2.5,.002,.12,0,.12,.38),wide:P('Wide and slow',W,18,2800,1.5,.12,.4,.75,.6,.3)},
+ square:{flute:P('Hollow flute',Q,2,1600,1.5,.03,.25,.75,.3,.32),chip:P('Chip lead',Q,0,9000,1,.002,.08,.8,.08,.24),buzz:P('Buzzy',Q,10,4200,5,.005,.2,.65,.2,.26),blip:P('Short blip',Q,3,3000,3,.002,.1,0,.1,.32)},
+ sub:{long:P('Long sub',N,0,700,1,.01,.3,1,.35,.6),punch:P('Punchy sub',N,0,1400,1.5,.002,.14,.55,.08,.62),tri:P('Triangle sub',T,0,1100,1,.004,.2,.85,.12,.55),thump:P('Short thump',N,0,900,1,.002,.16,0,.1,.65)},
+ bass:{dark:P('Dark and round',Q,2,320,2,.004,.22,.85,.14,.46),bite:P('Bright bite',Q,5,1500,6,.002,.16,.6,.1,.34),pluck:P('Plucked bass',Q,3,900,5,.002,.14,0,.1,.42),saw:P('Saw bass',W,6,700,3.5,.003,.2,.8,.12,.36)},
+ reese:{slow:P('Slow and wide',W,32,700,2,.04,.4,.9,.35,.33),tight:P('Tight reese',W,14,1200,3,.004,.2,.85,.12,.35),dark:P('Dark growl',W,26,420,5,.01,.3,.9,.2,.38),thin:P('Bright and thin',W,18,2600,2,.006,.25,.8,.18,.3)},
+ pad:{swell:P('Slow swell',W,14,1100,1,.9,.8,.85,2,.22),bright:P('Bright pad',W,12,3600,1,.25,.5,.8,1,.18),dark:P('Dark pad',W,10,600,1.2,.45,.7,.85,1.6,.26),glass:P('Glass pad',T,8,5000,2,.2,.6,.7,1.4,.3)},
+ strings:{slow:P('Slow strings',W,11,2200,.7,.45,.5,.85,1.1,.22),short:P('Short strings',W,8,3200,.8,.03,.25,.6,.25,.24),dark:P('Dark strings',W,10,1200,.8,.22,.45,.85,.8,.26),wide:P('Wide section',W,20,2800,.7,.2,.4,.85,.8,.2)},
+ pluck:{soft:P('Soft pluck',T,0,2200,2,.004,.26,0,.3,.52),bright:P('Bright pluck',W,4,7000,4,.002,.14,0,.16,.36),long:P('Long pluck',T,2,4200,5,.002,.5,0,.6,.48),square:P('Square pluck',Q,3,3000,5,.002,.16,0,.18,.36),reso:P('Resonant pluck',W,0,1800,11,.002,.2,0,.22,.34)},
+ keys:{bright:P('Bright keys',T,4,7000,1.2,.003,.8,.2,.4,.42),mellow:P('Mellow keys',N,2,1800,1,.006,1.1,.3,.6,.5),organ:P('Organ',Q,2,2600,1,.006,.1,.9,.12,.26),bell:P('Bell keys',T,9,9000,2,.002,1.4,0,1.2,.4)}}})();
+/* drum kits: the default sounds, reshaped with the pad knobs (tune, decay, tone) and another kick */
+const DUKIT={def:{n:'Default kit'},tight:{n:'Tight and dry',dec:.6,kp:'techno'},deep:{n:'Deep and long',tune:-3,dec:1.5,kp:'deep'},bright:{n:'Bright and snappy',tone:.22,dec:.8,tune:2,kp:'bigroom'},dark:{n:'Dark and low',tone:-.2,tune:-2,kp:'lofi'},trap:{n:'Trap kit',dec:1.2,tune:-1,kp:'trap'}};
+function duKit(k){const K=DUKIT[k]||{},pads=defaultPads();if(k==='def'||!DUKIT[k])return pads;for(const p of pads){if(p.type==='kick'){if(K.kp&&KPRE[K.kp])p.kp=K.kp;continue}p.tune=clamp(p.tune+(K.tune||0),-24,24);p.dec=clamp(p.dec*(K.dec||1),.2,4);p.tone=clamp(p.tone+(K.tone||0),0,1)}return pads}
+function duInit(){for(const k of Object.keys(DUBI)){const d=PRESETS[k];if(!d)continue;DUBI[k]={def:{n:'Default',wave:d.wave,det:d.det,cutoff:d.cutoff,res:d.res,a:d.a,d:d.d,s:d.s,r:d.r,gain:d.gain},...DUBI[k]};IPRE[k]=[DUBI[k],key=>{const p={...DUBI[k][key]};delete p.n;return p}]}
+ IPRE.drums=[DUKIT,k=>({pads:duKit(k),psel:0})];PL2.du_basic=duBasicDraw}
+/* the picture of the basic instruments: the filter on top (dim line: where it starts when a note begins), the envelope below; both move with the knobs */
+function duBasicDraw(g,w,h,I,tm,act,age,hit){const P=PRESETS[I.preset]||{},v=k=>I[k]??P[k]??IPAR[k][2],tall=h>=150,B=tall?[[0,0,w,h/2],[0,h/2,w,h/2]]:[[0,0,w/2,h],[w/2,0,w/2,h]],hz=f=>f>=1000?(f/1000).toFixed(f>=10000?0:1)+' kHz':Math.round(f)+' Hz',ms=s=>s>=1?s.toFixed(2)+' s':Math.round(s*1000)+' ms';
+  g.fillStyle='#07080c';g.fillRect(0,0,w,h);g.lineJoin='round';
+  {const[x0,y0,W,H]=B[0],fc=v('cutoff'),q=Math.pow(10,v('res')/20),fs=Math.min(18000,fc*2.5),L=x0+8,R=x0+W-8,T=y0+20,Bt=y0+H-10,X=f=>L+(R-L)*Math.log(f/30)/Math.log(20000/30),Y=db=>T+(Bt-T)*(18-clamp(db,-42,18))/60;
+   g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;g.fillStyle='rgba(255,255,255,.28)';g.font='8px Inter,system-ui,sans-serif';for(const f of[100,1000,10000]){const x=Math.round(X(f))+.5;g.beginPath();g.moveTo(x,T-4);g.lineTo(x,Bt);g.stroke();g.fillText(f>=1000?f/1000+'k':''+f,x+3,Bt-1)}
+   const curve=(f0,qq)=>{g.beginPath();for(let i=0;i<=96;i++){const f=30*Math.pow(20000/30,i/96),r=f/f0,m=1/Math.sqrt((1-r*r)*(1-r*r)+(r/qq)*(r/qq)),x=X(f),y=Y(20*Math.log10(Math.max(m,1e-4)));i?g.lineTo(x,y):g.moveTo(x,y)}};
+   if(fs>fc*1.05){curve(fs,q);g.strokeStyle='rgba(62,207,142,.3)';g.lineWidth=1;g.setLineDash([3,3]);g.stroke();g.setLineDash([])}
+   curve(fc,q);g.lineTo(R,Bt);g.lineTo(L,Bt);g.closePath();const gr=g.createLinearGradient(0,T,0,Bt);gr.addColorStop(0,'rgba(62,207,142,.34)');gr.addColorStop(1,'rgba(62,207,142,.02)');g.fillStyle=gr;g.fill();curve(fc,q);g.strokeStyle='#3ecf8e';g.lineWidth=1.8;g.stroke();
+   g.font='700 8.5px Inter,system-ui,sans-serif';g.fillStyle='#3ecf8e';g.fillText('FILTER',x0+8,y0+12);g.font='9px Inter,system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.5)';g.textAlign='right';g.fillText(hz(fc),x0+W-8,y0+12);g.textAlign='left'}
+  {const[x0,y0,W,H]=B[1],a=v('a'),d=v('d'),s=v('s'),r=v('r'),L=x0+8,R=x0+W-8,T=y0+22,Bt=y0+H-10,f=t=>Math.pow(t,.45),wa=f(a),wd=f(d),wr=f(r),wh=.55,tot=wa+wd+wh+wr,sx=(R-L)/tot,xa=L+wa*sx,xd=xa+wd*sx,xh=xd+wh*sx,Y=l=>Bt-(Bt-T)*l;
+   if(tall){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;g.beginPath();g.moveTo(x0+6,y0+.5);g.lineTo(x0+W-6,y0+.5);g.stroke()}
+   const path=()=>{g.beginPath();g.moveTo(L,Bt);g.lineTo(xa,T);g.quadraticCurveTo(xa+(xd-xa)*.25,Y(s),xd,Y(s));g.lineTo(xh,Y(s));g.quadraticCurveTo(xh+(R-xh)*.25,Bt,R,Bt)};
+   path();g.closePath();const gr=g.createLinearGradient(0,T,0,Bt);gr.addColorStop(0,'rgba(76,141,255,.36)');gr.addColorStop(1,'rgba(76,141,255,.03)');g.fillStyle=gr;g.fill();path();g.strokeStyle='#6ea3ff';g.lineWidth=1.8;g.stroke();
+   g.fillStyle='#dfe6ff';for(const[x,y] of[[xa,T],[xd,Y(s)],[xh,Y(s)]]){g.beginPath();g.arc(x,y,2.4,0,7);g.fill()}
+   if(hit&&age>=0&&age<hit.dur+r){let x,l;if(age<a){x=L+(xa-L)*age/a;l=age/a}else if(age<hit.dur){const u=Math.min(1,(age-a)/d);x=xa+(xd-xa)*u+(u>=1?Math.min(1,(age-a-d)/Math.max(.01,hit.dur-a-d))*(xh-xd):0);l=1-(1-s)*(1-Math.pow(1-u,2))}else{const u=(age-hit.dur)/r;x=xh+(R-xh)*u;l=s*Math.pow(1-u,2)}g.beginPath();g.arc(x,Y(clamp(l,0,1)),3.6,0,7);g.fillStyle='#fff';g.fill()}
+   g.font='700 8.5px Inter,system-ui,sans-serif';g.fillStyle='#6ea3ff';g.fillText('ENVELOPE',x0+8,y0+12);g.font='9px Inter,system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.5)';g.textAlign='right';g.fillText(ms(a)+' up, '+ms(r)+' down',x0+W-8,y0+12);g.textAlign='left'}}
+{const _ih=instDevHtml;instDevHtml=function(t,kn0){let h=_ih.apply(this,arguments);const I=t&&t.inst;if(I&&DUBI[I.preset]&&typeof h==='string')h=h.replace('<div class="pars">','<canvas class="ivz duviz" data-k="du_basic" title="What the knobs do. Top: the filter, which lets through everything left of the slope; the dashed line is where it starts when a note begins. Bottom: how the loudness of a note rises and falls."></canvas><div class="pars">');return h}}
+const DUAR=open=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${open?'M15 5l-7 7 7 7':'M9 5l7 7-7 7'}"/></svg>`;
+const DUSZ=/^(size|length|len|room|room size)$/i;
+function duDev(D,t){const isFx=D.dataset.d==='fx',own=isFx?t.fx.find(q=>q.id===D.dataset.id):t.inst;if(!own)return;const H=D.querySelector('.devh'),B=D.querySelector(':scope>.devb');if(!H||!B)return;
+  const sub=!!H.querySelector('.kdsub'),V=B.querySelector(':scope>.dfv');let S=B.querySelector(':scope>.dfs');
+  /* Growl: its knob groups had been taken for part of the picture */
+  if(V&&S){const g=V.querySelector(':scope>.grwks');if(g&&!S.querySelector(':scope>.dfc')){const c=document.createElement('div');c.className='dfc';c.append(g);S.append(c);D.classList.remove('dfclosed')}}
+  const shut=own.kOpen===false&&!sub;D.classList.add('du');D.classList.toggle('dushut',shut);H.classList.remove('eqov');D.prepend(H);
+  /* ---- the title row ---- */
+  for(const k of D.querySelectorAll('.kbtn'))k.remove();{const g=H.querySelector('.dgain');if(g)g.remove()}
+  const pw=H.querySelector(':scope>.pw');let logo=H.querySelector(':scope>svg');if(!logo&&!isFx&&!sub){try{const d=document.createElement('i');d.innerHTML=logoSvg(own.preset,20)||'';logo=d.firstElementChild}catch(e){}}const nm=H.querySelector(':scope>span'),x=H.querySelector(':scope>.x');
+  let pre=H.querySelector(':scope>.kpre');
+  if(!pre){let sel=H.querySelector('select[data-x=pre],select[data-x=cp],select.eqpre');
+    if(!sel&&!isFx&&!sub&&IPRE[own.preset]){const O=IPRE[own.preset][0];sel=document.createElement('select');sel.dataset.s='ipre';sel.innerHTML=Object.entries(O).map(([k,p])=>`<option value="${k}"${k===own.ipk?' selected':''}>${esc(p.n)}</option>`).join('');if(!O[own.ipk])sel.selectedIndex=0}
+    if(sel){const lab=sel.closest('label');pre=document.createElement('div');pre.className='kpre dupre';const mk=(a,ch,tt)=>{const b=document.createElement('button');b.textContent=ch;b.title=tt;b.setAttribute('aria-label',tt);if(sel.dataset.s==='ipre')b.dataset.ip=a;else b.dataset.dup=a;return b};
+      sel.setAttribute('aria-label','Preset');if(!sel.title)sel.title='Presets: ready-made settings for this device';pre.append(mk('prev','‹','Previous preset'),sel,mk('next','›','Next preset'));if(lab&&lab!==sel&&H.contains(lab))lab.remove()}}
+  if(pre&&!isFx){const rb=H.querySelector('[data-dk=reset]');if(rb)rb.remove()}
+  let chg=sub?null:H.querySelector('[data-s=browse]');if(!chg&&isFx){chg=document.createElement('button');chg.dataset.duchg='1'}
+  if(chg){chg.textContent='Change';chg.classList.add('duchg');chg.title=isFx?'Change: pick another effect to take the place of this one. It keeps its place in the chain.':'Change: pick another instrument for this track'}
+  /* choices that are not presets go to a row above the controls; buttons stay in the title */
+  const keep=new Set([pw,logo,nm,pre,chg,x]),rest=[];for(const c of[...H.children]){if(keep.has(c))continue;if(c.classList.contains('xs')){rest.push(...c.children);c.remove()}else if(c.classList.contains('ibsp')||c.classList.contains('dusp'))c.remove();else rest.push(c)}
+  const dfc=S&&S.querySelector(':scope>.dfc'),toRow=[],inTitle=[];for(const c of rest){if(dfc&&(c.tagName==='SELECT'||c.tagName==='LABEL'))toRow.push(c);else inTitle.push(c)}
+  if(toRow.length){let tb=S.querySelector(':scope>.ndtb');if(!tb){tb=document.createElement('div');tb.className='ndtb dutb';S.insertBefore(tb,dfc)}for(const c of toRow.reverse()){let e=c;if(c.tagName==='SELECT'){e=document.createElement('label');e.append(c.dataset.s==='wave'?'Wave ':'',c)}tb.prepend(e)}}
+  /* the arrow: only where there is a picture to keep when the parameters are shut */
+  const hasPic=!!(V&&V.children.length&&S&&(dfc||shut))||D.classList.contains('eq2');let ar=null;
+  if((hasPic||shut)&&!sub){ar=document.createElement('button');ar.className='duar';ar.dataset[isFx?'kt':'ikt']='';ar.innerHTML=DUAR(!shut);ar.title=shut?'Show the parameters':'Hide the parameters';ar.setAttribute('aria-label',ar.title);ar.setAttribute('aria-expanded',String(!shut))}
+  const sp=document.createElement('i');sp.className='dusp';H.replaceChildren(...[ar,pw,logo,nm,pre,chg,...inTitle,sp,x].filter(Boolean));
+  if(S&&!S.children.length)S.remove();
+  /* ---- the controls ---- */
+  if(S&&S.isConnected){S.style.minWidth='';S.classList.remove('h2','h2g','hm');
+    const pg=dfc&&dfc.querySelector('.pgrid');
+    if(pg){/* a Size or Length control stands as a bar next to the gain */
+      for(const el of[...pg.querySelectorAll('[data-c]')]){const C=CT.get(el.dataset.c);if(!C||!DUSZ.test(C.label||'')||el.classList.contains('vb'))continue;let lv=pg.querySelector(':scope>.pg-lv');if(!lv){lv=document.createElement('div');lv.className='pg-lv';pg.append(lv)}const grp=el.parentElement;el.remove();lv.insertAdjacentHTML('beforeend',ctl('vb',el.dataset.c,C.label,C.spec,C.get,C.set,C.after));const nv=lv.lastElementChild;if(el.title&&el.title.indexOf(': drag')<0)nv.title=el.title;if(grp&&!grp.children.length)grp.remove()}
+      pg.classList.remove('pgbig','pgcol')}}
+  /* ---- the gain: the last control, bottom right ---- */
+  if(!sub){const id=isFx?'fx:og:'+own.id:'fx:og:inst',g=document.createElement('div');g.className='dug';g.innerHTML=ctl('vb',id,'Gain',SPEC_OG,()=>+(isFx?own.p.og:own.og)||0,v=>{if(isFx){own.p.og=v;sgSoon()}else instOG(own,v);changed(false)});g.firstElementChild.title='Gain: turn this device up or down (-24 to +24 dB). Double-click for 0 dB.';B.append(g)}
+  duFit(D)}
+/* knobs fill the height in up to three rows, so a device with few knobs is narrow instead of grey */
+function duFit(D){const S=D.querySelector(':scope>.devb>.dfs'),dfc=S&&S.querySelector(':scope>.dfc');if(!dfc||D.classList.contains('dushut'))return;const pbx=D.classList.contains('pbx'),tb=S.querySelector(':scope>.ndtb'),kn=dfc.querySelector('.pgrid>.pg-kn'),hb=dfc.querySelector('.pgrid>.pg-hb');let maxRows=3,need=0;
+  if(!pbx)S.style.minWidth='';
+  for(let pass=0;pass<3;pass++){
+    /* a row of choices never sticks out, and when it wraps into many lines the side gets wider instead of squeezing the knobs */
+    if(tb&&!pbx){need=0;for(const c of tb.children)need=Math.max(need,c.offsetWidth);if(S.clientWidth<need)S.style.minWidth=need+'px';const req=dfc.querySelector('.vb')?104:hb?Math.min(150,hb.children.length*21):58;let n=0;while(tb.offsetHeight>24&&(dfc.clientHeight<req||S.scrollHeight>S.clientHeight+1)&&n++<10)S.style.minWidth=(S.offsetWidth+48)+'px'}
+    if(hb){const n=hb.children.length,av=hb.parentElement.clientHeight;hb.classList.toggle('duc',n*25-5>av);if(n*22-2>av&&!pbx){hb.classList.add('du2');hb.style.gridTemplateRows=`repeat(${Math.ceil(n/2)},auto)`}}
+    if(!kn)break;const n=kn.children.length,avail=kn.parentElement.clientHeight;let rows=clamp(Math.floor((avail+4)/58),1,maxRows);rows=Math.min(rows,n);let cols=Math.ceil(n/rows);{const others=[...kn.parentElement.children].reduce((a,c)=>a+(c===kn?0:c.offsetWidth+10),0);cols=Math.max(cols,Math.min(n,Math.floor((need-others)/54)))}rows=Math.ceil(n/cols);kn.style.gridTemplateRows=`repeat(${rows},minmax(0,auto))`;kn.style.gridAutoFlow='row';kn.style.gridTemplateColumns=`repeat(${cols},var(--dukw,54px))`;
+    if(kn.parentElement.clientHeight>=rows*54+(rows-1)*4-1||rows<=1)break;maxRows=rows-1}
+  if(tb&&!pbx&&S.clientWidth<need)S.style.minWidth=need+'px'}
+function duLayout(){const root=document.getElementById('fxin');if(!root)return;const t=curT();if(!t)return;const fresh=[];
+  for(const D of root.querySelectorAll('.dev[data-d=inst],.dev[data-d=fx]')){if(D._du)continue;D._du=1;try{duDev(D,t);fresh.push(D)}catch(e){console.error('AudioLab device design',e)}}
+  for(const D of fresh)paintAll(D);
+  if(fresh.length){/* the arrows between the devices are drawn again once the widths have settled */clearTimeout(DUCH);DUCH=setTimeout(()=>{try{drawChain()}catch(e){}},90)}
+  if(DUOPEN){const id=DUOPEN;DUOPEN=null;const D=id==='inst'?root.querySelector('.dev.du[data-d=inst]'):root.querySelector(`.dev.du[data-id="${id}"]`),S=D&&D.querySelector(':scope>.devb>.dfs,:scope>.devb>.eqside');if(S&&!AT.reduce&&!D.classList.contains('pbx')){S.style.setProperty('--duw',S.offsetWidth+'px');S.classList.add('duin');setTimeout(()=>S.classList.remove('duin'),220)}}}
+let DUOPEN=null,DUBUSY=false,DUCH=0;
+/* the older fit of the title row (one line or two, widening the side) is not needed any more: the title has its own row now, and duFit does the widening. Skipping it saves its measuring on every rebuild. */
+dfFit=function(){};
+/* the strip keeps its scroll position: while it is rebuilt the devices are narrower for a moment, which used to pull the view to the left */
+{const _rf=renderFx;renderFx=function(){const fx=document.getElementById('fxin'),sl=fx?fx.scrollLeft:0,r=_rf.apply(this,arguments);try{duLayout()}catch(e){console.error('AudioLab device design',e)}if(fx&&sl&&fx.scrollLeft!==sl)fx.scrollLeft=sl;return r}}
+/* the arrow slides the parameters shut and open */
+window.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.duar');if(!b)return;e.stopImmediatePropagation();e.preventDefault();if(DUBUSY)return;const D=b.closest('.dev'),t=curT();if(!D||!t)return;const isFx=D.dataset.d==='fx',own=isFx?t.fx.find(q=>q.id===D.dataset.id):t.inst;if(!own)return;
+  const open=own.kOpen===false,go=()=>{DUBUSY=false;own.kOpen=open;if(open)DUOPEN=isFx?own.id:'inst';renderFx()};
+  const S=D.querySelector(':scope>.devb>.dfs,:scope>.devb>.eqside');if(open||AT.reduce||!S||D.classList.contains('pbx')){go();return}
+  DUBUSY=true;S.style.width=S.offsetWidth+'px';S.style.minWidth='0';S.style.flex='none';S.style.overflow='hidden';S.offsetWidth;S.classList.add('duout');S.style.width='0px';setTimeout(go,170)},true);
+/* previous and next preset of an effect */
+fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-dup]');if(!b)return;const sel=b.parentElement.querySelector('select');if(!sel||!sel.options.length)return;const O=[...sel.options].filter(o=>!o.disabled&&o.value!==''&&o.value!=='custom');let i=O.indexOf(sel.selectedOptions[0]);i=(i+(b.dataset.dup==='next'?1:-1)+O.length)%O.length;if(i<0||!O[i])return;sel.value=O[i].value;sel.dispatchEvent(new Event('change',{bubbles:true}))});
+/* Change on an effect: the effect browser opens, and the effect picked there takes this one's place in the chain */
+function duChangeFx(t,f){openFxBrowser(t);ib.repl=f.id;ib.sel=f.type;$('#ibT').textContent='Effects Browser · replace '+FXDEF[f.type].name+' on '+t.name;$('#ibAdd').textContent='Use';renderIB()}
+fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-duchg]');if(!b)return;const D=b.closest('.dev'),t=curT(),f=t&&D&&t.fx.find(q=>q.id===D.dataset.id);if(f)duChangeFx(t,f)});
+{const _ch=chooseIB;chooseIB=function(){const R=ib&&ib.mode==='fx'&&ib.repl&&ib.sel?{t:ib.track,id:ib.repl}:null;if(ib)ib.repl=null;const r=_ch.apply(this,arguments);
+  if(R){const fx=R.t.fx,i=fx.findIndex(q=>q.id===R.id),n=fx.length-1;if(i>=0&&n>i){const nf=fx.pop();nf.on=fx[i].on;fx[i]=nf;changed(true)}}return r};
+ const a=document.getElementById('ibAdd');if(a)a.onclick=()=>chooseIB()}
+duInit();
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
