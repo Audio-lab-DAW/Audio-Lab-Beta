@@ -906,6 +906,93 @@ body.ovw #ovwChip{opacity:1}
 #ovwChip i{width:6px;height:6px;border-radius:50%;background:#6ea8ff;box-shadow:0 0 6px rgba(110,168,255,.9)}
 #ovwChip b{font-weight:600}
 #ovwChip svg{width:8px;height:8px;opacity:.7}
+/* track header layout editor (v0.164): #hdrin.hcz is set when the layout differs from the default */
+#hdrin.hcz.hcz .hdr{grid-template-columns:24px auto minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr)}
+#hdrin.hcz.hcz.nano .hdr{grid-template-columns:20px auto minmax(0,1fr) auto}
+#hdrin.hcz.hcz .hdr>.tc{grid-column:1;grid-row:1}#hdrin.hcz.hcz .hdr>.ms{grid-column:2;grid-row:1}#hdrin.hcz.hcz .hdr>.zm{grid-column:3;grid-row:1}#hdrin.hcz.hcz .hdr>.vm{grid-column:4;grid-row:1;width:8px}
+#hdrin.hcz.hcz.znom .hdr>.vm{display:none}
+#hdrin.hcz.hcz .hdr .ms{display:flex!important;flex-direction:column!important;align-items:flex-start;justify-content:flex-start;gap:0;padding:4px 3px 4px 4px!important;min-width:0}
+#hdrin.hcz.hcz.tiny .hdr .ms{padding:3px 3px 3px 4px!important;justify-content:center}
+#hdrin.hcz.hcz.zicH .hdr .ms{display:none!important}
+#hdrin.hcz.hcz .hdr .ms .pic{display:grid!important;place-items:center;flex:none!important;box-sizing:border-box;height:min(calc(var(--th) - 9px),52px);width:min(calc(var(--th) - 9px),36px);max-height:none!important;min-height:0;overflow:hidden}
+#hdrin.hcz.hcz .hdr .ms .pic svg{max-width:82%;max-height:82%}
+#hdrin.hcz.hcz .hdr .ms .pic .tic{font-size:min(22px,calc((var(--th) - 9px) * .62))!important;line-height:1}
+#hdrin.hcz.hcz.zicB .hdr .ms .pic{height:calc(var(--th) - 9px);width:min(calc(var(--th) - 9px),80px);border-radius:5px}
+#hdrin.hcz.hcz.zicB .hdr .ms .pic svg{width:min(calc((var(--th) - 9px) * .62),58px)!important;height:min(calc((var(--th) - 9px) * .62),58px)!important;max-width:none;max-height:none}
+#hdrin.hcz.hcz.zicB .hdr .ms .pic .tic{font-size:min(calc((var(--th) - 9px) * .58),54px)!important}
+#hdrin.hcz .zm{display:flex;flex-direction:column;gap:3px;padding:4px 6px 3px 2px;min-width:0;min-height:0;overflow:hidden}
+#hdrin.hcz.zicH .zm{padding-left:7px}
+#hdrin.hcz .zr1{display:flex;align-items:center;gap:3px;height:16px;flex:none;min-width:0}
+#hdrin.hcz .zw{display:flex;flex-wrap:wrap;gap:3px;align-items:center;align-content:flex-start;min-width:0;overflow:hidden;max-height:100%;max-height:calc(round(down,calc(var(--th) - 24px),var(--zp,21px)) - 3px)}
+#hdrin.hcz.tiny .zm{flex-direction:row;align-items:center;gap:5px;padding-top:0;padding-bottom:0}
+#hdrin.hcz.tiny .zr1{flex:0 1 36%;min-width:30px}
+#hdrin.hcz.tiny .zw{flex:1 1 0;align-self:center;max-height:calc(round(down,calc(var(--th) - 3px),var(--zp1,18px)) - 3px)}#hdrin.hcz.micro .zw{max-height:var(--zm1,14px)}#hdrin.hcz.nano .zw{max-height:var(--zn1,11px)}#hdrin.hcz.zmsL.micro .zw{max-height:calc(var(--th) - 5px)}#hdrin.hcz.zmsL.nano .zw{max-height:calc(var(--th) - 4px)}
+#hdrin.hcz.hcz .hdr .zw .hb{flex:1 1 54px!important;min-width:40px;max-width:none;width:auto;height:18px}
+#hdrin.hcz.hcz .hdr .zw .hb.pan{flex:1 1 40px!important;min-width:34px}
+#hdrin.hcz.hcz.tiny .hdr .zw .hb{height:14px;min-width:30px}#hdrin.hcz.hcz.micro .hdr .zw .hb{height:10px}
+#hdrin.hcz.hcz .hdr .zw button{position:static!important;transform:none!important;margin:0!important;flex:none;box-sizing:border-box;width:20px!important;min-width:20px!important;max-width:none!important;height:18px!important;min-height:18px!important;padding:0!important;display:grid!important;place-items:center;font:700 10px Inter,sans-serif;border-radius:3px;background:linear-gradient(#45474e,#383a40);border:1px solid #1c1d21;color:#d6d8de;opacity:1;line-height:1;overflow:hidden}
+#hdrin.hcz.hcz .hdr .zw button:hover{filter:brightness(1.18)}
+#hdrin.hcz.hcz .hdr .zw button svg{width:11px;height:11px;display:block}
+#hdrin.hcz.hcz .hdr .zw .lnb{display:flex!important;align-items:center;justify-content:center;gap:1px;width:auto!important;padding:0 3px!important}#hdrin.hcz.hcz .hdr .zw .lnb i{display:none}#hdrin.hcz.hcz .hdr .zw .lnb b{font-size:8.5px}
+#hdrin.hcz.hcz .hdr .zw button.m.on{background:linear-gradient(#ffd45e,#e0a721)!important;color:#1b1404!important;border-color:#8a640e!important;box-shadow:0 0 7px 1px rgba(255,204,70,.85),inset 0 0 4px rgba(255,255,255,.55)!important}
+#hdrin.hcz.hcz .hdr .zw button.s.on{background:linear-gradient(#ff7474,#d63c3c)!important;color:#fff!important;border-color:#7a1414!important;box-shadow:0 0 7px 1px rgba(255,90,90,.9),inset 0 0 4px rgba(255,255,255,.45)!important}
+#hdrin.hcz.hcz .hdr .zw button.rd.on{background:linear-gradient(#3fc36b,#249a4c);color:#071a0d;border-color:#0e4a22}
+#hdrin.hcz.hcz .hdr .zw .zb.zfrz.on{background:linear-gradient(#8fd8ff,#4aa9e6);color:#06202f;border-color:#1c5f8a;box-shadow:0 0 6px rgba(127,208,255,.7)}
+#hdrin.hcz.hcz .hdr .zw .zb.zbyp{width:22px!important;font-size:9px}
+#hdrin.hcz.hcz .hdr .zw .zb.zbyp.on{background:linear-gradient(#ffb04f,#e07f1c);color:#2a1400;border-color:#8a4a0e;box-shadow:0 0 6px rgba(255,160,60,.7);text-decoration:line-through}
+#hdrin.hcz.hcz .hdr .zw .zb.zout.on,#hdrin.hcz.hcz .hdr .zw .zb.zsnd.on{color:#8fe4ff;border-color:#2d6f8a;background:linear-gradient(#2f4854,#263a44)}
+#hdrin.hcz.hcz .hdr .zw .zb.zcol i{display:block;width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 0 1px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35)}
+#hdrin.hcz.hcz.zmsL .hdr .zw button.m,#hdrin.hcz.hcz.zmsL .hdr .zw button.s{width:29px!important;min-width:29px!important;height:22px!important;min-height:22px!important;font-size:13px;border-radius:4px}
+#hdrin.hcz.hcz.zmsL .hdr .zw>*{margin-block:2px!important}#hdrin.hcz.hcz.zmsL.tiny .hdr .zw>*{margin-block:3.5px!important}#hdrin.hcz.hcz.zmsL.micro .hdr .zw>*{margin-block:calc((var(--th) - 19px) / 2)!important}#hdrin.hcz.hcz.zmsL.nano .hdr .zw>*{margin-block:calc((var(--th) - 15px) / 2)!important}#hdrin.hcz.hcz.zmsL .hdr .zw button.m,#hdrin.hcz.hcz.zmsL .hdr .zw button.s{margin-block:0!important}
+#hdrin.hcz.hcz.tiny .hdr .zw button{height:15px!important;min-height:15px!important;font-size:9.5px}
+#hdrin.hcz.hcz.tiny.zmsL .hdr .zw button.m,#hdrin.hcz.hcz.tiny.zmsL .hdr .zw button.s{height:22px!important;min-height:0!important}
+#hdrin.hcz.hcz.micro .hdr .zw button{height:14px!important;min-height:14px!important;font-size:9px}
+#hdrin.hcz.hcz.micro.zmsL .hdr .zw button.m,#hdrin.hcz.hcz.micro.zmsL .hdr .zw button.s{height:calc(var(--th) - 5px)!important;min-height:0!important;font-size:11px}
+#hdrin.hcz.hcz.nano .hdr .zw button{height:11px!important;min-height:11px!important;font-size:8px}
+#hdrin.hcz.hcz.nano.zmsL .hdr .zw button.m,#hdrin.hcz.hcz.nano.zmsL .hdr .zw button.s{height:calc(var(--th) - 4px)!important;min-height:0!important;font-size:9.5px}
+#hdrin.hcz.hcz .hdr .zw .hpd{flex:none;flex-direction:row;align-items:center;gap:3px;height:18px}
+#hdrin.hcz.hcz .hdr .zw .hpd svg{width:31px;height:18px;display:block}#hdrin.hcz.hcz .hdr .zw .hpd span{display:none}
+#hdrin.hcz.hcz .hdr .zw .hpd .hpb{stroke:#0b0c0f;stroke-width:5}#hdrin.hcz.hcz .hdr .zw .hpd .hpv{stroke-width:5}
+#hdrin.hcz.hcz .hdr .zw .kn{flex:none;width:auto;flex-direction:row;align-items:center;gap:3px;height:18px}
+#hdrin.hcz.hcz .hdr .zw .kn svg{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#3a3c44,#1d1e23 70%)}#hdrin.hcz.hcz .hdr .zw .kn span{display:none}
+#hdrin.hcz.hcz .hdr .zw .kn .kb{stroke:#0b0c0f}
+#hdrin.hcz.hcz .hdr .zw .hpd output,#hdrin.hcz.hcz .hdr .zw .kn output{margin:0;min-width:19px;font:600 9px Inter,sans-serif;font-variant-numeric:tabular-nums;color:#cfd3db;text-align:left}
+#hdrin.hcz.hcz .hdr .zw .hpd.act svg,#hdrin.hcz.hcz .hdr .zw .kn.act svg{filter:brightness(1.3)}
+#hdrin.hcz.hcz.tiny .hdr .zw .hpd,#hdrin.hcz.hcz.tiny .hdr .zw .kn{height:15px}#hdrin.hcz.hcz.tiny .hdr .zw .hpd svg{width:26px;height:15px}#hdrin.hcz.hcz.tiny .hdr .zw .kn svg{width:15px;height:15px}
+#hdrin.hcz.hcz.micro .hdr .zw .hpd output,#hdrin.hcz.hcz.micro .hdr .zw .kn output{display:none}
+#hdrin.hcz.hcz.nano .hdr .zw .hpd,#hdrin.hcz.hcz.nano .hdr .zw .kn{height:11px}#hdrin.hcz.hcz.nano .hdr .zw .hpd svg{width:19px;height:11px}#hdrin.hcz.hcz.nano .hdr .zw .kn svg{width:11px;height:11px}
+#bHcz{position:absolute;right:32px;top:2px;height:14px;min-height:14px;padding:0 6px 0 4px;display:flex;align-items:center;gap:3px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#c5c8d2;font:600 8.5px Inter,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;line-height:1;z-index:5;cursor:pointer}
+#bHcz:hover{background:rgba(255,255,255,.14);color:#fff}#bHcz.on{background:#4c8dff;color:#fff;border-color:#4c8dff}#bHcz svg{width:10px;height:10px;flex:none}
+body.tr-right #bHcz{right:auto;left:32px}
+#hczEd{position:fixed;z-index:9790;width:316px;max-width:calc(100vw - 16px);max-height:calc(100vh - 40px);overflow:auto;padding:0 12px 12px;border-radius:14px;background:rgba(19,20,27,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.65);color:#d9dce6;font-size:12px;user-select:none;-webkit-user-select:none}
+#hczEd[hidden]{display:none}
+#hczEd .zeh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;margin:0 -12px;padding:10px 12px 8px;background:rgba(19,20,27,.98);font:700 13px Inter,system-ui,sans-serif;color:#eef1f6;cursor:move;border-radius:14px 14px 0 0}
+#hczEd .zeh button{margin-left:auto;width:26px;min-height:24px;padding:0;display:grid;place-items:center;cursor:pointer}
+#hczEd p{margin:0 0 4px;color:#9499a8;font-size:11.5px;line-height:1.4}
+#hczEd h5{margin:12px 0 6px;font:700 9.5px Inter,system-ui,sans-serif;letter-spacing:.08em;color:#8d92a3;text-transform:uppercase}
+#hczEd .zepre,#hczEd .zes{display:flex;gap:4px}
+#hczEd .zepre button,#hczEd .zes button{flex:1 1 0;min-height:26px;padding:3px 6px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#cdd1dc;font:600 11.5px Inter,system-ui,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+#hczEd .zepre button small{font-weight:500;font-size:9.5px;color:#8b90a0}
+#hczEd .zepre button:hover,#hczEd .zes button:hover{background:rgba(255,255,255,.1);color:#fff}
+#hczEd .zepre button.on,#hczEd .zes button.on{background:rgba(76,141,255,.24);border-color:#4c8dff;color:#fff}
+#hczEd .zes button svg{width:34px;height:18px;display:block}
+#hczEd .zel{display:flex;flex-direction:column;gap:2px}
+#hczEd .zer{display:grid;grid-template-columns:14px 24px minmax(0,1fr) 20px 20px 22px;align-items:center;gap:4px;min-height:27px;padding:0 4px 0 5px;border-radius:7px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);cursor:grab;touch-action:none}
+#hczEd .zer:hover{background:rgba(255,255,255,.08)}#hczEd .zer.drag{background:rgba(76,141,255,.22);border-color:#4c8dff;cursor:grabbing}
+#hczEd .zer .zeg{color:#6f7484;font-style:normal;font-size:11px;line-height:1;text-align:center}
+#hczEd .zer .zei{width:22px;height:17px;display:grid;place-items:center;border-radius:3px;background:linear-gradient(#45474e,#383a40);border:1px solid #1c1d21;color:#d6d8de;font:700 9.5px Inter,sans-serif}
+#hczEd .zer .zei svg{width:12px;height:12px}
+#hczEd .zer .zen{min-width:0;display:flex;flex-direction:column;line-height:1.15}#hczEd .zer .zen b{font-weight:600;font-size:11.5px;color:#e6e8ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hczEd .zer .zen small{font-size:9.5px;color:#858a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hczEd .zer button{width:20px;height:20px;min-height:20px;padding:0;display:grid;place-items:center;border-radius:5px;background:none;border:1px solid transparent;color:#9a9fae;font-size:9px;cursor:pointer}
+#hczEd .zer button:hover{background:rgba(255,255,255,.12);color:#fff}#hczEd .zer button:disabled{opacity:.25;cursor:default}
+#hczEd .zer button[data-ze=rm]{width:22px;font-size:11px}#hczEd .zer button[data-ze=rm]:hover{background:rgba(229,72,77,.3);color:#ffb3b5}
+#hczEd .zea{display:flex;flex-wrap:wrap;gap:4px}
+#hczEd .zea button{min-height:24px;padding:2px 9px 2px 6px;border-radius:12px;background:rgba(62,207,142,.1);border:1px dashed rgba(62,207,142,.45);color:#c9f2de;font:600 11px Inter,system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;gap:4px}
+#hczEd .zea button:hover{background:rgba(62,207,142,.22);color:#fff}#hczEd .zea button b{font-size:13px;line-height:1;color:#3ecf8e}
+#hczEd .zenone{color:#7d8292;font-size:11px}
+#hczEd .zef{display:flex;gap:8px;margin-top:14px}#hczEd .zef button{min-height:28px;padding:3px 12px;border-radius:7px;cursor:pointer}#hczEd .zef button:last-child{margin-left:auto}
+#hczCard .hczprev{flex:none;width:86px;height:46px;border-radius:6px;background:#1b1d23;border:1px solid rgba(255,255,255,.1);display:grid;grid-template-columns:8px 18px 1fr;gap:4px;padding:5px 6px 5px 0;overflow:hidden}
+#hczCard .hczprev i{display:block;border-radius:2px;background:#3a3d46}#hczCard .hczprev i:first-child{background:#f5c84c;border-radius:0;margin:-5px 0}#hczCard .hczprev span{display:grid;grid-template-columns:1fr 8px 8px;grid-auto-rows:8px;gap:3px;align-content:center}#hczCard .hczprev span b{display:block;border-radius:2px;background:#4a4d57}#hczCard .hczprev span b:first-child{grid-column:1/4;width:70%;background:#8d92a3;height:5px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5065,7 +5152,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.163',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.164',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -9041,6 +9128,126 @@ function ovwToggle(){if(OVW.on)ovwLeave(null);else ovwEnter()}
   else if(fx>1||fy!==1){OVW.limT=0;OVW.acc=0}
   return r}}
 addEventListener('keydown',e=>{if(!OVW.on||e.key!=='Escape'||e.metaKey||e.ctrlKey||e.altKey)return;if(typing(e)||!ctxm.hidden||!$('#set').hidden||!$('#ib').hidden||!$('#dlg').hidden||!$('#np').hidden||!$('#cdlg').hidden)return;e.preventDefault();e.stopImmediatePropagation();ovwLeave(null)},true);
+/* ===================== TRACK HEADER LAYOUT EDITOR (v0.164) =====================
+   UI.hcz = {order:[control ids], icon:'normal'|'big'|'hidden', pan:'slider'|'half'|'round', ms:'normal'|'large', meter:1|0}.
+   While the layout equals the default (HCZD) nothing is stored and the headers are drawn exactly as before.
+   Otherwise renderHeaders is followed by hczBuild(), which moves the existing header parts into a wrapping row (.zw)
+   in the chosen order, so every existing click handler keeps working. New optional buttons carry data-z. */
+const HCZS='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const HCZI={
+ vol:{l:'Volume',d:'How loud the track is',ic:HCZS+'<path d="M2 8h12"/><path d="M10 5v6" stroke-width="2.4"/></svg>'},
+ mute:{l:'Mute',d:'Silence the track',ic:'M'},
+ solo:{l:'Solo',d:'Hear only this track',ic:'S'},
+ arm:{l:'Record arm',d:'Get the track ready to record',ic:'●'},
+ edit:{l:'Edit channel',d:'Open the devices and effects',ic:'e'},
+ read:{l:'Read automation',d:'Follow the drawn automation or ignore it',ic:'R'},
+ pan:{l:'Pan',d:'Left and right position',ic:HCZS+'<path d="M2.5 12a5.5 5.5 0 0 1 11 0"/><path d="M8 12l2.5-4"/></svg>'},
+ write:{l:'Write automation',d:'Record control moves on this track',ic:HCZS+'<path d="M1.5 12.5 5 8.5l2.5 2 3-4.5"/><path d="M10.5 6l3-3 1.5 1.5-3 3z" fill="currentColor"/></svg>'},
+ lanes:{l:'Automation lanes',d:'Open or close the automation lanes',ic:HCZS+'<path d="M1.5 11.5L5 5l3 4 2.5-3 4 5.5"/></svg>'},
+ freeze:{l:'Freeze',d:'Play a recording of the track to save computer power',opt:1,ic:HCZS+'<path d="M8 1.5v13M2.4 4.8l11.2 6.4M13.6 4.8 2.4 11.2"/></svg>'},
+ byp:{l:'Effects off',d:'Turn all effects on the track off for a moment',opt:1,ic:'FX'},
+ out:{l:'Output',d:'Choose the master or a group',opt:1,ic:HCZS+'<path d="M2 8h8M7 4.5 10.5 8 7 11.5M13.5 3v10"/></svg>'},
+ sends:{l:'Sends',d:'Send the track to a return, such as a shared reverb',opt:1,ic:HCZS+'<path d="M13 3v4.5a3 3 0 0 1-3 3H3M6 7.5l-3 3 3 3"/></svg>'},
+ color:{l:'Track colour',d:'Pick another colour',opt:1,ic:'<i style="display:block;width:9px;height:9px;border-radius:50%;background:#f5c84c"></i>'}};
+const HCZD={order:['vol','mute','solo','arm','edit','read','pan','write','lanes'],icon:'normal',pan:'slider',ms:'normal',meter:1};
+const HCZP={min:{n:'Minimal',s:'name, M, S, volume',c:{order:['mute','solo','vol'],icon:'hidden',pan:'slider',ms:'normal',meter:1}},
+ std:{n:'Standard',s:'the usual set',c:HCZD},
+ all:{n:'Everything',s:'every control',c:{order:['vol','mute','solo','arm','edit','read','pan','write','lanes','freeze','byp','out','sends','color'],icon:'normal',pan:'slider',ms:'normal',meter:1}}};
+const HCZ={ctx:0,drag:null};
+function hczGet(){const u=UI.hcz||{},pick=(v,a,d)=>a.includes(v)?v:d;
+  return{order:Array.isArray(u.order)?u.order.filter((k,i,a)=>HCZI[k]&&a.indexOf(k)===i):HCZD.order.slice(),icon:pick(u.icon,['normal','big','hidden'],'normal'),pan:pick(u.pan,['slider','half','round'],'slider'),ms:pick(u.ms,['normal','large'],'normal'),meter:u.meter===0?0:1}}
+const hczSame=(a,b)=>a.icon===b.icon&&a.pan===b.pan&&a.ms===b.ms&&(!a.meter)===(!b.meter)&&a.order.join()===b.order.join();
+function hczSet(patch,quiet){const c=Object.assign(hczGet(),patch);if(hczSame(c,HCZD))delete UI.hcz;else UI.hcz=c;saveUI();try{renderHeaders()}catch(e){console.error(e)}dirty=true;if(!quiet)hczEdSync()}
+function hczZb(z,cls,tip,inner,on){const b=document.createElement('button');b.type='button';b.className='zb '+cls+(on?' on':'');b.dataset.z=z;b.title=tip;b.setAttribute('aria-label',HCZI[z].l);b.setAttribute('aria-pressed',on?'true':'false');b.innerHTML=inner;return b}
+function hczMake(k,t){const bus=t.kind==='group'||t.kind==='return';
+  if(k==='freeze')return bus?null:hczZb(k,'zfrz',t.frz?'Frozen: this track plays a recording of itself. Click to unfreeze and edit it again.':'Freeze. Records this track once and plays the recording, which saves computer power. Click again later to unfreeze.',HCZI.freeze.ic,!!t.frz);
+  if(k==='byp')return hczZb(k,'zbyp',"Effects off. Turns all of this track's effects off for a moment so you can hear the difference. Click again to turn them back on.",'FX',!!t.fxByp);
+  if(k==='out'){if(t.kind==='return')return null;const g=grpOf(t);return hczZb(k,'zout','Output. Choose where this track plays into: the master or a group. Now: '+(g?g.name:'Master')+'.',HCZI.out.ic,!!g)}
+  if(k==='sends'){if(t.kind==='return')return null;const n=RETN().filter(r=>(t.sends||{})[r.id]>0).length;return hczZb(k,'zsnd','Sends. Send some of this track to a return track, for example a shared reverb or delay.'+(n?' Sending to '+n+' now.':''),HCZI.sends.ic,n>0)}
+  if(k==='color')return hczZb(k,'zcol','Track colour. Pick another colour for this track.','<i></i>',false);
+  return null}
+function hczBuild(){const c=hczGet(),on=!hczSame(c,HCZD),L=hdrin.classList;
+  L.toggle('hcz',on);L.toggle('zmsL',on&&c.ms==='large');L.toggle('zicB',on&&c.icon==='big');L.toggle('zicH',on&&c.icon==='hidden');L.toggle('znom',on&&!c.meter);
+  if(!on)return;{const lg=c.ms==='large'&&(c.order.includes('mute')||c.order.includes('solo'));hdrin.style.setProperty('--zp',lg?'25px':'21px');hdrin.style.setProperty('--zp1',lg?'25px':'18px')}
+  for(const h of hdrin.querySelectorAll('.hdr')){const t=trkById(h.dataset.id),hm=h.querySelector('.hm'),ms=h.querySelector('.ms');if(!t||!hm||!ms)continue;
+    const q=s=>h.querySelector(s),el={vol:q('[data-c="hd:'+t.id+'"]'),pan:q('[data-c="hp:'+t.id+'"]'),mute:q('button[data-a="mute"]'),solo:q('button[data-a="solo"]'),arm:q('button[data-a="arm"]'),edit:q('button[data-a="edit"]'),read:q('button[data-a="read"]'),write:q('button[data-a="aar"]'),lanes:q('button[data-a="lanes"]')};
+    const pic=q('.pic'),nm=q('.nm'),frz=q('.frzb'),zm=document.createElement('div'),r1=document.createElement('div'),zw=document.createElement('div');zm.className='zm';r1.className='zr1';zw.className='zw';
+    if(frz)r1.appendChild(frz);if(nm)r1.appendChild(nm);
+    for(const k of c.order){let e=el[k];
+      if(k==='pan'&&e&&c.pan!=='slider'){const C=CT.get('hp:'+t.id);if(C){const d=document.createElement('div');d.innerHTML=ctl(c.pan==='half'?'hp':'kn','hp:'+t.id,'Pan',C.spec,C.get,C.set,C.after);e=d.firstElementChild;e.title=c.pan==='half'?'Pan: drag sideways, shift for fine, double-click to centre':'Pan: drag up or down, shift for fine, double-click to centre';paintCtl(e)}}
+      else if(!e&&HCZI[k].opt)e=hczMake(k,t);
+      if(e)zw.appendChild(e)}
+    zm.append(r1,zw);hm.replaceWith(zm);ms.textContent='';if(pic)ms.appendChild(pic)}}
+/* header and device strip moves also repaint the mixer strip (the mixer already repainted the other two) */
+function hczLink(id,mx){const C=CT.get(id);if(!C||C._zl)return;C._zl=1;const s0=C.set;C.set=v=>{s0(v);paintSel(mx)}}
+{const _rh=renderHeaders;renderHeaders=function(){const r=_rh.apply(this,arguments);try{for(const t of S.tracks){hczLink('hp:'+t.id,'mx:'+t.id+':pan');hczLink('hd:'+t.id,'mx:'+t.id+':vol')}hczBuild()}catch(e){console.error(e)}return r}}
+function hczSyncByp(){for(const b of hdrin.querySelectorAll('.zb[data-z="byp"]')){const h=b.closest('.hdr'),t=h&&trkById(h.dataset.id);if(t){b.classList.toggle('on',!!t.fxByp);b.setAttribute('aria-pressed',t.fxByp?'true':'false')}}}
+{const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{hczSyncByp();if(selT&&selT!=='__m'){hczLink('fx:pan','mx:'+selT+':pan');hczLink('fx:vol','mx:'+selT+':vol')}}catch(e){}return r}}
+function hczOutMenu(t,x,y){const g0=grpOf(t),gs=S.tracks.filter(g=>g.kind==='group'&&g!==t&&!grpAnc(g).includes(t));
+  openMenu(x,y,[{head:'Output of '+t.name},{label:'Master',sub:'plays straight into the master',check:!g0,dot:'#cfd3db',act:()=>{if(!g0)return;pushUndo();delete t.grp;changed(true)}},
+    ...gs.map(g=>({label:g.name,sub:'group',check:g0===g,dot:g.color,act:()=>{if(g0!==g)addToGroup(t,g)}})),'-',{label:'Put in a new group',dot:'#4cc9f0',act:()=>groupTracks([t])}])}
+function hczSendMenu(t,x,y){const R=RETN();
+  openMenu(x,y,[{head:'Sends from '+t.name},...R.map(r=>{const on=(t.sends||{})[r.id]>0;return{label:r.name,sub:on?'sending now, click to stop':'click to send',check:on,dot:r.color,act:()=>{pushUndo();t.sends=t.sends||{};if(on)delete t.sends[r.id];else t.sends[r.id]=.5;changed(true)}}}),...(R.length?['-']:[]),
+    {label:'New reverb return, send this track',dot:'#7fd0ff',act:()=>retNew('reverb',t)},{label:'New delay return, send this track',dot:'#c39bff',act:()=>retNew('delay',t)}])}
+hdrin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.zb[data-z]');if(!b)return;e.stopImmediatePropagation();const h=b.closest('.hdr'),t=h&&trkById(h.dataset.id);if(!t)return;const k=b.dataset.z,r=b.getBoundingClientRect();
+  if(k==='freeze'){freezeAsk(t);return}
+  if(k==='byp'){t.fxByp=!t.fxByp;syncGraph();renderFx();hczSyncByp();toast(t.fxByp?'Effects on '+t.name+' are off for now: listen, then click again.':'Effects back on.');return}
+  if(k==='out'){hczOutMenu(t,r.left,r.bottom+2);return}
+  if(k==='sends'){hczSendMenu(t,r.left,r.bottom+2);return}
+  if(k==='color'){openMenu(r.left,r.bottom+2,[{head:'Colour of '+t.name},{swatches:1,cur:t.color,act:c=>{pushUndo();t.color=c;changed(true)}}]);return}},true);
+/* right-click on a track header (or the empty space under the tracks): the menu gets "Customise track controls…" */
+hdrin.addEventListener('contextmenu',()=>{HCZ.ctx=performance.now()},true);
+{const _om=openMenu;openMenu=function(x,y,items){if(HCZ.ctx&&performance.now()-HCZ.ctx<80&&Array.isArray(items)){const it={label:'Customise track controls…',sub:'Choose the buttons and sliders every track shows',ic:HCZS.replace('currentColor','#4cc9f0')+'<path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg>',act:()=>hczOpen()};
+    items=items.slice();if(items[0]&&items[0].head)items.splice(1,0,it,'-');else items.push('-',it)}HCZ.ctx=0;return _om.call(this,x,y,items)}}
+/* the editor panel */
+function hczEdHtml(){const c=hczGet(),rest=Object.keys(HCZI).filter(k=>!c.order.includes(k)),seg=(k,opts)=>`<div class="zes" data-zo="${k}">${opts.map(o=>`<button type="button" data-v="${o[0]}" class="${String(c[k])===String(o[0])?'on':''}" aria-pressed="${String(c[k])===String(o[0])}" title="${esc(o[2]||o[1])}">${o[3]||''}<span>${esc(o[1])}</span></button>`).join('')}</div>`;
+  const pv=p=>`<svg viewBox="0 0 34 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">${p}</svg>`;
+  return`<div class="zeh"><span>Track controls</span><button type="button" data-ze="x" aria-label="Close" title="Close">✕</button></div>
+  <p>Choose what every track shows. Changes show on all tracks right away.</p>
+  <h5>Ready-made layouts</h5><div class="zepre">${Object.entries(HCZP).map(([k,p])=>`<button type="button" data-zp="${k}" class="${hczSame(c,p.c)?'on':''}" title="${esc(p.n+': '+p.s)}"><span>${esc(p.n)}</span><small>${esc(p.s)}</small></button>`).join('')}</div>
+  <h5>Shown, in this order</h5><div class="zel">${c.order.map((k,i)=>`<div class="zer" data-k="${k}" title="Drag up or down to change the order"><i class="zeg" aria-hidden="true">⠿</i><span class="zei">${HCZI[k].ic}</span><span class="zen"><b>${esc(HCZI[k].l)}</b><small>${esc(HCZI[k].d)}</small></span><button type="button" data-ze="up"${i?'':' disabled'} title="Move earlier" aria-label="Move ${esc(HCZI[k].l)} earlier">▲</button><button type="button" data-ze="dn"${i<c.order.length-1?'':' disabled'} title="Move later" aria-label="Move ${esc(HCZI[k].l)} later">▼</button><button type="button" data-ze="rm" title="Remove from the tracks" aria-label="Remove ${esc(HCZI[k].l)}">✕</button></div>`).join('')||'<span class="zenone">No controls. The tracks show only their name.</span>'}</div>
+  <h5>Not shown: click to add</h5><div class="zea">${rest.map(k=>`<button type="button" data-za="${k}" title="${esc(HCZI[k].l+': '+HCZI[k].d)}"><b>＋</b>${esc(HCZI[k].l)}</button>`).join('')||'<span class="zenone">Everything is shown.</span>'}</div>
+  <h5>Track icon</h5>${seg('icon',[['normal','Normal','A small icon box'],['big','Big','As tall as the track, grows with the track height'],['hidden','Hidden','No icon']])}
+  <h5>Pan control</h5>${seg('pan',[['slider','Slider','A bar you drag sideways',pv('<rect x="3" y="5" width="28" height="8" rx="2"/><path d="M17 3.5v11" stroke-width="2.2"/>')],['half','Half dial','A half circle, drag sideways',pv('<path d="M7 15a10 10 0 0 1 20 0"/><path d="M17 15l5-8" stroke-width="2"/>')],['round','Round dial','A small round knob, drag up or down',pv('<circle cx="17" cy="9" r="7"/><path d="M17 9l3.5-5" stroke-width="2"/>')]])}
+  <h5>Mute and Solo</h5>${seg('ms',[['normal','Normal'],['large','Large','Bigger buttons that are easier to hit']])}
+  <h5>Level meter</h5>${seg('meter',[[1,'Shown'],[0,'Hidden','No level bars at the edge of the track']])}
+  <div class="zef"><button type="button" data-ze="reset" title="Back to the layout AudioLab starts with">Reset to default</button><button type="button" data-ze="x" class="pri">Done</button></div>`}
+function hczEdSync(){const p=document.getElementById('hczEd');if(p&&!p.hidden){const s=p.scrollTop;p.innerHTML=hczEdHtml();p.scrollTop=s}}
+function hczClose(){const p=document.getElementById('hczEd');if(p)p.hidden=true;const b=document.getElementById('bHcz');if(b){b.classList.remove('on');b.setAttribute('aria-expanded','false')}}
+function hczOpen(){try{closeMenu()}catch(e){}let p=document.getElementById('hczEd');
+  if(!p){p=document.createElement('div');p.id='hczEd';p.setAttribute('role','dialog');p.setAttribute('aria-label','Track controls');document.body.appendChild(p);
+    p.addEventListener('click',e=>{const t=e.target,c=hczGet(),row=t.closest('.zer'),k=row&&row.dataset.k;let b;
+      if((b=t.closest('[data-ze]'))){const a=b.dataset.ze,i=c.order.indexOf(k);if(a==='x')return hczClose();if(a==='reset')return hczSet(HCZD);if(i<0)return;
+        if(a==='rm')c.order.splice(i,1);else{const j=a==='up'?i-1:i+1;if(j<0||j>=c.order.length)return;c.order.splice(j,0,c.order.splice(i,1)[0])}return hczSet({order:c.order})}
+      if((b=t.closest('[data-za]')))return hczSet({order:[...c.order,b.dataset.za]});
+      if((b=t.closest('[data-zp]')))return hczSet(JSON.parse(JSON.stringify(HCZP[b.dataset.zp].c)));
+      if((b=t.closest('.zes button'))){const o=b.parentNode.dataset.zo;return hczSet({[o]:o==='meter'?+b.dataset.v:b.dataset.v})}});
+    /* drag a row to reorder; drag the title to move the panel */
+    p.addEventListener('pointerdown',e=>{if(e.button!==0)return;const hd=e.target.closest('.zeh'),row=e.target.closest('.zer');if(e.target.closest('button'))return;
+      if(hd){const r=p.getBoundingClientRect();HCZ.drag={mv:1,dx:e.clientX-r.left,dy:e.clientY-r.top,zf:p.offsetWidth?r.width/p.offsetWidth:1};e.preventDefault();return}
+      if(row){HCZ.drag={row,k:row.dataset.k,y0:e.clientY,go:false};e.preventDefault()}});
+    addEventListener('pointermove',e=>{const d=HCZ.drag;if(!d)return;
+      if(d.mv){const r=p.getBoundingClientRect();p.style.left=clamp(e.clientX-d.dx,4,innerWidth-r.width-4)/d.zf+'px';const ty=clamp(e.clientY-d.dy,4,innerHeight-60);p.style.top=ty/d.zf+'px';p.style.maxHeight=Math.max(200,innerHeight-ty-8)/d.zf+'px';return}
+      if(!d.go){if(Math.abs(e.clientY-d.y0)<4)return;d.go=true;d.row.classList.add('drag')}
+      const rows=[...p.querySelectorAll('.zer')];let to=rows.length-1;for(let i=0;i<rows.length;i++){const r=rows[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){to=i;break}}
+      const from=rows.indexOf(d.row);if(to>from&&e.clientY<rows[to].getBoundingClientRect().top+rows[to].getBoundingClientRect().height/2)to--;if(to===from||to<0)return;
+      const list=d.row.parentNode;if(to>from)list.insertBefore(d.row,rows[to].nextSibling);else list.insertBefore(d.row,rows[to]);
+      hczSet({order:[...list.querySelectorAll('.zer')].map(x=>x.dataset.k)},true)});
+    const up=()=>{const d=HCZ.drag;if(!d)return;HCZ.drag=null;if(d.go)hczEdSync()};addEventListener('pointerup',up);addEventListener('pointercancel',up);
+    addEventListener('keydown',e=>{if(e.key==='Escape'&&!p.hidden&&ctxm.hidden&&$('#set').hidden&&!(e.target&&e.target.isContentEditable))hczClose()},true)}
+  p.hidden=false;p.innerHTML=hczEdHtml();const b=document.getElementById('bHcz');if(b){b.classList.add('on');b.setAttribute('aria-expanded','true')}
+  p.style.left='100px';p.style.top='100px';const r0=p.getBoundingClientRect(),zf=r0.left>0?r0.left/100:1,hc=document.getElementById('hdrcol').getBoundingClientRect(),right=document.body.classList.contains('tr-right');
+  p.style.left=clamp(right?hc.left-r0.width-10:hc.right+10,6,Math.max(6,innerWidth-r0.width-6))/zf+'px';const top=clamp(hc.top+22,6,Math.max(6,innerHeight-r0.height-6));p.style.top=top/zf+'px';p.style.maxHeight=Math.max(200,innerHeight-top-8)/zf+'px'}
+function hczToggle(){const p=document.getElementById('hczEd');if(p&&!p.hidden)hczClose();else hczOpen()}
+/* entry points: a button next to the "Tracks" heading and a card in Settings > Layout */
+{const cap=document.querySelector('#hdrcol .cap');if(cap&&!document.getElementById('bHcz')){const b=document.createElement('button');b.id='bHcz';b.type='button';b.setAttribute('aria-label','Customise track controls');b.setAttribute('aria-expanded','false');
+    b.title='Customise track controls. Choose which buttons and sliders every track shows, change their order, make the icon big or hide it, and pick a pan style. You can also right-click a track.';
+    b.innerHTML=HCZS+'<path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>Controls</span>';cap.appendChild(b);
+    b.addEventListener('click',e=>{e.stopPropagation();hczToggle()});b.addEventListener('pointerdown',e=>e.stopPropagation())}}
+{const sec=document.querySelector('#setBody section[data-page="layout"]'),h=sec&&[...sec.querySelectorAll('h4')].find(x=>x.textContent.trim()==='Transport bar');
+  if(h&&!document.getElementById('hczCard')){h.insertAdjacentHTML('beforebegin','<h4>Track controls</h4><div class="treditcard" id="hczCard"><div class="hczprev" aria-hidden="true"><i></i><i></i><span><b></b><b></b><b></b><b></b></span></div><div><b>Customise track controls</b><small>Choose which buttons and sliders every track shows and in what order. Make the icon big or hide it, pick a pan style (slider, half dial or round dial) and the size of Mute and Solo. Also under the Controls button above the tracks, or right-click a track.</small><div class="row" style="gap:8px;margin-top:6px"><button type="button" id="hczSetB" class="pri">Customise track controls…</button><button type="button" id="hczSetR" class="mini">Reset</button></div></div></div>');
+    document.getElementById('hczSetB').addEventListener('click',()=>{closeSet();hczOpen()});document.getElementById('hczSetR').addEventListener('click',()=>{hczSet(HCZD);toast('Track controls are back to the default layout.')})}}
+setTimeout(()=>{try{if(UI.hcz)renderHeaders()}catch(e){console.error(e)}},0);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
