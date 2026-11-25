@@ -338,3 +338,55 @@ Read: MusicRadar (FM growl in FM8, neurofunk bass and tearing reese in Serum), S
 ### Left
 - Tune the presets by ear with the user. Ideas: free-running movement, a second movement source, a formant picture you can drag, notch sweep for neuro basses, render in a worker.
 - App icons still show the old picture without text; nothing to change there unless the user wants "Pro" on the icon.
+
+## 25 November 2026: v0.170, run 9 (effect levels, blur from a ready-made picture, refraction as a switch, live edge light, new "Glass and light" settings)
+
+### What the app had before
+- "Light mode" (`UI.lite`, General tab): 30 fps cap, still logo, leaner voices. It did not touch the glass. It is unchanged, except that when it switches itself on for a very weak computer the effects now also go to Zero (wrapper of `liteAuto`; "Turn off" in the notice brings them back; not done once a level was chosen by hand, `UI.fxUser`).
+- "Make it smooth" (button in the frame rate hint): set blur 8, refraction 0. The button is now "Optimise for this computer" and opens Glass and light and runs the test.
+
+### Built (new code before `askChoice`, new CSS before `.dacv`)
+- **Effect levels** (`UI.fx = {refr, blur:'off'|'copy'|'live', edge, anim}`; `fxPre`, `fxGet`, `fxLevel`, `fxSet`; `applyTrans` and `glassPlay` replaced). Zero effects = all off, solid panels (body class `fxzero` removes every backdrop-filter, `fxstill` stops CSS animations and transitions, the logo and bubbles stand still). Optimised = no refraction, blur from a picture, edge light and animations on (or what the test chose, `UI.fxOpt`). Full effects = everything, live blur. Panels are solid whenever blur and refraction are both off. Old settings: refraction slider at 0 becomes Optimised, anything else Full.
+- **Blur from a ready-made picture** (`fxBlurPic`, `abDraw`, canvas `#arrBlur`, state `ABL`; `gbCopy`, `gbTick` replaced, `gbOn` and `gbLayout` patched). The transport bar, track headers and device panel only have the arrangement behind them. A quarter-size copy of the arrangement canvas is blurred once (canvas `filter: blur()`, edges stretched outward first so the blur does not fade at the border) each time the arrangement is redrawn, and shown under those panels. They then have no backdrop-filter (body class `fxcopy`). The device panel (`#fxglass`) uses the picture in every level (body class `fxpic`), also in Full effects. Windows, menus and dialogs keep one plain live `blur()` because anything can be behind them. With "Picture" a blur below about 4 screen pixels is raised to 4.2 (the browser's most expensive band).
+- **Refraction is a switch** (`fxGet().refr`, `RFK = 60`). The old slider only set the `scale` number of the displacement step; map size, filter area and the per-frame copy of the map were the same at 1% and at 100%. So strength costs nothing and it is fixed at 75% of the old maximum. What does cost is the map: it is now made at 1/6 of the panel size on large panels (was 1/4; the divisor follows the width of the bent band, 2 to 6), about 2.25 times fewer bytes copied per frame per panel. `rfStyle` leaves the blur out of the filter list when the picture is behind the panel.
+- **Live edge light** (`EL`, `elSoon`, `elTick`, `elGrad`, `elSampler`, CSS property `--elb`, registered as not inherited). The 1 px rim (half a pixel on high-density screens) is a conic gradient with 8 to 30 stops. Each stop takes brightness and 38% of its colour from three points next to that edge in a 64 x 36 copy of the blurred picture: bright next to bright clips, dim over dark areas. Recalculated at most 11 times a second, only after the backdrop picture changed or while the pointer is in use, and written only when the text changed. The old glow (`filter: drop-shadow` on every rim, a full extra layer per panel) and the wide inner glows are gone; the base rim is about half as bright. Panels that are not over the arrangement keep a fixed rim. Strength slider kept; off in Zero effects.
+- **Optimise for this computer** (`fxOptimise`, `fxFps`, `fxUndo`, `FXO`). Measures the screen rate with all effects off (or uses the desktop app's real rate), reads core count and memory, then tries Full, glass without refraction, the same with a fixed rim, solid with animations, Zero, 0.9 s each, and keeps the first that holds 95% of the screen rate. Computers with 2 cores or 2 GB skip Full. The result is written out in plain words. Undo returns to the settings from before (also after picking a level by hand).
+- **Settings, Glass and light** (`fxBuild`, `fxSync`, `gpDraw`, `setLoop`): the three levels as the main choice with Optimise and Undo; a preview that is a real glass panel over moving clips and a wandering light, using `rfAttach`, `fxBlurPic` and `elGrad` like the app, with the live frame rate; cards for transparency, blur, edge light (slider) and refraction (switch); a box "What each effect costs" with a picture, plain words and a toggle per option (blur Off / Picture / Live, edge light follows the background, animations, softer blur while playing, half-size picture behind live glass, note cache, sleeping tracks). The old tick boxes are the same inputs moved into toggles, so their handlers are unchanged.
+- **Logo in Settings at a steady 120 a second** (`setLoop`): it used to be painted on the visualiser clock, which drops to 2 a second after the mouse rests for 3 s. It now has its own loop while Settings is open: every frame up to about 160 Hz, every second frame at 240 Hz.
+
+### Research on blur (part B)
+- Live `backdrop-filter: blur()`: Chromium keeps the filtered result only while nothing under, inside or over the panel changes; any change re-filters the whole panel. Large radii are cheap per pixel because Skia blurs a scaled-down copy; the expensive band is just under 4 device pixels. Sources: grida.co/docs/wg/research/chromium/effect-optimizations, the project doc `claude/audiolab-liquid-glass-research.md` (Skia and Viz source links).
+- Pre-blurred copies instead of blurring per frame: developer.chrome.com/blog/animated-blur (a blur that is not animated is rasterised once and reused).
+- Dual Kawase / downsample-upsample: blog.frost.kiwi/dual-kawase (5 reads per pixel going down, 8 going up, cost grows slowly with radius). Needs WebGL or many small canvases; small 2D canvases may not be GPU canvases in Chromium, and drawing a GPU canvas into them forces a read-back. Not used.
+- Chosen: a static pre-blurred quarter-size picture refreshed only when the arrangement changes. The blur itself is done by the canvas `blur()` filter (Skia, the same scaled-down method) on 1/16 of the pixels. Zero filter passes while only meters, the time display or device pictures move. The arrangement you see directly keeps full resolution and frame rate.
+
+### Other things made lighter (part C)
+1. Device panel: no backdrop-filter in any level (picture instead).
+2. Rim glow: `filter: drop-shadow` removed from all glass panels.
+3. Refraction map 1/6 size on large panels.
+4. `#bLogo` glow: `steps(12)` timing, 6 changes a second instead of one on every frame; it sits in the transport glass, which was re-filtered for it all the time, also when idle.
+5. `gbLayout` (reads sizes and styles of four elements) ran on every backdrop copy, up to 120 times a second while scrolling. Now at most 4 times a second on that path (`gbCopy(true)`); resize and the 0.7 s timer still run it directly.
+6. With the picture, the half-size sharp copy `#arrBack` is not drawn (kept 2 x 2, it only passes clicks on).
+7. Bubbles and loading pictures (`hxTick`) are painted once a second instead of 30 times when animations are off.
+8. With the picture or Zero: the small blurs on device labels, the EQ overlay, the add-track buttons and tooltips are off.
+Looked at and left: level meters at 120 a second in the headers (free with the picture, still re-filter the header glass in Full effects); `fxGlassSync` 0.5 s timer; visualisers and Fun views (they show sound).
+
+### Tested (headless Playwright, Fractals demo; script `tools/ui-tests/fxlevels.py`)
+- No page errors on load, after reload, in every level, while playing, with Settings open.
+- Full: lens only on `#hglass`, `#tr`, the open sheet and the preview. Optimised and Zero: no element in the page has a `url()` backdrop filter (checked over all elements, also with Settings and a menu open).
+- Level buttons, Undo, Optimise (report text, Undo after it), every toggle, the refraction switch, the blur selector. Screenshots of each level, the settings section top and bottom, the preview and a menu at 1x and 2x were looked at.
+- Logo: with the pointer resting it is painted on every frame the headless browser delivers (about 13 a second there), not 2 a second.
+
+### Not verified (the container has no GPU)
+- All frame rates on the user's Mac. Expected from how Chromium works: Optimised has no filter pass for the three docked panels, so idle and playback should sit at the screen rate; Full effects loses the device panel's blur pass and the per-frame logo glow.
+- The read-back of the 64 x 36 edge light sample (through a quarter-size canvas, at most 11 times a second): if the Performance popup shows dips while the arrangement scrolls, switch "Edge light follows the background" off to compare.
+- Whether the 1/6 refraction map shows steps at the rim on a 2x screen (looked fine in software rendering).
+- 120 pictures a second for the logo on a real 120 or 240 Hz screen. If macOS itself throttles the window (low power mode), the app cannot override that.
+- Refraction fixed at 75% of the old maximum is stronger than the old default of 40%. One number to change: `RFK`.
+
+### Note
+- This run was first committed as v0.168 on top of v0.167; main had moved to v0.169 (cable fix, Growl) in the meantime, so the same changes were applied again on top of v0.169 and tested again.
+
+### Left
+- Windows and dialogs in Optimised still use one live blur. A picture is not possible there without capturing the page.
+- Light mode (General) and Zero effects overlap in purpose; they could become one switch.
