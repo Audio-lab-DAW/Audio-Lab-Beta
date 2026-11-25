@@ -543,3 +543,6 @@ None of the three was done before this run (checked in the log and the commits; 
 
 ### Left
 - Nothing from this task.
+
+### Release
+- v0.173, commit 242f9cb on main, artifact version 201, desktop build run 66 dispatched. Project doc `claude/audiolab-backlog-run-18.md`. `desktop/update-notes.txt` written for this release.
