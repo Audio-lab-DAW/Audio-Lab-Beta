@@ -761,3 +761,7 @@ Read: Dillon Bastan's Vector Delay manual (dillonbastan.com/inspiredbynature_man
 - All six particle devices of the series now exist. For Vector Delay: listen and tune the presets; the parts of Ableton's device listed under "Not built".
 - Still open from earlier entries: LFO, Steps and parameter automation lanes are not in exports; Vector Grain and Vector FM could use `vfPaint`; the default track layout question from v0.178.
 - New requests from the user during this session, not started in this version: an orbit synth (a centre mass with balls in orbit that make the sound), and a redesign of all older devices in the look of Vector Delay (picture on the left, parameters arrow top left, power then preset then Change at the top, gain bottom right, no empty space, pictures for simple devices such as Pluck, one slider design), with instruments and effects that change live while browsing and a double-click to choose.
+
+### Release
+- v0.179, commit 9edbb62 on main, artifact version 202 (this publish also brought v0.174 to v0.178 to the app artifact), desktop build run 45648296373 dispatched. Project docs `claude/audiolab-backlog-run-12.md` to `-17.md` written. The scheduled tasks 12 to 17 were deleted at the user's request.
+- The requests the user sent during this session are written down in `docs/device-backlog-2026-11-25.md` (tasks A to E), one scheduled run each.
