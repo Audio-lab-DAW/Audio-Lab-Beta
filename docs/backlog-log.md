@@ -890,3 +890,7 @@ Effects (38): Compressor, OTT, Sidechain, Limiter, Soft Clipper, Gate, Multiband
 ### Left
 - Task D (Change with live browsing; the browsers in the new look), task E (CPU and background freeze).
 
+
+### Release
+- v0.182: commit d12f4ad, artifact version 205, project doc `claude/audiolab-device-backlog-run-C.md`.
+- **Desktop build**: run 77 for this commit, all three jobs succeeded (release, Mac, Windows; 18:25 to 18:29 UTC). The installers of v0.182 are on the GitHub release; the builds for v0.179 to v0.181 that failed in the GitHub outage were not started again, since v0.182 contains them.
