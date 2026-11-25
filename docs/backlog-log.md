@@ -133,3 +133,34 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Tasks 5 to 7. Ideas: an "only show cables of the selected channel" option, curved cables over the strips like FL Studio when the lane is hidden, and a send level knob on hover.
+
+## 25 November 2026: v0.163, task 5 of 7 (zoomed-out overview, Ableton style)
+
+### Built (all new code sits before `askChoice`, names start with `ovw` / `OVW`)
+- **Overview picture** (`ovwPaint`, `ovwGeo`): every track is a thin row (9 to 20 px, so 30 tracks fit; more than about 60 scroll) of plain blocks in the track colour, one per clip. No notes, waveforms or names. Muted tracks and muted clips are faint. A group shows a thin line over the span of its tracks. Bar numbers and the section labels stay on top, section starts run down as faint lines, the loop is a band on the ruler. Track headers become a 128 px column drawn on the canvas: a colour tab and the name (groups bold, members indented, selected track white). The background is darker than the normal view. The rows stop above the device panel and transport (`OVW.bot`, measured from `#fx` and `#tr`).
+- **Getting in**: `zoomAround` is wrapped. When a zoom-out step is cut short by the view's limit, the cut-off part counts as "pushing against the end" (`OVW.acc`). After the end has been reached (180 ms earlier or more), a push of 0.25 (about half a wheel notch, a short pinch) or one more zoom key press opens the overview (`ovwEnter`). Also: Shift+O (new key command "Song overview on / off" in the shortcuts list, group View), right-click on the empty arrangement, the logo menu, and "Song Overview" in the desktop app's View menu (`desktop/main.js`).
+- **Animation** (`ovwAnim`, `ovwFrame`, 170 ms, ease-out): the same picture is drawn with every position blended between the normal view and the overview, so rows compress and the background darkens. The last normal frame (`OVW.snap`) fades out over the first part, the DOM headers fade with CSS (`body.ovw #hdrcol`). Leaving plays it backwards onto a freshly drawn normal frame.
+- **Inside** (events go to a see-through layer `#ovwL` over the canvas, so none of the normal clip handlers run and clips cannot be moved): pinch or Cmd/Ctrl-scroll zooms 1x to 2.2x around the pointer (`ovwZoom`), scroll or drag moves (`ovwPan`), a click puts the playhead on the nearest bar and selects the track, a click on a name only selects, Space plays. Zoom keys and map zoom act on the overview while it is open.
+- **Getting out** (`ovwLeave`): zooming in past the top of the range (same push rule) goes back to the normal view with the beat and track under the pointer staying under the pointer. Double-click does the same. Esc, Shift+O, the "Overview" chip (`#ovwChip`, top left) and right-click > "Leave the overview" go back to exactly where you were. `V.ppb` and `V.th` are never touched while the overview is open and are written back on leaving.
+- **Cheap drawing**: the picture is cached (`ARRC`); a playhead-only frame copies it and draws one line. While playing, full redraws are held to 10 per second (follow mode marks the view dirty every frame).
+- `drawArr` is wrapped once more on top of the glass-copy wrapper; `ovwBase` is the wrapped original. `#hglass` is hidden in the overview so the half-resolution glass copy does not replace the left column.
+
+### Tested (headless Playwright, Fractals demo, 30 tracks, 17 sections)
+- No page errors on load or in any test. (The only console message is the service worker file missing in the test server, as before.)
+- Screenshots checked: normal view, overview at 1600x1000 and 1200x800 (all 30 rows visible), frozen frames at 25% and 60% of the transition, a live frame during the animation, overview zoomed in while playing, tracks on the right, a folded group, the chip tooltip, the normal view after leaving.
+- Ctrl-scroll out from a mid zoom: 3 notches reach the end and open the overview. Further zoom-out does nothing. Zoom in, sideways scroll, drag: move as expected. Click: playhead to bar 187 and track selected; click on a name selects only. Space plays and the playhead moves.
+- Zoom in past the top: left after 2 notches; beat 840.52 and track 14 under the pointer before, the same after. Zoom and track height identical before and after (3.4 / 34 and 6 / 60 in two runs).
+- Shift+O in and Esc out: view identical. Esc with a menu open closes the menu first. Zoom keys: opens one press after the end is reached; 5 zoom-in presses leave again. Double-click, chip, both menus, seven fast toggles in a row, window resize, an empty project: all fine.
+- Cost (headless, software drawing): full overview frame about 4.4 ms, playhead-only frame 0.01 ms.
+- New test script: `tools/ui-tests/overview.py`.
+
+### Not verified
+- Look, feel and frame rate on the user's Mac; a real trackpad pinch (only Ctrl-scroll and keys were simulated). The push needed to get in or out (`OVW.PUSH` = 0.25, 180 ms rule) may need tuning by feel.
+- The "Song Overview" item in the desktop View menu (the file passes a syntax check, the desktop app was not run).
+- Safari gesture events on the overview layer.
+- With horizontal-only zoom keys the normal view has a soft far end (each step gets shorter and the view creeps back on redraw). This was already so; in that zone the zoom is not restored to the digit.
+- The map still shows the box of the normal view while the overview is open.
+- Dropping files in the overview only shows a hint.
+
+### Left
+- Tasks 6 and 7. Ideas: hover highlight of a row, follow the playhead when zoomed in inside the overview, drag on the ruler to scrub, show the overview range in the map.

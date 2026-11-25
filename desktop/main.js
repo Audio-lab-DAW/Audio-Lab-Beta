@@ -224,6 +224,7 @@ function buildMenu() {
       label: 'View',
       submenu: [
         { role: 'togglefullscreen' },
+        { label: 'Song Overview', click: () => runInApp("window.AudioLab&&window.AudioLab.run('ovwToggle()')") },
         { type: 'separator' },
         { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },
         { type: 'separator' },
