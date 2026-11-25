@@ -1,7 +1,7 @@
 {
-  "version": "0.181",
-  "sha256": "07bc63423116e6a689168468c69af9ca2ced544116b5023a46d99d233a0a0ce3",
-  "size": 2510363,
+  "version": "0.182",
+  "sha256": "9639997597c52b460ef3fcc272aba6a7d7412aff125de335e35c638bbfa2d589",
+  "size": 2535774,
   "minShell": "0.147.0",
   "notes": "Bounces in time with the song: Bouncy Notes has a Rhythm choice (the ball lands exactly on 1/4, 1/8, a bar and so on, steady, halving or a whole round in one bar), a Melody choice and a Harmony choice for chords. New effect: Bounce Delay, repeats that come like a bouncing ball. Also new since 0.178: the Orbit instrument and the Vector Delay effect."
 }
