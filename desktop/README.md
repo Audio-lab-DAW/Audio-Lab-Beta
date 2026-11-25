@@ -1,4 +1,4 @@
-# AudioLab Studio – desktop app (Electron)
+# AudioLab Pro – desktop app (Electron)
 
 Runs the same `index.html` as the website, as a real Mac and Windows app.
 
@@ -14,8 +14,8 @@ What the desktop app adds over the browser:
 1. GitHub repo ▸ **Actions** ▸ enable workflows if asked.
 2. Run **Build desktop apps** (Actions ▸ *Build desktop apps* ▸ *Run workflow*), or push a tag named `desktop-v0.114`.
 3. After ~10 minutes the **Releases** page holds:
-   - `AudioLab Studio-<version>-arm64.dmg` – Mac Apple Silicon
-   - `AudioLab Studio Setup <version>.exe` – Windows 64-bit
+   - `AudioLab Pro-<version>-arm64.dmg` – Mac Apple Silicon
+   - `AudioLab Pro Setup <version>.exe` – Windows 64-bit
 
 ### Opening the unsigned Mac app the first time
 macOS blocks apps without an Apple Developer signature. Drag it into Applications, then **right-click ▸ Open ▸ Open** once. If macOS still refuses: System Settings ▸ Privacy & Security ▸ *Open Anyway*.

@@ -11,7 +11,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AudioLab Studio</title>
+<title>AudioLab Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -1009,6 +1009,47 @@ body.tr-right #bHcz{right:auto;left:32px}
 .dev.pbx .devh select{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);box-shadow:none}
 .dev.pbx .dfc{gap:6px!important;padding:0!important}.dev.pbx .fxk{gap:2px 0!important}.dev.pbx .fxk .kn{width:54px!important}.dev.pbx .fxk .kn svg{width:30px!important;height:30px!important}.dev.pbx .fxk .kn span{font-size:9.5px!important;max-width:54px!important}.dev.pbx .fxk .kn output{font-size:9.5px!important}
 .dev.pbx .fxs{gap:3px!important;width:118px!important;flex:none!important;min-width:0}.dev.pbx .fxs>*{width:100%!important;min-width:0!important}
+/* v0.167: the mixer grows from the right; the master stays in view while the channels scroll under it */
+#mixWin{min-width:0!important;resize:none!important}
+#mixWin .mx.master{position:sticky;right:0;z-index:5;flex:none;background:linear-gradient(rgba(207,211,219,.11),rgba(207,211,219,.03)),rgb(var(--gtr2))!important}
+#mixWin.mxover .mx.master{box-shadow:-10px 0 14px -6px rgba(0,0,0,.6)}
+#mixWin .mx:not(.master){flex:none}
+#mixWin>.fwh{max-width:calc(100% + 2px);box-sizing:border-box}#mixWin>.fwh .fwx{min-width:0}
+#mixWin.mxb1>.fwh #mxVw>span,#mixWin.mxb1>.fwh #mxDev>span{display:none}#mixWin.mxb1>.fwh{gap:4px!important}
+#mixWin.mxb2>.fwh #mxDev,#mixWin.mxb2>.fwh #mxCmp,#mixWin.mxb2>.fwh #mxCab,#mixWin.mxb2>.fwh .dacw{display:none!important}#mixWin.mxb2>.fwh{padding-left:8px!important}#mixWin.mxb2>.fwh::before{width:16px}
+#mixWin>.fwh button{flex:none}
+#mixWin .cablg{max-width:calc(100% - 24px);box-sizing:border-box;overflow:hidden;justify-content:flex-end}#mixWin.mxb1 .cablg em{display:none}
+/* v0.167: Settings > Interface */
+.mxsp .mxsi{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:#8f95a6;transition:background .12s,color .12s;overflow:hidden}
+.mxsp .mxsi svg{width:16px;height:16px;display:block}
+.mxsp label:has(input:checked)>.mxsi{background:rgba(76,201,240,.2);color:#8fe0fa}.mxsp label:hover>.mxsi{color:#e6ebf5}
+.mxsp .mxst{min-height:26px}.mxsp .mxsr{grid-template-columns:22px 92px 1fr 52px}.mxsp .mxsr select{grid-column:3/5}
+.mxsp .mxsm .mxsr{grid-template-columns:22px 62px 1fr}.mxsp .mxsm .mxsr select{grid-column:3/4}
+.stmm,.stcol{display:flex;gap:2px;align-items:flex-end;height:16px}.stmm b,.stcol b{display:block;width:4px;border-radius:1px}
+.stmm b{background:linear-gradient(to top,#1fc8e0 0 70%,#e8d33a 70% 90%,#ff4d4d 90%) bottom/100% 16px no-repeat;height:11px}.stmm b+b{height:7px}
+.stcol b{height:16px}.stcol b+b{height:10px;background-size:100% 16px!important;background-position:bottom!important}
+@keyframes stmm{0%{height:16px}100%{height:1px}}
+label:hover>.mxsi .stmm b{animation:stmm var(--d,1s) linear infinite}label:hover>.mxsi .stmm b+b{animation-delay:calc(var(--d,1s)*-.35)}
+.stmm-instant{--d:.22s}.stmm-fast{--d:.55s}.stmm-normal{--d:1.2s}.stmm-smooth{--d:2.4s}.stmm-smooth b{animation-timing-function:ease-in-out!important}
+.mxsp .fdsel{display:flex;align-items:center;gap:12px;width:100%;height:auto;min-height:0;padding:6px 10px 6px 6px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);box-shadow:none;cursor:pointer;text-align:left}
+.mxsp .fdsel:hover,.mxsp .fdsel.open{background:rgba(255,255,255,.08);border-color:rgba(76,201,240,.6)}
+.fdsel .fdselp .fdp{width:40px;height:52px}.fdsel .fdselp .fdp .fwrap{height:52px;left:-23px}
+.fdsel .fdselt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.fdsel .fdselt b{font:600 12.5px Inter,system-ui,sans-serif;color:#eef1f6;white-space:pre}.fdsel .fdselt small{font-size:10.5px;color:#8b8f9c;line-height:1.3}
+.fdsel .cr{flex:none;color:#aeb3c0;transition:transform .12s}.fdsel.open .cr{transform:rotate(180deg)}
+#fdPop{position:fixed;z-index:100050;width:452px;max-width:calc(100vw - 12px);max-height:calc(100vh - 12px);overflow:auto;padding:8px;border-radius:12px;background:rgb(17,19,25);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.7);font:500 12px Inter,system-ui,sans-serif}
+#fdPop[hidden]{display:none}#fdPop .fdg{grid-template-columns:repeat(5,1fr)}
+/* the Layout box: picture, then tight rows for panels, transport bar and track controls */
+.stfsc{padding:8px 14px 10px!important}.stfsc .scalecard{margin:0;background:none!important;border:0!important;padding:0!important;box-shadow:none!important}
+.stfl .lhead{margin-top:8px}.stfl .lhead h4{margin:0!important}.stfl>.hint{margin:6px 0 8px}
+.stfrows{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.06)}
+.stfr{display:flex;align-items:center;gap:10px;min-height:38px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)}.stfr:last-child{border-bottom:0;padding-bottom:0}
+.stfk{flex:0 0 128px;display:flex;align-items:center;gap:9px;color:#d3d7e0}.stfk b{font:600 12px Inter,system-ui,sans-serif}.stfk>svg{width:20px;height:20px;flex:none;color:#8f95a6;margin:0 6px}
+.stfk .stfp{flex:none;transform-origin:left center}.stfk .trprev.stfp{width:32px;height:14px;padding:2px;gap:1.5px;margin:0}.stfk .hczprev.stfp{width:32px;height:20px;margin:0}
+.stfv{flex:1;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px}.stfv label.stfc{margin:0!important;display:flex;align-items:center;gap:6px;white-space:nowrap}.stfv select{height:26px;min-width:0;flex:0 1 150px;width:150px}.stfv button{min-height:26px}
+/* the footer of the Settings window: Reset all settings is always in view, set apart on the left */
+.setsf{gap:12px}.setsf .setrst{display:flex;align-items:center;gap:7px;min-height:30px;padding:0 12px;border-radius:8px;background:rgba(229,72,77,.1);border:1px solid rgba(255,90,90,.4);color:#ff9a9a;font-weight:600}
+.setsf .setrst:hover{background:rgba(229,72,77,.85);color:#fff;border-color:#ff6b6b}.setsf .setrst svg{width:14px;height:14px;flex:none}
+.setsf .setsep{flex:none;width:1px;align-self:stretch;margin:-4px 2px;background:rgba(255,255,255,.1)}.setsf>span{flex:1;text-align:right}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1981,7 +2022,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
 <div id="set" class="modal" hidden><div class="sheet lg setw" role="dialog" aria-label="Settings">
   <div class="sh"><b>Settings</b><button id="setX" aria-label="Close">✕</button></div>
   <div class="setgrid">
-    <nav id="setNav"><div class="setsrch"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2 17 17"/></svg><input id="setQ" type="search" placeholder="Search settings" aria-label="Search settings" autocomplete="off" spellcheck="false"><div id="setQR" role="listbox" hidden></div></div><small class="navh">Settings</small><button data-tab="general" class="on"><i class="nic" style="--ic:#cfd3db"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h7M15 5h1M4 10h2M10 10h6M4 15h9M17 15h0"/><circle cx="13" cy="5" r="1.8"/><circle cx="8" cy="10" r="1.8"/><circle cx="15" cy="15" r="1.8"/></svg></i>General</button><button data-tab="audio"><i class="nic" style="--ic:#3ecf8e"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V8M6.5 15V5M10 13V7M13.5 16V4M17 11V9"/></svg></i>Audio system</button><button data-tab="dac"><i class="nic" style="--ic:#ffd27a"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12v9H4zM7 7V4h6v3M8 11.5a2 2 0 1 0 4 0 2 2 0 0 0-4 0M12.5 11.5h1.5"/></svg></i>DAC &amp; listening</button><button data-tab="layout"><i class="nic" style="--ic:#4c8dff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><path d="M3 8h14M8 8v8.5"/></svg></i>Layout</button><button data-tab="glass"><i class="nic" style="--ic:#7fd6ff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5l2 4.5 4.8.4-3.6 3.2 1.1 4.8L10 13l-4.3 2.4 1.1-4.8L3.2 7.4 8 7z"/></svg></i>Glass &amp; light</button><button data-tab="colors"><i class="nic" style="--ic:#ff7fb8"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3a7 7 0 1 0 0 14c1 0 1.5-.8 1.5-1.5s-.6-1.2-.6-2c0-.8.7-1.5 1.5-1.5H14a3 3 0 0 0 3-3c0-3.3-3.1-6-7-6zM6.5 9.5h0M9 6.5h0M13 7h0"/></svg></i>Colours &amp; clips</button><button data-tab="nav"><i class="nic" style="--ic:#b583ff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2 17 17M6.5 8.5h4M8.5 6.5v4"/></svg></i>Zoom and playhead</button><button data-tab="keys"><i class="nic" style="--ic:#ff7fb8"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h16v9H2zM5 9h1M8 9h1M11 9h1M14 9h1M6 12h8"/></svg></i>Keyboard shortcuts</button><small class="navh navsep">Output</small><button data-tab="files" class="navex"><i class="nic" style="--ic:#4c8dff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h9.5L16 5.5V17H4z"/><path d="M7 3v4h6V3M7 17v-5h6v5"/></svg></i>Project file</button><button data-tab="export" class="navex"><i class="nic" style="--ic:#ff9a3c"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5"/><path d="M4 13v2.5A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V13"/></svg></i>Export audio</button><div class="navAtom" title="AudioLab Studio"><canvas class="bubc" aria-hidden="true"></canvas><canvas id="navAtomC" aria-hidden="true"></canvas><b><span class="wm"><span class="wmA">Audio</span><span class="wmL">Lab</span><span class="wmR"><span class="wmS">Studio</span><canvas class="hxc" aria-hidden="true"></canvas></span></span></b><small id="navVer">v0.131</small></div></nav>
+    <nav id="setNav"><div class="setsrch"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2 17 17"/></svg><input id="setQ" type="search" placeholder="Search settings" aria-label="Search settings" autocomplete="off" spellcheck="false"><div id="setQR" role="listbox" hidden></div></div><small class="navh">Settings</small><button data-tab="general" class="on"><i class="nic" style="--ic:#cfd3db"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h7M15 5h1M4 10h2M10 10h6M4 15h9M17 15h0"/><circle cx="13" cy="5" r="1.8"/><circle cx="8" cy="10" r="1.8"/><circle cx="15" cy="15" r="1.8"/></svg></i>General</button><button data-tab="audio"><i class="nic" style="--ic:#3ecf8e"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V8M6.5 15V5M10 13V7M13.5 16V4M17 11V9"/></svg></i>Audio system</button><button data-tab="dac"><i class="nic" style="--ic:#ffd27a"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12v9H4zM7 7V4h6v3M8 11.5a2 2 0 1 0 4 0 2 2 0 0 0-4 0M12.5 11.5h1.5"/></svg></i>DAC &amp; listening</button><button data-tab="layout"><i class="nic" style="--ic:#4c8dff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><path d="M3 8h14M8 8v8.5"/></svg></i>Interface</button><button data-tab="glass"><i class="nic" style="--ic:#7fd6ff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5l2 4.5 4.8.4-3.6 3.2 1.1 4.8L10 13l-4.3 2.4 1.1-4.8L3.2 7.4 8 7z"/></svg></i>Glass &amp; light</button><button data-tab="colors"><i class="nic" style="--ic:#ff7fb8"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3a7 7 0 1 0 0 14c1 0 1.5-.8 1.5-1.5s-.6-1.2-.6-2c0-.8.7-1.5 1.5-1.5H14a3 3 0 0 0 3-3c0-3.3-3.1-6-7-6zM6.5 9.5h0M9 6.5h0M13 7h0"/></svg></i>Colours &amp; clips</button><button data-tab="nav"><i class="nic" style="--ic:#b583ff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2 17 17M6.5 8.5h4M8.5 6.5v4"/></svg></i>Zoom and playhead</button><button data-tab="keys"><i class="nic" style="--ic:#ff7fb8"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h16v9H2zM5 9h1M8 9h1M11 9h1M14 9h1M6 12h8"/></svg></i>Keyboard shortcuts</button><small class="navh navsep">Output</small><button data-tab="files" class="navex"><i class="nic" style="--ic:#4c8dff"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h9.5L16 5.5V17H4z"/><path d="M7 3v4h6V3M7 17v-5h6v5"/></svg></i>Project file</button><button data-tab="export" class="navex"><i class="nic" style="--ic:#ff9a3c"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5"/><path d="M4 13v2.5A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V13"/></svg></i>Export audio</button><div class="navAtom" title="AudioLab Pro"><canvas class="bubc" aria-hidden="true"></canvas><canvas id="navAtomC" aria-hidden="true"></canvas><b><span class="wm"><span class="wmA">Audio</span><span class="wmL">Lab</span><span class="wmR"><span class="wmS">Pro</span><canvas class="hxc" aria-hidden="true"></canvas></span></span></b><small id="navVer">v0.131</small></div></nav>
     <div id="setBody">
       <section data-page="general">
         <h4>Performance</h4>
@@ -1998,9 +2039,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
         <h4>Closing projects</h4>
         <label class="chk"><input type="checkbox" id="genAskClose"> Ask before closing a project with unsaved changes</label>
         <h4>About</h4>
-        <div class="aboutrow"><span id="genVer">AudioLab Studio</span><button type="button" id="genUpd" hidden>Check for updates</button></div>
-        <h4 class="dz">Reset</h4>
-        <div class="row"><button type="button" id="genReset" class="dng">Reset all settings…</button><span class="hint">Puts every setting back to how it came. Your projects, files and shortcuts stay.</span></div>
+        <div class="aboutrow"><span id="genVer">AudioLab Pro</span><button type="button" id="genUpd" hidden>Check for updates</button></div>
       </section>
       <section data-page="audio" hidden>
         
@@ -2164,7 +2203,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
       </section>
     </div>
   </div>
-  <div class="sf"><span>Changes apply right away</span><button id="setDone" class="pri">Done</button></div>
+  <div class="sf setsf"><button type="button" id="genReset" class="dng setrst" title="Reset all settings: puts every setting back to how it came. Your projects, files and shortcuts stay. You are asked first."><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Reset all settings…</button><i class="setsep" aria-hidden="true"></i><span>Changes apply right away</span><button id="setDone" class="pri">Done</button></div>
 </div></div>
 <div id="mset" class="modal" hidden><div class="sheet lg msw" role="dialog" aria-label="Metronome setup">
   <div class="sh"><b>Metronome setup</b><button id="msX" aria-label="Close">✕</button></div>
@@ -5168,7 +5207,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.166',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.167',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6822,7 +6861,7 @@ function paintAtom(cv,S2,dpr,A,t){const PX=Math.round(S2*dpr);if(cv.width!==PX||
   it.sort((a,b)=>a.z-b.z);for(const x of it)x.d()}
 /* splash screen */
 let SPL=null;
-function showSplash(about){if(SPL)return;const pv=about==='pv';if(pv)about=false;const el=document.createElement('div');el.id='splash';el.classList.add(about?'ab':'ld');if(pv)el.classList.add('pv');if(!about&&!pv)document.body.classList.add('booting');el.innerHTML='<canvas></canvas><div class="spw"><b><span class="wm"><span class="wmA">Audio</span><span class="wmL">Lab</span><span class="wmR"><span class="wmS">Studio</span><canvas class="hxc" aria-hidden="true"></canvas></span></span></b><small class="sdaw">Digital audio workstation</small><small class="sver">Version '+VERSION+'</small>'+(about?aboutHtml():'<i><em></em></i><span class="ldst">Starting…</span>')+'</div><p>'+(about?'Press Esc or ✕ to close':pv?'Click anywhere to close':'Click to skip')+'</p>';document.body.appendChild(el);
+function showSplash(about){if(SPL)return;const pv=about==='pv';if(pv)about=false;const el=document.createElement('div');el.id='splash';el.classList.add(about?'ab':'ld');if(pv)el.classList.add('pv');if(!about&&!pv)document.body.classList.add('booting');el.innerHTML='<canvas></canvas><div class="spw"><b><span class="wm"><span class="wmA">Audio</span><span class="wmL">Lab</span><span class="wmR"><span class="wmS">Pro</span><canvas class="hxc" aria-hidden="true"></canvas></span></span></b><small class="sdaw">Digital audio workstation</small><small class="sver">Version '+VERSION+'</small>'+(about?aboutHtml():'<i><em></em></i><span class="ldst">Starting…</span>')+'</div><p>'+(about?'Press Esc or ✕ to close':pv?'Click anywhere to close':'Click to skip')+'</p>';document.body.appendChild(el);
   const cv=el.querySelector('canvas'),t0=performance.now();SPL={el,t0};
   const fr=now=>{if(!SPL)return;const sz=about?250:200;cv.style.width=cv.style.height=sz+'px';const sc=cv.getBoundingClientRect().width/sz;paintAtom(cv,sz,Math.min(2.5,devicePixelRatio||1)*(sc>0?sc:1),AT.big,AT.reduce?2:(now-t0)/1000+3);requestAnimationFrame(fr)};requestAnimationFrame(fr);
   if(about){el.insertAdjacentHTML('beforeend','<button class="abx" aria-label="Close">✕</button>');el.onclick=e=>{if(e.target===el||e.target.closest('.abx'))hideSplash()}}else if(pv){const l=el.querySelector('.ldst');if(l)l.textContent='Ready';const m=el.querySelector('em');if(m)m.style.width='100%';el.onclick=()=>hideSplash()}else setTimeout(bootRun,0)}
@@ -6872,7 +6911,7 @@ const fileSafe=n=>(n||'Untitled').replace(/[\\/:*?"<>|]+/g,'-').trim().slice(0,8
 function projOf(p){return p.id===PJ.cur?{S,view:{...V}}:{S:p.S,view:p.view}}
 async function packProject(p){const{S:PS,view}=projOf(p),ids=new Set();(function walk(o){if(!o||typeof o!=='object')return;if(Array.isArray(o)){for(const x of o)walk(x);return}for(const k in o){const v=o[k];if(k==='buf'&&typeof v==='string'&&BUFS.has(v))ids.add(v);else if(v&&typeof v==='object')walk(v)}})(PS);
   const audio=[],parts=[];let off=0;for(const id of ids){const b=BUFS.get(id).buf;audio.push({id,sr:b.sampleRate,ch:b.numberOfChannels,len:b.length,off});for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);parts.push(new Uint8Array(d.buffer,d.byteOffset,d.byteLength));off+=d.byteLength}}
-  const json=new TextEncoder().encode(JSON.stringify({format:'audiolab',formatVersion:1,app:'AudioLab Studio '+VERSION,saved:new Date().toISOString(),name:p.name,project:PS,view,audio})),hdr=new Uint8Array(16);hdr.set(new TextEncoder().encode('AUDIOLAB'));const dv=new DataView(hdr.buffer);dv.setUint32(8,1,true);dv.setUint32(12,json.length,true);
+  const json=new TextEncoder().encode(JSON.stringify({format:'audiolab',formatVersion:1,app:'AudioLab Pro '+VERSION,saved:new Date().toISOString(),name:p.name,project:PS,view,audio})),hdr=new Uint8Array(16);hdr.set(new TextEncoder().encode('AUDIOLAB'));const dv=new DataView(hdr.buffer);dv.setUint32(8,1,true);dv.setUint32(12,json.length,true);
   const raw=new Blob([hdr,json,...parts]);if(!window.CompressionStream)return raw;return new Response(raw.stream().pipeThrough(new CompressionStream('gzip'))).blob()}
 async function unpackProject(f){let u=new Uint8Array(await f.arrayBuffer());if(u[0]===0x1f&&u[1]===0x8b)u=new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
   if(new TextDecoder().decode(u.subarray(0,8))!=='AUDIOLAB')throw new Error('not an AudioLab file');const dv=new DataView(u.buffer,u.byteOffset,u.byteLength),jl=dv.getUint32(12,true),J=JSON.parse(new TextDecoder().decode(u.subarray(16,16+jl))),base=16+jl;ensureCtx();
@@ -6880,9 +6919,9 @@ async function unpackProject(f){let u=new Uint8Array(await f.arrayBuffer());if(u
 async function writeProject(p,asNew){if(!p)return false;let h=asNew?null:FH.get(p.id),blobP=null;
   const done=(fn,dl)=>{p.file=fn;p.dirty=false;p.savedAt=Date.now();p.name=fn.replace(/\.audiolab$/i,'');renderTabs();saveProjects();toast(dl?`Saved ${fn} to your Downloads folder.`:`Saved ${fn}.`);return true};
   if(h){try{let ok=true;if(h.queryPermission&&(await h.queryPermission({mode:'readwrite'}))!=='granted')ok=(await h.requestPermission({mode:'readwrite'}))==='granted';if(ok){const w=await h.createWritable();await w.write(await packProject(p));await w.close();return done(h.name)}}catch(e){}h=null}
-  if(window.showSaveFilePicker){try{h=await showSaveFilePicker({suggestedName:fileSafe(p.name)+'.audiolab',id:'audiolab',types:[{description:'AudioLab Studio project',accept:{'application/x-audiolab':['.audiolab']}}]});const w=await h.createWritable();await w.write(await packProject(p));await w.close();FH.set(p.id,h);idbPut('h',p.id,h);return done(h.name)}catch(e){if(e&&e.name==='AbortError')return false}}
+  if(window.showSaveFilePicker){try{h=await showSaveFilePicker({suggestedName:fileSafe(p.name)+'.audiolab',id:'audiolab',types:[{description:'AudioLab Pro project',accept:{'application/x-audiolab':['.audiolab']}}]});const w=await h.createWritable();await w.write(await packProject(p));await w.close();FH.set(p.id,h);idbPut('h',p.id,h);return done(h.name)}catch(e){if(e&&e.name==='AbortError')return false}}
   const nm=await askText('Save as (goes to your Downloads folder)',fileSafe(p.name));if(nm==null||!nm.trim())return false;const fn=fileSafe(nm.replace(/\.audiolab$/i,''))+'.audiolab',blob=await packProject(p),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},5000);return done(fn,true)}
-async function openProjectFile(){if(window.showOpenFilePicker){try{const[h]=await showOpenFilePicker({id:'audiolab',types:[{description:'AudioLab Studio project',accept:{'application/x-audiolab':['.audiolab']}}]});return openProjectBlob(await h.getFile(),h)}catch(e){if(e&&e.name==='AbortError')return}}
+async function openProjectFile(){if(window.showOpenFilePicker){try{const[h]=await showOpenFilePicker({id:'audiolab',types:[{description:'AudioLab Pro project',accept:{'application/x-audiolab':['.audiolab']}}]});return openProjectBlob(await h.getFile(),h)}catch(e){if(e&&e.name==='AbortError')return}}
   const inp=document.createElement('input');inp.type='file';inp.accept='.audiolab';inp.onchange=()=>{if(inp.files[0])openProjectBlob(inp.files[0])};inp.click()}
 async function openProjectBlob(f,h){const _ex=PJ.list.find(p=>p.file===f.name&&!p.dirty);if(!_ex&&pFull())return;let J;try{J=await unpackProject(f)}catch(e){toast(`${f.name} is not an AudioLab project, or it is damaged.`);return}
   const ex=PJ.list.find(p=>p.file===f.name&&!p.dirty);if(ex){switchProject(ex.id);toast(`${f.name} is already open.`);return}
@@ -7558,7 +7597,7 @@ addEventListener('resize',()=>{if(TRE.on)setTimeout(trEditPaint,120)});
 
 /* standalone copy: the same app as its own top-level page on the Mac (device picker, setSinkId and SharedArrayBuffer need that) */
 const SA_SERVE=`#!/usr/bin/env python3
-# AudioLab Studio local launcher. Run:  python3 serve_audiolab.py   (from the folder with AudioLab-Studio.html)
+# AudioLab Pro local launcher. Run:  python3 serve_audiolab.py   (from the folder with AudioLab-Studio.html)
 import http.server, os, socketserver, webbrowser, threading
 PORT = 8765
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -7579,7 +7618,7 @@ class H(http.server.SimpleHTTPRequestHandler):
 socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer(('127.0.0.1', PORT), H) as srv:
     url = f'http://localhost:{PORT}/'
-    print('AudioLab Studio is running at', url, ' (press Ctrl+C to stop)')
+    print('AudioLab Pro is running at', url, ' (press Ctrl+C to stop)')
     threading.Timer(.6, lambda: webbrowser.get('open -a "Google Chrome" %s').open(url) if os.path.exists('/Applications/Google Chrome.app') else webbrowser.open(url)).start()
     srv.serve_forever()
 `;
@@ -7658,7 +7697,7 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.fx
 fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ma=col],[data-ma=exp]');if(!b)return;const t=curT();if(!t||!t.macro)return;e.stopPropagation();e.preventDefault();t.macro.c=b.dataset.ma==='col';if(t.macro.c)MAC.edit=false;changed(false);renderFx()},true);
 /* settings: General page */
 function genSync(){const g=id=>document.getElementById(id);if(!g('genTut'))return;g('genTut').checked=UI.tutBtn!==false;g('genAskClose').checked=UI.askClose!==false;
-  const D=window.audiolabDesktop;g('genVer').textContent='AudioLab Studio v'+VERSION+(D?' · desktop app':' · browser');g('genUpd').hidden=!(D&&D.checkForUpdates);const tg=document.getElementById('tutgrp');if(tg)tg.hidden=UI.tutBtn===false}
+  const D=window.audiolabDesktop;g('genVer').textContent='AudioLab Pro v'+VERSION+(D?' · desktop app':' · browser');g('genUpd').hidden=!(D&&D.checkForUpdates);const tg=document.getElementById('tutgrp');if(tg)tg.hidden=UI.tutBtn===false}
 {const g=id=>document.getElementById(id);
  g('genTut').onchange=e=>{UI.tutBtn=e.target.checked;saveUI();genSync()};g('genAskClose').onchange=e=>{UI.askClose=e.target.checked;saveUI()};
  g('genTour').onclick=()=>{closeSet();if(typeof tutSet==='function')tutSet(true)};g('genKeys').onclick=()=>openSettings('keys');
@@ -9370,6 +9409,147 @@ function pbxInit(){
   draw:bnDraw})}
 /* the particle devices get the "picture fills the device" look */
 {const _fdP=fxDevHtml;fxDevHtml=function(t,f,kn){const h=_fdP.apply(this,arguments);return PBX.has(f.type)&&typeof h==='string'?h.replace('class="dev fxd','class="dev fxd pbx pbx-'+f.type):h}}
+/* ---------- v0.167: the mixer grows from the right ----------
+   The master strip and the tab above it are the base: they stay at the right. The window is exactly as wide as its channels need,
+   so adding or removing a track, another strip width or compact channels move the LEFT edge. When the channels no longer fit to the left
+   of the right edge, the window stops there and the channels scroll under the master, which stays in view.
+   UI.mxCapW: a narrower width the user set by dragging the window edge (cleared by dragging it wider than the channels need). */
+const MXR={rz:false,raf:0,bk:''};
+function mxrNeed(w,ms){const cs=getComputedStyle(ms),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,gap=parseFloat(cs.columnGap)||0,M=ms.querySelector('.mx.master');if(!M)return 0;
+  const S0=ms.querySelectorAll('.mx:not(.master)'),last=S0[S0.length-1],ml=parseFloat(getComputedStyle(M).marginLeft)||0;
+  const inner=(last?last.offsetLeft+last.offsetWidth+gap+ml:pl+ml)+M.offsetWidth+pr+(ms.querySelector(':scope>svg.cabs')?4:0);return Math.ceil(inner+(w.offsetWidth-ms.clientWidth))}
+mxAutoW=function(){const w=document.getElementById('mixWin');if(!w||w.hidden||MXR.rz)return;const ms=w.querySelector('.mxs');if(!ms)return;
+  const need=mxrNeed(w,ms);if(!need)return;const vw=innerWidth/ZOOM,W0=w.offsetWidth,R=w.offsetLeft+W0,M=ms.querySelector('.mx.master'),minW=Math.min(need,Math.ceil(M.offsetWidth+(W0-ms.clientWidth)+24));
+  /* room to the left of the fixed right edge; a window that was pushed far to the left keeps at least the master and may then grow to the right */
+  let room=Math.max(minW,Math.min(R,vw)-8);if(UI.mxCapW)room=Math.max(minW,Math.min(room,UI.mxCapW));
+  const W=Math.round(Math.min(need,room));w.classList.toggle('mxover',need>W+1);
+  if(Math.abs(W-W0)>=1){w.style.width=W+'px';w.style.left=Math.round(R-W)+'px';UI.win=UI.win||{};UI.win.mixWin={x:w.offsetLeft,y:w.offsetTop,w:W,h:w.offsetHeight}}
+  mxrBar(w)};
+/* the tab above the mixer is never wider than the window: first the words go, then the buttons that are also in the mixer settings menu */
+function mxrBar(w){const hd=w.querySelector(':scope>.fwh');if(!hd)return;const W=w.offsetWidth,k=W+'|'+hd.querySelectorAll('button').length+'|'+(hd.querySelector('.dacw')?1:0);if(MXR.bk===k)return;MXR.bk=k;
+  w.classList.remove('mxb1','mxb2');hd.style.maxWidth='none';try{if(hd.offsetWidth<=W+1)return;w.classList.add('mxb1');if(hd.offsetWidth<=W+1)return;w.classList.add('mxb2')}finally{hd.style.maxWidth=''}}
+function mxrSoon(){if(MXR.raf)return;MXR.raf=requestAnimationFrame(()=>{MXR.raf=0;try{mxAutoW()}catch(e){console.error('AudioLab mixer width',e)}})}
+{const _mfR=mxFit;mxFit=function(){const r=_mfR.apply(this,arguments);mxrSoon();return r}}
+addEventListener('resize',mxrSoon);
+/* dragging an edge of the mixer: narrower than the channels need is remembered as the widest it may get, wider snaps back to the channels */
+document.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('#mixWin>.rzh');if(h&&e.button===0)MXR.rz=true},true);
+document.addEventListener('pointerup',()=>{if(!MXR.rz)return;setTimeout(()=>{MXR.rz=false;const w=document.getElementById('mixWin'),ms=w&&w.querySelector('.mxs');if(!ms)return;const need=mxrNeed(w,ms);if(w.offsetWidth<need-2&&w.offsetLeft>14)UI.mxCapW=w.offsetWidth;else delete UI.mxCapW;saveUI();MXR.bk='';mxAutoW()},0)},true);
+/* the master stays in view while the channels scroll, so the cables are redrawn to keep its socket under it */
+document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('mxs')&&t.closest('#mixWin')){try{if(cabOn())cabSoon()}catch(x){}}},true);
+/* the spectrum overlay button can be folded away when the mixer is narrow, so the mixer settings menu has it too */
+{const _mhR=mxsHtml;mxsHtml=function(adv){const h=_mhR.apply(this,arguments);return adv?h:h.replace('<h5>Channels</h5>','<h5>Window</h5><div class="mxsg"><label class="mxst" title="Spectrum overlay: a see-through spectrum of the master (and any tracks you add) that floats over everything. The same as the Spectrum button at the top of the mixer."><input type="checkbox" data-mxspo="1"><span>Spectrum overlay</span></label></div><h5>Channels</h5>')}}
+{const _msR=mxsSync;mxsSync=function(){const r=_msR.apply(this,arguments);try{const on=SPO.list.some(o=>o.mx);for(const el of document.querySelectorAll('[data-mxspo]'))el.checked=on}catch(e){}return r}}
+document.addEventListener('change',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.mxspo){const b=document.getElementById('mxDev');if(b)b.click();setTimeout(()=>{try{mxsSync()}catch(x){}},0)}});
+/* after the mixer was moved there may be more or less room to its left */
+document.addEventListener('pointerup',()=>{const w=document.getElementById('mixWin');if(w&&!w.hidden&&!MXR.rz)setTimeout(mxrSoon,0)},true);
+/* ---------- v0.167: Settings > Interface (the tab that was called Layout) ----------
+   stfBuild() rearranges the tab once: Interface scale first, then one Layout box (picture, presets, panels, transport bar, track controls).
+   Every mixer setting gets a small picture (STI, stIc); the pictures of the four meter settings follow the chosen value (stIcV).
+   The fader and meter design is a drop-down (button .fdsel opens #fdPop) and is also used on the track headers (HFD, hfdCss, class hfd on #hdrin). */
+const STI={compact:'<rect x="5" y="4" width="3" height="16" rx="1"/><rect x="10.5" y="4" width="3" height="16" rx="1"/><rect x="16" y="4" width="3" height="16" rx="1"/>',
+ num:'<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10.5 9 12.5 7.5v6"/>',
+ w:'<rect x="8.5" y="4" width="7" height="16" rx="1.5"/><path d="M2 12h4M4 10l-2 2 2 2M22 12h-4M20 10l2 2-2 2"/>',
+ mw:'<rect x="6.5" y="4" width="11" height="16" rx="1.5"/><path d="M9.5 15V9l2.5 3 2.5-3v6"/><path d="M1.5 12h2.5M22.5 12H20"/>',
+ fh:'<path d="M8 4v16"/><rect x="5" y="9" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/><path d="M18 5v14M16 7l2-2 2 2M16 17l2 2 2-2"/>',
+ fx:'<rect x="4" y="4.5" width="16" height="4.2" rx="1.2"/><rect x="4" y="10.3" width="16" height="4.2" rx="1.2"/><path d="M12 16.8v4M10 18.8h4"/>',
+ snd:'<circle cx="8" cy="12" r="4.2"/><path d="M8 12V9"/><path d="M14.5 12H21M18 9l3 3-3 3"/>',
+ view:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M5.5 12c1.5 0 1.5-4 3-4s2 8 3.5 8 2-6 3.5-6 1.5 2 3 2"/>',
+ pan:'<path d="M5 17a8 8 0 0 1 14 0"/><path d="M12 14l3.5-5.5"/><path d="M2.5 20.5h3M18.5 20.5h3"/>',
+ btn:'<rect x="2.5" y="8" width="5.6" height="8" rx="1.3"/><rect x="9.2" y="8" width="5.6" height="8" rx="1.3"/><circle cx="19" cy="12" r="2.7" fill="currentColor" stroke="none"/>',
+ sc:'<path d="M8 4v16"/><path d="M11 5h6M11 9h3.5M11 13h6M11 17h3.5"/>',
+ val:'<rect x="2.5" y="8" width="19" height="8" rx="2"/><path d="M5.5 12h2M10 10.3v3.4M12.6 13.7h.01M15 10.3h2.4v3.4H15z"/>',
+ pkr:'<path d="M3 19l5-11 3.5 7 2.5-4 6.5 8"/><path d="M5 5h6"/>',
+ gband:'<rect x="7" y="4" width="10" height="16" rx="1.5"/><path d="M7.8 7h8.4" stroke-width="2.2"/><path d="M7.8 10h8.4" stroke="#f5c84c" stroke-width="1.6"/>',
+ cab:'<circle cx="5" cy="7" r="2.4"/><circle cx="19" cy="7" r="2.4"/><path d="M5 9.4c0 9 14 9 14 0"/>',
+ mLu:'<path d="M5 19v-6M10 19V7M15 19v-9M20 19V5"/>',
+ mTp:'<path d="M3 16c3 0 4-10 7.5-10S14 16 17 16s2-3 4-3"/><path d="M8 3.5h5"/><circle cx="5.5" cy="14.5" r=".9" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".9" fill="currentColor"/>',
+ mTgt:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+ mCorr:'<path d="M3 13h18"/><path d="M3 10v6M12 10v6M21 10v6"/><circle cx="16.5" cy="13" r="2.3" fill="currentColor" stroke="none"/>',
+ spo:'<rect x="2.5" y="4" width="19" height="16" rx="3" opacity=".55"/><path d="M5 16c2 0 2.5-7 5-7s2.5 5 4.5 5 2-3 4.5-3"/>'};
+const stSvg=h=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${h}</svg>`;
+/* pictures that follow the chosen value: meter speed (a tiny meter that falls at that speed when you point at the row), reading, peak hold line, colours */
+function stIcV(k,v){if(k==='spd')return`<span class="stmm stmm-${v}"><b></b><b></b></span>`;
+  if(k==='alg')return stSvg(v==='rms'?'<path d="M3 18c3 0 4.5-9 9-9s6 9 9 9"/><path d="M3 18h18" opacity=".4"/>':v==='vu'?'<path d="M4 17a8 8 0 0 1 16 0"/><path d="M12 17l4.5-7.5"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/>':v==='lufs'?'<path d="M5 19v-6M10 19V7M15 19v-9M20 19V5"/><path d="M3 4h18" opacity=".4"/>':'<path d="M3 19l3.5-13 3 10 2.5-7 3 6 2-4 4 8"/>');
+  if(k==='hold'){const t=v==='0'?'':v==='99'?'∞':v;return stSvg('<rect x="5" y="11" width="5" height="10" rx="1" fill="currentColor" stroke="none" opacity=".5"/>'+(v==='0'?'<path d="M4 6h7" stroke-dasharray="1.5 2.5" opacity=".45"/>':'<path d="M4 6h7" stroke-width="2"/>')+(t?`<text x="18" y="${t==='∞'?17:16.5}" font-size="${t==='∞'?12:9.5}" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700" font-family="Inter,system-ui,sans-serif">${t}</text>`:''))}
+  if(k==='col'){let g='';try{g=lvStops().map(([d,c])=>c+' '+(dbN(d)*100).toFixed(0)+'%').join(',')}catch(e){}return`<span class="stcol"><b style="background:linear-gradient(to top,${g})"></b><b style="background:linear-gradient(to top,${g})"></b></span>`}
+  return''}
+const STV={spd:1,alg:1,hold:1,col:1};
+const stIc=k=>`<i class="mxsi" data-ik="${k}" aria-hidden="true">${STV[k]?'':stSvg(STI[k]||'<circle cx="12" cy="12" r="5"/>')}</i>`;
+{const _mhB=mxsHtml;mxsHtml=function(adv){let h=_mhB.apply(this,arguments);
+  h=h.replace(/(<label class="mxs[tr]"[^>]*>)(?=(?:<span>[^<]*<\/span>)?<(?:input|select)[^>]*data-(mxs|mxm|mxspo)="(\w+)")/g,(m,a,at,k)=>a+stIc(at==='mxspo'?'spo':k));
+  h=h.replace(/<div class="fdg">[\s\S]*?<\/div>(?=<p class="hint">|<button type="button" class="mxsmore")/,`<button type="button" class="fdsel" data-fdsel="1" aria-haspopup="listbox" title="Fader and meter design: click to see all ${FDS.length} designs with a small picture of each. The chosen design is used in the mixer and on the tracks."><span class="fdselp"></span><span class="fdselt"><b></b><small>Used for the faders and meters in the mixer and for the volume and level bars on every track</small></span><svg class="cr" viewBox="0 0 12 12" width="14" height="14" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>`);
+  return h.split('Settings, Layout,').join('Settings, Interface,')}}
+{const _msB=mxsSync;mxsSync=function(){const r=_msB.apply(this,arguments);try{const o=mxsO(),m=mtrO();
+    for(const el of document.querySelectorAll('.mxsi[data-ik]')){const k=el.dataset.ik;if(!STV[k])continue;const v=String(m[k]),kk=k==='col'?v:v;if(el.dataset.v!==kk){el.dataset.v=kk;el.innerHTML=stIcV(k,v)}}
+    for(const b of document.querySelectorAll('.fdsel')){if(b.dataset.n===String(o.fd))continue;b.dataset.n=o.fd;b.querySelector('.fdselp').innerHTML=fdPrev(o.fd);b.querySelector('.fdselt b').textContent=o.fd+'  '+(FDS[o.fd-1]?FDS[o.fd-1].n:'')}
+    if(o.fd===9)for(const u of document.querySelectorAll('.fdsel .fdp.fd9 .fm u'))u.style.setProperty('background',mcolAt(-7),'important')}catch(e){console.error('AudioLab settings pictures',e)}return r}}
+/* the drop-down with all fader and meter designs */
+function fdPopClose(){const p=document.getElementById('fdPop');if(p&&!p.hidden){p.hidden=true;if(p._b)p._b.classList.remove('open')}}
+function fdPopOpen(btn){let p=document.getElementById('fdPop');
+  if(!p){p=document.createElement('div');p.id='fdPop';p.className='mxsp';p.setAttribute('role','listbox');p.setAttribute('aria-label','Fader and meter design');
+    p.innerHTML='<div class="fdg">'+FDS.map((d,i)=>`<button type="button" class="fdt" role="option" data-fd="${i+1}" title="${esc(d.n)}: use this design for the faders and meters in the mixer and on the tracks">${fdPrev(i+1)}<span><b>${i+1}</b>${esc(d.n)}</span></button>`).join('')+'</div>';document.body.appendChild(p);p.hidden=true}
+  if(!p.hidden&&p._b===btn){fdPopClose();return}if(p._b)p._b.classList.remove('open');p._b=btn;btn.classList.add('open');p.hidden=false;try{fdCssUp(true);mxsSync()}catch(e){}
+  p.style.left='100px';p.style.top='100px';const r0=p.getBoundingClientRect(),zf=r0.left>0?r0.left/100:1,r=btn.getBoundingClientRect();
+  let y=r.bottom+4;if(y+r0.height>innerHeight-6)y=r.top-r0.height-4;if(y<6)y=Math.max(6,innerHeight-r0.height-6);p.style.left=clamp(r.left,6,Math.max(6,innerWidth-r0.width-6))/zf+'px';p.style.top=y/zf+'px'}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;const b=t.closest('[data-fdsel]');if(b){fdPopOpen(b);return}if(t.closest('#fdPop [data-fd]'))setTimeout(fdPopClose,0)});
+document.addEventListener('pointerdown',e=>{const p=document.getElementById('fdPop');if(!p||p.hidden)return;const t=e.target;if(p.contains(t)){e.stopImmediatePropagation();return}if(!(t.closest&&t.closest('[data-fdsel]')))fdPopClose()},true);
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const p=document.getElementById('fdPop');if(p&&!p.hidden){fdPopClose();e.stopImmediatePropagation();e.preventDefault()}},true);
+document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='setBody')fdPopClose()},true);
+/* the same design on the track headers: the volume bar (.hb) and the level bars (.vm). The bars are still drawn the old way (a height per bar, a line for the peak);
+   a design only changes their look with CSS, and segments are a striped cover over the bar, so nothing extra is drawn per frame. § = the volume bar, ¶ = the level bars */
+const hfK=(w,bg,r,sh,x)=>`§ .hk{width:${w}px!important;margin-left:${-w/2}px!important;background:${bg}!important;border-radius:${r||'2px'};box-shadow:${sh||'0 1px 3px rgba(0,0,0,.8)'}!important;${x||''}}`;
+const hfDot=(d,bg,sh)=>hfK(d,bg,'50%',sh,`top:50%!important;bottom:auto!important;height:${d}px;margin-top:${-d/2}px`);
+const hfLine=(h,x)=>`§ .hf{top:50%!important;bottom:auto!important;height:${h}px;margin-top:${-h/2}px;${x||''}}`;
+const hfSeg=(on,gap)=>`¶ i::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(to top,transparent 0 ${on}px,#060708 ${on}px ${on+gap}px)}¶ i u{z-index:2}`;
+const hfThin=w=>`¶ i b{left:50%!important;right:auto!important;width:${w}px;margin-left:${-w/2}px}¶ i+i{border-left:0!important}`;
+const HFD=['',
+ hfK(9,'linear-gradient(90deg,#f3f4f7,#b9bcc6 38%,#16181d 38%,#16181d 62%,#b9bcc6 62%,#d1d3da)','2px','0 1px 4px rgba(0,0,0,.85),inset 0 1px 0 #fff')+hfLine(2,'opacity:.6')+`§{background:#030304!important}`+hfSeg(4,1),
+ hfK(7,'linear-gradient(90deg,#2c2e36 0 34%,#ff4d4d 34% 66%,#0b0c0f 66%)')+hfSeg(3,1),
+ hfDot(11,'radial-gradient(circle at 35% 28%,#fff,#b9bdc7 45%,#6c707b)','0 1px 4px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.35)')+hfLine(3)+`¶ i::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 1.2px,#060708 1.7px) 50% 100%/4px 5px repeat-y}¶ i u{z-index:2}¶ i+i{border-left:0!important}`,
+ hfK(3,'#f2f4f8','1px','0 0 4px rgba(0,0,0,.9)')+hfLine(1,'background:var(--c)!important')+`§{background:linear-gradient(transparent calc(50% - .5px),rgba(255,255,255,.2) calc(50% - .5px),rgba(255,255,255,.2) calc(50% + .5px),transparent calc(50% + .5px))!important;border-color:transparent!important;box-shadow:none!important}`+hfThin(1.5),
+ hfK(13,'linear-gradient(rgba(255,255,255,.4),rgba(255,255,255,.12))','7px','0 2px 6px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.5)','top:1px!important;bottom:1px!important')+`§{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.1)!important;border-radius:9px}§ .hf{opacity:.6}¶ i{border-radius:3px!important;background:rgba(255,255,255,.07)!important}¶ i b{border-radius:3px;opacity:.95}¶ i+i{border-left:0!important;margin-left:1px}`,
+ hfK(11,'#f2f4f8','0','none','clip-path:polygon(0 0,100% 0,60% 46%,60% 100%,40% 100%,40% 46%)')+`§ .hf{display:none}§{background:#15171d!important;border-color:transparent!important;box-shadow:none!important;border-radius:0}¶ i{background:#15171d!important}¶ i+i{border-left:0!important;margin-left:1px}`,
+ hfK(8,'repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),linear-gradient(#e2e5ea,#8f939d)')+`¶ i b{background-image:STEPS!important}`,
+ hfK(8,'linear-gradient(90deg,#3c3f48 0 36%,var(--c) 36% 64%,#1c1e24 64%)','3px')+`¶ i b{border-radius:1px}`,
+ hfK(11,'rgba(10,11,15,.9)','6px','0 0 0 1.5px var(--c),0 0 8px var(--c)','top:2px!important;bottom:2px!important')+hfLine(2,'background:var(--c)!important;box-shadow:0 0 6px var(--c)')+`§{background:#07080b!important}`+hfThin(2)+`¶ i b{filter:brightness(1.25)}`,
+ hfK(9,'linear-gradient(90deg,#f5ecd4 0 36%,#c0392b 36% 64%,#dccea9 64%)','2px','0 1px 4px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.8)')+hfLine(2,'opacity:.5')+`§{background:#050505!important;border-color:#8a744a!important}`+hfSeg(5,2)+`¶ i{background:#0b0906!important}`,
+ hfK(11,'transparent','3px','inset 0 0 0 2px #eef1f6,0 1px 4px rgba(0,0,0,.7)','top:1px!important;bottom:1px!important')+`§ .hf{opacity:.35}§{background:#06070a!important}¶{box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}`,
+ hfK(6,'linear-gradient(#8d9099,#f4f5f8 45%,#c9ccd3 60%,#7f828c)')+hfSeg(7,2),
+ hfK(5,'linear-gradient(90deg,#5e616b 0 30%,#fff 30% 70%,#212329 70%)')+`§{background:repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 8px),#0b0c0f!important}`+hfLine(2)+hfThin(2)+`¶ i{background:repeating-linear-gradient(to top,rgba(255,255,255,.14) 0 1px,transparent 1px 8px),#060708!important}`,
+ hfDot(11,'radial-gradient(circle,#fff 2.5px,#101217 3.2px)','0 0 0 2px var(--c),0 1px 4px rgba(0,0,0,.7)')+hfLine(3,'background:var(--c)!important')+`§{background:#0b0c0f!important}`+hfSeg(2,2)];
+function hfdCss(){const o=mxsO(),n=clamp(o.fd|0,1,HFD.length),k=n+'|'+mtrO().col;const hd=document.getElementById('hdrin');if(hd&&hd.classList.contains('hfd')!==(n>1))hd.classList.toggle('hfd',n>1);if(hfdCss.k===k)return;hfdCss.k=k;
+  let st=document.getElementById('hfdCss');if(!st){st=document.createElement('style');st.id='hfdCss';document.head.appendChild(st)}
+  const L=lvStops(),P=L.map(([d])=>dbN(d)*100),steps='linear-gradient(to top,'+L.map(([d,c],i)=>c+' '+P[i].toFixed(1)+'%,'+c+' '+(i<L.length-1?P[i+1]:100).toFixed(1)+'%').join(',')+')';
+  st.textContent=(HFD[n-1]||'').replace(/§/g,'#hdrin.hfd .hb[data-c^="hd:"]').replace(/¶/g,'#hdrin.hfd .vm').replace(/STEPS/g,steps);
+  const dyn=!!(FDS[n-1]&&FDS[n-1].dyn);if(hfdCss.dyn&&!dyn&&hd)for(const b of hd.querySelectorAll('.vm b')){b.style.removeProperty('background');b._dc=null}hfdCss.dyn=dyn}
+{const _maB=mxsApply;mxsApply=function(){const r=_maB.apply(this,arguments);try{hfdCss()}catch(e){console.error('AudioLab header design',e)}return r}}
+{const _fcB=fdCssUp;fdCssUp=function(){const r=_fcB.apply(this,arguments);try{hfdCss()}catch(e){}return r}}
+/* "Level colour" design on the tracks: each bar takes the colour of its own level. Only a colour change when the level crosses into another colour step. */
+{const _tmB=trackMeters;trackMeters=function(){const r=_tmB.apply(this,arguments);if(hfdCss.dyn&&trackMeters.L&&trackMeters.z<3)for(const{id,bars} of trackMeters.L)for(let ci=0;ci<2;ci++){const b=bars[ci];if(!b)continue;const v=LV.get(id+ci);if(v===undefined)continue;const c=mcolAt(v);if(b._dc!==c){b._dc=c;b.style.setProperty('background',c,'important')}}return r}}
+/* the Settings tab itself */
+function stfBuild(){const sec=document.querySelector('#setBody section[data-page=layout]');if(!sec||sec.dataset.stf)return;sec.dataset.stf=1;
+  const g=id=>document.getElementById(id),box=el=>el&&el.closest('.sbox');
+  const scale=box(g('setScale')),lhead=sec.querySelector('.lhead'),mini=sec.querySelector('.minibox'),hint=mini&&mini.nextElementSibling;if(!lhead||!mini)return;
+  if(scale){sec.insertBefore(scale,sec.firstChild);scale.classList.add('stfsc');const h=scale.querySelector('h4');if(h)h.remove()}
+  const lay=document.createElement('div');lay.className='sbox stfl';sec.insertBefore(lay,scale?scale.nextSibling:sec.firstChild);lay.append(lhead,mini);if(hint&&hint.classList.contains('hint'))lay.append(hint);
+  const rows=document.createElement('div');rows.className='stfrows';lay.append(rows);
+  const row=(ic,name,tip)=>{const r=document.createElement('div');r.className='stfr';r.innerHTML=`<span class="stfk" title="${esc(tip)}">${ic}<b>${name}</b></span><div class="stfv"></div>`;rows.append(r);return r.lastChild};
+  const short=(inp,txt,tip)=>{const l=inp&&inp.closest('label');if(!l)return null;for(const n of [...l.childNodes])if(n.nodeType===3)n.remove();l.append(' '+txt);l.title=tip;l.classList.add('stfc');return l};
+  /* panels: the map and the visualiser with its place */
+  {const m=g('layMap'),v=g('layViz'),vd=g('layVizDock'),old=box(m);if(m&&v){const c=row(stSvg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18M9 15v5"/>'),'Panels','Extra panels around the tracks');
+    const a=short(m,'Map','Map: a small overview of the whole song under the tracks'),b=short(v,'Visualizer','Visualizer: spectrogram, levels, waveform with beats and clipping');c.append(a,b);if(vd){vd.title='Where the visualizer sits';c.append(vd)}if(old&&old!==lay&&!old.querySelector('input,select,button'))old.remove()}}
+  /* transport bar: its editor and its options in one row */
+  {const e=g('trEditBtn'),rs=g('trReset'),au=g('trAuto'),old=box(e);if(e){const c=row(stSvg('<rect x="2.5" y="7" width="19" height="10" rx="2.5"/><path d="M6 10v4l3-2z" fill="currentColor"/><rect x="11" y="10.2" width="3.6" height="3.6" rx=".6"/><circle cx="18" cy="12" r="1.6"/>'),'Transport bar','The bar with play, stop, tempo and the position');
+    e.textContent='Edit…';e.classList.remove('pri');e.title='Edit the transport bar: opens the real transport bar in edit mode. Drag modules left and right, make them compact or hide them, and add gaps, dividers and extra modules.';c.append(e);if(rs){rs.title='Put the transport bar back to how it came';c.append(rs)}
+    if(au){const l=short(au,'Shrink on small screens','Shrink the modules of the transport bar automatically when the screen is small');if(l){l.style.margin='';c.append(l)}}if(old&&old!==lay&&!old.querySelector('input,select'))old.remove()}}
+  /* track controls: the editor from the Controls button above the tracks */
+  {const e=g('hczSetB'),rs=g('hczSetR'),old=box(e);if(e){const c=row(stSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M6.5 5v14"/><path d="M9.5 9.5h6M9.5 14h3"/><circle cx="17" cy="14" r="1.6"/>'),'Track controls','The buttons and sliders on every track');
+    e.textContent='Customise…';e.classList.remove('pri');e.title='Customise track controls: choose which buttons and sliders every track shows and in what order, the icon size, the pan style and the size of Mute and Solo. Also under the Controls button above the tracks, or right-click a track.';c.append(e);if(rs){rs.title='Put the track controls back to how they came';c.append(rs)}if(old&&old!==lay&&!old.querySelector('input,select'))old.remove()}}
+  /* the mixer part is drawn again so it gets the pictures and the design drop-down */
+  {const s=g('mxsSet');if(s){s.innerHTML=mxsHtml(true);try{fdCssUp(true);mxsSync()}catch(e){}}}}
+setTimeout(()=>{try{stfBuild();hfdCss()}catch(e){console.error('AudioLab settings layout',e)}},0);
+{const _osB=openSettings;openSettings=function(){try{stfBuild()}catch(e){console.error('AudioLab settings layout',e)}return _osB.apply(this,arguments)}}
+{const _rhB=renderHeaders;renderHeaders=function(){const r=_rhB.apply(this,arguments);try{hfdCss()}catch(e){}return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -9471,7 +9651,7 @@ if(CHILD){document.body.classList.add('child');saveProjects=()=>{};autosaveTick=
 /* ===== real windows (desktop app): a torn-off project runs in its own macOS / Windows window ===== */
 if(CHILDN){const D=window.audiolabDesktop;document.body.classList.add('childn');
   const post=m=>{try{D.toMain(m)}catch(e){}};parent={postMessage:m=>post(m)};/* the code that talked to the in-app parent now talks to the main window */
-  setTimeout(async()=>{const d=await D.childData();if(!d)return;const blob=new Blob([d.bytes]),J=await unpackProject(blob);PJ.list=[{id:d.pid,name:d.name,S:J.project,view:J.view,file:d.file,savedAt:d.savedAt,dirty:d.dirty}];PJ.cur='none';switchProject(d.pid);hideSplash();document.title=d.name+' · AudioLab Studio'},300);
+  setTimeout(async()=>{const d=await D.childData();if(!d)return;const blob=new Blob([d.bytes]),J=await unpackProject(blob);PJ.list=[{id:d.pid,name:d.name,S:J.project,view:J.view,file:d.file,savedAt:d.savedAt,dirty:d.dirty}];PJ.cur='none';switchProject(d.pid);hideSplash();document.title=d.name+' · AudioLab Pro'},300);
   window.audiolabHost.dockOut=async idx=>{const p=curP();if(!p)return D.dock(null);p.S=S;const blob=await packProject(p),bytes=new Uint8Array(await blob.arrayBuffer());return D.dock({pid:p.id,name:p.name,file:p.file||null,savedAt:p.savedAt||0,dirty:!!p.dirty,bytes,idx:idx==null?null:idx})};
   setTimeout(()=>{const b=document.createElement('button');b.id='pwNat';b.innerHTML='<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="2"/><path d="M10 15V9.5M7.6 11.8 10 9.4l2.4 2.4"/></svg>Back to tabs';b.title='Put this project back in the tabs of the main window';b.onclick=()=>window.audiolabHost.dockOut(null);document.body.appendChild(b)},800)}
 if(!CHILD&&window.audiolabDesktop&&window.audiolabDesktop.onDock){const D=window.audiolabDesktop;
