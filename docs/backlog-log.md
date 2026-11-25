@@ -68,3 +68,34 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Tasks 3 to 7. Optional dancing character for the Fun view was not built.
+
+## 25 November 2026: v0.161, task 3 of 7 (spectrum overlay fixes, dockable analyser with modules)
+
+### Research (how analyser suites lay this out)
+- iZotope Insight 2: one window made of modules (loudness, levels, sound field, spectrogram, spectrum, history) that are switched on and off with buttons in the title bar and share the space; the sound field puts the correlation bar beside or under the goniometer.
+- Cubase: the right zone / meter bridge is a narrow strip with a Loudness tab that lists momentary, short-term, integrated, range and true peak as numbers beside a bar with the target marked.
+- Followed here: module buttons in the title bar, numbers beside loudness bars with a green target band, goniometer with L and R on the diagonals and mono upright, correlation -1 to +1 with red below zero, spectrogram with bass at the bottom and newest on the right.
+
+### Built (all new code sits before `askChoice`, names start with `anz` / `ANZ`; the old `spo*` functions are reassigned)
+- **Steady spectrum scale** (`ANZD.spec`): the top of the picture is fixed at -24 dB (`ANZTOP`, measured so a very loud master sits about 12 dB under the top). Height can be 60, 72 (default) or 96 dB, or "Slow automatic", which only moves after the song has been louder or quieter for several seconds, in 6 dB steps. The old code rescaled on every frame.
+- **Rising line when stopped: fixed.** Cause: silent bins (minus infinity) were turned into -120 dB, the treble tilt of 4.5 dB per octave was added, and the auto scale then zoomed in on that tilted line. Silent bins now stay on the floor and nothing is drawn without sound.
+- **Glass border**: the window is now `.spov.anz` with a separate glass layer `.spgl` (class `lg` for the edge light, `rfAttach` for refraction) behind it. The canvases live in `.anzb`, a layer of their own above the glass, never inside it. Docked strips are solid (no glass at all).
+- **Docking** (`anzSetDock`, `anzDock`, `anzSide`; button in the title bar or right-click): window, or a strip at the bottom (`#botOut`), top (`#topOut`), left or right (fixed, `#stage` gets a margin through `body.anz-l` / `body.anz-r` and `--anzl` / `--anzr`). Strips are resized by dragging their inner edge (`.anzrs`; `ov.dh`, `ov.dw`). One strip per side; `applyLayout` is wrapped so strips stay next to the main window. Docked analysers are saved and come back (`spoSave`, `UI.spov` now also holds `dock, mods, col, rng, dh, dw`).
+- **Modules** (`ANZM`, drawn by `ANZD`, built by `anzBuild`): spectrum, spectrogram, stereo field, scrolling waveform, loudness (momentary, short-term and integrated bars, true peak max, range, target band), correlation (with a mark at the lowest recent value). Switch them with the buttons in the title bar, drag those buttons or the module labels to reorder (`anzWire`), or right-click for a menu (`anzMenu`). In a row the stereo field is square, loudness and correlation are narrow; in a column (left, right, or a tall window) they stack. The same modules work in the floating window. The first time an analyser is docked all modules are switched on.
+- **Colours** (`anzCols` reads the schemes from `MXMODES`, so schemes added to the mixer views later appear here too): source colour, heat, three bands, bass heat, rainbow, fire, ice, purple spectral, AudioLab blue and teal, mono white. Uses `mxLut`, `mxC`, `mxPosRGB`, `mxBands`.
+- **Idle**: after about 2 seconds without sound the pictures are only checked 3 times a second (`anzFrame`).
+- Comparing several sources still works in the spectrum; the other modules show the first source. Loudness is always the master.
+
+### Tested
+- Headless Playwright, demo project (30 tracks) playing at bar 48: no page errors on load or during the tests.
+- Screenshots checked: floating window with one and with six modules, tall window (column), docked bottom, top, left and right with different colour schemes, the right-click menu, and the picture 0.6 s and 4 s after stop (curve falls away, no rising line).
+- Stage size checked for each dock (for example left: strip 250 px, stage starts at 250). Reorder by dragging a title bar button, toggle by click, two sources, save and reload (strip came back docked with the same modules, order and colours), close (body classes and `UI.spov` cleared).
+- One frame with all six modules took about 1.7 ms (headless, software drawing).
+
+### Not verified
+- Look, refraction edge and frame rate on the user's Mac.
+- Track sources use the track's 256-sample analysers for stereo field, waveform and correlation, so those are coarser than for the master.
+- The older "Visualizer" panel (Settings) still exists next to this; both can be docked left or right together but that combination was not tested.
+
+### Left
+- Tasks 4 to 7. Ideas: level meters as a seventh module, loudness history graph, retire the old Visualizer panel in favour of this one.
