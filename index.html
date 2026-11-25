@@ -1058,6 +1058,51 @@ label:hover>.mxsi .stmm b{animation:stmm var(--d,1s) linear infinite}label:hover
 .grwd .grwg h6{margin:0;font:700 9px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8d92a3;white-space:nowrap}
 .grwd .grwk{display:grid;grid-template-rows:repeat(3,auto);grid-auto-flow:column;grid-auto-columns:60px;gap:3px 2px;align-content:start}.grwd .grwks{overflow:visible}
 .grwd .grwsr{display:flex;flex-direction:column;gap:3px;margin-top:4px;width:122px}.grwd .grws{display:flex;align-items:center;gap:6px;font-size:10px;color:#a9abb6}.grwd .grws span{width:36px}.grwd .grws select{min-height:20px;height:20px;font-size:10.5px;padding:0 4px;flex:1;min-width:0;max-width:84px}
+/* v0.170: effect levels (zero, optimised, full), blur from a ready-made picture, live edge light, new "Glass and light" settings */
+#arrBlur{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none}
+body.fxpic #fxglass{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.fxcopy #tr,body.fxcopy #hglass,body.fxcopy #gpPane{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.fxcopy #fxin .dev.eq2 .eqov2,body.fxcopy .dev.gridd>.devh .kpre,body.fxcopy .dev.gridd>.devh>button,body.fxcopy .addrow button,body.fxcopy #tip{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.fxzero *,body.fxzero *::before,body.fxzero *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.fxzero .fwin,body.fxzero .sheet,body.fxzero .pop{box-shadow:0 6px 18px rgba(0,0,0,.5)!important}
+body.fxzero .spov,body.fxzero .spov.anz>.spgl{background:rgb(10,11,16)!important}body.fxzero .spov.anz{background:none!important}
+body.fxzero #toast{background:rgb(36,36,46)}body.fxzero #presWin{background:rgb(30,31,40)}body.fxzero #liteNote{background:rgb(22,24,32)}
+body.fxstill *:not(#splash):not(#splash *),body.fxstill *:not(#splash):not(#splash *)::before,body.fxstill *:not(#splash):not(#splash *)::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+/* edge light v3: a hairline that takes its light from what is behind the panel (set from script as --elb), and a faint glow inside the edge */
+.lg::before,.fwin::before,#ctxm::before,.modal>div::before,.setw::before{padding:1px;filter:none;
+  background:var(--elb,linear-gradient(180deg,rgba(255,255,255,calc(.5*var(--edge))) 0%,rgba(230,240,255,calc(.2*var(--edge))) 9%,rgba(255,255,255,calc(.07*var(--edge))) 40%,rgba(255,255,255,calc(.05*var(--edge))) 70%,rgba(255,240,224,calc(.16*var(--edge))) 100%))}
+@media (min-resolution:1.5dppx){.lg::before,.fwin::before,#ctxm::before,.modal>div::before,.setw::before{padding:.5px}}
+.lg::after,.fwin::after,#ctxm::after,.modal>div::after,.setw::after{background:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.16*var(--edge))),inset 0 6px 10px -9px rgba(255,255,255,calc(.14*var(--edge))),inset 0 -1px 0 rgba(255,255,255,calc(.05*var(--edge)))}
+/* the logo glow changes 6 times a second instead of on every frame: it sits inside the transport glass, and every change makes that glass recalculate */
+#bLogo{animation-timing-function:steps(12)!important}
+/* Settings: Glass and light */
+.fxlv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 8px}
+.fxlv button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 11px;min-height:0;height:auto;border-radius:11px;background:rgba(6,7,10,.74);border:1px solid rgba(255,255,255,.1);white-space:normal;box-shadow:none}
+.fxlv button svg{width:30px;height:30px;margin-bottom:2px;color:#8a8fa0}
+.fxlv button b{font-size:13px}.fxlv button small{font-size:10.5px;line-height:1.35;color:#8a8fa0;font-weight:400}
+.fxlv button.on{border-color:#4cc9f0;background:linear-gradient(rgba(76,201,240,.16),rgba(76,141,255,.08));box-shadow:0 0 0 1px rgba(76,201,240,.35)}
+.fxlv button.on svg{color:#7fdcf6}
+.fxopt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.fxopt #fxOptB{background:linear-gradient(#3b78e0,#2b5cba);border-color:#13336e;color:#fff}
+.fxopt #fxRep{flex:1 1 260px;font-size:11px;line-height:1.4;color:#a9adba;min-width:0}
+#gpv{height:150px}
+#gpv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#gpv .gpane{background:rgba(var(--gtr),var(--ga));backdrop-filter:var(--blur2);-webkit-backdrop-filter:var(--blur2);left:22%;right:22%;top:24px;bottom:24px;border-radius:12px;text-align:center}
+#gpv #gpFps{position:absolute;right:8px;bottom:6px;font:600 10.5px Inter,system-ui,sans-serif;color:#cfd3db;background:rgba(0,0,0,.55);padding:2px 7px;border-radius:7px;font-variant-numeric:tabular-nums}
+.gcard .gsw{display:flex;align-items:center;gap:9px;margin-top:6px;font-size:11px;color:#a9adba}
+.fxh{display:flex;align-items:baseline;gap:10px;margin:14px 0 6px;font-size:12.5px;font-weight:600}
+.fxh output{font-weight:500;font-size:11px;color:#7fe3b5;font-variant-numeric:tabular-nums}
+.pbox{display:flex;flex-direction:column;border-radius:11px;background:rgba(6,7,10,.74);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.prow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:11px;align-items:center;padding:9px 12px;border-top:1px solid rgba(255,255,255,.06)}
+.prow:first-child{border-top:0}
+.prow .pic{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:#8a8fa0}
+.prow.on .pic{background:rgba(76,201,240,.14);color:#7fdcf6}
+.prow .pic svg{width:26px;height:26px}
+.prow b{font-size:12.5px;display:block}.prow small{display:block;font-size:10.5px;line-height:1.4;color:#8a8fa0}
+.prow small i{font-style:normal;color:#f8d97c}.prow small i.lo{color:#7fe3b5}
+.prow .seg button{min-height:26px;font-size:11px;padding:0 9px}
+.prow.dis{opacity:.45}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2037,7 +2082,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
         <div class="bpcard lite smallcard" id="liteCard"><div class="bpic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22a11 11 0 1 1 22 0"/><path d="M16 22l-6-6"/><circle cx="16" cy="22" r="1.8" fill="currentColor"/><path d="M8.5 22h-1M24.5 22h-1M16 13v-1" opacity=".6"/></svg></div>
           <div class="bptx"><b>Light mode</b><span>For slower computers: calmer screen updates (30 fps), still logo, leaner synth voices and a bigger safety margin for note timing.</span></div>
           <label class="bpsw"><input type="checkbox" id="liteChk"><i></i></label></div>
-        <div class="fpsrow"><label for="fpsSel">Screen updates</label><select id="fpsSel"><option value="0">As fast as the screen (up to 240 fps)</option><option value="120">120 fps</option><option value="60">60 fps (saves battery)</option></select><output id="fpsNow">–</output></div><div class="fpshint" id="fpsHint" hidden><span></span><button type="button" id="fpsFix">Make it smooth</button></div>
+        <div class="fpsrow"><label for="fpsSel">Screen updates</label><select id="fpsSel"><option value="0">As fast as the screen (up to 240 fps)</option><option value="120">120 fps</option><option value="60">60 fps (saves battery)</option></select><output id="fpsNow">–</output></div><div class="fpshint" id="fpsHint" hidden><span></span><button type="button" id="fpsFix">Optimise for this computer</button></div>
         <h4>Help while you work</h4>
         
         <label class="chk"><input type="checkbox" id="setTips"> Show tooltips with short explanations when hovering</label>
@@ -5215,7 +5260,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.169',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.170',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6390,11 +6435,11 @@ function rfMap(w,h,r,band){const c=document.createElement('canvas');c.width=w;c.
    - The map depends on size only. While a panel is being resized the old map is stretched; a new one is made once, after the size has settled, under a new filter name (Chromium caches filters by name).
    - The same glass for everyone: light mode no longer switches the glass off. */
 function rfBuild(el,o){o.tm=0;if(!el.isConnected)return;const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);if(w<8||h<8)return;
-  const q=Math.min(w,h)>=48?4:2,mw=Math.max(4,Math.ceil(w/q)),mh=Math.max(4,Math.ceil(h/q)),r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;
+  const q=Math.max(2,Math.min(6,Math.round(Math.min(24,Math.min(w,h)/3)/3.5))),mw=Math.max(4,Math.ceil(w/q)),mh=Math.max(4,Math.ceil(h/q)),r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;
   o.img.setAttribute('href',rfMap(mw,mh,r/q,Math.min(24,Math.min(w,h)/3)/q));o.built=w+'x'+h;o.id='rf'+(rfN++);o.f.setAttribute('id',o.id);rfStyle(el,o)}
-function rfStyle(el,o){const amt=(UI.refr??40)/100,b=UI.blur??18;o.dm.setAttribute('scale',(-amt*80).toFixed(1));
-  const v=`url(#${o.id}) blur(${(b/2).toFixed(1)}px) saturate(${(1+b/25).toFixed(2)})`;if(o.v!==v){o.v=v;el.style.backdropFilter=v;el.style.webkitBackdropFilter=v}}
-function rfUpdate(el){const o=RFX.get(el);if(!o)return;const amt=(UI.refr??40)/100;
+function rfStyle(el,o){const b=fxBlurPx();o.dm.setAttribute('scale',String(-RFK));
+  const v=`url(#${o.id})`+(b>0&&!fxPic(el)?` blur(${(b/2).toFixed(1)}px) saturate(${(1+b/25).toFixed(2)})`:'');if(o.v!==v){o.v=v;el.style.backdropFilter=v;el.style.webkitBackdropFilter=v}}
+function rfUpdate(el){const o=RFX.get(el);if(!o)return;const amt=fxGet().refr?1:0;
   if(!amt||!isChromium){if(o.v){o.v='';el.style.backdropFilter='';el.style.webkitBackdropFilter=''}return}
   const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);if(w<8||h<8)return;
   const key=w+'x'+h;if(o.key!==key){const first=!o.key;o.key=key;for(const n of[o.img,o.f]){n.setAttribute('width',w);n.setAttribute('height',h)}clearTimeout(o.tm);if(first)rfBuild(el,o);else o.tm=setTimeout(()=>rfBuild(el,o),160)}
@@ -8205,11 +8250,11 @@ setInterval(()=>{const cv=document.querySelector('#fxin canvas.spfv');if(!cv||!c
    Now the arrangement canvas is clipped to the part you see directly, and the part that only shows through glass is a second, half-resolution canvas refreshed 20 times
    a second. Through an 18 px blur that is indistinguishable, and the panels are filtered 20 times a second instead of every frame (and not at all while nothing moves). */
 const GB={cv:null,last:0,tm:0,clip:'',on:false};
-function gbOn(){return UI.glBack!==false&&(UI.blur??18)>=4}
+function gbOn(){const m=fxGet().blur;return m==='copy'?(UI.blur??18)>0:m==='live'&&UI.glBack!==false&&(UI.blur??18)>=4}
 function gbLayout(){if(!gbOn()){if(GB.clip){arr.style.clipPath='';GB.clip=''}if(GB.cv)GB.cv.style.display='none';GB.on=false;return false}
   if(!GB.cv){const c=document.createElement('canvas');c.id='arrBack';c.setAttribute('aria-hidden','true');arr.before(c);GB.cv=c;/* the clipped-away part of the arrangement still takes clicks, scrolling and drags exactly as before */for(const ty of['pointerdown','pointermove','pointerup','pointercancel','mousedown','mousemove','mouseup','click','dblclick','contextmenu','wheel'])c.addEventListener(ty,e=>{const E=new e.constructor(e.type,e);if(!arr.dispatchEvent(E))e.preventDefault();e.stopPropagation()},{passive:false})}GB.cv.style.display='';GB.on=true;
   const a=arr.getBoundingClientRect(),z=ZOOM;if(!a.width||!a.height)return false;let top=0,bot=0,left=0,right=0;
-  const glassy=e=>{if(!e)return null;const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden')return null;const bf=cs.backdropFilter||cs.webkitBackdropFilter;if(!bf||bf==='none')return null;const r=e.getBoundingClientRect();return r.width>4&&r.height>4?r:null};
+  const glassy=e=>{if(!e)return null;const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden')return null;const bf=cs.backdropFilter||cs.webkitBackdropFilter;if((!bf||bf==='none')&&!fxPic(e))return null;const r=e.getBoundingClientRect();return r.width>4&&r.height>4?r:null};
   for(const id of['tr','fx']){const e0=document.getElementById(id),r=glassy(e0)||(id==='fx'&&e0&&e0.offsetHeight>4?e0.getBoundingClientRect():null);/* the solid device panel hides the arrangement completely: nothing is drawn underneath it */if(!r||r.width<a.width*.7)continue;if((r.top+r.bottom)/2>(a.top+a.bottom)/2)bot=Math.max(bot,a.bottom-r.top);else top=Math.max(top,r.bottom-a.top)}
   {const r=glassy(document.getElementById('hglass'));if(r&&r.height>a.height*.5){if(r.left<=a.left+2)left=r.right-a.left;else right=a.right-r.left}}
   const px=v=>(Math.min(Math.max(0,v),a.width)/z).toFixed(1)+'px',cl=(top>0||bot>0||left>0||right>0)?`inset(${px(top)} ${px(right)} ${px(bot)} ${px(left)})`:'';
@@ -9686,6 +9731,176 @@ function grwInit(){PRESETS.growl={name:'Growl',cat:'Bass',desc:'Growl bass for d
   fxin.addEventListener('pointerdown',e=>{const cv=e.target.closest&&e.target.closest('canvas[data-k=grw_main]');if(!cv)return;const t=curT();if(t&&t.inst&&t.inst.preset==='growl')preview(t,36,.9)});
   fxin.addEventListener('change',e=>{const s=e.target.closest&&e.target.closest('select[data-grws]');if(!s)return;const t=curT();if(t&&t.inst&&t.inst.preset==='growl'){pushUndo();t.inst[s.dataset.grws]=s.value;changed(false)}},true);
   {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{for(const el of fxin.querySelectorAll('[data-c^="fx:grw:"]')){const k=el.dataset.c.slice(7);if(GWTIP[k])el.title=GWLB[k]+': '+GWTIP[k]+' Drag to change, double-click to reset.'}}catch(e){}return r}}}
+/* ====================== v0.170: effect levels, blur from a ready-made picture, refraction as a switch, live edge light ======================
+   Three levels (Settings, Glass and light): Zero effects, Optimised, Full effects. They are presets of four switches kept in UI.fx:
+     refr  refraction (the lens in backdrop-filter)            blur  'off' | 'copy' (ready-made picture) | 'live' (backdrop-filter)
+     edge  edge light that follows what is behind the panel    anim  animations
+   Blur from a picture: the transport bar, the track headers and the device panel only ever have the arrangement behind them. A quarter-size copy of the
+   arrangement is blurred ONCE when the arrangement changes (#arrBlur) and simply shown under those panels. They then need no backdrop-filter at all, so
+   meters, the time display and knobs moving inside them no longer make the browser blur the panel again. The arrangement you see directly is untouched.
+   The device panel uses this picture in every level. */
+function fxPre(k){return k==='zero'?{refr:false,blur:'off',edge:false,anim:false}:k==='light'?{refr:false,blur:'copy',edge:true,anim:true}:{refr:true,blur:'live',edge:true,anim:true}}
+function fxGet(){let f=UI.fx;if(!f||typeof f!=='object'||!/^(off|copy|live)$/.test(f.blur))f=UI.fx=fxPre(UI.refr===0?'light':'full');return f}
+function fxSame(a,b){return!!a.refr===!!b.refr&&a.blur===b.blur&&!!a.edge===!!b.edge&&!!a.anim===!!b.anim}
+function fxLevel(){const f=fxGet();return fxSame(f,fxPre('zero'))?'zero':fxSame(f,fxPre('full'))?'full':'opt'}
+let FXK=1;const RFK=60;/* refraction strength, fixed: 75% of the old slider's maximum (the old slider only changed this one number, never the cost) */
+function fxBlurPx(){const f=fxGet();if(f.blur==='off')return 0;let b=UI.blur??18;if(b>0&&f.blur==='copy'){/* a very small blur is the most expensive kind for the browser; keep it just above that band */const d=(window.devicePixelRatio||1)*ZOOM;if(b*d<4.2)b=4.2/d}return b}
+function fxPic(el){return fxGet().blur==='copy'&&!!el&&(el.id==='tr'||el.id==='hglass'||el.id==='gpPane')}
+function fxSnap(){return{fx:{...fxGet()}}}
+function fxSet(p,keep){if(!keep)FXO.undo=fxSnap();UI.fxUser=true;UI.fx={...fxGet(),...p};saveUI();applyTrans()}
+applyTrans=function(){const f=fxGet(),zero=f.blur==='off'&&!f.refr,/* no blur and no refraction: solid panels */t=zero?0:(UI.trans??50)/100,b=fxBlurPx(),k=f.blur==='live'?FXK:1,r=document.documentElement.style,B=document.body.classList;
+  r.setProperty('--ga',(1-t).toFixed(3));
+  if(b>0){const b1=k<1?Math.max(2,Math.round(b*k)):+b.toFixed(1),b2=k<1?Math.max(3,Math.round(b*1.5*k)):Math.round(b*1.5);r.setProperty('--blur',`blur(${b1}px) saturate(${(1+b/30).toFixed(2)})`);r.setProperty('--blur2',`blur(${b2}px) saturate(${(1+b/22).toFixed(2)})`)}
+  else{r.setProperty('--blur','none');r.setProperty('--blur2','none')}
+  r.setProperty('--edge',(f.edge?(UI.edge??60)/100:0).toFixed(2));
+  B.toggle('fxcopy',f.blur==='copy');B.toggle('fxzero',zero);B.toggle('fxstill',!f.anim);
+  {const red=AT.red0==null?(AT.red0=AT.reduce):AT.red0,nr=red||!f.anim;if(AT.reduce!==nr){AT.reduce=nr;for(const id of['atomC','navAtomC']){const c=document.getElementById(id);if(c)delete c.dataset.done}}}
+  rfAll();try{GB.lt=0;gbCopy()}catch(e){}dirty=true;try{elSoon();fxSync();GPV.k=''}catch(e){}};
+glassPlay=function(on){FXK=on&&UI.glPlay!==false?.5:1;if(fxGet().blur==='live')applyTrans()};
+
+/* ---- the blurred picture ---- */
+const ABL={cv:null,q:null,p:0,w:0,h:0,clip:'x'};
+/* src: any canvas. Q: a work canvas. out: the canvas that gets the blurred picture (w x h). sg: blur in out pixels. The edges are stretched outward first, so the blur does not fade to nothing at the border. */
+function fxBlurPic(src,Q,out,w,h,sg,sat){const p=Math.ceil(sg*2.5)+1,W=src.width,H=src.height;if(Q.width!==w+2*p||Q.height!==h+2*p){Q.width=w+2*p;Q.height=h+2*p}if(out.width!==w||out.height!==h){out.width=w;out.height=h}
+  const g=Q.getContext('2d');g.imageSmoothingEnabled=true;g.clearRect(0,0,w+2*p,h+2*p);g.drawImage(src,0,0,W,H,0,0,w+2*p,h+2*p);
+  g.drawImage(src,0,0,1,H,0,p,p,h);g.drawImage(src,W-1,0,1,H,p+w,p,p,h);g.drawImage(src,0,0,W,1,p,0,w,p);g.drawImage(src,0,H-1,W,1,p,p+h,w,p);g.clearRect(p,p,w,h);g.drawImage(src,0,0,W,H,p,p,w,h);
+  const c=out.getContext('2d');c.clearRect(0,0,w,h);c.filter=sg>.2?`blur(${sg.toFixed(2)}px) saturate(${sat.toFixed(2)})`:'none';c.drawImage(Q,-p,-p);c.filter='none';return p}
+function abDraw(){const mode=fxGet().blur,b=fxBlurPx(),want=GB.on&&b>0&&mode!=='off'&&arr.width>8&&arr.height>8;
+  if(!want){if(ABL.cv)ABL.cv.style.display='none';ABL.w=0;document.body.classList.remove('fxpic');return}
+  if(!ABL.cv){const c=document.createElement('canvas');c.id='arrBlur';c.setAttribute('aria-hidden','true');arr.before(c);ABL.cv=c;ABL.q=document.createElement('canvas')}
+  const a=arr.getBoundingClientRect();let clip='';
+  if(mode!=='copy'){/* live glass: only the device panel uses the picture */const fg=document.getElementById('fxglass'),r=fg&&fg.offsetHeight>4?fg.getBoundingClientRect():null;if(!r||r.bottom<=a.top||r.top>=a.bottom){ABL.cv.style.display='none';ABL.w=0;document.body.classList.remove('fxpic');return}
+    const z=ZOOM,px=v=>(Math.max(0,v)/z).toFixed(1)+'px';clip=`inset(${px(r.top-a.top-2)} 0px ${px(a.bottom-r.bottom-2)} 0px)`}
+  if(clip!==ABL.clip){ABL.clip=clip;ABL.cv.style.clipPath=clip}ABL.cv.style.display='';document.body.classList.add('fxpic');
+  const s=arr.width*arr.height/16<70000?.5:.25,w=Math.max(2,Math.round(arr.width*s)),h=Math.max(2,Math.round(arr.height*s)),d=arr.width/Math.max(1,a.width);
+  ABL.p=fxBlurPic(arr,ABL.q,ABL.cv,w,h,b*.8*d*ZOOM*s,1+b/30);ABL.w=w;ABL.h=h}
+/* the half-size sharp copy behind live glass, as before; with blur from a picture it is not needed and only passes clicks on.
+   The check of which panels cover the arrangement reads layout, so while scrolling it runs 4 times a second instead of on every copy. */
+gbCopy=function(fast){const n=performance.now();GB.last=n;GB.stale=false;let ok;if(fast&&n-(GB.lt||0)<250)ok=GB.ok;else{ok=gbLayout();GB.lt=n;GB.ok=ok}
+  if(!ok){abDraw();elSoon();return}const c=GB.cv;
+  if(fxGet().blur==='copy'){if(c.width!==2){c.width=2;c.height=2}}
+  else{const w=Math.max(1,Math.round(arr.width*.5)),h=Math.max(1,Math.round(arr.height*.5));if(c.width!==w||c.height!==h){c.width=w;c.height=h}const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='low';g.clearRect(0,0,w,h);g.drawImage(arr,0,0,w,h)}
+  abDraw();elSoon()};
+gbTick=function(){if(!GB.on&&!gbOn())return;const n=performance.now();if(n-GB.last>=8)gbCopy(true);else if(!GB.tm)GB.tm=setTimeout(()=>{GB.tm=0;gbCopy(true)},10)};
+
+/* ---- live edge light ----
+   The rim of every glass panel takes its brightness and a little of its colour from what is behind and next to that edge: bright clips or a bright picture
+   nearby light the rim up, dark areas leave it dim. The light is read from a 64 x 36 copy of the blurred picture above (never from the screen), at most
+   11 times a second and only after the picture behind changed or while the pointer is in use. The result is one gradient per panel, written only when it changed. */
+try{CSS.registerProperty({name:'--elb',syntax:'*',inherits:false})}catch(e){}
+const EL={cv:null,g:null,d:null,a:null,t:0,tm:0,w:64,h:36,set:new Set()};
+function elSoon(){if(EL.tm)return;EL.tm=setTimeout(()=>{EL.tm=0;try{elTick()}catch(e){}},Math.max(0,90-(performance.now()-EL.t)))}
+function elSampler(d,w,h,r){return(x,y)=>{const u=(x-r.left)/r.width,v=(y-r.top)/r.height;if(u<0||u>1||v<0||v>1)return null;const i=(Math.min(h-1,v*h|0)*w+Math.min(w-1,u*w|0))*4;return d[i+3]<8?null:[d[i],d[i+1],d[i+2]]}}
+function elGrad(r,S,e){const cx=r.left+r.width/2,cy=r.top+r.height/2,P=[],nx=Math.max(3,Math.min(9,Math.round(r.width/90))),ny=Math.max(2,Math.min(6,Math.round(r.height/90)));
+  for(let i=0;i<=nx;i++){P.push([r.left+r.width*i/nx,r.top,0,1,1]);P.push([r.left+r.width*i/nx,r.bottom,0,-1,.5])}for(let i=1;i<ny;i++){P.push([r.left,r.top+r.height*i/ny,1,0,.34]);P.push([r.right,r.top+r.height*i/ny,-1,0,.28])}
+  let any=false;const st=[];for(const[x,y,ix,iy,dir] of P){let R=0,G=0,Bl=0,n=0;for(const o of[-7,3,14]){const s=S(x+ix*o,y+iy*o);if(s){R+=s[0];G+=s[1];Bl+=s[2];n++}}
+    let lum=.1,cr=255,cg=255,cb=255;if(n){any=true;R/=n;G/=n;Bl/=n;lum=(.2126*R+.7152*G+.0722*Bl)/255;const m=Math.max(R,G,Bl,1),k=255/m;cr=255*.62+R*k*.38;cg=255*.62+G*k*.38;cb=255*.62+Bl*k*.38}
+    const al=Math.min(1,(.11+1.7*Math.pow(lum,.9))*dir*.8*e);let ang=Math.atan2(x-cx,-(y-cy))*180/Math.PI;if(ang<0)ang+=360;st.push([ang,`rgba(${Math.min(255,Math.round(cr/8)*8)},${Math.min(255,Math.round(cg/8)*8)},${Math.min(255,Math.round(cb/8)*8)},${(Math.round(al*50)/50).toFixed(2)})`])}
+  if(!any)return'';st.sort((p,q)=>p[0]-q[0]);const f0=st[0];return'conic-gradient(from 0deg,'+f0[1]+' 0deg,'+st.map(s=>s[1]+' '+s[0].toFixed(1)+'deg').join(',')+','+f0[1]+' 360deg)'}
+function elClear(){for(const el of EL.set){el.style.removeProperty('--elb');el._elb=''}EL.set.clear()}
+function elTick(){EL.t=performance.now();const f=fxGet(),e=(UI.edge??60)/100;if(!f.edge||e<=0||document.hidden||!ABL.w||!ABL.cv){elClear();return}
+  if(!EL.cv){EL.cv=document.createElement('canvas');EL.cv.width=EL.w;EL.cv.height=EL.h;EL.g=EL.cv.getContext('2d',{willReadFrequently:true})}
+  EL.g.clearRect(0,0,EL.w,EL.h);EL.g.drawImage(ABL.q,ABL.p,ABL.p,ABL.w,ABL.h,0,0,EL.w,EL.h);const S=elSampler(EL.g.getImageData(0,0,EL.w,EL.h).data,EL.w,EL.h,arr.getBoundingClientRect()),seen=new Set();
+  for(const el of document.querySelectorAll('.lg,.fwin,#ctxm,.modal>div')){if(el.id==='gpPane'||!el.getClientRects().length)continue;const r=el.getBoundingClientRect();if(r.width<8||r.height<8)continue;const s=elGrad(r,S,e);
+    if(s){seen.add(el);EL.set.add(el);if(el._elb!==s){el._elb=s;el.style.setProperty('--elb',s)}}}
+  for(const el of[...EL.set])if(!seen.has(el)){el.style.removeProperty('--elb');el._elb='';EL.set.delete(el)}}
+setInterval(()=>{if(!document.hidden&&performance.now()-LACT<1500)elSoon()},450);
+
+/* ---- Optimise for this computer ---- */
+const FXO={busy:false,undo:null,rep:''};
+function fxFps(ms){return new Promise(res=>{let n=0,t0=0;const f=now=>{if(!t0)t0=now;else n++;if(now-t0<ms)requestAnimationFrame(f);else res(n*1000/(now-t0))};requestAnimationFrame(f)})}
+function fxHzSnap(v){let best=v;for(const h of[30,48,50,60,72,75,90,100,120,144,165,180,200,240,300,360])if(Math.abs(h-v)<=h*.06)best=h;return Math.round(best)}
+function fxWords(f){return'refraction '+(f.refr?'on':'off')+', '+(f.blur==='live'?'live blur':f.blur==='copy'?'blur from a ready-made picture':'no blur')+', edge light '+(f.edge?'on':'off')+', animations '+(f.anim?'on':'off')}
+async function fxOptimise(){if(FXO.busy)return;if(document.hidden){FXO.rep='The window has to be in view for the test.';fxSync();return}FXO.busy=true;const before=fxSnap(),wait=ms=>new Promise(r=>setTimeout(r,ms)),say=t=>{FXO.rep=t;fxSync()};
+  try{const cores=navigator.hardwareConcurrency||0,mem=navigator.deviceMemory||0,weak=(cores&&cores<=2)||(mem&&mem<=2);
+    const steps=[['Full effects',fxPre('full')],['Glass without refraction',fxPre('light')],['Glass without refraction and with a fixed edge light',{...fxPre('light'),edge:false}],['Solid panels with animations',{...fxPre('zero'),anim:true}],['Zero effects',fxPre('zero')]];
+    say('Testing: how fast is this screen…');UI.fx=fxPre('zero');applyTrans();await wait(350);const f0=await fxFps(800),hz=FPS.real||fxHzSnap(Math.max(f0,FPS.hz||0));
+    let pick=null;const res=[];for(const[name,f] of steps){if(weak&&f.refr)continue;if(document.hidden)throw new Error('hidden');say('Testing: '+name.toLowerCase()+'…');UI.fx={...f};applyTrans();await wait(400);const v=await fxFps(900);res.push([name,Math.round(v)]);if(v>=hz*.95){pick=[name,f];break}}
+    if(!pick)pick=steps[steps.length-1];UI.fxUser=true;UI.fx={...pick[1]};UI.fxOpt={...pick[1]};saveUI();applyTrans();FXO.undo=before;
+    const hw=(cores?cores+' processor cores':'')+(cores&&mem?' and ':'')+(mem?(mem>=8?'8 GB of memory or more':mem+' GB of memory'):'');
+    say('Your screen shows '+hz+' pictures a second.'+(hw?' This computer has '+hw+'.':'')+' '+res.map(([n,v],i)=>n+' reached '+Math.min(v,hz)+(i<res.length-1||v<hz*.95?', too slow.':', the full rate.')).join(' ')+' Chosen: '+fxWords(pick[1])+'.')}
+  catch(e){UI.fx=before.fx;saveUI();applyTrans();say('The test was interrupted. Nothing was changed.')}
+  FXO.busy=false;fxSync()}
+function fxUndo(){const u=FXO.undo;if(!u)return;FXO.undo=null;UI.fx={...u.fx};saveUI();applyTrans();FXO.rep='Back to the settings from before.';fxSync()}
+
+/* ---- Settings: Glass and light ---- */
+const FXPIC={zero:'<rect x="5" y="7" width="22" height="18" rx="3" fill="currentColor" opacity=".35"/><rect x="5" y="7" width="22" height="18" rx="3"/>',
+ opt:'<path d="M5 22a11 11 0 1 1 22 0"/><path d="M16 22l6-7"/><circle cx="16" cy="22" r="1.8" fill="currentColor"/>',
+ full:'<rect x="5" y="8" width="18" height="16" rx="4"/><path d="M9 12c3-2 7-2 10 0" opacity=".6"/><path d="M26 4v5M23.5 6.500h5M27 13v3M25.500 14.500h3"/>',
+ refr:'<rect x="4" y="6" width="24" height="20" rx="5"/><path d="M4 16c4-5 7 5 12 0s8 5 12 0" opacity=".7"/>',
+ blur:'<circle cx="16" cy="16" r="4"/><circle cx="16" cy="16" r="8" opacity=".55"/><circle cx="16" cy="16" r="12" opacity=".25"/>',
+ edge:'<path d="M5 26V11a6 6 0 0 1 6-6h15"/><path d="M9 26V13a4 4 0 0 1 4-4h13" opacity=".35"/><circle cx="24" cy="20" r="3" fill="currentColor" opacity=".6"/>',
+ anim:'<circle cx="9" cy="16" r="3" opacity=".3"/><circle cx="15" cy="16" r="3" opacity=".6"/><circle cx="22" cy="16" r="4"/>',
+ play:'<path d="M11 8l12 8-12 8z"/><circle cx="16" cy="16" r="13" opacity=".3"/>',
+ back:'<rect x="4" y="6" width="24" height="20" rx="3"/><rect x="9" y="11" width="14" height="10" rx="2" opacity=".5"/>',
+ note:'<path d="M12 22V8l12-3v14"/><circle cx="9" cy="22" r="3"/><circle cx="21" cy="19" r="3"/>',
+ slp:'<path d="M22 19a9 9 0 1 1-9-12 7 7 0 0 0 9 12z"/><path d="M20 6h5l-5 6h5" opacity=".6"/>'};
+function fxSvg(k){return'<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+FXPIC[k]+'</svg>'}
+function fxBuild(){const sec=document.querySelector('#setBody section[data-page=glass]');if(!sec||sec.dataset.fx)return;sec.dataset.fx=1;
+  const keep={};for(const id of['glPlay','glBack','ncOn','slpOn','setRefr','setRefrO'])keep[id]=document.getElementById(id);const cards=sec.querySelector('.gcards'),hint=document.getElementById('refrHint');
+  const row=(k,ic,t,d,ctl)=>`<div class="prow" data-pr="${k}"><span class="pic">${fxSvg(ic)}</span><div><b>${t}</b><small>${d}</small></div>${ctl}</div>`,sw=id=>`<label class="bpsw" data-sw="${id}"><i></i></label>`;
+  const top=document.createElement('div');top.innerHTML=`<div class="fxlv" id="fxLv" role="radiogroup" aria-label="Effect level">
+<button type="button" data-fxl="zero" role="radio">${fxSvg('zero')}<b>Zero effects</b><small>For very weak computers. Solid panels, no blur, no refraction, no edge light, no animations.</small></button>
+<button type="button" data-fxl="opt" role="radio">${fxSvg('opt')}<b>Optimised</b><small>Glass without refraction. The blur comes from a ready-made picture, which costs almost nothing.</small></button>
+<button type="button" data-fxl="full" role="radio">${fxSvg('full')}<b>Full effects</b><small>Refraction, live blur, edge light and all animations. For strong computers.</small></button></div>
+<div class="fxopt"><button type="button" id="fxOptB">Optimise for this computer</button><button type="button" id="fxUndo" hidden>Undo</button><span id="fxRep" role="status"></span></div>
+<div class="gprev" id="gpv" aria-hidden="true"><canvas id="gpBack"></canvas><canvas id="gpBlur"></canvas><div class="gpane lg" id="gpPane"><b>Glass preview</b><span id="gpTxt"></span></div><output id="gpFps"></output></div>`;
+  for(const o of sec.querySelectorAll('.gprev'))o.remove();sec.prepend(...top.children);
+  {const gr=cards.querySelector('.gcard.gr');if(gr){gr.querySelector('small').textContent='Bends the picture near the edges of glass, like a thick pane';const rw=gr.querySelector('.row');rw.style.display='none';const d=document.createElement('label');d.className='gsw';d.innerHTML='<span class="bpsw"><input type="checkbox" id="fxRefr" aria-label="Refraction"><i></i></span><span id="fxRefrT"></span>';gr.querySelector('.gbd').appendChild(d)}
+   const ge=cards.querySelector('.gcard.ge small');if(ge)ge.textContent='The thin line of light inside the edge of glass'}
+  const box=document.createElement('div');box.innerHTML=`<div class="fxh">What each effect costs <output id="pbFps"></output></div><div class="pbox">`+
+   row('blur','blur','Blur','<span id="pbBlurT"></span>','<div class="seg" id="fxBlurSeg"><button type="button" data-bm="off">Off</button><button type="button" data-bm="copy">Picture</button><button type="button" data-bm="live">Live</button></div>')+
+   row('edge','edge','Edge light follows the background','The rim gets brighter next to bright clips and dimmer over dark areas. <i class="lo">Costs little:</i> worked out about 10 times a second from a tiny picture, and only while the background changes. Off: a fixed rim.','<label class="bpsw"><input type="checkbox" id="fxEdge" aria-label="Edge light follows the background"><i></i></label>')+
+   row('anim','anim','Animations','The moving logo, glows and soft fades. <i class="lo">Costs little</i> on most computers. Off: everything changes at once and the logo stands still.','<label class="bpsw"><input type="checkbox" id="fxAnim" aria-label="Animations"><i></i></label>')+
+   row('glPlay','play','Softer blur while the song plays','Halves the live blur during playback, so each panel takes less work. Only matters with live blur.',sw('glPlay'))+
+   row('glBack','back','Half-size picture behind live glass','What shows through live glass is a half-size copy of the arrangement. Through the blur you cannot tell, and the panels are recalculated less often. Only matters with live blur.',sw('glBack'))+
+   row('ncOn','note','Note cache','Notes that repeat (same sound, pitch and length) are made once and played back as audio. <i class="lo">Saves a lot of processor</i> in dense songs. Exports are not affected.',sw('ncOn'))+
+   row('slpOn','slp','Sleeping tracks','While the song plays, tracks with nothing to play are unplugged so their effects stop using the processor. They wake up before their next clip.',sw('slpOn'))+`</div>`;
+  for(const o of sec.querySelectorAll('.sbox,h4,label.chk'))o.remove();
+  cards.after(...box.children);if(hint){hint.style.display='none';sec.appendChild(hint)}
+  for(const l of sec.querySelectorAll('[data-sw]')){const inp=keep[l.dataset.sw];if(inp){inp.setAttribute('aria-label',l.closest('.prow').querySelector('b').textContent);l.prepend(inp)}}
+  sec.querySelector('#fxLv').onclick=e=>{const b=e.target.closest('[data-fxl]');if(!b||FXO.busy)return;const k=b.dataset.fxl;FXO.rep='';fxSet(k==='opt'?(UI.fxOpt&&!fxSame(UI.fxOpt,fxPre('zero'))&&!fxSame(UI.fxOpt,fxPre('full'))?UI.fxOpt:fxPre('light')):fxPre(k))};
+  sec.querySelector('#fxOptB').onclick=()=>fxOptimise();sec.querySelector('#fxUndo').onclick=()=>fxUndo();
+  sec.querySelector('#fxRefr').onchange=e=>fxSet({refr:e.target.checked});sec.querySelector('#fxEdge').onchange=e=>fxSet({edge:e.target.checked});sec.querySelector('#fxAnim').onchange=e=>fxSet({anim:e.target.checked});
+  sec.querySelector('#fxBlurSeg').onclick=e=>{const b=e.target.closest('[data-bm]');if(b)fxSet({blur:b.dataset.bm})};
+  for(const id of['glPlay','glBack','ncOn','slpOn'])if(keep[id])keep[id].addEventListener('change',()=>setTimeout(fxSync,0));
+  try{rfAttach(document.getElementById('gpPane'))}catch(e){}fxSync()}
+function fxSync(){const sec=document.querySelector('#setBody section[data-page=glass]');if(!sec||!sec.dataset.fx)return;const f=fxGet(),lv=fxLevel(),q=id=>document.getElementById(id);
+  for(const b of q('fxLv').children){const on=b.dataset.fxl===lv;b.classList.toggle('on',on);b.setAttribute('aria-checked',on)}
+  q('fxRefr').checked=!!f.refr;q('fxRefr').disabled=!isChromium;q('fxRefrT').textContent=!isChromium?'Needs a Chromium browser':f.refr?'On. The most expensive effect.':'Off';q('fxEdge').checked=!!f.edge;q('fxAnim').checked=!!f.anim;
+  for(const b of q('fxBlurSeg').children)b.classList.toggle('on',b.dataset.bm===f.blur);
+  q('pbBlurT').innerHTML=f.blur==='live'?'Live: the browser blurs what is behind each panel again whenever anything behind or inside it changes. <i>Costs the most after refraction.</i>':f.blur==='copy'?'Picture: the arrangement is blurred once into a small picture that sits behind the transport bar, the track headers and the devices. <i class="lo">Costs almost nothing.</i> Windows and menus keep one simple live blur.':(f.refr?'Off: panels are see-through and sharp.':'Off: solid panels.')+' <i class="lo">Costs nothing.</i>';
+  const on={blur:f.blur!=='off',edge:f.edge,anim:f.anim,glPlay:UI.glPlay!==false,glBack:UI.glBack!==false,ncOn:UI.noteCache!==false,slpOn:UI.fxSleep!==false};
+  for(const r of sec.querySelectorAll('.prow')){const k=r.dataset.pr;r.classList.toggle('on',!!on[k]);if(k==='glPlay'||k==='glBack')r.classList.toggle('dis',f.blur!=='live')}
+  q('fxUndo').hidden=!FXO.undo||FXO.busy;q('fxOptB').disabled=FXO.busy;q('fxOptB').textContent=FXO.busy?'Testing…':'Optimise for this computer';q('fxRep').textContent=FXO.rep;
+  q('gpTxt').textContent=lv==='zero'?'Solid, no effects':(f.refr?'Refraction':'No refraction')+' · '+(f.blur==='live'?'live blur':f.blur==='copy'?'blur from a picture':f.refr?'no blur':'solid')+(f.edge?' · live edge light':'')}
+
+/* ---- the preview: a real glass panel over moving content, drawn with the same functions as the app (rfAttach, fxBlurPic, elGrad) ---- */
+const GPV={k:'',t:0,q:null,s:null,sg:null,n:0,f:0};
+function gpDraw(now){const sec=document.querySelector('#setBody section[data-page=glass]');if(!sec||sec.hidden||!sec.dataset.fx)return;const bk=document.getElementById('gpBack'),pane=document.getElementById('gpPane'),bl=document.getElementById('gpBlur');if(!bk||!bk.clientWidth)return;
+  const f=fxGet(),still=!f.anim;if(now-GPV.f>450){GPV.f=now;const t=FPS.fps+' of '+(FPS.hz||'?')+' frames per second',a=document.getElementById('gpFps'),b=document.getElementById('pbFps');if(a.textContent!==t){a.textContent=t;b.textContent='Now: '+t}}
+  const key=bk.clientWidth+'x'+bk.clientHeight+'|'+JSON.stringify(f)+'|'+UI.blur+'|'+UI.edge+'|'+UI.trans;if(still&&GPV.k===key)return;if(!still&&now-GPV.t<15.5)return;GPV.t=now;GPV.k=key;
+  const d=Math.min(2,window.devicePixelRatio||1)*ZOOM,W=Math.round(bk.clientWidth*d),H=Math.round(bk.clientHeight*d);if(bk.width!==W||bk.height!==H){bk.width=W;bk.height=H}
+  const g=bk.getContext('2d'),t=still?3:now/1000,rows=5,rh=H/rows,cols=['#4cc9f0','#b583ff','#ff9a3c','#3ecf8e','#ff7fb8'];g.fillStyle='#0b0c10';g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(255,255,255,.05)';for(let x=-((t*40*d)%(48*d));x<W;x+=48*d)g.fillRect(x,0,1,H);
+  for(let r=0;r<rows;r++){const sp=(26+r*9)*d,per=(150+r*34)*d,off=(t*sp)%per;for(let x=-off-per;x<W;x+=per){const cw=per*(.45+.1*((r*7)%4));g.fillStyle=cols[r];g.globalAlpha=.8;g.fillRect(x,r*rh+3*d,cw,rh-6*d);g.globalAlpha=.35;g.fillStyle='#fff';g.fillRect(x,r*rh+3*d,cw,3*d);g.globalAlpha=1}}
+  {/* a bright light that wanders, so the edge light has something to follow */const lx=W*(.5+.42*Math.sin(t*.7)),ly=H*(.5+.34*Math.sin(t*1.1+1)),rg=g.createRadialGradient(lx,ly,0,lx,ly,46*d);rg.addColorStop(0,'rgba(255,255,255,.95)');rg.addColorStop(.35,'rgba(255,244,214,.5)');rg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=rg;g.fillRect(lx-46*d,ly-46*d,92*d,92*d)}
+  const b=fxBlurPx(),pr=pane.getBoundingClientRect(),br=bk.getBoundingClientRect(),z=ZOOM;
+  if(f.blur==='copy'&&b>0){if(!GPV.q)GPV.q=document.createElement('canvas');const s=.5;fxBlurPic(bk,GPV.q,bl,Math.round(W*s),Math.round(H*s),b*.8*d*s,1+b/30);bl.style.display='';const px=v=>(Math.max(0,v)/z).toFixed(1)+'px';bl.style.clipPath=`inset(${px(pr.top-br.top)} ${px(br.right-pr.right)} ${px(br.bottom-pr.bottom)} ${px(pr.left-br.left)} round 12px)`}else bl.style.display='none';
+  if(f.edge&&(UI.edge??60)>0&&(still||GPV.n++%4===0)){if(!GPV.s){GPV.s=document.createElement('canvas');GPV.s.width=64;GPV.s.height=20;GPV.sg=GPV.s.getContext('2d',{willReadFrequently:true})}GPV.sg.drawImage(bk,0,0,64,20);
+    const s=elGrad(pr,elSampler(GPV.sg.getImageData(0,0,64,20).data,64,20,br),(UI.edge??60)/100);if(pane._elb!==s){pane._elb=s;if(s)pane.style.setProperty('--elb',s);else pane.style.removeProperty('--elb')}}
+  else if(!f.edge&&pane._elb){pane._elb='';pane.style.removeProperty('--elb')}}
+/* ---- one loop while Settings is open: the logo at a steady 120 pictures a second (it used to follow the visualiser clock, which drops to 2 a second when the mouse rests), and the preview ---- */
+const SLP2={on:false,l:0};
+function setLoop(now){if($('#set').hidden){SLP2.on=false;return}requestAnimationFrame(setLoop);
+  if(now-SLP2.l>=6.2){const nc=document.getElementById('navAtomC');if(nc&&nc.clientWidth>2){const st=AT.reduce||UI.lite;if(!(st&&nc.dataset.done)){SLP2.l=now;if(st)nc.dataset.done=1;paintAtom(nc,132,Math.min(2.5,window.devicePixelRatio||1)*ZOOM,AT.big,st?2:now/1000)}}}
+  try{gpDraw(now)}catch(e){}}
+{const _osF=openSettings;openSettings=function(){try{fxBuild()}catch(e){console.error('AudioLab glass settings',e)}const x=_osF.apply(this,arguments);try{fxSync()}catch(e){}if(!SLP2.on){SLP2.on=true;requestAnimationFrame(setLoop)}return x}}
+setTimeout(()=>{try{fxBuild()}catch(e){console.error('AudioLab glass settings',e)}},0);
+/* when Light mode switches itself on for a very weak computer, the effects go to Zero as well, unless the level was chosen by hand; "Turn off" in the notice brings them back */
+{const _laF=liteAuto;let prev=null;liteAuto=function(){const was=!!UI.lite,r=_laF.apply(this,arguments);if(!was&&UI.lite&&!UI.fxUser&&fxLevel()!=='zero'){prev={...fxGet()};UI.fx=fxPre('zero');saveUI();applyTrans()}return r};
+ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#liteNote [data-ln=off]');if(b&&prev){UI.fx=prev;prev=null;saveUI();applyTrans()}},true)}
+{const _hxF=hxTick;let hxL=0;hxTick=function(){/* with animations off the pictures do not move, so they are painted once a second instead of 30 times */if(AT.reduce){const n=performance.now();if(n-hxL<1000)return;hxL=n}return _hxF.apply(this,arguments)}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -10118,14 +10333,14 @@ function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);if(UI.lite&&now-L
   const g30=now-LG30>=33;if(g30)LG30=now;/* things inside glass panels (time display, meters, device pictures) update 30 times a second: every update makes the whole panel's glass recalculate. The playhead in the open arrangement keeps the full screen rate. */
   if(dirty||phd){const full=dirty;dirty=false;drawArr(!full);if(full||g30)drawMap(!full);drawPR();if(full||g30){const b=curDisp(),bar=Math.floor(b/4)+1,bt=Math.floor(b%4)+1,six=Math.floor((b%1)*4)+1,tk=Math.floor(((b*4)%1)*120),sec=secOf(b);
     $('#posBars').textContent=barsStr(b);$('#locL').textContent=barsStr(loopA());$('#locR').textContent=barsStr(loopB());locSecs();$('#posTime').textContent=`${Math.floor(sec/3600)}:${String(Math.floor(sec/60)%60).padStart(2,'0')}:${(Math.floor(sec%60*1000)/1000).toFixed(3).padStart(6,'0')}`}}
-  const busy=play.on||LIVE.size>0||now-LINT<2500||(ctx&&ctx.currentTime-LHIT<3),calm=!busy&&now-LINT>3000,vz=now-LVZ>=(UI.lite?48:busy?15:calm?500:31);if(vz)LVZ=now;/* calm = nothing plays and the mouse has rested for 6 s: the visualisers and the logo stop repainting, so the glass above and around them is not recalculated 30 times a second for a picture that does not change *//* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;if(!calm)drawAtom(performance.now());hxTick()}if(vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}if(now-LM30>=7.5){/* level meters: up to 120 times a second, showing the level of this instant (no smoothing), with a peak line that holds for a second */const d3=Math.min(.1,(now-LM30)/1000);LM30=now;meters(d3);trackMeters(d3);miniMeter()}if(g30){patNow();playGlow()}if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
+  const busy=play.on||LIVE.size>0||now-LINT<2500||(ctx&&ctx.currentTime-LHIT<3),calm=!busy&&now-LINT>3000,vz=now-LVZ>=(UI.lite?48:busy?15:calm?500:31);if(vz)LVZ=now;/* calm = nothing plays and the mouse has rested for 6 s: the visualisers and the logo stop repainting, so the glass above and around them is not recalculated 30 times a second for a picture that does not change *//* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;if(!calm)drawAtom(performance.now());hxTick()}if(0&&vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){/* the Settings logo has its own steady loop now (setLoop) */if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}if(now-LM30>=7.5){/* level meters: up to 120 times a second, showing the level of this instant (no smoothing), with a peak line that holds for a second */const d3=Math.min(.1,(now-LM30)/1000);LM30=now;meters(d3);trackMeters(d3);miniMeter()}if(g30){patNow();playGlow()}if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
   {const wk=performance.now()-_w0;FPS.js=FPS.js==null?wk:FPS.js*.95+wk*.05;cpuFrame(wk)}
 }
 (function boxSettings(){document.querySelectorAll('#setBody section').forEach(sec=>{let box=null;for(const el of [...sec.children]){if(el.tagName==='H4'&&box&&/^(Blur|Edge light|Refraction|File name|Format)$/.test(el.textContent)){el.classList.add('sub');box.appendChild(el)}else if(el.tagName==='H4'){box=document.createElement('div');if(el.textContent==='Transparency'){const t=document.createElement('div');t.className='sboxT';t.textContent='Glass';box.appendChild(t);el.classList.add('sub')}box.className='sbox';sec.insertBefore(box,el);box.appendChild(el)}else if(box)box.appendChild(el)}})})();
 $('#fxPop').innerHTML=UI.devPop?(document.body.classList.contains('fx-top')?DXI.dockUp:DXI.dock):DXI.pop;$('#fxHide').innerHTML=UI.fxHide?DXI.exp:DXI.col;$('#fxPop').onclick=()=>devPop(!UI.devPop);$('#fxHide').onclick=e=>{e.stopPropagation();if(UI.devPop){devPop(false);devHide(false);return}devHide(!UI.fxHide)};$('#fx').addEventListener('click',e=>{if(FXSKIP){FXSKIP=false;return}if(e.target.closest('#fxPop,#fxHide'))return;if(UI.fxHide){devHide(false);return}if(e.target.closest('#fxTitle'))devHide(true)});if(UI.fxHide)devHide(true);if(UI.devPop)setTimeout(()=>devPop(true),0);new ResizeObserver(()=>drawChain()).observe(fxin);
 document.querySelector('.navAtom').addEventListener('click',showAbout);document.body.appendChild($('#cpuPop'));$('#cpu').onclick=e=>{const p=$('#cpuPop');p.hidden=!p.hidden;if(!p.hidden){p.style.position='fixed';p.style.zIndex=9000;p.style.maxHeight=Math.round(innerHeight/ZOOM*.8)+'px';p.style.overflow='auto';const r=e.currentTarget.getBoundingClientRect(),z=ZOOM;cpuPopFill();p.style.left=clamp(r.left/z-120,4,innerWidth/z-300)+'px';p.style.top=Math.max(4,r.top/z-p.offsetHeight-8)+'px'}};document.addEventListener('pointerdown',e=>{const p=$('#cpuPop');if(!p.hidden&&!p.contains(e.target)&&!e.target.closest('#cpu'))p.hidden=true},true);
 $('#bKbd').onclick=()=>{if(kbOn()&&UI.kbHidden){kbUnhide();kbSync();return}UI.kbPiano=!UI.kbPiano;saveUI();kbSync();if(kbOn()){const t=liveTracks()[0];toast(t?'Keyboard piano on: playing '+t.name+'.':'Keyboard piano on. Select an instrument track to play it.')}};kbSync();
-{const fx=document.getElementById('fpsFix');if(fx)fx.onclick=()=>{UI.blur=Math.min(UI.blur??18,8);UI.refr=0;UI.glPlay=true;UI.glBack=true;saveUI();applyTrans();try{rfAll()}catch(e){}FPS.iv=[];toast('Glass set to a light blur with no refraction: the cheapest look that still reads as glass. Glass & light has the sliders.')}}{const fs=document.getElementById('fpsSel');if(fs){fs.value=String(+UI.fpsCap||0);fs.onchange=()=>{UI.fpsCap=+fs.value||0;saveUI();toast(UI.fpsCap?'Screen updates capped at '+UI.fpsCap+' fps.':'Screen updates follow your screen (up to 240 fps).')}}}renderLogo();if(UI.splash!==false&&!CHILD)showSplash();$('#setTips').checked=UI.tips!==false;$('#setTips').onchange=e=>{UI.tips=e.target.checked;saveUI();tipHide()};$('#setSplash').onchange=e=>{UI.splash=e.target.checked;saveUI()};$('#splNow').onclick=e=>{e.preventDefault();e.stopPropagation();showSplash('pv')};initProjects();if(!curT())selT=S.tracks[0]?S.tracks[0].id:null;applyLayout();applyTheme();applyTrans();applyScale();mapHint();
+{const fx=document.getElementById('fpsFix');if(fx)fx.onclick=()=>{openSettings('glass');fxOptimise()}}{const fs=document.getElementById('fpsSel');if(fs){fs.value=String(+UI.fpsCap||0);fs.onchange=()=>{UI.fpsCap=+fs.value||0;saveUI();toast(UI.fpsCap?'Screen updates capped at '+UI.fpsCap+' fps.':'Screen updates follow your screen (up to 240 fps).')}}}renderLogo();if(UI.splash!==false&&!CHILD)showSplash();$('#setTips').checked=UI.tips!==false;$('#setTips').onchange=e=>{UI.tips=e.target.checked;saveUI();tipHide()};$('#setSplash').onchange=e=>{UI.splash=e.target.checked;saveUI()};$('#splNow').onclick=e=>{e.preventDefault();e.stopPropagation();showSplash('pv')};initProjects();if(!curT())selT=S.tracks[0]?S.tracks[0].id:null;applyLayout();applyTheme();applyTrans();applyScale();mapHint();
 for(const el of[$('#hglass'),$('#tr'),$('#ctxm'),$('#mPop'),$('#presWin'),...document.querySelectorAll('.sheet')])rfAttach(el);
 /*ND-BEGIN*/
 /* ====================== STAGE 7: NEW DEVICE FRAMEWORK ====================== */
