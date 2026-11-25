@@ -1261,3 +1261,7 @@ One pass per app frame at most, three windows per pass (no double drawing). The 
 
 ### Left
 - A pin for modulators. Task E (CPU and background freeze). The browsers in the new look.
+
+### Release
+- v0.185: commit 2f380ec, artifact version 208, project doc `claude/audiolab-device-backlog-run-M.md`.
+- **Desktop build**: run 45705272218 for this commit succeeded (3 min 51 s, started 21:32 UTC).
