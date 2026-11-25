@@ -997,6 +997,18 @@ body.tr-right #bHcz{right:auto;left:32px}
 #hczEd .zef{display:flex;gap:8px;margin-top:14px}#hczEd .zef button{min-height:28px;padding:3px 12px;border-radius:7px;cursor:pointer}#hczEd .zef button:last-child{margin-left:auto}
 #hczCard .hczprev{flex:none;width:86px;height:46px;border-radius:6px;background:#1b1d23;border:1px solid rgba(255,255,255,.1);display:grid;grid-template-columns:8px 18px 1fr;gap:4px;padding:5px 6px 5px 0;overflow:hidden}
 #hczCard .hczprev i{display:block;border-radius:2px;background:#3a3d46}#hczCard .hczprev i:first-child{background:#f5c84c;border-radius:0;margin:-5px 0}#hczCard .hczprev span{display:grid;grid-template-columns:1fr 8px 8px;grid-auto-rows:8px;gap:3px;align-content:center}#hczCard .hczprev span b{display:block;border-radius:2px;background:#4a4d57}#hczCard .hczprev span b:first-child{grid-column:1/4;width:70%;background:#8d92a3;height:5px}
+/* particle devices: the black picture fills the whole device, the controls float inside it on the right */
+#fxin .dev.pbx,.dev.pbx{background:#05060a;padding:0;overflow:hidden;width:824px}
+.dev.pbx>.devb{position:relative;gap:0;width:100%}
+.dev.pbx .dfv{position:absolute;inset:0;width:auto!important;height:auto!important}
+.dev.pbx .dfv canvas.viz{width:100%!important;height:100%!important;border-radius:0!important;background:#05060a}
+.dev.pbx .dfs{position:relative;z-index:1;margin-left:auto;width:444px;flex:none;padding:5px 8px 6px 4px;background:none!important;pointer-events:none}
+.dev.pbx .dfs>*{pointer-events:auto}
+.dev.pbx .dfs .devh,.dev.pbx .dfs .ndtb,.dev.pbx .dfs .dfc{background:none!important;box-shadow:none!important;border-color:transparent!important}
+.dev.pbx .ndtb{gap:3px 8px;font-size:10.5px}.dev.pbx .ndtb select{min-height:20px;height:20px;font-size:10.5px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);box-shadow:none}
+.dev.pbx .devh select{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);box-shadow:none}
+.dev.pbx .dfc{gap:6px!important;padding:0!important}.dev.pbx .fxk{gap:2px 0!important}.dev.pbx .fxk .kn{width:54px!important}.dev.pbx .fxk .kn svg{width:30px!important;height:30px!important}.dev.pbx .fxk .kn span{font-size:9.5px!important;max-width:54px!important}.dev.pbx .fxk .kn output{font-size:9.5px!important}
+.dev.pbx .fxs{gap:3px!important;width:118px!important;flex:none!important;min-width:0}.dev.pbx .fxs>*{width:100%!important;min-width:0!important}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5156,7 +5168,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.165',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.166',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -9295,6 +9307,69 @@ function hczToggle(){const p=document.getElementById('hczEd');if(p&&!p.hidden)hc
   if(h&&!document.getElementById('hczCard')){h.insertAdjacentHTML('beforebegin','<h4>Track controls</h4><div class="treditcard" id="hczCard"><div class="hczprev" aria-hidden="true"><i></i><i></i><span><b></b><b></b><b></b><b></b></span></div><div><b>Customise track controls</b><small>Choose which buttons and sliders every track shows and in what order. Make the icon big or hide it, pick a pan style (slider, half dial or round dial) and the size of Mute and Solo. Also under the Controls button above the tracks, or right-click a track.</small><div class="row" style="gap:8px;margin-top:6px"><button type="button" id="hczSetB" class="pri">Customise track controls…</button><button type="button" id="hczSetR" class="mini">Reset</button></div></div></div>');
     document.getElementById('hczSetB').addEventListener('click',()=>{closeSet();hczOpen()});document.getElementById('hczSetR').addEventListener('click',()=>{hczSet(HCZD);toast('Track controls are back to the default layout.')})}}
 setTimeout(()=>{try{if(UI.hcz)renderHeaders()}catch(e){console.error(e)}},0);
+/* ===================== PARTICLE DEVICES (v0.166) =====================
+   Devices in the manner of Ableton's "Inspired by Nature" pack. First one: Bouncy Notes, a MIDI effect.
+   Every note drops a ball onto a keyboard; each bounce plays a note, lower and softer as the ball loses energy.
+   The bounces are worked out from the clip's notes alone (no random timing from the screen), so playback, freeze and export give the same notes.
+   The look: the black picture fills the whole device and the controls float inside it (class pbx). pbxInit() registers the devices; it is called once after the device registry exists. */
+const PBX=new Set(),PBSC={chromatic:null,major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],phrygian:[0,1,3,5,7,8,10],lydian:[0,2,4,6,7,9,11],mixolydian:[0,2,4,5,7,9,10],'harmonic minor':[0,2,3,5,7,8,11],'major pentatonic':[0,2,4,7,9],'minor pentatonic':[0,3,5,7,10],blues:[0,3,5,6,7,10],'whole tone':[0,2,4,6,8,10]};
+const PBTON=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'],PBG=20;
+const pbRng=s=>{s=(s>>>0)||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}};
+const pbRefl=(x,lo,hi)=>{const w=hi-lo;if(!(w>0))return lo;let u=(x-lo)%(2*w);if(u<0)u+=2*w;return lo+(u>w?2*w-u:u)};
+function pbSnap(x,scale,tonic){const sc=PBSC[scale],p=Math.round(x);if(!sc)return p;for(let d=0;d<7;d++)for(const q of d?[p-d,p+d]:[p])if(sc.includes(((q-tonic)%12+12)%12))return q;return p}
+/* the balls of a list of notes. Times inside a ball (tk) are in seconds at speed 1; s and eb are in beats. */
+function bnBalls(p,notes,spb){const g=PBG*clamp(p.grav,.05,8),mass=clamp(p.mass,.25,4),e=clamp(1-p.fric/100/Math.sqrt(mass),.04,.975),sp=clamp(p.speed,.1,8),life=clamp(p.life,.2,60),voices=clamp(Math.round(p.voices),1,32),R=pbRng((p.seed|0)*7919+17),balls=[],drops=[],ivl=p.auto?(SDIV[p.ivl]||1):0;
+  for(const n of notes){if(n.m)continue;drops.push([n.s,n]);if(ivl)for(let t=n.s+ivl;t<n.s+n.l-1e-6;t+=ivl)drops.push([t,n])}
+  drops.sort((a,b)=>a[0]-b[0]||a[1].p-b[1].p);
+  for(const[s,n] of drops){const vel=n.v||.8,h0=clamp(1-p.vh/100*(1-vel),.06,1),v0=Math.sqrt(2*g*h0),tk=[],vk=[];let t=v0/g,v=v0,rest=false;
+    for(let k=0;k<240;k++){if(t>life)break;tk.push(t);vk.push(v);v*=e;const dt=2*v/g;if(dt<.03){rest=true;break}t+=dt}
+    const end=rest?Math.min(life,tk[tk.length-1]+.25):life,half=p.range/2,b={s,n,h0,g,e,tk,vk,x0:n.p,vx:(R()*2-1)*p.rdir/100*16/mass,lo:n.p-half,hi:n.p+half,end,sp,eb:s+end/sp/spb};
+    const alive=balls.filter(q=>q.eb>s+1e-9);while(alive.length>=voices){alive.shift().eb=s}balls.push(b)}
+  return balls}
+const bnX=(b,t)=>pbRefl(b.x0+b.vx*t,b.lo,b.hi);
+/* height of a ball (0 = on the keys, 1 = top) at t seconds after it was dropped */
+function bnY(b,t){const tk=b.tk;if(!tk.length||t<tk[0])return Math.max(0,b.h0-b.g*t*t/2);let k=tk.length-1;while(k>0&&tk[k]>t)k--;const v=b.vk[k]*b.e,u=t-tk[k];return Math.max(0,v*u-b.g*u*u/2)}
+function bnRun(f,notes){const p=f.p,spb=60/S.bpm,B=bnBalls(p,notes,spb),out=[],q=p.quant&&p.quant!=='off'?(SDIV[p.quant]||0):0,seen=new Set(),R=pbRng((p.seed|0)*31+5);
+  if(p.thru)for(const n of notes)out.push(n);
+  for(const b of B)for(let k=0;k<b.tk.length;k++){let s=b.s+b.tk[k]/b.sp/spb;const rl=R();if(s>=b.eb-1e-9)break;if(q)s=Math.round(s/q)*q;
+    const pt=clamp(pbSnap(bnX(b,b.tk[k]),p.scale,p.tonic|0),0,127),key=pt+'@'+Math.round(s*960);if(seen.has(key))continue;seen.add(key);
+    out.push({p:pt,s,l:Math.max(.01,p.len/1000/spb*(1+(rl*2-1)*p.rlen/100*.9)),v:clamp((b.n.v||.8)*(1-p.vfade/100*(1-b.vk[k]/b.vk[0])),.02,1)})}
+  out.sort((a,b)=>a.s-b.s);return out}
+const BNC=new WeakMap();
+function bnDraw(g,w,h,f){const p=f.p,t=curT(),spb=60/S.bpm,open=f.kOpen!==false,L=10,RW=open?Math.max(140,w-PBXW.bnotes):w-50,T=30,KB=h-22,KH=14;vbg(g,w,h,'#05060a');
+  let balls=null,loc=0,live=false;
+  if(play.on&&t&&t.clips){const beat=curDisp(),c=t.clips.find(c=>c.notes&&beat>=c.start&&beat<c.start+c.len);if(c){const sig=JSON.stringify(p)+S.bpm+'|'+c.notes.length;let m=BNC.get(c.notes);if(!m||m.sig!==sig)BNC.set(c.notes,m={sig,B:bnBalls(p,c.notes,spb)});balls=m.B;loc=beat-c.start+(c.off||0);live=true}}
+  if(!balls){/* nothing playing: one ball dropped again and again, so the knobs can be judged by eye */const dn=[{p:60,s:0,l:1,v:.9}],sig=JSON.stringify(p);if(!f._bd||f._bd.sig!==sig)f._bd={sig,B:bnBalls(Object.assign({},p,{auto:false}),dn,spb)};balls=f._bd.B;const per=Math.min(12,balls[0].end/balls[0].sp)+.6;loc=(performance.now()/1000%per)/spb}
+  let lo=1e9,hi=-1e9;for(const b of balls){if(b.lo<lo)lo=b.lo;if(b.hi>hi)hi=b.hi}if(!(hi>lo)){lo=48;hi=72}lo=Math.floor(lo);hi=Math.ceil(hi);const X=x=>L+(x-lo+.5)/(hi-lo+1)*(RW-L),Y=y=>KB-4-y*(KB-4-T-6),kw=(RW-L)/(hi-lo+1),sc=PBSC[p.scale],lit=new Map();
+  /* the balls */
+  for(const b of balls){const tt=(loc-b.s)*spb*b.sp;if(tt<0||loc>=b.eb)continue;const x=X(bnX(b,tt)),y=Y(bnY(b,tt)),hue=(b.n.p*30+200)%360,r=clamp(3.5+2.5*Math.sqrt(clamp(p.mass,.25,4)),4,9);
+    for(let k=b.tk.length-1;k>=0;k--){const d=tt-b.tk[k];if(d>=0){if(d<.16){const pt=pbSnap(bnX(b,b.tk[k]),p.scale,p.tonic|0);lit.set(pt,Math.max(lit.get(pt)||0,1-d/.16))}break}}
+    g.globalAlpha=.25;for(let j=1;j<=5;j++){const tj=tt-j*.018;if(tj<0)break;g.beginPath();g.arc(X(bnX(b,tj)),Y(bnY(b,tj)),r*(1-j*.13),0,7);g.fillStyle=`hsl(${hue},85%,62%)`;g.fill()}g.globalAlpha=1;
+    g.beginPath();g.arc(x,y-r,r,0,7);g.fillStyle=`hsl(${hue},85%,66%)`;glow(g,`hsl(${hue},90%,60%)`,10);g.fill();g.shadowBlur=0}
+  /* the keyboard along the bottom: keys outside the scale are dark */
+  for(let k=lo;k<=hi;k++){const pc=((k-(p.tonic|0))%12+12)%12,inS=!sc||sc.includes(pc),bl=[1,3,6,8,10].includes(((k%12)+12)%12),x=L+(k-lo)/(hi-lo+1)*(RW-L),a=lit.get(k)||0;
+    g.fillStyle=a>0?`rgba(255,214,102,${.35+.65*a})`:inS?(bl?'rgba(255,255,255,.16)':'rgba(255,255,255,.3)'):'rgba(255,255,255,.05)';g.fillRect(x+.5,KB,Math.max(1,kw-1),KH);if(pc===0&&inS&&!a){g.fillStyle='rgba(76,201,240,.75)';g.fillRect(x+.5,KB+KH-2,Math.max(1,kw-1),2)}}
+  txt(g,noteName(lo+12),L,h-3,'rgba(255,255,255,.35)',8);txt(g,noteName(hi+12),RW,h-3,'rgba(255,255,255,.35)',8,'right');
+  if(!live)txt(g,'preview: one ball on C',(L+RW)/2,h-3,'rgba(255,255,255,.3)',8,'center')}
+const BN0={grav:1,mass:1,fric:20,speed:1,voices:8,life:8,vh:50,vfade:70,len:120,rlen:0,rdir:0,range:24,seed:1,scale:'chromatic',tonic:0,quant:'off',auto:false,ivl:'1/4',thru:false};
+const bnp=o=>Object.assign({},BN0,o);
+const PBXW={bnotes:456};
+function pbxInit(){
+ PBX.add('bnotes');MFXRUN.bnotes=bnRun;
+ ND('bnotes',{name:'Bouncy Notes',vw:640,midi:1,grp:['MIDI','#b583ff'],desc:'Every note drops a ball onto a keyboard. Each bounce plays the note again, softer and faster, like a ball coming to rest',hint:'The balls show what the notes will do. With nothing playing, one test ball is dropped over and over',
+  logo:['#b583ff','#4cc9f0','<path d="M6 38h36" stroke-width="2.4"/><path d="M8 38c3-30 9-30 12 0c2-18 7-18 9 0c2-9 5-9 6 0" stroke-width="2.2"/><circle cx="14" cy="12" r="3.4" fill="currentColor" stroke="none"/>','BOUNCE'],
+  p:{grav:[.2,4,1,'f1',1],mass:[.5,3,1,'f1'],fric:[0,90,20,'%'],speed:[.25,4,1,'f1',1],voices:[1,16,8,'n'],life:[.5,30,8,'s',1],vh:[0,100,50,'%'],vfade:[0,100,70,'%'],len:[20,1000,120,'ms',1],rlen:[0,100,0,'%'],rdir:[0,100,0,'%'],range:[12,60,24,'n'],seed:[1,99,1,'n']},
+  dial:['grav','mass','fric','speed','voices','life','vh','vfade','len','rlen','rdir','range','seed'],
+  lab:{grav:'Gravity',mass:'Mass',fric:'Friction',speed:'Speed',voices:'Voices',life:'Lifetime',vh:'Vel > Height',vfade:'Vel fade',len:'Length',rlen:'Rnd > Len',rdir:'Rnd > Dir',range:'Range',seed:'Seed'},
+  init:Object.assign({},BN0),
+  sel:[['scale','Scale',Object.keys(PBSC).map(k=>[k,k[0].toUpperCase()+k.slice(1)])],['tonic','Tonic',PBTON.map((n,i)=>[i,n])],['quant','Quantize',[['off','Off'],['1/32','1/32'],['1/16','1/16'],['1/8 triplet','1/8 triplet'],['1/8','1/8'],['1/4','1/4']]],['auto','Auto',null,'chk'],['ivl','Interval',['1/16','1/8','1/4','1/2','1 bar','2 bars'].map(k=>[k,k])],['thru','Thru',null,'chk']],
+  pre:mergePre(PRS('Balls',[['one','One ball',bnp({})],['rubber','Rubber ball',bnp({fric:8,grav:1.4,life:14,vfade:80})],['dead','Dead drop',bnp({fric:45,grav:2,len:80})],['moon','Slow moon',bnp({grav:.3,fric:10,life:24,len:260,vfade:55})],['heavy','Heavy and fast',bnp({grav:3,mass:2.5,fric:25,speed:1.5,len:60})]]),
+   PRS('Melodic',[['scatter','Scatter (minor pentatonic)',bnp({rdir:80,range:36,scale:'minor pentatonic',fric:14,life:12})],['harp','Falling harp (major)',bnp({rdir:55,range:24,scale:'major',grav:.7,fric:12,len:300,vfade:60})],['grid16','On the grid 1/16',bnp({quant:'1/16',fric:12,grav:1.2,len:90})],['trip','Triplet stumble',bnp({quant:'1/8 triplet',fric:18,rdir:30,scale:'dorian'})]]),
+   PRS('Auto',[['rain','Rain every 1/4',bnp({auto:true,ivl:'1/4',fric:35,grav:1.6,voices:12,rdir:40,scale:'minor pentatonic'})],['drip','Slow drip every bar',bnp({auto:true,ivl:'1 bar',fric:10,grav:.6,life:16,len:220})],['echo','Thru plus bounces',bnp({thru:true,fric:30,grav:2.2,vfade:90})]])),
+  node:c=>{const i=c.createGain(),o=c.createGain();i.connect(o);return{in:i,out:o,set(){}}},
+  draw:bnDraw})}
+/* the particle devices get the "picture fills the device" look */
+{const _fdP=fxDevHtml;fxDevHtml=function(t,f,kn){const h=_fdP.apply(this,arguments);return PBX.has(f.type)&&typeof h==='string'?h.replace('class="dev fxd','class="dev fxd pbx pbx-'+f.type):h}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -9803,6 +9878,7 @@ function mfxNotes(t,notes){if(!t||!t.fx||!notes)return notes;let any=false;for(c
   let h=notes.length;for(const n of notes)h=(h*31+n.p*7+Math.round(n.s*480)*13+Math.round(n.l*480)*17+Math.round((n.v||0)*127)+(n.m?1:0))|0;const sig=t.fx.filter(f=>f.on&&MIDIFX.has(f.type)).map(f=>f.type+JSON.stringify(f.p)).join('|')+'#'+h+'#'+S.bpm;const c=MFXC.get(notes);if(c&&c.sig===sig)return c.out;
   let cur=notes;for(const f of t.fx){if(f.on&&MIDIFX.has(f.type)&&MFXRUN[f.type])cur=MFXRUN[f.type](f,cur)}MFXC.set(notes,{sig,out:cur});return cur}
 const MFXRUN={};
+pbxInit();/* particle devices (defined before askChoice) */
 function activeNotes(t,b,xf){const out=[];if(!t||!t.clips)return out;for(const c of t.clips){if(!c.notes||b<c.start||b>=c.start+c.len)continue;const loc=b-c.start+c.off,ns=xf?ccSus(c,mfxNotes(t,c.notes)):c.notes;for(const n of ns)if(!n.m&&n.s<=loc&&loc<n.s+n.l)out.push(n)}return out}
 /* shared handle-list helper: value <-> position */
 const hy=(h,v,lo,hi,pad)=>(pad||8)+(1-clamp((v-lo)/(hi-lo),0,1))*(h-(pad||8)*2);

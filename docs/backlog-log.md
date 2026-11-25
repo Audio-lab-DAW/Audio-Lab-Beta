@@ -218,3 +218,28 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 ### Not verified
 - Look and feel on the user's Mac, real mouse or trackpad. Sound is untouched (drawing code only), so no renders were compared.
 - Projects with many returns and nested groups (more than about 8 levels) in a small mixer window: the levels get as close as 3 px.
+
+## 25 November 2026: v0.166, run 7: particle devices, part 1 (Bouncy Notes)
+
+### Change of plan (the user answered during the run)
+- The user asked for a list of Ableton's particle devices and then chose to copy all of them: Bouncy Notes, Emit, Vector FM, Vector Grain, Vector Delay, Vector Map (the "Inspired by Nature" pack). Wishes: engines and controls as close to Ableton as possible, in our look, little grey, the black picture from the top to the bottom of the device with the controls floating inside it. The room-shape synth and slice-bounce effect of the original task 7 are replaced by this list.
+- Done in this version: Bouncy Notes. The other five are set up as scheduled tasks (one device per run).
+
+### Built (new code before `askChoice`; one call `pbxInit();` sits right after `const MFXRUN={};` because the device registry `ND` only exists from there)
+- **Bouncy Notes** (`bnotes`, MIDI effect, group MIDI): every note of a clip drops a ball onto a keyboard; each bounce plays a note. Worked out from the notes alone in `bnBalls` (drop height, gravity 20 units/s² x Gravity, each bounce keeps `1 - Friction / sqrt(Mass)` of its speed, ball ends when bounces are closer than 30 ms or after Lifetime) and turned into notes by `bnRun` = `MFXRUN.bnotes`. Same notes in playback, freeze and export.
+- Controls (Ableton's names): Gravity, Mass, Friction, Speed, Voices (oldest ball is removed), Lifetime, Vel > Height, Vel fade, Length, Rnd > Len, Rnd > Dir (the ball drifts across the keys and turns round at the edge of Range), Range, Seed, Scale, Tonic, Quantize, Auto + Interval (a held note drops a new ball every interval), Thru (also plays the original note). 12 presets in three groups (`FXPRE.bnotes`).
+- Picture (`bnDraw`): balls with short trails over a keyboard; keys outside the scale are dark, the tonic has a blue mark, a key lights up when a ball lands on it. While the song plays it shows the balls of the clip under the playhead; when stopped it drops one test ball again and again so the knobs can be judged by eye.
+- **Look for the particle devices** (CSS class `pbx`, added by an `fxDevHtml` wrapper for every type in the set `PBX`): black picture over the whole device, header, selects, knobs and sliders float on its right side without a grey panel. The draw function leaves `PBXW[type]` px free on the right while the parameters are shown.
+
+### Tested
+- Headless load: no page errors. Screenshots checked: stopped (test ball), playing the Arp track of Fractals with the Scatter preset, parameters hidden.
+- Offline render (`tools/engine-tests/bouncy_notes.py`): pluck track with two notes: 28 notes out, not silent (RMS 0.0134, peak 0.125), no NaN, two renders bit-identical, first sound at 0.308 s (the fall). Same seed gives the same notes, another seed gives other notes, Scatter stays in the scale.
+- Demo unchanged: Fractals Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96, solo), identical in v0.164 and now.
+
+### Not verified / not built
+- Not compared against Ableton itself (no access): the feel of Gravity, Mass and Friction ranges is a best guess from descriptions.
+- Missing compared with Ableton: walls drawn into the picture that deflect balls, Freeze, the note Filter. Live keyboard notes do not go through MIDI effects in this app (same as the Arpeggiator), so balls only come from clip notes.
+- The picture uses the clip's own notes; a MIDI effect placed before Bouncy Notes is not shown in the picture (the sound is right).
+
+### Left
+- Vector Delay, Emit, Vector Grain, Vector FM, Vector Map (scheduled). Track controls editor redesign asked by the user (see next entry or the schedule).
