@@ -1335,6 +1335,77 @@ body.rdmo .pinw.flash>.pinb{animation:none}
 #fxin .dev.pinph>.pinphb:focus-visible{outline:1px solid var(--blf,#4c8dff)}
 /* Sub (sub bass instrument) */
 .emd.vgd.vfd.sbd .emc .smtg.on{background:#b8f24a;color:#10180a}.emd.vgd.vfd.sbd .emk{--kc:#b8f24a}.emd.sbd .emc select{max-width:104px}
+/* v0.187: the Performance tab, and Lightest (body.fxmin) */
+#setBody section[data-page=perf]{--pz:#2ef2c2;--pa:#4c8dff}
+.pmhero{border-radius:14px;padding:14px 16px 12px;margin:0 0 12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.pmtop{display:flex;align-items:center;gap:12px}
+.pmic{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;background:rgba(46,242,194,.1);color:var(--pz)}.pmic svg{width:20px;height:20px}
+.pmtt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.pmtt b{font-size:15px;font-weight:650;color:#f1f3f7}.pmtt small{font-size:11.5px;color:#9a9fad}
+.pmsw{position:relative}.pmsw input:checked+i{background:var(--pz)!important}
+.pmsl{display:flex;align-items:flex-start;gap:0;margin:16px 0 4px;outline:none;user-select:none}
+.pmsl:focus-visible{outline:2px solid var(--pa);outline-offset:4px;border-radius:10px}
+.pmsl button{border:0;background:none;color:#9a9fad;cursor:pointer;padding:0;font:inherit}
+.pmz{display:flex;flex-direction:column;align-items:center;gap:7px;width:84px;flex:none}
+.pmz i{display:block;width:72px;height:22px;border-radius:11px;border:1.5px solid rgba(46,242,194,.55);background:rgba(46,242,194,.06);position:relative}
+.pmz i::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:rgba(46,242,194,.6)}
+.pmz b{font-size:11.5px;font-weight:600;color:var(--pz)}
+.pmz.on i{background:var(--pz);border-color:var(--pz)}.pmz.on i::after{background:#06281f;width:10px;height:10px;margin:-5px}
+.pmz:hover i{border-color:var(--pz)}
+.pmgap{width:1px;align-self:stretch;margin:0 16px 0 12px;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.22) 0 3px,transparent 3px 6px)}
+.pmtrk{flex:1;position:relative;display:flex;justify-content:space-between;cursor:pointer;touch-action:none;min-width:0}
+.pmln{position:absolute;left:11px;right:11px;top:9px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);pointer-events:none}
+.pmln u{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--pa)}
+.pmtrk button{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;width:22px}
+.pmtrk button:nth-child(2){align-items:flex-start}.pmtrk button:last-child{align-items:flex-end}
+.pmtrk button i{display:block;width:22px;height:22px;border-radius:50%;background:#2a2c35;border:2px solid rgba(255,255,255,.22);box-sizing:border-box}
+.pmtrk button b{font-size:11.5px;font-weight:600;white-space:nowrap}
+.pmtrk button:nth-child(3) b{position:relative}
+.pmtrk button.on i{background:#fff;border:5px solid var(--pa)}.pmtrk button.on b{color:#f1f3f7}
+.pmtrk button:hover i{border-color:rgba(255,255,255,.5)}.pmtrk button.on:hover i{border-color:var(--pa)}
+.pmoff .pmsl{opacity:.45}.pmoff .pmtrk button.on i{border-color:#8a8f9c}.pmoff .pmln u{background:#8a8f9c}
+.pmcap{margin:12px 0 0;font-size:12px;color:#b9bdc8;min-height:16px}.pmcap.z{color:var(--pz);font-weight:600}
+.pmauto{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+#pmAuto{display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 10px;border-radius:9px;border:1px solid rgba(var(--bl3),.6);background:rgba(var(--bl3),.16);color:#fff;font-weight:600;cursor:pointer}
+#pmAuto svg{width:16px;height:16px}#pmAuto:hover{background:rgba(var(--bl3),.28)}#pmAuto:disabled{opacity:.7;cursor:default}
+.pmbusy #pmAuto svg{animation:pmspin 1.2s linear infinite}@keyframes pmspin{to{transform:rotate(360deg)}}
+#pmUndo{padding:6px 12px;border-radius:9px}
+#pmRep{font-size:12px;color:#d6d9e0;flex:1;min-width:180px}
+.pmtrail{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.pmtrail:empty{display:none}
+.pmtrail span{font-size:10.5px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.06);color:#9a9fad}
+.pmtrail span b{font-weight:600;color:#d6d9e0}.pmtrail span.ok b{color:var(--pz)}.pmtrail span.no b{color:#f5c84c}.pmtrail .pmhw{background:none;padding-left:0}
+.pmfps{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:12px 16px;margin:0 0 6px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.pmfn{display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:6px}
+.pmfn b{font-size:34px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.5px;color:var(--pz);min-width:2ch}
+.pmfn span{font-size:13px;color:#9a9fad;font-variant-numeric:tabular-nums}.pmfn small{grid-column:1/3;font-size:11px;color:#8b8f9c;margin-top:3px}
+#pmFpsC{width:100%;height:46px;display:block;min-width:0}
+.pmfl{display:grid;grid-template-columns:auto auto;gap:3px 10px;font-size:11px;color:#8b8f9c;align-items:baseline}.pmfl b{font-size:13px;color:#e6e8ee;font-variant-numeric:tabular-nums;text-align:right}
+.pmlim{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:11.5px;color:#9a9fad;margin:0 2px 12px}
+.pmh{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8b8f9c;margin:14px 2px 6px}
+.pmlist{border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);overflow:hidden}
+.pmr{display:grid;grid-template-columns:28px minmax(0,1fr) 34px 150px;align-items:center;gap:10px;padding:7px 12px;min-height:38px}
+.pmr+.pmr{border-top:1px solid rgba(255,255,255,.05)}
+.pmr .pic{width:26px;height:26px;color:#7f8494}.pmr .pic svg{width:22px;height:22px}.pmr.on .pic{color:#cfd3db}
+.pmr b{font-size:12.5px;font-weight:550;color:#e6e8ee}
+.pmr.dis{opacity:.45}
+.pmd{display:flex;gap:4px}.pmd i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1)}
+.pmd[data-m="1"] i:nth-child(n+2),.pmd[data-m="2"] i:nth-child(3){visibility:hidden}
+.pmd[data-c="1"] i:nth-child(-n+1),.pmd[data-c="2"] i:nth-child(-n+2),.pmd[data-c="3"] i{background:#f5c84c}
+.pmd[data-c="3"] i{background:#ff9a3c}
+.pmsv{font-size:10px;color:var(--pz);opacity:.8}
+.pmr .seg{display:inline-flex;gap:2px}.pmr>:last-child{justify-self:end}
+.pmlink{font-size:12px;color:#9a9fad;margin:6px 0 10px}
+.pmlink button{border:0;background:none;color:#7fb1ff;cursor:pointer;padding:0 2px;font:inherit;font-weight:600}.pmlink button:hover{text-decoration:underline}
+#setBody section[data-page=perf] .fpshint{margin:-4px 0 12px}
+/* Lightest: solid colours, no shadows, no filters, no large gradients, nothing animated; the glass rims are not drawn */
+body.fxmin *,body.fxmin *::before,body.fxmin *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important;filter:none!important;animation:none!important;transition:none!important}
+body.fxmin .lg::before,body.fxmin .fwin::before,body.fxmin #ctxm::before,body.fxmin .modal>div::before,body.fxmin .setw::before{display:none!important}
+body.fxmin .fwin,body.fxmin .sheet,body.fxmin .pop,body.fxmin #ctxm,body.fxmin .pinb,body.fxmin .pinw,body.fxmin #toast,body.fxmin #liteNote,body.fxmin #presWin,body.fxmin #tip,body.fxmin .modal>div,body.fxmin #setQR,body.fxmin #fdPop,body.fxmin #mixWin,body.fxmin #cpuPop,body.fxmin .sdgh,body.fxmin #mixWin .mx.master,body.fxmin #fx,body.fxmin #hglass,body.fxmin .sbox,body.fxmin #tr,body.fxmin .viz{box-shadow:none!important}
+body.fxmin #hglass{transform:none!important;background:rgb(var(--gtr))!important}
+body.fxmin #tr{background:rgb(var(--gtr))!important}
+body.fxmin #ptabs,body.fxmin #fxglass,body.fxmin .fwin,body.fxmin .sheet,body.fxmin .pop,body.fxmin #ctxm,body.fxmin #setQR,body.fxmin #cpuPop{background:rgb(var(--gtr2))!important}
+body.fxmin .modal{background:none!important}
+body.fxmin .sbox,body.fxmin .pmhero,body.fxmin .pmfps,body.fxmin .pmlist,body.fxmin .bpcard{background:rgb(var(--gtr2))!important}
+
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3132,7 +3203,7 @@ function plantPlay(c,I,dest,p,w,dur,v){const f=hz(p),pk=v*I.gain,nv=Math.max(1,M
   env.gain.setValueAtTime(0,w);env.gain.linearRampToValueAtTime(pk,w+I.a);env.gain.setTargetAtTime(pk*I.s,w+I.a,I.d/3+.001);const off=w+Math.max(dur,I.a+.005);env.gain.setTargetAtTime(0,off,I.r/3+.001);const end=off+I.r*1.8+.05;
   if(I.lamt>0){const lf=c.createOscillator(),lg=c.createGain();lf.frequency.value=I.lfo;lg.gain.value=fc*I.lamt/100*.9;lf.connect(lg);lg.connect(flt.frequency);lf.start(w);lf.stop(end);reg(c,lf)}
   let fmg=null;if(I.fm>0){const mo=c.createOscillator();mo.frequency.value=f*I.ratio;fmg=c.createGain();fmg.gain.setValueAtTime(f*I.fm/100*4,w);fmg.gain.setTargetAtTime(f*I.fm/100*1.2,w,.3);mo.connect(fmg);mo.start(w);mo.stop(end);reg(c,mo)}
-  const mix=I.w1===I.w2?[[I.w1,1]]:[[I.w1,1-I.morph],[I.w2,I.morph]],NV0=UI.lite&&c===ctx?Math.min(nv,3):nv;
+  const mix=I.w1===I.w2?[[I.w1,1]]:[[I.w1,1-I.morph],[I.w2,I.morph]],NV0=false&&c===ctx?Math.min(nv,3):nv;
   for(const[wv,lv0] of mix){if(lv0<.02)continue;const lv=lv0,NV=mix.length>1&&lv0<.5?Math.max(1,Math.ceil(NV0/2)):NV0;const B={},bus=k=>{if(B[k])return B[k];const g=c.createGain();g.gain.value=lv/Math.sqrt(NV)*.7;if(k&&I.width>0){const pn=c.createStereoPanner();pn.pan.value=k*.85*I.width/100;g.connect(pn);pn.connect(flt)}else g.connect(flt);return B[k]=g};
     for(let k=0;k<NV;k++){const sp=NV===1?0:k/(NV-1)*2-1,o=c.createOscillator();o.type=wv;o.frequency.value=f;o.detune.value=sp*I.det+(RND()-.5)*2;
     if(fmg)fmg.connect(o.frequency);o.connect(bus(NV>1?Math.round(sp)||0:0));o.start(w);o.stop(end);reg(c,o)}}
@@ -3188,7 +3259,7 @@ function sampPlay(c,I,dest,p,w,dur,v){let B=sampleBuf(I.buf);if(!B)return;const 
   if(I.mode!=='grain'){const src=c.createBufferSource();src.buffer=B;src.playbackRate.value=rate;src.connect(flt);let len=(s1-s0)/rate;const lp=I.mode!=='oneshot'&&(I.loop??I.mode==='classic');
     if(I.mode==='classic'){if(lp){src.loop=true;src.loopStart=s0;src.loopEnd=s1;len=Math.max(dur,A)}else len=Math.min(Math.max(dur,A),len)}
     env(w+len);src.start(w,s0);src.stop(w+len+I.r*3+.05);reg(c,src);hitMark(c,I,w,p,len);return}
-  const tot=Math.min(Math.max(dur,A)+I.r*2,12),step=1/(UI.lite&&c===ctx?I.dens*.5:I.dens),gn=1/Math.sqrt(Math.max(1,I.dens*I.size));env(w+Math.max(A,dur));
+  const tot=Math.min(Math.max(dur,A)+I.r*2,12),step=1/(false&&c===ctx?I.dens*.5:I.dens),gn=1/Math.sqrt(Math.max(1,I.dens*I.size));env(w+Math.max(A,dur));
   const job={c,I,B,rate,rv,D,flt,w,tot,step,t:0,cv:HANN.map(x=>x*gn)};
   if(c===ctx){GJ.add(job);grainPump(job)}else while(job.t<tot)grainOne(job);/* live: grains are created just ahead of time (like notes), never thousands at once */
   hitMark(c,I,w,p,Math.max(dur,A))}
@@ -4976,7 +5047,7 @@ function heatCol(v){const S0=[[0,[27,42,107]],[.22,[47,107,255]],[.45,[37,208,20
 const mxBuf=new Float32Array(2048),mxF=new Uint8Array(1024);
 function peakOf(an){return mtrPeak(an)}
 function peakOld(an){if(!an)return 0;const n=an.fftSize;an.getFloatTimeDomainData(mxBuf.subarray(0,n));let p=0;for(let i=0;i<n;i++){const a=Math.abs(mxBuf[i]);if(a>p)p=a}return p}
-function drawMixer(){const w=$('#mixWin');if(!w||w.hidden||!MXV)return;if(FRN%(UI.lite?3:2))return;const view=UI.mxView||'wave';{const ms=w.querySelector('.mxs');if(ms)ms.classList.toggle('nobgm',view==='meter')}
+function drawMixer(){const w=$('#mixWin');if(!w||w.hidden||!MXV)return;if(FRN%2)return;const view=UI.mxView||'wave';{const ms=w.querySelector('.mxs');if(ms)ms.classList.toggle('nobgm',view==='meter')}
   const slow=!(drawMixer.k=((drawMixer.k|0)+1)%8);/* number read-outs and knob pictures: 8 times less often than the level pictures */
   if(slow)mxNums(w);
   if(slow)for(const el of w.querySelectorAll('[data-c^="mx:"]'))paintCtl(el);
@@ -5492,7 +5563,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.186',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.187',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6747,7 +6818,7 @@ $('#bLogo').addEventListener('contextmenu',e=>{e.preventDefault();const p=curP()
    {label:'Restart audio engine',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5','#3ecf8e'),act:()=>restartAudio()},
    {label:'Restart AudioLab',sub:'reload everything, back to the splash',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5M10 8v3','#ff9a3c'),act:()=>restartApp()},
    {label:OVW.on?'Song overview: on':'Song overview',key:scShow(scBind(SCM.get('overview'))).join(''),sub:'the whole song at a glance',ic:I('M2 5h16M2 9h7M11 9h7M2 13h10M14 13h4M2 17h5M9 17h9','#6ea8ff'),act:()=>ovwToggle()},
-   {label:UI.lite?'Light mode: on':'Light mode: off',check:!!UI.lite,keep:1,act:()=>{const c=$('#liteChk');if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}}},'-',
+   {label:UI.pm&&UI.pm.on?'Light mode: on':'Light mode: off',check:!!(UI.pm&&UI.pm.on),keep:1,act:()=>{const c=$('#liteChk');if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}}},'-',
    {label:'Interface and DAC…',ic:I('M4 7h12v9H4zM7 7V4h6v3M8 11.5a2 2 0 1 0 4 0 2 2 0 0 0-4 0','#ffd27a'),act:()=>openSettings('dac')},
    {label:'Settings…',ic:I('M10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM10 2v2M10 16v2M2 10h2M16 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M15.8 4.2l-1.4 1.4M5.6 14.4l-1.4 1.4'),act:()=>openSettings()}]);
   requestAnimationFrame(()=>{const h=ctxm.offsetHeight;ctxm.style.top=Math.max(4,r.top/z-h-6)+'px';ctxm.style.left=Math.max(4,r.left/z)+'px';ctxm.classList.add('dropup')})});
@@ -7993,10 +8064,10 @@ function genSync(){const g=id=>document.getElementById(id);if(!g('genTut'))retur
 /* settings search: finds any setting by its words and takes you there */
 {const q=document.getElementById('setQ'),R=document.getElementById('setQR');let IDX=null,sel=-1;
  const build=()=>{IDX=[];const navs=[...document.querySelectorAll('#setNav [data-tab]')];{const gr=document.getElementById('genReset');/* the reset button sits in the footer, outside every tab page */if(gr)IDX.push({tab:'',tn:'Bottom of Settings',el:gr,t:(gr.textContent||'').replace(/\s+/g,' ').trim()||'Reset all settings',head:'',ex:'restore defaults factory start over clear '+(gr.title||''),self:1})}for(const sec of document.querySelectorAll('#setBody section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab),tn=nb?nb.textContent.trim():tab;let head='';
-   for(const el of sec.querySelectorAll('h4,label.chk,.cprow>span:first-child,.bptx b,.scalecard b,.treditcard b,.pnlrow label,.mgcol h5,.devrow button,.lhead h4,.dawpres button,.pfbtns button,.aboutrow')){const t=(el.textContent||'').replace(/\s+/g,' ').trim();if(!t||t.length>140)continue;if(el.tagName==='H4'){head=t}IDX.push({tab,tn,el,t,head:el.tagName==='H4'?'':head,ex:(el.closest('label,.cprow,.bpcard')&&el.closest('label,.cprow,.bpcard').title)||''})}}
-   const extra={audio:'buffer latency sample rate driver output device headroom limiter test tone sine noise',dac:'bit perfect dac interface mode rate balance mono swap dc headphone ceiling lossless buffer latency input monitoring round trip output channels profile gryphon scarlett exclusive volume',layout:'panels map visualizer transport scale zoom meters presets tracks right left devices colours daw ableton fl studio cubase logic bitwig',glass:'blur transparency refraction glass edge light',colors:'background tint hue clip transparency grid',nav:'zoom playhead follow scroll',keys:'keyboard shortcuts keys hotkeys ableton fl studio cubase',general:'light mode performance slow computer tooltips splash tour updates reset version about',files:'save autosave file folder',export:'export wav mp3 flac render bounce mixdown dither'};
+   for(const el of sec.querySelectorAll('h4,label.chk,.cprow>span:first-child,.bptx b,.scalecard b,.treditcard b,.pnlrow label,.mgcol h5,.devrow button,.lhead h4,.dawpres button,.pfbtns button,.aboutrow,.pmq')){const t=(el.textContent||'').replace(/\s+/g,' ').trim();if(!t||t.length>140)continue;if(el.tagName==='H4'){head=t}IDX.push({tab,tn,el,t,head:el.tagName==='H4'?'':head,ex:(el.closest('label,.cprow,.bpcard')&&el.closest('label,.cprow,.bpcard').title)||''})}}
+   const extra={audio:'buffer latency sample rate driver output device headroom limiter test tone sine noise',dac:'bit perfect dac interface mode rate balance mono swap dc headphone ceiling lossless buffer latency input monitoring round trip output channels profile gryphon scarlett exclusive volume',layout:'panels map visualizer transport scale zoom meters presets tracks right left devices colours daw ableton fl studio cubase logic bitwig',glass:'blur transparency glass edge light look preview',perf:'light mode lightest lighter optimised optimise optimize full effects automatic auto speed fast slow computer weak laptop battery fps frame rate frames per second refresh hz limit refraction blur edge light animations note cache sleeping tracks cost performance',colors:'background tint hue clip transparency grid',nav:'zoom playhead follow scroll',keys:'keyboard shortcuts keys hotkeys ableton fl studio cubase',general:'performance tooltips splash tour updates reset version about',files:'save autosave file folder',export:'export wav mp3 flac render bounce mixdown dither'};
    for(const sec of document.querySelectorAll('#setBody section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab);if(nb)IDX.push({tab,tn:nb.textContent.trim(),el:null,t:nb.textContent.trim(),head:'',ex:extra[tab]||'',page:1})}};
- const go=it=>{const nb=it.tab?document.querySelector(`#setNav [data-tab="${it.tab}"]`):null;if(nb)nb.click();R.hidden=true;q.value='';if(it.el){requestAnimationFrame(()=>{const t=it.self?it.el:it.el.closest('label,.cprow,.bpcard,.row,.pnlrow,h4,.scalecard,.treditcard,.mtrset,.dawpres,.devrow')||it.el;t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.remove('sflash');void t.offsetWidth;t.classList.add('sflash');setTimeout(()=>t.classList.remove('sflash'),1800)})}};
+ const go=it=>{const nb=it.tab?document.querySelector(`#setNav [data-tab="${it.tab}"]`):null;if(nb)nb.click();R.hidden=true;q.value='';if(it.el){requestAnimationFrame(()=>{const t=it.self?it.el:it.el.closest('label,.cprow,.bpcard,.row,.pnlrow,h4,.scalecard,.treditcard,.mtrset,.dawpres,.devrow,.pmr,.pmtop,.pmsl,.pmauto,.pmfps,.pmlim')||it.el;t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.remove('sflash');void t.offsetWidth;t.classList.add('sflash');setTimeout(()=>t.classList.remove('sflash'),1800)})}};
  const render=()=>{const v=q.value.toLowerCase().trim();if(!v){R.hidden=true;return}if(!IDX)build();const ws=v.split(/\s+/);const hits=IDX.map(it=>{const hay=(it.t+' '+it.head+' '+it.tn+' '+it.ex).toLowerCase();if(!ws.every(w=>hay.includes(w)))return null;let sc=it.t.toLowerCase().startsWith(ws[0])?3:it.t.toLowerCase().includes(v)?2:1;if(it.page)sc-=.5;return{it,sc}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,9);
    sel=hits.length?0:-1;R.innerHTML=hits.length?hits.map((h,i)=>`<button role="option" data-qi="${i}" class="${i===0?'on':''}"><b>${esc(h.it.t)}</b><small>${esc(h.it.tn)}${h.it.head&&h.it.head!==h.it.t?' › '+esc(h.it.head):''}</small></button>`).join(''):`<div class="qnone">Nothing matches “${esc(q.value)}”.</div>`;R.hidden=false;R._hits=hits};
  q.addEventListener('input',render);q.addEventListener('focus',()=>{IDX=null;if(q.value)render()});
@@ -8061,7 +8132,7 @@ function vizApply(){const on=!!UI.viz,dock=UI.vizDock||'bottom';const el=vizBuil
   else{if(fw)fw.hidden=true;if(dock==='bottom'){const bo=document.getElementById('botOut');bo.insertBefore(el,bo.firstChild);el.style.height=(UI.vizH||190)+'px'}else{document.body.appendChild(el);el.style.width=(UI.vizW||300)+'px';vizSide()}}
   vizPaintBtns();VZ.cols=[];if(!VZ.raf)VZ.raf=requestAnimationFrame(vizFrame);setTimeout(()=>dispatchEvent(new Event('resize')),30)}
 const VZHEAT=(()=>{const c=[];for(let i=0;i<256;i++){const t=i/255;const r=Math.round(255*Math.min(1,Math.max(0,1.6*t-.35))),g=Math.round(255*Math.min(1,Math.max(0,1.8*t-.8))),b=Math.round(255*Math.min(1,Math.max(0,t<.5?.25+t*1.2:1.6-t*1.4)));c.push(`rgb(${r},${g},${b})`)}return c})();
-function vizFrame(now){VZ.raf=requestAnimationFrame(vizFrame);if(!UI.viz||!VZ.el||!VZ.el.isConnected||document.hidden)return;if(now-VZ.last<(UI.lite?40:20))return;VZ.last=now;const cv=VZ.cv,box=cv.parentElement,dp=Math.min(2,window.devicePixelRatio||1),W=Math.max(10,Math.floor(box.clientWidth)),H=Math.max(10,Math.floor(box.clientHeight));
+function vizFrame(now){VZ.raf=requestAnimationFrame(vizFrame);if(!UI.viz||!VZ.el||!VZ.el.isConnected||document.hidden)return;if(now-VZ.last<(UI.lite?33:20))return;VZ.last=now;const cv=VZ.cv,box=cv.parentElement,dp=Math.min(2,window.devicePixelRatio||1),W=Math.max(10,Math.floor(box.clientWidth)),H=Math.max(10,Math.floor(box.clientHeight));
   if(cv.width!==Math.floor(W*dp)||cv.height!==Math.floor(H*dp)){cv.width=Math.floor(W*dp);cv.height=Math.floor(H*dp);cv.style.width=W+'px';cv.style.height=H+'px';VZ.cols=[];VZ.sg=null}
   const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);const live=vizEnsure();if(live){VZ.an.getFloatFrequencyData(VZ.f);VZ.an.getFloatTimeDomainData(VZ.t)}
   const mode=UI.vizMode||'all';g.fillStyle='#07080b';g.fillRect(0,0,W,H);
@@ -8751,7 +8822,7 @@ function pvParams(I,c,acc){const og=I.og?Math.pow(10,I.og/20):1,osc=[];
     return{osc,wt:I.wt||'basic',pos:clamp(I.pos??.2,0,1),lA:(I.lamt||0)/100*.5,lfoRate:I.lfoRate||.4,eA:(I.penv||0)/100,pd:I.pd||.5,ft:ft==='highpass'?2:ft==='bandpass'?3:1,subPre:1,gain:(I.gain??.5)*.7*og,a,dtc:d/3+.001,s:clamp(I.s??.7,0,1),rtc:r/3+.001,rend:r*3+.05,fc:cut,fe:Math.min(18000,cut*(1+(I.fenv||0)/100*4)),ftc:.04+d*.3,q:clamp(I.res??1,.1,20),lfo:0,lamt:0,fm:0,ratio:1,fm0:0,fm1:0,sub:(I.sub||0)>0?I.sub/100*.8:0,noise:(I.noise||0)>0?I.noise/100*.5:0}}
   if(I.preset==='acid'){/* one oscillator, two filter stages, drive; a loud note (velocity above 88 %) is an accent */const ty=PVW[I.wave]||1,ea=1+(acc?I.acc/100:0),k=Math.round(I.dist/100*10)/10;osc.push([ty,0,PVA[ty],PVA[ty]]);
     return{osc,gain:I.gain*(acc?1.35:.85)*.7*PVMONO*og,a:.003,dtc:1,s:1,rtc:.01,rlin:.018,rend:.03,fc:I.cut,fe:Math.min(16000,I.cut*Math.pow(2,I.env/100*5*ea)),ftc:I.dec/(acc?1.6:3),q:I.res*(acc?1.15:1),q2:.7,dg:1+k*12,lfo:0,lamt:0,fm:0,ratio:1,fm0:0,fm1:0,sub:0,noise:0}}
-  if(I.preset==='plant'){const nv=Math.max(1,Math.round(I.uni)),NV0=UI.lite&&c===ctx?Math.min(nv,3):nv,mix=I.w1===I.w2?[[I.w1,1]]:[[I.w1,1-I.morph],[I.w2,I.morph]];
+  if(I.preset==='plant'){const nv=Math.max(1,Math.round(I.uni)),NV0=false&&c===ctx?Math.min(nv,3):nv,mix=I.w1===I.w2?[[I.w1,1]]:[[I.w1,1-I.morph],[I.w2,I.morph]];
     for(const[wv,lv] of mix){if(lv<.02)continue;const NV=mix.length>1&&lv<.5?Math.max(1,Math.ceil(NV0/2)):NV0,g=lv/Math.sqrt(NV)*.7;
       for(let k=0;k<NV;k++){const sp=NV===1?0:k/(NV-1)*2-1,b=NV>1?Math.round(sp)||0:0;let gl=g,gr=g;if(b&&I.width>0){const x=(b*.85*I.width/100+1)/2;gl=g*Math.cos(x*Math.PI/2);gr=g*Math.sin(x*Math.PI/2)}const ty=PVW[wv]||0;osc.push([ty,sp*I.det,+(gl*PVA[ty]).toFixed(5),+(gr*PVA[ty]).toFixed(5)])}}
     const fc=I.cut,mono=osc.every(o=>o[2]===o[3])?PVMONO:1;return{osc,gain:I.gain*og*mono,a:I.a,dtc:I.d/3+.001,s:I.s,rtc:I.r/3+.001,rend:I.r*1.8+.05,fc,fe:fc*Math.pow(2,I.fenv/100*5),ftc:.03+I.d*.35,q:I.res,lfo:I.lfo,lamt:I.lamt>0?fc*I.lamt/100*.9:0,fm:I.fm>0?1:0,ratio:I.ratio,fm0:I.fm/100*4,fm1:I.fm/100*1.2,sub:I.sub>0?I.sub/100*.8:0,noise:I.noise>0?I.noise/100*.35:0}}
@@ -8767,7 +8838,7 @@ function pvState(c,key,name,M){name=name||'al-poly';M=M||PVS;let m=M.get(c);if(!
 function pvFlush(st){const nb=st.nb;if(!nb)return;st.nb=null;pvSend(st,{n:nb})}
 function pvSend(st,m){if(st.node&&!st.fin)st.node.port.postMessage(m);else st.q.push(m)}
 function pvDrop(c,st){try{const m=(st.M||PVS).get(c);if(m&&m.get(st.key)===st)m.delete(st.key);if(st.node){st.node.port.postMessage({die:1});st.node.disconnect()}st.out.disconnect();if(st.spg)st.spg.disconnect()}catch(e){}}
-const pvKey=(I,c,acc)=>I.preset==='wtab'?'wt|'+I.wt+'|'+I.pos+'|'+I.lamt+'|'+I.lfoRate+'|'+I.penv+'|'+I.pd+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.ftype+'|'+I.sub+'|'+I.noise+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.gain+'|'+I.og:I.preset==='acid'?'acid|'+I.wave+'|'+I.cut+'|'+I.res+'|'+I.env+'|'+I.dec+'|'+I.acc+'|'+I.dist+'|'+I.gain+'|'+I.og+'|'+(acc?1:0):I.preset+'|'+I.w1+'|'+I.w2+'|'+I.morph+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.lfo+'|'+I.lamt+'|'+I.sub+'|'+I.noise+'|'+I.fm+'|'+I.ratio+'|'+I.gain+'|'+I.og+'|'+I.wave+'|'+I.cutoff+'|'+(UI.lite&&c===ctx?1:0);
+const pvKey=(I,c,acc)=>I.preset==='wtab'?'wt|'+I.wt+'|'+I.pos+'|'+I.lamt+'|'+I.lfoRate+'|'+I.penv+'|'+I.pd+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.ftype+'|'+I.sub+'|'+I.noise+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.gain+'|'+I.og:I.preset==='acid'?'acid|'+I.wave+'|'+I.cut+'|'+I.res+'|'+I.env+'|'+I.dec+'|'+I.acc+'|'+I.dist+'|'+I.gain+'|'+I.og+'|'+(acc?1:0):I.preset+'|'+I.w1+'|'+I.w2+'|'+I.morph+'|'+I.uni+'|'+I.det+'|'+I.width+'|'+I.cut+'|'+I.res+'|'+I.fenv+'|'+I.a+'|'+I.d+'|'+I.s+'|'+I.r+'|'+I.lfo+'|'+I.lamt+'|'+I.sub+'|'+I.noise+'|'+I.fm+'|'+I.ratio+'|'+I.gain+'|'+I.og+'|'+I.wave+'|'+I.cutoff+'|'+(false&&c===ctx?1:0);
 function pvPlay(c,I,ch,p,w,dur,v,tag){const key=ch.triv?ch.dest:ch.in,st=pvState(c,key),acid=I.preset==='acid',acc=acid&&v>.88,sig=pvKey(I,c,acc);let id=st.ids.get(sig);
   if(I.preset==='wtab'){const nm=I.wt||'basic';if(!st.wts)st.wts=new Set();if(!st.wts.has(nm)){st.wts.add(nm);pvSend(st,{wt:nm,T:wtMips(nm)})}}
   if(!id){if(st.ids.size>80)st.ids.clear();id=st.nid++;st.ids.set(sig,id);pvSend(st,{P:pvParams(I,c,acc),id})}
@@ -8785,7 +8856,7 @@ const gvOK=I=>!!I&&UI.poly!==false&&I.preset==='sampler'&&I.mode==='grain';
 const pvAny=I=>pvOK(I)||gvOK(I)||emOK(I)||vgOK(I)||vfmOK(I)||orbOK(I)||(typeof sbsOK==='function'&&sbsOK(I));
 function gvPlay(c,I,ch,p,w,dur,v,tag){let B=sampleBuf(I.buf);if(!B)return null;const rv=!!I.rev;if(rv)B=sampRev(B);const key=ch.triv?ch.dest:ch.in,st=pvState(c,key,'al-grain',GVS),bid=I.buf+(rv?'~r':'');
   if(!st.bufs)st.bufs=new Set();if(!st.bufs.has(bid)){st.bufs.add(bid);const chs=[];for(let k=0;k<Math.min(2,B.numberOfChannels);k++)chs.push(B.getChannelData(k));pvSend(st,{buf:bid,ch:chs,sr:B.sampleRate})}
-  const lite=UI.lite&&c===ctx,ft=I.ftype||'lowpass',A=I.a,DD=I.d??.3,fe=I.fenv||0,og=I.og?Math.pow(10,I.og/20):1,
+  const lite=false&&c===ctx,ft=I.ftype||'lowpass',A=I.a,DD=I.d??.3,fe=I.fenv||0,og=I.og?Math.pow(10,I.og/20):1,
     sig=[bid,I.gain,og,A,DD,I.s,I.r,ft,I.cut,I.res,fe,I.lfor,I.lfoa,I.pos,I.scan,I.spray,I.size,I.dens,I.prand,lite?1:0].join('|');let id=st.ids.get(sig);
   if(!id){if(st.ids.size>40)st.ids.clear();id=st.nid++;st.ids.set(sig,id);const off0=ft==='off',cut=off0?20000:I.cut;
     pvSend(st,{id,P:{buf:bid,rv:rv?1:0,gain:I.gain*og,a:A,dtc:DD/3+.001,s:I.s??1,rtc:I.r/3+.001,rend:I.r*3+.05,tail:I.r*2,ft:GVF[ft]||0,fc:cut,fe:fe>0&&!off0?Math.min(18000,cut*Math.pow(2,fe/100*5)):cut,ftc:DD/3+.001,q:I.res??.7,lfor:I.lfor||4,lfoa:off0?0:(I.lfoa||0)/100*2400,
@@ -8919,7 +8990,7 @@ function mxsMount(){const w=document.getElementById('mixWin');if(!w||w.hidden)re
 function mxsMaster(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const me=w.querySelector('.mxme');if(!me)return;const o=mxsO(),T=lmTarget();
   if(o.mTp){const el=me.querySelector('.mxtp'),v=LM.tpMax;el.querySelector('b').textContent=v>-89?(v>0?'+':'')+v.toFixed(1):'–';el.classList.toggle('ov',v>T[3]);el.classList.toggle('near',v<=T[3]&&v>T[3]-1)}
   if(o.mTgt){const el=me.querySelector('.mxtg'),s=LM.S,on=s>-69,d=s-T[2];el.querySelector('small').textContent='Target '+T[2];el.querySelector('b').textContent=on?(d>=0?'+':'')+d.toFixed(1)+' LU':'–';el.classList.toggle('ok',on&&Math.abs(d)<=1);el.classList.toggle('hot',on&&d>1&&d<=3);el.classList.toggle('over',on&&d>3);const em=el.querySelector('em');em.style.display=on?'block':'none';if(on)em.style.left=(clamp((d+12)/18,0,1)*100).toFixed(1)+'%'}}
-function mxsTick(){const w=document.getElementById('mixWin');if(!w||w.hidden||!MXV)return;if(FRN%(UI.lite?3:2))return;const o=mxsO(),slow=!(mxsTick.k=((mxsTick.k|0)+1)%8),view=UI.mxView||'wave',dyn=!!(FDS[o.fd-1]&&FDS[o.fd-1].dyn);
+function mxsTick(){const w=document.getElementById('mixWin');if(!w||w.hidden||!MXV)return;if(FRN%2)return;const o=mxsO(),slow=!(mxsTick.k=((mxsTick.k|0)+1)%8),view=UI.mxView||'wave',dyn=!!(FDS[o.fd-1]&&FDS[o.fd-1].dyn);
   for(const cv of MXV){if(!cv.isConnected)continue;const id=cv.dataset.id,H0=MXH.get(id);if(!H0)continue;const pl=H0.l[H0.i],pr=H0.r[H0.i];if(o.pkr)H0.pkm=Math.max(H0.pkm||0,pl,pr);
     /* the side meters of the master (its picture sits in a wrapper, so the mixer's own drawing never found them) and, when the picture is hidden in the meter view, of every channel are driven here */
     const own=view==='meter'?!o.view:id==='master';if(!dyn&&!own)continue;
@@ -9154,7 +9225,7 @@ function anzWire(ov){const el=ov.el;let d=null;const fl=()=>(ov.dock||'float')==
     else if(a==='add')openMenu(r.left,r.bottom+3,[{head:'Compare with'},...['master',...S.tracks.map(t=>t.id)].filter(k=>!ov.src.includes(k)).map(k=>({label:spoName(k),dot:spoCol(k),act:()=>{ov.src.push(k);spoHead(ov);ov.idle=0;spoSave()}}))])})}
 
 /* drawing: every module has a canvas of its own. Nothing moves when there is no sound: after about two seconds of silence the pictures are only checked a few times a second. */
-spoDraw=function(){SPO.raf=0;if(!SPO.list.length)return;SPO.raf=requestAnimationFrame(spoDraw);const now=performance.now(),last=SPO.last||0;if(document.hidden||now-last<(UI.lite?30:14))return;const dt=Math.min(.1,last?(now-last)/1000:.016);SPO.last=now;
+spoDraw=function(){SPO.raf=0;if(!SPO.list.length)return;SPO.raf=requestAnimationFrame(spoDraw);const now=performance.now(),last=SPO.last||0;if(document.hidden||now-last<(UI.lite?33:14))return;const dt=Math.min(.1,last?(now-last)/1000:.016);SPO.last=now;
   for(const ov of SPO.list){try{anzFrame(ov,now,dt)}catch(e){if(!SPO.err){SPO.err=1;console.error(e)}}}};
 function anzFrame(ov,now,dt){const el=ov.el;if(!el.isConnected)return;let sig=false;
   if(ctx&&ctx.state==='running')for(const k of ov.src){const p=anzPair(k);if(p&&(mtrPeak(p[0])>1e-4||mtrPeak(p[1])>1e-4)){sig=true;break}}
@@ -12780,6 +12851,152 @@ function sbsInit(){PRESETS.sbass={name:'Sub',cat:'Bass',desc:'A sub bass built f
   fxin.addEventListener('change',e=>{const s=e.target.closest&&e.target.closest('select[data-sbs]');if(!s)return;const t=cur();if(!t)return;pushUndo();t.inst[s.dataset.sbs]=+s.value;sbsPush(t.inst);changed(false)},true);
   fxin.addEventListener('pointerdown',e=>{const cv=e.target.closest&&e.target.closest('canvas.ivz[data-k=sbs_main]');if(!cv||e.button!==0)return;const t=cur();if(!t)return;e.stopImmediatePropagation();e.preventDefault();preview(t,SBSN.get(t.inst)??31,.9)},true);
   {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{for(const el of fxin.querySelectorAll('[data-c^="fx:sb:"]')){const k=el.dataset.c.slice(6);if(SBSTIP[k])el.title=(k==='ss'?'Small speakers':SBSL[k])+': '+SBSTIP[k]+' Drag to change, double-click to reset.'}}catch(e){}return r}}}
+/* ====================== v0.187: the Performance tab (task O) ======================
+   One switch, Light mode, and one slider with four stops: 0 Lightest | 1 Lighter, 2 Optimised, 3 Full effects.  UI.pm = {on, st, user}.
+   Light mode off = Full effects (the slider keeps its place, dimmed). The stop is turned into the glass switches in UI.fx (the v0.170 code reads those),
+   and UI.lite (the older light code: pictures 30 times a second, simpler clip drawing, a still logo, a longer note look-ahead) is on for stops 0 and 1.
+   Stop 0 (Lightest) adds body.fxmin: no transparency, no shadows, no filters, no large gradients, no animations or transitions, and the glass
+   layers (blurred picture, the copy behind the glass, the refraction maps) leave the page. Automatic never picks Lightest. */
+const PM={busy:false,undo:null,rep:'',steps:[],ext:null,hw:''};
+const PMN=['Lightest','Lighter','Optimised','Full effects'];
+const PMD=['Fastest and lightest: no transparency, no blur, no shadows, no animations.','Solid panels, no animations. Pictures redraw 30 times a second.','Glass with blur from a ready-made picture. Smooth on most computers.','Refraction, live blur, edge light and every animation.'];
+function pmInit(){if(UI.pm&&typeof UI.pm==='object'&&UI.pm.st>=0&&UI.pm.st<=3)return;
+  /* first start with this version: the old three levels and the old Light mode become a stop */
+  const lv=UI.fx&&typeof UI.fx==='object'?fxLevel():(UI.refr===0?'opt':'full'),man=!!UI.lite&&UI.liteMan===true;let on=false,st=2;
+  if(lv==='zero'){on=true;st=1}else if(lv==='opt'){on=true;st=2;if(!UI.fxOpt||fxSame(UI.fxOpt,fxPre('zero'))||fxSame(UI.fxOpt,fxPre('full')))UI.fxOpt={...fxGet()}}else if(man){on=true;st=1}
+  UI.pm={on,st,user:!!(UI.fxUser||man)};saveUI()}
+function pmEff(){const p=UI.pm||{};return p.on?(p.st|0):3}
+function pmFx(st){if(st>=3)return fxPre('full');if(st===2){const o=UI.fxOpt;return o&&typeof o==='object'&&/^(off|copy|live)$/.test(o.blur)&&!fxSame(o,fxPre('zero'))&&!fxSame(o,fxPre('full'))?{...o}:fxPre('light')}return fxPre('zero')}
+/* the glass layers leave the page in Lightest (not only hidden), and come back in their old order when it is left */
+function pmLayers(min){try{if(min){if(rfSvg&&rfSvg.isConnected)rfSvg.remove();for(const c of[GB.cv,ABL.cv])if(c&&c.isConnected){c.width=0;c.height=0;c.remove()}if(ABL.q){ABL.q.width=0;ABL.q.height=0}ABL.w=0;elClear()}
+  else{if(rfSvg&&!rfSvg.isConnected)document.body.appendChild(rfSvg);for(const c of[GB.cv,ABL.cv])if(c&&!c.isConnected)arr.before(c)}}catch(e){}}
+function pmApply(){const e=pmEff(),min=e===0,B=document.body.classList;UI.fx=pmFx(e);UI.lite=e<=1;B.toggle('fxmin',min);B.toggle('lite',UI.lite);
+  {const c=document.getElementById('liteChk');if(c)c.checked=!!UI.pm.on}
+  for(const id of['atomC','navAtomC']){const c=document.getElementById(id);if(c)delete c.dataset.done}
+  pmLayers(min);saveUI();applyTrans();if(!min)try{GB.lt=0;gbCopy()}catch(x){}dirty=true;try{pmSync()}catch(x){}}
+function pmSetOn(v){UI.pm={...UI.pm,on:!!v,user:true};UI.liteMan=!!v;PM.ext=null;pmApply()}
+function pmSetStop(st){st=clamp(st|0,0,3);UI.pm={...UI.pm,on:true,st,user:true};UI.liteMan=true;PM.ext=null;if(!PM.busy)PM.rep='';pmApply()}
+/* one effect switched by hand: Full when everything is on, otherwise Optimised with this mix (kept in UI.fxOpt) */
+function pmToggle(patch){const n={...fxGet(),...patch};let st;if(fxSame(n,fxPre('full')))st=3;else if(fxSame(n,fxPre('zero')))st=pmEff()<=1?pmEff():1;else{st=2;UI.fxOpt={...n}}UI.pm={...UI.pm,on:true,st,user:true};PM.ext=null;pmApply()}
+/* the older code still switches UI.lite and calls applyLite (light mode switching itself on for a weak computer, three open projects, the CPU popup):
+   that becomes Lighter, and switching it off again puts back what was there before */
+applyLite=function(){const want=!!UI.lite,have=pmEff()<=1;
+  if(want!==have){if(want){PM.ext={...UI.pm};UI.pm={...UI.pm,on:true,st:UI.pm.on&&UI.pm.st===0?0:1}}else{UI.pm=PM.ext&&!(PM.ext.on&&PM.ext.st<=1)?{...PM.ext}:{...UI.pm,on:false};PM.ext=null}}
+  pmApply()};
+{const _la=liteAuto;liteAuto=function(){if(UI.pm&&UI.pm.user)return;return _la.apply(this,arguments)}}
+{const _ec=ecoCheck;ecoCheck=function(){/* a stop chosen by hand is kept, also with three projects open */if(UI.pm&&UI.pm.user&&!ECO)return;return _ec.apply(this,arguments)}}
+/* the old switch (#liteChk) is now the main switch of the Performance tab; the menu item and the command still toggle it */
+{const c=document.getElementById('liteChk');if(c)c.onchange=e=>{pmSetOn(e.target.checked);toast(UI.pm.on?'Light mode on: '+PMN[UI.pm.st]+'.':'Light mode off: Full effects.')}}
+addEventListener('click',e=>{if(e.target&&e.target.id==='cpuLite'){e.stopImmediatePropagation();e.preventDefault();pmSetOn(!UI.pm.on);try{cpuPopFill()}catch(x){}}},true);
+{const _cf=cpuPopFill;cpuPopFill=function(){const r=_cf.apply(this,arguments);const b=document.getElementById('cpuLite');if(b)b.textContent=UI.pm&&UI.pm.on?'Turn off light mode':'Turn on light mode';return r}}
+pmInit();UI.lite=pmEff()<=1;UI.fx=pmFx(pmEff());
+
+/* ---- Automatic: measures this computer and moves the slider step by step, never to Lightest ---- */
+async function pmAuto(){if(PM.busy)return;if(document.hidden){PM.rep='The window has to be in view.';pmSync();return}
+  PM.busy=true;PM.steps=[];const before={pm:{...UI.pm},opt:UI.fxOpt?{...UI.fxOpt}:null,man:UI.liteMan},wait=ms=>new Promise(r=>setTimeout(r,ms)),say=t=>{PM.rep=t;pmSync()};
+  /* while measuring, the visuals run: the arrangement and what shows through the glass are drawn on every frame and the pictures are awake */
+  const load=async ms=>{let go=true;const k=()=>{if(!go)return;dirty=true;LINT=performance.now();requestAnimationFrame(k)};requestAnimationFrame(k);const v=await fxFps(ms);go=false;return v};
+  const set=(st,f)=>{UI.pm={...UI.pm,on:true,st};if(f)UI.fxOpt={...f};pmApply()};
+  try{const cores=navigator.hardwareConcurrency||0,mem=navigator.deviceMemory||0,weak=(cores&&cores<=2)||(mem&&mem<=2),aud=typeof CPU==='object'?CPU.aud:null;
+    say('Measuring your screen…');set(1);await wait(350);const f0=await load(1000),hz=FPS.real||fxHzSnap(Math.max(f0,FPS.hz||0));
+    PM.hw=hz+' Hz screen'+(cores?' · '+cores+' cores':'')+(mem?' · '+(mem>=8?'8+':mem)+' GB':'')+(aud!=null?' · audio '+Math.round(aud*100)+'%':'');
+    PM.steps.push(['Lighter',Math.round(f0),f0>=hz*.95]);pmSync();
+    let best=1,bestF=null,why='';
+    if(f0<hz*.95)why='Even Lighter stays below '+hz+' here.';
+    else for(const[st,f,nm] of[[2,{...fxPre('light'),edge:false},'Optimised, fixed edge'],[2,fxPre('light'),'Optimised'],[3,null,'Full effects']]){
+      if(st===3&&weak){why='Full effects need more than '+(cores<=2?cores+' cores':mem+' GB')+'.';break}
+      if(st===3&&aud!=null&&aud>.6){why='The audio engine is busy ('+Math.round(aud*100)+'%), so Full effects were left out.';break}
+      if(document.hidden)throw new Error('hidden');say('Trying '+nm+'…');set(st,f);await wait(400);const v=await load(1000),ok=v>=hz*.95;PM.steps.push([nm,Math.round(v),ok]);
+      if(!ok){why=nm+' reached '+Math.round(Math.min(v,hz))+' of '+hz+'.';break}best=st;bestF=f}
+    set(best,best===2?bestF:null);UI.pm.user=true;UI.liteMan=true;saveUI();PM.undo=before;
+    say('Stopped at '+PMN[best]+'.'+(why?' '+why:best===3?' It holds '+hz+' of '+hz+'.':''))}
+  catch(e){UI.pm=before.pm;UI.fxOpt=before.opt;pmApply();say('Stopped. Nothing was changed.')}
+  PM.busy=false;pmSync()}
+function pmUndo(){const u=PM.undo;if(!u||PM.busy)return;PM.undo=null;UI.pm={...u.pm};UI.fxOpt=u.opt;UI.liteMan=u.man;PM.steps=[];PM.rep='Back to how it was.';pmApply()}
+
+/* ---- the tab ---- */
+const PMIC={tab:'<path d="M3.5 14.5a6.5 6.5 0 1 1 13 0"/><path d="M10 14.5l3.6-4.2"/><circle cx="10" cy="14.5" r="1.1"/><path d="M5.6 9.3l.9.7M10 6.2v1.1M14.4 9.3l-.9.7" opacity=".6"/>',
+ bolt:'<path d="M17 3 7 18h8l-2 11 10-15h-8z"/>',auto:'<path d="M16 4v4M16 24v4M4 16h4M24 16h4"/><circle cx="16" cy="16" r="6"/><path d="M16 13v3l2 2"/>'};
+function pmSvg(k,v){return`<svg viewBox="${v||'0 0 32 32'}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PMIC[k]||FXPIC[k]}</svg>`}
+function pmBuild(){const body=document.getElementById('setBody'),nav=document.getElementById('setNav');if(!body||!nav||document.querySelector('#setBody section[data-page=perf]'))return;
+  const nb=document.createElement('button');nb.dataset.tab='perf';nb.innerHTML=`<i class="nic" style="--ic:#2ef2c2">${pmSvg('tab','0 0 20 20')}</i>Performance`;
+  const gb=nav.querySelector('[data-tab=glass]');if(gb)gb.before(nb);else nav.appendChild(nb);
+  const dots='<span class="pmd" aria-hidden="true"><i></i><i></i><i></i></span>',sw=id=>`<label class="bpsw"><input type="checkbox" id="${id}"><i></i></label>`;
+  const row=(k,ic,t,tip,ctl,save)=>`<div class="pmr" data-pr="${k}" title="${tip}"><span class="pic">${fxSvg(ic)}</span><b class="pmq">${t}</b>${save?'<span class="pmsv">saves</span>':dots}${ctl}</div>`;
+  const sec=document.createElement('section');sec.dataset.page='perf';sec.hidden=true;
+  sec.innerHTML=`<div class="pmhero"><div class="pmtop"><span class="pmic">${pmSvg('bolt')}</span><div class="pmtt"><b class="pmq">Light mode</b><small id="pmSub"></small></div><span id="pmSwH"></span></div>
+<div class="pmsl" id="pmSl" role="slider" tabindex="0" aria-label="How light" aria-valuemin="0" aria-valuemax="3">
+<button type="button" class="pmz" data-st="0" title="Lightest: fastest and lightest. No transparency, no blur, no shadows, no animations. Automatic never goes here."><i></i><b class="pmq">Lightest</b></button><span class="pmgap" aria-hidden="true"></span>
+<div class="pmtrk" id="pmTrk"><span class="pmln"><u id="pmFill"></u></span><button type="button" data-st="1" title="Lighter: solid panels, no animations, pictures 30 times a second"><i></i><b class="pmq">Lighter</b></button><button type="button" data-st="2" title="Optimised: glass with blur from a ready-made picture"><i></i><b class="pmq">Optimised</b></button><button type="button" data-st="3" title="Full effects: refraction, live blur, edge light, all animations"><i></i><b class="pmq">Full effects</b></button></div></div>
+<p class="pmcap" id="pmCap"></p>
+<div class="pmauto"><button type="button" id="pmAuto" class="pmq" title="Measures this computer (screen rate, frame times while the visuals run, cores, memory, audio load), then moves the slider up while the screen keeps its full rate. Never picks Lightest.">${pmSvg('auto')}<span>Automatic</span></button><button type="button" id="pmUndo" hidden>Undo</button><span id="pmRep" role="status"></span></div>
+<div class="pmtrail" id="pmTrail"></div></div>
+<div class="pmfps" title="Pictures a second that AudioLab draws, next to your screen's rate. Only measured while this tab is open."><div class="pmfn"><b id="pmFpsN">–</b><span id="pmHz"></span><small class="pmq">Frame rate</small></div><canvas id="pmFpsC" aria-hidden="true"></canvas><div class="pmfl"><span>Lowest 10 s</span><b id="pmLow">–</b><span>Work a frame</span><b id="pmMs">–</b></div></div>
+<div class="pmlim" id="pmLim"><span class="pmq">Frame limit</span></div>
+<div class="pmh">What each effect costs</div><div class="pmlist">`+
+  row('refr','refr','Refraction','Bends the picture near the edges of glass, like a thick pane. The most expensive effect.',sw('pmRefr'))+
+  row('blur','blur','Blur','Live: the browser blurs what is behind each panel whenever anything changes. Picture: the arrangement is blurred once into a small picture. Off: solid panels.','<div class="seg" id="pmBlur"><button type="button" data-bm="off">Off</button><button type="button" data-bm="copy">Picture</button><button type="button" data-bm="live">Live</button></div>')+
+  row('edge','edge','Edge light','The rim gets brighter next to bright clips. Worked out about 10 times a second from a tiny picture, only while the background changes.',sw('pmEdge'))+
+  row('anim','anim','Animations','The moving logo, glows and soft fades.',sw('pmAnim'))+`</div>
+<div class="pmh">Savers</div><div class="pmlist">`+
+  row('glPlay','play','Softer blur while playing','Halves the live blur during playback. Only matters with live blur.','<span data-mv="glPlay"></span>',1)+
+  row('glBack','back','Half-size picture behind glass','What shows through live glass is a half-size copy of the arrangement. Only matters with live blur.','<span data-mv="glBack"></span>',1)+
+  row('ncOn','note','Note cache','Notes that repeat are made once and played back as audio. Saves a lot of processor in dense songs. Exports are not affected.','<span data-mv="ncOn"></span>',1)+
+  row('slpOn','slp','Sleeping tracks','While the song plays, tracks with nothing to play are unplugged until just before their next clip.','<span data-mv="slpOn"></span>',1)+`</div>`;
+  body.appendChild(sec);
+  /* move the existing controls here (same inputs, same handlers) */
+  {const c=document.getElementById('liteChk');if(c){const l=document.createElement('label');l.className='bpsw pmsw';l.title='Light mode. On: the slider below is used. Off: Full effects.';c.setAttribute('aria-label','Light mode');l.append(c,document.createElement('i'));sec.querySelector('#pmSwH').replaceWith(l)}}
+  {const s=document.getElementById('fpsSel');if(s){s.setAttribute('aria-label','Frame limit');sec.querySelector('#pmLim').appendChild(s)}const h=document.getElementById('fpsHint');if(h)sec.querySelector('#pmLim').after(h)}
+  for(const ph of sec.querySelectorAll('[data-mv]')){const inp=document.getElementById(ph.dataset.mv);if(!inp){ph.remove();continue}const l=document.createElement('label');l.className='bpsw';inp.setAttribute('aria-label',ph.closest('.pmr').querySelector('b').textContent);l.append(inp,document.createElement('i'));ph.replaceWith(l);inp.addEventListener('change',()=>setTimeout(pmSync,0))}
+  /* General keeps a pointer to the new tab */
+  {const lc=document.getElementById('liteCard'),box=lc&&lc.closest('.sbox');const link='<p class="pmlink">Light mode, effects and frame rate: <button type="button" data-pmgo="perf">Performance</button></p>';
+   if(box){box.innerHTML='<h4>Performance</h4>'+link}else if(lc){lc.outerHTML=link}}
+  /* Glass and light keeps only the look; the levels, the costs and the frame rate moved here */
+  {const g=document.querySelector('#setBody section[data-page=glass]');if(g){for(const s of g.querySelectorAll('#fxLv,.fxopt,.fxh,.pbox'))s.remove();/* the refraction card holds the old slider that syncLook still fills: hidden, not removed */for(const s of g.querySelectorAll('.gcard.gr'))s.style.display='none';const o=document.getElementById('gpFps');if(o)o.hidden=true;
+    const p=document.createElement('p');p.className='pmlink';p.innerHTML='Light mode and what each effect costs: <button type="button" data-pmgo="perf">Performance</button>';const gp=g.querySelector('.gprev');if(gp)gp.after(p);else g.prepend(p)}}
+  /* events */
+  const sl=sec.querySelector('#pmSl'),trk=sec.querySelector('#pmTrk');
+  sl.addEventListener('click',e=>{const b=e.target.closest('[data-st]');/* the track itself answers pointerdown; a click from the keyboard (Enter, Space) has detail 0 */if(b&&(!trk.contains(b)||e.detail===0))pmSetStop(+b.dataset.st)});
+  {let drag=false;const pick=e=>{const bs=[...trk.querySelectorAll('[data-st]')];let best=null,bd=1e9;for(const b of bs){const r=b.querySelector('i').getBoundingClientRect(),d=Math.abs(r.left+r.width/2-e.clientX);if(d<bd){bd=d;best=b}}if(best&&(+best.dataset.st!==UI.pm.st||!UI.pm.on))pmSetStop(+best.dataset.st)};
+   trk.addEventListener('pointerdown',e=>{if(e.button)return;drag=true;try{trk.setPointerCapture(e.pointerId)}catch(x){}pick(e)});trk.addEventListener('pointermove',e=>{if(drag)pick(e)});
+   for(const t of['pointerup','pointercancel'])trk.addEventListener(t,()=>{drag=false})}
+  sl.addEventListener('keydown',e=>{const k=e.key;let st=UI.pm.st;if(k==='ArrowLeft'||k==='ArrowDown')st--;else if(k==='ArrowRight'||k==='ArrowUp')st++;else if(k==='Home')st=0;else if(k==='End')st=3;else return;e.preventDefault();pmSetStop(clamp(st,0,3))});
+  sec.querySelector('#pmAuto').onclick=()=>pmAuto();sec.querySelector('#pmUndo').onclick=()=>pmUndo();
+  sec.querySelector('#pmRefr').onchange=e=>pmToggle({refr:e.target.checked});sec.querySelector('#pmEdge').onchange=e=>pmToggle({edge:e.target.checked});sec.querySelector('#pmAnim').onchange=e=>pmToggle({anim:e.target.checked});
+  sec.querySelector('#pmBlur').onclick=e=>{const b=e.target.closest('[data-bm]');if(b)pmToggle({blur:b.dataset.bm})};
+  pmSync()}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pmgo]');if(!b)return;const n=document.querySelector(`#setNav [data-tab="${b.dataset.pmgo}"]`);if(n)n.click()});
+function pmSync(){const sec=document.querySelector('#setBody section[data-page=perf]');if(!sec)return;const q=id=>document.getElementById(id),p=UI.pm,e=pmEff(),f=fxGet(),cust=p.on&&p.st===2&&!fxSame(f,fxPre('light'));
+  sec.classList.toggle('pmoff',!p.on);sec.dataset.st=p.st;{const c=q('liteChk');if(c)c.checked=!!p.on}
+  for(const b of sec.querySelectorAll('#pmSl [data-st]'))b.classList.toggle('on',+b.dataset.st===p.st);
+  const sl=q('pmSl');sl.setAttribute('aria-valuenow',p.st);sl.setAttribute('aria-valuetext',PMN[p.st]+(p.on?'':' (Light mode off)'));
+  q('pmFill').style.width=(p.st<=1?0:p.st===2?50:100)+'%';
+  q('pmSub').textContent=p.on?'On · '+PMN[p.st]+(cust?' (your mix)':''):'Off · Full effects';
+  const cap=q('pmCap');cap.textContent=p.on?PMD[p.st]:'Off, so every effect is on. Pick a stop to turn it on.';cap.classList.toggle('z',p.on&&p.st===0);
+  q('pmRefr').checked=!!f.refr;q('pmRefr').disabled=!isChromium;q('pmEdge').checked=!!f.edge;q('pmAnim').checked=!!f.anim;
+  for(const b of q('pmBlur').children)b.classList.toggle('on',b.dataset.bm===f.blur);
+  const cost={refr:f.refr?3:0,blur:f.blur==='live'?2:f.blur==='copy'?1:0,edge:f.edge?1:0,anim:f.anim?1:0},max={refr:3,blur:2,edge:1,anim:1};
+  for(const r of sec.querySelectorAll('.pmr')){const k=r.dataset.pr,d=r.querySelector('.pmd');if(d){d.dataset.c=cost[k];d.dataset.m=max[k];r.classList.toggle('on',cost[k]>0)}
+    else{const i=r.querySelector('input');r.classList.toggle('on',!!(i&&i.checked));if(k==='glPlay'||k==='glBack')r.classList.toggle('dis',f.blur!=='live')}}
+  const a=q('pmAuto');a.disabled=PM.busy;a.querySelector('span').textContent=PM.busy?'Measuring…':'Automatic';sec.classList.toggle('pmbusy',PM.busy);
+  q('pmUndo').hidden=!PM.undo||PM.busy;q('pmRep').textContent=PM.rep;
+  q('pmTrail').innerHTML=(PM.hw?'<span class="pmhw">'+esc(PM.hw)+'</span>':'')+PM.steps.map(([n,v,ok])=>`<span class="${ok?'ok':'no'}">${esc(n)} <b>${v}</b></span>`).join('')}
+fxSync=function(){try{pmSync()}catch(e){}const t=document.getElementById('gpTxt');if(t){const f=fxGet(),z=f.blur==='off'&&!f.refr;t.textContent=z?'Solid, no effects':(f.refr?'Refraction':'No refraction')+' · '+(f.blur==='live'?'live blur':f.blur==='copy'?'blur from a picture':'no blur')+(f.edge?' · live edge light':'')}};
+/* the frame rate read-out: drawn only while the tab is open (inside the Settings loop) */
+const PMF={t:0,k:''};
+function pmFpsDraw(now){const sec=document.querySelector('#setBody section[data-page=perf]');if(!sec||sec.hidden||now-PMF.t<250)return;PMF.t=now;
+  const hz=FPS.hz||0,L=(FPS.lows||[]).filter(x=>now-x[0]<=10000),low=L.length?Math.min(...L.map(x=>x[1])):FPS.fps,q=id=>document.getElementById(id),col=v=>!hz||v>=hz*.95?'#2ef2c2':v>=hz*.7?'#f5c84c':'#ff6b6b';
+  const set=(id,t)=>{const el=q(id);if(el&&el.textContent!==t)el.textContent=t};set('pmFpsN',String(Math.min(FPS.fps,hz||FPS.fps)||'–'));set('pmHz',hz?'/ '+hz+' Hz':'');set('pmLow',L.length?String(Math.min(low,hz||low)):'–');set('pmMs',FPS.js!=null?FPS.js.toFixed(1)+' ms':'–');
+  q('pmFpsN').style.color=col(FPS.fps);q('pmLow').style.color=col(low);
+  const cv=q('pmFpsC');if(!cv||!cv.clientWidth)return;const d=Math.min(2,window.devicePixelRatio||1)*ZOOM,W=Math.round(cv.clientWidth*d),H=Math.round(cv.clientHeight*d);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  const g=cv.getContext('2d'),top=Math.max(hz,...L.map(x=>x[1]),30)*1.08,n=20,bw=W/n;g.clearRect(0,0,W,H);
+  g.fillStyle='rgba(255,255,255,.05)';for(let i=0;i<n;i++)g.fillRect(i*bw+bw*.18,0,bw*.64,H);
+  L.slice(-n).forEach((x,i,a)=>{const j=n-a.length+i,h=Math.max(2*d,x[1]/top*H);g.fillStyle=col(x[1]);g.fillRect(j*bw+bw*.18,H-h,bw*.64,h)});
+  if(hz){const y=Math.round(H-hz/top*H)+.5;g.strokeStyle='rgba(255,255,255,.45)';g.lineWidth=1;g.setLineDash([3*d,3*d]);g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();g.setLineDash([])}}
+{const _gd=gpDraw;gpDraw=function(now){try{pmFpsDraw(now)}catch(e){}return _gd.apply(this,arguments)}}
+{const _osP=openSettings;openSettings=function(){try{pmBuild()}catch(e){console.error('AudioLab performance tab',e)}const x=_osP.apply(this,arguments);try{pmSync()}catch(e){}return x}}
+setTimeout(()=>{try{pmBuild()}catch(e){console.error('AudioLab performance tab',e)}try{pmApply()}catch(e){console.error('AudioLab performance level',e)}{const fx=document.getElementById('fpsFix');if(fx){fx.textContent='Automatic';fx.onclick=()=>{openSettings('perf');pmAuto()}}}},0);
+
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -13204,7 +13421,7 @@ const FPS={t:0,n:0,fps:0,hz:0,last:0,iv:[]};function fpsTrack(now){if(FPS.last){
 setTimeout(function hzAsk(){const D=window.audiolabDesktop;if(D&&D.displayHz)D.displayHz().then(h=>{if(h>0)FPS.real=Math.round(h)}).catch(()=>{});setTimeout(hzAsk,5000)},500);
 function fpsHint(){const h=document.getElementById('fpsHint');if(!h)return;const slow=FPS.hz>0&&FPS.fps<FPS.hz*.8&&!UI.fpsCap;h.hidden=!slow;if(slow){const ms=(FPS.js||0).toFixed(1),gpu=(FPS.js||0)<1000/FPS.hz*.6;h.querySelector('span').textContent=`Your screen refreshes ${FPS.hz} times a second, but AudioLab draws ${FPS.fps}. AudioLab's own work takes ${ms} ms a frame, `+(gpu?'so the time goes into drawing the see-through glass (blur and refraction) at your screen size.':'so drawing the arrangement is the slow part right now.')}}
 let FRERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now)}catch(e){if(FRERR++<5){console.error('frame',e);try{wdLog('Screen update error: '+(e&&e.message||e))}catch(_){}}dirty=true}}
-function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);if(UI.lite&&now-LFR<30){return}{const cap=+UI.fpsCap||0;if(cap&&now-LFR<1000/cap-1.5)return}LFR=now;FRN++;paTick(now);if(S.tracks.some(t=>t.mods&&t.mods.length))modTick(now);refSync(false);if(SZraf)szStep(now);clockTick(now);SUBPX=0;const _w0=performance.now();FPS.t0w=_w0;
+function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);{const cap=+UI.fpsCap||0;if(cap&&now-LFR<1000/cap-1.5)return}LFR=now;FRN++;paTick(now);if(S.tracks.some(t=>t.mods&&t.mods.length))modTick(now);refSync(false);if(SZraf)szStep(now);clockTick(now);SUBPX=0;const _w0=performance.now();FPS.t0w=_w0;
   const dt=Math.min(.1,(now-lastT)/1000);lastT=now;
   let phd=false;if(play.on){phd=true;const ox=V.x;if(UI.follow&&!(md&&md.k!=='move')&&!(ad&&ad.k!=='pan')){const b=curDisp(),vis=arrW/V.ppb;if(UI.followMode==='center'||UI.followMode==='lead'){const d=(window.devicePixelRatio||1)*ZOOM,ex=b-vis*(UI.followMode==='lead'?.28:.5);V.x=Math.round(ex*V.ppb*d)/(V.ppb*d);clampV();SUBPX=V.x===Math.round(ex*V.ppb*d)/(V.ppb*d)?(ex-V.x)*V.ppb:0}else if(UI.followMode==='edge'){if(b>V.x+vis*.8){V.x+=Math.min((b-(V.x+vis*.8)),vis*.02+ (b-(V.x+vis*.8))*.15);clampV()}else if(b<V.x){V.x=b-vis*.05;clampV()}}else if(b>V.x+vis*.95||b<V.x){V.x=b-vis*.05;clampV()}}if(V.x!==ox)dirty=true}
   if(FOLR&&UI.followResume!==false&&play.on&&!UI.follow&&performance.now()-Math.max(FOLR,LWH)>3500){FOLR=0;UI.follow=true;dirty=true}
@@ -13212,7 +13429,7 @@ function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);if(UI.lite&&now-L
   const g30=now-LG30>=33;if(g30)LG30=now;/* things inside glass panels (time display, meters, device pictures) update 30 times a second: every update makes the whole panel's glass recalculate. The playhead in the open arrangement keeps the full screen rate. */
   if(dirty||phd){const full=dirty;dirty=false;drawArr(!full);if(full||g30)drawMap(!full);drawPR();if(full||g30){const b=curDisp(),bar=Math.floor(b/4)+1,bt=Math.floor(b%4)+1,six=Math.floor((b%1)*4)+1,tk=Math.floor(((b*4)%1)*120),sec=secOf(b);
     $('#posBars').textContent=barsStr(b);$('#locL').textContent=barsStr(loopA());$('#locR').textContent=barsStr(loopB());locSecs();$('#posTime').textContent=`${Math.floor(sec/3600)}:${String(Math.floor(sec/60)%60).padStart(2,'0')}:${(Math.floor(sec%60*1000)/1000).toFixed(3).padStart(6,'0')}`}}
-  const busy=play.on||LIVE.size>0||now-LINT<2500||(ctx&&ctx.currentTime-LHIT<3),calm=!busy&&now-LINT>3000,vz=now-LVZ>=(UI.lite?48:busy?15:calm?500:31);if(vz)LVZ=now;/* calm = nothing plays and the mouse has rested for 6 s: the visualisers and the logo stop repainting, so the glass above and around them is not recalculated 30 times a second for a picture that does not change *//* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;if(!calm)drawAtom(performance.now());hxTick()}if(0&&vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){/* the Settings logo has its own steady loop now (setLoop) */if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}if(now-LM30>=7.5){/* level meters: up to 120 times a second, showing the level of this instant (no smoothing), with a peak line that holds for a second */const d3=Math.min(.1,(now-LM30)/1000);LM30=now;meters(d3);trackMeters(d3);miniMeter()}if(g30){patNow();playGlow()}if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
+  const busy=play.on||LIVE.size>0||now-LINT<2500||(ctx&&ctx.currentTime-LHIT<3),calm=!busy&&now-LINT>3000,vz=now-LVZ>=(calm?500:UI.lite?33:busy?15:31);if(vz)LVZ=now;/* calm = nothing plays and the mouse has rested for 6 s: the visualisers and the logo stop repainting, so the glass above and around them is not recalculated 30 times a second for a picture that does not change *//* visualisers by time (~60 fps), not by frame, so a 240 Hz screen doesn't do 4× the analyser work; the playhead, dragging and meters run at the full screen rate */if(vz){drawViz();drawKick();drawPads();drawIV()}drawMixer();if(typeof vnWinDraw==='function')vnWinDraw();if(now-LATM>=33){LATM=now;if(!calm)drawAtom(performance.now());hxTick()}if(0&&vz&&!$('#set').hidden&&!(UI.lite&&document.getElementById('navAtomC')?.dataset.done)){/* the Settings logo has its own steady loop now (setLoop) */if(UI.lite)document.getElementById('navAtomC')&&(document.getElementById('navAtomC').dataset.done=1);const nc=document.getElementById('navAtomC');if(nc)paintAtom(nc,132,Math.min(2.5,devicePixelRatio||1)*ZOOM,AT.big,AT.reduce?2:performance.now()/1000)}if(now-LM30>=7.5){/* level meters: up to 120 times a second, showing the level of this instant (no smoothing), with a peak line that holds for a second */const d3=Math.min(.1,(now-LM30)/1000);LM30=now;meters(d3);trackMeters(d3);miniMeter()}if(g30){patNow();playGlow()}if(vz){drawIBLive();if(GRIDT)drawGridBig();drawGridLink()}
   {const wk=performance.now()-_w0;FPS.js=FPS.js==null?wk:FPS.js*.95+wk*.05;cpuFrame(wk)}
 }
 (function boxSettings(){document.querySelectorAll('#setBody section').forEach(sec=>{let box=null;for(const el of [...sec.children]){if(el.tagName==='H4'&&box&&/^(Blur|Edge light|Refraction|File name|Format)$/.test(el.textContent)){el.classList.add('sub');box.appendChild(el)}else if(el.tagName==='H4'){box=document.createElement('div');if(el.textContent==='Transparency'){const t=document.createElement('div');t.className='sboxT';t.textContent='Glass';box.appendChild(t);el.classList.add('sub')}box.className='sbox';sec.insertBefore(box,el);box.appendChild(el)}else if(box)box.appendChild(el)}})})();
