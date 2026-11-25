@@ -1200,3 +1200,7 @@ Method: the track's own output is recorded on the audio thread together with a m
 
 ### Left
 - Envelope fast-forward for the particle instruments and Venom. A phase that carries on for the voice engine. Clearing the shared Space. Removing old Venom engines. Task E (CPU and background freeze). The browsers in the new look.
+
+### Release
+- v0.184: commit 7849602, project doc `claude/audiolab-device-backlog-run-I.md`.
+- **Desktop build**: run 45699105826 for this commit succeeded (3 min 30 s, started 20:52 UTC).
