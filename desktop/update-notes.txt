@@ -1,0 +1,1 @@
+Check for updates works again and opens a window with the installed and newest version, what is new, and Update now. New: install updates automatically (off by default), a clearer Audio devices window with an icon per device, and the settings tab Interface and DAC with DAC mode, Interface mode and profiles for common devices.

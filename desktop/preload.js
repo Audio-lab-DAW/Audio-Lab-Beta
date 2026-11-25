@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   checkForUpdates: () => ipcRenderer.invoke('al:check-updates'),
   applyUpdate: () => ipcRenderer.invoke('al:apply-update'),
   programVersion: () => ipcRenderer.invoke('al:program-version'),
-  // v0.171: the page shows its own update window and asks for plain results (no system dialogs)
+  // v0.172: the page shows its own update window and asks for plain results (no system dialogs)
   updateCheck: (o) => ipcRenderer.invoke('al:update-check', o || {}),
   updateStatus: () => ipcRenderer.invoke('al:update-status'),
   updateApp: () => ipcRenderer.invoke('al:update-app'),

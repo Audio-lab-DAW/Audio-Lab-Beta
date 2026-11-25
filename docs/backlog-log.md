@@ -436,3 +436,76 @@ Six "Colours like another DAW" buttons (`DAWLOOK`). Each one only set the hue, t
 - In the default theme the active Settings tab and the hovered menu row are now solid accent blue instead of 85% blue.
 
 - Release of run 10: v0.171 (commit 570eebf, artifact version 199); desktop build workflow dispatched. Project doc `claude/audiolab-backlog-run-10.md`.
+
+## 25 November 2026: v0.172, run 11 (updates, Audio devices window, "Interface and DAC")
+
+### Why "Check for updates" stopped working
+Tested in the real desktop app under xvfb with a local update server (`tools/engine-tests/updater/rig_check.js`).
+- **Cause:** `updFetch` in `desktop/main.js` had no time limit. One request that never answers (the laptop woke from sleep, a network that drops packets; the app checks every hour) left `updBusy = true` for good, and `checkUpdates` then returned at once without a word. From then on the button did nothing until the app was restarted. Reproduced: with a server that never answers, the first click gives no dialog and every later click nothing.
+- Second cause: a click while the automatic check or download was running was also dropped silently.
+- The repo is public and both GitHub addresses answer, so it was not an access problem.
+
+### Built: desktop side (`desktop/main.js`, `preload.js`, `native/alvol.swift`). **Only reaches users who install a new app build.**
+- `updFetch(file, ms)`: every request has a time limit (15 s for the version file, 120 s for the program). `updDo` / `updCheck(download)`: one check that always answers with a plain result and shows no dialog: `{status, installed, app, latest, notes, size, at, reason, error}`; status `current`, `available`, `ready`, `needs-app`, `reverted`, `publishing`, `error` (reason `offline`, `timeout`, `http`, `bad`, `unreachable`, `disk`). Checks queue up (`updChain`). `manualCheck` and `updBusy` are gone.
+- `checkUpdates(manual)` (menu, hourly timer, old program versions): opens the page's own window when the page has `audiolabHost.updOpen`, otherwise the old dialogs, now with a reason.
+- New IPC and preload functions: `updateCheck({download})`, `updateStatus()`, `updateApp()`, `dac.info()`, `dac.rate(uid, hz)`.
+- `alvol info`: every device, inputs too (kind of connection, channel counts, sample rate, rates on offer, bit depth, which process holds it exclusively, volume). `alvol rate <uid> <hz>` sets the device's own sample rate. **Not compiled in the container (no Swift): see the Mac job of the build.**
+- `MIN_SHELL` stays 0.147.0: the page feature-detects everything and works in older app builds.
+- New file `desktop/update-notes.txt`: one or two plain sentences per release. `sync-app.js` already read it into the update file, but it never existed, so the notes were always empty. **Write it at every release from now on.**
+
+### Built: page (new code before `askChoice`, new CSS before `.dacv`)
+**Updates** (`UPD`, `UPDU`, `updOpen`, `updRun`, `updLook`, `updPaint`, `updAct`, `updApply`, `updNotes`, `updSafe`, `updAutoArm`, `updNote`)
+- "Check for updates" (Settings, General and About) opens an own window: installed version, newest version, last checked, size, what is new (first line of each release's commit message, or the notes in the update file), Update now / Later; progress while checking and downloading; on failure the reason (not connected, GitHub did not answer in time, GitHub not reachable).
+- New app build: asks the app (`updateCheck`). Older app build: the page reads the version file from GitHub itself; Update now uses the already downloaded version (`applyUpdate`) or the old updater, and says honestly what to do if that old updater is stuck (quit and reopen). Browser: says the web version is always current, offers Reload when a newer one is online. The button is now shown in the browser too.
+- "Install updates automatically" (`UI.updAuto`, off by default, Settings, General, desktop app only): a downloaded update is installed when nothing is playing, recording or exporting, no question is open and there was no input for 20 s (or the window is hidden). It goes through the app's `applyContent`, which runs `beforeReload` (stop, save projects and settings). A card says it is waiting (Install now / Not now); after the restart a card says which version is running. Works in older app builds too.
+**Audio devices window** (`adScan`, `ADV`, `ADK`, `ADIC`, `adIc`, `adChips`, `devKind`, `audDevOpen`, `audDevRender`, `audDevClick`, `adUseOut`; the three old functions were replaced)
+- Two summary cards on top (playing through, recording from), headings Outputs and Inputs with icons and counts, every device with an icon and colour for its kind (built-in speakers, headphones, Bluetooth, USB DAC, audio interface, display audio, microphone, USB audio, virtual), chips for the recognised model, sample rate, bit depth, channels, volume, system default.
+- Test is a small dashed pill with a play icon; Use is the solid blue main button; the device in use shows a green "In use" badge and a green edge instead of Use. Inputs have Use too (new `UI.inDev`) and Test shows the input level for five seconds. The system's "Default" entry is folded into the device it points to.
+- Rates and channels: read from the system in a new Mac app build (`dac.info`); otherwise the engine rate and channel count of the device in use, what the browser reports for inputs, or "up to" from the device profile.
+**Settings tab "Interface and DAC"** (was "DAC & listening"; `ifdBuild`, `ifdPaint`, `ifdSync`, `ifdMode`, `IFD`, `DEVP`, `devProf`). The existing inputs (`bpChk`, `lockSr`, `ceilSel`, `balR`, `monoChk`, `swapChk`, `dcChk`, `hqChk`) were moved into the new layout, so their handlers are unchanged.
+- Head: current output with icon and chips, a button to the devices window, and the mode switch Automatic / DAC mode / Interface mode (`UI.ifMode`). Automatic picks Interface mode for recognised interfaces and USB devices that also have inputs, DAC mode otherwise, and says why. "Apply the recommended settings" sets the buffer for the mode (nothing is changed without pressing it).
+- Device profile card: recognised model, limits, tips, whether the engine rate is one the device supports, and a drop-down to choose the profile by hand (`UI.dac`).
+- DAC mode: volume link (same `DAC` object as the Output slider in the mixer, both follow each other); bit-perfect switch with a live list of what is true right now (mode on, master at 0.0 dB, device rate equals engine rate, device volume 100% or fixed, note about other programs) and a verdict; engine sample rate; "Switch the DAC to the engine's sample rate automatically" (`UI.rateFollow`, `rateFollow`, `rateSet`; only shown when the app can do it) and a button to switch once; exclusive use explained as not possible; DC blocker, safety ceiling, keep the engine awake; the Lossless listening box.
+- Interface mode: buffer size and sample rate (mirrors of the Control Panel selects, linked both ways), delay reported by the system, measured round trip (`rtMeasure`: a small worklet plays two clicks and listens; both must come back with the same delay), recording latency offset (mirror), input device, input channels (stereo, input 1, input 2: `UI.inCh`), input monitoring (`UI.inMon`), output device, output pair (`UI.outPair`, only shown when the device has more than two channels).
+- Engine hooks, all inactive at the default settings: `inCons()` replaces the two fixed `getUserMedia` settings (adds the chosen input device); `inWire` (wrapper of `armTrack`) picks one channel and/or sends the input to the master for monitoring, with Stereo and monitoring off the stream is used untouched as before; `outRoute` (wrapper of `ensureCtx`) copies the stereo mix to another pair of outputs, with pair 1+2 nothing is touched. The way sound is calculated is unchanged.
+- Device profiles (`DEVP`): iFi xDSD Gryphon (also matches the old "griffin" spelling and the generic iFi USB name), Chord (Mojo, Mojo 2, Hugo 2, Qutest), Topping, FiiO, RME ADI-2; Focusrite Scarlett (channels read from the name, for example 18i20), Zoom AMS-22/24/44, M-Audio, Universal Audio Volt, MOTU M2/M4/M6, Audient, RME, PreSonus, Behringer. Unknown devices get a general DAC or interface profile.
+
+### Tested
+- Headless page (`tools/ui-tests/ifd.py`): no page errors; update window in the browser (newer online, not reachable), as an older app build (update found, Update now, not reachable), automatic installing (waits while playing, installs when stopped), About button; devices window with the fake devices and with a made-up list of 14 devices (kinds and profiles as expected); settings page in both modes; buffer, sample rate and offset linked both ways with the Control Panel; round trip reports "not heard" on an input without the click; input channel and monitoring on an armed track (mono stream, nodes removed again, stream stopped on disarm). Screenshots of every new window were looked at.
+- Mac paths with a stand-in for the app bridge (`tools/ui-tests/ifd_mac.py`): device info shown, checklist, "Switch the device" button, automatic rate switching after an engine restart at 96 kHz, volume link both ways, Set 100%.
+- Real desktop app under xvfb (`tools/engine-tests/updater/test_popup.js`): update found and installed from the window; up to date; server down; server that never answers (answer after 15 s, button still works afterwards); menu entry opens the window; automatic installing; and the same page inside the v0.170 app build (`OLD=f8371a1`): found, installed, card first then window.
+
+### Not verified
+- **`alvol.swift` was not compiled here.** If the Mac job fails at "Build the Core Audio volume helper", the update itself still works (it does not need a build); only new installers would be missing.
+- Everything that needs real hardware: device names as the system reports them (most USB names could not be confirmed, so the patterns are broad), the icons and profiles for the user's Gryphon and AMS-24, setting the device rate and whether Chromium then really stops converting, the output pair on a device with more than two channels (headless has two), the round trip with a cable, input channel choice on a real interface.
+- Whether the stuck request was the user's case. It is the only way found to make the button dead, and it fits (long sessions, hourly checks), but it was not seen on the user's Mac.
+- On weak computers the "Light mode is on" notice can overlap the left edge of the update card.
+
+### Left
+- The recording latency offset is only applied to recorded notes, not to audio takes, so the measured round trip is shown but not used ("Use as offset" is hidden). Next step: shift audio takes by it in `recStop`.
+- Audio takes are recorded with `MediaRecorder` (compressed); a lossless recorder (worklet to WAV) would fit the app better.
+- More than two inputs at once; a Core Audio listener for instant volume; drop the Mac zip from the build.
+- The old test `tools/engine-tests/updater/test.js` uses fixed /tmp paths; `test_popup.js` replaces it.
+
+### Research ("unconfirmed" = not found on a page that was read)
+DACs, all 2 channels out
+- iFi xDSD Gryphon: 44.1 to 768 kHz, 32 bit, DSD512. Filters Bit-Perfect, Standard, GTO. USB name unconfirmed (probably "iFi (by AMR) HD USB Audio").
+- Chord Mojo 2, Hugo 2, Qutest: up to 768 kHz, 32 bit. Hugo 2 driverless on Mac (stated). Qutest has no volume (fixed 1, 2 or 3 V). Mojo (first): 768 kHz unconfirmed.
+- Topping: D10s up to 384 kHz, E30 II and D90 up to 768 kHz; DX3 Pro+ and E50 unconfirmed.
+- FiiO: K5 Pro ESS up to 768 kHz, K9 Pro ESS up to 384 kHz; K7, KA3, BTR5 unconfirmed.
+- RME ADI-2 DAC FS and ADI-2 Pro FS R: up to 768 kHz, class compliant, 2 in 2 out in stereo mode.
+Interfaces, 24 bit unless noted
+- Focusrite Scarlett 3rd and 4th gen: 44.1 to 192 kHz; channels follow the name (2i2 = 2 in 2 out, 18i20 and so on); 3rd gen plug and play on Mac.
+- M-Audio M-Track Solo and Duo: 44.1 and 48 kHz only, 16 bit, 2x2. AIR 192|4: up to 192 kHz, 2x2.
+- Zoom AMS-22 / 24 / 44: 44.1 to 96 kHz, 2x2 / 2x4 / 4x4. Use Music mode for DAW work (Streaming mode sums to stereo). Direct monitor and loopback are switches on the unit.
+- Universal Audio Volt: 44.1 to 192 kHz, class compliant; 276 is 2x2 (others unconfirmed).
+- MOTU M2 / M4 / M6: 44.1 to 192 kHz, 2x2 / 4x4 / 6x4, plug and play on Mac; loopback needs MOTU's driver.
+- Audient iD4 MkII, iD14 MkII, EVO 4, EVO 8: up to 96 kHz; 2x2, 10x6, 2x2, 4x4.
+- RME Babyface Pro FS (12x12) and Fireface UCX II: 44.1 to 192 kHz.
+- PreSonus Studio 24c: up to 192 kHz, 2x2. AudioBox USB 96: 96 kHz unconfirmed.
+- Behringer UMC202HD / 204HD / 404HD: up to 192 kHz (204HD confirmed, 2x4), no driver on Mac. UMC22 unconfirmed.
+Platform facts
+- macOS: any app may set a device's sample rate (Apple QA1196). Exclusive "hog" mode belongs to one process; a Chromium or Electron app cannot get it or WASAPI exclusive mode through Web Audio.
+- Bit-perfect in audiophile players means: exclusive access, device rate switched to the material's rate, device bit depth at least the material's, no software volume or processing, nothing else mixed in.
+- Buffer: as small as the computer manages without clicks for recording, larger for mixing (Sound On Sound, Focusrite); the usual 64 to 256 and 512 to 2048 samples are common practice, not from a page that was read.
+Sources: ifi-audio.com/collections/all/products/xdsd-gryphon · richersounds.com/content/product_files/Qutest_User_manual_2_1.pdf · audioadvisor.com (Chord Hugo 2, Mojo 2) · techpowerup.com/review/topping-e30-ii-dac-l30-ii-amplifier-desktop-stack/4.html · apos.audio/blogs/news/topping-l30-vs-d30-pro-vs-d90-comparison-chart · fiio.com/k5proess_parameters · fiio.com/k9proess_parameters · rme-audio.de/downloads/adi2dacr_e.pdf · rme-audio.de/adi-2-pro-fs.html · rme-audio.de/babyface-pro-fs.html · rme-audio.de/fireface-ucx-ii.html · us.focusrite.com/scarlett-in-depth · userguides.focusrite.com (Scarlett 8i6 3rd Gen) · soundonsound.com/reviews/m-audio-m-track-solo-duo · m-audio.com/audio-midi-interfaces/air-192-4.html · zoomcorp.com (AMS series) · soundonsound.com/reviews/zoom-ams-22-24-44 · uaudio.com/products/volt-276 · motu.com/de/news/introducing-the-m2-and-m4 · soundonsound.com/reviews/audient-id4-id14-mkii · soundonsound.com/reviews/audient-evo-4-evo-8 · fender.com/studio-24c/2777700403.html · behringer.com/en/products/0805-aas · developer.apple.com/library/content/qa/qa1196/_index.html · audirvana.com/exclusive-playback-technology · learn.microsoft.com/en-us/windows/win32/CoreAudio/exclusive-mode-streams · soundonsound.com/sound-advice/q-what-buffer-size-should-use
