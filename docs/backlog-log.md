@@ -487,6 +487,10 @@ Tested in the real desktop app under xvfb with a local update server (`tools/eng
 - More than two inputs at once; a Core Audio listener for instant volume; drop the Mac zip from the build.
 - The old test `tools/engine-tests/updater/test.js` uses fixed /tmp paths; `test_popup.js` replaces it.
 
+### Release
+- v0.172, commit cc8bdef on main, artifact version 200, desktop build run 65 dispatched. Project doc `claude/audiolab-backlog-run-11.md`. The branch `wip/backlog-11` (an early save of the desktop part, already contained in main) could not be deleted from the container and can be removed by hand.
+- This run was stopped early by the user and then continued in the same session; backlog tasks 12 to 18 were moved two hours later.
+
 ### Research ("unconfirmed" = not found on a page that was read)
 DACs, all 2 channels out
 - iFi xDSD Gryphon: 44.1 to 768 kHz, 32 bit, DSD512. Filters Bit-Perfect, Standard, GTO. USB name unconfirmed (probably "iFi (by AMR) HD USB Audio").
