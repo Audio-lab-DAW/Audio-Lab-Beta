@@ -5207,7 +5207,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.167',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.168',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -9550,6 +9550,9 @@ function stfBuild(){const sec=document.querySelector('#setBody section[data-page
 setTimeout(()=>{try{stfBuild();hfdCss()}catch(e){console.error('AudioLab settings layout',e)}},0);
 {const _osB=openSettings;openSettings=function(){try{stfBuild()}catch(e){console.error('AudioLab settings layout',e)}return _osB.apply(this,arguments)}}
 {const _rhB=renderHeaders;renderHeaders=function(){const r=_rhB.apply(this,arguments);try{hfdCss()}catch(e){}return r}}
+/* v0.168: a cable dropped on the master. Since v0.167 the master stays put while the channels scroll under it, so it is found by where it is on screen;
+   before this the channel hidden under the master was picked instead. */
+{const _ctM=cabTarget;cabTarget=function(G,cx,cy){const m=G&&G.ms&&G.ms.querySelector('.mx.master');if(m){const r=m.getBoundingClientRect();if(cx>=r.left-2&&cx<=r.right+2&&cy>=r.top-4)return'master'}const id=_ctM.apply(this,arguments);return id==='master'?null:id}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

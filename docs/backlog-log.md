@@ -282,3 +282,25 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 ### Left
 - The user picks one of the 15 logo options; then the logo is changed for real (splash, Settings, icons).
 - Growl device (asked by the user during this run): next release.
+
+## 25 November 2026: v0.168, second firing of run 8 (one fix on top of v0.167)
+
+### What happened
+- The scheduled task for run 8 fired a second time while another session was already building it. That session released the whole of task 8 as v0.167 (commit fde3faf, 04:58 UTC) before this run was done, so this run's own version of the same features was thrown away and nothing was built twice.
+- This run then checked the released v0.167 against the task: loads without page errors, right edge of the mixer stays fixed with 30, 3 and 3 compact channels, tab called Interface with scale first, one Layout box, Reset in the footer, design class on the track headers.
+
+### Fixed in v0.168
+- **A cable dropped on the master went to the wrong channel.** Since v0.167 the master stays put while the channels scroll under it, but `cabTarget` still looked the channels up by their place in the scrolled row, so the channel hidden under the master was picked (dragging Kick onto the master offered "Output to Music"). `cabTarget` now has a wrapper (before `askChoice`) that first checks whether the pointer is on the master on screen.
+
+### Tested
+- Headless load: no page errors. Dragging the socket of Kick onto the master with 30 tracks: the master lights up and the menu offers "Output to Master". `tools/ui-tests/cables2.py` and `tools/ui-tests/mixright.py` give the same results as before.
+
+### Not verified
+- Real mouse on the user's Mac.
+
+### Seen, not changed
+- The volume numbers under the mixer faders are sometimes empty right after the mixer is drawn again and fill in at the next repaint. This was already so in v0.166.
+- Ideas from the thrown-away version that v0.167 does not have: an Edit button on the Transport block of the mini layout picture; a note in General saying where Reset moved to (searching Settings for "reset" now only finds the General page, not the button).
+
+### For the user
+- The schedule seems to hold task 8 twice (or the task was also started by hand). One of the two can be removed.
