@@ -1461,3 +1461,7 @@ Not verified: the GPU side. In software drawing Lighter and Lightest reach the s
 
 ### Left
 - An offline "measure the whole song" button (render and read integrated, LRA, PLR, true peak of the export), a saved reference spectrum or a loaded reference track, and AES-17 RMS as a choice.
+
+### Release
+- v0.188: commit fd7185d, artifact version 211, project doc `claude/audiolab-metering-device.md`.
+- **Desktop build**: run 45714983990 for this commit succeeded (2 min 49 s, started 22:38 UTC).
