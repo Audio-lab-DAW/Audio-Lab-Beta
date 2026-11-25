@@ -959,3 +959,7 @@ Effects (38): Compressor, OTT, Sidechain, Limiter, Soft Clipper, Gate, Multiband
 
 ### Left
 - Task E (CPU and background freeze). The browsers in the new look. A crossfade for effect swaps.
+
+### Release
+- v0.183: commit f4aea01, artifact version 206, project doc `claude/audiolab-device-backlog-run-D.md`.
+- **Desktop build**: run 45683210948 for this commit, all three jobs succeeded (release, Mac, Windows; 19:14 to 19:20 UTC).
