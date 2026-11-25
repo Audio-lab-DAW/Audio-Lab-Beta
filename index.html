@@ -868,12 +868,15 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 body.anz-l #stage{margin-left:var(--anzl,250px)}body.anz-r #stage{margin-right:var(--anzr,250px)}
 body.viz-l.anz-l #stage{margin-left:calc(var(--vzw,300px) + 12px + var(--anzl,250px))}body.viz-r.anz-r #stage{margin-right:calc(var(--vzw,300px) + 12px + var(--anzr,250px))}
 #mixWin .mxs{position:relative}#mixWin>.fwb{position:relative}
-#mixWin.mxcab .mxs{padding-bottom:46px}
+#mixWin.mxcab .mxs{padding-bottom:var(--cabh,46px)}#mixWin.mxcab .mx .mxp{flex-shrink:0}#mixWin.mxcab .mxf output{min-height:15px}/* the pan row must not be squeezed: the fader sizing measures it */
 #mixWin svg.cabs{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:6}
 #mixWin svg.cabs path{fill:none;stroke-linecap:round}
 #mixWin svg.cabs .cbk{stroke:rgba(0,0,0,.55)}
 #mixWin svg.cabs .cfr,#mixWin svg.cabs .cend{transition:opacity .12s,stroke-width .12s}
-#mixWin svg.cabs.hov .cfr:not(.hi),#mixWin svg.cabs.hov .cend:not(.hi){opacity:.18!important}
+#mixWin svg.cabs.hov .cfr:not(.hi),#mixWin svg.cabs.hov .cend:not(.hi),#mixWin svg.cabs.hov .ctr,#mixWin svg.cabs.hov .carr,#mixWin svg.cabs.hov .clab{opacity:.18!important}
+#mixWin svg.cabs .ctr,#mixWin svg.cabs .carr,#mixWin svg.cabs .clab{transition:opacity .12s}#mixWin svg.cabs .cfu{opacity:0;stroke-width:3.6px;stroke-linejoin:round;transition:opacity .12s}#mixWin svg.cabs .cfu.hi{opacity:1;filter:drop-shadow(0 0 4px currentColor)}
+#mixWin svg.cabs .clab{font:600 9px Inter,system-ui,sans-serif;paint-order:stroke;stroke:#0c0d11;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+#mixWin .cabrz{position:absolute;left:0;right:0;height:7px;cursor:ns-resize;z-index:7;touch-action:none}#mixWin .cabrz i{position:absolute;left:50%;top:2px;width:44px;height:3px;margin-left:-22px;border-radius:2px;background:rgba(255,255,255,.16);transition:background .12s}#mixWin .cabrz:hover i,#mixWin .cabrz.on i{background:rgba(255,255,255,.55)}
 #mixWin svg.cabs .cfr.hi{stroke-width:4px;filter:drop-shadow(0 0 4px currentColor)}
 #mixWin svg.cabs .chit{stroke:transparent;stroke-width:12px;pointer-events:stroke;cursor:pointer}
 #mixWin svg.cabs .cabsk{fill:#121419;stroke-width:2;pointer-events:all;cursor:crosshair;transition:r .1s,fill .1s}
@@ -884,7 +887,8 @@ body.cabdrag #mixWin svg.cabs .chit{pointer-events:none}body.cabdrag,body.cabdra
 #mixWin .mx.cabhi{outline:2px solid var(--cabc,#fff);outline-offset:-2px}
 #mixWin .mx.cabok{outline:2px solid #3ecf8e;outline-offset:-2px;background:linear-gradient(rgba(62,207,142,.14),rgba(62,207,142,.04))}
 #mixWin .mx.cabno{outline:2px dashed rgba(255,107,107,.75);outline-offset:-2px}
-#mixWin .cablg{position:absolute;right:12px;bottom:3px;height:14px;display:flex;gap:10px;align-items:center;font:600 9.5px Inter,system-ui,sans-serif;color:#a3a8b5;pointer-events:none;padding:0 6px;border-radius:5px;background:rgba(12,13,17,.6);z-index:7;white-space:nowrap}
+#mixWin .cablg{position:absolute;right:12px;bottom:3px;height:14px;display:flex;gap:10px;align-items:center;font:600 9.5px Inter,system-ui,sans-serif;color:#a3a8b5;padding:0 6px;border-radius:5px;background:rgba(12,13,17,.6);z-index:8;white-space:nowrap}
+#mixWin .cablg button{all:unset;display:flex;align-items:center;gap:4px;cursor:pointer;opacity:.38;height:14px}#mixWin .cablg button.on{opacity:1}#mixWin .cablg button:hover{color:#fff}#mixWin .cablg button:focus-visible{outline:1px solid #4c8dff;outline-offset:1px}#mixWin .cablg .cl2{padding:0 6px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);opacity:.7}#mixWin .cablg .cl2.on{opacity:1;background:rgba(255,255,255,.1);color:#e8eaf0}
 #mixWin .cablg span{display:flex;align-items:center;gap:4px}#mixWin .cablg em{font-style:normal;color:#6f7482}#mixWin.mxcmp .cablg em{display:none}
 #cabPop{position:fixed;z-index:9795;width:290px;max-width:calc(100vw - 16px);padding:10px 12px 12px;border-radius:12px;background:rgba(19,20,27,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.65);color:#d9dce6;font-size:12px;line-height:1.45}
 #cabPop .cabph{display:flex;align-items:center;gap:5px;font-size:12px}#cabPop .cabph i{width:9px;height:9px;border-radius:50%;flex:none}#cabPop .cabph span{color:#8d92a3}#cabPop .cabph b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:95px}
@@ -5152,7 +5156,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.164',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.165',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8918,14 +8922,46 @@ function cabGeo(){const w=document.getElementById('mixWin');if(!w||w.hidden)retu
   return{w,ms,R,k,P,right,sy:bot+10,H:ms.clientHeight}}
 const cabPt=(G,cx,cy)=>({x:(cx-G.R.left)/G.k+G.ms.scrollLeft-G.ms.clientLeft,y:(cy-G.R.top)/G.k-G.ms.clientTop});
 function cabPath(x1,y1,x2,y2,sag){const s=sag*1.33;return`M${x1.toFixed(1)} ${y1.toFixed(1)}C${x1.toFixed(1)} ${(y1+s).toFixed(1)} ${x2.toFixed(1)} ${(y2+s).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
-function cabDraw(){{const w0=document.getElementById('mixWin');if(w0)w0.classList.toggle('mxcab',cabOn())}const G=cabGeo();if(!G)return;const{w,ms,P}=G;let sv=ms.querySelector(':scope>svg.cabs');
-  if(!cabOn()){if(sv)sv.remove();cabLegend(w,false);return}
+/* which cables are shown: kinds can be hidden from the legend, and "Selected only" keeps the cables of the selected channel */
+function cabVis(c){const o=mxsO(),hd=o.cabHide||{};if(hd[c.k])return false;if(o.cabSel&&selT&&selT!=='__m'&&trkById(selT)&&c.a.id!==selT&&c.b.id!==selT)return false;return true}
+const cabTidy=()=>mxsO().cabSty!=='curve';
+/* tidy layout: all cables of one kind into the same channel share one straight line; lines that would run over each other get a level of their own */
+function cabPlan(L,xOf,pad){const G=new Map();L.forEach((c,i)=>{if(!cabVis(c))return;const xa=xOf(c.a.id),xb=xOf(c.b.id);if(xa==null||xb==null)return;const key=c.k+'>'+c.b.id;let g=G.get(key);if(!g)G.set(key,g={k:c.k,b:c.b,xb,lo:xb,hi:xb,it:[]});g.it.push(i);g.lo=Math.min(g.lo,xa);g.hi=Math.max(g.hi,xa)});
+  const A=[...G.values()].sort((p,q)=>(p.hi-p.lo)-(q.hi-q.lo)||p.lo-q.lo),lv=[];
+  for(const g of A){for(let n=0;;n++){const row=lv[n]||(lv[n]=[]);if(row.every(r=>g.hi<r.lo-pad||g.lo>r.hi+pad)){row.push(g);g.lv=n;break}}}
+  return{groups:A,n:lv.length}}
+/* height of the lane under the channels: dragged by hand (UI.mxs.cabH), or as tall as the cables need */
+function cabH(){const o=mxsO();if(o.cabH)return clamp(o.cabH,CABLANE,400);if(!cabTidy())return CABLANE;
+  const sg=cabSig()+'|'+JSON.stringify(o.cabHide||{})+(o.cabSel?selT:'');if(!CAB.ph||CAB.ph.sig!==sg){const TI=new Map(S.tracks.map((t,i)=>[t.id,i*100]));CAB.ph={sig:sg,n:cabPlan(cabList(),id=>id==='master'?S.tracks.length*100:TI.get(id),14).n}}
+  /* never so tall by itself that the channels get squeezed (below about 378 px their faders no longer fit) */const ms=document.querySelector('#mixWin .mxs'),room=ms&&ms.clientHeight>0?ms.clientHeight-378:150;
+  return clamp(52+12*Math.max(0,CAB.ph.n-1),CABLANE,Math.max(CABLANE,Math.min(150,room)))}
+function cabDraw(){const w0=document.getElementById('mixWin');if(w0){w0.classList.toggle('mxcab',cabOn());if(cabOn()){const hh=cabH();if(CAB.h!==hh){CAB.h=hh;w0.style.setProperty('--cabh',hh+'px');if(!w0.hidden){try{mxFit()}catch(e){}return}}}}
+  const G=cabGeo();if(!G)return;const{w,ms,P}=G;let sv=ms.querySelector(':scope>svg.cabs');
+  if(!cabOn()){if(sv)sv.remove();cabLegend(w,false);cabGrip(w,null);return}
   if(!sv){sv=document.createElementNS(CABSVG,'svg');sv.setAttribute('class','cabs');ms.appendChild(sv);cabWireSvg(sv)}
   sv.setAttribute('width',Math.ceil(G.right+12));sv.setAttribute('height',Math.max(10,Math.floor(G.H)));
-  const L=cabList();CAB.list=L;CAB.G=G;const inc=new Map(),incN=new Map(),outN=new Map(),outI=new Map();
-  for(const c of L){incN.set(c.b.id,(incN.get(c.b.id)||0)+1);outN.set(c.a.id,(outN.get(c.a.id)||0)+1)}
-  const sy=G.sy,maxSag=Math.max(6,G.H-sy-17),TI=new Map(S.tracks.map((t,i)=>[t.id,i]));let back='',front='',hit='',ends='';
-  L.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B)return;
+  const L=cabList();CAB.list=L;CAB.G=G;const sy=G.sy,TI=new Map(S.tracks.map((t,i)=>[t.id,i]));let back='',front='',hit='',ends='',over='',lab='';
+  const outN=new Map(),outI=new Map();L.forEach(c=>{if(cabVis(c))outN.set(c.a.id,(outN.get(c.a.id)||0)+1)});
+  const tip=(c,i,d)=>`<path class="chit" data-i="${i}" d="${d}"><title>${esc(c.a.name)} to ${esc(c.b.name)}: ${esc(cabWhat(c))}. Click to change or remove.</title></path>`;
+  if(cabTidy()){
+    const PL=cabPlan(L,id=>{const A=P.get(id);return A?A.cx:null},14),y0=sy+18,avail=G.H-22-y0,gap=PL.n>1?clamp(avail/(PL.n-1),3,44):0,tgN=new Map(),tgI=new Map();
+    for(const g of PL.groups)tgN.set(g.b.id,(tgN.get(g.b.id)||0)+1);
+    for(const g of PL.groups){const B=P.get(g.b.id),K=CABK[g.k],nT=tgN.get(g.b.id),jT=tgI.get(g.b.id)||0;tgI.set(g.b.id,jT+1);
+      const xT=B.cx+(jT-(nT-1)/2)*8,y=y0+g.lv*gap,tc=g.b.color||'#cfd3db',top=sy+7,da=K.da?` stroke-dasharray="${K.da}"`:'';let lo=xT,hi=xT;const xs=[];
+      for(const i of g.it){const c=L[i],A=P.get(c.a.id),nA=outN.get(c.a.id),jA=outI.get(c.a.id)||0;outI.set(c.a.id,jA+1);const x1=A.cx+(jA-(nA-1)/2)*Math.min(5,A.w*.3/Math.max(1,nA));xs.push([i,x1]);lo=Math.min(lo,x1);hi=Math.max(hi,x1)}
+      const r=Math.min(5,y-top-1);
+      /* the shared line, in the colour of the channel it goes into */
+      let td=xT<=lo+.5?`M${xT.toFixed(1)} ${top}V${(y-r).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${(xT+r).toFixed(1)} ${y.toFixed(1)}`:`M${(lo+r).toFixed(1)} ${y.toFixed(1)}`;
+      td+=xT>=hi-.5?`H${(xT-r).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${xT.toFixed(1)} ${(y-r).toFixed(1)}V${top}`:`H${(hi-r).toFixed(1)}`;if(xT>lo+.5&&xT<hi-.5)td+=`M${xT.toFixed(1)} ${y.toFixed(1)}V${top}`;
+      back+=`<path class="cbk" d="${td}" stroke-width="${K.w+2.6}"/>`;front+=`<path class="ctr" d="${td}" stroke="${tc}" stroke-width="${K.w}"${da}/>`;
+      ends+=`<path class="carr" d="M${(xT-4).toFixed(1)} ${sy+12}L${xT.toFixed(1)} ${sy+5}L${(xT+4).toFixed(1)} ${sy+12}z" fill="${tc}"/>`;
+      if(gap>=11||PL.n===1){const right=xT>=hi-.5;lab+=`<text class="clab" x="${(right?xT-9:xT+9).toFixed(1)}" y="${(y-3.5).toFixed(1)}" text-anchor="${right?'end':'start'}" fill="${tc}">${esc(K.n==='Output to group'?'Output':K.n)} to ${esc(g.b.name)}</text>`}
+      for(const[i,x1] of xs){const c=L[i],col=c.a.color||'#cfd3db',s=x1<xT?1:-1,rr=Math.min(r,Math.abs(xT-x1)/2),op=c.k==='send'?(.55+.45*Math.min(1,c.lv/.7)).toFixed(2):c.mod&&c.mod.off?'.4':'1';
+        const dd=`M${x1.toFixed(1)} ${sy}V${(y-rr).toFixed(1)}Q${x1.toFixed(1)} ${y.toFixed(1)} ${(x1+s*rr).toFixed(1)} ${y.toFixed(1)}`,full=dd+`H${(xT-s*rr).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${xT.toFixed(1)} ${(y-rr).toFixed(1)}V${top}`;
+        back+=`<path class="cbk" d="${dd}" stroke-width="${K.w+2.6}"/>`;front+=`<path class="cfr" data-i="${i}" d="${dd}" stroke="${col}" stroke-width="${K.w}" opacity="${op}"${da}/>`;
+        over+=`<path class="cfu" data-i="${i}" d="${full}" stroke="${col}"/>`;hit+=tip(c,i,full)}}}
+  else{const inc=new Map(),incN=new Map(),maxSag=Math.max(6,G.H-sy-17);L.forEach(c=>{if(cabVis(c))incN.set(c.b.id,(incN.get(c.b.id)||0)+1)});
+   L.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B||!cabVis(c))return;
     const nB=incN.get(c.b.id),jB=inc.get(c.b.id)||0;inc.set(c.b.id,jB+1);const nA=outN.get(c.a.id),jA=outI.get(c.a.id)||0;outI.set(c.a.id,jA+1);
     const spB=Math.min(9,B.w*.5/Math.max(1,nB)),spA=Math.min(4,A.w*.3/Math.max(1,nA));
     const x1=A.cx+(jA-(nA-1)/2)*spA,x2=B.cx+(jB-(nB-1)/2)*spB+(nB>1?0:(c.k==='send'?-2:c.k==='sc'?2:0)),dx=Math.abs(x2-x1);
@@ -8933,17 +8969,26 @@ function cabDraw(){{const w0=document.getElementById('mixWin');if(w0)w0.classLis
     const op=c.k==='send'?(.5+.5*Math.min(1,c.lv/.7)).toFixed(2):c.mod&&c.mod.off?'.4':'1';
     back+=`<path class="cbk" data-i="${i}" d="${d}" stroke-width="${K.w+2.6}"${K.da?` stroke-dasharray="${K.da}"`:''}/>`;
     front+=`<path class="cfr" data-i="${i}" d="${d}" stroke="${col}" stroke-width="${K.w}" opacity="${op}"${K.da?` stroke-dasharray="${K.da}"`:''}/>`;
-    ends+=`<circle class="cend" data-i="${i}" cx="${x2.toFixed(1)}" cy="${sy}" r="2.6" fill="${col}"/>`;
-    hit+=`<path class="chit" data-i="${i}" d="${d}"><title>${esc(c.a.name)} to ${esc(c.b.name)}: ${esc(cabWhat(c))}. Click to change or remove.</title></path>`});
+    ends+=`<circle class="cend" data-i="${i}" cx="${x2.toFixed(1)}" cy="${sy}" r="2.6" fill="${col}"/>`;hit+=tip(c,i,d)})}
   let socks='';for(const t of S.tracks){const A=P.get(t.id);if(!A)continue;socks+=`<circle class="cabsk" data-sk="${t.id}" cx="${A.cx.toFixed(1)}" cy="${sy}" r="5" stroke="${t.color||'#cfd3db'}"><title>Drag from here to another channel to send, route or sidechain ${esc(t.name)}</title></circle>`}
   {const M=P.get('master');if(M)socks+=`<circle class="cabsk mst" cx="${M.cx.toFixed(1)}" cy="${sy}" r="5" stroke="#cfd3db"><title>Master: drop a cable here to send a grouped channel straight to the master</title></circle>`}
-  sv.innerHTML=`<g class="cbg">${back}</g><g class="cfg">${front}</g><g class="ceg">${ends}</g><g class="chg">${hit}</g><g class="csk">${socks}</g><path class="cabtmp" d=""/>`;
-  CAB.hov=-1;cabLegend(w,true,L)}
+  sv.innerHTML=`<g class="cbg">${back}</g><g class="cfg">${front}</g><g class="ceg">${ends}</g><g class="clg">${lab}</g><g class="cog">${over}</g><g class="chg">${hit}</g><g class="csk">${socks}</g><path class="cabtmp" d=""/>`;
+  CAB.hov=-1;cabLegend(w,true,L);cabGrip(w,G)}
+/* the grip on the top edge of the lane: drag it to make the lane taller or lower, double-click to let it size itself again */
+function cabGrip(w,G){const fb=w.querySelector('.fwb');let gp=w.querySelector('.cabrz');if(!G||!fb){if(gp)gp.remove();return}
+  if(!gp){gp=document.createElement('div');gp.className='cabrz';gp.innerHTML='<i></i>';gp.title='Drag up or down to make the cable lane taller or lower. Double-click to let it fit the cables by itself.';fb.appendChild(gp);
+    gp.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();try{gp.setPointerCapture(e.pointerId)}catch(x){}const ms=w.querySelector('.mxs'),k=(ms.getBoundingClientRect().height/(ms.offsetHeight||1))||1;const h0=cabH(),wr=w.getBoundingClientRect();/* the mixer window grows downwards with the lane, so the channels keep their size; when the screen is used up the channels give way, down to 378 px */CAB.rz={y:e.clientY,h:h0,k,wh:w.offsetHeight,free:Math.max(0,ms.clientHeight-h0-378),grow:Math.max(0,(innerHeight-wr.bottom)/k-4)};gp.classList.add('on')});
+    gp.addEventListener('pointermove',e=>{const D=CAB.rz;if(!D)return;const h=Math.round(clamp(D.h+(D.y-e.clientY)/D.k,CABLANE,Math.min(400,D.h+D.free+D.grow)));if(h===mxsO().cabH)return;const g=clamp(h-D.h,0,D.grow);if(g>0||D.grew){D.grew=1;w.style.height=(D.wh+g)+'px'}UI.mxs=Object.assign({},UI.mxs||{},{cabH:h});cabSoon()});
+    const up=()=>{const D=CAB.rz;if(!D)return;CAB.rz=null;gp.classList.remove('on');if(D.grew){UI.win=UI.win||{};UI.win.mixWin={x:w.offsetLeft,y:w.offsetTop,w:w.offsetWidth,h:w.offsetHeight};UI.winSized=UI.winSized||{};UI.winSized.mixWin=true}saveUI();try{mxFit()}catch(x){}};gp.addEventListener('pointerup',up);gp.addEventListener('pointercancel',up);
+    gp.addEventListener('dblclick',e=>{e.preventDefault();mxsSet('cabH',0)})}
+  const fr=fb.getBoundingClientRect(),top=(G.R.top-fr.top)/G.k+G.ms.clientTop+G.sy-10;gp.style.top=(top-3).toFixed(1)+'px'}
 function cabWhat(c){if(c.k==='send')return'send at '+SPEC_SEND.f(c.lv);if(c.k==='out')return'plays through this group';return c.mod?'sidechain follower'+(c.mod.off?' (switched off)':''):'Sidechain effect source'}
 function cabLegend(w,on,L){let lg=w.querySelector('.cablg');if(!on){if(lg)lg.remove();return}const fb=w.querySelector('.fwb');if(!fb)return;
-  if(!lg){lg=document.createElement('div');lg.className='cablg';fb.appendChild(lg)}
-  const sw=k=>`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 4H25" stroke="#cfd3db" stroke-width="${CABK[k].w}" fill="none" stroke-linecap="round"${CABK[k].da?` stroke-dasharray="${CABK[k].da}"`:''}/></svg>`;
-  const h=`${Object.keys(CABK).map(k=>`<span title="${esc(CABK[k].tip)}">${sw(k)}${CABK[k].n}</span>`).join('')}<em>${L&&L.length?'Click a cable to change it':'Drag from a dot under a channel to connect it'}</em>`;if(lg._h!==h){lg._h=h;lg.innerHTML=h}}
+  if(!lg){lg=document.createElement('div');lg.className='cablg';fb.appendChild(lg);lg.addEventListener('pointerdown',e=>e.stopPropagation());
+    lg.addEventListener('click',e=>{const b=e.target.closest('[data-cl]');if(!b)return;e.stopPropagation();const o=mxsO(),k=b.dataset.cl;
+      if(k==='sel')mxsSet('cabSel',o.cabSel?0:1);else if(k==='sty')mxsSet('cabSty',cabTidy()?'curve':'tidy');else{const h=Object.assign({},o.cabHide||{});if(h[k])delete h[k];else h[k]=1;mxsSet('cabHide',h)}})}
+  const o=mxsO(),hd=o.cabHide||{},sw=k=>`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 4H25" stroke="#cfd3db" stroke-width="${CABK[k].w}" fill="none" stroke-linecap="round"${CABK[k].da?` stroke-dasharray="${CABK[k].da}"`:''}/></svg>`;
+  const h=`${Object.keys(CABK).map(k=>`<button type="button" data-cl="${k}" class="${hd[k]?'':'on'}" aria-pressed="${!hd[k]}" title="${esc(CABK[k].tip)}. Click to ${hd[k]?'show':'hide'} these cables.">${sw(k)}${CABK[k].n}</button>`).join('')}<button type="button" data-cl="sel" class="cl2${o.cabSel?' on':''}" aria-pressed="${!!o.cabSel}" title="Selected only: show just the cables that start or end at the selected channel. Click a channel to see where it goes.">Selected only</button><button type="button" data-cl="sty" class="cl2 on" title="${cabTidy()?'Tidy: cables into the same channel share one straight line, and every line has its own level. Click for loose curved cables.':'Curved: every cable hangs loose. Click for tidy straight lines.'}">${cabTidy()?'Tidy':'Curved'}</button><em>${L&&L.length?'Click a cable to change it':'Drag from a dot under a channel to connect it'}</em>`;if(lg._h!==h){lg._h=h;lg.innerHTML=h}}
 function cabHi(i){if(CAB.hov===i)return;const w=document.getElementById('mixWin');if(!w)return;for(const el of w.querySelectorAll('.cabhi'))el.classList.remove('cabhi');for(const el of w.querySelectorAll('svg.cabs .hi'))el.classList.remove('hi');CAB.hov=i;
   const c=CAB.list[i];if(!c)return;for(const el of w.querySelectorAll(`svg.cabs [data-i="${i}"]`))el.classList.add('hi');const sv=w.querySelector('svg.cabs');if(sv)sv.classList.add('hov');
   for(const t of[c.a,c.b]){const el=w.querySelector(`.mx[data-id="${t.id}"]`);if(el){el.classList.add('cabhi');el.style.setProperty('--cabc',c.a.color||'#cfd3db')}}}
@@ -8981,7 +9026,7 @@ function cabPop(c,cx,cy){cabPopClose();const p=document.createElement('div');p.i
 document.addEventListener('pointerdown',e=>{const p=document.getElementById('cabPop');if(p&&!p.contains(e.target)&&!(e.target.closest&&e.target.closest('svg.cabs .chit')))p.remove()},true);
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(CAB.drag)cabEnd(null);cabPopClose()}});
 /* dragging a new cable from a socket */
-function cabTarget(G,cx,cy){const q=cabPt(G,cx,cy);for(const[id,A] of G.P)if(q.x>=A.x-2&&q.x<=A.x+A.w+2&&q.y>=A.y-4&&q.y<=Math.max(A.by,G.sy)+CABLANE)return id;return null}
+function cabTarget(G,cx,cy){const q=cabPt(G,cx,cy);for(const[id,A] of G.P)if(q.x>=A.x-2&&q.x<=A.x+A.w+2&&q.y>=A.y-4&&q.y<=Math.max(A.by,G.sy)+cabH())return id;return null}
 function cabMark(id,ok){const w=document.getElementById('mixWin');if(!w)return;for(const el of w.querySelectorAll('.cabok,.cabno'))el.classList.remove('cabok','cabno');if(id){const el=w.querySelector(`.mx[data-id="${id}"]`);if(el)el.classList.add(ok?'cabok':'cabno')}}
 function cabEnd(e){const D=CAB.drag;CAB.drag=null;document.body.classList.remove('cabdrag');cabMark(null);const w=document.getElementById('mixWin');const tp=w&&w.querySelector('svg.cabs .cabtmp');if(tp)tp.setAttribute('d','');if(!D||!e)return;
   if(!D.moved){toast('Drag from this dot to another channel to connect '+D.a.name+'.');return}
@@ -9009,12 +9054,14 @@ function cabChanged(){const w=document.getElementById('mixWin');if(!w||w.hidden)
 /* the lane under the strips takes its height from the faders */
 /* the lane under the strips: mxFit sizes the faders for the room above it (it is measured as if the mixer were that much shorter) */
 {const _mfC=mxFit;mxFit=function(){const w=document.getElementById('mixWin'),ms=w&&!w.hidden&&w.querySelector('.mxs');if(!ms||!cabOn())return _mfC.apply(this,arguments);
-  w.classList.add('mxcab');const h=ms.clientHeight,bb=getComputedStyle(ms).boxSizing==='border-box';ms.style.paddingBottom='8px';ms.style.height=Math.max(60,(bb?h-(CABLANE-8):h-CABLANE-8)-12)+'px';/* 12 px spare: the volume numbers under the faders are often still empty when this runs */
-  try{return _mfC.apply(this,arguments)}finally{ms.style.paddingBottom='';ms.style.height='';cabSoon()}}}
+  w.classList.add('mxcab');const h=ms.clientHeight,bb=getComputedStyle(ms).boxSizing==='border-box';ms.style.paddingBottom='8px';const ch=cabH();CAB.h=ch;w.style.setProperty('--cabh',ch+'px');ms.style.height=Math.max(60,(bb?h-(ch-8):h-ch-8)-12)+'px';/* 12 px spare: the volume numbers under the faders are often still empty when this runs */
+  try{_mfC.apply(this,arguments);/* twice: the first pass can change the height of the effect list, which the fader size depends on */return _mfC.apply(this,arguments)}finally{ms.style.paddingBottom='';ms.style.height='';cabSoon()}}}
 {const _maC=mxsApply;mxsApply=function(){const r=_maC.apply(this,arguments);try{const w=document.getElementById('mixWin');if(w){w.classList.toggle('mxcab',cabOn());const b=w.querySelector('#mxCab');if(b)b.classList.toggle('on',cabOn())}cabSoon()}catch(e){}return r}}
 {const _mh=mxsHtml;mxsHtml=function(adv){return _mh.apply(this,arguments).replace(`<h5>Master shows</h5>`,`<h5>Routing</h5><div class="mxsg"><label class="mxst" title="Show the sends, group outputs and sidechains as cables under the channels. Drag from the dot under a channel to make a new one."><input type="checkbox" data-mxs="cab"><span>Cables</span></label></div><h5>Master shows</h5>`)}}
 {const s=document.getElementById('mxsSet');if(s&&!s.querySelector('[data-mxs="cab"]')){const h=[...s.querySelectorAll('h5')].find(x=>x.textContent==='Master shows');if(h)h.insertAdjacentHTML('beforebegin',`<h5>Routing</h5><div class="mxsg"><label class="mxst" title="Show the sends, group outputs and sidechains as cables under the channels. Drag from the dot under a channel to make a new one."><input type="checkbox" data-mxs="cab"><span>Cables</span></label></div>`)}}
 addEventListener('resize',()=>cabSoon());
+/* with "Selected only" on, the cables follow the selected channel */
+{const _stC=selectTrack;selectTrack=function(){const r=_stC.apply(this,arguments);try{if(mxsO().cabSel&&cabOn())cabSoon()}catch(e){}return r}}
 {let cro=null;const iv=setInterval(()=>{const w=document.getElementById('mixWin');if(w){clearInterval(iv);cro=new ResizeObserver(()=>cabSoon());cro.observe(w)}},400)}
 /* ---------- song overview: one more zoom-out step past the far end snaps the arrangement into a compact picture of the whole song
    (thin rows of plain coloured blocks, Ableton style). The normal view (V) is never changed while the overview is open, so it comes back exactly. ---------- */

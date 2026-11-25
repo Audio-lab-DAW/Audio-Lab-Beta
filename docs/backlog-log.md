@@ -200,3 +200,21 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Release
 - Commit 16e42c4 on main (v0.164), desktop build workflow (desktop.yml) dispatched, artifact 1b07d888 updated to version 192.
+
+## 25 November 2026: v0.165, mixer cables: resizable lane and a tidy layout (asked for by the user during run 7)
+
+### Built (names start with `cab` / `CAB`; `cabDraw` and `cabLegend` were rewritten in place)
+- **Tidy layout** (`cabPlan`, default; `UI.mxs.cabSty` = `tidy` or `curve`): all cables of one kind into the same channel share one straight line in the colour of the channel they go into, with an arrow into that channel and a label ("Output to Drums", "Send to Plate reverb") when there is room. Each source drops onto that line in its own colour. Lines that would run over each other get their own level (shortest spans on top). The old hanging curves are still there under the "Tidy / Curved" button in the legend.
+- **Lane height** (`cabH`): by itself the lane is as tall as the levels need (52 px + 12 px per extra level, at most 150 px, and never so tall that the channels are squeezed under 378 px). A grip on the top edge of the lane (`cabGrip`, `.cabrz`) drags it taller or lower (46 to 400 px, stored in `UI.mxs.cabH`); the mixer window grows downwards with it so the channels keep their size, and only when the screen is used up do the channels give way. Double-click the grip: back to automatic.
+- **Legend is now clickable**: Send, Output to group and Sidechain each hide or show that kind (`UI.mxs.cabHide`); "Selected only" shows just the cables that start or end at the selected channel (`UI.mxs.cabSel`, follows `selectTrack` through a wrapper).
+- Hover lights up the whole route of one cable (`.cfu`) and fades the rest; click, drag from a socket, the pop-up and remove work as before.
+- Fader sizing fixes found on the way: with cables on, the pan row can no longer be squeezed and the volume read-out keeps its height when empty (the fader fit measured both, so the result changed from call to call and the pan row could end up on the buttons).
+
+### Tested (headless Playwright, Fractals demo, 30 tracks, 33 cables)
+- No page errors. Screenshots checked: automatic lane (2 levels, 64 px), scrolled to the right end, lane dragged to 177 px (window grew from 470 to 583 px, channels unchanged), Selected only, outputs hidden, Curved, hover, compact mixer, a third level after adding two sidechain followers (76 px, channels still fit), undo back to 64 px.
+- Click on a cable opens the pop-up; dragging from a socket to another channel shows the menu; double-click on the grip resets; the height survives a reload; cables off removes lane, grip and legend.
+- Test script: `tools/ui-tests/cables2.py`.
+
+### Not verified
+- Look and feel on the user's Mac, real mouse or trackpad. Sound is untouched (drawing code only), so no renders were compared.
+- Projects with many returns and nested groups (more than about 8 levels) in a small mixer window: the levels get as close as 3 px.
