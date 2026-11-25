@@ -61,12 +61,6 @@
           "arch": [
             "arm64"
           ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "arm64"
-          ]
         }
       ],
       "category": "public.app-category.music",
@@ -83,7 +77,8 @@
       ]
     },
     "dmg": {
-      "title": "AudioLab Pro ${version}"
+      "title": "AudioLab Pro ${version}",
+      "writeUpdateInfo": false
     },
     "win": {
       "target": [
