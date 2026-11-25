@@ -167,3 +167,33 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Release
 - Commit 2cdca93 on main, desktop build workflow (desktop.yml) dispatched, artifact 1b07d888 updated to version 191 (v0.163).
+
+## 25 November 2026: v0.164, task 6 of 7 (track header layout editor)
+
+### Built (all new code sits before `askChoice`, names start with `hcz` / `HCZ`; CSS classes `hcz`, `zm`, `zr1`, `zw`, `zb`, `ze*`)
+- **Setting**: `UI.hcz = {order:[ids], icon:'normal'|'big'|'hidden', pan:'slider'|'half'|'round', ms:'normal'|'large', meter:1|0}` (`hczGet`, `hczSet`, default `HCZD`). When the layout equals the default, nothing is stored and the headers are drawn exactly as before (old code path, no class). Any other layout sets `#hdrin.hcz`.
+- **Drawing** (`hczBuild`, runs after `renderHeaders` through one more wrapper): the existing parts of each header (volume, pan, M, S, arm, e, R, write, lanes) are moved into one wrapping row `.zw` under the name in the chosen order, so all existing click handlers still work. Rows that do not fully fit the track height are hidden (CSS `round()`), so put the important controls first. Below 46 px the controls sit beside the name.
+- **Controls list** (`HCZI`): Volume, Mute, Solo, Record arm, Edit channel, Read automation, Pan, Write automation, Automation lanes (the default set, each removable), plus new optional ones: **Freeze** (`freezeAsk`), **Effects off** (`t.fxByp`, stays in step with the button in the device strip through a `renderFx` wrapper, `hczSyncByp`), **Output** (master or a group, `hczOutMenu`, uses `addToGroup` / `groupTracks`), **Sends** (`hczSendMenu`, same actions as the track menu), **Track colour**. The icon and the level meter are switched in the options.
+- **Icon**: normal, big (as tall as the track, grows with the track height, at most 80 px wide) or hidden. **Pan**: slider, half-circle dial (`hp` control) or round dial (`kn` control); all three use the same control id `hp:<track id>`, so header, mixer and device strip stay one value. **Mute and Solo**: normal or large. **Level meter**: shown or hidden.
+- **Editor** (`hczOpen`, panel `#hczEd`, not modal, so the tracks change live behind it): three ready-made layouts (Minimal, Standard, Everything; `HCZP`), the shown list (drag a row, or the up / down buttons, ✕ to remove), "Not shown: click to add", the four options, "Reset to default", Done. Drag the title to move it, Esc closes it.
+- **Ways in**: a "Controls" button with a tooltip next to the TRACKS heading (`#bHcz`), right-click on a track header or under the tracks ("Customise track controls…" at the top of the menu; `openMenu` is wrapped and looks at a time stamp set by a `contextmenu` listener on `#hdrin`), and a card in Settings > Layout > Track controls (`#hczCard`, with Reset).
+- **Linking fix found on the way** (`hczLink`): moving volume or pan in the header or the device strip did not repaint the open mixer strip (the other directions already worked). Now it does, in every layout.
+
+### Tested (headless Playwright, Fractals demo, 30 tracks)
+- No page errors on load (default layout and with a stored custom layout) or in any test. Only console message: the service worker file missing in the test server, as before.
+- Screenshots checked: default (unchanged), Everything at 140 / 96 / 64 / 44 px and collapsed, big icon + half dial + large M/S at 140 / 64 / 44 px and collapsed, round dial without meter, Minimal, tracks on the right, the editor, the right-click menu, the Settings card.
+- Editor: add five optional controls, remove one, move with the buttons, drag a row to the end and to the third place (tracks follow during the drag), all options, presets (the matching one lights up), reset (old header DOM comes back), title drag, Esc (closes a menu first, then the panel).
+- Pan: half dial drag gave R71 in the header and in the device strip; round dial drag, double-click to centre; set from the device strip and from the mixer, the header dial follows; set from the header, the mixer follows.
+- Optional buttons: Effects off both ways with the device strip, Output menu lists Master and the groups, Sends menu switches a send on and the button lights up, colour changes, Freeze opens the freeze dialog.
+- Layout survives undo and a page reload. Playback with the meter hidden: no errors.
+- New test script: `tools/ui-tests/hdrlayout.py`.
+
+### Not verified
+- Look and feel on the user's Mac and with a real mouse; Safari (the row fitting uses CSS `round()`, Safari 15.4+ / Chrome 125+; older engines would show a cut-off row instead of hiding it).
+- Monitor and lock buttons were not added: the app has no monitor or lock function yet (`t.mon` is only read, never set).
+- With the big icon the room for controls is small (the header column is 216 px), so fewer controls fit.
+- In custom layouts the controls that do not fit are simply hidden; the old layout's special small-size arrangements only apply to the default layout.
+- MIDI-learn marks on the dial pan styles were not checked.
+
+### Left
+- Task 7. Ideas: a resizable header column, per-track-kind layouts, a track number toggle, monitor and lock once they exist.
