@@ -254,18 +254,64 @@ const UPD_BASE = process.env.AL_UPDATE_BASE || '';   // tests point this at a lo
 const UPD_API = 'https://api.github.com/repos/Audio-lab-DAW/Audio-Lab-Beta/contents/';
 const UPD_RAW = 'https://raw.githubusercontent.com/Audio-lab-DAW/Audio-Lab-Beta/main/';
 let autoUpdater = null;
-let manualCheck = false;
-let updBusy = false;
-let updReady = null;   // a downloaded version waiting for a restart
-async function updFetch(file) {
+let updReady = null;   // a downloaded version waiting for a restart: { version, notes, size }
+let updLast = { status: 'never', at: 0 };   // result of the last check, for the page's update window
+let updChain = Promise.resolve();   // checks run one after another, never two at once
+/* Every request has a time limit. Before v0.171 a request that never answered (after sleep, on a network that drops packets) left the updater
+   "busy" for good, and "Check for updates" then did nothing at all until the app was restarted. */
+async function updFetch(file, ms) {
   const { net } = require('electron');
   const tries = UPD_BASE ? [[UPD_BASE + file, {}]] : [[UPD_API + file + '?ref=main', { Accept: 'application/vnd.github.raw+json' }], [UPD_RAW + file + '?t=' + Date.now(), {}]];
   let err = null;
   for (const [url, headers] of tries) {
-    try { const r = await net.fetch(url, { headers, cache: 'no-store' }); if (r.ok) return Buffer.from(await r.arrayBuffer()); err = new Error('HTTP ' + r.status); } catch (e) { err = e; }
+    const ac = new AbortController(); let tm = null;
+    const limit = new Promise((_, rej) => { tm = setTimeout(() => { try { ac.abort(); } catch (e) { /* ignore */ } rej(Object.assign(new Error('no answer in time'), { timeout: true })); }, ms || 20000); });
+    try {
+      const got = await Promise.race([limit, (async () => { const r = await net.fetch(url, { headers, cache: 'no-store', signal: ac.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return Buffer.from(await r.arrayBuffer()); })()]);
+      clearTimeout(tm); return got;
+    } catch (e) { clearTimeout(tm); err = e; }
   }
   throw err || new Error('download failed');
 }
+function updWhy(e) {
+  try { const { net } = require('electron'); if (net.isOnline && !net.isOnline()) return 'offline'; } catch (x) { /* ignore */ }
+  if (e && e.timeout) return 'timeout';
+  const s = String(e && e.message || e);
+  if (/^HTTP /.test(s)) return 'http';
+  if (/manifest|JSON|Unexpected/i.test(s)) return 'bad';
+  return 'unreachable';
+}
+// One check. download=false only looks; download=true also fetches the new version and keeps it ready for a restart. Always answers, never hangs.
+async function updDo(download) {
+  const inst = liveVer || app.getVersion();
+  const fin = (o) => { updLast = Object.assign({ installed: inst, app: app.getVersion(), at: Date.now() }, o); return updLast; };
+  let m;
+  try {
+    m = JSON.parse((await updFetch('desktop/app-version.json', 15000)).toString('utf8'));
+    if (!m || !m.version || !m.sha256) throw new Error('bad manifest');
+  } catch (e) {
+    if (updReady) return fin({ status: 'ready', latest: updReady.version, notes: updReady.notes || '', size: updReady.size || 0 });
+    return fin({ status: 'error', reason: updWhy(e), error: String(e && e.message || e) });
+  }
+  const base = { latest: m.version, notes: m.notes || '', size: m.size || 0 };
+  if (updReady && updReady.version === m.version) return fin(Object.assign({ status: 'ready' }, base));
+  if (cmpV(m.version, inst) <= 0) return fin(Object.assign({ status: 'current' }, base));
+  if (m.minShell && cmpV(m.minShell, app.getVersion()) > 0) return fin(Object.assign({ status: 'needs-app', minShell: m.minShell, autoApp: !!autoUpdater }, base));
+  if (upState.reverted && upState.version === m.version) return fin(Object.assign({ status: 'reverted' }, base));
+  if (!download) return fin(Object.assign({ status: 'available' }, base));
+  let data;
+  try { data = await updFetch('index.html', 120000); } catch (e) { return fin(Object.assign({ status: 'error', reason: updWhy(e), error: String(e && e.message || e) }, base)); }
+  const sha = require('crypto').createHash('sha256').update(data).digest('hex');
+  if (sha !== m.sha256) return fin(Object.assign({ status: 'publishing' }, base));
+  try {
+    fs.mkdirSync(upDir(), { recursive: true });
+    const tmp = upIndex() + '.part'; fs.writeFileSync(tmp, data); fs.renameSync(tmp, upIndex());
+    writeMeta({ version: m.version, sha256: sha, at: Date.now() });
+  } catch (e) { return fin(Object.assign({ status: 'error', reason: 'disk', error: String(e && e.message || e) }, base)); }
+  updReady = { version: m.version, notes: m.notes || '', size: m.size || data.length };
+  return fin(Object.assign({ status: 'ready' }, base));
+}
+function updCheck(download) { const p = updChain.then(() => updDo(download)); updChain = p.catch(() => {}); return p; }
 function setupUpdater() {
   if (!isMac && app.isPackaged) {
     try { ({ autoUpdater } = require('electron-updater')); autoUpdater.logger = null; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
@@ -279,21 +325,21 @@ function setupUpdater() {
   if (!app.isPackaged && !UPD_BASE) return;
   setTimeout(() => checkUpdates(false), 8000);
   setInterval(() => checkUpdates(false), 3600 * 1000);   // once an hour
-  setInterval(() => { if (updReady) offerRestart(); }, 6 * 3600 * 1000);   // a dismissed notice comes back after 6 hours
+  setInterval(() => { if (updReady) offerRestart(false); }, 6 * 3600 * 1000);   // a dismissed notice comes back after 6 hours
 }
 let shellAsked = null;
-function needNewApp(m) {
-  if (!manualCheck && shellAsked === m.version) return;   // ask once per version, not at every check
+function needNewApp(m, manual) {
+  if (!manual && shellAsked === m.version) return;   // ask once per version, not at every check
   shellAsked = m.version;
-  if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); if (manualCheck) dialog.showMessageBox(win, { type: 'info', message: `Version ${m.version} needs a newer app`, detail: 'It is being downloaded. You will be asked to restart when it is ready.' }); return; }
+  if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); if (manual) dialog.showMessageBox(win, { type: 'info', message: `Version ${m.version} needs a newer app`, detail: 'It is being downloaded. You will be asked to restart when it is ready.' }); return; }
   dialog.showMessageBox(win, { type: 'info', buttons: ['Open download page', 'Later'], defaultId: 0, cancelId: 1, message: `Version ${m.version} needs a newer app`, detail: 'This one time, download the new app and replace this one. After that, updates install by themselves again.' })
     .then((r) => { if (r.response === 0) shell.openExternal(RELEASES); });
 }
-function offerRestart() {
+function offerRestart(manual) {
   if (!updReady || !win || win.isDestroyed()) return;
   const v = updReady.version;
   // Preferred: a card inside the window (top right) that stays until accepted or dismissed. Older program versions don't have it: then a dialog.
-  if (!manualCheck) {
+  if (!manual) {
     win.webContents.executeJavaScript(`!!(window.audiolabHost&&window.audiolabHost.updateReady&&window.audiolabHost.updateReady(${JSON.stringify(v)},${JSON.stringify(updReady.notes || '')}))`, true)
       .then((ok) => { if (!ok) offerDialog(); }).catch(() => offerDialog());
     return;
@@ -307,34 +353,28 @@ function offerDialog() {
     .then((r) => { if (r.response === 0) applyContent(); });
 }
 function applyContent() {
-  if (!updReady) return;
+  if (!updReady) return false;
   updReady = null; pickContent();
   if (win && !win.isDestroyed()) { appReady = false; win.webContents.executeJavaScript('try{window.audiolabHost&&window.audiolabHost.beforeReload&&window.audiolabHost.beforeReload()}catch(e){}', true).catch(() => {}).then(() => setTimeout(() => { if (win && !win.isDestroyed()) win.reload(); }, 300)); }
+  return true;
 }
+// From the menu, the hourly timer, and program versions older than v0.171 (their button calls this). Newer program versions show their own update window.
 async function checkUpdates(manual) {
-  manualCheck = !!manual;
-  if (updBusy) return;
-  if (updReady) { if (manual) offerDialog(); return; }
-  updBusy = true;
+  if (manual && win && !win.isDestroyed() && appReady) {
+    try { if (await win.webContents.executeJavaScript('!!(window.audiolabHost&&window.audiolabHost.updOpen&&(window.audiolabHost.updOpen(),true))', true)) return; } catch (e) { /* older program: dialogs below */ }
+  }
   const say = (message, detail, type) => { if (manual && win && !win.isDestroyed()) dialog.showMessageBox(win, { type: type || 'info', message, detail }); };
-  try {
-    const m = JSON.parse((await updFetch('desktop/app-version.json')).toString('utf8'));
-    if (!m || !m.version || !m.sha256) throw new Error('bad manifest');
-    if (cmpV(m.version, liveVer || app.getVersion()) <= 0) { say('AudioLab is up to date.', 'Version ' + (liveVer || app.getVersion())); return; }
-    if (m.minShell && cmpV(m.minShell, app.getVersion()) > 0) { needNewApp(m); return; }
-    if (upState.reverted && upState.version === m.version) { say(`Version ${m.version} did not start on this computer`, 'AudioLab stays on version ' + (liveVer || app.getVersion()) + ' until a newer one is published.', 'warning'); return; }
-    const data = await updFetch('index.html');
-    const sha = require('crypto').createHash('sha256').update(data).digest('hex');
-    if (sha !== m.sha256) { say('The update is still being published.', 'Try again in a few minutes.'); return; }
-    fs.mkdirSync(upDir(), { recursive: true });
-    const tmp = upIndex() + '.part'; fs.writeFileSync(tmp, data); fs.renameSync(tmp, upIndex());
-    writeMeta({ version: m.version, sha256: sha, at: Date.now() });
-    updReady = { version: m.version, notes: m.notes || '' };
-    offerRestart();
-  } catch (e) {
-    say('Could not check for updates.', String(e && e.message || e), 'warning');
-  } finally { updBusy = false; manualCheck = false; }
+  const r = await updCheck(true);
+  if (r.status === 'ready') offerRestart(manual);
+  else if (r.status === 'needs-app') needNewApp({ version: r.latest }, manual);
+  else if (r.status === 'current') say('AudioLab is up to date.', 'Version ' + r.installed);
+  else if (r.status === 'reverted') say(`Version ${r.latest} did not start on this computer`, 'AudioLab stays on version ' + r.installed + ' until a newer one is published.', 'warning');
+  else if (r.status === 'publishing') say('The update is still being published.', 'Try again in a few minutes.');
+  else say('Could not check for updates.', r.reason === 'offline' ? 'This computer is not connected to the internet.' : r.reason === 'timeout' ? 'GitHub did not answer in time. Try again in a moment.' : 'GitHub could not be reached (' + (r.error || 'unknown reason') + ').', 'warning');
 }
+ipcMain.handle('al:update-check', (e, o) => updCheck(!!(o && o.download)));
+ipcMain.handle('al:update-status', () => Object.assign({}, updLast, { installed: liveVer || app.getVersion(), app: app.getVersion(), ready: updReady ? updReady.version : null, platform: process.platform }));
+ipcMain.handle('al:update-app', () => { if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); return 'auto'; } shell.openExternal(RELEASES); return 'page'; });
 ipcMain.handle('al:version', () => app.getVersion());
 ipcMain.handle('al:program-version', () => liveVer || app.getVersion());
 
@@ -346,7 +386,7 @@ function alvolPath() {
 function alvol(args) {
   return new Promise((resolve) => {
     if (!isMac || !fs.existsSync(alvolPath())) return resolve({ error: 'unavailable' });
-    execFile(alvolPath(), args, { timeout: 4000 }, (err, stdout) => {
+    execFile(alvolPath(), args, { timeout: 6000 }, (err, stdout) => {
       try { resolve(JSON.parse(String(stdout).trim() || '{}')); } catch (e) { resolve({ error: String(err || e) }); }
     });
   });
@@ -356,6 +396,9 @@ ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]
 ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
 ipcMain.handle('al:apply-update', () => applyContent());
+/* every device with its kind, channels, rate and the rates it offers; setting the device's own sample rate (v0.171) */
+ipcMain.handle('al:dac-info', () => alvol(['info']));
+ipcMain.handle('al:dac-rate', (e, uid, hz) => alvol(['rate', String(uid || 'default'), String(Math.round(+hz || 0))]));
 
 /* ---------- torn-off projects: each one gets a real window of its own ---------- */
 const kids = new Map();   // webContents id -> { win, data }
