@@ -894,3 +894,68 @@ Effects (38): Compressor, OTT, Sidechain, Limiter, Soft Clipper, Gate, Multiband
 ### Release
 - v0.182: commit d12f4ad, artifact version 205, project doc `claude/audiolab-device-backlog-run-C.md`.
 - **Desktop build**: run 77 for this commit, all three jobs succeeded (release, Mac, Windows; 18:25 to 18:29 UTC). The installers of v0.182 are on the GitHub release; the builds for v0.179 to v0.181 that failed in the GitHub outage were not started again, since v0.182 contains them.
+
+## 25 November 2026: v0.183, Change with live browsing, for instruments and effects (task D of `docs/device-backlog-2026-11-25.md`)
+
+### What changed for the user
+- **Change on an instrument or an effect opens its browser in change mode.** The title says "change on (track)", the button says Keep, the line at the bottom says what the clicks do, and the device the track had is marked "On the track before". The tile that is open is the track's own device with its own settings, moved into view above the piano.
+- **One click on an entry puts that device on the track at once**, whether the song plays or not. Another click swaps again. A click on the entry marked "On the track before" brings the old device back with all its settings.
+  - While the song plays, the notes of the track carry on with the new sound: every note that is sounding, or that was already handed to the audio engine, is played again with the new instrument, and the old sound fades out in 30 ms (longer when the new sound has a slow attack).
+  - While the song is stopped, a click on an instrument plays a short test note through the track, so the track's effects are heard too. A click on an effect plays two short notes of the track's instrument through the chain (on a track without an instrument: the test sound chosen in the piano).
+  - An effect keeps its place in the chain and its on/off state.
+  - The piano in the browser plays through the track as well.
+- **A double-click anywhere on an entry keeps it and closes the browser**: on its picture, its name, its text, anywhere on the tile. **Enter** does the same. In the ordinary browsers (add an instrument, add an effect) a double-click on the picture now works too; before, the second click landed on the device that had just been opened and nothing happened.
+- **Escape, Cancel or the close button put the original device back exactly as it was**, with all its settings, also when knobs were turned inside the browser.
+- **The arrow keys move to the nearest entry in that direction** and swap live, in both browsers (also when adding). The view follows.
+- **The whole visit is one undo step.** Undo steps made inside the browser (a knob, a drag in a picture) are folded into it. Undo and redo are ignored while the change browser is open.
+- The tooltips of the two Change buttons say what happens.
+- Fixed on the way (was there in v0.182): after any visit to a browser the knobs of the strip behind it answered to the browser's copies until the strip was drawn again, and every Stop threw an error in the console. The strip is now drawn again when a browser closes, and one control that cannot be painted no longer stops the others.
+
+### What the old "live mode" was, and what it is now
+- Before: a click in the instrument browser made a temporary track (`ib.t`) with a fresh copy of the device, drew it as a real, editable device inside the tile (`ibLiveRender`, `IBCTX` makes `curT()` return that temporary track), and played a phrase through the preview bus. The track itself changed only on Use (`chooseIB`). The effect browser did the same with a temporary effect chain (`ibFxChain`).
+- Now, in change mode (`ib.chg`, state in `CHG`): the temporary track holds **the very object that is on the track** (`ib.t.inst === track.inst`, `ib.t.fx[0]` is the effect in the chain). So the tile shows and edits the real device, and what is heard is the track. The preview chain is not built in change mode.
+
+### How it is built (search "Change with live browsing" in index.html, before `askChoice`)
+- `chgOpen(mode,t,f)`: called by the wrapped `openBrowser(track)` and by `duChangeFx`. Takes a copy of the device (`CHG.orig`) and one undo snapshot (`CHG.snap`).
+- `chgSwap(k)`: called from the wrapped `renderIBTry` when the selection differs from what is on the track. Instrument: the instrument object is refilled in place. Effect: one entry of `t.fx` is replaced and `syncGraph()` builds the one missing node. Nothing else is rebuilt: the device strip behind the browser is not drawn during the visit (the one device in it is emptied once, `chgBlank`).
+- `chgRevoice(t)`: the track gets a fresh input node; the old one, with everything connected to it (clip chains, voice engines, note tails), is faded out and dropped. The notes to play again come from a list kept by a wrapper of `synthB` (`CHGN`: every note the scheduler hands over while playing). Notes of instruments built from browser nodes continue as if they had played from their start (`pastShim`, as presets already did); instruments with a voice engine start the held notes again with their own attack.
+- `chgEnd(keep)`: keep pushes the one snapshot and calls `changed(true)`; otherwise the copy is put back. A watcher on the browser's `hidden` attribute ends the visit however the browser was closed.
+- Double-click: the second press is recognised by time and place (`pointerdown`, 500 ms, 8 px) because the first click redraws the tile and the browser's own double-click may never arrive. On a tile that was already open, a double-click on a control or a picture still belongs to the device.
+- `chgNav(key)`, `chgSee(tile)`: arrow keys and bringing a tile into view (above the piano).
+- Opening Change a second time reuses the tiles that are already built (wrapper of `renderPlaneInst`).
+- Nothing in the sound code was changed. The only addition on the audio side is the note list and the fresh input node at a swap.
+
+### Tested (headless, no page errors)
+- `tools/ui-tests/change_live.py` (new, mouse and keyboard): Change on the instrument and on the middle effect of comp > delay > reverb.
+  - Instrument, stopped: clicks on Saw lead, Reese bass, Wavetable: the track holds each, level of the test note -18.6, -13.5, -12.8 dB, no undo step.
+  - Instrument, playing: Soft pad, Soft keys, Acid, Orbit, Pluck: the track holds each, loudest block -13.6 to -8.8 dB. Back on the original tile: settings equal to before.
+  - Double-click on the picture of Plant: browser shut, track holds Plant, one undo step; one undo: equal to before. Double-click on a name while stopped: the same.
+  - Escape after two clicks, and the Cancel button: equal to before, no undo step.
+  - Arrow keys: each press swaps; Enter keeps; undo: equal to before.
+  - Effect, stopped: Phaser, Drive, Timeless delay: chain comp > X > reverb each time, three nodes, level -13.9, -7.5, -13.4 dB. Playing: Bitcrusher, Chorus, Space reverb, Echo delay: the same. Double-click on the picture of Blur keeps it, one undo brings the chain back; Escape after two clicks: equal to before; arrows and Enter; an effect that is switched off stays off; first and last place of the chain.
+  - Adding an instrument (Enter) and an effect (double-click on the name) the usual way still work.
+- `tools/ui-tests/change_live_gap.py` (new): three long notes held, the instrument swapped twelve times while playing (pad, strings, sub, keys, wavetable, saw, Venom, Orbit, Plant, reese, acid, sampler, pad), the track recorded across each swap. No silent block; the quietest 5 ms block around a swap is at most 8 dB under the level next to it (pad to strings: -30.9 against -23.6 and -25.6 dB). The biggest step from one sample to the next around a swap is in the range of the steps of the new sound itself, except keys to wavetable (0.14 against 0.05 afterwards): that is the start of the wavetable notes, not a break. Escape while playing brings the pad back and it sounds.
+- Edge cases by script: Change on a master effect, on an effect of an audio track, from a track that is not selected, a knob changed inside the visit then Escape and then Enter, undo while open, Stop and Play inside a visit.
+- Speed in the headless test browser: a click on an entry 12 to 50 ms in all (drawing the device in the tile is most of it); the swap on the track itself 0.1 to 0.4 ms. Opening Change: 137 ms the first time, 51 ms after that (110 to 250 ms before).
+- `design.py`, `orbit.py`, `vector_delay.py`, `particles_look.py` (one line adapted: the browser now opens at the device of the track), `hdrlayout.py`: as before.
+- Unchanged: Fractals Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96, solo).
+- Screenshots looked at: both browsers in change mode, after swaps, after arrow keys, the strip after keeping.
+
+### Not done, or different from what one might expect
+- **An effect swap is a hard switch**, as adding an effect always was: the tail of the old effect (a delay, a reverb) is cut at once and there is no crossfade. On loud material this can be heard as a small step. Only the instrument swap has the fade.
+- **Instruments with a voice engine** (the basic synths, Plant, Wavetable, Acid, Venom, Sampler grains, the particle instruments) start a held note again from its attack after a swap; they do not pick up in the middle of the envelope.
+- An effect that is switched off stays off while browsing, so nothing is heard of the swap.
+- Modulators, automation and MIDI learn that pointed at the old effect are not carried to the new one (as with the plain replace of v0.182). After Escape they are all still there.
+- The track takes the name of the new instrument only if it still had the name of the old one, and only when kept.
+- Right arrow on the last tile of a row does nothing; the arrows go by where the tiles are, not by a fixed order.
+- **The tiles of the two browsers still have the old look** (left from task C).
+- A frozen track was not tried.
+
+### Not verified
+- **Nobody has heard it.** "No gap, no click" rests on the recorded numbers above, not on ears.
+- **Nobody has tried it with a real mouse on a real screen**; the Mac build; touch; a trackpad double-tap.
+- In the headless test, during playback, a tile sometimes could be clicked only about 300 ms after the view had moved to it (the test waits and says so). Positions and sizes were stable in that time, so it looks like the test browser's hit test lagging; on a real machine it was not checked.
+- Projects with many tracks: the swap itself does not depend on the number of tracks except for `syncGraph()` (0.04 ms on the small test project) and the undo snapshot taken once when Change opens.
+
+### Left
+- Task E (CPU and background freeze). The browsers in the new look. A crossfade for effect swaps.

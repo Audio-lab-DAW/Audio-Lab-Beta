@@ -32,7 +32,7 @@ al.page.click('.dev.pbx-bnotes [data-kt]');shot('walls_hidden.png','.dev.pbx-bno
 # the small pictures in the instrument browser
 al.run("openBrowser(S.tracks[2]);1");al.page.wait_for_timeout(2500);al.page.screenshot(path=os.path.join(out,'browser.png'))
 for k in ('vgrain','vfm','emit'):
-    r=al.run("(()=>{const el=document.querySelector('#ib .ibdv[data-k=%s]')||document.querySelector('#ib [data-k=%s]');if(!el)return '';el.scrollIntoView({block:'center'});const r=el.getBoundingClientRect();return JSON.stringify({x:r.left,y:r.top,width:r.width,height:r.height})})()"%(k,k))
+    r=al.run("(()=>{const el=document.querySelector('#ib .ibdv[data-k=%s]')||document.querySelector('#ib [data-k=%s]');if(!el)return '';chgSee(el.closest('.ibc'));const r=el.getBoundingClientRect();return JSON.stringify({x:r.left,y:r.top,width:r.width,height:r.height})})()"%(k,k))
     print('browser tile',k,r)
     if r:
         al.page.wait_for_timeout(900);r=json.loads(al.run("(()=>{const el=document.querySelector('#ib .ibdv[data-k=%s]')||document.querySelector('#ib [data-k=%s]');const r=el.getBoundingClientRect();return JSON.stringify({x:r.left,y:r.top,width:r.width,height:r.height})})()"%(k,k)));al.page.screenshot(path=os.path.join(out,'browser_%s.png'%k),clip=r)

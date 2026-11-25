@@ -1,7 +1,7 @@
 {
-  "version": "0.182",
-  "sha256": "9639997597c52b460ef3fcc272aba6a7d7412aff125de335e35c638bbfa2d589",
-  "size": 2535774,
+  "version": "0.183",
+  "sha256": "3e583cc94cd30c88075c1d6f409c8384c13f4d8193d429e308cb50b0b3facd63",
+  "size": 2551749,
   "minShell": "0.147.0",
-  "notes": "Bounces in time with the song: Bouncy Notes has a Rhythm choice (the ball lands exactly on 1/4, 1/8, a bar and so on, steady, halving or a whole round in one bar), a Melody choice and a Harmony choice for chords. New effect: Bounce Delay, repeats that come like a bouncing ball. Also new since 0.178: the Orbit instrument and the Vector Delay effect."
+  "notes": "Every instrument and effect now has the same layout: a title row with an arrow that slides the parameters shut, on/off, name, presets and a Change button, the picture on the left, the controls on the right and the gain as a bar at the right end. The basic instruments and the drum kit have presets and the basic instruments show their filter and envelope. Opening and changing devices is about three times faster."
 }
