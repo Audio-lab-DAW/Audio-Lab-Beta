@@ -390,3 +390,4 @@ Looked at and left: level meters at 120 a second in the headers (free with the p
 ### Left
 - Windows and dialogs in Optimised still use one live blur. A picture is not possible there without capturing the page.
 - Light mode (General) and Zero effects overlap in purpose; they could become one switch.
+- Release of run 9: v0.170 (commit 709cb9a, artifact version 198); desktop build workflow dispatched. Project doc `claude/audiolab-backlog-run-9.md`.
