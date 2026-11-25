@@ -796,3 +796,39 @@ Read: Dillon Bastan's Vector Delay manual (dillonbastan.com/inspiredbynature_man
 ### Left
 - Listen and tune the presets; throw a ball by dragging; remove one ball with a right-click; per-ball mass by scrolling over a ball; Vector FM and Orbit could share one copy of the engine again.
 - Tasks B to E of `docs/device-backlog-2026-11-25.md` (bouncing ball devices tied to the rhythm, one design language for all older devices, Change button with live browsing, light devices and background freeze).
+
+## 25 November 2026: v0.181, bounces tied to the rhythm, melody and harmony for Bouncy Notes, and the Bounce Delay effect (task B of `docs/device-backlog-2026-11-25.md`, most of it)
+
+### Research (the user asked for it)
+- Bouncing ball delays in other plug-ins: Sinevibes Dispersion ("a single round of such delay bounces is always summing up to a precise tempo fraction", up to 32 delay lines, pan spread so the ball moves across the stereo field; pluginboutique.com, sinevibes.com/dispersion, kvraudio.com), Boscomac Bouncing Ball for Reaktor (number of bounces, time between bounces that can follow the tempo, gravity, decay; audiofanzine.com, rekkerd.org), G-Delay for Max for Live (a fixed number of taps instead of feedback, Gravity and Antigravity modes, the interval sets the largest gap; isotonikstudios.com), the Audacity Bouncing Ball Delay (decay per bounce, delay time, number of bounces, a version with pan; plugins.audacityteam.org), a "Panning gravity delay" MIDI patch that retriggers notes as if bouncing (patchstorage.com). Ableton's own is Bouncy Notes in Inspired by Nature (copied in v0.166). Search results and page summaries were read, not the manuals.
+- How games do ball physics: a fixed time step with an accumulator so the result is the same on every machine, semi-implicit Euler or velocity Verlet as the step (Glenn Fiedler, "Fix Your Timestep!", gafferongames.com; summaries of it on gamedev.net and others).
+- What was taken from it: (1) taps instead of feedback for the delay, so every repeat lands exactly where the formula puts it; (2) both ways of tying to the tempo: the first gap is the note length, or the whole round is the note length (Dispersion's way); (3) no time stepping at all for a single ball on a flat floor: the landing times are a closed formula, which is exact and costs nothing while playing. Time stepping is only used where forces change all the time (Orbit, the Vector devices), there with a fixed step of 64 samples.
+
+### How the rhythm is real physics
+A ball thrown up with speed v is in the air for 2v/g and comes back with speed v; a bounce multiplies the speed by the bounciness e. For a chosen note length T the gravity is solved so that a ball that rises to its height h comes down after exactly T: g = 8h/T². Then the gaps are T, Te, Te² and so on. Steady is e = 1 (it never loses height: a bounce on every step for as long as Lifetime lasts), Halving is e = 1/2 (1/4, 1/8, 1/16), Two thirds is e = 2/3, By friction takes e from the Friction and Mass knobs, Whole round makes the first gap T(1 - e) so that all gaps together are exactly T. In a rhythm the ball starts on the keys at the note (the note itself is the first landing), and the Gravity and Speed knobs no longer change the timing, only Free mode uses them. The picture shows the same flight.
+
+### Built
+- **Bouncy Notes** (`bnBalls`, `bnRun` changed in place; new `bnDeg`, `BNWALK`, `BNHARM`; `bn2Init();` after `orbInit();`):
+  - Rhythm (`p.sync`: Free, 1/16 to 2 bars) and Bounce (`p.bmode`: By friction, Steady, Halving, Two thirds, Whole round).
+  - Melody (`p.walk`): each bounce moves along the chosen scale: up, down, up and down, skipping up. One held key becomes a melody.
+  - Harmony (`p.harm`): third, fifth, octave, fifth and octave, chord of 3 notes, chord of 4 notes, all in the scale (major is used when the scale is chromatic).
+  - With Thru on, the first landing is not played twice.
+  - The device now has two pages, Balls and Notes (same way as Vector Delay's pages), so everything fits.
+  - 9 new presets in two groups: On the beat (Every beat for ever, Ratchet, Falling by two thirds, One round fills a bar, Steady 1/8 walk up the scale) and Melody and chords (Ratchet melody, Chords on every beat, Falling sevenths, Skipping fifths). The old presets are unchanged (Rhythm free).
+- **Bounce Delay** (`FXDEF.bdelay`, Delay & space, particle look; worklet `al-bdelay` in `BDWL`; `bdTaps` works out the landings, `bdSp`, `bdDraw`): 2 to 24 repeats at the landing times of a ball. First gap in milliseconds or as a note length; Length is the first gap or the whole round; Bounces get faster (falling ball), get slower (the ball in reverse, a wind-up) or stay even; Bounciness, Fade per bounce, Pan sweep (the ball crosses from one side to the other), Feedback (the last repeat starts the round again, with a soft limit), Tone, Mix. Changing a setting fades the old taps out and the new ones in over 30 ms. The picture shows the flight, a dot per landing (size = level, colour = side) and a ball running along. 7 presets. Tooltips on everything.
+
+### Tested (headless, no page errors)
+- `tools/engine-tests/bounce_rhythm.py`: 1/4 steady gives notes at beats 0, 1, 2, 3 ...; halving gives gaps 1, 0.5, 0.25, 0.125; two thirds 1, 0.6667, 0.4444; a whole round in a bar ends at beat 4 (last landing 3.84 of 10); 1/8 triplet stays on the grid with other Speed and Gravity; at 90 bpm the notes are still on the beats. Melody up the major scale from C: 60 62 64 65 67 69 71 72; up and down in minor pentatonic; chords (60 64 67 on every landing); four-note chords walking down in minor (60 63 67 70, then 58 62 65 68); Thru does not double. Free mode gives the same starts as before (0.6164, 1.6027, 2.3918 ...). A render is bit-identical twice.
+- Bounce Delay, same file: for all 7 presets the output equals the dry sound repeated at the formula's times with the formula's levels and pans, to 2e-8; bit-identical twice; one round in a bar at 120 bpm is 2.0000 s; feedback 80% for 16 s peaks at 0.15 and ends; mix 0 is exactly the dry sound; 24 bounces: 16 s of sound in 0.6 s.
+- `tools/ui-tests/bounce.py`: nothing outside the devices; the two pages of Bouncy Notes; choosing 1/4 and Halving in the page gives 0, 1, 1.5, 1.75; tooltips; screenshots of both pages, playing, Bounce Delay with two presets, parameters hidden.
+- Unchanged: Fractals Kick -9.75669 dB and Bass -25.48699 dB.
+
+### Not verified
+- **Nobody has listened to it.** Real mouse, the Mac.
+- Bouncy Notes with walls (v0.177) together with a rhythm: the walls only move the keys, so the times should hold; not tested together.
+- Bounce Delay follows a tempo change only when its settings are sent again (the app does that on every change); tempo automation inside a held round was not tested.
+
+### Left from task B
+- **A bouncing-ball instrument of its own** was not built: Bouncy Notes in front of any instrument does what was asked (every bounce plays the instrument), and a separate sound engine would only repeat that. Say so if a dedicated one is still wanted (for example a struck resonator whose loudness follows the impact).
+- A chord progression per bar for the Harmony choice; more than one rhythm per ball; throwing balls onto pads.
+- Tasks C, D and E of the device backlog are not started: one design language for all older devices, the Change button with live browsing, light devices and background freeze.
