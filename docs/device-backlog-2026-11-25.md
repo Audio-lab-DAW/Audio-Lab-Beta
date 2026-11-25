@@ -2,6 +2,11 @@
 
 The user sent these while Vector Delay (v0.179) was being finished and then left ("Finish all tasks in one go. I won't be around, so I won't be able to accept anything that you ask me."). Work without questions. One task per session: build, test, release, write the log. The user's words are quoted so nothing is lost; read them again before building.
 
+## Where it stands (25 November 2026, evening)
+- Task A: **done**, v0.180 (Orbit). Left: throw a ball by dragging, remove one ball, listen and tune.
+- Task B: **mostly done**, v0.181 (Bouncy Notes: Rhythm, Bounce, Melody, Harmony; new effect Bounce Delay). Left: a bouncing-ball instrument of its own (Bouncy Notes in front of any instrument already does it; build one only if the user still wants it), a chord progression per bar.
+- Task C, D, E: **not started.** Each is a session of its own. Start with C and D together (they share the title row), then E. Scheduling them as runs was refused by the permission system in the session that wrote this, so they wait for the user to start them ("continue with task C of the device backlog").
+
 ## Task A: Orbit synth (a new instrument)
 > "Let's also make a device also based on physics. So you have a center mass that you can change the size of the mass, and then you can drop in small little balls that orbit around the center mass. You can change their mass, make them orbit faster or slower, add more or less. And as they orbit around the center mass, it creates sound on the synthesizer. And then on the right, I want to have some extra parameters. And yeah, you can figure out how a synthesizer would work like that. And add all the relevant features that you think are necessary with the right buttons and sliders."
 

@@ -832,3 +832,7 @@ A ball thrown up with speed v is in the air for 2v/g and comes back with speed v
 - **A bouncing-ball instrument of its own** was not built: Bouncy Notes in front of any instrument does what was asked (every bounce plays the instrument), and a separate sound engine would only repeat that. Say so if a dedicated one is still wanted (for example a struck resonator whose loudness follows the impact).
 - A chord progression per bar for the Harmony choice; more than one rhythm per ball; throwing balls onto pads.
 - Tasks C, D and E of the device backlog are not started: one design language for all older devices, the Change button with live browsing, light devices and background freeze.
+
+### Release
+- v0.180: commit cfa6d2d, artifact version 203. v0.181: commit e69fe26, artifact version 204. Project docs `claude/audiolab-device-backlog-run-A.md` and `-B.md`.
+- **Desktop builds**: the builds for v0.179, v0.180 and v0.181 failed or could not be started because GitHub answered with server errors (HTTP 500 and 502 on the releases and dispatch addresses, between 15:43 and 16:20 UTC; the page deploy failed once too). Nothing is wrong in the code. The program update inside the installed app comes from the repo and is not affected; only new installers are missing until the build is started again.
