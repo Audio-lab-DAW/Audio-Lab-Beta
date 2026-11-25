@@ -164,3 +164,6 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Tasks 6 and 7. Ideas: hover highlight of a row, follow the playhead when zoomed in inside the overview, drag on the ruler to scrub, show the overview range in the map.
+
+### Release
+- Commit 2cdca93 on main, desktop build workflow (desktop.yml) dispatched, artifact 1b07d888 updated to version 191 (v0.163).
