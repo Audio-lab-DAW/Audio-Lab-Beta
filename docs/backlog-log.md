@@ -304,3 +304,6 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### For the user
 - The schedule seems to hold task 8 twice (or the task was also started by hand). One of the two can be removed.
+
+### Release
+- Commit 9c98f69 on main (v0.168), desktop build workflow started (run 60), artifact 1b07d888 updated to version 196.
