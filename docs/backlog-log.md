@@ -243,3 +243,8 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Vector Delay, Emit, Vector Grain, Vector FM, Vector Map (scheduled). Track controls editor redesign asked by the user (see next entry or the schedule).
+
+### Scheduled after run 7 (25 November 2026)
+- Backlog 17 (04:56 UTC): track controls editor made universal and visual (mini track with drag and drop, layouts as pictures in a 2 by 2 square, a fourth layout, pan styles as pictures, icon as Normal / Big / Hidden).
+- Backlog 12 (09:30 UTC) Vector Delay, 13 (11:00) Emit with the rotating centre emitter, 14 (14:30) Vector Grain, 15 (16:00) Vector FM, 16 (17:30) Vector Map plus the walls for Bouncy Notes.
+- Releases of run 7: v0.165 (commit 98b8a99, artifact version 193) and v0.166 (commit 0aaf794, artifact version 194); desktop build workflow dispatched for both.
