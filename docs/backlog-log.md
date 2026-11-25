@@ -197,3 +197,6 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Task 7. Ideas: a resizable header column, per-track-kind layouts, a track number toggle, monitor and lock once they exist.
+
+### Release
+- Commit 16e42c4 on main (v0.164), desktop build workflow (desktop.yml) dispatched, artifact 1b07d888 updated to version 192.
