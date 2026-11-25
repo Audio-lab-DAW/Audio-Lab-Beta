@@ -94,6 +94,8 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Not verified
 - Look, refraction edge and frame rate on the user's Mac.
+- Dragging a strip's inner edge to resize it and dragging module labels (only the title bar buttons were dragged in the test).
+- The research came from general knowledge of these products; the web search only returned page links, not their text.
 - Track sources use the track's 256-sample analysers for stereo field, waveform and correlation, so those are coarser than for the master.
 - The older "Visualizer" panel (Settings) still exists next to this; both can be docked left or right together but that combination was not tested.
 
