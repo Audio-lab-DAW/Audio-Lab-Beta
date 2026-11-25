@@ -765,3 +765,34 @@ Read: Dillon Bastan's Vector Delay manual (dillonbastan.com/inspiredbynature_man
 ### Release
 - v0.179, commit 9edbb62 on main, artifact version 202 (this publish also brought v0.174 to v0.178 to the app artifact), desktop build run 45648296373 dispatched. Project docs `claude/audiolab-backlog-run-12.md` to `-17.md` written. The scheduled tasks 12 to 17 were deleted at the user's request.
 - The requests the user sent during this session are written down in `docs/device-backlog-2026-11-25.md` (tasks A to E), one scheduled run each.
+
+## 25 November 2026: v0.180, Orbit, an instrument (asked for by the user during the session that finished run 12; task A of `docs/device-backlog-2026-11-25.md`)
+
+### The user's request
+"A center mass that you can change the size of the mass, and then you can drop in small little balls that orbit around the center mass. You can change their mass, make them orbit faster or slower, add more or less. And as they orbit around the center mass, it creates sound on the synthesizer. And then on the right, I want to have some extra parameters."
+
+### Built (names `orb` / `ORB`, code before the Vector Map block; `orbInit();` sits right after `vdlInit();`)
+- **Orbit** (`PRESETS.orb`, in the instrument browser under Synths), worklet `al-orb` (`ORBWL`, added to both module lists in `wlLoad`; `pvAny` covers it).
+- **The sound engine, the pages and the picture code are a renamed copy of Vector FM** (made by a script from the v0.176 block): every ball is an oscillator of the held note, or a modulator and carrier pair, or part of a chain; the five values of a ball (left-right, up-down, distance from the centre, speed, mass) drive Ratio, Index, Pan, Gain, Detune, Cutoff or Pitch; ADSR, filter per carrier, pitch steps in a scale, One per key, Lock. So Orbit has everything Vector FM has, and a fix to one of the two does not reach the other.
+- **New: the movement, `orbPhys()`** (same interface as `vfCore`, so the engine is unchanged). Real gravity towards the centre: pull = 4 x Centre x Gravity / distance squared, made soft very close to the centre (as if the centre had a radius of 0.06) so nothing is thrown out to infinity. Stepped with velocity Verlet every 64 samples. A new ball gets the speed of a circle orbit for its distance; Orbit shape scales that start speed (50% = circle, lower = it dives in and swings out, an ellipse; higher = it swings out to the rim). The rim of the picture is a wall. Ball pull lets the balls attract each other by mass. Drag slows them (heavier balls less), so they spiral in. Clockwise turns the direction round.
+- **Dropping balls**: a click in the picture adds a ball at that place (`I.balls`, up to 16; the Balls knob goes up by one); balls without a dropped place start at seeded places. "Clear dropped balls" forgets the places. Dragging the centre up or down changes Centre (how heavy it is; the drawn size follows). A click also plays a test note.
+- Pages: Operators, Vectors, Orbits (Centre, Gravity, Orbit shape, Ball mass, Rnd > Mass, Ball pull, Drag, Seed, Clockwise, Clear dropped balls), Output. Always visible: Scale, Orbit speed, Gain, Balls, Attack, Decay, Sustain, Release. Tooltips rewritten for the orbit knobs.
+- Picture: a square field so circles are circles, the centre as a glowing mass, balls with trails, the strip with the overtones of every carrier below. Orange accent (`.obd`).
+- **9 presets**: Solar system, Comets, Orbit bells, Slow planets (pad), Double star (bass), Ring of moons (organ), Asteroid swarm, One moon per key, Slingshot.
+
+### Tested (headless, no page errors)
+- Physics (`tools/engine-tests/orbit.py`, last part): one ball dropped at distance 0.6 with a circle start, 60 s in steps of 64 samples: the distance stays between 0.6000 and 0.6000, the first turn takes 2.943 s (2.942 s from the formula), the energy drifts by 6e-12. Orbit shape 25% gives an ellipse between 0.174 and 0.600. Four times the pull gives twice the turns (13 in 20 s against 6.8).
+- Sound (same file, the Vector FM test with the names changed): all 9 presets no NaN, peaks 0.22 to 0.50, bit-identical in two renders, tails end; seed 2 differs; a note moved by 293 samples sounds exactly the same; tuning exact (440.0 Hz for A3 with Index 0); ratios give the expected parts; all targets, operator counts, waves and filters; 20 keys with One per key (peak 0.74); a dropped ball changes the sound and renders the same twice. Heaviest case (16 pairs, six notes, filters): 4 s of sound in 1.0 s.
+- `tools/ui-tests/orbit.py`: nothing outside the device on any page; two clicks drop two balls (Balls 6 to 8, places stored); dragging the centre up 30 px makes it 74%; three undos bring everything back; Clear dropped balls; while the song plays the picture gets the engine's balls; it is in the browser. Screenshots looked at: the four pages, dropped balls, playing, the browser tile.
+- Unchanged: Fractals Kick -9.75669 dB and Bass -25.48699 dB.
+
+### Not verified
+- **Nobody has listened to it.** Presets were set by measurement and by looking at the picture.
+- Real mouse or trackpad, the Mac, MIDI learn and automation of the knobs.
+- As in Vector FM: all notes of a track share one set of balls, which starts again when a note begins while nothing sounds; a note's sound depends on the notes before it in the phrase. Strong FM on high keys folds back (no oversampling).
+- A ball can only be dropped at rest relative to a circle (no throwing by dragging), and a single dropped ball cannot be removed on its own (lower Balls, or clear all).
+- The mass of a ball does not change its orbit round the centre (as in nature); it counts for Ball pull, Drag and for whatever "Mass" drives on the Vectors page.
+
+### Left
+- Listen and tune the presets; throw a ball by dragging; remove one ball with a right-click; per-ball mass by scrolling over a ball; Vector FM and Orbit could share one copy of the engine again.
+- Tasks B to E of `docs/device-backlog-2026-11-25.md` (bouncing ball devices tied to the rhythm, one design language for all older devices, Change button with live browsing, light devices and background freeze).
