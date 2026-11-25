@@ -1,7 +1,7 @@
 {
-  "version": "0.183",
-  "sha256": "3e583cc94cd30c88075c1d6f409c8384c13f4d8193d429e308cb50b0b3facd63",
-  "size": 2551749,
+  "version": "0.184",
+  "sha256": "0fdbe440929ce04c127de5a7d9913c25ca0e1520c6857cd818e8bc3f07b88101",
+  "size": 2565915,
   "minShell": "0.147.0",
-  "notes": "Every instrument and effect now has the same layout: a title row with an arrow that slides the parameters shut, on/off, name, presets and a Change button, the picture on the left, the controls on the right and the gain as a bar at the right end. The basic instruments and the drum kit have presets and the basic instruments show their filter and envelope. Opening and changing devices is about three times faster."
+  "notes": "The Change button now browses live: one click on an instrument or effect in the browser puts it on the track at once, playing or stopped, and held notes carry on with the new sound. A double-click or Enter keeps it, Escape brings the old one back with all its settings, the arrow keys move from one to the next, and the whole visit is one undo step."
 }

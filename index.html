@@ -3395,16 +3395,16 @@ const curDisp=()=>{const T=play.on&&DISP_T!=null?DISP_T:ctx?ctx.currentTime:0;if
 const tm=b=>play.t0+(secOf(b)-secOf(play.b0));
 function schedule(from,to,first){
   const spb=60/S.bpm,PW=1.4*S.bpm/60;/* build clip chains ~1.4 s early so many clips starting together (bar 97) never stall the audio thread */
-  if(S.click&&UI.clickPlay!==false&&!sigFlat()){/* odd metres: a click on every beat of the bar's unit (eighths in 7/8), accent on the downbeat */let b=from;for(let k=0;k<512&&b<to;k++){const P=barPos(b),u=4/P.sig.d,j=Math.ceil((P.inBar-1e-9)/u),bb=P.start+j*u;if(bb>=P.start+P.len-1e-9){b=P.start+P.len;continue}if(bb>=to)break;if(bb>=from-1e-9)clickSound(ctx,clickOut,Math.max(ctx.currentTime,tm(bb)),j===0?2:1,UI.clickSnd);b=bb+u*.5}}
+  if(play.only){/* one track is being scheduled again after a clean switch: no clicks */}else if(S.click&&UI.clickPlay!==false&&!sigFlat()){/* odd metres: a click on every beat of the bar's unit (eighths in 7/8), accent on the downbeat */let b=from;for(let k=0;k<512&&b<to;k++){const P=barPos(b),u=4/P.sig.d,j=Math.ceil((P.inBar-1e-9)/u),bb=P.start+j*u;if(bb>=P.start+P.len-1e-9){b=P.start+P.len;continue}if(bb>=to)break;if(bb>=from-1e-9)clickSound(ctx,clickOut,Math.max(ctx.currentTime,tm(bb)),j===0?2:1,UI.clickSnd);b=bb+u*.5}}
   else if(S.click&&UI.clickPlay!==false){const P=pat(),N=P.length,st=4/N;for(let b=Math.ceil((from-1e-9)/st)*st;b<to;b+=st){const k=Math.round(((b%4)+4)%4/st)%N;if(P[k])clickSound(ctx,clickOut,Math.max(ctx.currentTime,tm(b)),P[k],UI.clickSnd)}}
   const solo=S.tracks.some(t=>t.solo),scSrc=new Set();for(const t of S.tracks)for(const f of t.fx)if(f.on&&f.p&&f.p.src)scSrc.add(f.p.src);
-  for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;/* a muted (or not soloed) track is silent anyway: don't build its notes. It joins in again within the look-ahead when unmuted. Tracks that drive a sidechain keep playing. */if(UI.skipMuted!==false&&!trkAudible(t,solo)&&!scSrc.has(t.id))continue;try{
+  for(const t of S.tracks){if(play.only&&t!==play.only)continue;const N=NODES.get(t.id);if(!N)continue;/* a muted (or not soloed) track is silent anyway: don't build its notes. It joins in again within the look-ahead when unmuted. Tracks that drive a sidechain keep playing. */if(UI.skipMuted!==false&&!trkAudible(t,solo)&&!scSrc.has(t.id))continue;try{
     for(const c of t.clips){if(c.mute)continue;const cs=c.start,ce=cs+c.len;if(ce<=from||cs>=to+PW)continue;
       const key=c.id+':'+play.pass;let I=INST.get(key);
       if(!I){const bFrom=Math.max(0,from-cs),t0=Math.max(ctx.currentTime,tm(cs+bFrom));I=clipChain(ctx,c,bFrom,t0,N.in,60/bpmAt(cs+bFrom),t.read!==false);INST.set(key,I);
         if(!c.notes){const B=srcView(c);if(B){const src=ctx.createBufferSource();src.buffer=B.buf;src.connect(I.in);const[o1,d1]=clipAudioSpan(c,bFrom);src.start(t0,o1,d1);reg(ctx,src)}}
         const II=I;setTimeout(()=>{try{II.out.disconnect()}catch(e){}if(INST.get(key)===II)INST.delete(key)},Math.max(0,(I.end-ctx.currentTime)*1000)+14000)}
-      if(c.notes&&t.inst)for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb>=from&&nb<to){if(tm(nb)<ctx.currentTime-.005){CPU.late++;CPU.lateT=performance.now();laLate()}}if(nb>=from&&nb<to){const w0=Math.max(ctx.currentTime,tm(nb)),du=secSpan(nb,nb+Math.min(n.l,c.off+c.len-n.s)),pe=(pvAny(t.inst)&&!pvBend(c))||(UI.poly!==false&&t.inst.preset==='venom'),ng=pe?I.in:ctx.createGain();if(!pe)ng.connect(I.in);NREC=[];PVCH=I;try{synthB(ctx,t.inst,ng,n.p,w0,du,n.v,c,n.s,spb)}finally{PVCH=null;const L=NREC;NREC=null;if(pe){if(L.length)NGC.push({t:w0+du+noteTail(t.inst),L})}else{L.push(ng);const E={t:w0+du+noteTail(t.inst),L};NGC.push(E);vcap(t,ng,w0,du,E);liveAdd(t,ng,I.in,n,c,w0,du,spb,L)}}}}
+      if(c.notes&&t.inst)for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb>=from&&nb<to){if(tm(nb)<ctx.currentTime-.005){CPU.late++;CPU.lateT=performance.now();laLate()}}if(nb>=from&&nb<to){const w0=Math.max(ctx.currentTime,tm(nb)),du=secSpan(nb,chsEnd(nb,nb+Math.min(n.l,c.off+c.len-n.s))),pe=(pvAny(t.inst)&&!pvBend(c))||(UI.poly!==false&&t.inst.preset==='venom'),ng=pe?I.in:ctx.createGain();if(!pe)ng.connect(I.in);NREC=[];PVCH=I;try{synthB(ctx,t.inst,ng,n.p,w0,du,n.v,c,n.s,spb)}finally{PVCH=null;const L=NREC;NREC=null;if(pe){if(L.length)NGC.push({t:w0+du+noteTail(t.inst),L})}else{L.push(ng);const E={t:w0+du+noteTail(t.inst),L};NGC.push(E);vcap(t,ng,w0,du,E);liveAdd(t,ng,I.in,n,c,w0,du,spb,L)}}}else if(play.chs&&nb<from&&nb+n.l>from)chsNote(t,c,n,nb,I,from,spb)}
     }}catch(err){if(!SCHERR.has(t.id)){SCHERR.add(t.id);console.error('AudioLab: scheduling failed on',t.name,err);toast('A part on “'+t.name+'” could not play ('+(err&&err.message||err)+'). The rest keeps playing.')}}}
 }
 const SCHERR=new Set();
@@ -3463,7 +3463,7 @@ function start(){play.past=!!(S.loop&&pos>=loopB()-1e-6&&S.loopRange);play.wrapp
   if(ci&&UI.clickCount!==false){const P=pat(),N=P.length,st=4/N;for(let b=0;b<ci-1e-9;b+=st){const k=Math.round((b%4)/st)%N;if(P[k])clickSound(ctx,clickOut,t00+b*spb,P[k],UI.clickSnd)}}
   {const tb0=play.t0-play.b0*spb;for(const N of NODES.values())for(const x of N.fxm.values())if(x.sync)x.sync(tb0)}
   {const tq=performance.now();tick();/* how long the first round took decides how much head start the next Play gets, so the first notes are never late */PLEAD.s=clamp((performance.now()-tq)/1000*1.3+.03,.05,.4)}play.timer=setInterval(tick,25);sclk('go');URS.n=0;URS.last=urNow();$('#bPlay').classList.add('on');$('#bStop').classList.remove('cur')}
-function stop(){if(!play.on)return;LIVEN.length=0;setTimeout(awStop,0);if(REC.on)recStop();clearInterval(play.timer);sclk('stop');setTimeout(autoBufCheck,0);play.on=false;for(const v of VOICES){try{v.stop()}catch(e){}}VOICES.clear();GJ.clear();setTimeout(()=>ngcSweep(true),400);for(const I of INST.values()){try{I.out.disconnect()}catch(e){}}INST.clear();$('#bPlay').classList.remove('on');$('#bStop').classList.add('cur');dirty=true}
+function stop(){if(!play.on)return;LIVEN.length=0;setTimeout(awStop,0);if(REC.on)recStop();clearInterval(play.timer);sclk('stop');setTimeout(autoBufCheck,0);play.on=false;for(const v of VOICES){try{v.stop()}catch(e){}}VOICES.clear();GJ.clear();{/* only the notes of the playback that just stopped are cleared away 0.4 s later. Before v0.184 this cleared everything, also the first notes of a playback started again within that time (a jump of the playhead is a stop and a start) */const old=NGC;NGC=[];setTimeout(()=>{for(const x of old)for(const n of x.L){try{n.disconnect()}catch(e){}}},400)}for(const I of INST.values()){try{I.out.disconnect()}catch(e){}}INST.clear();$('#bPlay').classList.remove('on');$('#bStop').classList.add('cur');dirty=true}
 function toggle(){if(play.on){pos=Math.max(0,curDisp());stop()}else start()}
 function panic(){if(!ctx||!master)return;const now=ctx.currentTime;master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(0,now,.006);
   for(const v of VOICES){try{v.stop()}catch(e){}}VOICES.clear();
@@ -5461,7 +5461,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.183',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.184',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8204,11 +8204,12 @@ const LIVEN=[];const instSig=I=>I?[I.preset,I.ipk,I.kp,I.pp,I.pk,I.sp,I.uname,I.
 function liveAdd(t,ng,dest,n,c,w0,du,spb,L){const now=ctx.currentTime;if(LIVEN.length>400){let k=0;for(const e of LIVEN)if(e.end>now)LIVEN[k++]=e;LIVEN.length=k}LIVEN.push({t,I:t.inst,sig:instSig(t.inst),ng,dest,p:n.p,v:n.v,ns:n.s,c,w0,du,spb,end:w0+du,L})}
 function pastShim(now,fn){const AP=AudioParam.prototype,M=['setValueAtTime','linearRampToValueAtTime','exponentialRampToValueAtTime','setTargetAtTime','setValueCurveAtTime','cancelScheduledValues','cancelAndHoldAtTime'],O={},Q=new Map();
   for(const m of M){if(!AP[m])continue;O[m]=AP[m];AP[m]=function(...a){let L=Q.get(this);if(!L)Q.set(this,L=[]);L.push([m,a]);return this}}
-  const SS=AudioScheduledSourceNode.prototype,BS=AudioBufferSourceNode.prototype,os=SS.start,bOwn=Object.prototype.hasOwnProperty.call(BS,'start'),obs=BS.start;
+  const SS=AudioScheduledSourceNode.prototype,BS=AudioBufferSourceNode.prototype,os=SS.start,ostp=SS.stop,bOwn=Object.prototype.hasOwnProperty.call(BS,'start'),obs=BS.start;
+  SS.stop=function(w=0){try{return ostp.call(this,Math.max(w,now))}catch(e){}};
   SS.start=function(w=0,...r){return os.call(this,Math.max(w,now),...r)};
   BS.start=function(w=0,off=0,dur){if(w<now){const el=(now-w)*(this.playbackRate.value||1),b=this.buffer;let o=off+el;if(this.loop&&b){const ls=this.loopStart||0,le=this.loopEnd>0?this.loopEnd:b.duration;if(o>le&&le>ls)o=ls+((o-ls)%(le-ls))}else if(b&&o>=b.duration)return;
       if(dur!==undefined){dur-=el;if(dur<=0)return}return dur===undefined?obs.call(this,now,o):obs.call(this,now,o,dur)}return dur===undefined?obs.call(this,w,off):obs.call(this,w,off,dur)};
-  try{fn()}finally{for(const m in O)AP[m]=O[m];SS.start=os;if(bOwn)BS.start=obs;else delete BS.start}
+  try{fn()}finally{for(const m in O)AP[m]=O[m];SS.start=os;SS.stop=ostp;if(bOwn)BS.start=obs;else delete BS.start}
   for(const[p,L]of Q){try{pastResolve(p,L,now,O)}catch(e){for(const[m,a]of L)try{O[m].apply(p,a)}catch(err){}}}}
 function pastResolve(p,L,now,O){const ev=L.map(([m,a],i)=>({m,a,i,t:m.startsWith('cancel')?a[0]:a[1]})).sort((x,y)=>x.t-y.t||x.i-y.i);
   if(!ev.some(e=>e.t<now)){for(const e of L)O[e[0]].apply(p,e[1]);return}
@@ -8570,7 +8571,11 @@ class Grain extends AudioWorkletProcessor{
   const s0=f0+off,dur=Math.max(q[1],P.a+.001);
   v.on=1;v.kill=0;v.kg=1;v.off=off;v.tag=q[5]||0;v.born=this.cnt++;v.B=B;v.P=P;v.rate=q[2]*B.sr/sr;v.st=0;v.e=0;v.pk=q[3]*P.gain;v.sus=v.pk*P.s;v.ai=v.pk/Math.max(1,P.a*sr);v.kd=1-Math.exp(-1/(P.dtc*sr));v.kr=1-Math.exp(-1/(P.rtc*sr));
   v.f0=s0;v.fOff=s0+Math.round(dur*sr);v.fEnd=v.fOff+Math.round(P.rend*sr);v.t=0;v.tot=Math.min(dur+P.tail,12);
-  v.ft=P.ft;v.c=P.fe;v.fc=P.fc;v.kc=1-Math.exp(-16/(P.ftc*sr));v.q=P.q;v.lph=0;v.linc=P.lfor/sr;v.lamt=P.lfoa;v.z1l=v.z2l=v.z1r=v.z2r=0}
+  v.ft=P.ft;v.c=P.fe;v.fc=P.fc;v.kc=1-Math.exp(-16/(P.ftc*sr));v.q=P.q;v.lph=0;v.linc=P.lfor/sr;v.lamt=P.lfoa;v.z1l=v.z2l=v.z1r=v.z2r=0;
+  /* picked up in the middle (v0.184): q[6] = seconds this note has been sounding already. The scan through the sample and the envelopes carry on from there */
+  if(q[6]>0){const ag=q[6],a=Math.max(.004,P.a);v.f0=s0-Math.round(ag*sr);v.t=ag;v.fOff=s0+Math.round(Math.max(q[1],.005)*sr);v.fEnd=v.fOff+Math.round(P.rend*sr);v.tot=Math.min(ag+q[1]+P.tail,Math.max(12,ag+.05));
+   if(ag<a)v.ai=v.pk/Math.max(1,Math.max(.004,a-ag)*sr);else{const lv=v.sus+(v.pk-v.sus)*Math.exp(-(ag-a)/P.dtc);v.pk=lv;v.ai=lv/(.004*sr)}
+   v.c=v.fc+(v.c-v.fc)*Math.exp(-ag/P.ftc);v.lph=(P.lfor*ag)%1}}
  drop(v){v.on=0;const gr=this.gr;for(let i=0;i<NG;i++)if(gr[i].on&&gr[i].v===v)gr[i].on=0}
  spawn(v,at){const gr=this.gr;let g=null;for(let k=0;k<NG;k++){const x=gr[(this.ng+k)%NG];if(!x.on){g=x;this.ng=(this.ng+k+1)%NG;break}}if(!g)return;
   const P=v.P,B=v.B,sr=sampleRate,len=B.ch[0].length,D=len/B.sr,t=v.t;let ps=P.pos+P.scan*t*.1+(this.rnd()-.5)*P.spray*.4;if(ps<0)ps=0;else if(ps>1)ps=1;
@@ -8648,7 +8653,12 @@ class Poly extends AudioWorkletProcessor{
   v.f2=P.q2!=null?1:0;v.G2=v.f2?Math.pow(10,P.q2/20):1;v.z3l=v.z4l=v.z3r=v.z4r=0;v.dg=P.dg||0;v.dn=v.dg?1/Math.tanh(v.dg):1;v.rl=P.rlin>0?v.pk/Math.max(1,P.rlin*sr):0;
   /* wavetable: 8 frames, each in 7 band-limited versions; the position moves with an LFO and an envelope */
   v.ft=P.ft||1;v.sp=P.subPre?1:0;v.wt=null;if(P.wt){const W=this.wts.get(P.wt);if(W){const mh=Math.max(1,Math.floor(sr*.5/f));let lv=0;while(lv<6&&(64>>lv)>mh)lv++;v.wt=W[lv];v.wp0=P.pos;v.wla=P.lA;v.wlinc=P.lfoRate/sr;v.wlph=0;v.wea=P.eA;v.we=0;v.wes=0;v.wei=16/(.003*sr);v.wek=1-Math.exp(-16/(Math.max(.02,P.pd)/3*sr));v.wfi=0;v.wfr=0}}
-  let n=0;for(const o of P.osc){if(n>=NOSC)break;v.ph[n]=o[0]===1?.5:0;v.df[n]=f*Math.pow(2,(o[1]+(this.rnd()-.5)*2)/1200)/sr;v.ty[n]=o[0]===4&&!v.wt?0:o[0];v.gl[n]=o[2];v.gr[n]=o[3];n++}v.n=n}
+  let n=0;for(const o of P.osc){if(n>=NOSC)break;v.ph[n]=o[0]===1?.5:0;v.df[n]=f*Math.pow(2,(o[1]+(this.rnd()-.5)*2)/1200)/sr;v.ty[n]=o[0]===4&&!v.wt?0:o[0];v.gl[n]=o[2];v.gr[n]=o[3];n++}v.n=n;
+  /* picked up in the middle (v0.184): q[8] = seconds this note has been sounding already. The envelopes start where they would be by now (the level is reached in 4 ms, so there is no click), the oscillators start fresh */
+  if(q[8]>0){const ag=q[8],a=Math.max(.004,P.a);v.fOff=s0+Math.round(Math.max(q[1],.005)*sr);v.fEnd=v.fOff+Math.round(P.rend*sr);
+   if(ag<a)v.ai=v.pk/Math.max(1,Math.max(.004,a-ag)*sr);else{const lv=v.sus+(v.pk-v.sus)*Math.exp(-(ag-a)/P.dtc);v.pk=lv;v.ai=lv/(.004*sr)}
+   v.c=v.fc+(v.c-v.fc)*Math.exp(-ag/P.ftc);if(v.fm)v.fd=v.fdT+(v.fd-v.fdT)*Math.exp(-ag/.3);v.lph=(P.lfo*ag)%1;
+   if(v.wt){v.wlph=(P.lfoRate*ag)%1;if(v.wea!==0){v.wes=1;v.we=Math.exp(-ag/(Math.max(.02,P.pd)/3))}}}}
  process(ins,outs){if(this.dead)return false;const out=outs[0],L=out[0],R=out[1]||out[0],N=L.length,sr=sampleRate,f0=currentFrame;
   if(this.pend.length){const pd=this.pend;let due=null;for(let k=pd.length-1;k>=0;k--){const s0=Math.round(pd[k][0]*sr);if(s0<f0+N){(due||(due=[])).push([s0,pd[k]]);pd.splice(k,1)}}
    if(due){if(due.length>1)due.sort((a,b)=>a[0]-b[0]);for(const d of due)this.start(d[1],Math.max(0,Math.min(N-1,d[0]-f0)),f0)}}
@@ -8733,7 +8743,7 @@ function pvPlay(c,I,ch,p,w,dur,v,tag){const key=ch.triv?ch.dest:ch.in,st=pvState
   let gr=0,gt=0;if(acid){/* overlapping notes slide */const L=st.last;if(L&&w<=L.end+.012&&w>=L.w){gr=hz(L.p)/hz(p);gt=I.slide}st.last={p,w,end:w+dur};if(!tag)dur=Math.max(.01,dur-.006)}
   if(I.space>0){const lv=I.space/100*.8;if(!st.spg){const _nr=NREC;NREC=null;try{st.spg=c.createGain();st.spg.gain.value=lv;st.out.connect(st.spg);st.spg.connect(plantBus(c,key,I).i)}catch(e){}finally{NREC=_nr}}else if(st.spv!==lv)st.spg.gain.value=lv;st.spv=lv}else if(st.spg&&st.spv!==0){st.spg.gain.value=0;st.spv=0}
   /* notes are collected and sent once per scheduling round, not one message per note */
-  if(!st.nb){st.nb=[];if(c===ctx)queueMicrotask(()=>pvFlush(st))}st.nb.push([w,Math.max(.005,dur),p,Math.max(0,Math.min(1.5,v)),id,tag||0,gr,gt]);
+  if(!st.nb){st.nb=[];if(c===ctx)queueMicrotask(()=>pvFlush(st))}st.nb.push([w,Math.max(.005,dur),p,Math.max(0,Math.min(1.5,v)),id,tag||0,gr,gt,PVN.age||0]);
   if(c===ctx){reg(c,st.stub||(st.stub={stop(){st.nb=null;pvSend(st,{x:1})},onended:null}));
     if(!ch.triv&&!st.tmo){st.tmo=setTimeout(()=>pvDrop(c,st),Math.max(0,(ch.end-c.currentTime)*1000)+20000)}/* an engine made for one clip with its own volume or fade curve goes away after the clip */}
   PVN.n++;hitMark(c,I,w,p,tag?.3:dur);return st}
@@ -8749,7 +8759,7 @@ function gvPlay(c,I,ch,p,w,dur,v,tag){let B=sampleBuf(I.buf);if(!B)return null;c
   if(!id){if(st.ids.size>40)st.ids.clear();id=st.nid++;st.ids.set(sig,id);const off0=ft==='off',cut=off0?20000:I.cut;
     pvSend(st,{id,P:{buf:bid,rv:rv?1:0,gain:I.gain*og,a:A,dtc:DD/3+.001,s:I.s??1,rtc:I.r/3+.001,rend:I.r*3+.05,tail:I.r*2,ft:GVF[ft]||0,fc:cut,fe:fe>0&&!off0?Math.min(18000,cut*Math.pow(2,fe/100*5)):cut,ftc:DD/3+.001,q:I.res??.7,lfor:I.lfor||4,lfoa:off0?0:(I.lfoa||0)/100*2400,
       pos:I.pos,scan:I.scan/100,spray:I.spray/100,size:I.size,step:1/(lite?I.dens*.5:I.dens),prand:I.prand,gn:1/Math.sqrt(Math.max(1,I.dens*I.size))}})}
-  if(!st.nb){st.nb=[];if(c===ctx)queueMicrotask(()=>pvFlush(st))}st.nb.push([w,Math.max(.005,dur),Math.pow(2,(p-60+I.tune)/12),Math.max(0,Math.min(1.5,v)),id,tag||0]);
+  if(!st.nb){st.nb=[];if(c===ctx)queueMicrotask(()=>pvFlush(st))}st.nb.push([w,Math.max(.005,dur),Math.pow(2,(p-60+I.tune)/12),Math.max(0,Math.min(1.5,v)),id,tag||0,PVN.age||0]);
   if(c===ctx){reg(c,st.stub||(st.stub={stop(){st.nb=null;pvSend(st,{x:1})},onended:null}));if(!ch.triv&&!st.tmo)st.tmo=setTimeout(()=>pvDrop(c,st),Math.max(0,(ch.end-c.currentTime)*1000)+20000)}
   PVN.g=(PVN.g||0)+1;hitMark(c,I,w,p,tag?.3:Math.max(dur,A));return st}
 if(typeof OfflineAudioContext!=='undefined'&&!OfflineAudioContext.prototype._pv){const sr0=OfflineAudioContext.prototype.startRendering;OfflineAudioContext.prototype.startRendering=function(){if(this._pre){const q=this._pre;this._pre=null;for(const f of q){try{f()}catch(e){}}}for(const M of[PVS,GVS]){const m=M.get(this);if(m)for(const st of m.values())st.fin&&st.fin()}return sr0.apply(this,arguments)};OfflineAudioContext.prototype._pv=1}
@@ -12195,22 +12205,8 @@ duInit();
    (chgRevoice): the track gets a fresh input, the old one fades out in 30 ms with everything that was connected to it. */
 let CHG=null,CHGR=0,CHGS=0,CHGCT=0,CHGRT=0;const CHGN=[],CHGDR=new Set(['drums','kick','zsnare','zclap','zhat','ztom','perc']);
 const chgOn=()=>!!(CHG&&ib&&ib.chg),chgDest=t=>{if(t===MSTO)return prevIn;const N=NODES.get(t.id);return N?N.in:null};
-{const _s=start;start=function(){CHGS++;CHGN.length=0;return _s.apply(this,arguments)}}
-{const _sb=synthB;synthB=function(c,I,dest,p,w,dur,v,clip,ns,spb){if(!CHGR&&c===ctx&&PVCH&&clip&&play.on){if(CHGN.length>600){const now=ctx.currentTime;let k=0;for(const e of CHGN)if(e.w+e.du>now)CHGN[k++]=e;CHGN.length=k}CHGN.push({I,ch:PVCH,p,w,du:dur,v,c:clip,ns,spb,s:CHGS,re:0})}return _sb.apply(this,arguments)}}
-function chgRevoice(t){if(!ctx||t===MSTO)return;const N=NODES.get(t.id);if(!N){syncGraph();return}const now=ctx.currentTime+.005,old=N.in,nin=ctx.createGain(),fg=ctx.createGain(),olds=[];
-  for(const c of t.clips)for(const[k,ch]of INST)if(k.startsWith(c.id+':')){if(c.notes){olds.push(ch);INST.delete(k)}else try{ch.out.disconnect();ch.out.connect(nin)}catch(e){}}
-  try{old.disconnect()}catch(e){}old.connect(fg);fg.connect(nin);N.in=nin;N.sig=null;syncGraph();
-  /* the old sound fades only after the new notes have been handed over (building a voice engine takes a moment), and as slowly as the new sound comes in */
-  const I0=t.inst,eng=pvAny(I0)||(UI.poly!==false&&I0.preset==='venom'),F=eng?clamp(+(I0.a??I0.att??I0.attack??0)||0,.03,.35):.03,fade=()=>{const t1=ctx.currentTime+(eng&&play.on?.03:.004);fg.gain.setValueAtTime(1,t1);fg.gain.linearRampToValueAtTime(0,t1+F)};
-  setTimeout(()=>{try{old.disconnect();fg.disconnect()}catch(e){}try{for(const M of[PVS,GVS]){const m=M.get(ctx);if(!m)continue;for(const k of[old,...olds.map(c=>c.in)]){const st=m.get(k);if(st)pvDrop(ctx,st)}}}catch(e){}for(const ch of olds)try{ch.out.disconnect()}catch(e){}},F*1000+400);
-  for(const e of LIVEN)if(e.t===t)e.end=0;
-  if(!play.on){fade();return}const b=curBeat(),made=new Map(),I=t.inst;CHGR=1;
-  try{for(const e of CHGN){if(e.s!==CHGS||ITRK.get(e.I)!==t||e.w+e.du<=now+.03||!(e.re||olds.includes(e.ch)))continue;const c=e.c;let C=null;
-      if(!e.ch.triv){const cs=c.start,key=c.id+':'+play.pass;C=made.get(c.id)||null;if(!C&&b>=cs&&b<cs+c.len&&t.clips.includes(c)){const bF=Math.max(0,b-cs),t0=Math.max(ctx.currentTime,tm(cs+bF));C=clipChain(ctx,c,bF,t0,N.in,60/bpmAt(cs+bF),t.read!==false);INST.set(key,C);made.set(c.id,C);const II=C;setTimeout(()=>{try{II.out.disconnect()}catch(er){}if(INST.get(key)===II)INST.delete(key)},Math.max(0,(C.end-ctx.currentTime)*1000)+14000)}}
-      if(!C)C={triv:true,dest:N.in,in:N.in,out:N.in,end:e.w+e.du};
-      const pe=(pvAny(I)&&!pvBend(c))||(UI.poly!==false&&I.preset==='venom'),ng=pe?C.in:ctx.createGain();if(!pe){ng.gain.setValueAtTime(0,now);ng.gain.linearRampToValueAtTime(1,now+.03);ng.connect(C.in)}
-      NREC=[];PVCH=C;try{pastShim(now,()=>synthB(ctx,I,ng,e.p,e.w,e.du,e.v,c,e.ns,e.spb))}catch(er){}finally{PVCH=null;const L=NREC||[];NREC=null;const tl=e.w+e.du+noteTail(I);if(pe){if(L.length)NGC.push({t:tl,L})}else{L.push(ng);const E={t:tl,L};NGC.push(E);try{vcap(t,ng,e.w,e.du,E)}catch(er){}liveAdd(t,ng,C.in,{p:e.p,v:e.v,s:e.ns},c,e.w,e.du,e.spb,L)}}
-      e.I=I;e.ch=C;e.re=1}}finally{CHGR=0;NREC=null;PVCH=null;fade()}}
+/* since v0.184 a swap is a clean switch like a preset change: the old sound is cut in a few milliseconds and the notes that are sounding are picked up (chsTrack) */
+function chgRevoice(t){if(!ctx||t===MSTO)return;if(!NODES.get(t.id)){syncGraph();return}CHSSIG.set(t.id,chsSig(t.inst));chsTrack(t,true)}
 /* the short sound after a swap while the song is stopped: it goes through the track, so the effects are heard too */
 function chgTest(){const C=CHG;if(!C||!ctx||play.on)return;const t=C.t;try{if(ctx.state!=='running')ctx.resume()}catch(e){}clearTimeout(C.tt);
   const one=()=>{if(CHG!==C||play.on)return;const I=t.inst;if(I&&t!==MSTO){const P=PRESETS[I.preset]||{};preview(t,CHGDR.has(I.preset)||P.cat==='Bass'?36:60,.8)}else{const d=chgDest(t),J=ibTestInst();if(!d||!J)return;const g=ctx.createGain();g.connect(d);synth(ctx,J,g,60,ctx.currentTime+.01,.3,.8);setTimeout(()=>{try{g.disconnect()}catch(e){}},4000)}};
@@ -12220,7 +12216,7 @@ function chgBlank(){const C=CHG;if(C.blank)return;C.blank=1;const Ds=C.mode==='f
   for(const D of Ds){const out=c=>!D.contains(c);IVZ=IVZ.filter(out);VIZ=VIZ.filter(out);PADEL=PADEL.filter(out);if(KVIZ&&D.contains(KVIZ))KVIZ=null;D.style.width=D.offsetWidth+'px';D.style.height=D.offsetHeight+'px';D.innerHTML='<div class="chgph">Being changed in the browser</div>'}}
 function chgSwap(k){const C=CHG,t=C.t,back=k===C.key;
   if(C.mode==='inst'){const I=t.inst,nt=ibMkTrack(k),src=back?JSON.parse(C.orig):nt.inst;for(const q of Object.keys(I))delete I[q];Object.assign(I,src);I.preset=k;nt.inst=I;ib.t=nt;ITRK.set(I,t);C.cur=k;C.n++;chgBlank();chgRevoice(t)}
-  else{const fx=t.fx,i=fx.findIndex(q=>q.id===C.id);if(i<0)return;const nf=back?JSON.parse(C.orig):mkFx(k);if(!back)nf.on=fx[i].on;fx[i]=nf;C.id=nf.id;const nt=ibMkFxTrack(k);nt.fx=[nf];ib.t=nt;C.cur=k;C.n++;chgBlank();syncGraph()}}
+  else{const fx=t.fx,i=fx.findIndex(q=>q.id===C.id);if(i<0)return;const nf=back?JSON.parse(C.orig):mkFx(k);if(!back)nf.on=fx[i].on;const oid=fx[i].id;fx[i]=nf;C.id=nf.id;const nt=ibMkFxTrack(k);nt.fx=[nf];ib.t=nt;C.cur=k;C.n++;chgBlank();CHSPRE.set(nf.id,(nf.p&&nf.p.pre)??'');chsFxOut(t,[[oid,nf.id]])}}
 function chgOpen(mode,t,f){ensureCtx();if(t!==MSTO&&selT!==t.id){selT=t.id;renderHeaders();renderFx()}if(t!==MSTO&&!NODES.get(t.id))syncGraph();const k=mode==='fx'?f.type:t.inst.preset;
   CHG={mode,t,key:k,cur:k,id:f?f.id:null,id0:f?f.id:null,orig:JSON.stringify(mode==='fx'?f:t.inst),snap:undoSnap(),top:UNDO[UNDO.length-1],redo:REDO,n:0,blank:0,name:t.name,tt:0};
   let ft;if(mode==='fx'){ft=ibMkFxTrack(k);ft.fx=[f]}else{ft=ibMkTrack(k);ft.inst=t.inst;ITRK.set(t.inst,t)}
@@ -12281,6 +12277,97 @@ for(const ty of['click','dblclick'])document.addEventListener(ty,e=>{if(performa
 document.addEventListener('keydown',e=>{if($('#ib').hidden||!ib||e.metaKey||e.ctrlKey||e.altKey)return;const g=e.target,cl=s=>g&&g.closest&&g.closest(s);
   if(e.key==='Enter'){if(cl('button,input,select,textarea,a')||!ib.sel)return;e.preventDefault();e.stopImmediatePropagation();chooseIB();return}
   if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight'&&e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;if(cl('input,select,textarea,#ibLive [data-c],#ibTry'))return;e.preventDefault();e.stopImmediatePropagation();chgNav(e.key)},true);
+/* ===== Clean switch and picking up notes (v0.184) =====
+   Clean switch: when the preset of an instrument changes (or the whole instrument, or its sample), everything the track was playing is cut in 4 ms:
+   the track gets a fresh input and the old one fades out with all that hangs on it (notes of the look-ahead, held notes, release tails, clip chains).
+   Voice engines are told to stop their voices (3 ms inside the engine) and move to the new input, so no engine is built again. Effects with a memory
+   on that track (delays, reverbs, Blur, the particle delays, Resonator) are replaced by fresh ones while the old one fades out in 5 ms; the same when
+   the preset of such an effect changes. Then the track's notes from this moment on are scheduled again with the new sound.
+   Picking up (chasing): a note that began earlier and has not ended yet starts now with the length that is left. This is one function (chsNote), called
+   from schedule() when play.chs is set: after a clean switch, when Play is pressed inside a note, after a jump of the playhead (that is stop and start)
+   and at the start of every loop round. Instruments made of browser nodes continue as if they had played from their start (pastShim: envelopes and
+   samples at the right spot); the voice engine of the basic synths, Plant, Acid and Wavetable and the grain engine of the Sampler start with their
+   envelopes where they would be by now (see q[8] in PWL, q[6] in GWL); Emit, Vector Grain, Vector FM, Orbit and Venom start the note with its own attack.
+   Nothing here runs while nothing changes. Settings > Audio > Playback switches the picking up off (UI.chase=false); the clean switch stays. */
+const CHS={n:0,c:0,last:null,lastN:0,lastT:0,cuts:0,ms:0,vo:null},CHSSIG=new Map(),CHSPRE=new Map(),CHSK=new Set(),CHSSP=new Map(),CHSMEM=new Set(['delay','tdelay','reverb','blur','conv','vdelay','bdelay','reson']);
+const chsSig=I=>I?instSig(I)+'|'+(I.buf||''):'';
+/* while the loop is on, a note that began before the loop ends at the loop end: it is picked up again at the loop start, so it must not pile up */
+function chsEnd(nb,eb){if(UI.chase===false||!S.loop||play.past)return eb;const B=loopB();return nb<loopA()-1e-6&&nb<B&&eb>B?B:eb}
+/* one note that is sounding at beat `from`: start it now with what is left of it */
+function chsNote(t,c,n,nb,I,from,spb){const eb=chsEnd(nb,nb+Math.min(n.l,c.off+c.len-n.s)),wf=Math.max(ctx.currentTime+.002,tm(from)),w0=tm(nb),we=tm(eb),rem=we-wf;if(!(rem>.02)||!(wf>w0))return;
+  const pe=(pvAny(t.inst)&&!pvBend(c))||(UI.poly!==false&&t.inst.preset==='venom'),ng=pe?I.in:ctx.createGain();if(!pe){ng.gain.setValueAtTime(0,wf);ng.gain.linearRampToValueAtTime(1,wf+.004);ng.connect(I.in)}
+  NREC=[];PVCH=I;try{if(pe){PVN.age=wf-w0;synthB(ctx,t.inst,ng,n.p,wf,rem,n.v,c,n.s,spb)}else pastShim(wf,()=>synthB(ctx,t.inst,ng,n.p,w0,we-w0,n.v,c,n.s,spb))}catch(e){}
+  finally{PVN.age=0;PVCH=null;const L=NREC||[];NREC=null;const tl=we+noteTail(t.inst);if(pe){if(L.length)NGC.push({t:tl,L})}else{L.push(ng);const E={t:tl,L};NGC.push(E);try{vcap(t,ng,wf,rem,E)}catch(e){}liveAdd(t,ng,I.in,n,c,w0,we-w0,spb,L)}}}
+{const _sb=synthB;synthB=function(){if(CHS.c)CHS.n++;return _sb.apply(this,arguments)}}
+{const _sc=schedule;schedule=function(from,to,first){if(first&&!play.only){play.chs=UI.chase!==false;try{return _sc.apply(this,arguments)}finally{play.chs=false}}return _sc.apply(this,arguments)}}
+/* effects: a fresh node takes the place of the old one, which fades out in 5 ms. pairs = [[id of the old node, id of the new one]] (the same id twice clears the memory of an effect) */
+function chsFxOut(t,pairs){if(!ctx)return;const N=t===MSTO?null:NODES.get(t.id),M=t===MSTO?MFXM:N&&N.fxm;if(!M){if(t!==MSTO)syncGraph();return}const olds=[],fx=t.fx||[],q=performance.now(),now=ctx.currentTime,
+    fade=()=>{const fg=ctx.createGain(),w=Math.max(now,ctx.currentTime)+.003;fg.gain.setValueAtTime(1,w);fg.gain.linearRampToValueAtTime(0,w+.005);return fg},later=(x,fg)=>setTimeout(()=>{try{x.out.disconnect();fg.disconnect()}catch(e){}},90);
+  for(const[a,b]of pairs){const x=M.get(a);if(!x)continue;/* where the old node plays into: its fade goes there, and it starts before the fresh node is built (a reverb can take 40 ms to build) */
+    let nx=null,done=false;if(N){const i=fx.findIndex(f=>f.id===b);nx=N.pdc;for(let k=i+1;k<fx.length;k++){const f=fx[k];if(!f.on||(t.fxByp&&f.type!=='chord'&&f.type!=='arp'))continue;const y=M.get(f.id);nx=y&&y.in?y.in:null;break}}
+    if(nx&&x.out){try{const fg=fade();fg.connect(nx);x.out.connect(fg);x.out.disconnect(nx);later(x,fg);done=true}catch(e){}}olds.push([x,b,done,a])}
+  for(const o of olds)M.delete(o[3]);
+  if(t===MSTO){MSIG='';syncMaster()}else{N.sig=null;syncGraph()}
+  for(const[x,b,done]of olds){const xn=M.get(b);if(!done){try{x.out.disconnect()}catch(e){}if(xn&&xn.out)try{const fg=fade();fg.connect(xn.out);x.out.connect(fg);later(x,fg)}catch(e){}}
+    if(xn&&play.on&&xn.sync)try{xn.sync(play.t0-play.b0*60/S.bpm)}catch(e){}}
+  CHS.fxms=performance.now()-q}
+/* the cut: a fresh input for the track, the old one fades out with everything on it */
+/* The cut and the new notes are set a little ahead (6 to 14 ms, one output buffer): a message to a voice engine needs up to a buffer to arrive, and a fade set at the
+   present moment can already be over when the audio thread gets to it, which would be a hard cut. So the old sound fades at T and the new one starts at T, exact to the sample. */
+function chsCut(t){const N=NODES.get(t.id),now=CHS.T=ctx.currentTime+Math.min(.012,Math.max(.005,(ctx.baseLatency||.005)+.002)),old=N.in,nin=ctx.createGain(),fg=ctx.createGain(),dead=[],drop=[];
+  for(const c of t.clips)for(const[k,ch]of INST)if(k.startsWith(c.id+':')){if(c.notes){dead.push(ch);INST.delete(k)}else try{ch.out.disconnect();ch.out.connect(nin)}catch(e){}}
+  /* voice engines: the engine that was playing stays on the old input and fades out with it, exact to the sample (a message to the engine can take a buffer to arrive).
+     It is then emptied and kept as the spare, and the spare of last time takes over at once, with its samples and tables still loaded. So a track has two engines after its first switch and none is built again. */
+  let sp=CHSSP.get(t.id);if(!sp||sp.c!==ctx){sp={c:ctx,e:[]};CHSSP.set(t.id,sp)}const ret=[];
+  [PVS,GVS,EMS,VGS,VFMS,ORBS].forEach((M,i)=>{const m=M.get(ctx);if(!m)return;const st=m.get(old);
+    if(st){st.nb=null;m.delete(old);ret.push([i,st]);const s2=sp.e[i];if(s2){sp.e[i]=null;try{if(s2.park){s2.out.disconnect();s2.park=null}s2.out.connect(nin);s2.key=nin;s2.last=null;m.set(nin,s2)}catch(e){}}}
+    for(const ch of dead){const s3=m.get(ch.in);if(s3){s3.nb=null;drop.push(s3)}}});
+  let vn=[];{const m=VNS.get(ctx);if(m)for(const k of[old,...dead.map(c=>c.in)]){const st=m.get(k);if(st){m.delete(k);vn.push(st)}}
+    /* Venom cuts hard when told to stop and has effects of its own inside, so its engine fades out with the old input and a fresh one takes over. A fresh one is kept ready (building one takes longer than 50 ms) */
+    if(vn.length&&m){const v=sp.v;sp.v=null;if(v&&v.node){try{v.node.disconnect();v.node.connect(nin);m.delete(v.park);m.set(nin,v)}catch(e){}}chsVnSpare(sp)}}
+  /* the new path is wired before the old one is taken away, so the sound never has a hole (a disconnect followed by a connect can leave one block of silence) */
+  let nx=null;if(N.sig===(t.fxByp?'B|':'')+t.fx.map(f=>f.id+(f.on?'1':'0')).join(',')){nx=N.pdc;for(const f of t.fx){if(!f.on||(t.fxByp&&f.type!=='chord'&&f.type!=='arp'))continue;const x=N.fxm.get(f.id);nx=x&&x.in?x.in:null;break}}
+  fg.connect(nin);
+  if(nx){try{nin.connect(nx);old.connect(fg);old.disconnect(nx)}catch(e){nx=null}}if(!nx){try{old.disconnect()}catch(e){}old.connect(fg);N.sig=null}N.in=nin;
+  for(const e of LIVEN)if(e.t===t||e.t.id===t.id)e.end=0;for(const h of LIVEK)if(h.t===t||h.t.id===t.id){h.t=t;h.dest=nin;h.sig=''}try{VCAP.delete(t.id)}catch(e){}
+  syncGraph();
+  /* the fade of the old sound is set by the caller after the new notes have been handed over: if that took longer than planned (a sound that has to be worked out first), the old sound stays until the new one is there */
+  return()=>{const T2=Math.max(now,ctx.currentTime+.004);fg.gain.setValueAtTime(1,T2);fg.gain.linearRampToValueAtTime(0,T2+.004);setTimeout(()=>{try{old.disconnect();fg.disconnect()}catch(e){}for(const ch of dead)try{ch.out.disconnect()}catch(e){}for(const st of drop)try{pvDrop(ctx,st)}catch(e){}for(const[i,st]of ret)try{pvSend(st,{x:1});st.out.disconnect();if(st.spg){st.spg.disconnect();st.spg=null;st.spv=undefined}if(sp.e[i]||sp.c!==ctx||CHSSP.get(t.id)!==sp)pvDrop(sp.c,st);else sp.e[i]=st}catch(e){}for(const st of vn)try{vnSend(st,{x:1});if(st.node){st.node.port.onmessage=null;st.node.disconnect()}}catch(e){}},(T2-ctx.currentTime)*1000+60)}}
+/* the spare engine of a track is made when Play is pressed (once per track), so the first switch has one ready: an engine built at the moment of the switch would leave a hole of some milliseconds.
+   A spare that plays nothing costs next to nothing: its loop finds no voice and returns. */
+const CHSENG=[['al-poly',()=>PVS,I=>pvOK(I)],['al-grain',()=>GVS,I=>gvOK(I)],['al-emit',()=>EMS,I=>emOK(I)],['al-vgrain',()=>VGS,I=>vgOK(I)],['al-vfm',()=>VFMS,I=>vfmOK(I)],['al-orb',()=>ORBS,I=>orbOK(I)]];
+function chsSpare(t){const I=t.inst;if(!I||!ctx||!ctx._wl)return;let sp=CHSSP.get(t.id);if(!sp||sp.c!==ctx){sp={c:ctx,e:[]};CHSSP.set(t.id,sp)}
+  if(I.preset==='venom'){if(UI.poly!==false)chsVnSpare(sp);return}
+  for(let i=0;i<CHSENG.length;i++){const E=CHSENG[i];if(!E[2](I))continue;if(!sp.e[i]){const M=E[1](),_nr=NREC;NREC=null;try{const park=ctx.createGain(),st=pvState(ctx,park,E[0],M);M.get(ctx).delete(park);st.park=park;sp.e[i]=st}finally{NREC=_nr}}break}}
+function chsVnSpare(sp){if(sp.v||sp.c!==ctx||!ctx._wl)return;try{const park=ctx.createGain(),st=vnState(ctx,park);st.park=park;sp.v=st}catch(e){}}
+/* the track's notes from now on, again: the ones that are sounding are picked up, the ones of the look-ahead keep their times */
+function chsResched(t){const now=Math.max(CHS.T||0,ctx.currentTime+.003),k0=play.only,k1=play.chs;CHS.c=1;play.only=t;play.chs=UI.chase!==false;
+  try{if(now<play.t0&&play.wrapped&&S.loop&&!play.past){/* the scheduler has gone round the loop already, the sound has not: the rest of this round, then what was scheduled of the next */
+      const end=loopB(),b0=play.b0,fb=Math.max(loopA(),beatOf(secOf(end)-(play.t0-now)));play.b0=end;play.pass--;try{schedule(fb,end,false)}finally{play.b0=b0;play.pass++}
+      if(play.sched>b0+1e-9)schedule(b0,play.sched,false)}
+    else{const fb=Math.min(play.sched,Math.max(play.b0,beatOf(secOf(play.b0)+(now-play.t0))));schedule(fb,play.sched,false)}}
+  catch(e){console.error('AudioLab: picking up notes failed on',t.name,e)}finally{play.only=k0;play.chs=k1;CHS.c=0}}
+/* keys that are held down on the keyboard carry on with the new sound */
+function chsKeys(t){try{if(LIVEK.size)liveKeysRevoice()}catch(e){}for(const e of CHSK)if(e.t===t||e.t.id===t.id){e.t=t;try{const h=CHS.vo(t,e.p,e.v);if(h)e.h=h}catch(er){}}}
+{const _vo=voiceOn;CHS.vo=_vo;voiceOn=function(t,p,v){const n0=LIVEK.size,h=_vo.apply(this,arguments);if(!h||LIVEK.size!==n0)return h;const e={t,p,v,h};CHSK.add(e);return{off(f){CHSK.delete(e);e.h.off(f)}}}}
+/* tables and samples the new sound needs are made before the cut, so the gap between the old sound and the new one stays short (a new wavetable takes up to 90 ms the first time) */
+function chsWarm(I){try{if(I.preset==='venom'){const P=vnParams(I);vnTab(P.aw|0);vnTab(P.bw|0)}else if(I.preset==='wtab'){if(pvOK(I))wtMips(I.wt||'basic')}else if(I.buf){const B=sampleBuf(I.buf);if(B&&I.rev)sampRev(B)}}catch(e){}}
+function chsTrack(t,fxToo){if(!ctx||!t||t===MSTO||!t.inst)return 0;if(!NODES.get(t.id)){syncGraph();return 0}chsWarm(t.inst);const q=performance.now();
+  if(fxToo){const fs=t.fx.filter(f=>CHSMEM.has(f.type)&&f.on);if(fs.length)chsFxOut(t,fs.map(f=>[f.id,f.id]))}
+  const fd=chsCut(t);CHS.n=0;try{if(play.on)chsResched(t);chsKeys(t)}finally{fd()}CHS.last=t;CHS.lastN=CHS.n;CHS.lastT=performance.now();CHS.ms=CHS.lastT-q;CHS.cuts++;return CHS.n}
+function chsFxWatch(){if(CHSPRE.size>4000)CHSPRE.clear();const go=(t,fx)=>{let L=null;for(const f of fx){const p=(f.p&&f.p.pre)??'',had=CHSPRE.has(f.id),o=CHSPRE.get(f.id);if(o!==p){CHSPRE.set(f.id,p);if(had&&f.on&&CHSMEM.has(f.type))(L||(L=[])).push([f.id,f.id])}}if(L&&ctx)chsFxOut(t,L)};
+  for(const t of S.tracks)if(t.fx&&t.fx.length)go(t,t.fx);if(S.mfx&&S.mfx.length)go(MSTO,S.mfx)}
+{const _ch=changed;changed=function(){let hit=null;
+  try{if(CHSSIG.size>4000)CHSSIG.clear();for(const t of S.tracks){if(!t.inst)continue;const s=chsSig(t.inst),o=CHSSIG.get(t.id);if(o!==s){CHSSIG.set(t.id,s);if(o!==undefined&&ctx&&NODES.get(t.id)){(hit||(hit=[])).push(t);for(const e of LIVEN)if(e.t.id===t.id)e.end=0}}}}catch(e){}
+  try{chsFxWatch()}catch(e){console.error('AudioLab: clean switch',e)}
+  const r=_ch.apply(this,arguments);
+  try{if(hit)for(const t of hit)chsTrack(t,true);if(CHSSP.size)for(const[id,sp]of CHSSP)if(sp.c!==ctx||!S.tracks.some(t=>t.id===id)){CHSSP.delete(id);for(const st of sp.e)if(st)try{pvDrop(sp.c,st)}catch(e){}if(sp.v)try{const m=VNS.get(sp.c);if(m)m.delete(sp.v.park);if(sp.v.node)sp.v.node.disconnect()}catch(e){}}}catch(e){console.error('AudioLab: clean switch',e)}return r}}
+{const _st=start;start=function(){try{for(const t of S.tracks)if(t.inst&&!CHSSIG.has(t.id))CHSSIG.set(t.id,chsSig(t.inst));chsFxWatch()}catch(e){}const r=_st.apply(this,arguments);try{for(const t of S.tracks)if(t.inst)chsSpare(t)}catch(e){}return r}}
+/* the test note of a preset change is left out while the song plays and the track's own notes were picked up */
+{const _pv=preview;preview=function(t){if(play.on&&CHS.last===t&&CHS.lastN>0&&performance.now()-CHS.lastT<80)return;return _pv.apply(this,arguments)}}
+{const lim=document.getElementById('limChk'),lab=lim&&lim.closest('label'),h4=lab&&lab.previousElementSibling,at=h4&&h4.tagName==='H4'?h4:lab;
+  if(at){at.insertAdjacentHTML('beforebegin','<h4>Playback</h4><label class="chk" title="A note that began earlier and has not ended yet is heard at once: when you press Play in the middle of it, when the playhead jumps, at the start of a loop and after a change of preset or instrument. Switched off, a note is only heard when the playhead passes its start."><input type="checkbox" id="chaseChk"> Pick up notes that are already sounding: press Play in the middle of a long note and it carries on from there</label>');
+    const c=document.getElementById('chaseChk');c.checked=UI.chase!==false;c.onchange=e=>{UI.chase=e.target.checked;saveUI()};const _ss=syncSettings;syncSettings=function(){const r=_ss.apply(this,arguments);c.checked=UI.chase!==false;return r}}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

@@ -963,3 +963,240 @@ Effects (38): Compressor, OTT, Sidechain, Limiter, Soft Clipper, Gate, Multiband
 ### Release
 - v0.183: commit f4aea01, artifact version 206, project doc `claude/audiolab-device-backlog-run-D.md`.
 - **Desktop build**: run 45683210948 for this commit, all three jobs succeeded (release, Mac, Windows; 19:14 to 19:20 UTC).
+
+## 25 November 2026: v0.184, clean preset switch and picking up notes in the middle (task I, from the user's message)
+
+The user's words: "we do have some problems with changing presets on synths. And I suspect we might have the same problem for effects. [...] The previous preset still keeps going under your next preset. [...] when you change presets, you instantly hear one or the other preset or the next without hearing the previous one. [...] Let's say you have like a long pad note and you're in the middle of it. It continues in the middle of the note. [...] Look into how other DAWs do this and what the best algorithms are to keep everything light and snappy".
+
+### What changed for the user
+- **A preset change is a clean switch.** When the preset of an instrument changes while the song plays (menu, arrow buttons, undo, a new sample, a whole new instrument through Change), the old sound is gone within 13 to 19 ms: the notes that were already handed to the audio engine ahead of time, held notes, release tails, and the echo or reverb of the old sound in the delays and reverbs of that track. The new preset sounds from that same moment.
+- **Notes that are sounding are picked up.** A long pad that is in the middle of its note carries on with the new preset at once. A fast pattern keeps its timing: every note of the look-ahead is handed over again at its own time, none twice, none missing.
+- **The same when Play is pressed in the middle of a long note**, after a jump of the playhead (a jump is a stop and a start) and at the start of every loop round: the note sounds. Before, it stayed silent until its next start.
+- **Effects**: a preset change on Echo delay, Timeless delay, Reverb, Space reverb, Blur, Vector Delay, Bounce Delay or Resonator clears the memory of the effect; the old tail fades out in 8 ms. Other effects take the new settings as before, without a break. The Change browser's effect swap now fades the old effect out the same way (it was a hard switch in v0.183).
+- **Keys held on the keyboard** carry on with the new preset and still end when they are let go.
+- **The test note of a preset change is left out while the song plays** and the track's own notes were picked up (it used to play a C over the song).
+- **Settings, Audio system, Playback**: "Pick up notes that are already sounding" (on by default). Switched off, a note is only heard when the playhead passes its start; the clean switch stays.
+- While the loop is on, a note that began before the loop now ends at the loop end and is picked up again at the loop start (before, it rang on once through the loop and was then gone in every later round).
+- Fixed on the way (was there before): pressing Stop and then Play again within 0.4 s (which is what a jump of the playhead does) cleared away the first notes of the new playback 0.4 s later, for instruments made of browser nodes (Sampler, Growl, Grid, SFX, drums).
+
+### Part 1: what happened before (v0.183), measured
+Method: the track's own output is recorded on the audio thread together with a marker that jumps at the moment the preset menu gets its change event (the same path as a click on the menu or the arrows). From that moment the test swallows every new note, so all that is heard after the marker was started before the switch. "gone" = the last sample above -60 dB of the level before. Three cases: a note held for 30 s, a switch 100 ms into the release of a note, sixteenth notes.
+
+    instrument                     | switch                 | long note held | in the release | sixteenth notes
+    Saw lead (voice engine)        | def > bright           | over 2772 ms   | 581 ms         | 1215 ms
+    Soft pad (voice engine)        | def > swell            | 2819 ms        | 2732 ms        | 2817 ms
+    Strings (voice engine)         | def > slow             | 2816 ms        | 1481 ms        | 2317 ms
+    Plant (voice engine)           | lush > supersaw        | 2819 ms        | 2772 ms        | 2819 ms
+    Acid (voice engine)            | psy > rubber2          | 2819 ms        | 0 ms           | 676 ms
+    Wavetable (voice engine)       | init > supersaw        | 2819 ms        | 644 ms         | 1339 ms
+    Sampler, grains (al-grain)     | choir > cloud          | over 2726 ms   | 919 ms         | 1716 ms
+    Sampler, plain                 | choir > cloud          | 0 ms           | 1072 ms        | 1141 ms
+    Emit                           | spin > duo             | 2786 ms        | 1517 ms        | 2221 ms
+    Vector Grain                   | orbit > swarm          | 2786 ms        | 595 ms         | 1280 ms
+    Vector FM                      | glass > church         | 521 ms         | 2089 ms        | 2811 ms
+    Orbit                          | sun > comet            | 2786 ms        | 1791 ms        | 2522 ms
+    Venom                          | init > b_riddim        | over 2726 ms   | 229 ms         | 937 ms
+    Growl                          | yoi > wub              | 0 ms           | 0 ms           | 0 ms
+    Grid                           | basic > init           | 0 ms           | 797 ms         | 977 ms
+    SFX                            | riser > uplift         | 0 ms           | 0 ms           | 185 ms
+    Perc                           | marimba > vibes        | silent before  | 0 ms           | 909 ms
+    Drum kit                       | def > tight            | silent before  | silent before  | 214 ms
+    Snare (drum instrument)        | t909 > f808            | silent before  | silent before  | 154 ms
+    Hat (drum instrument)          | c909 > o909            | silent before  | silent before  | 25 ms
+    Soft pad (per-note nodes)      | def > swell            | silent before  | 2598 ms        | over 2726 ms
+    Plant (per-note nodes)         | lush > supersaw        | silent before  | 2728 ms        | 2810 ms
+    Wavetable (per-note nodes)     | init > supersaw        | silent before  | 634 ms         | 804 ms
+
+- "0 ms" in the first column for Sampler (plain), Growl, Grid and SFX: these are made of browser nodes and already had a re-voicing of held notes (`liveRevoice`, 12 ms fade). Everything on a voice engine had nothing: the note kept its old sound to its end, up to the whole recording.
+- "silent before": a drum or percussion hit is over long before the switch; with the voice engine switched off (not the default) a 30 s note is silent after about a second (the note cache, not looked into).
+- Effects, old tail after a preset change on the effect (a short phrase, then silence, then the switch):
+
+    Echo delay       | tape-dub-dub > tape-dub-spa | tail before the switch  -18.5 dB | old tail heard for over 2601 ms | biggest step at the switch 0.55, before 1.51
+    Timeless delay   | ambient-froz > ambient-dark | tail before the switch  -16.2 dB | old tail heard for over 2633 ms | biggest step at the switch 1.36, before 1.85
+    Reverb           | creative-inf > creative-sna | tail before the switch  -25.9 dB | old tail heard for 232 ms       | biggest step at the switch 0.20, before 0.39
+    Blur             | pad-ambient- > pad-crystal  | tail before the switch  -18.9 dB | old tail heard for 1801 ms      | biggest step at the switch 0.18, before 0.41
+    Space reverb     | wash         > small        | tail before the switch  -19.9 dB | old tail heard for 200 ms       | biggest step at the switch 0.53, before 0.90
+    Vector Delay     | comb         > chorus       | tail before the switch  -79.3 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00
+    Bounce Delay     | even         > marble       | tail before the switch  -14.3 dB | old tail heard for 786 ms       | biggest step at the switch 0.05, before 1.07
+    Resonator        | voc          > harsh        | tail before the switch -180.0 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00
+    Chorus           | metal        > psy          | tail before the switch -146.6 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00
+    Phaser           | deep-spacesh > gentle-subtl | tail before the switch -149.9 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00
+
+- Press Play inside a long note:
+    all 23 instruments: silent (-180 dB), measured at beat 20 of a note from 0 to 60
+
+### Part 2: how others do it
+- **Chasing notes** is a standard option. Logic Pro (Project settings, MIDI, Chase) sends a note-on for a note when playback starts between its start and its end, with extra switches for notes held by the sustain pedal and for drum and sample channels, where a sample started late would be out of step (read from Apple's page through a summary; the page says nothing about where a sample starts). Ableton Live has "Chase MIDI Notes" in the Options menu: starting in the middle of notes whose starts lie before the start point plays them (forum reports, some of them about cases where it failed; no official text read). Cubase has "Chase Events" in the MIDI preferences; its manual page could not be read in this run (the page is a stub that points to a 1.2 MB PDF), so nothing is claimed about it here.
+- All of these send a plain note-on, so the instrument starts the note from its attack and a sample from its beginning. AudioLab knows its own instruments, so it can do better where it is cheap: start the envelopes where they would be by now, and samples at the right spot.
+- **All notes off against all sound off** (MIDI controllers 123 and 120): as far as the MIDI standard is known to me, 123 lets go of the keys, so releases ring on, and 120 silences at once including releases and effects inside the instrument. This could not be confirmed from the two pages fetched for it (one returned a home page, the other only names 123). A preset switch that must not let the old sound ring needs the second kind, with a short fade so it does not click. That is what was built.
+- **Program changes in plug-ins**: no source read; the common ways are a short crossfade between the old and the new state or a fast fade of all voices. The cheapest that is exact to the sample here is a gain ramp on what the track's notes play into.
+- Sources: https://support.apple.com/guide/logicpro/lgcp621f927c/mac , https://forum.ableton.com/viewtopic.php?p=1744482 , https://steinberg.help/cubase_ai/v13/en/cubase_nuendo/topics/preferences/preferences_midi_r.html (not readable), https://www.sweetwater.com/sweetcare/articles/what-controller-number-midi-all-notes-off-midi-panic/
+
+### Part 3: how it is built (search "Clean switch and picking up notes" in index.html, before `askChoice`)
+- **One rule for all instruments, in one place: `chsTrack(t)`.** It is called from one wrapper of `changed()` when the instrument's signature changed (preset key, user preset, instrument kind, sample; `chsSig`), and from `chgRevoice` (the Change browser, whose own re-voicing code and note list were removed).
+  1. `chsWarm`: tables and samples the new sound needs are made first.
+  2. `chsCut`: the track gets a fresh input node. The new path is wired before the old one is taken away (a disconnect followed by a connect left one block of silence, measured). The old input goes through a gain that fades to zero in 4 ms, with everything that hangs on it: notes of the look-ahead, held notes, tails, clip chains. Nothing has to be tracked per note.
+  3. Voice engines (`al-poly`, `al-grain`, Emit, Vector Grain, Vector FM, Orbit): the engine that was playing stays on the old input and fades with it, exact to the sample; then it is emptied and kept as the track's spare, and the spare of last time takes over at once with its samples and tables still loaded. A message to an engine takes up to one output buffer to arrive, so telling the engine to stop was not exact enough (measured: 3 to 15 ms). The spare is made when Play is pressed, once per track (`chsSpare`); an engine with no voices does nothing in its loop. Venom cuts hard when told to stop and has effects inside, so it always gets a fresh engine, which is also kept ready.
+  4. Effects with memory on that track are replaced by fresh nodes (`chsFxOut`); the old node fades out in 5 ms into the place it played into, and that fade starts before the fresh node is built (a Reverb takes about 40 ms to build).
+  5. `chsResched`: the scheduler runs once more for this one track (`play.only`) from the moment of the cut to where it had got to (`play.sched`), with picking up switched on (`play.chs`). It also handles the 150 ms before a loop end, when the scheduler is already in the next round and the sound is not.
+  6. The fade of the old sound is set after the new notes have been handed over. Both are set one output buffer ahead (5 to 12 ms): a fade set at the present moment can already be over when the audio thread gets to it, which would be a hard cut, and a message to an engine needs that long. If handing over took longer than planned, the old sound stays until the new one is there.
+- **Picking up is one function: `chsNote`**, called from `schedule()` for every note that began before `from` and has not ended, when `play.chs` is set: after a clean switch, and whenever `schedule` is called with `first` (Play, which is also every jump, and the start of every loop round). Which engine does what:
+  - Made of browser nodes (Sampler plain, Growl, Grid, SFX, Perc, drum kit and drum instruments, and the basic synths, Plant and Wavetable when the voice engine is off): the note is built with its real start time inside `pastShim` (it existed for held notes since the preset feature), so envelopes are where they would be and samples continue at the right spot. A 4 ms fade-in.
+  - `al-poly` (basic synths, Plant, Acid, Wavetable): the note starts now with the length that is left, and the engine gets the age of the note (`q[8]`): amplitude envelope, filter envelope, FM envelope, the LFOs and the wavetable position start where they would be by now; the level is reached in 4 ms. The oscillators start fresh.
+  - `al-grain` (Sampler in grain mode): the same with `q[6]`, and the scan through the sample carries on from where it would be.
+  - Emit, Vector Grain, Vector FM, Orbit, Venom: the cheap way, the note starts now with the length that is left and its own attack.
+- **Effect presets**: `chsFxWatch` (in the same wrapper of `changed()`, before the rest of the change is worked through) compares `f.p.pre` of every effect with what it was; the kinds with memory are in `CHSMEM`. Master effects are covered too.
+- **No cost while nothing changes**: there is no timer and no per-note bookkeeping. `schedule()` has two extra comparisons per note. The v0.183 note list (every note pushed into a list while playing) is gone.
+- Direct edits outside the new block: `schedule()` (one track only, the chase hook, the loop end), the two worklets (the age of a note), `pvPlay` and `gvPlay` (the age travels with the note), `pastShim` (a source that would have ended already must not throw), `stop()` (the sweep fix), `chgSwap`.
+
+### Tested (headless Chromium, 2 cores, output buffer 10 ms; no page errors)
+`tools/engine-tests/preset_switch.py` (new), same method as part 1.
+
+**How long the old preset is heard after a switch, now** (before: the table in part 1):
+
+    instrument                     | switch                 | long note held | in the release | sixteenth notes
+    Saw lead (voice engine)        | def > bright           | 16 ms          | 13 ms          | 16 ms
+    Soft pad (voice engine)        | def > swell            | 16 ms          | 16 ms          | 16 ms
+    Strings (voice engine)         | def > slow             | 16 ms          | 16 ms          | 16 ms
+    Plant (voice engine)           | lush > supersaw        | 13 ms          | 16 ms          | 13 ms
+    Acid (voice engine)            | psy > rubber2          | 16 ms          | 0 ms           | 16 ms
+    Wavetable (voice engine)       | init > supersaw        | 16 ms          | 16 ms          | 19 ms
+    Sampler, grains (al-grain)     | choir > cloud          | 16 ms          | 16 ms          | 16 ms
+    Sampler, plain                 | choir > cloud          | 16 ms          | 16 ms          | 16 ms
+    Emit                           | spin > duo             | 16 ms          | 16 ms          | 16 ms
+    Vector Grain                   | orbit > swarm          | 16 ms          | 16 ms          | 16 ms
+    Vector FM                      | glass > church         | 16 ms          | 16 ms          | 19 ms
+    Orbit                          | sun > comet            | 16 ms          | 16 ms          | 16 ms
+    Venom                          | init > b_riddim        | 74 ms          | 16 ms          | 16 ms
+    Growl                          | yoi > wub              | 16 ms          | 10 ms          | 16 ms
+    Grid                           | basic > init           | 19 ms          | 16 ms          | 16 ms
+    SFX                            | riser > uplift         | 15 ms          | 0 ms           | 13 ms
+    Perc                           | marimba > vibes        | silent before  | 0 ms           | 16 ms
+    Drum kit                       | def > tight            | silent before  | silent before  | 16 ms
+    Snare (drum instrument)        | t909 > f808            | silent before  | silent before  | 16 ms
+    Hat (drum instrument)          | c909 > o909            | silent before  | silent before  | 15 ms
+    Soft pad (per-note nodes)      | def > swell            | 16 ms          | 13 ms          | 16 ms
+    Plant (per-note nodes)         | lush > supersaw        | 16 ms          | 16 ms          | 16 ms
+    Wavetable (per-note nodes)     | init > supersaw        | 16 ms          | 16 ms          | 16 ms
+    longest: 74 ms
+
+- Venom, 74 ms: the first time a Venom wavetable is used it has to be worked out (70 to 140 ms on this machine). The old sound stays for that time instead of a silence. The second switch to a preset with tables that exist: 16 ms.
+- 13 to 19 ms is the look-ahead of one output buffer (12 ms here) plus the 4 ms fade. On a machine with a smaller buffer it is shorter (5 ms plus 4 ms at the least).
+
+**A real switch inside a 30 s note: heard again within 50 ms, and no click** (biggest step from one sample to the next around the switch, against the steps of the sound before and after):
+
+    instrument                     | switch                 | level before | 20 to 50 ms after | 100 to 300 ms after | biggest step at the switch / in the sound before / after (per cent of full scale)
+    Saw lead (voice engine)        | def > bright           |  -27.2 dB |  -25.8 dB yes |  -29.9 dB | 4.92 / 4.92 / 8.67
+    Soft pad (voice engine)        | def > swell            |  -29.6 dB |  -26.9 dB yes |  -28.7 dB | 1.39 / 1.75 / 1.45
+    Strings (voice engine)         | def > slow             |  -29.0 dB |  -26.9 dB yes |  -30.1 dB | 2.54 / 3.41 / 2.87
+    Plant (voice engine)           | lush > supersaw        |  -28.0 dB |  -22.9 dB yes |  -25.0 dB | 6.13 / 2.65 / 8.30
+    Acid (voice engine)            | psy > rubber2          |  -20.9 dB |  -21.7 dB yes |  -21.7 dB | 5.18 / 5.19 / 0.56
+    Wavetable (voice engine)       | init > supersaw        |  -24.0 dB |  -26.6 dB yes |  -36.9 dB | 3.84 / 3.85 / 1.92
+    Sampler, grains (al-grain)     | choir > cloud          |  -30.9 dB |  -38.3 dB yes |  -26.7 dB | 1.35 / 2.59 / 2.70
+    Sampler, plain                 | choir > cloud          |  -19.0 dB |  -38.4 dB yes |  -26.7 dB | 5.20 / 4.99 / 2.70
+    Emit                           | spin > duo             |  -14.6 dB |  -23.8 dB yes |  -23.1 dB | 8.20 / 11.18 / 1.29
+    Vector Grain                   | orbit > swarm          |  -16.8 dB |  -28.1 dB yes |  -23.7 dB | 1.26 / 8.28 / 4.54
+    Vector FM                      | glass > church         |  -30.1 dB |  -16.6 dB yes |  -17.9 dB | 1.93 / 1.12 / 2.87
+    Orbit                          | sun > comet            |  -20.7 dB |  -16.3 dB yes |  -17.8 dB | 12.52 / 6.22 / 13.72
+    Venom                          | init > b_riddim        |  -16.8 dB |   -5.2 dB yes |   -4.8 dB | 23.76 / 16.82 / 60.28
+    Growl                          | yoi > wub              |  -15.4 dB |  -15.5 dB yes |  -14.4 dB | 3.88 / 6.45 / 23.57
+    Grid                           | basic > init           |  -31.1 dB |  -25.3 dB yes |  -25.4 dB | 2.09 / 2.09 / 0.28
+    SFX                            | riser > uplift         |  -66.5 dB |  -41.2 dB n/a |  -45.9 dB | 0.81 / 0.06 / 0.64
+    Perc                           | marimba > vibes        | -180.0 dB |  -51.4 dB n/a |  -54.2 dB | 0.02 / 0.00 / 0.02
+    Drum kit                       | def > tight            | -180.0 dB | -180.0 dB n/a | -180.0 dB | 0.00 / 0.00 / 0.00
+    Snare (drum instrument)        | t909 > f808            | -180.0 dB | -180.0 dB n/a | -180.0 dB | 0.00 / 0.00 / 0.00
+    Hat (drum instrument)          | c909 > o909            | -180.0 dB | -180.0 dB n/a | -180.0 dB | 0.00 / 0.00 / 0.00
+    Soft pad (per-note nodes)      | def > swell            |  -29.6 dB |  -27.0 dB yes |  -28.7 dB | 1.40 / 1.76 / 1.46
+    Plant (per-note nodes)         | lush > supersaw        |  -25.9 dB |  -23.4 dB yes |  -24.9 dB | 6.63 / 3.41 / 10.21
+    Wavetable (per-note nodes)     | init > supersaw        |  -24.0 dB |  -26.8 dB yes |  -36.6 dB | 3.84 / 3.85 / 1.84
+
+- Every instrument that was sounding sounds again in the window 20 to 50 ms after the switch. No step at the switch is larger than the steps of the sounds themselves (Venom's new preset has steps of 60 per cent by itself).
+- No hole (`chase_more.py`, case 6): the quietest 5 ms block around the switch is within 1 to 10 dB of the levels next to it for pad, strings, Plant, Wavetable, Acid, Venom, Orbit, Vector FM, Grid. In some runs one block dips by 10 to 20 dB on a voice engine (the message with the note arrived after its start time). The Sampler in grain mode has a real dip of about 10 ms when the new preset uses another sample (its grains fade in).
+- **Sixteenth notes across a switch** (the notes handed to the engine are logged with their times): all 23 instruments: 13 to 16 notes due after the switch, missing 0, sounding twice 0, off the grid by more than 2 ms 0.
+- **Press Play inside a long note** (at beat 3 of a note from 0 to 60, against what playing from the start gives at that spot):
+
+    Saw lead (voice engine)        | playing from the start, at that spot  -28.3 dB | Play pressed there: 20 to 50 ms after  -25.9 dB, 100 to 500 ms after  -28.5 dB | sounds
+    Soft pad (voice engine)        | playing from the start, at that spot  -29.2 dB | Play pressed there: 20 to 50 ms after  -28.2 dB, 100 to 500 ms after  -30.0 dB | sounds
+    Strings (voice engine)         | playing from the start, at that spot  -29.1 dB | Play pressed there: 20 to 50 ms after  -27.2 dB, 100 to 500 ms after  -29.1 dB | sounds
+    Plant (voice engine)           | playing from the start, at that spot  -29.1 dB | Play pressed there: 20 to 50 ms after  -23.5 dB, 100 to 500 ms after  -26.5 dB | sounds
+    Acid (voice engine)            | playing from the start, at that spot  -20.9 dB | Play pressed there: 20 to 50 ms after  -20.9 dB, 100 to 500 ms after  -20.9 dB | sounds
+    Wavetable (voice engine)       | playing from the start, at that spot  -24.0 dB | Play pressed there: 20 to 50 ms after  -24.1 dB, 100 to 500 ms after  -24.0 dB | sounds
+    Sampler, grains (al-grain)     | playing from the start, at that spot  -30.3 dB | Play pressed there: 20 to 50 ms after  -30.4 dB, 100 to 500 ms after  -31.3 dB | sounds
+    Sampler, plain                 | playing from the start, at that spot  -20.3 dB | Play pressed there: 20 to 50 ms after  -17.4 dB, 100 to 500 ms after  -20.3 dB | sounds
+    Emit                           | playing from the start, at that spot  -11.5 dB | Play pressed there: 20 to 50 ms after  -24.0 dB, 100 to 500 ms after  -18.9 dB | sounds
+    Vector Grain                   | playing from the start, at that spot  -15.6 dB | Play pressed there: 20 to 50 ms after  -20.9 dB, 100 to 500 ms after  -16.0 dB | sounds
+    Vector FM                      | playing from the start, at that spot  -44.5 dB | Play pressed there: 20 to 50 ms after  -18.2 dB, 100 to 500 ms after  -18.2 dB | sounds
+    Orbit                          | playing from the start, at that spot  -19.2 dB | Play pressed there: 20 to 50 ms after  -16.6 dB, 100 to 500 ms after  -17.6 dB | sounds
+    Venom                          | playing from the start, at that spot  -16.8 dB | Play pressed there: 20 to 50 ms after  -15.5 dB, 100 to 500 ms after  -16.6 dB | sounds
+    Growl                          | playing from the start, at that spot  -15.6 dB | Play pressed there: 20 to 50 ms after  -14.8 dB, 100 to 500 ms after  -15.6 dB | sounds
+    Grid                           | playing from the start, at that spot  -31.2 dB | Play pressed there: 20 to 50 ms after  -31.1 dB, 100 to 500 ms after  -31.1 dB | sounds
+    SFX                            | playing from the start, at that spot  -64.3 dB | Play pressed there: 20 to 50 ms after  -67.2 dB, 100 to 500 ms after  -63.8 dB | nothing to pick up
+    Perc                           | playing from the start, at that spot -180.0 dB | Play pressed there: 20 to 50 ms after -180.0 dB, 100 to 500 ms after -180.0 dB | nothing to pick up
+    Drum kit                       | playing from the start, at that spot -180.0 dB | Play pressed there: 20 to 50 ms after -180.0 dB, 100 to 500 ms after -180.0 dB | nothing to pick up
+    Snare (drum instrument)        | playing from the start, at that spot -180.0 dB | Play pressed there: 20 to 50 ms after -180.0 dB, 100 to 500 ms after -180.0 dB | nothing to pick up
+    Hat (drum instrument)          | playing from the start, at that spot -180.0 dB | Play pressed there: 20 to 50 ms after -180.0 dB, 100 to 500 ms after -180.0 dB | nothing to pick up
+    Soft pad (per-note nodes)      | playing from the start, at that spot  -28.9 dB | Play pressed there: 20 to 50 ms after  -28.2 dB, 100 to 500 ms after  -30.0 dB | sounds
+    Plant (per-note nodes)         | playing from the start, at that spot  -29.1 dB | Play pressed there: 20 to 50 ms after  -23.5 dB, 100 to 500 ms after  -26.5 dB | sounds
+    Wavetable (per-note nodes)     | playing from the start, at that spot  -24.0 dB | Play pressed there: 20 to 50 ms after  -24.1 dB, 100 to 500 ms after  -24.0 dB | sounds
+
+- **Effects, old tail after a preset change on the effect, now** (before: part 1):
+
+    Echo delay       | tape-dub-sel > tape-dub-lo- | tail before the switch  -24.3 dB | old tail heard for 8 ms         | biggest step at the switch 0.02, before 0.42 | the fresh effect took 2.7 ms to bui
+    Timeless delay   | ambient-froz > ambient-dark | tail before the switch  -15.1 dB | old tail heard for 8 ms         | biggest step at the switch 0.10, before 2.27 | the fresh effect took 1.6 ms to bui
+    Reverb           | creative-inf > creative-sna | tail before the switch  -26.5 dB | old tail heard for 8 ms         | biggest step at the switch 0.24, before 0.36 | the fresh effect took 41.9 ms to bu
+    Blur             | pad-ambient- > pad-crystal  | tail before the switch  -18.9 dB | old tail heard for 8 ms         | biggest step at the switch 0.09, before 0.41 | the fresh effect took 3.4 ms to bui
+    Space reverb     | wash         > small        | tail before the switch  -16.1 dB | old tail heard for 8 ms         | biggest step at the switch 0.62, before 1.24 | the fresh effect took 0.3 ms to bui
+    Vector Delay     | comb         > chorus       | tail before the switch  -93.8 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00 | the fresh effect took 0.7 ms to bu
+    Bounce Delay     | even         > marble       | tail before the switch  -15.3 dB | old tail heard for 8 ms         | biggest step at the switch 0.04, before 0.93 | the fresh effect took 0.3 ms to bui
+    Resonator        | voc          > harsh        | tail before the switch -180.0 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00 | the fresh effect took 2.7 ms to bu
+    Chorus           | metal        > psy          | tail before the switch -161.1 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00 | the fresh effect took 2.7 ms to bu
+    Phaser           | deep-spacesh > gentle-subtl | tail before the switch -135.2 dB | old tail heard for silent before | biggest step at the switch 0.00, before 0.00 | the fresh effect took 2.7 ms to bu
+
+- Vector Delay, Resonator, Chorus and Phaser had no tail to measure with the presets the test picked.
+- **More cases** (`tools/engine-tests/chase_more.py`, new):
+
+    1 loop pad (loop [4,8]): level per quarter second over 5.5 s (rounds wrap at 1.5 s and 3.5 s): -30 -30 -29 -29 -29 -29 -27 -28 -29 -29 -29 -29 -30 -30 -30 -31 -30 -30 -29 -29 -29 -29 | quietest 20 ms 
+    1 loop sampler (loop [4,8]): level per quarter second over 5.5 s (rounds wrap at 1.5 s and 3.5 s): -18 -21 -18 -21 -17 -21 -19 -22 -18 -21 -18 -21 -17 -21 -19 -22 -18 -21 -18 -21 -17 -21 | quietest 20
+    2 setting off: Play inside a long note: -180.0 dB (silent is right)
+    2 setting off: preset switch inside a long note: old sound gone after 16 ms, then -180.0 dB (silent is right: the note is not picked up)
+    3 held key on pad: before -28.9 dB, after the preset change -30.6 dB, after letting go -65.3 dB ok
+    3 held key on sampler: before -20.3 dB, after the preset change -30.4 dB, after letting go -88.0 dB ok
+    3 held key on venom: before -16.8 dB, after the preset change -5.7 dB, after letting go -180.0 dB ok
+    4 delay tail of the old preset after an instrument preset change: tail before -10.3 dB, gone after 7 ms
+    5 ten switches on a one second loop of sixteenth notes (1 of them in the last 150 ms of a round): notes that sound 74, missing 0, twice 0 [] []
+    6 quietest 5 ms block from 5 ms before to 60 ms after a switch inside a long note, against the level before and after
+      pad      before  -29.1 dB | quietest 5 ms  -33.0 dB | after  -29.3 dB
+      strings  before  -28.1 dB | quietest 5 ms  -29.2 dB | after  -29.0 dB
+      plant    before  -26.8 dB | quietest 5 ms  -33.3 dB | after  -25.7 dB
+      wtab     before  -24.1 dB | quietest 5 ms  -30.0 dB | after  -35.2 dB
+      acid     before  -20.9 dB | quietest 5 ms  -22.7 dB | after  -20.6 dB
+      sampler  before  -24.3 dB | quietest 5 ms -110.8 dB | after  -24.2 dB
+      venom    before  -16.8 dB | quietest 5 ms  -17.7 dB | after   -4.7 dB
+      orb      before  -20.7 dB | quietest 5 ms  -21.4 dB | after  -18.2 dB
+      vfm      before  -32.6 dB | quietest 5 ms  -36.1 dB | after  -17.8 dB
+      grid     before  -31.2 dB | quietest 5 ms  -31.9 dB | after  -25.4 dB
+    
+
+- **Exports unchanged** (`tools/engine-tests/export_same.py`, new, run on v0.183 and v0.184): Fractals Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96, solo), and the checksums of the samples are equal for Fractals Kick, Fractals Bass, a Saw, a Pad, an Acid, a Wavetable and a Venom clip. Plant, Sampler and Drum kit renders differ from run to run in v0.183 as well (random detune, grains, noise), so they prove nothing either way. `orbit.py` and `growl.py`: the same output on both versions apart from timings.
+- `tools/ui-tests/change_live.py`, `change_live_gap.py`, `design.py`: pass. The gap test of v0.183 now shows no silent block for 11 of 12 swaps; Orbit to Plant has one (see below).
+- The demo song, playing at bar 81: a preset change on each of its 24 instrument tracks, one after the other: the cut and the picking up take 1 to 32 ms of the page's time per switch (mostly 1 to 3 ms; the long ones are a first-time drum sample or an effect being built). Play from the same spot: the first scheduling round takes as long as before (7 to 31 ms against 4 to 31 ms).
+
+### Not done, or different from what one might expect
+- **Changing to another kind of instrument in the Change browser** can leave a hole of some milliseconds the first time (measured once: Orbit to Plant, one silent 5 ms block): the engine of the new kind has to be built. A second swap to that kind has none.
+- **Venom**: 70 to 140 ms of the old sound the first time a wavetable is used (above). Every Venom switch leaves the old engine behind, stopped and disconnected; they are not removed until the audio engine restarts.
+- **Emit, Vector Grain, Vector FM, Orbit and Venom start a picked up note with their attack**, not in the middle of their envelope. Their particles start fresh as well.
+- **The oscillators of a picked up note start fresh** on every engine, so the phase is not where it would have been. With a 4 ms crossfade this is not a click, but a slow beating between detuned oscillators starts over.
+- **A shared Space (Plant's reverb send on the master) is not cleared**: the old sound's reverb there rings out. Return tracks are not cleared either. Only the effects on the track itself.
+- A knob turn is not a preset change: held notes of a voice engine keep their old settings to their end, as before.
+- A drum hit is "picked up" only inside its note length, and then from the right spot of its sample.
+- **Each track with a voice engine now has two engines** after its first Play (one spare). Measured load of the demo while playing: the same within noise (27 to 33 per cent before and after on this machine).
+- With the voice engine switched off in the settings, notes longer than about a second are silent after that second, before and after this release. Not looked into.
+- The Cubase manual and the MIDI controller texts could not be read (part 2).
+
+### Not verified
+- **Nobody has heard it.** "Gone within 20 ms", "no click" and "no hole" rest on recorded numbers from a headless browser with a 10 ms output buffer, not on ears and not on a real sound card. On Windows with a large buffer (2048 samples) the times will be longer by about the buffer.
+- The Mac build, a real MIDI keyboard for the held keys, and projects with tempo changes inside a picked up note were not tried.
+- The switch in the 150 ms before a loop end was hit only once or twice in the test runs (no note missing, none twice).
+
+### Left
+- Envelope fast-forward for the particle instruments and Venom. A phase that carries on for the voice engine. Clearing the shared Space. Removing old Venom engines. Task E (CPU and background freeze). The browsers in the new look.
