@@ -793,6 +793,56 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 #fx{border-bottom:0!important;margin-bottom:-2px}
 #updCard{position:fixed;top:44px;right:12px;z-index:400;width:270px;padding:12px;border-radius:12px;background:rgba(22,24,30,.97);border:1px solid rgba(62,207,142,.45);box-shadow:0 14px 40px rgba(0,0,0,.6);font-size:12px;display:flex;flex-direction:column;gap:6px}#updCard[hidden]{display:none}#updCard small{color:#aab0bd;line-height:1.4}#updCard div{display:flex;gap:6px;justify-content:flex-end;margin-top:2px}#updCard button.pri{background:#3ecf8e;color:#04140c;border-color:#3ecf8e;font-weight:600}
 #fxglass{position:absolute;left:0;right:0;pointer-events:none;background:rgba(var(--gtr2),var(--ga));backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+/* mixer settings, master extras, fader designs (v0.159) */
+#mxsPop{position:fixed;z-index:9790;width:404px;max-width:calc(100vw - 16px);max-height:calc(100vh - 80px);overflow:auto;padding:12px 14px 14px;border-radius:14px;background:rgba(19,20,27,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.65);color:#d9dce6;font-size:12px}
+#mxsPop[hidden]{display:none}
+.mxsp h5{margin:12px 0 6px;font:700 9.5px Inter,system-ui,sans-serif;letter-spacing:.08em;color:#8d92a3;text-transform:uppercase}
+.mxsp .mxsh0{display:flex;align-items:center;gap:8px;margin:0 0 2px;font:700 13px Inter,system-ui,sans-serif;color:#eef1f6}.mxsp .mxsh0 button{margin-left:auto;width:26px;min-height:24px;padding:0;display:grid;place-items:center}
+.mxsp .mxsg{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
+.mxsp .mxst{display:flex;align-items:center;gap:7px;min-height:22px;cursor:pointer;color:#d3d7e0}.mxsp .mxst input{margin:0;accent-color:#4cc9f0;flex:none}
+.mxsp .mxsr{display:grid;grid-template-columns:118px 1fr 52px;align-items:center;gap:8px;min-height:24px;color:#d3d7e0}.mxsp .mxsr input[type=range]{width:100%;margin:0;accent-color:#4cc9f0}.mxsp .mxsr output{font:600 10.5px ui-monospace,Menlo,monospace;color:#e6e8ee;text-align:right}
+.mxsp .mxsr select{grid-column:2/4;height:24px;min-width:0;width:100%}
+.mxsp .mxsm{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}.mxsp .mxsm .mxsr{grid-template-columns:66px 1fr 0}.mxsp .mxsm .mxsr select{grid-column:2/3}
+.mxsp .fdg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mxsp .fdt{display:flex;flex-direction:column;align-items:center;gap:3px;height:auto;min-height:0;padding:5px 2px 4px;border-radius:9px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);box-shadow:none;cursor:pointer}
+.mxsp .fdt:hover{background:rgba(255,255,255,.07)}.mxsp .fdt.on{background:rgba(76,201,240,.16);border-color:#4cc9f0}
+.mxsp .fdt span{font:600 9.5px Inter,system-ui,sans-serif;color:#cfd3dc;line-height:1.15;text-align:center;white-space:nowrap}.mxsp .fdt span b{color:#7d8292;font-weight:600;margin-right:3px}
+.fdp{position:relative;width:46px;height:84px;overflow:hidden;border-radius:6px;background:#0b0c11;pointer-events:none;--c:#4cc9f0}
+.fdp .mxf{display:block}.fdp .mxf .fwrap{position:absolute;left:-20px;top:0;height:84px;width:62px}
+.mxsp .mxsmore{margin-top:12px;width:100%;justify-content:center}
+.mxsp .hint{margin:4px 0 0;font-size:10.5px;color:#8b8f9c;line-height:1.4}
+#mxsSet{padding:10px 12px 12px;border-radius:10px;background:rgba(6,7,10,.74);border:1px solid rgba(255,255,255,.08);margin:6px 0 14px}#mxsSet h5:first-child{margin-top:0}#mxsSet .fdg{grid-template-columns:repeat(auto-fill,minmax(74px,1fr))}
+/* what the strips show */
+#mixWin.mxnofx .mx .mxi{display:none!important}
+#mixWin.mxnosnd .mx .mxsnd,#mixWin.mxcmp .mx .mxsnd{display:none!important}
+#mixWin.mxnov .mx .mxv{display:none!important}#mixWin.mxnov .mx.master .mxvw{flex:none!important;min-height:0!important}
+#mixWin.mxnov .mx .mxf{flex:1 1 auto!important;min-height:0}#mixWin.mxnov .mx .mxf .fwrap{height:auto!important;flex:1 1 60px;min-height:60px}
+#mixWin.mxnov .mxs.nobgm .fm{display:flex}
+#mixWin.mxnopan .mx .mxp{display:none!important}
+#mixWin.mxnobtn .mx:not(.master) .mxb{display:none!important}
+#mixWin.mxnonum .mx .mxn b{display:none}
+#mixWin.mxnosc .mx .fsc{display:none!important}
+#mixWin.mxnosc .mx .mxf .fm,#mixWin.mxnosc .mx .mxf .fv,#mixWin.mxcmp .mx:not(.master) .mxf .fm,#mixWin.mxcmp .mx:not(.master) .mxf .fv{transform:translateX(-12px)}
+#mixWin.mxnoval .mx .mxf output{display:none!important}
+.mxpkr{display:none;font:600 9px ui-monospace,Menlo,monospace;color:#9aa0ad;cursor:pointer;line-height:1;font-variant-numeric:tabular-nums}.mxpkr.ov{color:#ff6b6b}#mixWin.mxshowpk .mxpkr{display:block}
+#mixWin.mxgb .mx.gm{box-shadow:inset 0 3px 0 var(--gc)!important}
+#mixWin.mxnolu .mx.master .mxlu{display:none!important}
+/* master strip extras */
+.mxme{display:flex;flex-direction:column;gap:3px;flex:none}.mxme:empty{display:none}
+.mxme>div{padding:2px 5px 3px;border-radius:5px;background:rgba(6,7,10,.5);border:1px solid rgba(255,255,255,.06);cursor:pointer}
+.mxme .mxmh{display:flex;align-items:baseline;justify-content:space-between;gap:4px;white-space:nowrap}.mxme small{font:600 7.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad;text-transform:uppercase}.mxme b{font:600 10px ui-monospace,Menlo,monospace;color:#eef1f6;font-variant-numeric:tabular-nums}
+.mxme .mxtp.ov b{color:#ff6b6b}.mxme .mxtp.near b{color:#f5c84c}
+.mxme .mxbar{position:relative;height:5px;margin-top:3px;border-radius:3px;background:#181a21}
+.mxme .mxtg .mxbar i{position:absolute;top:0;bottom:0;left:61.1%;width:11.2%;background:rgba(62,207,142,.45);border-radius:1px}
+.mxme .mxtg .mxbar u{position:absolute;top:-2px;bottom:-2px;left:66.7%;width:1px;background:rgba(255,255,255,.55)}
+.mxme .mxbar em{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1.5px;border-radius:1px;background:#e8ecf4;left:0;display:none}
+.mxme .mxtg.ok b,.mxme .mxtg.ok em{color:#6fe6ae}.mxme .mxtg.ok em{background:#3ecf8e}.mxme .mxtg.hot b{color:#f5c84c}.mxme .mxtg.hot em{background:#f5c84c}.mxme .mxtg.over b{color:#ff8a8a}.mxme .mxtg.over em{background:#ff6b6b}
+.mxme .mxco .mxbar i{position:absolute;top:0;bottom:0;left:50%;width:0;background:#3ecf8e;border-radius:1px}.mxme .mxco.neg .mxbar i{background:#ff4d6d}.mxme .mxco.neg b{color:#ff8a8a}
+.mxme .mxco .mxbar u{position:absolute;top:-1px;bottom:-1px;left:50%;width:1px;background:rgba(255,255,255,.35)}
+.mxme .mxsc{display:flex;justify-content:space-between;margin-top:2px;font:600 7px ui-monospace,Menlo,monospace;color:#6f7482;line-height:1}
+#mixWin.mxnotp .mxme .mxtp,#mixWin.mxnotgt .mxme .mxtg,#mixWin.mxnocorr .mxme .mxco{display:none}
+
+.mx.master .mxvw{min-height:62px!important}#mixWin.mxnov .mx.master .mxvw{min-height:0!important}.mx.master.mxtight .mxme{display:none}.mx>.mxn{flex:none!important}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4947,7 +4997,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.158',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.159',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8288,6 +8338,113 @@ function updCard(v,notes){let c=document.getElementById('updCard');if(!c){c=docu
 function fxGlassSync(){const fx=document.getElementById('fx');if(!fx||!fx.parentElement)return;let g=document.getElementById('fxglass');if(!g){g=document.createElement('div');g.id='fxglass';g.setAttribute('aria-hidden','true');fx.parentElement.insertBefore(g,fx)}
   const h=fx.offsetHeight,k=fx.offsetTop+'|'+h+'|'+fx.offsetLeft+'|'+fx.offsetWidth;if(g._k===k)return;g._k=k;g.style.display=h>4?'':'none';g.style.top=fx.offsetTop+'px';g.style.height=Math.max(0,h-2)+'px'}
 setTimeout(()=>{try{fxGlassSync();new ResizeObserver(fxGlassSync).observe(document.getElementById('fx'));setInterval(()=>{if(!document.hidden)fxGlassSync()},500)}catch(e){}},200);
+/* ---------- mixer settings, master strip extras, fader designs (v0.159) ----------
+   One settings object (UI.mxs, defaults in MXSD) edited from two places that stay in sync: the settings button in the mixer's tab (#mxSetB opens #mxsPop)
+   and Settings > Layout > Mixer (#mxsSet). Every control carries data-mxs (a UI.mxs key), data-mxm (a UI.mtr key) or data-fd (a fader design number). */
+const MXSD={w:96,mw:136,fh:0,fx:1,snd:1,view:1,pan:1,btn:1,num:1,sc:1,val:1,pkr:0,gband:0,fd:1,mLu:1,mTp:1,mTgt:1,mCorr:1};
+const mxsO=()=>Object.assign({},MXSD,UI.mxs||{});
+const fdLn=(h,c)=>`linear-gradient(transparent ${h/2-1}px,${c} ${h/2-1}px,${c} ${h/2+1}px,transparent ${h/2+1}px)`;
+const fdCap=(w,h,r,bg,sh,fw)=>`§ .fv i::after{left:${((fw||34)-w)/2}px!important;right:${((fw||34)-w)/2}px!important;top:${-h/2}px!important;height:${h}px!important;border-radius:${r}!important;background:${bg}!important;box-shadow:${sh}!important}§ .fv:hover i::after,§ .fv.act i::after{filter:brightness(1.15)}`;
+const fdGr=(w,css)=>`§ .fv::before{width:${w}px;margin-left:${-w/2}px;${css||''}}`;
+const fdFill=(w,css)=>`§ .fv i::before{width:${w}px!important;margin-left:${-w/2}px;${css||''}}`;
+const fdBar=(l,w,bw,css)=>`§ .fm{left:${l}px;width:${w}px}§ .fm u{width:${bw}px;${css||''}}§ .fm s{width:${bw}px}`;
+const fdSeg=(bw,on,gap)=>{const m=`repeating-linear-gradient(to top,#000 0 ${on}px,transparent ${on}px ${on+gap}px)`,d=`repeating-linear-gradient(to top,rgba(255,255,255,.09) 0 ${on}px,transparent ${on}px ${on+gap}px)`;return`§ .fm u{-webkit-mask-image:${m};mask-image:${m}}§ .fm{background:${d} left/${bw}px 100% no-repeat,${d} right/${bw}px 100% no-repeat}`};
+const FDSH='0 3px 7px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.4)';
+/* the 15 fader and level-meter designs; number 1 is the look the mixer always had. § stands for the scope (".fdN .mxf"), GRAD and STEPS for the meter colours in use */
+const FDS=[
+ {n:'Classic',css:''},
+ {n:'Console',css:`§ .fv{left:20px;width:28px!important}`+fdGr(6,'background:#030304;box-shadow:inset 0 1px 3px #000,0 0 0 1px rgba(255,255,255,.1)')+fdFill(2,'opacity:.55')+fdCap(20,32,'3px',`${fdLn(32,'#16181d')},repeating-linear-gradient(rgba(0,0,0,.16) 0 1px,transparent 1px 4px),linear-gradient(#f3f4f7,#b9bcc6 45%,#8e919b 55%,#d1d3da)`,'0 4px 8px rgba(0,0,0,.8),inset 0 1px 0 #fff,inset 0 -1px 0 rgba(0,0,0,.45)',28)+fdBar(49,12,5,'opacity:1!important;border-radius:0')+fdSeg(5,4,1)+`§ .fsc span::after{width:6px}`},
+ {n:'LED ladder',css:fdBar(30,26,6,'opacity:1!important;border-radius:0')+fdSeg(6,3,1)+fdGr(4)+fdCap(26,14,'2px',`${fdLn(14,'#ff4d4d')},linear-gradient(#2c2e36,#0b0c0f)`,FDSH)},
+ {n:'Dots',css:fdBar(31,24,5,'opacity:1!important;-webkit-mask:radial-gradient(circle,#000 2px,transparent 2.5px) center bottom/5px 6px repeat-y;mask:radial-gradient(circle,#000 2px,transparent 2.5px) center bottom/5px 6px repeat-y')+`§ .fm{background:radial-gradient(circle,rgba(255,255,255,.1) 2px,transparent 2.5px) left bottom/5px 6px repeat-y,radial-gradient(circle,rgba(255,255,255,.1) 2px,transparent 2.5px) right bottom/5px 6px repeat-y}§ .fm s{height:2px;border-radius:1px}`+fdGr(3)+fdFill(3)+fdCap(20,20,'50%',`${fdLn(20,'#15171c')},radial-gradient(circle at 35% 28%,#fff,#b9bdc7 45%,#6c707b)`,'0 3px 7px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.35)')},
+ {n:'Hairline',css:fdBar(34,18,2,'opacity:1!important;border-radius:0')+`§ .fm s{height:2px}`+fdGr(1,'background:rgba(255,255,255,.22);box-shadow:none')+fdFill(1,'opacity:1')+fdCap(30,5,'2px','#f2f4f8','0 1px 4px rgba(0,0,0,.85)')+`§ .fsc span{color:#5d616d}`},
+ {n:'Glass',css:fdBar(28,30,7,'opacity:.95!important;border-radius:4px')+fdGr(6,'background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);border-radius:3px')+fdFill(6,'opacity:.45;border-radius:3px')+fdCap(26,22,'11px',`${fdLn(22,'rgba(255,255,255,.92)')},linear-gradient(rgba(255,255,255,.36),rgba(255,255,255,.1))`,'0 4px 10px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.45),inset 0 1px 0 rgba(255,255,255,.7)')},
+ {n:'Flat bars',css:fdBar(31,20,9,'opacity:1!important;border-radius:0')+`§ .fm{background:linear-gradient(#15171d,#15171d) left/9px 100% no-repeat,linear-gradient(#15171d,#15171d) right/9px 100% no-repeat}§ .fv::before{display:none}§ .fv i::before{left:3px!important;width:24px!important;margin-left:0;top:-1px!important;height:2px!important;bottom:auto;background:#f2f4f8!important;opacity:1;border-radius:0;z-index:1!important}§ .fv i::after{left:26px!important;right:0!important;top:-6px!important;height:12px!important;border-radius:0!important;background:#f2f4f8!important;box-shadow:none!important;clip-path:polygon(0 50%,100% 0,100% 100%)}`},
+ {n:'Zones',css:fdBar(30,26,6,'opacity:1!important;border-radius:0;background:STEPS!important')+fdGr(4)+fdCap(24,16,'2px',`${fdLn(16,'#1b1d22')},repeating-linear-gradient(rgba(0,0,0,.2) 0 1px,transparent 1px 3px),linear-gradient(#e2e5ea,#8f939d)`,FDSH)},
+ {n:'Level colour',dyn:1,css:fdBar(29,28,7,'opacity:1!important;border-radius:3px')+fdGr(4)+fdCap(26,16,'5px',`${fdLn(16,'var(--c)')},linear-gradient(#3c3f48,#1c1e24)`,FDSH)},
+ {n:'Neon',css:fdBar(33,20,3,'opacity:1!important;border-radius:2px')+fdGr(2,'background:rgba(255,255,255,.12);box-shadow:none')+fdFill(2,'opacity:1;box-shadow:0 0 6px var(--c)')+fdCap(28,12,'6px','rgba(10,11,15,.88)','0 0 0 1.5px var(--c),0 0 10px var(--c),inset 0 0 6px color-mix(in srgb,var(--c) 50%,transparent)')},
+ {n:'Vintage',css:fdBar(30,26,6,'opacity:1!important;border-radius:0')+fdSeg(6,5,2)+fdGr(6,'background:#050505;box-shadow:0 0 0 1px #8a744a')+fdFill(2,'opacity:.4')+fdCap(22,24,'3px',`${fdLn(24,'#c0392b')},linear-gradient(#f5ecd4,#dccea9 50%,#bdac82)`,'0 4px 8px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.8),inset 0 -1px 0 rgba(0,0,0,.35)')+`§ .fsc span{color:#b7a57c}§ .fsc span::after{background:#8a744a;width:6px}`},
+ {n:'In the groove',css:fdBar(37,12,5,'opacity:1!important;border-radius:0')+`§ .fm{background:#06070a;box-shadow:0 0 0 2px #06070a,0 0 0 3px rgba(255,255,255,.12)}`+fdGr(4,'background:none;box-shadow:none')+fdFill(2,'opacity:0')+fdCap(28,14,'4px','transparent','inset 0 0 0 2px #eef1f6,0 2px 6px rgba(0,0,0,.7)')},
+ {n:'Big blocks',css:fdBar(28,30,9,'opacity:1!important;border-radius:1px')+fdSeg(9,7,2)+fdGr(4)+fdCap(14,34,'3px',`${fdLn(34,'#111318')},linear-gradient(90deg,#8d9099,#f4f5f8 45%,#c9ccd3 60%,#7f828c)`,FDSH)},
+ {n:'Rails',css:fdBar(26,34,3,'opacity:1!important;border-radius:0')+`§ .fm{background:repeating-linear-gradient(to top,rgba(255,255,255,.17) 0 1px,transparent 1px 8px) center/16px 100% no-repeat}`+fdGr(2)+fdFill(2)+fdCap(12,28,'2px',`${fdLn(28,'#fff')},linear-gradient(#5e616b,#212329)`,FDSH)},
+ {n:'Line and dot',css:fdBar(32,22,3,'opacity:1!important;border-radius:0;-webkit-mask-image:repeating-linear-gradient(to top,#000 0 2px,transparent 2px 4px);mask-image:repeating-linear-gradient(to top,#000 0 2px,transparent 2px 4px)')+fdGr(4,'background:rgba(255,255,255,.08);box-shadow:none')+fdFill(4,'opacity:1')+fdCap(14,14,'50%','radial-gradient(circle,#fff 3px,#101217 3.6px)','0 0 0 2px var(--c),0 2px 6px rgba(0,0,0,.7)')}];
+function fdCssUp(force){const k=mtrO().col;if(!force&&fdCssUp.k===k)return;fdCssUp.k=k;const L=lvStops(),P=L.map(([d])=>dbN(d)*100),
+  grad='linear-gradient(to top,'+L.map(([d,c],i)=>c+' '+P[i].toFixed(1)+'%').join(',')+')',steps='linear-gradient(to top,'+L.map(([d,c],i)=>c+' '+P[i].toFixed(1)+'%,'+c+' '+(i<L.length-1?P[i+1]:100).toFixed(1)+'%').join(',')+')';
+  let st=document.getElementById('fdCss');if(!st){st=document.createElement('style');st.id='fdCss';document.head.appendChild(st)}
+  st.textContent=FDS.map((d,i)=>d.css.replace(/§/g,'.fd'+(i+1)+' .mxf').replace(/STEPS/g,steps).replace(/GRAD/g,grad)).join('\n');
+  for(const u of document.querySelectorAll('.fdp.fd9 .fm u'))u.style.setProperty('background',mcolAt(-7),'important')}
+const fdPrev=n=>`<div class="fdp fd${n}"><div class="mxf"><div class="fwrap"><div class="fm"><u style="clip-path:inset(26% 0 0 0)"></u><u style="clip-path:inset(38% 0 0 0)"></u><s style="left:0;bottom:83%;display:block"></s><s style="right:0;bottom:70%;display:block"></s></div><div class="fv"><i style="height:58%"></i></div></div></div></div>`;
+const MXSM={spd:['Speed',[['instant','Instant'],['fast','Fast'],['normal','Normal'],['smooth','Smooth']]],alg:['Reading',[['peak','Peak'],['rms','RMS'],['vu','VU'],['lufs','Loudness']]],hold:['Peak hold',[['0','Off'],['1','1 second'],['3','3 seconds'],['99','Until reset']]],col:['Colours',[['classic','Classic'],['heat','Heat'],['ice','Ice'],['mono','Mono']]]};
+function mxsHtml(adv){const tg=(k,l,tip)=>`<label class="mxst" title="${esc(tip)}"><input type="checkbox" data-mxs="${k}"><span>${l}</span></label>`,
+  rg=(k,l,a,b,s,tip)=>`<label class="mxsr" title="${esc(tip)}"><span>${l}</span><input type="range" data-mxs="${k}" min="${a}" max="${b}" step="${s}"><output></output></label>`;
+  return(adv?'':`<div class="mxsh0">Mixer settings<button type="button" data-mxsx="1" aria-label="Close" title="Close">✕</button></div>`)+
+  `<h5>Channels</h5><div class="mxsg">${tg('compact','Compact channels','Thin strips with only the name, level and fader, so more channels fit')}${adv?tg('num','Channel number','The number in front of each channel name'):''}</div>
+${rg('w','Strip width',64,170,2,'How wide each channel is. Compact channels have their own fixed width. Double-click to reset.')}${adv?rg('mw','Master strip width',110,240,2,'How wide the master channel is. Double-click to reset.')+rg('fh','Fader height',76,320,4,'How tall the faders are. All the way left is automatic: the faders use the room the window gives them. Double-click to reset.'):''}
+<h5>Each channel shows</h5><div class="mxsg">${tg('fx','Effect slots','The list of the instrument and effects on each channel')}${tg('snd','Sends','The send amounts to return channels')}${tg('view','Picture','The waveform, spectrum, meters or stereo picture above the fader')}${tg('pan','Pan','The pan control under the fader')}${tg('btn','Mute, solo, record','The buttons at the bottom of each channel')}${tg('sc','dB scale','The numbers beside the fader')}${tg('val','Volume number','The fader setting in dB under the fader')}${adv?tg('pkr','Highest peak','The loudest peak each channel has reached, under the fader. Click a number to reset it, Shift and click to reset all.')+tg('gband','Group colour band','A second colour band on channels that belong to a group, in the colour of the group'):''}</div>
+<h5>Master shows</h5><div class="mxsg">${tg('mLu','Loudness and peak','Short-term loudness in LUFS and the highest sample peak')}${tg('mTp','True peak','The highest true peak, which is what streaming services check')}${tg('mTgt','Loudness target','How far the mix is from the loudness target you chose')}${tg('mCorr','Stereo correlation','How alike left and right are: +1 is mono, 0 is very wide, below 0 can vanish in mono')}</div>
+<h5>Level meters</h5><div class="mxsm">${Object.entries(MXSM).map(([k,[l,os]])=>`<label class="mxsr" title="The same setting as Settings, Layout, Level meters. It applies to every meter in AudioLab."><span>${l}</span><select data-mxm="${k}">${os.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`).join('')}</div>
+<h5>Fader and meter design</h5><div class="fdg">${FDS.map((d,i)=>`<button type="button" class="fdt" data-fd="${i+1}" title="${esc(d.n)}: click to use this fader and meter design in the mixer">${fdPrev(i+1)}<span><b>${i+1}</b>${esc(d.n)}</span></button>`).join('')}</div>`+
+  (adv?`<p class="hint">These are the same settings as the settings button at the top right of the mixer. Change them in either place.</p>`:`<button type="button" class="mxsmore" data-mxsmore="1" title="Open Settings, Layout, where the mixer has more settings">More mixer settings…</button>`)}
+function mxsSync(){const o=mxsO(),m=mtrO();for(const el of document.querySelectorAll('[data-mxs]')){const k=el.dataset.mxs;if(el.type==='checkbox')el.checked=k==='compact'?!!UI.mxCompact:!!o[k];else{const v=k==='fh'?(o.fh||76):o[k];if(document.activeElement!==el||+el.value!==v)el.value=v;const out=el.parentElement.querySelector('output');if(out)out.textContent=k==='fh'&&!o.fh?'Auto':v+' px'}}
+  for(const el of document.querySelectorAll('[data-mxm]'))el.value=String(m[el.dataset.mxm]);
+  for(const el of document.querySelectorAll('[data-fd]'))el.classList.toggle('on',+el.dataset.fd===o.fd);
+  const cb=document.getElementById('mxCmp');if(cb)cb.classList.toggle('on',!!UI.mxCompact)}
+function mxsApply(){const o=mxsO(),w=document.getElementById('mixWin');fdCssUp();let st=document.getElementById('mxsCss');if(!st){st=document.createElement('style');st.id='mxsCss';document.head.appendChild(st)}
+  const css=`#mixWin .mx:not(.master){width:${o.w}px!important}#mixWin .mx.master{width:${o.mw}px!important}`;if(st.textContent!==css)st.textContent=css;if(!w)return;
+  const C={mxcmp:!!UI.mxCompact,mxnofx:!o.fx,mxnosnd:!o.snd,mxnov:!o.view,mxnopan:!o.pan,mxnobtn:!o.btn,mxnonum:!o.num,mxnosc:!o.sc,mxnoval:!o.val,mxshowpk:!!o.pkr,mxgb:!!o.gband,mxnolu:!o.mLu,mxnotp:!o.mTp,mxnotgt:!o.mTgt,mxnocorr:!o.mCorr};
+  for(const k in C)w.classList.toggle(k,C[k]);for(let i=1;i<=FDS.length;i++)w.classList.toggle('fd'+i,o.fd===i);
+  if(w._fd!==o.fd){w._fd=o.fd;for(const u of w.querySelectorAll('.fm u')){u.style.removeProperty('background');u._dc=null}}}
+function mxsSet(k,v){if(k==='compact'){UI.mxCompact=!!v}else UI.mxs=Object.assign({},UI.mxs||{},{[k]:v});saveUI();mxsApply();mxsSync();try{mxFit();mxAutoW()}catch(e){}dirty=true}
+function mxsFit(){const o=mxsO(),w=document.getElementById('mixWin');if(!w||w.hidden)return;const ms=w.querySelector('.mxs');if(!ms)return;
+  if(o.fh&&o.view){const p=ms.querySelector('.mx:not(.master)')||ms.querySelector('.mx'),cv=p&&p.querySelector('.mxv'),fw=p&&p.querySelector('.fwrap');if(cv&&fw)ms.style.setProperty('--fh',Math.round(clamp(o.fh,64,Math.max(64,fw.offsetHeight+cv.offsetHeight-40)))+'px')}
+  /* the master has more above its fader (read-outs and the master extras): if it would not fit, every fader gets shorter by the missing room so they stay the same height */
+  const M=ms.querySelector('.mx.master'),fw=M&&M.querySelector('.fwrap'),vw=M&&M.querySelector('.mxvw');if(!fw)return;const need=Math.max(0,M.scrollHeight-M.clientHeight)+Math.max(0,(o.view?40:0)-(vw?vw.offsetHeight:0));
+  M.classList.remove('mxtight');if(need>0)ms.style.setProperty('--fh',Math.max(60,fw.offsetHeight-need)+'px');
+  /* still too tight (a very small window): leave out the master extras rather than squeezing them under the picture */
+  if(M.scrollHeight-M.clientHeight>1)M.classList.add('mxtight')}
+{const _mf=mxFit;mxFit=function(){const r=_mf.apply(this,arguments);try{mxsFit()}catch(e){}return r}}
+function mxsPop(){let p=document.getElementById('mxsPop');const b=document.getElementById('mxSetB');if(p&&!p.hidden){p.hidden=true;if(b)b.classList.remove('on');return}
+  if(!p){p=document.createElement('div');p.id='mxsPop';p.className='mxsp';p.innerHTML=mxsHtml(false);document.body.appendChild(p);
+    document.addEventListener('pointerdown',e=>{if(!p.hidden&&!p.contains(e.target)&&!(e.target.closest&&e.target.closest('#mxSetB'))){p.hidden=true;const b2=document.getElementById('mxSetB');if(b2)b2.classList.remove('on')}},true);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!p.hidden){p.hidden=true;const b2=document.getElementById('mxSetB');if(b2)b2.classList.remove('on')}})}
+  p.hidden=false;if(b)b.classList.add('on');fdCssUp(true);mxsSync();p.style.left='100px';p.style.top='100px';const r0=p.getBoundingClientRect(),zf=r0.left>0?r0.left/100:1,r=b?b.getBoundingClientRect():{right:innerWidth-20,bottom:60,top:30};
+  let y=r.bottom+6;if(y+r0.height>innerHeight-6)y=Math.max(6,innerHeight-r0.height-6);p.style.left=clamp(r.right-r0.width,6,innerWidth-r0.width-6)/zf+'px';p.style.top=y/zf+'px'}
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;if(el.dataset.mxs&&el.type==='checkbox')mxsSet(el.dataset.mxs,el.checked?1:0);else if(el.dataset.mxm){UI.mtr=Object.assign({},UI.mtr||{},{[el.dataset.mxm]:el.value});saveUI();try{mtrUI()}catch(x){}fdCssUp();mxsSync();dirty=true}});
+document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||!el.dataset.mxs||el.type!=='range')return;const k=el.dataset.mxs,v=+el.value;mxsSet(k,k==='fh'&&v<=76?0:v)});
+document.addEventListener('dblclick',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.mxs&&el.type==='range')mxsSet(el.dataset.mxs,MXSD[el.dataset.mxs])});
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;const f=t.closest('[data-fd]');if(f){mxsSet('fd',+f.dataset.fd);return}
+  if(t.closest('#mxSetB')){mxsPop();return}if(t.closest('[data-mxsx]')){mxsPop();return}
+  if(t.closest('[data-mxsmore]')){mxsPop();openSettings('layout');setTimeout(()=>{const s=document.getElementById('mxsSet');if(s)s.scrollIntoView({block:'start'})},60);return}
+  if(t.closest('#mxCmp')){setTimeout(()=>{mxsApply();mxsSync()},0);return}
+  const pk=t.closest('.mxpkr');if(pk){if(e.shiftKey)for(const h of MXH.values())h.pkm=0;else{const h=MXH.get(pk.dataset.pk);if(h)h.pkm=0}return}
+  const me=t.closest('.mxme>div');if(me){if(me.classList.contains('mxtp')){LM.tpMax=-90;mxsMaster()}else if(me.classList.contains('mxtg')){const r=me.getBoundingClientRect();openMenu(r.left,r.bottom+4,[{head:'Loudness target'},...LMT.map(x=>({label:x[1],sub:x[2]+' LUFS, peaks under '+x[3]+' dBTP',check:x[0]===lmTarget()[0],act:()=>{UI.lufsP=x[0];saveUI();const s=document.getElementById('lmSel');if(s)s.value=x[0];try{lmPaint()}catch(x2){}mxsMaster()}}))])}}});
+/* master strip: true peak, loudness target and stereo correlation */
+const MXCB=[new Float32Array(1024),new Float32Array(1024)];let MXCO=null,MXPKE=[];
+function mxsMount(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const fx=w.querySelector('.fwx');
+  if(fx&&!fx.querySelector('#mxSetB')){const cb=fx.querySelector('#mxCmp');const h='<button class="mvi mvspo" id="mxSetB" title="Mixer settings: what the channels show, their size, the level meters and the fader design" aria-label="Mixer settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>';if(cb)cb.insertAdjacentHTML('afterend',h);else fx.insertAdjacentHTML('beforeend',h)}
+  const ms=w.querySelector('.mx.master');if(ms&&!ms.querySelector('.mxme')){const vw=ms.querySelector('.mxvw');if(vw)vw.insertAdjacentHTML('afterend',`<div class="mxme"><div class="mxtp" title="True peak: the highest peak between the samples since you last reset it. Streaming services want it under the limit of your loudness target. Click to reset."><div class="mxmh"><small>True peak</small><span><b>–</b> <small>dBTP</small></span></div></div><div class="mxtg" title="Loudness target: the marker shows the short-term loudness of the mix, the line is your target and the green band is within 1 LU of it. Click to choose another target."><div class="mxmh"><small>Target</small><b>–</b></div><div class="mxbar"><i></i><u></u><em></em></div></div><div class="mxco" title="Stereo correlation: +1 means left and right are the same (mono), 0 is very wide, and below 0 parts of the sound cancel when the mix is played in mono."><div class="mxmh"><small>Stereo</small><b>–</b></div><div class="mxbar"><i></i><u></u><em></em></div><div class="mxsc"><span>-1</span><span>0</span><span>+1</span></div></div></div>`)}
+  for(const mx of w.querySelectorAll('.mx[data-id]')){const f=mx.querySelector('.mxf');if(f&&!f.querySelector('.mxpkr'))f.insertAdjacentHTML('beforeend',`<small class="mxpkr" data-pk="${mx.dataset.id}" title="Highest peak of this channel in dB. Click to reset, Shift and click to reset all.">–</small>`)}
+  MXPKE=[...w.querySelectorAll('.mxpkr')];mxsApply();mxsMaster()}
+function mxsMaster(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const me=w.querySelector('.mxme');if(!me)return;const o=mxsO(),T=lmTarget();
+  if(o.mTp){const el=me.querySelector('.mxtp'),v=LM.tpMax;el.querySelector('b').textContent=v>-89?(v>0?'+':'')+v.toFixed(1):'–';el.classList.toggle('ov',v>T[3]);el.classList.toggle('near',v<=T[3]&&v>T[3]-1)}
+  if(o.mTgt){const el=me.querySelector('.mxtg'),s=LM.S,on=s>-69,d=s-T[2];el.querySelector('small').textContent='Target '+T[2];el.querySelector('b').textContent=on?(d>=0?'+':'')+d.toFixed(1)+' LU':'–';el.classList.toggle('ok',on&&Math.abs(d)<=1);el.classList.toggle('hot',on&&d>1&&d<=3);el.classList.toggle('over',on&&d>3);const em=el.querySelector('em');em.style.display=on?'block':'none';if(on)em.style.left=(clamp((d+12)/18,0,1)*100).toFixed(1)+'%'}}
+function mxsTick(){const w=document.getElementById('mixWin');if(!w||w.hidden||!MXV)return;if(FRN%(UI.lite?3:2))return;const o=mxsO(),slow=!(mxsTick.k=((mxsTick.k|0)+1)%8),view=UI.mxView||'wave',dyn=!!(FDS[o.fd-1]&&FDS[o.fd-1].dyn);
+  for(const cv of MXV){if(!cv.isConnected)continue;const id=cv.dataset.id,H0=MXH.get(id);if(!H0)continue;const pl=H0.l[H0.i],pr=H0.r[H0.i];if(o.pkr)H0.pkm=Math.max(H0.pkm||0,pl,pr);
+    /* the side meters of the master (its picture sits in a wrapper, so the mixer's own drawing never found them) and, when the picture is hidden in the meter view, of every channel are driven here */
+    const own=view==='meter'?!o.view:id==='master';if(!dyn&&!own)continue;
+    const fm=cv._fm2||(cv._fm2=cv.closest('.mx').querySelectorAll('.fm u'));if(fm.length!==2)continue;
+    if(own){const n2=performance.now(),dn=x=>x>1e-6?dbN(20*Math.log10(x)):0;for(const[k,v] of[[0,dn(pl)],[1,dn(pr)]]){const u=fm[k],c=((1-v)*100).toFixed(1);if(u._c!==c){u._c=c;u.style.clipPath=`inset(${c}% 0 0 0)`}let s2=u._s;if(!s2){s2=u._s=document.createElement('s');s2.style[k?'right':'left']='0';u.parentElement.appendChild(s2);u._pv=0;u._pt=0}if(v>=u._pv||n2-u._pt>mtrHold()){u._pv=v;u._pt=n2}const b2=u._pv>.01?(u._pv*100).toFixed(1)+'%':'';if(s2._b!==b2){s2._b=b2;s2.style.display=b2?'block':'none';if(b2)s2.style.bottom=b2}}}
+    if(dyn)for(const[k,v] of[[0,pl],[1,pr]]){const c=mcolAt(v>1e-6?20*Math.log10(v):-90);if(fm[k]._dc!==c){fm[k]._dc=c;fm[k].style.setProperty('background',c,'important')}}}
+  if(o.pkr&&slow)for(const el of MXPKE){const H0=MXH.get(el.dataset.pk),v=H0&&H0.pkm>1e-6?20*Math.log10(H0.pkm):-90,t=v>-89?(v>0?'+':'')+v.toFixed(1):'–';if(el._t!==t){el._t=t;el.textContent=t;el.classList.toggle('ov',v>0)}}
+  if(slow){mxsMaster();fdCssUp()}
+  if(o.mCorr){const me=w.querySelector('.mxme .mxco');if(me){let c=null;if(ctx&&typeof anL!=='undefined'&&anL&&anR){const n=Math.min(anL.fftSize,1024),a=MXCB[0].subarray(0,n),b=MXCB[1].subarray(0,n);anL.getFloatTimeDomainData(a);anR.getFloatTimeDomainData(b);let sl=0,sr=0,sc=0;for(let i=0;i<n;i++){const l=a[i],r=b[i];sl+=l*l;sr+=r*r;sc+=l*r}if(sl+sr>1e-7)c=sl*sr>1e-14?sc/Math.sqrt(sl*sr):0}
+      MXCO=c===null?null:MXCO===null?c:MXCO*.8+c*.2;const t=MXCO===null?'–':(MXCO>=0?'+':'')+MXCO.toFixed(2);if(me._t!==t){me._t=t;me.querySelector('b').textContent=t;const v=MXCO||0,em=me.querySelector('em'),fi=me.querySelector('i');em.style.display=MXCO===null?'none':'block';em.style.left=((v+1)*50).toFixed(1)+'%';fi.style.left=(Math.min(v,0)+1)*50+'%';fi.style.width=Math.abs(v)*50+'%';me.classList.toggle('neg',v<0)}}}}
+{const _rmS=renderMixer;renderMixer=function(){const r=_rmS.apply(this,arguments);try{mxsMount();mxFit()}catch(e){console.error('AudioLab mixer settings',e)}return r}}
+{const _dmS=drawMixer;drawMixer=function(){const r=_dmS.apply(this,arguments);try{mxsTick()}catch(e){}return r}}
+{const _muS=mtrUI;mtrUI=function(){const r=_muS.apply(this,arguments);try{fdCssUp();mxsSync()}catch(e){}return r}}
+{const _ssS=syncSettings;syncSettings=function(){const r=_ssS.apply(this,arguments);try{mxsSync()}catch(e){}return r}}
+/* Settings > Layout > Mixer: the same controls plus the advanced ones */
+{const ms=document.getElementById('mtrSet'),h=ms&&ms.previousElementSibling;if(h&&!document.getElementById('mxsSet')){h.insertAdjacentHTML('beforebegin','<h4>Mixer</h4><div id="mxsSet" class="mxsp">'+mxsHtml(true)+'</div>')}
+ setTimeout(()=>{try{fdCssUp(true);mxsApply();mxsSync()}catch(e){}},80)}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
