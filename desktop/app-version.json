@@ -1,7 +1,7 @@
 {
-  "version": "0.185",
-  "sha256": "91b6151c671482c602411149e02b0e153a49b2eab21e046ec4f1374f31cc066f",
-  "size": 2585280,
+  "version": "0.186",
+  "sha256": "9df56f7f092cd3c56e0a31e89a8961c509f900acfda9b3a2414d5ff147f9ba40",
+  "size": 2621689,
   "minShell": "0.147.0",
-  "notes": "Changing a preset while the song plays is now clean: the old sound stops within a few milliseconds (also its notes that were already on their way, its release and its echo), and notes that are sounding carry on with the new preset. Long notes are also picked up when you press Play in the middle of them, after a jump and at the start of a loop (Settings, Audio system, Playback switches this off)."
+  "notes": "New instrument: Sub, a sub bass built from exact overtones, so it stays perfectly clean on every key. It has a picture of the wave and its overtones against note names and Hz, 22 presets by genre (club, house, techno, drum and bass, dubstep, 808, psytrance, small speakers), pitch drop, glide, the same start for every note and a Duck to kick button."
 }
