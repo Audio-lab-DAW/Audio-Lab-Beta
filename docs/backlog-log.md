@@ -1400,3 +1400,6 @@ Not verified: the GPU side. In software drawing Lighter and Lightest reach the s
 
 ### Left
 - A bias slider separate from the main slider for Automatic was not made: the main slider is the "more effects / more optimised" control, Automatic moves it.
+
+### Release
+- v0.187: commit 06b0cf8, artifact version 210, project doc `claude/audiolab-device-backlog-run-O.md`. Desktop build run 45710927753 dispatched.
