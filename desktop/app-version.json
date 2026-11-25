@@ -1,7 +1,7 @@
 {
-  "version": "0.178",
-  "sha256": "2c8a58c8a376c552212195b7e82fc48291b9b78a6ce289eb56a5b87ffa5f3251",
-  "size": 2425155,
+  "version": "0.179",
+  "sha256": "c0e3f1dc1d8a28c6e7e1b8ef3d5c66f7938cca524bb2f40bb1c0e62b8054782d",
+  "size": 2456281,
   "minShell": "0.147.0",
-  "notes": "New instrument: Emit. Particles fly across the picture of a sample and each one plays the spot it is over, filtered or panned by its height. One or two emitters you can move, resize and aim in the picture, two movement sources (a ramp on Angle makes an emitter spin), 10 presets including Sprinkler in the centre. Find it next to the Sampler in the instrument browser."
+  "notes": "New effect: Vector Delay. Every particle is its own delay line, and where it is and how it moves sets the time, pitch, pan, level and filter of its line. Forces or flow, an emitter that launches particles on the beat, reverse, pitch shift with Recycle, 14 presets. Find it under Delay & space. This completes the six particle devices (Bouncy Notes, Emit, Vector Grain, Vector FM, Vector Map, Vector Delay)."
 }
