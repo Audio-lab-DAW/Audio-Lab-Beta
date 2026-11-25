@@ -476,7 +476,7 @@ Tested in the real desktop app under xvfb with a local update server (`tools/eng
 - Real desktop app under xvfb (`tools/engine-tests/updater/test_popup.js`): update found and installed from the window; up to date; server down; server that never answers (answer after 15 s, button still works afterwards); menu entry opens the window; automatic installing; and the same page inside the v0.170 app build (`OLD=f8371a1`): found, installed, card first then window.
 
 ### Not verified
-- **`alvol.swift` was not compiled here.** If the Mac job fails at "Build the Core Audio volume helper", the update itself still works (it does not need a build); only new installers would be missing.
+- `alvol.swift` could not be compiled in the container. The Mac job of build run 65 compiled it and built the app (the .dmg for 0.172.0 was uploaded), so it compiles; what `alvol info` and `alvol rate` return on a real Mac has not been seen.
 - Everything that needs real hardware: device names as the system reports them (most USB names could not be confirmed, so the patterns are broad), the icons and profiles for the user's Gryphon and AMS-24, setting the device rate and whether Chromium then really stops converting, the output pair on a device with more than two channels (headless has two), the round trip with a cable, input channel choice on a real interface.
 - Whether the stuck request was the user's case. It is the only way found to make the button dead, and it fits (long sessions, hourly checks), but it was not seen on the user's Mac.
 - On weak computers the "Light mode is on" notice can overlap the left edge of the update card.
