@@ -6,6 +6,10 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   checkForUpdates: () => ipcRenderer.invoke('al:check-updates'),
   applyUpdate: () => ipcRenderer.invoke('al:apply-update'),
   programVersion: () => ipcRenderer.invoke('al:program-version'),
+  // v0.171: the page shows its own update window and asks for plain results (no system dialogs)
+  updateCheck: (o) => ipcRenderer.invoke('al:update-check', o || {}),
+  updateStatus: () => ipcRenderer.invoke('al:update-status'),
+  updateApp: () => ipcRenderer.invoke('al:update-app'),
   // torn-off projects in their own windows
   isFullScreen: () => ipcRenderer.invoke('al:is-fullscreen'),
   displayHz: () => ipcRenderer.invoke('al:display-hz'),
@@ -19,6 +23,8 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   dac: process.platform === 'darwin' ? {
     list: () => ipcRenderer.invoke('al:dac-list'),
     get: (uid) => ipcRenderer.invoke('al:dac-get', uid),
-    set: (uid, v) => ipcRenderer.invoke('al:dac-set', uid, v)
+    set: (uid, v) => ipcRenderer.invoke('al:dac-set', uid, v),
+    info: () => ipcRenderer.invoke('al:dac-info'),
+    rate: (uid, hz) => ipcRenderer.invoke('al:dac-rate', uid, hz)
   } : null
 });
