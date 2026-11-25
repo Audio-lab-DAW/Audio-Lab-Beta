@@ -1,7 +1,7 @@
 {
-  "version": "0.177",
-  "sha256": "f992a408fa7baea654655fffc208198440b3105fd8e2bd3cea389307a6294561",
-  "size": 2411003,
+  "version": "0.178",
+  "sha256": "2c8a58c8a376c552212195b7e82fc48291b9b78a6ce289eb56a5b87ffa5f3251",
+  "size": 2425155,
   "minShell": "0.147.0",
   "notes": "New instrument: Emit. Particles fly across the picture of a sample and each one plays the spot it is over, filtered or panned by its height. One or two emitters you can move, resize and aim in the picture, two movement sources (a ramp on Angle makes an emitter spin), 10 presets including Sprinkler in the centre. Find it next to the Sampler in the instrument browser."
 }
