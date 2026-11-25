@@ -1,7 +1,7 @@
 {
-  "version": "0.187",
-  "sha256": "c19d7893085a09748fdf4d5e6ba5dfa7bc8407977cc6d5dd61f720e4642bc536",
-  "size": 2650870,
+  "version": "0.188",
+  "sha256": "ffe3169eb872b8d1120d6c8ce2d6b144333e022e3a2f446e6f1ed21450296435",
+  "size": 2684507,
   "minShell": "0.147.0",
-  "notes": "New instrument: Sub, a sub bass built from exact overtones, so it stays perfectly clean on every key. It has a picture of the wave and its overtones against note names and Hz, 22 presets by genre (club, house, techno, drum and bass, dubstep, 808, psytrance, small speakers), pitch drop, glide, the same start for every note and a Duck to kick button."
+  "notes": "New analysis effect Meter: loudness in LUFS against a target you pick (club, psytrance, Spotify, Apple Music, YouTube, broadcast or your own), true peak, PLR and PSR, levels, spectrum, a low-end mono check, spectrogram, stereo width per band and a waveform history, with presets and a small Minimal view to pin in a corner. The master loudness read-out now measures true peak the way the standard asks (it read up to about 1 dB low on some peaks before)."
 }
