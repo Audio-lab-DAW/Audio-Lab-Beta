@@ -435,3 +435,4 @@ Six "Colours like another DAW" buttons (`DAWLOOK`). Each one only set the hue, t
 - The area before the song start is shown dark, which is heavy next to a light arrangement.
 - In the default theme the active Settings tab and the hovered menu row are now solid accent blue instead of 85% blue.
 
+- Release of run 10: v0.171 (commit 570eebf, artifact version 199); desktop build workflow dispatched. Project doc `claude/audiolab-backlog-run-10.md`.
