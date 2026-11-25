@@ -307,3 +307,34 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Release
 - Commit 9c98f69 on main (v0.168), desktop build workflow started (run 60), artifact 1b07d888 updated to version 196.
+
+## 25 November 2026: v0.169, Growl instrument and the AudioLab Pro logo (both asked by the user during run 8)
+
+### Research (what makes a good growl)
+Read: MusicRadar (FM growl in FM8, neurofunk bass and tearing reese in Serum), Sound On Sound "Dubstep secrets", ADSR (Skrillex growl in Serum), EDM.com "Beefy growls", Native Instruments (reese bass), Splice (talking wobble bass), two smaller blogs. What they agree on:
+- **Source**: rich in harmonics. FM with ratio 1 or 2 and the amount moved by an LFO; a saw-like wave; for drum and bass two saws detuned by 15 to 30 cents (reese). Mono, with a clean sine sub underneath that is not distorted.
+- **Mouth**: band-pass or vowel resonances that move in step with the beat (1/8 for classic wobble, 1/16 for rolling parts, 1/4 to 2 bars for slow neuro sweeps). Talking sounds jump between vowels far apart; neuro sounds use notch or narrow band sweeps over the whole note.
+- **Dirt**: distortion before and after the filter, then strong levelling (OTT), then saturation or a clipper. Bit or sample-rate reduction for an edge.
+- **Squeals and scrapes**: no page describes the "moving chair" itself. Built from the physics instead: a chair leg sticks and slips many times a second (rough bursts at about 20 to 60 per second, slightly irregular) while a narrow whistle rises in pitch.
+
+### Built (new code before `askChoice`, names start with `grw` / `GW`; `grwInit();` sits right before the `/*VN-BEGIN*/` marker because the instrument registries only exist from there)
+- **Growl** (`PRESETS.growl`, group Bass and acid in the instrument browser). Every note is worked out once as audio by `grwRender` and played as a buffer (`grwBuf`, `grwPlay`, cache `GWC`), so playback, freeze and export give the same sound and a repeated note costs nothing.
+- Signal path: FM pair with a saw-like shape and an optional second detuned voice (Reese) → stick-slip bursts (Scrape) → drive → the mouth (three vowel resonances that move from Vowel A to Vowel B: OO, OH, AH, ER, EH, EE) → fold → crush → levelling (Squash) → the squeal (a whistle through a narrow band that glides from "Squeal from" to "Squeal to" over the note and jumps with every slip) → low cut, tone → clean mono sub added at the end.
+- Movement: Speed in note lengths (1/1 to 1/32, with triplets), eight shapes (sine, triangle, ramps, square, Yoi, once over the note, random steps), starts again with every note. Stereo gives left and right slightly different mouths; the sub stays in the middle.
+- 27 knobs in five groups (Source, Mouth, Movement, Scrape and squeal, Dirt and level), each with a plain-language tooltip (`GWTIP`). The picture shows the mouth as resonance peaks for vowel A and B and the moving one while a note plays.
+- **24 presets** (`GWPRE`): dubstep (Yoi talker, Wub 1/8, Riddim grind, Screech, Robot vowels, Tearout machine gun, Deep growl, Metal gargle), EDM (Electro house growl, Complextro stab, Midtempo snarl, Bass house bark, Talk box lead), drum and bass (Neuro reese growl, **Moving chair**, Chair drag long and low, Chair screech short, Squeaky door, Foghorn, Neuro stab, Jump up squelch, Tearing reese 1/8, Rubber squeak), and Plain growl.
+- **Logo 1** (chosen by the user): "PRO" in an outlined pill at the top right of the name (`.wmP`), in Settings and on the start screen. The small moving wave next to the old word is gone with it. The 15 options are kept in `docs/logo/audiolab-pro-logo-options.html`.
+
+### Tested
+- Headless load: no page errors. Growl on a track: the device, the preset list (24), the picture, playback, the instrument browser.
+- `tools/engine-tests/growl.py`: all 24 presets rendered through the app at 174 BPM: no NaN, levels between 0.08 and 0.14 RMS, the sub share and brightness differ per preset as intended, two renders are bit-identical.
+- Moving chair measured: the strongest band between 350 and 3000 Hz rises from about 600 Hz to 1350 Hz over the note and the loudness chatters at about 38 times a second.
+
+### Not verified
+- **Nobody has listened to it.** The presets were set from the research and from measurements, not by ear. They will need tuning on real speakers, the chair presets most of all.
+- Working out a new note takes 25 to 50 ms per second of sound in the headless test machine (once per different note; the user's Mac should be several times faster). Very long notes with many different lengths could cause a short hitch the first time they play.
+- Live keyboard playing, MIDI learn and automation of the Growl knobs were not tried. The movement always restarts with the note (no free-running mode yet).
+
+### Left
+- Tune the presets by ear with the user. Ideas: free-running movement, a second movement source, a formant picture you can drag, notch sweep for neuro basses, render in a worker.
+- App icons still show the old picture without text; nothing to change there unless the user wants "Pro" on the icon.
