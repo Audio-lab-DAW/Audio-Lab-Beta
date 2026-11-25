@@ -1,7 +1,7 @@
 {
-  "name": "AudioLab Studio",
+  "name": "AudioLab Pro",
   "short_name": "AudioLab",
-  "description": "AudioLab Studio - a Digital Audio Workstation",
+  "description": "AudioLab Pro - a Digital Audio Workstation",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

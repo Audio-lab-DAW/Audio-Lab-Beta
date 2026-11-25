@@ -1,8 +1,8 @@
 {
   "name": "audiolab-studio",
-  "productName": "AudioLab Studio",
-  "version": "0.166.0",
-  "description": "AudioLab Studio - a Digital Audio Workstation",
+  "productName": "AudioLab Pro",
+  "version": "0.167.0",
+  "description": "AudioLab Pro - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
   "private": true,
@@ -24,8 +24,8 @@
   },
   "build": {
     "appId": "com.audiolab.studio",
-    "productName": "AudioLab Studio",
-    "copyright": "AudioLab Studio",
+    "productName": "AudioLab Pro",
+    "copyright": "AudioLab Pro",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -48,8 +48,8 @@
     "fileAssociations": [
       {
         "ext": "audiolab",
-        "name": "AudioLab Studio project",
-        "description": "AudioLab Studio project",
+        "name": "AudioLab Pro project",
+        "description": "AudioLab Pro project",
         "role": "Editor",
         "icon": "build/doc"
       }
@@ -73,7 +73,7 @@
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "AudioLab Studio needs audio input access to record and to list your audio output devices."
+        "NSMicrophoneUsageDescription": "AudioLab Pro needs audio input access to record and to list your audio output devices."
       },
       "extraResources": [
         {
@@ -83,7 +83,7 @@
       ]
     },
     "dmg": {
-      "title": "AudioLab Studio ${version}"
+      "title": "AudioLab Pro ${version}"
     },
     "win": {
       "target": [

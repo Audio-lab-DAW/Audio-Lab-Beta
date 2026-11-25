@@ -1,10 +1,13 @@
-// AudioLab Studio desktop wrapper (Electron).
+// AudioLab Pro desktop wrapper (Electron).
 // Loads the web app from a private secure scheme so it is cross-origin isolated
 // (SharedArrayBuffer on), grants audio-device / MIDI / file permissions, and adds
 // menus, window memory, .audiolab file opening and auto-update.
 const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+/* The app was called AudioLab Studio before v0.167. Its settings, projects list and downloaded updates stay in the folder with the old name,
+   so nothing is lost when the app is installed under the new name. */
+try { app.setPath('userData', path.join(app.getPath('appData'), 'AudioLab Studio')); } catch (e) {}
 
 const SCHEME = 'audiolab';
 const HOST = 'app';
@@ -114,7 +117,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 560,
     backgroundColor: '#0c0e14',
-    title: 'AudioLab Studio',
+    title: 'AudioLab Pro',
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
@@ -199,7 +202,7 @@ function runInApp(code) {
 function buildMenu() {
   const tpl = [
     ...(isMac ? [{
-      label: 'AudioLab Studio',
+      label: 'AudioLab Pro',
       submenu: [
         { role: 'about' },
         { label: 'Check for Updates…', click: () => checkUpdates(true) },
@@ -236,7 +239,7 @@ function buildMenu() {
       label: 'Help',
       submenu: [
         ...(!isMac ? [{ label: 'Check for Updates…', click: () => checkUpdates(true) }] : []),
-        { label: 'AudioLab Studio on GitHub', click: () => shell.openExternal('https://github.com/Audio-lab-DAW/Audio-Lab-Beta') },
+        { label: 'AudioLab Pro on GitHub', click: () => shell.openExternal('https://github.com/Audio-lab-DAW/Audio-Lab-Beta') },
         { label: 'Releases', click: () => shell.openExternal(RELEASES) }
       ]
     }
@@ -267,7 +270,7 @@ function setupUpdater() {
   if (!isMac && app.isPackaged) {
     try { ({ autoUpdater } = require('electron-updater')); autoUpdater.logger = null; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
       autoUpdater.on('update-downloaded', (info) => {
-        dialog.showMessageBox(win, { type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab Studio ${info.version} is ready`, detail: 'Save your project first, then restart to finish updating.' })
+        dialog.showMessageBox(win, { type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab Pro ${info.version} is ready`, detail: 'Save your project first, then restart to finish updating.' })
           .then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
       });
       autoUpdater.on('error', () => {});
@@ -375,7 +378,7 @@ ipcMain.handle('al:tear', (e, d) => {
   let x = Number.isFinite(d.x) ? d.x : undefined, y = Number.isFinite(d.y) ? d.y : undefined;
   if (x != null) x = Math.max(disp.x, Math.min(disp.x + disp.width - 200, x));
   if (y != null) y = Math.max(disp.y, Math.min(disp.y + disp.height - 100, y));
-  const kw = new BrowserWindow({ width: w, height: h, x, y, minWidth: 700, minHeight: 420, backgroundColor: '#0c0e14', title: (d.name || 'Project') + ' · AudioLab Studio', webPreferences: kidPrefs() });
+  const kw = new BrowserWindow({ width: w, height: h, x, y, minWidth: 700, minHeight: 420, backgroundColor: '#0c0e14', title: (d.name || 'Project') + ' · AudioLab Pro', webPreferences: kidPrefs() });
   const id = kw.webContents.id;
   kids.set(id, { win: kw, data: d });
   kw.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/i.test(url)) shell.openExternal(url); return { action: 'deny' }; });

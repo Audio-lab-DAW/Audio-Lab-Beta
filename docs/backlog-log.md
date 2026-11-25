@@ -248,3 +248,37 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 - Backlog 17 (04:56 UTC): track controls editor made universal and visual (mini track with drag and drop, layouts as pictures in a 2 by 2 square, a fourth layout, pan styles as pictures, icon as Normal / Big / Hidden).
 - Backlog 12 (09:30 UTC) Vector Delay, 13 (11:00) Emit with the rotating centre emitter, 14 (14:30) Vector Grain, 15 (16:00) Vector FM, 16 (17:30) Vector Map plus the walls for Bouncy Notes.
 - Releases of run 7: v0.165 (commit 98b8a99, artifact version 193) and v0.166 (commit 0aaf794, artifact version 194); desktop build workflow dispatched for both.
+
+## 25 November 2026: v0.167, run 8 (mixer that grows from the right, Settings tab "Interface", the app is now called AudioLab Pro)
+
+### Built (new code before `askChoice`; names start with `mxr` / `MXR`, `st` / `STI`, `fdPop`, `hf` / `HFD`)
+- **Mixer anchored to the right** (`mxAutoW` was replaced, `mxrNeed`, `mxrBar`, `mxrSoon`): the window is exactly as wide as its channels plus the master. Adding or removing a track, the strip width, compact channels and the master width all move the LEFT edge; the right edge and the tab above it stay where they are. When the channels do not fit to the left of the right edge, the window stops at the screen edge and the channels scroll.
+  - The master strip is now `position:sticky` at the right, so it stays in view while the channels scroll under it (class `mxover` adds a shadow on its left). The cables are redrawn on scroll so the master's socket stays under it.
+  - Dragging an edge of the mixer narrower than the channels need is remembered as the widest it may get (`UI.mxCapW`); dragging it wider, or to the left screen edge, clears that. After moving the window it grows or shrinks to the new room.
+  - The tab above the mixer is never wider than the window: first the words on the view and Spectrum buttons go (`mxb1`), then the Spectrum, compact and cables buttons and the DAC volume (`mxb2`). Compact and cables were already in the mixer settings menu; a "Spectrum overlay" switch was added there (section Window). The cable legend is cut to the window width.
+- **Settings tab renamed to "Interface"** (it holds the scale, the layout, the track and transport controls, the mixer look and the meters; the key is still `layout`). `stfBuild()` rearranges it once at start:
+  1. Interface scale at the very top.
+  2. One Layout box: the picture with Presets, then three tight rows: Panels (Map, Visualizer and where it sits), Transport bar (Edit, Reset, Shrink on small screens), Track controls (Customise, Reset). The old separate Panels, Transport bar and Track controls boxes are gone; the same buttons and checkboxes were moved, so their ids and handlers are unchanged.
+  3. Colours like another DAW, Mixer and Level meters follow (not redone).
+- **Mixer settings with pictures** (`STI`, `stIc`, `stIcV`, through a wrapper of `mxsHtml`, in Settings and in the mixer's own menu): every switch and slider has a small icon that lights up when on. The four meter settings show the chosen value: speed is a tiny meter that falls at that speed while the pointer is on the row, reading shows a peak, RMS, VU or loudness shape, peak hold shows the line with 1, 3 or ∞, colours shows the real colours.
+- **Fader and meter design as a drop-down** (`.fdsel` button opens `#fdPop`, `fdPopOpen`, `fdPopClose`): the button shows the current design with its picture; the list shows all 15 with picture and name. Esc or a click outside closes it.
+- **The design also applies to the track headers** (`HFD`, `hfdCss`, class `hfd` on `#hdrin`, style tag `#hfdCss`): the volume bar gets the design's fader cap and groove, the level bars get its segments, dots, thin lines or stepped colours. The bars are still drawn as before (one height per bar, a line for the peak); segments are a striped cover drawn by CSS, so nothing extra happens per frame and nothing was added to `#hglass`. "Level colour" sets a bar's colour only when the level crosses into another colour step (wrapper of `trackMeters`).
+- **Reset all settings** moved from General to the footer of the Settings window (left, red outline, divider), in view on every tab. It still asks first.
+- **Name**: AudioLab Studio is now AudioLab Pro in the app (title, About, file type, saved file header), the web manifest, the READMEs and the desktop app (product name, menus, dialogs, window titles, installer names). The desktop app keeps its data folder with the old name (`app.setPath('userData', …'AudioLab Studio')` in `desktop/main.js`), so settings and downloaded updates stay. `appId` and the package name were left as they were on purpose. The word under the logo reads "Pro" for now; 15 logo options were made for the user to choose from.
+
+### Tested (headless Playwright, Fractals demo, 30 tracks)
+- No page errors on load, after a reload with a stored design, or in any test.
+- Mixer: 30 tracks (stops at the left screen edge, scrolls, master stays), 3 tracks, 3 compact, 1 compact, 0 tracks, strip width 64, undo back to 30: the right edge stayed at the same pixel every time and the content never scrolled by a few pixels. Edge drag narrower and back, window move, compact button. Screenshots of each looked at.
+- Settings: the whole Interface tab, the design drop-down in Settings and in the mixer menu (the mixer menu stays open while choosing), the reset button with its question, General without the old reset row.
+- Track headers: all 15 designs screenshotted while playing. Frame rate while playing was the same for designs 1, 3 and 9 in the headless browser (25 to 28 fps there, software drawing).
+- Test script: `tools/ui-tests/mixright.py`.
+
+### Not verified
+- Look and speed on the user's Mac, real mouse. The header level bars are only about 3 px wide each, so the designs differ less there than in the mixer.
+- The desktop build with the new product name (the workflow was started; the installed app's name on disk changes only when a new installer is used). Windows: the installer should replace the old install because `appId` is the same, not checked.
+- Desktop DAC volume control in the narrow tab (only exists in the desktop app).
+- No analyser row was added to the Panels row: the dockable analyser keeps its own docking menu.
+
+### Left
+- The user picks one of the 15 logo options; then the logo is changed for real (splash, Settings, icons).
+- Growl device (asked by the user during this run): next release.

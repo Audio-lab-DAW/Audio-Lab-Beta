@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AudioLab Studio local launcher. Run:  python3 serve_audiolab.py   (from this repository folder)
+# AudioLab Pro local launcher. Run:  python3 serve_audiolab.py   (from this repository folder)
 import http.server, os, socketserver, webbrowser, threading
 PORT = 8765
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +20,6 @@ class H(http.server.SimpleHTTPRequestHandler):
 socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer(('127.0.0.1', PORT), H) as srv:
     url = f'http://localhost:{PORT}/'
-    print('AudioLab Studio is running at', url, ' (press Ctrl+C to stop)')
+    print('AudioLab Pro is running at', url, ' (press Ctrl+C to stop)')
     threading.Timer(.6, lambda: webbrowser.get('open -a "Google Chrome" %s').open(url) if os.path.exists('/Applications/Google Chrome.app') else webbrowser.open(url)).start()
     srv.serve_forever()
