@@ -274,7 +274,8 @@ function setupUpdater() {
   }
   if (!app.isPackaged && !UPD_BASE) return;
   setTimeout(() => checkUpdates(false), 8000);
-  setInterval(() => checkUpdates(false), 4 * 3600 * 1000);
+  setInterval(() => checkUpdates(false), 3600 * 1000);   // once an hour
+  setInterval(() => { if (updReady) offerRestart(); }, 6 * 3600 * 1000);   // a dismissed notice comes back after 6 hours
 }
 let shellAsked = null;
 function needNewApp(m) {
@@ -285,6 +286,17 @@ function needNewApp(m) {
     .then((r) => { if (r.response === 0) shell.openExternal(RELEASES); });
 }
 function offerRestart() {
+  if (!updReady || !win || win.isDestroyed()) return;
+  const v = updReady.version;
+  // Preferred: a card inside the window (top right) that stays until accepted or dismissed. Older program versions don't have it: then a dialog.
+  if (!manualCheck) {
+    win.webContents.executeJavaScript(`!!(window.audiolabHost&&window.audiolabHost.updateReady&&window.audiolabHost.updateReady(${JSON.stringify(v)},${JSON.stringify(updReady.notes || '')}))`, true)
+      .then((ok) => { if (!ok) offerDialog(); }).catch(() => offerDialog());
+    return;
+  }
+  offerDialog();
+}
+function offerDialog() {
   if (!updReady || !win || win.isDestroyed()) return;
   const v = updReady.version;
   dialog.showMessageBox(win, { type: 'info', buttons: ['Restart now', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab ${v} is ready`, detail: (updReady.notes ? updReady.notes + '\n\n' : '') + 'Restarting takes a second and keeps your open projects. With "Later" it is used the next time you start AudioLab.' })
@@ -298,7 +310,7 @@ function applyContent() {
 async function checkUpdates(manual) {
   manualCheck = !!manual;
   if (updBusy) return;
-  if (updReady) { if (manual) offerRestart(); return; }
+  if (updReady) { if (manual) offerDialog(); return; }
   updBusy = true;
   const say = (message, detail, type) => { if (manual && win && !win.isDestroyed()) dialog.showMessageBox(win, { type: type || 'info', message, detail }); };
   try {
@@ -339,6 +351,7 @@ ipcMain.handle('al:dac-list', () => alvol(['list']));
 ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]));
 ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
+ipcMain.handle('al:apply-update', () => applyContent());
 
 /* ---------- torn-off projects: each one gets a real window of its own ---------- */
 const kids = new Map();   // webContents id -> { win, data }
