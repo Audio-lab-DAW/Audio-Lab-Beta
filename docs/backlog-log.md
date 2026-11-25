@@ -391,3 +391,47 @@ Looked at and left: level meters at 120 a second in the headers (free with the p
 - Windows and dialogs in Optimised still use one live blur. A picture is not possible there without capturing the page.
 - Light mode (General) and Zero effects overlap in purpose; they could become one switch.
 - Release of run 9: v0.170 (commit 709cb9a, artifact version 198); desktop build workflow dispatched. Project doc `claude/audiolab-backlog-run-9.md`.
+
+## 25 November 2026: v0.171, run 10 (themes with the look of another DAW, with matching faders and meters)
+
+### What the app had before
+Six "Colours like another DAW" buttons (`DAWLOOK`). Each one only set the hue, tint amount and brightness of the same dark tint, the grid strength, the clip opacity and a track palette. Panels, accent, grid, playhead and clip shape were the same in all of them, which is why they looked alike.
+
+### Research (colours and general feel only; no logos, icons, fonts or artwork were used)
+- **Ableton Live**: real values from the stock theme files (Live 10.1 "Mid Light" and "Dark"): desktop #6e6e6e, surface #878787, highlight #a5a5a5, dark-theme surface #414141 / #555555, accent #ffb532, play #00ff81, record #ff363c, selection #c7edff, black grid lines, black waveform on bright clips; clip palette from Live 10+. Sources: github.com/phixion/ableton-themes (00Light.ask, 01Mid Light.ask, 02Mid Dark.ask, 03Dark.ask), github.com/danhemerlein/ableton-colors. Live 11/12 files were not found; believed near-identical.
+- **FL Studio**: playlist background RGB 52,68,78 = #34444e (Image-Line knowledge base, support.image-line.com/action/knowledgebase?ans=632). Theme elements listed in the manual (image-line.com, envsettings_themes.htm) without default values. Everything else (slate panels, orange accent, grey caps) is an estimate.
+- **Reaper**: real values from the stock Default 7 theme: chrome #333333, arrange #454545 / #424242, black grid, teal #1abc98, play cursor amber #efc852, meters #00bfbf to #00daad to #00fe95 with clip #bb2500, grey items #818989 with #1a1a1a peaks. Source: github.com/Conceptual-Machines/reaper-theme-builder (Default_7.0_unpacked.ReaperTheme).
+- **Bitwig**: track palette from the DrivenByMoss `DAWColor` constants (github.com/git-moss/DrivenByMoss). Panel greys and the orange accent are estimates.
+- **Cubase, Logic Pro, Pro Tools, Studio One**: no published colour values were found (Steinberg and Avid help pages only describe what can be coloured and how the meters behave: steinberg.help colours page, avid.com color-coding-tracks-clips, Pro Tools First help on meters). Their colours here are **estimates** of the well-known look: blue-grey with blue meters (Cubase), neutral charcoal with rounded blue and green regions and a white playhead (Logic), light grey edit area with plain blocks and green lights (Pro Tools).
+- **Seventh theme: Reaper**, not Studio One. Studio One (dark blue-grey, blue accent, blue meters) sits close to Cubase and FL; Reaper's teal, mint meters, grey items and amber playhead match none of the others.
+
+### Built (new code before `askChoice`, new CSS before `.dacv`)
+- **Eight themes** in `THEMES`: AudioLab, Live style, FL style, Cubase style, Logic style, Bitwig style, Pro Tools style (new), Reaper style (new). The old ids (`ableton`, `fl`, `cubase`, `logic`, `bitwig`) are kept, so a saved choice gets the new look by itself.
+- Each theme now sets: panel colours (`c`: `--gtr`, `--gtr2`, `--bg`), accent (`a`: `--blue`, plus the new `--bl3`, `--blf`, `--blu1`, `--blu2`), the arrangement (`t`: lanes, ruler, ruler text, section row `secBg`, grid colour `gr` and strength `grk`, hint text), the clip look (`k`: dark or light waveform `wave`, corner radius `cr`, title bar shade `hdk` or no title bar `hd:'none'`, playhead `ph`, a display-only colour blend `cmix` that never changes the project), sharp corners (`sharp`, body class `thsharp`), knob line width (`knw`).
+- `thPaint()` writes all of that after `applyTheme()` (wrapper). `drawArr`, `arrPH` and `drawClip` read the new `TH` fields; without a theme they draw exactly as before.
+- **Accent as a variable**: inside the main style block, 53 fixed `#4c8dff` and 75 `rgba(76,141,255,…)` became `var(--blue)` / `rgba(var(--bl3),…)`; filled backgrounds use `--blf`, a deeper shade per theme so white text on it stays readable. The logo keeps its own colours.
+- **Light arrangements** (Live style mid grey, Pro Tools style light grey): the app's text is light everywhere, so panels stay dark. `thUnder()` paints a dark layer on the arrangement under the transport bar, track headers and device panel, and `thGlass()` (wrapper of `applyTrans`) keeps glass at least 90% solid in these two themes.
+- **Controls follow the theme** (`thPick`): fader and meter design (`UI.mxs.fd`, used in the mixer and on the track headers) and meter colours (`UI.mtr.col`). Only a starting point: both can be changed afterwards as before and stay changed (also after a reload).
+  - Six new fader and meter designs (now 21 in `FDS` and `HFD`): 16 Slate (FL style), 17 Wide cap (Cubase style), 18 Round cap (Logic style), 19 Slim bar (Bitwig style), 20 Ridged (Pro Tools style), 21 Pill (Reaper style). Live style uses 7 Flat bars.
+  - Three new meter colour choices (`MCOLS`, `MXSM`, buttons added by `thMtrBtns`): Lime (Live style), Blue to red (Cubase style), Mint (Reaper style). They show in the mixer settings and in Settings, Level meters like the others.
+- **Preview cards** in Settings, Interface (`dawLookRender` replaced, `thCard`): each theme is a small picture with a bit of arrangement (lanes, grid, clips in that theme's clip look, playhead) and one mixer channel (panel colour, fader cap shape, meters in that theme's meter colours, accent button), with the name and one line of description.
+- Moving the Background, Hue or Tint sliders while a theme is on takes over from its fixed colours (`UI.dawTint`); accent, clip look and controls stay. Clicking the theme again brings its colours back.
+- "Also recolour the tracks in this project" is kept (one undo step).
+
+### Tested (headless Playwright, Fractals demo; script `tools/ui-tests/themes.py`)
+- No page errors on load, after reload, or in any of the 24 combinations (8 themes x Zero, Optimised, Full effects) with the mixer open and music playing. Every screenshot was looked at: text readable in each, also the glass mixer over the light Pro Tools style arrangement.
+- All six new designs in the mixer and on the track headers; the three new meter colours while playing.
+- Settings: the eight cards, a click on a card (theme, design 17 and Blue to red set, the drop-downs follow), changing design and meter colours afterwards and reloading (they stay), slider take-over, recolour and undo.
+
+### Not verified
+- How it looks on the user's Mac and at 2x; the screenshots were made in software rendering.
+- Colours for Cubase, Logic, Pro Tools and most of FL and Bitwig are estimates, see Research.
+- The older tests (`fxlevels.py`, `mixright.py`) were not run again.
+
+### Left
+- Panels and all text stay dark with light text in every theme. A truly light interface (Live's default mid grey with black text, classic Pro Tools) needs the several hundred fixed text and panel colours turned into variables first.
+- Only the arrangement follows the theme. The piano roll, the map, device panels and the pictures in the mixer keep their dark look. Selection frames and loop lines keep their colours.
+- **Knobs**: the app has no knob style setting, so a theme only changes the line width of knob rings (`--knw`). Real knob styles (ring, disc, flat) would be a task of its own.
+- The area before the song start is shown dark, which is heavy next to a light arrangement.
+- In the default theme the active Settings tab and the hovered menu row are now solid accent blue instead of 85% blue.
+
