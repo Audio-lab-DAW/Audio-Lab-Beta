@@ -1300,6 +1300,10 @@ body.fxstill #mixWin .mxs,body.fxstill #mixWin .mxs *:not(#splash):not(#splash *
 #fxin .dev.du .vb .vl{font-size:9px;max-width:none;overflow:visible}
 /* in the Devices window the rows have no height of their own, so every device gets the height it has in the panel */
 #fxin.wrap .dev.du{height:253px}
+/* change with live browsing (task D) */
+.chgph{display:flex;align-items:center;justify-content:center;height:100%;min-height:80px;padding:0 18px;color:var(--mut);font-size:12px;text-align:center}
+.ibc.chgwas .ibdl{position:relative}.ibc.chgwas .ibdl::after{content:'On the track before';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;padding:4px 8px;border-radius:9px;background:rgba(255,255,255,.14);color:#e6e8ee;white-space:nowrap}
+.chghint{color:var(--mut);font-size:12px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5457,7 +5461,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.182',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.183',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -12129,7 +12133,7 @@ function duDev(D,t){const isFx=D.dataset.d==='fx',own=isFx?t.fx.find(q=>q.id===D
       sel.setAttribute('aria-label','Preset');if(!sel.title)sel.title='Presets: ready-made settings for this device';pre.append(mk('prev','‹','Previous preset'),sel,mk('next','›','Next preset'));if(lab&&lab!==sel&&H.contains(lab))lab.remove()}}
   if(pre&&!isFx){const rb=H.querySelector('[data-dk=reset]');if(rb)rb.remove()}
   let chg=sub?null:H.querySelector('[data-s=browse]');if(!chg&&isFx){chg=document.createElement('button');chg.dataset.duchg='1'}
-  if(chg){chg.textContent='Change';chg.classList.add('duchg');chg.title=isFx?'Change: pick another effect to take the place of this one. It keeps its place in the chain.':'Change: pick another instrument for this track'}
+  if(chg){chg.textContent='Change';chg.classList.add('duchg');chg.title=isFx?'Change: try other effects in this place of the chain. One click swaps it, a double-click keeps it, Escape brings this one back.':'Change: try other instruments on this track. One click swaps it, a double-click keeps it, Escape brings this one back.'}
   /* choices that are not presets go to a row above the controls; buttons stay in the title */
   const keep=new Set([pw,logo,nm,pre,chg,x]),rest=[];for(const c of[...H.children]){if(keep.has(c))continue;if(c.classList.contains('xs')){rest.push(...c.children);c.remove()}else if(c.classList.contains('ibsp')||c.classList.contains('dusp'))c.remove();else rest.push(c)}
   const dfc=S&&S.querySelector(':scope>.dfc'),toRow=[],inTitle=[];for(const c of rest){if(dfc&&(c.tagName==='SELECT'||c.tagName==='LABEL'))toRow.push(c);else inTitle.push(c)}
@@ -12182,6 +12186,101 @@ fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[d
   if(R){const fx=R.t.fx,i=fx.findIndex(q=>q.id===R.id),n=fx.length-1;if(i>=0&&n>i){const nf=fx.pop();nf.on=fx[i].on;fx[i]=nf;changed(true)}}return r};
  const a=document.getElementById('ibAdd');if(a)a.onclick=()=>chooseIB()}
 duInit();
+/* ===== Change with live browsing (v0.183, task D) =====
+   Change on a device opens its browser in change mode (ib.chg). One click on an entry (or an arrow key) swaps the device on the track itself, at once:
+   the tile that is open in the browser shows and edits the very device that is on the track. Double-click or Enter keeps it, Escape or closing puts the
+   original back from the copy taken when the browser opened. The whole visit is one undo step (the snapshot taken at the start).
+   A swap touches one device: the instrument object is refilled in place, or one effect of the chain is replaced and syncGraph() builds only its node.
+   While the song plays, every note of the track that is sounding or already handed to the audio engine is played again with the new instrument
+   (chgRevoice): the track gets a fresh input, the old one fades out in 30 ms with everything that was connected to it. */
+let CHG=null,CHGR=0,CHGS=0,CHGCT=0,CHGRT=0;const CHGN=[],CHGDR=new Set(['drums','kick','zsnare','zclap','zhat','ztom','perc']);
+const chgOn=()=>!!(CHG&&ib&&ib.chg),chgDest=t=>{if(t===MSTO)return prevIn;const N=NODES.get(t.id);return N?N.in:null};
+{const _s=start;start=function(){CHGS++;CHGN.length=0;return _s.apply(this,arguments)}}
+{const _sb=synthB;synthB=function(c,I,dest,p,w,dur,v,clip,ns,spb){if(!CHGR&&c===ctx&&PVCH&&clip&&play.on){if(CHGN.length>600){const now=ctx.currentTime;let k=0;for(const e of CHGN)if(e.w+e.du>now)CHGN[k++]=e;CHGN.length=k}CHGN.push({I,ch:PVCH,p,w,du:dur,v,c:clip,ns,spb,s:CHGS,re:0})}return _sb.apply(this,arguments)}}
+function chgRevoice(t){if(!ctx||t===MSTO)return;const N=NODES.get(t.id);if(!N){syncGraph();return}const now=ctx.currentTime+.005,old=N.in,nin=ctx.createGain(),fg=ctx.createGain(),olds=[];
+  for(const c of t.clips)for(const[k,ch]of INST)if(k.startsWith(c.id+':')){if(c.notes){olds.push(ch);INST.delete(k)}else try{ch.out.disconnect();ch.out.connect(nin)}catch(e){}}
+  try{old.disconnect()}catch(e){}old.connect(fg);fg.connect(nin);N.in=nin;N.sig=null;syncGraph();
+  /* the old sound fades only after the new notes have been handed over (building a voice engine takes a moment), and as slowly as the new sound comes in */
+  const I0=t.inst,eng=pvAny(I0)||(UI.poly!==false&&I0.preset==='venom'),F=eng?clamp(+(I0.a??I0.att??I0.attack??0)||0,.03,.35):.03,fade=()=>{const t1=ctx.currentTime+(eng&&play.on?.03:.004);fg.gain.setValueAtTime(1,t1);fg.gain.linearRampToValueAtTime(0,t1+F)};
+  setTimeout(()=>{try{old.disconnect();fg.disconnect()}catch(e){}try{for(const M of[PVS,GVS]){const m=M.get(ctx);if(!m)continue;for(const k of[old,...olds.map(c=>c.in)]){const st=m.get(k);if(st)pvDrop(ctx,st)}}}catch(e){}for(const ch of olds)try{ch.out.disconnect()}catch(e){}},F*1000+400);
+  for(const e of LIVEN)if(e.t===t)e.end=0;
+  if(!play.on){fade();return}const b=curBeat(),made=new Map(),I=t.inst;CHGR=1;
+  try{for(const e of CHGN){if(e.s!==CHGS||ITRK.get(e.I)!==t||e.w+e.du<=now+.03||!(e.re||olds.includes(e.ch)))continue;const c=e.c;let C=null;
+      if(!e.ch.triv){const cs=c.start,key=c.id+':'+play.pass;C=made.get(c.id)||null;if(!C&&b>=cs&&b<cs+c.len&&t.clips.includes(c)){const bF=Math.max(0,b-cs),t0=Math.max(ctx.currentTime,tm(cs+bF));C=clipChain(ctx,c,bF,t0,N.in,60/bpmAt(cs+bF),t.read!==false);INST.set(key,C);made.set(c.id,C);const II=C;setTimeout(()=>{try{II.out.disconnect()}catch(er){}if(INST.get(key)===II)INST.delete(key)},Math.max(0,(C.end-ctx.currentTime)*1000)+14000)}}
+      if(!C)C={triv:true,dest:N.in,in:N.in,out:N.in,end:e.w+e.du};
+      const pe=(pvAny(I)&&!pvBend(c))||(UI.poly!==false&&I.preset==='venom'),ng=pe?C.in:ctx.createGain();if(!pe){ng.gain.setValueAtTime(0,now);ng.gain.linearRampToValueAtTime(1,now+.03);ng.connect(C.in)}
+      NREC=[];PVCH=C;try{pastShim(now,()=>synthB(ctx,I,ng,e.p,e.w,e.du,e.v,c,e.ns,e.spb))}catch(er){}finally{PVCH=null;const L=NREC||[];NREC=null;const tl=e.w+e.du+noteTail(I);if(pe){if(L.length)NGC.push({t:tl,L})}else{L.push(ng);const E={t:tl,L};NGC.push(E);try{vcap(t,ng,e.w,e.du,E)}catch(er){}liveAdd(t,ng,C.in,{p:e.p,v:e.v,s:e.ns},c,e.w,e.du,e.spb,L)}}
+      e.I=I;e.ch=C;e.re=1}}finally{CHGR=0;NREC=null;PVCH=null;fade()}}
+/* the short sound after a swap while the song is stopped: it goes through the track, so the effects are heard too */
+function chgTest(){const C=CHG;if(!C||!ctx||play.on)return;const t=C.t;try{if(ctx.state!=='running')ctx.resume()}catch(e){}clearTimeout(C.tt);
+  const one=()=>{if(CHG!==C||play.on)return;const I=t.inst;if(I&&t!==MSTO){const P=PRESETS[I.preset]||{};preview(t,CHGDR.has(I.preset)||P.cat==='Bass'?36:60,.8)}else{const d=chgDest(t),J=ibTestInst();if(!d||!J)return;const g=ctx.createGain();g.connect(d);synth(ctx,J,g,60,ctx.currentTime+.01,.3,.8);setTimeout(()=>{try{g.disconnect()}catch(e){}},4000)}};
+  one();if(C.mode==='fx')C.tt=setTimeout(one,280)}
+/* the device in the strip behind the browser is emptied once (it would draw a device that is no longer there); the strip is drawn again when the browser closes */
+function chgBlank(){const C=CHG;if(C.blank)return;C.blank=1;const Ds=C.mode==='fx'?[...fxin.querySelectorAll('.dev[data-d=fx]')].filter(d=>d.dataset.id===C.id0):[...fxin.querySelectorAll('.dev')].filter(d=>!['fx','mods','track'].includes(d.dataset.d)&&d.dataset.d);
+  for(const D of Ds){const out=c=>!D.contains(c);IVZ=IVZ.filter(out);VIZ=VIZ.filter(out);PADEL=PADEL.filter(out);if(KVIZ&&D.contains(KVIZ))KVIZ=null;D.style.width=D.offsetWidth+'px';D.style.height=D.offsetHeight+'px';D.innerHTML='<div class="chgph">Being changed in the browser</div>'}}
+function chgSwap(k){const C=CHG,t=C.t,back=k===C.key;
+  if(C.mode==='inst'){const I=t.inst,nt=ibMkTrack(k),src=back?JSON.parse(C.orig):nt.inst;for(const q of Object.keys(I))delete I[q];Object.assign(I,src);I.preset=k;nt.inst=I;ib.t=nt;ITRK.set(I,t);C.cur=k;C.n++;chgBlank();chgRevoice(t)}
+  else{const fx=t.fx,i=fx.findIndex(q=>q.id===C.id);if(i<0)return;const nf=back?JSON.parse(C.orig):mkFx(k);if(!back)nf.on=fx[i].on;fx[i]=nf;C.id=nf.id;const nt=ibMkFxTrack(k);nt.fx=[nf];ib.t=nt;C.cur=k;C.n++;chgBlank();syncGraph()}}
+function chgOpen(mode,t,f){ensureCtx();if(t!==MSTO&&selT!==t.id){selT=t.id;renderHeaders();renderFx()}if(t!==MSTO&&!NODES.get(t.id))syncGraph();const k=mode==='fx'?f.type:t.inst.preset;
+  CHG={mode,t,key:k,cur:k,id:f?f.id:null,id0:f?f.id:null,orig:JSON.stringify(mode==='fx'?f:t.inst),snap:undoSnap(),top:UNDO[UNDO.length-1],redo:REDO,n:0,blank:0,name:t.name,tt:0};
+  let ft;if(mode==='fx'){ft=ibMkFxTrack(k);ft.fx=[f]}else{ft=ibMkTrack(k);ft.inst=t.inst;ITRK.set(t.inst,t)}
+  ibOriginSet();ib={mode,track:t,idx:S.tracks.length,sel:k,t:ft,chg:1};$('#ibT').textContent=mode==='fx'?'Effects Browser · change '+FXDEF[k].name+' on '+t.name:'Instrument Browser · change on '+t.name;$('#ibAdd').textContent='Keep';
+  $('#ib').hidden=false;ibSizeApply();renderIB();$('#ibAdd').focus();{const see=()=>{if(chgOn()&&ib.sel===k)chgSee(document.querySelector('#ibPlane .ibc[data-k="'+k+'"]'))};see();setTimeout(see,80)/* once more when the piano has found its place */}}
+function chgEnd(keep){const C=CHG;if(!C)return;CHG=null;clearTimeout(C.tt);if(ib)ib.chg=0;const t=C.t;if(t!==MSTO&&!S.tracks.includes(t))return;
+  if(C.top===undefined||UNDO.includes(C.top))while(UNDO.length&&UNDO[UNDO.length-1]!==C.top)UNDO.pop();
+  const cur=C.mode==='fx'?t.fx.find(q=>q.id===C.id):t.inst,same=!!cur&&JSON.stringify(cur)===C.orig;
+  if(same){REDO=C.redo;renderFx();return}
+  if(keep){UNDO.push(C.snap);if(UNDO.length>80)UNDO.shift();REDO=[];if(C.mode==='inst'&&PRESETS[t.inst.preset]&&Object.values(PRESETS).some(p=>p.name===C.name))t.name=PRESETS[t.inst.preset].name;if(t!==MSTO)selT=t.id;changed(true);return}
+  REDO=C.redo;if(C.mode==='inst'){const I=t.inst;for(const q of Object.keys(I))delete I[q];Object.assign(I,JSON.parse(C.orig));ITRK.set(I,t);chgRevoice(t)}else{const i=t.fx.findIndex(q=>q.id===C.id);if(i>=0)t.fx[i]=JSON.parse(C.orig);syncGraph()}
+  renderFx()}
+/* bring a tile into view */
+function chgSee(el){const v=$('#ibList');if(!el||!v||!IBLAY)return;const z=IBV2.z,W=v.clientWidth,l=el.offsetLeft*z+IBV2.x,tp=el.offsetTop*z+IBV2.y,w=el.offsetWidth*z,h=el.offsetHeight*z,m=14,top=NAVH+m;let H=v.clientHeight;{/* the piano floats over the lower part of the list: keep the tile above it */const T=$('#ibTry'),a=T&&!T.hidden&&T.getBoundingClientRect(),r=v.getBoundingClientRect();if(a&&a.width&&a.left<r.right&&a.right>r.left){const pt=(a.top-r.top)/ZOOM;if(pt>H*.45&&pt<H)H=pt}}
+  if(w>W-2*m||l<m)IBV2.x+=m-l;else if(l+w>W-m)IBV2.x-=l+w-(W-m);if(h>H-top-m||tp<top)IBV2.y+=top-tp;else if(tp+h>H-m)IBV2.y-=tp+h-(H-m);ibApply()}
+/* arrow keys: the nearest tile in that direction */
+function chgNav(key){const P=$('#ibPlane');if(!P)return;const T=[...P.querySelectorAll('.ibc[data-k]')];if(!T.length)return;const cur=ib.sel&&T.find(x=>x.dataset.k===ib.sel);let nx=null;
+  if(!cur)nx=T.slice().sort((a,b)=>a.offsetTop-b.offsetTop||a.offsetLeft-b.offsetLeft)[0];
+  else{const R=e=>({l:e.offsetLeft,t:e.offsetTop,r:e.offsetLeft+e.offsetWidth,b:e.offsetTop+e.offsetHeight}),c=R(cur),hor=key==='ArrowLeft'||key==='ArrowRight',fw=key==='ArrowRight'||key==='ArrowDown';let best=1e18;
+    for(const e of T){if(e===cur)continue;const q=R(e);let d,o,cc;if(hor){d=fw?q.l-c.r:c.l-q.r;o=Math.max(0,q.t-c.b,c.t-q.b);cc=Math.abs(q.t+q.b-c.t-c.b)}else{d=fw?q.t-c.b:c.t-q.b;o=Math.max(0,q.l-c.r,c.l-q.r);cc=Math.abs(q.l+q.r-c.l-c.r)}
+      if(d<-2)continue;const s=d+o*4+cc*.02;if(s<best){best=s;nx=e}}}
+  if(!nx)return;nx.click();try{nx.focus({preventScroll:true})}catch(e){}chgSee(nx)}
+{const _ob=openBrowser;openBrowser=function(track,idx){if(CHG)chgEnd(false);if(!track||!track.inst||!PRESETS[track.inst.preset])return _ob.apply(this,arguments);chgOpen('inst',track)};
+ const _of=openFxBrowser;openFxBrowser=function(){if(CHG)chgEnd(false);return _of.apply(this,arguments)};
+ duChangeFx=function(t,f){if(CHG)chgEnd(false);chgOpen('fx',t,f)};
+ const _ch=chooseIB;chooseIB=function(){if($('#ib').hidden)return;if(!chgOn())return _ch.apply(this,arguments);$('#ib').hidden=true;ibStopPhrase();chgEnd(true)};
+ /* the tiles of the browsers use the same control names as the strip (fx:i:cutoff ...), so after a visit the strip's controls answer to the browser's.
+    The strip is drawn again whenever the browser closes, unless that has just happened; and one control that cannot be painted no longer stops the others. */
+ const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);if(!IBCTX)CHGRT=performance.now();return r};
+ const _pc=paintCtl;paintCtl=function(el){try{return _pc.apply(this,arguments)}catch(e){}};
+ new MutationObserver(()=>{if(!$('#ib').hidden)return;if(CHG)chgEnd(false);if(performance.now()-CHGRT>60)try{renderFx()}catch(e){}}).observe($('#ib'),{attributes:true,attributeFilter:['hidden']});
+ const _u=undo,_rd=redo;undo=function(){if(chgOn())return;return _u.apply(this,arguments)};redo=function(){if(chgOn())return;return _rd.apply(this,arguments)};
+ const _r=renderIB;renderIB=function(){const r=_r.apply(this,arguments);for(const x of document.querySelectorAll('#ibPlane .chgwas'))x.classList.remove('chgwas');const c=$('#ibCancel');if(c)c.title=chgOn()?'Put the old one back and close':'';
+   if(chgOn()){$('#ibAdd').disabled=false;const w=document.querySelector('#ibPlane .ibc[data-k="'+CHG.key+'"]');if(w)w.classList.add('chgwas')}return r};
+ const _t=renderIBTry;renderIBTry=function(){const on=chgOn();if(on&&ib.sel&&ib.sel!==CHG.cur)chgSwap(ib.sel);const r=_t.apply(this,arguments);
+   if(on){$('#ibFoot').innerHTML='<span class="chghint">One click puts it on the track. Double-click or Enter keeps it. Escape brings the old one back.</span>';const s=$('#ibSrc');if(s&&CHG.t.inst&&CHG.t!==MSTO)s.remove()}return r};
+ const _pp=ibPlayPhrase;ibPlayPhrase=function(){if(!chgOn())return _pp.apply(this,arguments);ibStopPhrase();chgTest()};
+ const _fc=ibFxChain;ibFxChain=function(){if(!chgOn())return _fc.apply(this,arguments);ibFxFree()};
+ const _fa=ibFxApply;ibFxApply=function(){if(!chgOn()||CHG.mode!=='fx')return _fa.apply(this,arguments);const f=ib.t&&ib.t.fx[0],x=f&&(CHG.t===MSTO?MFXM.get(f.id):(NODES.get(CHG.t.id)||{fxm:new Map()}).fxm.get(f.id));if(x)try{x.set(f.p)}catch(e){}};
+ const _ti=ibTestInst;ibTestInst=function(){if(chgOn()&&CHG.t.inst&&CHG.t!==MSTO)return CHG.t.inst;return _ti.apply(this,arguments)};
+ const _no=ibNoteOn;ibNoteOn=function(){const d=chgOn()?chgDest(CHG.t):null;if(!d)return _no.apply(this,arguments);const sv=prevIn;prevIn=d;try{return _no.apply(this,arguments)}finally{prevIn=sv}};
+ const _cg=changed;changed=function(){const r=_cg.apply(this,arguments);if(chgOn())sgSoon();return r};
+ /* opening Change again reuses the tiles that are already built */
+ const _rp=renderPlaneInst;renderPlaneInst=function(){const v=$('#ibList'),k2=[ib.mode,UI.ibGroups!==false,ZOOM].join('|'),P=$('#ibPlane');
+   if(ib.chg&&ib.t&&P&&IBLAY&&v.dataset.k2===k2&&P.querySelector('.ibc[data-k="'+ib.sel+'"]')){const tt=v.querySelector('.ibttl');if(tt)tt.textContent=$('#ibT').textContent;const old=document.getElementById('ibLive');if(old&&old.dataset.k!==ib.sel)ibThumbOne(old);
+     for(const x of P.querySelectorAll('.ibc'))x.classList.toggle('on',x.dataset.k===ib.sel);ibLiveRender();ibLayout();ibFitInst(false);return}
+   _rp.apply(this,arguments);v.dataset.k2=k2}}
+/* a double-click anywhere on a tile keeps it, and so does Enter; arrow keys move to the next tile.
+   The first click opens the tile and draws its device, so the second press lands on a new element and the browser's own double-click may never arrive:
+   the second press is recognised here by time and place. On a tile that was open already, a double-click on a control still belongs to the control. */
+let CHGPD={t:0,x:0,y:0,fresh:0};
+const chgInList=e=>{const r=$('#ibList').getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&!e.target.closest('.ibnav,.ibzoom,#ibTry')};
+document.addEventListener('pointerdown',e=>{if(!ib||$('#ib').hidden||e.button||!e.target.closest||!chgInList(e))return;const c=e.target.closest('#ibPlane .ibc'),n=e.timeStamp;
+  if(CHGPD.fresh&&ib.sel&&n-CHGPD.t<500&&Math.hypot(e.clientX-CHGPD.x,e.clientY-CHGPD.y)<8){e.preventDefault();e.stopPropagation();CHGPD.fresh=0;CHGCT=performance.now();chooseIB();return}
+  CHGPD={t:n,x:e.clientX,y:e.clientY,fresh:c&&c.dataset.k!==ib.sel?1:0}},true);
+for(const ty of['click','dblclick'])document.addEventListener(ty,e=>{if(performance.now()-CHGCT<600){e.stopPropagation();e.preventDefault();return}if(ty!=='click'||e.detail!==2||!ib||!ib.sel||$('#ib').hidden||!e.target.closest||!chgInList(e))return;
+  const c=e.target.closest('#ibPlane .ibc');if(!c||c.dataset.k!==ib.sel||e.target.closest('[data-c],button,select,input,textarea,label,canvas,a,.pad'))return;e.stopPropagation();e.preventDefault();CHGCT=performance.now();chooseIB()},true);
+document.addEventListener('keydown',e=>{if($('#ib').hidden||!ib||e.metaKey||e.ctrlKey||e.altKey)return;const g=e.target,cl=s=>g&&g.closest&&g.closest(s);
+  if(e.key==='Enter'){if(cl('button,input,select,textarea,a')||!ib.sel)return;e.preventDefault();e.stopImmediatePropagation();chooseIB();return}
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight'&&e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;if(cl('input,select,textarea,#ibLive [data-c],#ibTry'))return;e.preventDefault();e.stopImmediatePropagation();chgNav(e.key)},true);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
