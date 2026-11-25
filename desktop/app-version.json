@@ -1,7 +1,7 @@
 {
-  "version": "0.154",
-  "sha256": "04946a96ce20ab9771e20159cf50ab91eb8e1cc5c542d4ee66f556f2a7d6e133",
-  "size": 1911993,
+  "version": "0.155",
+  "sha256": "3f3765690582be3d3839e7e127758321a9e56a8805fdf6ec2fc3c377b4bacc2d",
+  "size": 1914893,
   "minShell": "0.147.0",
   "notes": ""
 }
