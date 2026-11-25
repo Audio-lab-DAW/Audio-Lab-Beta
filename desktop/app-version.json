@@ -1,7 +1,7 @@
 {
-  "version": "0.173",
-  "sha256": "124279ff0abdcb2cc2e52dc7e1fd102f37a60bdaf163a0baa0d6eab885050e45",
-  "size": 2273235,
+  "version": "0.174",
+  "sha256": "0603a9fba1242bdc7f01108d78ac066cf8025f1d28df7a51c6d6b86ebd844f1d",
+  "size": 2309957,
   "minShell": "0.147.0",
-  "notes": "The volume numbers under the mixer faders are there at once after every redraw, and with animations off the faders no longer change height a moment later. Searching Settings for \"reset\" finds Reset all settings. The layout picture in Settings has an Edit button on the Transport block."
+  "notes": "New instrument: Emit. Particles fly across the picture of a sample and each one plays the spot it is over, filtered or panned by its height. One or two emitters you can move, resize and aim in the picture, two movement sources (a ramp on Angle makes an emitter spin), 10 presets including Sprinkler in the centre. Find it next to the Sampler in the instrument browser."
 }
