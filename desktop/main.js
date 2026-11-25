@@ -257,7 +257,7 @@ let autoUpdater = null;
 let updReady = null;   // a downloaded version waiting for a restart: { version, notes, size }
 let updLast = { status: 'never', at: 0 };   // result of the last check, for the page's update window
 let updChain = Promise.resolve();   // checks run one after another, never two at once
-/* Every request has a time limit. Before v0.171 a request that never answered (after sleep, on a network that drops packets) left the updater
+/* Every request has a time limit. Before v0.172 a request that never answered (after sleep, on a network that drops packets) left the updater
    "busy" for good, and "Check for updates" then did nothing at all until the app was restarted. */
 async function updFetch(file, ms) {
   const { net } = require('electron');
@@ -358,7 +358,7 @@ function applyContent() {
   if (win && !win.isDestroyed()) { appReady = false; win.webContents.executeJavaScript('try{window.audiolabHost&&window.audiolabHost.beforeReload&&window.audiolabHost.beforeReload()}catch(e){}', true).catch(() => {}).then(() => setTimeout(() => { if (win && !win.isDestroyed()) win.reload(); }, 300)); }
   return true;
 }
-// From the menu, the hourly timer, and program versions older than v0.171 (their button calls this). Newer program versions show their own update window.
+// From the menu, the hourly timer, and program versions older than v0.172 (their button calls this). Newer program versions show their own update window.
 async function checkUpdates(manual) {
   if (manual && win && !win.isDestroyed() && appReady) {
     try { if (await win.webContents.executeJavaScript('!!(window.audiolabHost&&window.audiolabHost.updOpen&&(window.audiolabHost.updOpen(),true))', true)) return; } catch (e) { /* older program: dialogs below */ }
@@ -396,7 +396,7 @@ ipcMain.handle('al:dac-get', (e, uid) => alvol(['get', String(uid || 'default')]
 ipcMain.handle('al:dac-set', (e, uid, v) => alvol(['set', String(uid || 'default'), String(Math.max(0, Math.min(1, +v || 0)))]));
 ipcMain.handle('al:check-updates', () => checkUpdates(true));
 ipcMain.handle('al:apply-update', () => applyContent());
-/* every device with its kind, channels, rate and the rates it offers; setting the device's own sample rate (v0.171) */
+/* every device with its kind, channels, rate and the rates it offers; setting the device's own sample rate (v0.172) */
 ipcMain.handle('al:dac-info', () => alvol(['info']));
 ipcMain.handle('al:dac-rate', (e, uid, hz) => alvol(['rate', String(uid || 'default'), String(Math.round(+hz || 0))]));
 

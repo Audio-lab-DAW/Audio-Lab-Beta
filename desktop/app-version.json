@@ -1,7 +1,7 @@
 {
-  "version": "0.171",
-  "sha256": "48f9cb4f69a151519780a54dbac38c5bc895b06e880759e28f175cee3cf47773",
-  "size": 2203966,
+  "version": "0.172",
+  "sha256": "4ca211fff511fb9c72a21168cccbaffb55592172269f42a3e09827aa8ad2deaf",
+  "size": 2269942,
   "minShell": "0.147.0",
-  "notes": ""
+  "notes": "Check for updates works again and opens a window with the installed and newest version, what is new, and Update now. New: install updates automatically (off by default), a clearer Audio devices window with an icon per device, and the settings tab Interface and DAC with DAC mode, Interface mode and profiles for common devices."
 }
