@@ -1345,4 +1345,4 @@ Sources: musicradar.com/news/ultimate-guide-to-sub-bass · native-instruments.co
 ### Release
 - v0.186: commit 60cf96e, artifact version 209, project doc `claude/audiolab-sub-bass-research-and-device.md`.
 - It was built on top of v0.185 (pinned devices), which another session released while this one was testing; the Sub block was put onto the new version and all its tests were run again there.
-- **Desktop build**: run 45707822024 (number 81) for this commit, started 21:49 UTC; the release job succeeded, the Mac and Windows jobs were still building when this was written. Check it, and start it once more if it failed.
+- **Desktop build**: run 45707822024 (number 81) for this commit, started 21:49 UTC: succeeded (release, Mac and Windows).
