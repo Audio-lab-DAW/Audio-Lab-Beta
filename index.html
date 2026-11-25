@@ -867,6 +867,33 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 .spov.anz-left>.anzrs{display:block;top:0;bottom:0;right:0;width:5px;cursor:ew-resize}.spov.anz-right>.anzrs{display:block;top:0;bottom:0;left:0;width:5px;cursor:ew-resize}.spov .anzrs:hover{background:rgba(76,141,255,.45)}
 body.anz-l #stage{margin-left:var(--anzl,250px)}body.anz-r #stage{margin-right:var(--anzr,250px)}
 body.viz-l.anz-l #stage{margin-left:calc(var(--vzw,300px) + 12px + var(--anzl,250px))}body.viz-r.anz-r #stage{margin-right:calc(var(--vzw,300px) + 12px + var(--anzr,250px))}
+#mixWin .mxs{position:relative}#mixWin>.fwb{position:relative}
+#mixWin.mxcab .mxs{padding-bottom:46px}
+#mixWin svg.cabs{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:6}
+#mixWin svg.cabs path{fill:none;stroke-linecap:round}
+#mixWin svg.cabs .cbk{stroke:rgba(0,0,0,.55)}
+#mixWin svg.cabs .cfr,#mixWin svg.cabs .cend{transition:opacity .12s,stroke-width .12s}
+#mixWin svg.cabs.hov .cfr:not(.hi),#mixWin svg.cabs.hov .cend:not(.hi){opacity:.18!important}
+#mixWin svg.cabs .cfr.hi{stroke-width:4px;filter:drop-shadow(0 0 4px currentColor)}
+#mixWin svg.cabs .chit{stroke:transparent;stroke-width:12px;pointer-events:stroke;cursor:pointer}
+#mixWin svg.cabs .cabsk{fill:#121419;stroke-width:2;pointer-events:all;cursor:crosshair;transition:r .1s,fill .1s}
+#mixWin svg.cabs .cabsk:hover{r:6.5px;fill:#2a2d36}
+#mixWin svg.cabs .cabsk.mst{pointer-events:none;stroke-dasharray:2 2;opacity:.7}
+#mixWin svg.cabs .cabtmp{fill:none;stroke-width:2.6;stroke-dasharray:6 4;pointer-events:none}
+body.cabdrag #mixWin svg.cabs .chit{pointer-events:none}body.cabdrag,body.cabdrag *{cursor:crosshair!important}
+#mixWin .mx.cabhi{outline:2px solid var(--cabc,#fff);outline-offset:-2px}
+#mixWin .mx.cabok{outline:2px solid #3ecf8e;outline-offset:-2px;background:linear-gradient(rgba(62,207,142,.14),rgba(62,207,142,.04))}
+#mixWin .mx.cabno{outline:2px dashed rgba(255,107,107,.75);outline-offset:-2px}
+#mixWin .cablg{position:absolute;right:12px;bottom:3px;height:14px;display:flex;gap:10px;align-items:center;font:600 9.5px Inter,system-ui,sans-serif;color:#a3a8b5;pointer-events:none;padding:0 6px;border-radius:5px;background:rgba(12,13,17,.6);z-index:7;white-space:nowrap}
+#mixWin .cablg span{display:flex;align-items:center;gap:4px}#mixWin .cablg em{font-style:normal;color:#6f7482}#mixWin.mxcmp .cablg em{display:none}
+#cabPop{position:fixed;z-index:9795;width:290px;max-width:calc(100vw - 16px);padding:10px 12px 12px;border-radius:12px;background:rgba(19,20,27,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.65);color:#d9dce6;font-size:12px;line-height:1.45}
+#cabPop .cabph{display:flex;align-items:center;gap:5px;font-size:12px}#cabPop .cabph i{width:9px;height:9px;border-radius:50%;flex:none}#cabPop .cabph span{color:#8d92a3}#cabPop .cabph b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:95px}
+#cabPop .cabph button{margin-left:auto;min-height:22px;width:24px;padding:0;background:transparent;border-color:transparent}
+#cabPop .cabpk{display:flex;align-items:center;gap:6px;color:#9aa0ad;font-size:11px;margin:4px 0 2px}
+#cabPop p{margin:6px 0}#cabPop ul{margin:4px 0;padding-left:18px}#cabPop .cabh{color:#8d92a3}
+#cabPop .cabctl{margin:6px 0 8px}#cabPop .cabctl>*{width:100%!important}
+#cabPop .cabpb{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#cabPop .cabpb button{min-height:26px;padding:0 10px}
+#cabPop .cabpb .dng{color:#ff8a8a;border-color:rgba(255,107,107,.35)}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5026,7 +5053,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.161',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.162',BUILD='25 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8763,6 +8790,132 @@ const ANZD={
    else{const y0=18,y1=h-22,cx=Math.round(w/2),bw=Math.max(4,Math.min(10,w-22)),Y=q=>y1-(q+1)/2*(y1-y0);g.fillStyle='rgba(255,95,107,.16)';g.fillRect(cx-bw/2,Y(0),bw,y1-Y(0));g.fillStyle='rgba(255,255,255,.07)';g.fillRect(cx-bw/2,y0,bw,Y(0)-y0);
      if(v!=null){g.fillStyle=col;const a=Y(0),b=Y(v);g.fillRect(cx-bw/2,Math.min(a,b),bw,Math.abs(b-a));g.fillStyle='#fff';g.fillRect(cx-bw/2-2,b-1,bw+4,2);if(M.lo!=null){g.fillStyle='rgba(255,255,255,.5)';g.fillRect(cx-bw/2,Y(M.lo),bw,1)}}
      g.fillStyle='rgba(255,255,255,.4)';g.fillText('+1',cx+bw/2+4,y0+6);g.fillText('0',cx+bw/2+4,Y(0)+3);g.fillText('-1',cx+bw/2+4,y1);if(v!=null){g.fillStyle=col;g.fillText((v>=0?'+':'')+v.toFixed(2),Math.max(1,cx-14),h-5)}}}};
+/* ===== mixer cables (v0.162): sends, group outputs and sidechains drawn as cables between channels, like FL Studio's mixer routing =====
+   The cables only show and edit routings that already exist in the project data:
+   - send:  t.sends[returnId] = level (0..1), the same value as the Sends bars in each strip
+   - out:   t.grp = id of the group track the channel plays through (grpOf / grpAnc / addToGroup)
+   - sc:    f.p.src on a Sidechain effect, or m.p.src on a Sidechain follower (modulator), holding the id of the source track
+   Every change goes through pushUndo() and changed(), exactly like the track menu, so menus, strips and cables stay in step.
+   Nothing about how the sound is routed or calculated is changed here. */
+MXSD.cab=1;
+const CABK={send:{n:'Send',da:'',w:2.2,tip:'Send: a copy of the sound goes to a return channel'},out:{n:'Output to group',da:'8 4',w:2.8,tip:'Output: the channel plays through a group'},sc:{n:'Sidechain',da:'1 5',w:2.6,tip:'Sidechain: the level of one channel controls another'}};
+const CABLANE=46,CABSVG='http://www.w3.org/2000/svg';
+const CAB={drag:null,hov:-1,sig:'',rT:null,raf:0,list:[],G:null};
+const cabOn=()=>!!mxsO().cab;
+function cabList(){const L=[];for(const t of S.tracks){
+    if(t.kind!=='return')for(const rid in t.sends||{}){const r=trkById(rid),lv=t.sends[rid];if(r&&r!==t&&lv>0)L.push({k:'send',a:t,b:r,lv})}
+    const g=grpOf(t);if(g)L.push({k:'out',a:t,b:g});
+    for(const f of t.fx||[])if(f&&f.p&&typeof f.p.src==='string'){const s=trkById(f.p.src);if(s&&s!==t)L.push({k:'sc',a:s,b:t,fx:f})}
+    for(const m of t.mods||[])if(m&&m.type==='side'&&m.p&&typeof m.p.src==='string'){const s=trkById(m.p.src);if(s&&s!==t)L.push({k:'sc',a:s,b:t,mod:m})}}
+  return L}
+const cabSig=()=>cabList().map(c=>c.k+c.a.id+'>'+c.b.id+(c.lv?':'+c.lv.toFixed(3):'')+(c.mod&&c.mod.off?'x':'')).join('|')+'|'+(cabOn()?1:0);
+function cabSoon(){if(CAB.raf)return;CAB.raf=requestAnimationFrame(()=>{CAB.raf=0;try{cabDraw()}catch(e){console.error('AudioLab cables',e)}})}
+/* where every strip sits, in the scrolling content of the mixer (so the cables scroll with the strips) */
+function cabGeo(){const w=document.getElementById('mixWin');if(!w||w.hidden)return null;const ms=w.querySelector('.mxs');if(!ms)return null;
+  const R=ms.getBoundingClientRect(),k=(R.width/(ms.offsetWidth||1))||1,P=new Map();let right=0,bot=0;
+  for(const mx of ms.querySelectorAll('.mx[data-id]')){const r=mx.getBoundingClientRect(),x=(r.left-R.left)/k+ms.scrollLeft-ms.clientLeft,y=(r.top-R.top)/k-ms.clientTop,wd=r.width/k,h=r.height/k;
+    P.set(mx.dataset.id,{x,y,w:wd,h,cx:x+wd/2,by:y+h,el:mx});right=Math.max(right,x+wd);bot=Math.max(bot,y+h)}
+  return{w,ms,R,k,P,right,sy:bot+10,H:ms.clientHeight}}
+const cabPt=(G,cx,cy)=>({x:(cx-G.R.left)/G.k+G.ms.scrollLeft-G.ms.clientLeft,y:(cy-G.R.top)/G.k-G.ms.clientTop});
+function cabPath(x1,y1,x2,y2,sag){const s=sag*1.33;return`M${x1.toFixed(1)} ${y1.toFixed(1)}C${x1.toFixed(1)} ${(y1+s).toFixed(1)} ${x2.toFixed(1)} ${(y2+s).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
+function cabDraw(){{const w0=document.getElementById('mixWin');if(w0)w0.classList.toggle('mxcab',cabOn())}const G=cabGeo();if(!G)return;const{w,ms,P}=G;let sv=ms.querySelector(':scope>svg.cabs');
+  if(!cabOn()){if(sv)sv.remove();cabLegend(w,false);return}
+  if(!sv){sv=document.createElementNS(CABSVG,'svg');sv.setAttribute('class','cabs');ms.appendChild(sv);cabWireSvg(sv)}
+  sv.setAttribute('width',Math.ceil(G.right+12));sv.setAttribute('height',Math.max(10,Math.floor(G.H)));
+  const L=cabList();CAB.list=L;CAB.G=G;const inc=new Map(),incN=new Map(),outN=new Map(),outI=new Map();
+  for(const c of L){incN.set(c.b.id,(incN.get(c.b.id)||0)+1);outN.set(c.a.id,(outN.get(c.a.id)||0)+1)}
+  const sy=G.sy,maxSag=Math.max(6,G.H-sy-17),TI=new Map(S.tracks.map((t,i)=>[t.id,i]));let back='',front='',hit='',ends='';
+  L.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B)return;
+    const nB=incN.get(c.b.id),jB=inc.get(c.b.id)||0;inc.set(c.b.id,jB+1);const nA=outN.get(c.a.id),jA=outI.get(c.a.id)||0;outI.set(c.a.id,jA+1);
+    const spB=Math.min(9,B.w*.5/Math.max(1,nB)),spA=Math.min(4,A.w*.3/Math.max(1,nA));
+    const x1=A.cx+(jA-(nA-1)/2)*spA,x2=B.cx+(jB-(nB-1)/2)*spB+(nB>1?0:(c.k==='send'?-2:c.k==='sc'?2:0)),dx=Math.abs(x2-x1);
+    const sag=clamp(maxSag*(1-Math.exp(-dx/240))+5-(dx>160?((TI.get(c.a.id)||0)%4)*3:0)+(c.k==='out'?-2:c.k==='sc'?3:0),5,maxSag),d=cabPath(x1,sy,x2,sy,sag),K=CABK[c.k],col=c.a.color||'#cfd3db';
+    const op=c.k==='send'?(.5+.5*Math.min(1,c.lv/.7)).toFixed(2):c.mod&&c.mod.off?'.4':'1';
+    back+=`<path class="cbk" data-i="${i}" d="${d}" stroke-width="${K.w+2.6}"${K.da?` stroke-dasharray="${K.da}"`:''}/>`;
+    front+=`<path class="cfr" data-i="${i}" d="${d}" stroke="${col}" stroke-width="${K.w}" opacity="${op}"${K.da?` stroke-dasharray="${K.da}"`:''}/>`;
+    ends+=`<circle class="cend" data-i="${i}" cx="${x2.toFixed(1)}" cy="${sy}" r="2.6" fill="${col}"/>`;
+    hit+=`<path class="chit" data-i="${i}" d="${d}"><title>${esc(c.a.name)} to ${esc(c.b.name)}: ${esc(cabWhat(c))}. Click to change or remove.</title></path>`});
+  let socks='';for(const t of S.tracks){const A=P.get(t.id);if(!A)continue;socks+=`<circle class="cabsk" data-sk="${t.id}" cx="${A.cx.toFixed(1)}" cy="${sy}" r="5" stroke="${t.color||'#cfd3db'}"><title>Drag from here to another channel to send, route or sidechain ${esc(t.name)}</title></circle>`}
+  {const M=P.get('master');if(M)socks+=`<circle class="cabsk mst" cx="${M.cx.toFixed(1)}" cy="${sy}" r="5" stroke="#cfd3db"><title>Master: drop a cable here to send a grouped channel straight to the master</title></circle>`}
+  sv.innerHTML=`<g class="cbg">${back}</g><g class="cfg">${front}</g><g class="ceg">${ends}</g><g class="chg">${hit}</g><g class="csk">${socks}</g><path class="cabtmp" d=""/>`;
+  CAB.hov=-1;cabLegend(w,true,L)}
+function cabWhat(c){if(c.k==='send')return'send at '+SPEC_SEND.f(c.lv);if(c.k==='out')return'plays through this group';return c.mod?'sidechain follower'+(c.mod.off?' (switched off)':''):'Sidechain effect source'}
+function cabLegend(w,on,L){let lg=w.querySelector('.cablg');if(!on){if(lg)lg.remove();return}const fb=w.querySelector('.fwb');if(!fb)return;
+  if(!lg){lg=document.createElement('div');lg.className='cablg';fb.appendChild(lg)}
+  const sw=k=>`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 4H25" stroke="#cfd3db" stroke-width="${CABK[k].w}" fill="none" stroke-linecap="round"${CABK[k].da?` stroke-dasharray="${CABK[k].da}"`:''}/></svg>`;
+  const h=`${Object.keys(CABK).map(k=>`<span title="${esc(CABK[k].tip)}">${sw(k)}${CABK[k].n}</span>`).join('')}<em>${L&&L.length?'Click a cable to change it':'Drag from a dot under a channel to connect it'}</em>`;if(lg._h!==h){lg._h=h;lg.innerHTML=h}}
+function cabHi(i){if(CAB.hov===i)return;const w=document.getElementById('mixWin');if(!w)return;for(const el of w.querySelectorAll('.cabhi'))el.classList.remove('cabhi');for(const el of w.querySelectorAll('svg.cabs .hi'))el.classList.remove('hi');CAB.hov=i;
+  const c=CAB.list[i];if(!c)return;for(const el of w.querySelectorAll(`svg.cabs [data-i="${i}"]`))el.classList.add('hi');const sv=w.querySelector('svg.cabs');if(sv)sv.classList.add('hov');
+  for(const t of[c.a,c.b]){const el=w.querySelector(`.mx[data-id="${t.id}"]`);if(el){el.classList.add('cabhi');el.style.setProperty('--cabc',c.a.color||'#cfd3db')}}}
+function cabUnhi(){const w=document.getElementById('mixWin');CAB.hov=-1;if(!w)return;for(const el of w.querySelectorAll('.cabhi'))el.classList.remove('cabhi');for(const el of w.querySelectorAll('svg.cabs .hi'))el.classList.remove('hi');const sv=w.querySelector('svg.cabs');if(sv)sv.classList.remove('hov')}
+function cabWireSvg(sv){sv.addEventListener('pointerover',e=>{const p=e.target.closest&&e.target.closest('.chit');if(p&&!CAB.drag)cabHi(+p.dataset.i)});
+  sv.addEventListener('pointerout',e=>{const p=e.target.closest&&e.target.closest('.chit');if(p&&!(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('.chit')))cabUnhi()});
+  sv.addEventListener('click',e=>{const p=e.target.closest&&e.target.closest('.chit');if(!p)return;e.stopPropagation();const c=CAB.list[+p.dataset.i];if(c)cabPop(c,e.clientX,e.clientY)})}
+/* what a cable from a to b can mean: only the choices that are valid for that pair */
+function cabOpts(a,b){const it=[];if(!a||!b||a===b)return it;
+  if(b==='master'){const g=grpOf(a);if(g)it.push({label:'Output to Master',sub:a.name+' leaves '+g.name+' and plays straight into the master',dot:'#cfd3db',act:()=>{pushUndo();delete a.grp;changed(true);toast(a.name+' now plays straight into the master.')}});return it}
+  if(b.kind==='return'&&a.kind!=='return'){const on=(a.sends||{})[b.id]>0;if(on)it.push({label:'Already sends to '+b.name,sub:'Change the amount',dot:b.color,act:()=>{const c=cabList().find(x=>x.k==='send'&&x.a===a&&x.b===b);if(c)cabPop(c,CAB.lx||200,CAB.ly||200)}});
+    else it.push({label:'Send to '+b.name,sub:'Feeds '+b.name+' at half level. Change the amount on the cable or under Sends.',dot:b.color,act:()=>{pushUndo();a.sends=a.sends||{};a.sends[b.id]=.5;changed(true)}})}
+  if(b.kind==='group'&&a.kind!=='return'){if(grpOf(a)===b)it.push({label:'Already plays through '+b.name,dot:b.color,dis:true});else if(!grpAnc(b).includes(a))it.push({label:'Output to '+b.name,sub:a.name+' plays through the group '+b.name+' (its effects and fader)',dot:b.color,act:()=>{addToGroup(a,b);toast(a.name+' now plays through '+b.name+'.')}})}
+  const sc=[];(b.mods||[]).forEach((m,j)=>{if(m.type!=='side')return;const cur=m.p&&m.p.src===a.id;sc.push({label:'Sidechain follower '+(j+1)+(cur?' (already follows '+a.name+')':''),sub:cur?'':'Now follows '+spoName(m.p.src)+'. Make it follow '+a.name+' instead.',dot:MODT.side.c,dis:cur,act:()=>{pushUndo();m.p.src=a.id;changed(false);renderFx();cabSoon()}})});
+  b.fx.forEach((f,j)=>{if(f.type!=='side')return;const cur=f.p&&f.p.src===a.id;sc.push({label:'Sidechain effect in slot '+(j+1)+(cur?' (source is already '+a.name+')':''),sub:cur?'':'Pumps in time with the song. The cable marks '+a.name+' as its source.',dot:'#4cc9f0',dis:cur,act:()=>{pushUndo();f.p.src=a.id;changed(true)}})});
+  sc.push({label:'New sidechain follower that ducks '+b.name,sub:a.name+' pushes the volume of '+b.name+' down while it plays. Shape it in the modulators of '+b.name+'.',dot:MODT.side.c,act:()=>{pushUndo();const m=modNew('side');m.p.src=a.id;m.routes.push({pid:'t:'+b.id+':vol',d:.5});b.mods=b.mods||[];b.mods.push(m);changed(false);renderFx();cabSoon();toast(b.name+' now ducks when '+a.name+' plays.')}});
+  if(FXDEF.side)sc.push({label:'Add a Sidechain effect to '+b.name,sub:'A pumping effect in time with the song, with '+a.name+' marked as its source',dot:'#4cc9f0',act:()=>{pushUndo();const f=mkFx('side');f.p.src=a.id;b.fx.push(f);changed(true)}});
+  if(it.length)it.push('-');it.push({head:'Sidechain into '+b.name},...sc);return it}
+function cabRemove(c){pushUndo();if(c.k==='send'){if(c.a.sends)delete c.a.sends[c.b.id];changed(true)}
+  else if(c.k==='out'){const g=c.b;if(g.grp&&trkById(g.grp))c.a.grp=g.grp;else delete c.a.grp;changed(true)}
+  else if(c.fx){delete c.fx.p.src;changed(true)}
+  else if(c.mod){const m=c.mod;for(const r of m.routes||[])if(r.b!=null){const en=PAREG.get(r.pid);if(en)try{en.set(en.spec.v(r.b))}catch(e){}}c.b.mods=(c.b.mods||[]).filter(q=>q!==m);changed(false);renderFx()}
+  cabSoon()}
+/* clicking a cable: its amount, and a way to remove it */
+function cabPopClose(){const p=document.getElementById('cabPop');if(p)p.remove()}
+function cabPop(c,cx,cy){cabPopClose();const p=document.createElement('div');p.id='cabPop';p.className='cabp';const K=CABK[c.k],a=c.a,b=c.b;let body='',rm='Remove cable';
+  if(c.k==='send'){const id='mx:'+a.id+':s:'+b.id;body=`<p>A copy of ${esc(a.name)} goes to the return ${esc(b.name)}. This is the same amount as the ${esc(b.name)} bar under Sends.</p><div class="cabctl">${ctl('hb',id,'Send level',SPEC_SEND,()=>(a.sends||{})[b.id]||0,v=>{a.sends=a.sends||{};if(v>0)a.sends[b.id]=v;else delete a.sends[b.id];sgSoon();changed(false);paintSel(id)})}</div>`;rm='Stop sending'}
+  else if(c.k==='out'){const up=b.grp&&trkById(b.grp);body=`<p>${esc(a.name)} plays through the group ${esc(b.name)}: its sound goes through the effects and fader of ${esc(b.name)}.</p>`;rm='Take out of '+b.name+(up?' (to '+up.name+')':' (to Master)')}
+  else if(c.mod){const rs=(c.mod.routes||[]).map(r=>`<li>${esc(paLabel(r.pid))} <b>${Math.round(r.d*100)}%</b></li>`).join('');body=`<p>A sidechain follower on ${esc(b.name)} follows the level of ${esc(a.name)}${c.mod.off?' (switched off)':''}.</p>${rs?`<ul>${rs}</ul>`:'<p class="cabh">It has no targets yet: open it in the devices and click 🎯.</p>'}`;rm='Remove the follower'}
+  else{body=`<p>The Sidechain effect on ${esc(b.name)} has ${esc(a.name)} marked as its source. It pumps in time with the song.</p>`;rm='Remove the source'}
+  p.innerHTML=`<div class="cabph"><i style="background:${a.color}"></i><b>${esc(a.name)}</b><span>to</span><i style="background:${b.color}"></i><b>${esc(b.name)}</b><button type="button" data-cb="x" aria-label="Close" title="Close">✕</button></div><div class="cabpk"><svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 4H25" stroke="${a.color}" stroke-width="${K.w}" fill="none" stroke-linecap="round"${K.da?` stroke-dasharray="${K.da}"`:''}/></svg>${K.n}</div>${body}<div class="cabpb">${c.k!=='send'?`<button type="button" data-cb="show" title="Select ${esc(b.name)} and show its devices">Show ${esc(b.name)}</button>`:''}<button type="button" class="dng" data-cb="rm">${esc(rm)}</button></div>`;
+  document.body.appendChild(p);paintAll(p);
+  p.addEventListener('click',e=>{const bt=e.target.closest('[data-cb]');if(!bt)return;const k=bt.dataset.cb;if(k==='x')cabPopClose();else if(k==='rm'){cabPopClose();cabRemove(c)}else if(k==='show'){cabPopClose();selectTrack(b.id);try{renderFx()}catch(x){}}});
+  p.style.left='100px';p.style.top='100px';const r0=p.getBoundingClientRect(),zf=r0.left>0?r0.left/100:1;p.style.left=clamp(cx+10,4,innerWidth-r0.width-6)/zf+'px';p.style.top=clamp(cy-r0.height-10,4,innerHeight-r0.height-6)/zf+'px'}
+document.addEventListener('pointerdown',e=>{const p=document.getElementById('cabPop');if(p&&!p.contains(e.target)&&!(e.target.closest&&e.target.closest('svg.cabs .chit')))p.remove()},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(CAB.drag)cabEnd(null);cabPopClose()}});
+/* dragging a new cable from a socket */
+function cabTarget(G,cx,cy){const q=cabPt(G,cx,cy);for(const[id,A] of G.P)if(q.x>=A.x-2&&q.x<=A.x+A.w+2&&q.y>=A.y-4&&q.y<=Math.max(A.by,G.sy)+CABLANE)return id;return null}
+function cabMark(id,ok){const w=document.getElementById('mixWin');if(!w)return;for(const el of w.querySelectorAll('.cabok,.cabno'))el.classList.remove('cabok','cabno');if(id){const el=w.querySelector(`.mx[data-id="${id}"]`);if(el)el.classList.add(ok?'cabok':'cabno')}}
+function cabEnd(e){const D=CAB.drag;CAB.drag=null;document.body.classList.remove('cabdrag');cabMark(null);const w=document.getElementById('mixWin');const tp=w&&w.querySelector('svg.cabs .cabtmp');if(tp)tp.setAttribute('d','');if(!D||!e)return;
+  if(!D.moved){toast('Drag from this dot to another channel to connect '+D.a.name+'.');return}
+  const id=cabTarget(D.G,e.clientX,e.clientY);if(!id||id===D.a.id)return;const b=id==='master'?'master':trkById(id);const it=cabOpts(D.a,b);CAB.lx=e.clientX;CAB.ly=e.clientY;
+  if(!it.length){toast(id==='master'?D.a.name+' already plays into the master.':'Nothing to connect from '+D.a.name+' to '+b.name+'.');return}
+  openMenu(e.clientX,e.clientY,[{head:'Connect '+D.a.name+' to '+(b==='master'?'Master':b.name)},...it])}
+function cabMount(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;
+  const fx=w.querySelector('.fwx');if(fx&&!fx.querySelector('#mxCab')){const after=fx.querySelector('#mxCmp');const h='<button class="mvi mvspo" id="mxCab" title="Cables: show the sends, group outputs and sidechains as cables under the channels. Drag from the dot under a channel to make a new one." aria-label="Cables"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="7" r="2.4"/><circle cx="19" cy="7" r="2.4"/><path d="M5 9.4c0 9 14 9 14 0"/></svg></button>';if(after)after.insertAdjacentHTML('afterend',h);else fx.insertAdjacentHTML('beforeend',h);fx.querySelector('#mxCab').onclick=()=>mxsSet('cab',cabOn()?0:1)}
+  {const b=w.querySelector('#mxCab');if(b)b.classList.toggle('on',cabOn())}
+  if(!w._cab){w._cab=1;
+    w.addEventListener('pointerdown',e=>{const s=e.target.closest&&e.target.closest('svg.cabs .cabsk[data-sk]');if(!s||e.button!==0)return;e.preventDefault();e.stopPropagation();const a=trkById(s.dataset.sk);if(!a)return;cabPopClose();cabUnhi();
+      const G=cabGeo();if(!G)return;CAB.drag={a,G,x:e.clientX,y:e.clientY,moved:false};document.body.classList.add('cabdrag')},true);
+    addEventListener('pointermove',e=>{const D=CAB.drag;if(!D)return;if(!D.moved&&Math.hypot(e.clientX-D.x,e.clientY-D.y)<4)return;D.moved=true;const G=D.G,ms=G.ms;
+      if(e.clientX<G.R.left+36)ms.scrollLeft-=14;else if(e.clientX>G.R.right-36)ms.scrollLeft+=14;
+      const A=G.P.get(D.a.id),q=cabPt(G,e.clientX,e.clientY),tp=ms.querySelector('svg.cabs .cabtmp');if(tp&&A){tp.setAttribute('d',cabPath(A.cx,G.sy,q.x,q.y,Math.min(36,12+Math.abs(q.x-A.cx)*.05)));tp.setAttribute('stroke',D.a.color||'#cfd3db')}
+      const id=cabTarget(G,e.clientX,e.clientY);if(id&&id!==D.a.id)cabMark(id,cabOpts(D.a,id==='master'?'master':trkById(id)).some(x=>x.act&&!x.dis));else cabMark(null)});
+    addEventListener('pointerup',e=>{if(CAB.drag)cabEnd(e)});addEventListener('pointercancel',()=>{if(CAB.drag)cabEnd(null)})}
+  CAB.rT=S.tracks.slice();CAB.sig=cabSig();cabSoon()}
+/* keep the strips, the cables and every menu in step: a change anywhere goes through changed() */
+function cabChanged(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const T=CAB.rT;
+  if(!T||T.length!==S.tracks.length||S.tracks.some((t,i)=>t!==T[i])){if(!CAB.rr){CAB.rr=requestAnimationFrame(()=>{CAB.rr=0;const T2=CAB.rT;if(!T2||T2.length!==S.tracks.length||S.tracks.some((t,i)=>t!==T2[i])){cabPopClose();renderMixer()}})}return}
+  const sg=cabSig();if(sg!==CAB.sig){CAB.sig=sg;cabSoon()}}
+{const _ch=changed;changed=function(){const r=_ch.apply(this,arguments);try{cabChanged()}catch(e){console.error('AudioLab cables',e)}return r}}
+{const _rmC=renderMixer;renderMixer=function(){cabPopClose();const r=_rmC.apply(this,arguments);try{cabMount()}catch(e){console.error('AudioLab cables',e)}return r}}
+/* the lane under the strips takes its height from the faders */
+/* the lane under the strips: mxFit sizes the faders for the room above it (it is measured as if the mixer were that much shorter) */
+{const _mfC=mxFit;mxFit=function(){const w=document.getElementById('mixWin'),ms=w&&!w.hidden&&w.querySelector('.mxs');if(!ms||!cabOn())return _mfC.apply(this,arguments);
+  w.classList.add('mxcab');const h=ms.clientHeight,bb=getComputedStyle(ms).boxSizing==='border-box';ms.style.paddingBottom='8px';ms.style.height=Math.max(60,(bb?h-(CABLANE-8):h-CABLANE-8)-12)+'px';/* 12 px spare: the volume numbers under the faders are often still empty when this runs */
+  try{return _mfC.apply(this,arguments)}finally{ms.style.paddingBottom='';ms.style.height='';cabSoon()}}}
+{const _maC=mxsApply;mxsApply=function(){const r=_maC.apply(this,arguments);try{const w=document.getElementById('mixWin');if(w){w.classList.toggle('mxcab',cabOn());const b=w.querySelector('#mxCab');if(b)b.classList.toggle('on',cabOn())}cabSoon()}catch(e){}return r}}
+{const _mh=mxsHtml;mxsHtml=function(adv){return _mh.apply(this,arguments).replace(`<h5>Master shows</h5>`,`<h5>Routing</h5><div class="mxsg"><label class="mxst" title="Show the sends, group outputs and sidechains as cables under the channels. Drag from the dot under a channel to make a new one."><input type="checkbox" data-mxs="cab"><span>Cables</span></label></div><h5>Master shows</h5>`)}}
+{const s=document.getElementById('mxsSet');if(s&&!s.querySelector('[data-mxs="cab"]')){const h=[...s.querySelectorAll('h5')].find(x=>x.textContent==='Master shows');if(h)h.insertAdjacentHTML('beforebegin',`<h5>Routing</h5><div class="mxsg"><label class="mxst" title="Show the sends, group outputs and sidechains as cables under the channels. Drag from the dot under a channel to make a new one."><input type="checkbox" data-mxs="cab"><span>Cables</span></label></div>`)}}
+addEventListener('resize',()=>cabSoon());
+{let cro=null;const iv=setInterval(()=>{const w=document.getElementById('mixWin');if(w){clearInterval(iv);cro=new ResizeObserver(()=>cabSoon());cro.observe(w)}},400)}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

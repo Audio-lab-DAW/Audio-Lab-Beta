@@ -101,3 +101,35 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Tasks 4 to 7. Ideas: level meters as a seventh module, loudness history graph, retire the old Visualizer panel in favour of this one.
+
+## 25 November 2026: v0.162, task 4 of 7 (cables in the mixer, FL Studio style)
+
+### How routings are stored (nothing here was changed)
+- Sends: `t.sends[returnId] = level` (0 to about 2, same value as the Sends bars, `SPEC_SEND`); applied by `busRoute()` and the offline render.
+- Group output: `t.grp` = id of the group track (`grpOf`, `grpAnc`, `addToGroup`); `busRoute()` connects the track to the group input instead of the master.
+- Sidechain: `f.p.src` (track id) on a Sidechain effect (`side`), and `m.p.src` on a Sidechain follower modulator (`t.mods`, type `side`, routes to parameters such as `t:<id>:vol`). Note: the Sidechain effect pumps in time with the song; its builder does not read `f.p.src` (only `scSrc` and `frzCut` do). The follower is the one that actually listens to another track (live, through `modFollow`).
+
+### Built (all new code sits before `askChoice`, names start with `cab` / `CAB`)
+- **Cable layer** (`cabDraw`, `cabList`, `cabGeo`): an SVG inside `.mxs` (so it scrolls with the strips) draws every existing send (solid line), group output (dashed) and sidechain (dotted) as a curve in the source track's colour, in a 46 px lane under the strips (`CABLANE`, class `mxcab` on `#mixWin`). Send cables get fainter at low levels; a switched-off follower is drawn faint. Several cables into one channel fan out. Legend at the bottom right (`cabLegend`).
+- **Sockets**: a dot under every channel. Drag from it to another channel (or to the master): a dashed cable follows the pointer, the target outline turns green when something valid is possible, red when not, and the mixer scrolls when the pointer nears its edge (`cabTarget`, `cabMark`, `cabEnd`).
+- **Drop menu** (`cabOpts`), only valid choices: "Send to" (target is a return, sends at 0.5), "Output to" (target is a group, uses `addToGroup`, no loops), "Output to Master" (dropped on the master while the channel is in a group), and "Sidechain into": switch an existing follower or Sidechain effect on the target to this source, add a new ducking follower (route to the target's volume at 50%), or add a Sidechain effect with this source.
+- **Hover** a cable: both channels get an outline in the cable colour, other cables fade (`cabHi`, `cabUnhi`). **Click**: a small panel (`cabPop`) with the send level (the same control id as the strip's Sends bar, so both move together), a plain description, "Show <track>" and a remove button (`cabRemove`: stop sending, take out of the group (to the parent group or the master), remove the sidechain source, or remove the follower and put its targets back to their own values).
+- **Toggle**: cable button in the mixer tab (`#mxCab`) and a "Cables" switch under Routing in the mixer settings drop-down and in Settings > Layout > Mixer (`UI.mxs.cab`, default on, `MXSD.cab`). All three stay in step through `mxsSet` / `mxsSync`.
+- **Keeping it linked**: `changed()` is wrapped (`cabChanged`): if the tracks are different objects (undo, redo, track added, moved or removed) the mixer is rebuilt, otherwise the cables are redrawn when the routing signature (`cabSig`) changed. Track menu routing (`routeItems`), the Sends bars and the modulator source menu all go through `changed()`, so cables follow them. Every cable action calls `pushUndo()` first.
+- `mxFit` is wrapped so the faders are sized for the room above the lane (it measures with the mixer temporarily that much shorter, plus 12 px spare because the volume numbers under the faders are often still empty when it runs; without that the pan row got squeezed onto the buttons).
+
+### Tested (headless Playwright, 30-track project with groups and a reverb return, plus the Psytrance demo)
+- No page errors on load, while opening the mixer, dragging, using the menus, the panel, compact mode, scrolling, toggling, settings.
+- 33 existing cables drawn (25 group outputs, 8 sends). Hover outlines both channels. Click opens the panel; dragging its send bar changed the value from 0.1 to about 1.6 and moved the strip's Sends bar too; one undo step.
+- Drag Kick to Plate reverb: menu offered Send plus sidechain choices; Send created `sends={..:0.5}` and a cable, one undo step; undo removed both. Pad to Drums: Output to Drums set the group and moved the track. Kick to Lead: new follower with a volume route. Kick to Bass: offered the existing Sidechain effect in slot 2 and set its source. Lead to Master: "Output to Master" only. Snare to Kick: only sidechain choices. Removing the follower cable removed the modulator. Track menu "Send to" from `routeItems` made a cable appear.
+- Compact mode: cables follow the narrow strips. Horizontal scroll: sockets move with the strips; grab-scrolling in the lane still works. Toggle off: lane and SVG gone, padding back to 8 px, both settings switches unticked; switching on in the drop-down brought them back.
+- Sound unchanged: renders through `AudioLab.render` (`renderMix`) of the Psytrance demo and the Shrine Legion demo, beats 0 to 96, three or more runs each before and after. The renders are not bit-identical between runs even on the old version (hats, acid lead, pad and pluck use random parts); mix RMS old -16.64 to -16.69 dB vs new -16.59 to -16.66 dB (Psytrance), old -11.116 to -11.120 dB vs new -11.116 to -11.118 dB (Shrine). Per track, beats 64 to 128: Kick -20.59628 dB and Rolling bass -36.12767 dB identical before and after in every run; the random tracks vary by the same amounts in the old and new version. The cable code does not run during a render (it returns at once when the mixer is closed).
+
+### Not verified
+- Look and feel on the user's Mac, and dragging with a real mouse or trackpad (only Playwright's mouse).
+- Very long cables to a far-away channel all sit near the bottom of the lane and overlap; with many sends to one return the lane gets busy.
+- The ducking follower works during playback through the modulator system; whether exports include its movement is the same as for any modulator (not checked here).
+- Dropping onto a channel while the mixer auto-scrolls far (tested only with both channels visible).
+
+### Left
+- Tasks 5 to 7. Ideas: an "only show cables of the selected channel" option, curved cables over the strips like FL Studio when the lane is hidden, and a send level knob on hover.
