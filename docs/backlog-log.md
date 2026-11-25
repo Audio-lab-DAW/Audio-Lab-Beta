@@ -44,3 +44,27 @@ Note: a manual run (2:54) and the scheduled 3:05 run overlapped; the 3:05 run wa
 
 ### Left
 - Tasks 2 to 7 of the scheduled backlog. Ideas: a reference A/B in the master strip (A/B already exists), and per-design fader-cap hover states.
+
+## 25 November 2026: v0.160, task 2 of 7 (mixer view colours, spectrogram, fun views)
+
+### Built
+- **Bigger view drop-down** (`#ctxm.mxvm`): wider, larger text, bigger previews, descriptions wrap. New last entry **Colours and options** opens the colour and option menu of the chosen view (`mxMenuItems`, now reassigned to handle every view). Right-clicking a picture still opens the same menu.
+- **Colour schemes for every view** (`MXMODES`, `MXPAL`, tables from `mxLut()`): temperature heat, three bands (bass red, mids green, treble blue, like Serato/Traktor), bass heat (hot when the bass is loud), fire, ice, purple spectral, mono white, track colour; meters keep green/yellow/red zones, spectrum keeps rainbow. Saved per view in `UI.mxCol` as before.
+  - Band levels per channel: `mxBands()` (5 bands in `H0.b5`, 3-band bytes in `H0.b3`; waveform rows keep their band colour in `H0.bc`). Only computed when a band scheme or the Fun view is used.
+  - Colour helpers: `mxC()`, `mxTriRGB()` (cached), `mxPosRGB()` (colour by position along the frequency axis).
+- **Stereo field size**: Small, Medium, Large (`mxOpt('stereo','size')`, default Large = old look).
+- **Spectrogram view** (`UI.mxView='sgram'`, `mxSgram()`): 64 x 160 ring-buffer canvas per channel (`H0.sg`), bass left, treble right, newest at the top, scaled into the strip. Default colours purple spectral; all schemes available.
+- **Fun view** (`UI.mxView='fun'`, `mxFun()`, choice in `mxOpt('fun','anim')`, list `MXFUN`): fireflies (drift with stereo position, more of them light up and glow brighter with level), liquid surface (spring-driven slosh from the balance, rises with level, ripples on hits, dB ticks at the side), kaleidoscope (waveform mirrored 8 times, bigger when louder, turns with the balance), bouncing balls (5 bands, bass left, launch speed from band level, peak marks), particle fountain (gravity, wall and floor bounces, particle-to-particle collisions, max 70 per strip, hits throw bursts, dashed line at recent height). Default colours "AudioLab blue and teal" (the logo's ball colours, cached ball/glow sprites in `mxSpr()`).
+- Channels scrolled out of view are still skipped in `drawMixer()`.
+
+### Tested
+- Headless Playwright, demo project (30 tracks) playing at bar 48: no page errors on load or while switching every view and several schemes; screenshots of each view, the master strip and both menus checked.
+- Time per `drawMixer()` with 17 visible strips (headless, software drawing): 3 to 5 ms for the new views and schemes, same range as the old waveform view (stereo field is still the slowest at about 9 ms).
+- Choosing a view and an animation from the menus saves to `audiolab-ui`.
+
+### Not verified
+- Look and frame rate on the user's Mac. In headless runs the spectrogram fills slowly because the test browser draws few frames; at 60 updates a second it covers about 2.7 s.
+- Track analysers use 256-point FFTs, so the bass part of track spectrograms and the lowest ball are coarse (the master uses 2048).
+
+### Left
+- Tasks 3 to 7. Optional dancing character for the Fun view was not built.
