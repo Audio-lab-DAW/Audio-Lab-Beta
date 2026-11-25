@@ -773,8 +773,10 @@ body.modmap #fxin .macdev .mitem{outline:1px dashed #f5c84c;cursor:crosshair}
 #tr .capgrp{margin-left:8px!important;margin-right:2px}
 #arrBack{position:absolute;left:0;top:0;width:100%;height:100%;display:block;cursor:copy}
 #fxin .dfs>.ndtb,#fxin .dfs>.devh{flex:none}#fxin .dfs>.dfc{min-height:62px}
-/* the device panel is solid (v0.153): it is the largest surface on screen and its content changes all the time, so glass there cost the most. The panels around it keep their glass. */
-#fx{background:rgb(var(--gtr2))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+/* the device panel has no refraction (v0.153): it is the largest surface on screen and its content changes all the time. */
+#fx{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+/* v0.154: see-through and blurred again, without the edge-bending. The blur lives on its own layer (#fxglass) BEHIND the device panel, not on the panel itself, so a knob or picture changing on top is not a change inside the blurred layer. */
+#fxglass{position:absolute;left:0;right:0;pointer-events:none;background:rgba(var(--gtr2),var(--ga));backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4920,7 +4922,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.153',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.154',BUILD='24 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8240,6 +8242,9 @@ const trkLat=(t,sr)=>{if(t.fxByp)return 0;let n=0;for(const f of t.fx)n+=fxLat(f
 function pdcMap(sr){const M=new Map();M.target=0;if(UI.pdc===false)return M;const src=S.tracks.filter(t=>t.kind!=='group'&&t.kind!=='return'),path=new Map();
   for(const t of src){let n=trkLat(t,sr);for(const g of grpAnc(t))n+=trkLat(g,sr);path.set(t.id,n);if(n>M.target)M.target=n}
   if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));return M}
+function fxGlassSync(){const fx=document.getElementById('fx');if(!fx||!fx.parentElement)return;let g=document.getElementById('fxglass');if(!g){g=document.createElement('div');g.id='fxglass';g.setAttribute('aria-hidden','true');fx.parentElement.insertBefore(g,fx)}
+  const h=fx.offsetHeight,k=fx.offsetTop+'|'+h+'|'+fx.offsetLeft+'|'+fx.offsetWidth;if(g._k===k)return;g._k=k;g.style.display=h>4?'':'none';g.style.top=fx.offsetTop+'px';g.style.height=h+'px'}
+setTimeout(()=>{try{fxGlassSync();new ResizeObserver(fxGlassSync).observe(document.getElementById('fx'));setInterval(()=>{if(!document.hidden)fxGlassSync()},500)}catch(e){}},200);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
