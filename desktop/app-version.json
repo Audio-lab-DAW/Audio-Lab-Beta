@@ -1,7 +1,7 @@
 {
-  "version": "0.186",
-  "sha256": "9df56f7f092cd3c56e0a31e89a8961c509f900acfda9b3a2414d5ff147f9ba40",
-  "size": 2621689,
+  "version": "0.187",
+  "sha256": "c19d7893085a09748fdf4d5e6ba5dfa7bc8407977cc6d5dd61f720e4642bc536",
+  "size": 2650870,
   "minShell": "0.147.0",
   "notes": "New instrument: Sub, a sub bass built from exact overtones, so it stays perfectly clean on every key. It has a picture of the wave and its overtones against note names and Hz, 22 presets by genre (club, house, techno, drum and bass, dubstep, 808, psytrance, small speakers), pitch drop, glide, the same start for every note and a Duck to kick button."
 }
