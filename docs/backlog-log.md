@@ -1659,3 +1659,5 @@ Sources: kilohearts.com/products/trance_gate · image-line.com/support/FLHelp/ht
 
 ### Release
 - v0.191 (v0.190 was taken by Psy Bass, released by another run during this one; this was rebuilt and tested again on top of it).
+- v0.191: commit 46bafa9, artifact version 214, project doc `claude/audiolab-crackle-pulse-synth.md`.
+- **Desktop build**: run 45747286773 for this commit succeeded (1 min 59 s, started 03:11 UTC).
