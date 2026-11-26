@@ -131,6 +131,20 @@ Rule for parallel work: **index.html is one file.** Tasks that edit it must run 
 
 Suggested order for index.html work: D2, D1 (small, asked for directly), G1, D3, then G3 once G2 and U1 are in.
 
+### 3.1 Go-ahead and notes for whoever implements (added 27 Nov)
+
+**The user approved implementation** ("Let's start implementing it into AudioLab as best as possible, in a smart way; snappiness and CPU speed are the most important thing, together with the effects and the sound engine") and asked that the scheduling chat split and run the tasks. No implementation was started in the planning session; index.html is untouched by it.
+
+How to fit the engine into what exists (from the audit; line numbers are for v0.219 and will drift):
+- The app already keeps "pictures behind glass": `#arrBack` (a half-size copy of the arrangement, made by `gbLayout`/`gbCopy`/`gbTick`, about line 9086) and `#arrBlur` (a pre-blurred picture for the device panel, `abDraw`, about line 10709). `#arr` itself is clipped away under docked glass (`gbClip`). **The engine's canvas takes the place of these two pictures**: one WebGL2 canvas inserted where `#arrBack` sits (before `#arr`), drawing the finished glass faces for the docked surfaces. The DOM elements (`#hglass`, `#tr`, `#fxband`, `#fxglass`) then carry no `backdrop-filter`, only their border and content.
+- Source for the engine: the arrangement canvas. Upload it only when `drawArr` actually repainted; a playhead-only frame should not rebuild the blur (draw the playhead as its own thin layer, or accept it unblurred under glass).
+- **Step 1: docked surfaces only** (track headers, transport, tab band, device panel). They are always on screen and decide the idle and playing frame rate. Do the G1 fixes in the same step where they touch the same code (logo glow, meters and time text out of the transport's glass element; Follow centre).
+- **Step 2: floating windows, sheets and menus.** One more engine layer directly under the floating layer, or a face per window; where a window covers DOM, feed the flat picture (plan 2.4). Remove the nested blurs in the mixer.
+- **Step 3: remove the old path** (`rfAttach`, `rfBuild`, `rfMap`, `rfStyle`, the `feImage` lens, `elTick`'s read-back if no longer needed) only after the user confirms on the Mac. Until then the old path is the fallback when WebGL2 is missing or the context is lost.
+- Settings: three levels (GL engine, Blur, Solid) replace Full / Optimised / Lighter / Lightest; `UI.pm` and `UI.fx` must migrate existing choices (Full and Optimised to GL engine, Lighter to Blur, Lightest to Solid). Lens preset (Off, Fine, Apple, Wide) and blur preset (Light, Regular, Heavy) as plain choices. Automatic stepping-down stays, now between the three levels.
+- Nothing in the audio path changes. Check the Fractals levels and the existing glass tests (`tools/ui-tests/glass*.py`) after each step; headless machines have no GPU, so frame rates there prove nothing: correctness and "no backdrop-filter left on docked surfaces" are what can be tested, the frame rate is the user's to confirm.
+- The release routine and editing rules are the ones in the existing task prompts (new JS before `function askChoice(`, new CSS before `.dacv{display:flex;`, Python edit scripts with unique-replacement asserts, `git pull --rebase`, version bump, `sync-app.js`, update note, backlog log, project doc, notification, artifact).
+
 ## 4. Open questions for the user
 
 1. Which lens and blur preset the user likes best as the default (Apple and Regular proposed).
