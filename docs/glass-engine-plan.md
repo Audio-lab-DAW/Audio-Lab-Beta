@@ -200,6 +200,25 @@ Reading:
 
 Bench 3: https://claude.ai/artifact/68cA3L4uNaJ5jE3kmZeQas
 
+### 3.4 Bench 3 on the user's Mac (27 Nov, one run): decided, the backdrop is drawn on the GPU
+
+Same Mac, 3840x2027 at 240 Hz, lens Wide, blur Light, arrangement scrolling, mixer moving:
+
+| Mode | fps | frames delivered | 95 % ms | worst ms |
+|---|---|---|---|---|
+| Solid | 240 | 100 % | 4.60 | 4.8 |
+| Blur (plain `backdrop-filter`) | 240 | 100 % | 4.70 | 4.8 |
+| GL, full-size upload every frame (half or quarter blur) | 200 to 202 | 84 to 85 % | 8.40 | 8.9 |
+| GL, quarter, upload every 4th frame | 240 | 100 % | 4.70 | 4.8 |
+| GL, small (quarter-size) copy uploaded every frame | 237 | about 100 % | 4.60 | 8.4 |
+| **GL, backdrop drawn on the GPU, every frame** | **240** | **100 %** | **4.60** | **4.8** |
+
+**Decision: the engine draws its own backdrop on the GPU** (clips as flat coloured rectangles straight into the quarter-size target, then the blur pyramid, then the glass, all on every frame). At 7.8 megapixels and 240 Hz it is indistinguishable from Solid in this test: no dropped frames, same worst frame. The small-copy upload is the fallback (it loses an occasional frame: worst 8.4 ms). A full-size upload is not allowed.
+
+What the proxy must contain in the real app (keep it this small): the track lane background, each clip's rectangle in its track colour (body and title band), selection tint if cheap, and the playhead line. No waveforms, notes, text or grid: under frost they cannot be seen. It is rebuilt from the same clip geometry `drawArr` uses, only when the view or the clips change (scroll, zoom, edit), and the playhead is one extra rectangle. For glass over other things than the arrangement (piano roll, device displays) use the small-copy route for that source.
+
+Caveat: one run, on a test page, in Chrome 157; the app runs in Electron's Chromium 156. The first real check is glass step 1 in the app on this Mac.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
