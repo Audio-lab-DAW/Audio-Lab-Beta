@@ -2750,3 +2750,42 @@ Research (from what is known of the other programs, not re-checked online in thi
 
 ### Release
 - v0.214: commit cb81148 on main, app copy synced, update note written, desktop build not dispatched (as asked). Artifact 1b07d888 updated to version 237. Project doc `claude/audiolab-fixes-run-AK.md`.
+
+## 26 November 2026, v0.215: Shift and scroll makes clips wider or thinner, zoom and scroll settings (task AN, from a later message)
+> "When you hold Control, you zoom in and out. When you hold Option, it makes the tracks taller or less tall, and I want it so when you hold Shift, the clips become wider or thinner and you can scroll. And I want some similar controls in the settings where you can change the way it zooms in and out. The way you zoom in and out should be part of the layout under settings under interface. It should be part of the layout block on the top under scaling."
+
+### Research: what the wheel does in other DAWs
+- Ableton Live 12 (manual, Arrangement View and keyboard shortcuts): Ctrl/Cmd + scroll zooms time; Alt/Option + scroll (or Alt + pinch) changes the track height; Shift + scroll scrolls left and right.
+- Logic Pro (Sound On Sound, "Logic Pro customisation: project navigation"): Option + scroll zooms vertically, Shift + Option + scroll zooms horizontally; Shift + scroll moves along the timeline (the Mac's own behaviour).
+- FL Studio (manual, Playlist): Ctrl + wheel zooms time at the pointer; Shift + wheel over the track names reorders tracks; middle-button drag scrolls. Alt + wheel as the vertical zoom is what FL users know, but the manual pages read in this run do not state it, so that part of the preset is from memory.
+- Cubase and Bitwig: the pages found gave no table (Cubase forum threads ask for a vertical zoom key; G and H zoom). Not used for a preset.
+- All of them use Shift + wheel for scrolling sideways. Here Shift is the clip width key because that was asked, so sideways scrolling moved (see below).
+
+### What scrolling over the arrangement does now (default)
+- Ctrl + scroll (Cmd too on a Mac): zoom, as before. Time and track height together, like zooming a picture (with the Ableton zoom style in Settings > Zoom and playhead it zooms time only, also as before).
+- Option/Alt + scroll: track height, as before. All tracks get taller or shorter and the track under the pointer stays where it is. New: it also works with the pointer over the track names.
+- New, Shift + scroll: clip width. Only time is zoomed: clips become wider or thinner, the track height stays. Anchored at the pointer. This is the difference from Ctrl: Ctrl is the overall zoom (both directions), Shift only changes the width.
+- Scrolling sideways: two fingers sideways on a trackpad (or a tilt wheel) with no key, as before. With a plain mouse wheel it is Ctrl + Shift + scroll, because Shift alone now has the clip width job. If Shift is given no job in the settings, Shift + scroll scrolls sideways again (what browsers and the other DAWs do).
+- Plain scroll: up and down (and sideways on a trackpad), as before. The map follows the same keys.
+- A trackpad pinch zooms like Ctrl (it can be switched off). A pinch reaches the app as a scroll with Ctrl set although no Ctrl key is down; the app follows the real key so the two can be told apart.
+- Smooth: every delta is added up and eased once per frame (the existing view animator); 30 small trackpad deltas give exactly the same zoom as the sum; the point under the pointer stays within a pixel (measured 0.00 px for time, 0.33 px for rows).
+- Limits are the view's own: 600 px per beat zoomed in; zoomed out until the song is a small part of the width, and pushing on past that end opens the Overview as before. Track height 34 px to the height of the arrangement.
+- Task AJ's arrow step follows the zoom reached this way (1/64 note at 567 px per beat, 4 beats at 5.8).
+
+### Settings > Interface > Layout > Zoom and scroll
+First thing in the Layout box, directly under the scale. Saved with the other settings (`UI.zs`), applied at once.
+- Presets: AudioLab default (Ctrl zoom, Option track height, Shift clip width, Ctrl+Shift sideways), Ableton style (Ctrl clip width, Option track height, Shift sideways, no overall zoom key), Logic style (Option track height, Option+Shift clip width, Shift sideways), FL Studio style (Ctrl clip width, Alt track height; Shift has no job and scrolls sideways, since there is no reordering by wheel here).
+- Four jobs, each with its key: Zoom, Track height, Clip width, Sideways. Keys: Ctrl (Cmd on a Mac too), Option/Alt, Shift, Ctrl + Shift, Option/Alt + Shift, None. Choosing a key that is taken swaps the two. Ctrl + Shift and Option + Shift were added to the four that were asked for, because Logic and the sideways scroll need them.
+- Zoom speed 25% to 300%; Zoom around: mouse pointer or playhead (the playhead while it is in view, else the pointer); Invert direction (zoom, track height, clip width; pinch keeps its direction); Trackpad pinch zooms on or off; Reset. Every control has a tooltip.
+
+### Code
+- `zsWheel(e,beat,row,key)` decides for the arrangement, the map and (track height only) the track names; `ZS()` reads `UI.zs` over the defaults `ZSD`; presets `ZSPRE`; the settings group is built by `zsBuild()` after `stfBuild()`. The old Ctrl and Alt branches of the two wheel handlers were replaced by one call. Mixer, piano roll, devices panel and MIDI panel were not touched.
+
+### Test
+`tools/ui-tests/taskAN.py` (66 checks, all pass): each key with mouse wheel steps and trackpad-like deltas, the browser's Shift swap to a sideways delta, anchoring within a pixel, easing over frames without going backwards, both limits, the Overview still opening, track names, pinch, the arrow step, the four presets live, swap, None, Reset, speed 200% and 50% (exactly 2x and 0.5x), invert, playhead anchor, pinch off, saved and back after a reload, and the wheel with every key over the devices panel, mixer, piano roll and MIDI panel leaving the arrangement view alone; no console errors. taskAJ, taskU, overview, playhead and setfind still pass. Fractals Kick -9.75669 dB, Bass -25.48699 dB unchanged. Screenshots of the Layout block looked at, normal and Light mode.
+
+### Left
+- Not tried on a real trackpad or on the user's Mac: the feel of the speed, pinch against Ctrl + scroll on macOS and Windows, and whether macOS itself turns Shift + trackpad scrolling sideways (both directions are handled).
+- Zoomed out with Shift alone the song can become about a tenth of the width before the Overview opens; that is the view's existing limit, not changed.
+- Inside the Overview the keys are as before (Ctrl or pinch zooms).
+- The shortcuts window lists keys only, so these scroll keys are not in it.

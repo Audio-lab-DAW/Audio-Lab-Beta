@@ -1877,6 +1877,18 @@ body.fx-top #fx.dsh:not(.collapsed) .fxbtns{top:auto!important;bottom:-24px}
 body.fx-top #fx.dsh.collapsed .fxbtns{top:auto!important;bottom:-28px}
 /* the drum designers share one width, so the preset row (menu, Change, play) stays on one line on the Hat designer too */
 #fxin .dev.du.pzd:not(.dushut)>.devb>.dfs,.dev.du.pzd:not(.dushut)>.devb>.dfs{min-width:270px}
+/* v0.215 (task AN): Zoom and scroll group at the top of the Layout box in Settings > Interface */
+.zsbox{padding:8px 0 12px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2px}
+.zsh{display:flex;align-items:center;gap:8px;margin:0 0 8px}.zsh h4{margin:0!important;flex:1}
+.zsp{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}.zsp button{font:600 11px Inter,system-ui,sans-serif;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);color:#c9cedb;cursor:pointer;box-shadow:none}.zsp button:hover{background:rgba(255,255,255,.09)}.zsp button.on{background:rgba(76,141,255,.18);border-color:rgba(76,141,255,.6);color:#fff}
+.zsg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.zsc{display:flex;flex-direction:column;gap:5px;padding:7px 8px 8px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);min-width:0}
+.zsc>span{display:flex;align-items:center;gap:6px;font:600 11.5px Inter,system-ui,sans-serif;color:#d3d7e0;white-space:nowrap}.zsc svg{width:16px;height:16px;color:#8f95a6;flex:none}.zsc select{width:100%;min-width:0}
+.zso{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;font:500 12px Inter,system-ui,sans-serif;color:#c9cedb}
+.zso>label,.zso>span{display:flex;align-items:center;gap:7px;margin:0}.zso b{font-weight:600;color:#d3d7e0}.zso input[type=range]{width:120px}.zso output{font:600 11px ui-monospace,Menlo,monospace;color:#e6ebf5;min-width:38px}
+.zsseg{display:inline-flex;border:1px solid rgba(255,255,255,.1);border-radius:7px;overflow:hidden}.zsseg button{font:600 11px Inter,system-ui,sans-serif;padding:4px 10px;border:0;border-radius:0;background:rgba(255,255,255,.03);color:#b9bfcd;cursor:pointer;box-shadow:none}.zsseg button+button{border-left:1px solid rgba(255,255,255,.1)}.zsseg button.on{background:#4c8dff;color:#fff}
+#setBody .zsbox>.hint{margin:10px 0 0}.zsc select{font-size:11.5px}
+@media (max-width:900px){.zsg{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6048,7 +6060,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.214',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.215',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6315,7 +6327,7 @@ hdrin.addEventListener('dblclick',e=>{
   nm.onkeydown=ev=>{if(ev.key==='Enter'||ev.key==='Escape'){ev.preventDefault();nm.blur()}};
   nm.onblur=()=>{nm.contentEditable='false';const v=nm.textContent.trim().slice(0,40);if(v&&v!==t.name){pushUndo();t.name=v}changed(true)};
 });
-hdrin.addEventListener('wheel',e=>{e.preventDefault();const ly=e.deltaMode===1?16:1;if(mouseLike(e))smoothPan('arry',e.deltaY*ly,s=>{V.y+=s;clampV();dirty=true});else{V.y+=e.deltaY*ly;clampV();dirty=true}},{passive:false});
+hdrin.addEventListener('wheel',e=>{e.preventDefault();if(zsHdrWheel(e))return;const ly=e.deltaMode===1?16:1;if(mouseLike(e))smoothPan('arry',e.deltaY*ly,s=>{V.y+=s;clampV();dirty=true});else{V.y+=e.deltaY*ly;clampV();dirty=true}},{passive:false});
 
 /* ---------- plugin displays ---------- */
 const fX=(f,w)=>Math.log(f/20)/Math.log(1000)*w,xF=(x,w)=>20*Math.pow(1000,x/w);
@@ -6708,9 +6720,8 @@ arr.addEventListener('dblclick',e=>{
 });
 arr.addEventListener('wheel',e=>{
   e.preventDefault();const{x,y}=arrPt(e);
-  if(e.ctrlKey||e.metaKey){const bt=V.x+(x-X0)/V.ppb,rw=(y-AY+V.y)/V.th;smoothZoom('arr',wz(e),f=>zoomAround(f,UI.mapZoom==='ableton'?1:f,bt,rw))}
-  else if(e.altKey){const bt=V.x+(x-X0)/V.ppb,rw=(y-AY+V.y)/V.th;smoothZoom('arrv',wz(e)*.45,f=>zoomAround(1,f,bt,rw))}
-  else{const dxw=e.shiftKey?(e.deltaX||e.deltaY):e.deltaX,sm=e.shiftKey||mouseLike(e),ly=e.deltaMode===1?16:1;
+  if(zsWheel(e,V.x+(x-X0)/V.ppb,(y-AY+V.y)/V.th,'arr'))return;/* zoom, track height, clip width, sideways: the keys are set in Settings > Interface > Layout (zsWheel) */
+  {const dxw=e.shiftKey?(e.deltaX||e.deltaY):e.deltaX,sm=e.shiftKey||mouseLike(e),ly=e.deltaMode===1?16:1;
     if(FLOCK()){WACC=(performance.now()-WACT>400?0:WACC)+dxw;WACT=performance.now();if(Math.abs(WACC)>140&&Math.abs(dxw)>Math.abs(e.shiftKey?0:e.deltaY)){WACC=0;phFlash()}}
     else if(dxw){if(sm)smoothPan('arrx',dxw*ly,s=>{V.x+=s/V.ppb;clampV();dirty=true});else V.x+=dxw/V.ppb}
     if(!e.shiftKey&&e.deltaY){if(sm)smoothPan('arry',e.deltaY*ly,s=>{V.y+=s;clampV();dirty=true});else V.y+=e.deltaY}clampV();dirty=true}
@@ -6785,8 +6796,8 @@ const mapUp=e=>{if(md&&md.k==='abl'&&!md.moved){const vis=arrW/V.ppb;V.x=md.beat
 map.addEventListener('pointerup',mapUp);map.addEventListener('pointercancel',mapUp);
 map.addEventListener('wheel',e=>{
   e.preventDefault();const p=mapPt(e),M=mapGeom(p.W,p.H);
-  if(e.ctrlKey||e.metaKey){const bx=M.xb(p.x),ry=M.yr(p.y);smoothZoom('map',wz(e),f=>zoomAround(f,UI.mapZoom==='ableton'?1:f,bx,ry))}
-  else{const dxw=e.shiftKey?e.deltaY:e.deltaX,sm=e.shiftKey||mouseLike(e),ly=e.deltaMode===1?16:1;
+  if(zsWheel(e,M.xb(p.x),M.yr(p.y),'map'))return;
+  {const dxw=e.shiftKey?(e.deltaX||e.deltaY):e.deltaX,sm=e.shiftKey||mouseLike(e),ly=e.deltaMode===1?16:1;
     if(FLOCK()){WACC=(performance.now()-WACT>400?0:WACC)+dxw;WACT=performance.now();if(Math.abs(WACC)>140&&Math.abs(dxw)>Math.abs(e.shiftKey?0:e.deltaY)){WACC=0;phFlash()}}
     else if(dxw){if(sm)smoothPan('arrx',dxw*ly,s=>{V.x+=s/V.ppb;clampV();dirty=true});else V.x+=dxw/V.ppb}
     if(!e.shiftKey&&e.deltaY){if(sm)smoothPan('arry',e.deltaY*ly,s=>{V.y+=s;clampV();dirty=true});else V.y+=e.deltaY}clampV();dirty=true}
@@ -6794,7 +6805,7 @@ map.addEventListener('wheel',e=>{
 let gs=1;
 for(const el of[map,arr]){
   el.addEventListener('gesturestart',e=>{e.preventDefault();gs=1});
-  el.addEventListener('gesturechange',e=>{e.preventDefault();const f=e.scale/gs;gs=e.scale;
+  el.addEventListener('gesturechange',e=>{e.preventDefault();const f=e.scale/gs;gs=e.scale;if(!ZS().pinch)return;
     if(el===arr){const r=arr.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,bt=V.x+(x-X0)/V.ppb,rw=(y-AY+V.y)/V.th;smoothZoom('arr',Math.log(f),g=>zoomAround(g,UI.mapZoom==='ableton'?1:g,bt,rw))}
     else{const p=mapPt(e),M=mapGeom(p.W,p.H),bx=M.xb(p.x),ry=M.yr(p.y);smoothZoom('map',Math.log(f),g=>zoomAround(g,UI.mapZoom==='ableton'?1:g,bx,ry))}});
 }
@@ -17936,6 +17947,61 @@ function akDraw(g,w,h){
     g.strokeStyle='rgba(255,255,255,.1)';g.lineWidth=6;const off=(now/40)%24;for(let sx=G.x-G.h-24+off;sx<G.x+G.w+24;sx+=24){g.beginPath();g.moveTo(sx,G.y+G.h);g.lineTo(sx+G.h,G.y);g.stroke()}
     g.fillStyle='#4cc9f0';g.fillRect(G.x,G.y+G.h-4,G.w*Math.max(.02,J.p),4);g.fillStyle='#e8f6ff';g.font='600 11px Inter,system-ui,sans-serif';if(G.w>60)g.fillText('Bouncing to audio… '+Math.round(J.p*100)+'%',Math.max(G.x,X0)+8,G.y+G.h/2+4);g.restore()}});
   if(fin)setTimeout(()=>{if(akResolve())changed(true)},0)/* a bounce that finished while another project was in front */}
+/* ---------- v0.215 (task AN): zoom and scroll keys of the arrangement ----------
+   One place decides what a wheel or trackpad scroll over the arrangement (and the map) does: zsWheel(e,beat,row,key).
+   UI.zs holds the choice (defaults ZSD): which key combination does Zoom (time and track height together), Track height, Clip width (time only)
+   and Scroll sideways; the speed, the anchor (mouse pointer or playhead), the direction and whether a trackpad pinch zooms.
+   A scroll with no job falls through to the plain scrolling of the caller (two fingers on a trackpad move both ways; Shift without a job scrolls sideways, as browsers do).
+   A trackpad pinch arrives as a wheel event with ctrlKey set although no Ctrl key is down: ZSK.c follows the real key, so pinch and Ctrl+scroll can differ.
+   All zooming goes through smoothZoom (deltas add up, one eased step per frame) and zoomAround (keeps the anchor where it is on screen). */
+const ZSD={zoom:'ctrl',th:'alt',cw:'shift',side:'ctrl+shift',speed:100,anchor:'mouse',inv:false,pinch:true},ZSF=['zoom','th','cw','side'];
+const ZSPRE={audiolab:{n:'AudioLab default',zoom:'ctrl',th:'alt',cw:'shift',side:'ctrl+shift',tip:'AudioLab default: Ctrl zooms time and track height together, Option/Alt changes the track height, Shift makes clips wider or thinner, Ctrl+Shift scrolls sideways.'},
+  ableton:{n:'Ableton style',zoom:'none',th:'alt',cw:'ctrl',side:'shift',tip:'Ableton style: Ctrl/Cmd zooms time only (clip width), Option/Alt changes the track height, Shift scrolls sideways.'},
+  logic:{n:'Logic style',zoom:'none',th:'alt',cw:'alt+shift',side:'shift',tip:'Logic style: Option zooms the track height, Option+Shift zooms time (clip width), Shift scrolls sideways.'},
+  fl:{n:'FL Studio style',zoom:'none',th:'alt',cw:'ctrl',side:'none',tip:'FL Studio style: Ctrl zooms time (clip width) at the pointer, Alt zooms the track height. Shift keeps scrolling sideways, because it has no other job here.'}};
+const ZSK={c:false};let ZSC=null;
+function ZS(){if(!ZSC||ZSC.src!==UI.zs){const z=Object.assign({},ZSD,UI.zs||{});for(const f of ZSF)if(!/^(ctrl|alt|shift|ctrl\+shift|alt\+shift|none)$/.test(z[f]))z[f]=ZSD[f];z.speed=clamp(+z.speed||100,25,300);if(z.anchor!=='play')z.anchor='mouse';z.inv=!!z.inv;z.pinch=z.pinch!==false;z.src=UI.zs;ZSC=z}return ZSC}
+function zsSet(o){const z=Object.assign({},ZS(),o);delete z.src;UI.zs=z;ZSC=null;saveUI();zsSync()}
+addEventListener('keydown',e=>{if(e.key==='Control')ZSK.c=true},true);addEventListener('keyup',e=>{if(e.key==='Control')ZSK.c=false},true);addEventListener('blur',()=>{ZSK.c=false});
+for(const ev of['pointermove','pointerdown','keydown'])addEventListener(ev,e=>{if(e.key!=='Control')ZSK.c=!!e.ctrlKey},{capture:true,passive:true});
+/* which job a scroll has: '' none, 'pinch' a trackpad pinch, else one of ZSF. An exact combination wins; a combination without its own job uses the job of one of its keys. */
+function zsAct(e){const c=e.ctrlKey||e.metaKey;if(e.ctrlKey&&!e.metaKey&&!ZSK.c)return'pinch';const k=[c?'ctrl':'',e.altKey?'alt':'',e.shiftKey?'shift':''].filter(Boolean).join('+');if(!k)return'';const z=ZS();
+  for(const f of ZSF)if(z[f]===k)return f;for(const m of k.split('+'))for(const f of ZSF)if(z[f]===m)return f;return''}
+function zsWheel(e,bt,rw,key){let act=zsAct(e);if(!act)return false;const z=ZS(),pin=act==='pinch';if(pin){if(!z.pinch)return true;act='zoom'}
+  const raw=e.deltaY||e.deltaX,ly=e.deltaMode===1?16:1;/* a held Shift turns a mouse wheel into a sideways scroll in most browsers, so either axis counts */
+  if(act==='side'){if(FLOCK()){WACC=(performance.now()-WACT>400?0:WACC)+raw;WACT=performance.now();if(Math.abs(WACC)>140){WACC=0;phFlash()}}else if(raw)smoothPan('arrx',raw*ly,s=>{V.x+=s/V.ppb;clampV();dirty=true});return true}
+  const amt=-clamp(raw*ly,-60,60)*.0085*(z.speed/100)*(z.inv&&!pin?-1:1);if(!amt)return true;
+  if(z.anchor==='play'){const pb=curBeat();if(pb>=V.x&&pb<=V.x+arrW/V.ppb)bt=pb}/* the playhead is the anchor while it is in view, else the pointer */
+  if(act==='zoom')smoothZoom(key,amt,f=>zoomAround(f,UI.mapZoom==='ableton'?1:f,bt,rw));
+  else if(act==='th')smoothZoom(key+'v',amt*.45,f=>zoomAround(1,f,bt,rw));
+  else smoothZoom(key+'h',amt,f=>zoomAround(f,1,bt,rw));
+  return true}
+/* over the track headers only the track height key has a job; everything else scrolls up and down as before */
+function zsHdrWheel(e){if(zsAct(e)!=='th')return false;const r=arr.getBoundingClientRect();return zsWheel(e,V.x,((e.clientY-r.top)/ZOOM-AY+V.y)/V.th,'arr')}
+/* the group in Settings > Interface, first thing in the Layout box (right under the scale) */
+const ZSIC={zoom:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5M8 10.5h5M10.5 8v5"/>',th:'<rect x="4" y="7" width="16" height="10" rx="2"/><path d="M12 2.5v3m0 0-2-1.6m2 1.6 2-1.6M12 21.5v-3m0 0-2 1.6m2-1.6 2 1.6"/>',cw:'<rect x="7" y="6" width="10" height="12" rx="2"/><path d="M1.5 12h4m-4 0 1.8-2m-1.8 2 1.8 2M22.5 12h-4m4 0-1.8-2m1.8 2-1.8 2"/>',side:'<path d="M3 12h18M3 12l4-4M3 12l4 4M21 12l-4-4M21 12l-4 4"/>'};
+const ZSL={zoom:['Zoom','Zoom: time and track height together, like zooming a picture. With the Ableton zoom style (Settings > Zoom and playhead) it zooms time only.'],th:['Track height','Track height: all tracks become taller or shorter. The track under the pointer stays where it is. Also works over the track names.'],cw:['Clip width','Clip width: only time is zoomed, so clips become wider or thinner and the track height stays.'],side:['Sideways','Sideways: scroll left and right with a mouse wheel. A trackpad scrolls sideways with two fingers without any key, and Shift scrolls sideways whenever it has no other job.']};
+function zsBuild(){const lay=document.querySelector('#setBody section[data-page=layout] .stfl');if(!lay||document.getElementById('zsBox'))return;
+  const mac=/Mac|iPhone|iPad/.test(navigator.platform||''),MN={ctrl:mac?'Cmd or Ctrl':'Ctrl',alt:mac?'Option':'Alt',shift:'Shift','ctrl+shift':(mac?'Cmd':'Ctrl')+' + Shift','alt+shift':(mac?'Option':'Alt')+' + Shift',none:'None'};
+  const b=document.createElement('div');b.className='zsbox';b.id='zsBox';
+  b.innerHTML=`<div class="zsh"><h4>Zoom and scroll</h4><button type="button" class="mini" id="zsReset" title="Reset: put the zoom and scroll keys, the speed and the other choices of this group back to the AudioLab default">Reset</button></div>
+<div class="zsp" id="zsPre">${Object.entries(ZSPRE).map(([k,p])=>`<button type="button" data-zp="${k}" title="${esc(p.tip)}">${p.n}</button>`).join('')}</div>
+<div class="zsg">${ZSF.map(f=>`<label class="zsc" title="${esc(ZSL[f][1])}"><span>${stSvg(ZSIC[f])}${ZSL[f][0]}</span><select data-zf="${f}" aria-label="Key for ${ZSL[f][0]}">${Object.entries(MN).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>`).join('')}</div>
+<div class="zso"><label title="Zoom speed: how much one step of the wheel or one swipe zooms. 100% is the normal speed."><b>Zoom speed</b><input type="range" id="zsSpeed" min="25" max="300" step="5" aria-label="Zoom speed"><output id="zsSpeedO"></output></label>
+<span title="Zoom around: what stays in place while you zoom. Mouse pointer: the spot under the pointer. Playhead: the playhead, as long as it is in view (else the pointer)."><b>Zoom around</b><span class="zsseg" id="zsAnchor"><button type="button" data-za="mouse" title="Zoom around the mouse pointer">Mouse pointer</button><button type="button" data-za="play" title="Zoom around the playhead while it is in view">Playhead</button></span></span>
+<label class="chk" title="Invert direction: scrolling up zooms out and scrolling down zooms in, for zoom, track height and clip width. Pinch is not changed."><input type="checkbox" id="zsInv"> Invert direction</label>
+<label class="chk" title="Trackpad pinch zooms the arrangement and the map. Switch it off if you zoom by accident."><input type="checkbox" id="zsPinch"> Trackpad pinch zooms</label></div>
+<p class="hint">Hold the key and scroll over the tracks or the map. Each key has one job: choosing a key that is taken swaps the two. On Mac, Cmd works like Ctrl.</p>`;
+  lay.insertBefore(b,lay.firstChild);
+  b.addEventListener('change',e=>{const el=e.target,f=el.dataset&&el.dataset.zf;if(f){const z=ZS(),o={[f]:el.value};if(el.value!=='none')for(const g of ZSF)if(g!==f&&z[g]===el.value)o[g]=z[f];zsSet(o)}else if(el.id==='zsInv')zsSet({inv:el.checked});else if(el.id==='zsPinch')zsSet({pinch:el.checked})});
+  b.addEventListener('input',e=>{if(e.target.id==='zsSpeed')zsSet({speed:+e.target.value})});
+  b.addEventListener('click',e=>{const p=e.target.closest('[data-zp]'),a=e.target.closest('[data-za]');if(p){const q=ZSPRE[p.dataset.zp];zsSet({zoom:q.zoom,th:q.th,cw:q.cw,side:q.side})}else if(a)zsSet({anchor:a.dataset.za});else if(e.target.closest('#zsReset')){delete UI.zs;ZSC=null;saveUI();zsSync();toast('Zoom and scroll are back to the AudioLab default.')}});
+  zsSync()}
+function zsSync(){const b=document.getElementById('zsBox');if(!b)return;const z=ZS();for(const s of b.querySelectorAll('select[data-zf]'))s.value=z[s.dataset.zf];
+  for(const p of b.querySelectorAll('[data-zp]')){const q=ZSPRE[p.dataset.zp];p.classList.toggle('on',ZSF.every(f=>q[f]===z[f]))}
+  for(const a of b.querySelectorAll('[data-za]'))a.classList.toggle('on',a.dataset.za===z.anchor);
+  const sp=b.querySelector('#zsSpeed');if(+sp.value!==z.speed)sp.value=z.speed;b.querySelector('#zsSpeedO').textContent=z.speed+'%';b.querySelector('#zsInv').checked=z.inv;b.querySelector('#zsPinch').checked=z.pinch}
+{const _sbZ=stfBuild;stfBuild=function(){const r=_sbZ.apply(this,arguments);try{zsBuild();zsSync()}catch(e){console.error('AudioLab zoom settings',e)}return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

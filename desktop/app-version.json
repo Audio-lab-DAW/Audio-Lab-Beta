@@ -1,7 +1,7 @@
 {
-  "version": "0.214",
-  "sha256": "2850cbfedaf5a02f32e4330109d5d0dbabaf7dd61ffd7432bc54a168f80fdc1e",
-  "size": 3421434,
+  "version": "0.215",
+  "sha256": "5bccc6080f879eaef22cd396191ea632f1fc3b1c4c41411a03722bd2b68620ab",
+  "size": 3433053,
   "minShell": "0.147.0",
-  "notes": "Right-click drag selects partly covered clips; MIDI dropped or copied onto an audio track is bounced to audio automatically."
+  "notes": "Shift and scroll makes clips wider or thinner; zoom and scroll controls are in Settings > Interface > Layout."
 }
