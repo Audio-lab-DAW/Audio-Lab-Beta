@@ -1,7 +1,7 @@
 {
-  "version": "0.193",
-  "sha256": "3475f54f4abb2249b93d49b3ef0ef355781090f1f6056f7d5cff315076bfcc6f",
-  "size": 2854334,
+  "version": "0.194",
+  "sha256": "ca507a138fdb1214a25ccaac85aea7eca90c04f588dfcb86ef6d5db3d0b4417f",
+  "size": 2878499,
   "minShell": "0.147.0",
   "notes": "The piano roll now sits above the devices panel at the same height, nothing is cut off, and it grows down when you hide the devices; drag the bar between them to change the sizes. Its window has a head like the mixer's, no border, smaller buttons when it is small, and the track tabs above the devices are now glass."
 }
