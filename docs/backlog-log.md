@@ -1860,3 +1860,6 @@ The visualizer should dock at the top too and be sharper on high resolution scre
 ### Left
 - The placeholder a pinned device leaves in the panel and the tiles in the two browsers keep the old horizontal title.
 - Narrow effects (Compressor, Sidechain) wrap Change to a second line in the row.
+
+### Release
+- v0.196: commit d216367. Artifact version 219 (1b07d888). Desktop build run 45755589112 dispatched for this commit. Project doc `claude/audiolab-ui-run-T.md`.
