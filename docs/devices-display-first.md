@@ -2,7 +2,7 @@
 
 Pick page: **"AudioLab devices, display first, round 1"**, https://claude.ai/artifact/FdsjNefeJo8UJfXfkDQNjZ
 
-**Nothing in index.html or desktop/ was changed.** This is the pick page only. The implementation, device by device, comes after the user picks a layout number (per device, or one for all).
+**Nothing in index.html or desktop/ was changed.** This is the pick page only. **The user has picked (section 7)**; the implementation, device by device, has not started.
 
 Related: `docs/glass-engine-plan.md` (section 1, the user's decisions; section 2.4, the engine; section 3, task D4), `docs/design-language-research.md` (section 2, option G2 "Display first"; section 9, round 1 result).
 
@@ -118,8 +118,45 @@ Rules for the implementation so that floating glass stays cheap:
 - Bright theme: the display stays black and only the frame and the glass turn light. This follows the user's "black display boxes"; it was not checked against the app's own bright themes.
 - Not tested with a real mouse, a trackpad or touch; nothing was tried on the user's Mac.
 
-## 7. What happens next
+## 7. Round 1 result (26 November 2026, late)
 
-1. The user picks a layout number per device, or one for all.
+**The user's picks: Psy Bass DD2, Kick designer DD2, Pro EQ DD3, Compressor DD4, Echo delay DD4, Voice DD2**, and they are to be combined into one behaviour that every device has:
+
+- **Rail open** (the eye is on): the glass rail, DD2.
+- **Rail closed**: **hover reveal** (DD4) is the standard: a clean display, values as text, the dock on hover.
+- **Right-click the eye** (top right, beside the pin): a drop-down with a choice of what the closed state shows, **Hover reveal** or **On the picture** (DD3). Available on every device.
+- On the picture goes away while the rail is open, and comes back when it is closed.
+- User's words: "The glass rail is not for everything", so the picks above stay as each device's own starting state.
+
+How this was read (to confirm with the user):
+
+| Device | Starts with | Closed state shows |
+|---|---|---|
+| Psy Bass | rail open | hover reveal |
+| Kick designer (and the other drum designers) | rail open | hover reveal |
+| Pro EQ | rail closed | on the picture |
+| Compressor (and Sidechain) | rail closed | hover reveal |
+| Echo delay (and Reverb) | rail closed | hover reveal |
+| Voice | rail open | hover reveal |
+
+Assumptions made in the prototype, not yet confirmed:
+
+- Every device has all three states, also the ones that start closed (Compressor, Echo delay, Pro EQ can still open a rail from the eye).
+- A plain click on the eye opens and closes the rail; the right-click menu also has "Open / Close the glass rail". On touch the menu opens with a long press.
+- The choice between hover reveal and on the picture is kept per device (per instance), like today's open or shut parameters (`kOpen`). Whether it should instead be one setting for the whole app is open.
+- Devices of the same family as a picked one take its starting state. The roughly sixty devices not shown in round 1 need a default: suggested rule, rail open when the device has more than about eight parameters or pages, otherwise closed with hover reveal.
+
+The prototype of this behaviour is the first section of the pick page ("Your pick: one device, three states"): six devices, each starting in its picked state, with the eye and its right-click menu working.
+
+Notes for the implementation:
+
+- Today's `kOpen` (parameters open or shut) maps onto rail open or closed; the new per-device value is the closed-state mode (`hover` or `picture`), default `hover`.
+- CPU: with the rail closed and hover reveal, a device has no glass over its display at rest (only the preset and pin pills, 4 to 9% of the display). That is the cheapest case, and it is now the standard for narrow effects.
+- On the picture needs a position for every control on each device's display; where a control has no place in the picture it lines up along the bottom or goes to a More drawer (section 3). Devices without such positions yet (the Reverb, for one) fall back to hover reveal until they have them.
+- Hover reveal needs a touch and keyboard way in: tap the display, or focus a control with Tab.
+
+## 8. What happens next
+
+1. Done: the user picked (section 7). Open: confirm the assumptions listed there.
 2. Implementation device by device in index.html (serial work, after or together with G3, since the floating glass uses the glass engine with the flat-picture feed for canvases).
 3. The page source is in the artifact; it can be read back from the link above.
