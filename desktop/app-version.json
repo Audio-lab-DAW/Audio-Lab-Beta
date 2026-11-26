@@ -1,7 +1,7 @@
 {
-  "version": "0.203",
-  "sha256": "a236895c78a15a59f7499abe8e130acb9e2ce435e425aac403341b3f94ef4c0f",
-  "size": 3219747,
+  "version": "0.204",
+  "sha256": "9d5d2ca5432b98d61e9238b0137b58cf508e42fbf7d3f1e3d14ba084a3ce5bd4",
+  "size": 3222186,
   "minShell": "0.147.0",
   "notes": "New app icon: Ocean Yellow. In Settings, Colours & clips, App icon you can now pick any of the 49 icons by name. In the browser it changes the tab icon at once. On the desktop the icon choice and the new .audiolab file icon need the new desktop app (download it once from the Releases page; Windows updates by itself). macOS keeps old icons in a cache: if .audiolab files or the app still show the old icon after installing, log out and in once."
 }
