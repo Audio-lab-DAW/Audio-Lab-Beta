@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
-<title>AudioLab Glass Bench</title>
+<title>AudioLab Glass Bench 3</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* LAYOUT: a full-window fake arrangement with AudioLab-sized glass panels over it; one control card top right. Single dark look on purpose (it imitates the app). */
@@ -36,7 +36,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
   <canvas id="gl"></canvas>
   </div>
 <div id="hud">
-  <h1>AudioLab Glass Bench <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
+  <h1>AudioLab Glass Bench 3 <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
   <p>The same glass panels drawn three ways over a moving arrangement. Run compares the levels and four versions of the engine. Compare presets shows what each lens and blur choice costs.</p>
   <div class="seg" role="group" aria-label="How the glass is drawn">
     <button data-m="none" aria-pressed="false" title="No glass at all: the Lightest setting">Solid</button>
@@ -53,9 +53,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
     <label for="lv">Blur</label><select id="lv"><option value="2" selected>light</option><option value="3">regular</option><option value="4">heavy</option></select></div>
   <div class="rowx">
     <label><input type="checkbox" id="dirty" checked> GL redraws only on change</label></div>
-  <div class="rowx"><label for="eng">Engine</label><select id="eng"><option value="half">half-size backdrop, every frame (first test)</option><option value="q1">quarter-size backdrop, every frame</option><option value="q2" selected>quarter-size, backdrop every 2nd frame</option><option value="q4">quarter-size, backdrop every 4th frame</option></select></div>
+  <div class="rowx"><label for="eng">Engine</label><select id="eng"><option value="half">half-size backdrop, every frame (first test)</option><option value="q1">quarter-size backdrop, every frame</option><option value="q2">quarter-size, backdrop every 2nd frame</option><option value="q4">quarter-size, backdrop every 4th frame</option><option value="s1">small copy uploaded, every frame</option><option value="p1" selected>backdrop drawn on the GPU, every frame</option></select></div>
   <div id="live">measuring…</div>
-  <div class="rowx"><button class="b go" id="run">Run (about 45 s)</button><button class="b" id="cmp">Compare presets (about 1 min)</button><button class="b" id="copy">Copy table</button></div>
+  <div class="rowx"><button class="b go" id="run">Run (about 1 min)</button><button class="b" id="cmp">Compare presets (about 1 min)</button><button class="b" id="copy">Copy table</button></div>
   <pre id="res">No run yet.</pre>
 </div>
 
@@ -89,13 +89,19 @@ function drawScene(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0
   sx.fillStyle='#ffffff10';for(let x=-(off*D%bw);x<S.width;x+=bw)sx.fillRect(x,0,1,S.height);
   if(scn!=='still'){const px=scn==='scroll'?S.width*.5:((t*.15*D)%S.width);sx.fillStyle='#3ecf8e';sx.fillRect(px,0,Math.max(1,D),S.height)}}
 
+const RGB=COL.map(c=>[1,3,5].map(i=>parseInt(c.substr(i,2),16)/255)),BGc=[10/255,10/255,12/255],RB=new Float32Array(30*6000);let tScene=0;
+function sceneRects(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0,rh=64*D,bw=120*D;let n=0;
+  const put=(x,y,w,h,c)=>{if(n>=6000)return;const o=n*30,X=x+w,Y=y+h,v=[x,y,X,y,x,Y,x,Y,X,y,X,Y];for(let k=0;k<6;k++){RB[o+k*5]=v[k*2];RB[o+k*5+1]=v[k*2+1];RB[o+k*5+2]=c[0];RB[o+k*5+3]=c[1];RB[o+k*5+4]=c[2]}n++};
+  for(let r=0,y=40*D;y<S.height;r++,y+=rh){const c=RGB[r%8],b=c.map((v,i)=>v*.533+BGc[i]*.467);
+    for(let i=-1;i<S.width/bw+9;i++){const seed=(i*7+r*13)%11;if(seed<3)continue;const x=i*bw-off*D%(bw*8)+(r%2)*bw*.5;put(x+1,y+2*D,bw-2,rh-4*D,b);put(x+1,y+2*D,bw-2,14*D,c)}}
+  if(scn!=='still'){const px=scn==='scroll'?S.width*.5:((t*.15*D)%S.width);put(px,0,Math.max(1,D),S.height,[.243,.812,.557])}return n}
 /* lens presets: the width follows the size of each panel, so a thin bar gets a thinner lens than a tall side panel */
 const LENS={off:[0,0],fine:[4,12],apple:[4,20],wide:[3,45]},bandOf=p=>{const[dv,mx]=LENS[$('#lens').value],sh=Math.min(p.w,p.h);return dv?Math.max(.5,Math.min(mx,sh/dv)):.5},amtOf=p=>LENS[$('#lens').value][0]?Math.min(Math.min(p.w,p.h)/2,Math.max(24,bandOf(p)*1.2)):0;
 /* ---------- the engine: one shared backdrop, dual-Kawase pyramid, SDF rim lens per panel ---------- */
 const gl=G.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,powerPreference:'high-performance'});
-let glOK=!!gl,prog={},src,lev=[],vao,srcReady=false,srcMip=false,fc=0;
+let glOK=!!gl,prog={},src,lev=[],vao,vaoR,bufR,Q,qx,srcQ,srcReady=false,srcMip=false,fc=0;
 /* engine variants: q = start the blur from a quarter-size copy (Apple's macOS scale); div = refresh the blurred backdrop every Nth frame (panels still move every frame); noup, idle = diagnostics */
-const EV={half:{q:0,div:1},q1:{q:1,div:1},q2:{q:1,div:2},q4:{q:1,div:4}};let ENG=EV.q2;
+const EV={half:{q:0,div:1},q1:{q:1,div:1},q2:{q:1,div:2},q4:{q:1,div:4},s1:{q:1,div:1,small:1},p1:{q:1,div:1,proxy:1}};let ENG=EV.p1;
 const VS=`#version 300 es
 out vec2 v;void main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);v=p;gl_Position=vec4(p*2.-1.,0.,1.);}`;
 const FDOWN=`#version 300 es
@@ -115,18 +121,22 @@ void main(){vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y),hb=rc.zw*.5,l=p-rc.
  float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,1.3);c=mix(c,vec3(.086,.11,.165),.5);
  float rim=smoothstep(1.6*dpr,0.,-d),lit=abs(dot(n,vec2(-.7071,-.7071)));c+=rim*(.06+.3*lit);
  o=vec4(c*a,a);}`;
-function mk(fs){const p=gl.createProgram();for(const[ty,s]of[[gl.VERTEX_SHADER,VS],[gl.FRAGMENT_SHADER,fs]]){const sh=gl.createShader(ty);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh));gl.attachShader(p,sh)}gl.linkProgram(p);const u={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);u[a.name]=gl.getUniformLocation(p,a.name)}return{p,u}}
+function mk(fs,vs=VS){const p=gl.createProgram();for(const[ty,s]of[[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]]){const sh=gl.createShader(ty);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh));gl.attachShader(p,sh)}gl.linkProgram(p);const u={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);u[a.name]=gl.getUniformLocation(p,a.name)}return{p,u}}
 function tex(w,h){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);for(const[k,v]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,k,v);return t}
-function glInit(){if(!glOK)return;try{prog.d=mk(FDOWN);prog.u=mk(FUP);prog.g=mk(FGLASS);vao=gl.createVertexArray()}catch(e){glOK=false;console.warn(e)}}
+function glInit(){if(!glOK)return;try{prog.d=mk(FDOWN);prog.u=mk(FUP);prog.g=mk(FGLASS);vao=gl.createVertexArray();prog.r=mk(`#version 300 es
+precision mediump float;in vec3 v;out vec4 o;void main(){o=vec4(v,1.);}`,`#version 300 es
+layout(location=0) in vec2 p;layout(location=1) in vec3 c;uniform vec2 res;out vec3 v;void main(){v=c;gl_Position=vec4(p.x/res.x*2.-1.,1.-p.y/res.y*2.,0.,1.);}`);vaoR=gl.createVertexArray();bufR=gl.createBuffer();gl.bindVertexArray(vaoR);gl.bindBuffer(gl.ARRAY_BUFFER,bufR);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,20,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,20,8);gl.bindVertexArray(null);Q=document.createElement('canvas');qx=Q.getContext('2d',{alpha:false})}catch(e){glOK=false;console.warn(e)}}
 function glSize(){if(!glOK)return;for(const l of lev){gl.deleteTexture(l.t);gl.deleteFramebuffer(l.f);gl.deleteTexture(l.t2);gl.deleteFramebuffer(l.f2)}lev=[];if(src)gl.deleteTexture(src);src=tex(G.width,G.height);
-  srcReady=srcMip=false;let w=G.width,h=G.height;for(let i=0;i<5;i++){w=Math.max(2,w>>1);h=Math.max(2,h>>1);const L={w,h};for(const s of['','2']){L['t'+s]=tex(w,h);L['f'+s]=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,L['f'+s]);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,L['t'+s],0)}lev.push(L)}glDirty=true}
+  srcReady=srcMip=false;let w=G.width,h=G.height;for(let i=0;i<5;i++){w=Math.max(2,w>>1);h=Math.max(2,h>>1);const L={w,h};for(const s of['','2']){L['t'+s]=tex(w,h);L['f'+s]=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,L['f'+s]);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,L['t'+s],0)}lev.push(L)}if(srcQ)gl.deleteTexture(srcQ);srcQ=tex(lev[1].w,lev[1].h);Q.width=lev[1].w;Q.height=lev[1].h;glDirty=true}
 function pass(pr,t,fb,w,h,pw,ph,flip){gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.viewport(0,0,w,h);gl.useProgram(pr.p);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform2f(pr.u.px,.5/pw*2,.5/ph*2);if(pr.u.flip)gl.uniform1f(pr.u.flip,flip?1:0);gl.drawArrays(gl.TRIANGLES,0,3)}
 function glFrame(newScene,upload=true){gl.bindVertexArray(vao);gl.disable(gl.BLEND);gl.disable(gl.SCISSOR_TEST);gl.activeTexture(gl.TEXTURE0);const n=+$('#lv').value;
   const st=ENG.q?1:0;
-  if(newScene){gl.bindTexture(gl.TEXTURE_2D,src);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,ENG.q?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);
+  if(newScene){if(ENG.proxy){const n=sceneRects(tScene),L=lev[1];gl.bindFramebuffer(gl.FRAMEBUFFER,L.f);gl.viewport(0,0,L.w,L.h);gl.clearColor(BGc[0],BGc[1],BGc[2],1);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(prog.r.p);gl.uniform2f(prog.r.u.res,G.width,G.height);gl.bindVertexArray(vaoR);gl.bindBuffer(gl.ARRAY_BUFFER,bufR);gl.bufferData(gl.ARRAY_BUFFER,RB.subarray(0,n*30),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,n*6);gl.bindVertexArray(vao)}
+    else if(ENG.small){qx.drawImage(S,0,0,Q.width,Q.height);gl.bindTexture(gl.TEXTURE_2D,srcQ);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,Q);pass(prog.d,srcQ,lev[1].f,lev[1].w,lev[1].h,lev[1].w,lev[1].h,true)}
+    else{gl.bindTexture(gl.TEXTURE_2D,src);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,ENG.q?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);
     if((upload&&!ENG.noup)||!srcReady){gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,S);srcReady=true;srcMip=false}
     if(ENG.q&&!srcMip){gl.generateMipmap(gl.TEXTURE_2D);srcMip=true}
-    pass(prog.d,src,lev[st].f,lev[st].w,lev[st].h,lev[st].w,lev[st].h,true);
+    pass(prog.d,src,lev[st].f,lev[st].w,lev[st].h,lev[st].w,lev[st].h,true)}
     for(let i=st+1;i<st+n;i++)pass(prog.d,lev[i-1].t,lev[i].f,lev[i].w,lev[i].h,lev[i].w,lev[i].h,false);
     let t=lev[st+n-1].t;for(let i=st+n-2;i>=st;i--){pass(prog.u,t,lev[i].f2,lev[i].w,lev[i].h,lev[i].w,lev[i].h);t=lev[i].t2}}
   gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,G.width,G.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
@@ -142,18 +152,18 @@ function stats(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),q=p=>
 function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&dt<1000){ring.push(dt);if(ring.length>720)ring.shift();if(acc)acc.push(dt)}
   const scn=$('#scn').value;let moved=false;
   if($('#drag').checked&&P.mix.on){const nx=Math.round(Math.sin((t-t0)/900)*Math.min(160,W*.12));if(nx!==P.mix.dx){P.mix.dx=nx;P.mix.el.style.translate=`${P.mix.x+nx}px ${P.mix.y}px`;moved=true}}
-  const redraw=scn!=='still'||sceneDirty;if(redraw){drawScene(t-t0);sceneDirty=false}
+  const redraw=scn!=='still'||sceneDirty;if(redraw){tScene=t-t0;drawScene(tScene);sceneDirty=false}
   if(mode==='gl'&&glOK&&!(ENG.idle&&!glDirty)){fc++;const fresh=glDirty||((redraw||!$('#dirty').checked)&&fc%ENG.div===0),need=fresh||redraw||moved;if(need||stress>1){glFrame(fresh||stress>1);for(let i=1;i<stress;i++)glFrame(true,false);glDirty=false}}}
 setInterval(()=>{const s=stats(ring);if(s)$('#live').textContent=`${s.fps.toFixed(0)} fps   median ${s.med.toFixed(2)} ms   95% ${s.p95.toFixed(2)} ms   worst ${s.worst.toFixed(1)} ms\n${W}x${H} @ ${D}x = ${(S.width*S.height/1e6).toFixed(1)} MP${glOK?'':'   (WebGL2 not available)'}`},500);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const kept=(a,base)=>Math.min(100,100*a.length/(a.reduce((x,y)=>x+y,0)/base));
-const ROWS=[['Solid (Lightest)','none'],['Blur (Light)','blur'],['GL half, every frame','gl',{q:0,div:1}],['GL quarter, every frame','gl',{q:1,div:1}],['GL quarter, every 2nd','gl',{q:1,div:2}],['GL quarter, every 4th','gl',{q:1,div:4}],['check: no upload','gl',{q:1,div:1,noup:1}],['check: layer only','gl',{q:1,div:1,idle:1}]];
+const ROWS=[['Solid (Lightest)','none'],['Blur (Light)','blur'],['GL half, every frame','gl',{q:0,div:1}],['GL quarter, every frame','gl',{q:1,div:1}],['GL quarter, every 2nd','gl',{q:1,div:2}],['GL quarter, every 4th','gl',{q:1,div:4}],['GL small copy, every','gl',{q:1,div:1,small:1}],['GL drawn on GPU, every','gl',{q:1,div:1,proxy:1}],['check: no upload','gl',{q:1,div:1,noup:1}],['check: layer only','gl',{q:1,div:1,idle:1}]];
 async function run(){const b=$('#run');b.disabled=$('#cmp').disabled=true;const keep=mode,keepE=ENG,rows=[];let base=0;
   for(const[n,m,e]of ROWS){if(m==='gl'&&!glOK){rows.push([n,'WebGL2 not available']);continue}
     if(e)ENG=e;setMode(m);b.textContent='Measuring: '+n;await sleep(1200);acc=[];await sleep(4500);const st=stats(acc);if(!base)base=st.med;st.kept=kept(acc,base);acc=null;rows.push([n,st])}
-  ENG=keepE;setMode(keep);b.disabled=$('#cmp').disabled=false;b.textContent='Run (about 45 s)';
+  ENG=keepE;setMode(keep);b.disabled=$('#cmp').disabled=false;b.textContent='Run (about 1 min)';
   const gi=glOK&&gl.getExtension('WEBGL_debug_renderer_info'),ren=gi?gl.getParameter(gi.UNMASKED_RENDERER_WEBGL):'?';
-  $('#res').textContent=`AudioLab Glass Bench 2\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · lens ${$('#lens').value} · blur ${$('#lv').value}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n\n`+
+  $('#res').textContent=`AudioLab Glass Bench 3\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · lens ${$('#lens').value} · blur ${$('#lv').value}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n\n`+
    'mode                      fps  kept%  median    95%   worst\n'+rows.map(([n,x])=>typeof x==='string'?n.padEnd(25)+x:n.padEnd(25)+x.fps.toFixed(0).padStart(4)+x.kept.toFixed(0).padStart(7)+x.med.toFixed(2).padStart(8)+x.p95.toFixed(2).padStart(7)+x.worst.toFixed(1).padStart(8)).join('\n')+'\n\nkept% = share of the screen\'s frames that were delivered'}
 /* what does each preset cost? The screen caps the frame rate, so instead of fps we count how many times the whole glass (blur pyramid + all panels) can be drawn per frame before frames start to drop. */
 const PRE=[['lens off','off',3],['lens fine','fine',3],['lens Apple','apple',3],['lens wide','wide',3],['blur light','apple',2],['blur regular','apple',3],['blur heavy','apple',4]];
@@ -164,7 +174,7 @@ async function compare(){if(!glOK)return;const b=$('#cmp'),keep=[mode,$('#lens')
     stress=1;rows.push(n.padEnd(14)+r.join(''))}
   $('#lens').value=keep[1];$('#lv').value=keep[2];setMode(keep[0]);b.disabled=$('#run').disabled=false;b.textContent='Compare presets (about 1 min)';
   const gi=gl.getExtension('WEBGL_debug_renderer_info'),ren=gi?gl.getParameter(gi.UNMASKED_RENDERER_WEBGL):'?';
-  $('#res').textContent=`AudioLab Glass Bench 2: cost of each preset (engine: ${$('#eng').selectedOptions[0].textContent})\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · screen frame ${base.toFixed(2)} ms (${(1000/base).toFixed(0)} Hz)\n${ren}\n\nframes kept, %    x1     x2     x4\n`+rows.join('\n')+'\n\nx2, x4 = the whole glass drawn 2 or 4 times per frame, to show how much room is left'}
+  $('#res').textContent=`AudioLab Glass Bench 3: cost of each preset (engine: ${$('#eng').selectedOptions[0].textContent})\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · screen frame ${base.toFixed(2)} ms (${(1000/base).toFixed(0)} Hz)\n${ren}\n\nframes kept, %    x1     x2     x4\n`+rows.join('\n')+'\n\nx2, x4 = the whole glass drawn 2 or 4 times per frame, to show how much room is left'}
 $('#cmp').onclick=compare;
 /* direct timing (forces the GPU to finish; used for checks on machines without a screen cap) */
 function costSync(n=20){const out={},px=new Uint8Array(4),keep=[$('#lens').value,$('#lv').value];glFrame(true);for(const[nm,l,v]of PRE){$('#lens').value=l;$('#lv').value=v;glFrame(true,false);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);const t=performance.now();for(let i=0;i<n;i++)glFrame(true,false);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);out[nm]=+((performance.now()-t)/n).toFixed(2)}$('#lens').value=keep[0];$('#lv').value=keep[1];return out}

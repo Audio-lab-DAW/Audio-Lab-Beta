@@ -171,6 +171,35 @@ Where the first version spends its time, and the fixes now in **Bench 2** (same 
 
 **Requirement for the engine (task G2 and glass step 1): on this Mac at this window size it must deliver 100 % of frames with room to spare, or it is not ready.** Design consequences already clear: quarter-size backdrop by default; backdrop refresh decoupled from the screen rate (default every 2nd frame at 240 Hz, every frame at 60 Hz); never upload or blur on a playhead-only frame; keep the engine's canvas no larger than the glass it draws if "layer only" turns out to cost frames. The Bench 2 table from the Mac decides the rest.
 
+### 3.3 Bench 2 on the user's Mac (27 Nov, four runs): the cost is the upload, not the blur
+
+Same Mac, same 3840x2027 window at 240 Hz, lens Wide, blur Light. Share of frames delivered, four runs:
+
+| Mode | Run 1 | Run 2 | Run 3 | Run 4 |
+|---|---|---|---|---|
+| Solid | 100 | 100 | 100 | 100 |
+| Blur (plain `backdrop-filter`) | 100 | 100 | 100 | 100 |
+| GL, half-size backdrop, every frame | 85 | 83 | 82 | 83 |
+| GL, quarter-size backdrop, every frame | 85 | 84 | 82 | 84 |
+| GL, quarter-size, backdrop every 2nd frame | 90 | 96 | 90 | 100 |
+| GL, quarter-size, backdrop every 4th frame | **100** | **100** | **100** | **100** |
+| Check: no upload (blur and all panels still drawn every frame) | **100** | **100** | **100** | **100** |
+| Check: layer only | 100 | 100 | 100 | 100 |
+
+Reading:
+- **The blur pyramid and the glass shader are cheap.** With the upload switched off, the whole glass is drawn on every frame at 7.8 megapixels and 240 Hz without losing a frame (95 % frame time 4.2 to 4.3 ms, as good as Solid).
+- **Copying the full-size 2D arrangement canvas into the GPU (`texImage2D` from a 7.8 megapixel canvas) is what drops frames.** Half-size and quarter-size blur behave the same, which confirms the blur is not the cost.
+- The extra full-screen engine layer costs nothing measurable.
+- Uploading 60 times a second (every 4th frame at 240 Hz) holds every frame; 120 times a second is borderline.
+
+**Rules for the engine that follow (binding for G2 and glass step 1):**
+1. **Never upload the full-size arrangement canvas per frame.** In order of preference: (a) draw the backdrop on the GPU directly as a small proxy: the clips as flat coloured rectangles, straight into the quarter-size target (under frosted glass nothing finer can be seen); (b) upload a quarter-size copy of the arrangement (the app already makes a half-size copy, `#arrBack`); (c) upload the full canvas at most 60 times a second.
+2. Blur and glass may run on every frame; they are not the bottleneck.
+3. Bench 3 (`tools/glass-lab/glass-bench.html`, link below) has (a) and (b) as rows "GL drawn on GPU" and "GL small copy", each on every frame. The user's run of Bench 3 decides between them. Only checked in the cloud that both draw correctly.
+4. If the G2 module was built around a per-frame full-size upload, change its source to (a) or (b) before it is integrated.
+
+Bench 3: https://claude.ai/artifact/68cA3L4uNaJ5jE3kmZeQas
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
