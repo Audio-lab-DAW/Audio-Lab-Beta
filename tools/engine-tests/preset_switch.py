@@ -26,7 +26,7 @@ ENG = [
     ('Saw lead (voice engine)', 'saw', {}, True, 60), ('Soft pad (voice engine)', 'pad', {}, True, 60), ('Strings (voice engine)', 'strings', {}, True, 60),
     ('Plant (voice engine)', 'plant', {}, True, 60), ('Acid (voice engine)', 'acid', {}, True, 48), ('Wavetable (voice engine)', 'wtab', {}, True, 60),
     ('Sampler, grains (al-grain)', 'sampler', {'mode': 'grain'}, True, 60), ('Sampler, plain', 'sampler', {}, True, 60),
-    ('Emit', 'emit', {}, True, 60), ('Vector Grain', 'vgrain', {}, True, 60), ('Vector FM', 'vfm', {}, True, 60), ('Orbit', 'orb', {}, True, 60), ('Sub', 'sbass', {}, True, 33),
+    ('Emit', 'emit', {}, True, 60), ('Vector Grain', 'vgrain', {}, True, 60), ('Vector FM', 'vfm', {}, True, 60), ('Orbit', 'orb', {}, True, 60), ('Sub', 'sbass', {}, True, 33), ('Bounce', 'bball', {'sync': '1/4', 'bmode': 'steady', 'hold': 'n', 'life': 30}, True, 60),
     ('Venom', 'venom', {}, True, 60), ('Growl', 'growl', {}, True, 40), ('Grid', 'grid', {}, True, 60), ('SFX', 'sfx', {}, True, 60),
     ('Perc', 'perc', {}, True, 60), ('Drum kit', 'drums', {}, True, 36), ('Snare (drum instrument)', 'zsnare', {}, True, 60), ('Hat (drum instrument)', 'zhat', {}, True, 60),
     ('Soft pad (per-note nodes)', 'pad', {}, False, 60), ('Plant (per-note nodes)', 'plant', {}, False, 60), ('Wavetable (per-note nodes)', 'wtab', {}, False, 60),

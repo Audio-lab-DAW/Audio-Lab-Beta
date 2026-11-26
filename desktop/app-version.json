@@ -1,7 +1,7 @@
 {
-  "version": "0.188",
-  "sha256": "ffe3169eb872b8d1120d6c8ce2d6b144333e022e3a2f446e6f1ed21450296435",
-  "size": 2684507,
+  "version": "0.189",
+  "sha256": "3ed894b96c566123e53515ea1371f368ba8cbe867ac15114f4787aec5f3afaac",
+  "size": 2726220,
   "minShell": "0.147.0",
-  "notes": "New analysis effect Meter: loudness in LUFS against a target you pick (club, psytrance, Spotify, Apple Music, YouTube, broadcast or your own), true peak, PLR and PSR, levels, spectrum, a low-end mono check, spectrogram, stereo width per band and a waveform history, with presets and a small Minimal view to pin in a corner. The master loudness read-out now measures true peak the way the standard asks (it read up to about 1 dB low on some peaks before)."
+  "notes": "New instrument Bounce: every note drops a ball, and every landing strikes wood, glass, metal, a string or a drum, louder and brighter the harder it hits, free or bouncing in time with the song. Bouncy Notes gets chord steps that change through the bar and a rhythm per ball; in Orbit you can throw a ball by dragging, remove one with a right-click, change its mass by scrolling over it, and see each ball's orbit."
 }
