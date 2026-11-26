@@ -2281,3 +2281,6 @@ Ran after task E (v0.201) was finished. Icon files from the branch `assets/app-i
 
 ### Release
 - Update notes say the new icon needs the new desktop app, and that macOS caches icons: if .audiolab files or the app still show the old icon after installing, log out and in once.
+- v0.203: commit bdde4ed; desktop build run 45772449717 succeeded (release v0.203.0: Mac dmg, Windows setup). The Mac dmg was opened (7z): Info.plist has exactly one document type (AudioLab Pro project, Editor, Owner, LSItemContentTypes com.audiolab.project, extension audiolab, icon doc.icns) and the UTExportedTypeDeclarations entry; Contents/Resources holds doc.icns and icon.icns identical to `desktop/build/`; app.asar holds the picker pictures. MIN_SHELL stays 0.147.0.
+- The branch `assets/app-icons` could not be deleted from here (the connection drops on a branch delete); its files are on main in `desktop/icon-assets/`. Delete it on GitHub (Branches) when convenient.
+- Next: the user tries the new app on the Mac (Dock icon, .audiolab icon in Finder after one log out and in) and on Windows (shortcuts).
