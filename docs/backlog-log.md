@@ -2749,4 +2749,4 @@ Research (from what is known of the other programs, not re-checked online in thi
 - Not checked on the user's Mac; themes other than the default were not looked at (the marks are drawn in fixed colours on the arrangement).
 
 ### Release
-- v0.214 on main, app copy synced, desktop build not dispatched (as asked). Project doc `claude/audiolab-fixes-run-AK.md`.
+- v0.214: commit cb81148 on main, app copy synced, update note written, desktop build not dispatched (as asked). Artifact 1b07d888 updated to version 237. Project doc `claude/audiolab-fixes-run-AK.md`.
