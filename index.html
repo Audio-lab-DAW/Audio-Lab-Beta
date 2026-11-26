@@ -1769,6 +1769,13 @@ body.fxmin #mixWin .mx.abxl .fwrap{box-shadow:0 0 0 1px var(--abxc)}
 .uywb{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.uywb button{min-width:96px;height:32px;border-radius:9px}.uywb button.pri{background:#3ecf8e;color:#04140c;border-color:#3ecf8e;font-weight:600}.uywb button.pri:hover{filter:brightness(1.08)}
 #uywB{position:fixed;top:44px;right:12px;z-index:2147480300;display:flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 5px;border-radius:13px;font-size:11.5px;font-weight:600;color:#ffe48a;background:rgba(var(--gtr),.88);backdrop-filter:var(--blur2);-webkit-backdrop-filter:var(--blur2);border:1px solid rgba(255,210,58,.45);box-shadow:0 6px 18px rgba(0,0,0,.4);cursor:pointer}
 #uywB[hidden]{display:none}#uywB img{border-radius:4px}#uywB:hover{border-color:#ffd23a}
+/* v0.208 (task AE): several channels selected */
+#mixWin .mxs .mx.msel{box-shadow:inset 0 0 0 2px rgba(76,201,240,.85),0 0 10px rgba(76,201,240,.25)!important;background:linear-gradient(rgba(76,201,240,.2),rgba(76,201,240,.06))!important}#mixWin .mxs .mx.msel .mxn{color:#c9f2ff}
+#mixWin .fwh .aecnt{all:unset;display:inline-flex;align-items:center;gap:5px;margin:0 8px;padding:0 4px 0 7px;height:18px;border-radius:9px;font:600 10.5px Inter,system-ui,sans-serif;color:#dff6ff;background:rgba(76,201,240,.22);box-shadow:inset 0 0 0 1px rgba(76,201,240,.6);cursor:pointer;white-space:nowrap}
+#mixWin .fwh .aecnt i{width:7px;height:7px;border-radius:2px;background:#4cc9f0}#mixWin .fwh .aecnt b{display:grid;place-items:center;width:14px;height:14px;border-radius:7px;font-size:8px;background:rgba(0,0,0,.25)}#mixWin .fwh .aecnt:hover b{background:rgba(0,0,0,.5)}
+/* the bottom tab stays clear of the cable legend */
+#mixWin .cablg{bottom:8px}
+#mixWin>.abxtab{bottom:-7px;height:11px;gap:2px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5938,7 +5945,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.207',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.208',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -15604,7 +15611,7 @@ cabDraw=function(){const w0=document.getElementById('mixWin');if(w0){w0.classLis
   const tip=(c,i,d)=>`<path class="chit" data-i="${i}" d="${d}"><title>${esc(c.a.name)} to ${esc(c.b.name)}: ${esc(cabWhat(c))}. Click to change or remove.</title></path>`;
   const addFlow=(c,i,d,x0,x1)=>{const k=c.k,pl=k==='sc'?' pathLength="100"':'';flow+=`<path class="cfl cfl-${k}" data-i="${i}" d="${d}"${pl} stroke-width="${k==='sc'?CABK.sc.w+1.8:k==='mod'?1.6:Math.max(1.4,CABK[k].w-.6)}"/>`;FL.push({c,i,k,x0:Math.min(x0,x1),x1:Math.max(x0,x1)})};
   if(cabTidy()){
-    const y0=sy+18,avail=G.H-22-y0,R=avail>=12?clamp(1+Math.floor(avail/14),1,5):avail>=5?2:1,PL=cabPlan(L,id=>{const A=P.get(id);return A?A.cx:null},14,R),nR=Math.max(1,PL.n),gap=nR>1?clamp(avail/(nR-1),3,44):0,tgN=new Map(),tgI=new Map(),labOn=gap>=12||nR===1;
+    const y0=sy+18,avail=G.H-27-y0,R=avail>=12?clamp(1+Math.floor(avail/14),1,5):avail>=5?2:1,PL=cabPlan(L,id=>{const A=P.get(id);return A?A.cx:null},14,R),nR=Math.max(1,PL.n),gap=nR>1?clamp(avail/(nR-1),3,44):0,tgN=new Map(),tgI=new Map(),labOn=gap>=12||nR===1;
     for(const g of PL.groups)tgN.set(g.b.id,(tgN.get(g.b.id)||0)+1);
     const occ=PL.rows.map(()=>[]);/* label room taken on each level */const lgE=w.querySelector('.cablg'),lgL=lgE?(lgE.getBoundingClientRect().left-G.R.left)/G.k+ms.scrollLeft-8:1e9;const Mst=ms.querySelector('.mx.master'),vL=ms.scrollLeft+4,vR=ms.scrollLeft+ms.clientWidth-(Mst&&!w.classList.contains('mxunpin')?Mst.offsetWidth+8:0)-4;
     for(const g of PL.groups){const B=P.get(g.b.id),K=CABK[g.k],nT=tgN.get(g.b.id),jT=tgI.get(g.b.id)||0;tgI.set(g.b.id,jT+1);
@@ -17439,6 +17446,83 @@ function uywBusyBtn(k,t,on){const b=document.querySelector('#uywM [data-uy="'+k+
   H.appUpdate=o=>{try{o=o||{};return uywShow({kind:'app',to:String(o.version||''),notes:o.notes||'',stage:o.stage||'needed',auto:!!o.auto,app:o.app||''})}catch(e){return false}};
   /* the Updates window (Check for updates) gets the same logo */
   const _uo=updOpen;updOpen=function(){const x=_uo.apply(this,arguments);try{const c=document.querySelector('#updDlg .updh .cdi');if(c&&!c.dataset.uy){c.dataset.uy=1;c.className='uywlogo sm';c.innerHTML=uywLogo('');uywPic().then(s=>{if(s&&c.isConnected)c.innerHTML=uywLogo(s)})}}catch(e){}return x}}
+/* ---------- v0.208: change several channels and tracks together (task AE) ----------
+   Select with click, Shift-click (range), Cmd or Ctrl-click (add or remove), in the mixer or the track headers (one shared selection: selT + TSEL).
+   Moving a fader, pan, width or send on a selected channel moves every selected one: volume and sends relative in dB, pan and width relative,
+   each stops at its own limit and gets its offset back when the drag comes back. Option (Alt) gives all the same value, Cmd or Ctrl at the start moves only this one.
+   Buttons (mute, solo, arm, read, write) set every selected track to the clicked track's new state. One undo step. */
+const AE={g:null,in:0,noU:0,alt:false,tip:0};
+{const _pu=pushUndo;pushUndo=function(){if(AE.noU)return;return _pu.apply(this,arguments)}}
+function aeMulti(tid){if(!tid||TSEL.size<2||!TSEL.has(tid))return null;const L=S.tracks.filter(t=>TSEL.has(t.id));return L.length>1?L:null}
+function aeParse(id){let m;if(!id)return null;
+  if((m=/^mx:([^:]+):(vol|pan)$/.exec(id))&&m[1]!=='master')return{tid:m[1],p:m[2]};
+  if((m=/^mx:([^:]+):s:(.+)$/.exec(id)))return{tid:m[1],p:'s:'+m[2]};
+  if((m=/^hd:(.+)$/.exec(id))&&m[1]!=='master')return{tid:m[1],p:'vol'};
+  if((m=/^hp:(.+)$/.exec(id))&&m[1]!=='master')return{tid:m[1],p:'pan'};
+  if((m=/^fx:(vol|pan|width)$/.exec(id))&&!IBCTX&&selT&&selT!=='__m')return{tid:selT,p:m[1]};
+  return null}
+function aeGet(t,p){if(p==='vol')return t.vol;if(p==='pan')return t.pan||0;if(p==='width')return t.width??100;return(t.sends||{})[p.slice(2)]||0}
+function aeOk(t,p){if(p.startsWith('s:')){const r=p.slice(2);return t.kind!=='return'&&t.id!==r&&!!trkById(r)}return true}
+function aePut(t,p,v){if(p==='vol'){try{awTouch(t,'vol',v)}catch(e){}t.vol=v;paintSel('hd:'+t.id);paintSel('mx:'+t.id+':vol');if(t.id===selT)paintSel('fx:vol')}
+  else if(p==='pan'){try{awTouch(t,'pan',v)}catch(e){}t.pan=v;paintSel('hp:'+t.id);paintSel('mx:'+t.id+':pan');if(t.id===selT)paintSel('fx:pan')}
+  else if(p==='width'){t.width=v;if(t.id===selT)paintSel('fx:width')}
+  else{const r=p.slice(2);t.sends=t.sends||{};if(v>0)t.sends[r]=v;else delete t.sends[r];paintSel('mx:'+t.id+':'+p)}}
+const aeDb=g=>g<=1e-4?-Infinity:20*Math.log10(g);
+/* new value of one follower: s its value at the start, s0 and v the dragged one's start and now */
+function aeCalc(p,s,s0,v,abs){if(abs)return v;
+  if(p==='vol'||p.startsWith('s:')){const d0=aeDb(s0),d1=aeDb(v),di=aeDb(s);
+    if(d0===-Infinity)return di===-Infinity?v:s;/* the dragged one started silent: only the silent ones follow it, the others keep their level */
+    if(di===-Infinity||d1===-Infinity)return 0;const n=di+(d1-d0);return n<=-60?0:Math.pow(10,Math.min(6,n)/20)}
+  if(p==='pan')return clamp(s+(v-s0),-1,1);if(p==='width')return clamp(s+(v-s0),0,200);return v}
+function aeWrap(C){if(C._ae)return;C._ae=1;const raw=C.set;C.set=function(v){raw(v);const g=AE.g;if(g&&g.C===C&&!AE.in)aeFollow(g)}}
+function aeStart(C,id,e,abs){const P=aeParse(id);if(!P||!C)return null;if(e&&(e.metaKey||e.ctrlKey))return null;const L=aeMulti(P.tid),t0=trkById(P.tid);if(!L||!t0)return null;
+  const st=new Map();for(const t of L)if(t!==t0&&aeOk(t,P.p))st.set(t,aeGet(t,P.p));if(!st.size)return null;aeWrap(C);return{C,p:P.p,t0,s0:aeGet(t0,P.p),st,abs:!!abs}}
+function aeFollow(g){AE.in=1;try{const v=aeGet(g.t0,g.p);for(const[t,s]of g.st)aePut(t,g.p,aeCalc(g.p,s,g.s0,v,g.abs||AE.alt));changed(false)}finally{AE.in=0}}
+document.addEventListener('pointerdown',e=>{AE.g=null;if(!cd||e.button!==0||!e.target.closest)return;const el=e.target.closest('[data-c]');if(!el||cd.el!==el)return;AE.alt=e.altKey;AE.g=aeStart(cd.C,el.dataset.c,e,false)},true);
+document.addEventListener('pointermove',e=>{if(AE.g&&AE.alt!==e.altKey){AE.alt=e.altKey;if(cd)aeFollow(AE.g)}},true);
+{const end=()=>{AE.g=null;AE.alt=false};document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end)}
+document.addEventListener('wheel',e=>{if(cd||!e.target.closest)return;const el=e.target.closest('[data-c]');if(!el)return;const g=aeStart(CT.get(el.dataset.c),el.dataset.c,e,e.altKey);if(!g)return;AE.g=g;setTimeout(()=>{if(AE.g===g)AE.g=null},0)},{capture:true,passive:true});
+document.addEventListener('dblclick',e=>{if(!e.target.closest)return;const el=e.target.closest('[data-c]');if(!el)return;const g=aeStart(CT.get(el.dataset.c),el.dataset.c,e,true);if(!g)return;AE.g=g;setTimeout(()=>{if(AE.g===g)AE.g=null},0)},true);
+/* buttons: every selected track gets the clicked one's new state */
+const AEBTN={mute:'Mute',solo:'Solo',arm:'Record arm',read:'Read automation',aar:'Write automation'};
+function aeSetAll(L,k,on){
+  if(k==='aar'){for(const t of L)t.autoArm=on;renderHeaders();changed(false);toast(AEBTN[k]+' '+(on?'on':'off')+' for '+L.length+' tracks.');return}
+  pushUndo();AE.noU=1;try{for(const t of L){if(k==='arm'){if(t.kind==='group'||t.kind==='return')continue;if(!!t.arm!==on)armTrack(t)}else if(k==='read')t.read=on;else t[k]=on}}finally{AE.noU=0}
+  changed(true);try{renderMixer()}catch(e){}toast(AEBTN[k]+' '+(on?'on':'off')+' for '+L.length+' tracks. Press ⌘Z to undo.')}
+function aeBtn(e,row){const b=e.target.closest('[data-a]');if(!b||!AEBTN[b.dataset.a]||e.metaKey||e.ctrlKey)return;const L=aeMulti(row.dataset.id),t0=trkById(row.dataset.id);if(!L||!t0)return;
+  e.stopImmediatePropagation();e.preventDefault();const k=b.dataset.a;aeSetAll(L,k,k==='read'?t0.read===false:k==='aar'?!t0.autoArm:!t0[k])}
+hdrin.addEventListener('click',e=>{const h=e.target.closest&&e.target.closest('.hdr');if(h)aeBtn(e,h)},true);
+/* selecting channels in the mixer, the same way as the track headers */
+document.addEventListener('click',e=>{const s=e.target.closest&&e.target.closest('#mixWin .mx[data-id]');if(!s)return;const id=s.dataset.id;if(id==='master')return;
+  if(e.target.closest('[data-a]')){aeBtn(e,s);return}if(e.target.closest('button,input,select,textarea,[data-c],.slot,.mxpkr'))return;
+  if(e.metaKey||e.ctrlKey){e.stopImmediatePropagation();if(!TSEL.size&&selT&&selT!=='__m')TSEL.add(selT);TSEL.has(id)?TSEL.delete(id):TSEL.add(id);hdrMark();return}
+  if(e.shiftKey&&selT&&selT!=='__m'){e.stopImmediatePropagation();const a=S.tracks.findIndex(t=>t.id===selT),b=S.tracks.findIndex(t=>t.id===id);if(a<0||b<0)return;TSEL.clear();for(let i=Math.min(a,b);i<=Math.max(a,b);i++)if(!HIDT.has(S.tracks[i]))TSEL.add(S.tracks[i].id);hdrMark();return}
+  if(TSEL.size){TSEL.clear();hdrMark()}},true);
+hdrMark=function(){for(const id of[...TSEL])if(!trkById(id))TSEL.delete(id);
+  for(const h of hdrin.querySelectorAll('.hdr'))h.classList.toggle('msel',TSEL.has(h.dataset.id));
+  const w=document.getElementById('mixWin');if(!w)return aeTip();for(const m of w.querySelectorAll('.mx[data-id]'))m.classList.toggle('msel',TSEL.has(m.dataset.id));
+  const fh=w.querySelector('.fwh');if(fh){let p=fh.querySelector('.aecnt');const n=TSEL.size;if(n>1){if(!p){p=document.createElement('button');p.type='button';p.className='aecnt';p.addEventListener('click',ev=>{ev.stopPropagation();TSEL.clear();hdrMark()});p.addEventListener('pointerdown',ev=>ev.stopPropagation());const x=fh.querySelector('.fwx');fh.insertBefore(p,x||null)}
+      const t=`${n} channels selected. Moving a fader, pan, send or button on one of them changes all of them: volume keeps each channel's difference in dB. Hold Option (Alt) to give all the same value, hold Cmd (Ctrl) to change only one. Click to clear the selection.`;if(p._n!==n){p._n=n;p.innerHTML=`<i></i>${n} selected<b>✕</b>`;p.title=t}}else if(p)p.remove()}
+  aeTip()};
+function aeTip(){if(TSEL.size<2||AE.tip)return;AE.tip=1;toast(TSEL.size+' tracks selected. Move a control on one of them and all follow. Option (Alt): all the same value. Cmd (Ctrl): only that one.')}
+{const _rm=renderMixer;renderMixer=function(){const r=_rm.apply(this,arguments);try{hdrMark()}catch(e){}return r}}
+/* right-click a selected track: the menu works on all selected tracks */
+function aeDup(L){pushUndo();AE.noU=1;const nw=[];try{for(const t of L){dupTrack(t);nw.push(selT)}}finally{AE.noU=0}TSEL.clear();for(const id of nw)TSEL.add(id);hdrMark();try{renderMixer()}catch(e){}toast('Duplicated '+L.length+' tracks. The copies are selected.')}
+function aeDel(L){pushUndo();AE.noU=1;try{for(const t of L)if(S.tracks.includes(t))delTrack(t)}finally{AE.noU=0}TSEL.clear();hdrMark();try{renderMixer()}catch(e){}toast(L.length+' tracks deleted. Press ⌘Z to undo.')}
+async function aeFreeze(L,t0){const fz=L.filter(t=>t.frz);
+  if(t0.frz){pushUndo();AE.noU=1;try{for(const t of fz)freezeTrack(t)}finally{AE.noU=0}toast(fz.length+' tracks unfrozen.');return}
+  const go=L.filter(t=>!t.frz&&t.kind!=='group'&&t.kind!=='return'&&t.clips.some(c=>!c.mute));if(!go.length){toast('Nothing to freeze on these tracks.');return}
+  let mode='post';if(go.some(t=>frzAudioFx(t).length)){mode=await askChoice('Freeze '+go.length+' tracks','Each track is recorded once and plays the recording, so it needs almost no computer power. With effects: lowest load, the effects are locked too. Without effects: only the instruments and clips are recorded and the effects stay live.',[{label:'Cancel',v:null},{label:'Without effects',v:'pre'},{label:'With effects',v:'post',cls:'pri'}]);if(!mode)return}
+  for(const t of go)await freezeTrack(t,mode)}
+{const _tm=trackMenu;trackMenu=function(x,y,t,beat){const L=t&&aeMulti(t.id);if(!L)return _tm.apply(this,arguments);const n=L.length,args=arguments;
+  openMenu(x,y,[{head:n+' tracks selected'},{swatches:1,cur:t.color,act:c=>{pushUndo();for(const q of L)q.color=c;changed(true);try{renderMixer()}catch(e){}}},
+    {label:(t.mute?'Unmute ':'Mute ')+n+' tracks',act:()=>aeSetAll(L,'mute',!t.mute)},{label:(t.solo?'Unsolo ':'Solo ')+n+' tracks',act:()=>aeSetAll(L,'solo',!t.solo)},
+    ...(L.some(q=>q.kind!=='group'&&q.kind!=='return')?[{label:(t.arm?'Disarm ':'Arm ')+n+' tracks',sub:'Record arm',act:()=>aeSetAll(L,'arm',!t.arm)}]:[]),
+    {label:'Duplicate '+n+' tracks',act:()=>aeDup(L)},
+    {label:t.frz?'Unfreeze '+n+' tracks':'Freeze '+n+' tracks…',sub:t.frz?'Play live and edit again':'Record them once and play the recordings: saves computer power',ic:'<svg viewBox="0 0 20 20" fill="none" stroke="#7fd0ff" stroke-width="1.7" stroke-linecap="round"><path d="M10 2v16M3 6l14 8M17 6 3 14M8 3.5l2 2 2-2M8 16.5l2-2 2 2"/></svg>',act:()=>aeFreeze(L,t)},
+    '-',{label:'Group the '+n+' selected tracks',key:'⌘G',dot:'#4cc9f0',act:()=>groupTracks(L)},
+    {label:'Only '+t.name+'…',sub:'the menu for this track alone',act:()=>setTimeout(()=>_tm.apply(null,args),0)},{label:'Clear the selection',act:()=>{TSEL.clear();hdrMark()}},
+    '-',{label:'Delete '+n+' tracks',danger:1,act:()=>aeDel(L)}])}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

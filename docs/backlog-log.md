@@ -2420,3 +2420,47 @@ Reading: every update notice (a new program version downloaded over the air, and
 ### Not verified
 - A real Windows electron-updater download and a real Mac app replacement; how the Dock icon cache behaves after replacing the app.
 - App builds before v0.207 still show the system dialog for a new desktop app (their `main.js` does not know the page window); over-the-air notices use the window in every app build.
+
+## 26 November 2026, v0.208: change several channels and tracks together (task AE, from a later message)
+> "I want to be able to select multiple channels and move multiple related parameters at the same time. So let's say I select kick, bass, and riff, and then I slide down on one volume level. I want them all to follow, and do some research online how it should follow, in proportion or relative or any other way. I want the same for the panning, mute, and all the other buttons that are the same over and over again on the channels. And let's do exactly the same for tracks as well ... One small thing on the mixer: the tab to pull it down is a little bit overlapping over 'output to group' ... I like that it's thin and not taking up a lot of space. Let's keep that."
+
+### What was there before
+- The track headers already had a multi-selection (`TSEL`: Cmd or Ctrl-click, Shift-click for a range, light blue outline), used only for "Group the selected tracks". The mixer had no multi-selection, and every control changed only its own track. The cable legend sat 3 px above the window's bottom edge, and the bottom tab (v0.205) reached 7 px into the window, over "Output to group".
+
+### Research
+- **Ableton Live 12 manual, Mixing** (ableton.com/en/live-manual/12/mixing/): "With multiple tracks selected, adjusting the volume of one of them will adjust the others as well", and differences between them are kept ("this difference will be maintained"); the same for pan. Toggling one Track Activator toggles the others, and pressing a Solo or Arm switch of a selected track solos or arms all of them.
+- **REAPER**, Sound On Sound "Reaper: VCA grouping and linking" (soundonsound.com/techniques/reaper-vca-grouping-linking): tweak a control on one selected track "and the others will all follow", keeping the level relationship; selection by Shift or Cmd/Ctrl-click; covers level, pan, mute and solo.
+- **Studio One / Fender Studio Pro manual, Groups** (fenderstudiopromanual.fender.com, Mixing Topics, Groups): group faders move "relative to one another, maintaining the correct dB value relationships"; mute, solo and sends are linked; Alt/Option-click suspends the group so only one track changes.
+- **Cubase Pro 10, Using Quick Link** (steinberg.help, MixConsole): Q-Link synchronises "all touched parameters of selected channels"; the page does not say relative or absolute (Cubase has both modes in its link settings, not re-read this run).
+- **Logic Pro, Edit multiple tracks** (support.apple.com, lgcpe53254fa): swiping across Mute or Solo buttons sets all of them to the same state (the page summary, the verbatim text was not seen). Pages on selection-based processing and Bitwig's Mix View do not cover multi-channel controls.
+- **Pro Tools** (relative groups in dB, offsets kept while one fader is at its limit) and Bitwig were searched; no primary page was read, so they are not used for the decision.
+
+### Decision
+- **Faders and sends: relative in dB.** Every selected channel moves by the same number of dB as the one being dragged (Ableton, REAPER, Studio One). The offsets are measured from where each channel was when the drag started, so a channel that reaches +6 dB or the bottom stops there and gets its old difference back when the drag comes back (it is lost only if you let go there). If the dragged fader goes to silent, all go silent. A channel that was silent stays silent (there is no offset to keep), and if the dragged one started silent only the silent ones follow it. A send moves only on the channels that already send to that return.
+- **Pan and width: relative** (same offset, each stops at its own end), like Ableton.
+- **Option (Alt) during a drag: all get the same value** (absolute), a mode the research shows some programs offer. **Cmd or Ctrl held when the drag or click starts: only that one changes** (Studio One uses Alt for that, but Alt was already free here for absolute, and Cmd/Ctrl-click is how the selection is made, so holding it on a control reads as "this one").
+- **Buttons** (mute, solo, record arm, read automation, write automation): all selected tracks get the clicked track's new state, not each one flipped (Ableton, Logic), so a mixed selection ends up the same.
+- **Double-click** on a control of a selected channel resets all of them, the **mouse wheel** moves all of them relative.
+
+### Built (block "v0.208: change several channels and tracks together (task AE)" before `askChoice`, CSS before `.dacv`; names `ae*`, `AE`)
+- One selection for both views: `selT` (the focused track) plus `TSEL`. The mixer now selects like the headers: click (clears), Shift-click (range, folded tracks skipped), Cmd or Ctrl-click (add or remove). `hdrMark` marks both the headers and the mixer strips (`.msel`: light blue edge and tint), runs after every mixer render, and shows "N selected ✕" in the mixer title bar (click to clear; tooltip explains the modifiers). A tip appears once per session when two or more are selected.
+- Controls: on pointer down on a control of a selected track (`mx:<id>:vol|pan`, `mx:<id>:s:<return>`, `hd:<id>`, `hp:<id>`, `fx:vol|pan|width`), the start values of all selected tracks are taken and the control's setter is wrapped once (`aeWrap`), so every frame of the drag sets the others (`aeFollow`, then one `changed(false)`). The existing first-move `pushUndo` already covers all tracks: one undo step.
+- Buttons: a capture click on header and mixer buttons applies the state to all selected with one `pushUndo` (`pushUndo` is silenced inside, `AE.noU`); arm skips groups and returns and asks for the input per audio track as before.
+- Right-click a selected track (header or mixer strip): a menu for all of them: colour, mute, solo, arm, duplicate (the copies become the selection), freeze or unfreeze (one question for all), group, the menu for that track alone, clear the selection, delete. Duplicate and delete are one undo step.
+- Bottom of the mixer: the cable legend moved up from 3 px to 8 px above the edge (the cable rows keep 5 px more room for it) and the tab is 11 px instead of 13 px and sits 1 px lower, so there is a 4 px gap between them; the tab is as thin as before.
+
+### Tested (`tools/ui-tests/taskAE.py`, headless Chromium)
+- No page errors on load or in any step; version 0.208.
+- Kick, Bass, Clap at -3, -9, -14 dB selected with Ctrl-click in the mixer (3 strips and 3 headers marked, "3 selected"). Dragging the Kick fader: -23.81, -29.81, -34.81 (all down 20.81 dB); far up: 6, 0, -5 (Kick stops at +6, the others keep going by the same step); back down: -8.24, -14.24, -19.24 (offsets of 6 and 11 dB back). One undo step, and one undo gives -3, -9, -14.
+- Pan 0, -0.2, 0.5 dragged right: 0.75, 0.55, 1 (Clap stops at the right); with Alt: 0.25 for all; with Ctrl: only Kick moved.
+- Mute clicked on Bass in the mixer: all three muted, one undo step; Ctrl-click on Solo: only Bass; Solo on Clap: all three on; three undos bring it all back.
+- Arrangement: the same three headers marked after closing the mixer; the Bass header volume dragged left: all three down by 13.56 dB, one undo step; the wheel moved all three by 6.47 dB; a double-click reset all three to 0 dB; header mute on Kick: all three; a plain click cleared the selection; Shift-click gave the range Kick to Clap (4 tracks).
+- Right-click menu with "4 tracks selected": Duplicate made 4 copies (30 → 34 tracks, the copies selected), one undo back to 30; Delete 3 tracks (30 → 27), one undo back to 30.
+- Bottom tab: legend bottom at 551 px, tab top at 555 px (it was 552 over a legend ending at 556); screenshots of the strips, the menu and the tab looked at.
+- Demo unchanged: `tools/engine-tests/export_same.py` Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96), same checksums.
+
+### Not verified
+- The user's Mac and trackpad (Cmd is the key there; the test used Ctrl); moving several channels while automation Write is on (the followers write their own lanes through `awTouch`, not tested while playing); the devices panel's own buttons (Mono, phase, FX on) are not linked, since that panel belongs to another run.
+
+### Left
+- A saved link mode (groups that stay linked without selecting, like Studio One groups or Cubase links) and a choice of absolute as the default; linking the devices panel's buttons and the effect knobs of the same effect on several tracks; the Delete key for selected tracks.

@@ -1,7 +1,7 @@
 {
-  "version": "0.207",
-  "sha256": "44d3979a2c3a56a48f9414760a0b750b5481a4160f205a97e7148177654b8c63",
-  "size": 3345602,
+  "version": "0.208",
+  "sha256": "9546d3976225233358e63c9cec1d12ca73ad18103eada57114366fb0659ddd63",
+  "size": 3357261,
   "minShell": "0.147.0",
   "notes": "Update notices are now a window in the middle of the screen with the logo, the version you have and the new one, what is new and what to do. It never opens while music plays: a small badge waits at the top right instead. Close it with the X or Escape; Later is remembered for that version."
 }
