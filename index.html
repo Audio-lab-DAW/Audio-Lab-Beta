@@ -1776,6 +1776,41 @@ body.fxmin #mixWin .mx.abxl .fwrap{box-shadow:0 0 0 1px var(--abxc)}
 /* the bottom tab stays clear of the cable legend */
 #mixWin .cablg{bottom:8px}
 #mixWin>.abxtab{bottom:-7px;height:11px;gap:2px}
+/* About window: scrolls, "Under the hood" showcase (v0.209, task AD) */
+body #splash.ab{height:min(860px,92vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent;align-content:start}
+body #splash.ab .spw{align-self:start;margin-top:204px;margin-bottom:0!important}
+body #splash.ab>p{position:static!important;grid-area:2/1;justify-self:center;margin:4px 0 12px!important}
+body #splash.ab .abx{position:sticky!important;grid-area:1/1;justify-self:end;align-self:start;top:12px;margin:12px 12px 0 0}
+body #splash.ab .about{padding-bottom:6px;max-width:min(700px,calc(94vw - 32px))}
+.ahf{width:min(700px,calc(94vw - 40px));margin:8px 0 2px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:left}
+.ahfH{display:flex;flex-direction:column;align-items:center;gap:3px}
+.ahfK{font:600 10px Inter,system-ui,sans-serif;letter-spacing:2.5px;text-transform:uppercase;color:#f5c84c}
+.ahfL{font-size:12px;color:#8a8fa0}
+.ahfHl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.ahfT{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:9px;row-gap:3px;align-items:center;padding:10px 11px;border-radius:11px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);cursor:default;transition:border-color .2s,background .2s}
+.ahfT:hover{border-color:color-mix(in srgb,var(--c) 45%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 12%,transparent),rgba(255,255,255,.02))}
+.ahfT .ahfI{grid-row:1/3}
+.ahfI{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 26%,transparent);flex:none}
+.ahfI svg{width:16px;height:16px}
+.ahfN{font:600 12.5px Inter,system-ui,sans-serif;color:#e6e9f0;line-height:1.25}
+.ahfV{font:500 11px Inter,system-ui,sans-serif;color:var(--c);line-height:1.3;font-variant-numeric:tabular-nums}
+.ahfMore{min-height:28px;padding:0 14px;border-radius:14px;font-size:12px}
+.ahfAll{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}.ahfC{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ahfAll[hidden]{display:none}
+.ahfG{display:flex;flex-direction:column;gap:2px;padding:10px 10px 8px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+.ahfGh{display:flex;align-items:center;gap:7px;font:600 10px Inter,system-ui,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#aeb3c2;padding:0 2px 6px}
+.ahfD{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.ahfGn{margin-left:auto;font-weight:500;letter-spacing:0;color:#6c7080}
+.ahfR{display:flex;gap:9px;padding:6px 2px;border-top:1px solid rgba(255,255,255,.05)}
+.ahfRt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ahfS{font-size:11.5px;line-height:1.4;color:#9a9fb0}
+.ahfNote{grid-column:1/-1;text-align:center;font-size:10.5px;color:#6c7080;padding:2px 0 0}
+@media (max-width:640px){.ahfHl{grid-template-columns:1fr 1fr}.ahfAll{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){body:not(.lite) #splash.ab .ahfT{animation:ahfIn .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.25s + var(--i)*.06s)}body:not(.lite) #splash.ab .ahfAll:not([hidden]) .ahfG{animation:ahfIn .4s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i)*.05s)}}
+@keyframes ahfIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+body.lite .ahfT,body.lite .ahfG{background:#15171d;box-shadow:none}
+body.lite .ahfT:hover{background:#1a1d25}
+.genhood{margin-left:8px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2770,7 +2805,7 @@ var ms=+localStorage.getItem('audiolab-boot')||1400;document.body.classList.add(
         <h4>Closing projects</h4>
         <label class="chk"><input type="checkbox" id="genAskClose"> Ask before closing a project with unsaved changes</label>
         <h4>About</h4>
-        <div class="aboutrow"><span id="genVer">AudioLab Pro</span><button type="button" id="genUpd" hidden>Check for updates</button></div>
+        <div class="aboutrow"><span id="genVer">AudioLab Pro</span><button type="button" id="genUpd" hidden>Check for updates</button><button type="button" id="genHood" class="genhood" title="Opens the About window with every advanced feature and the numbers we measured">What's inside AudioLab</button></div>
       </section>
       <section data-page="audio" hidden>
         
@@ -5945,7 +5980,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.208',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.209',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -5955,7 +5990,7 @@ function aboutHtml(){const sr=ctx?ctx.sampleRate:0,bl=ctx&&ctx.baseLatency?Math.
 <div class="abg"><div><span>Version</span><b>${VERSION}</b></div><div><span>Build</span><b>${BUILD}</b></div><div><span>Audio engine</span><b>Web Audio · 32-bit float</b></div><div><span>Running at</span><b>${sr?(sr/1000)+' kHz':'not started'}${bl?' · '+bl+' samples':''}</b></div>
 <div><span>Instruments</span><b>${nI}</b></div><div><span>Effects</span><b>${nF}</b></div><div><span>Platform</span><b>${/Mac/.test(ua)?'macOS':'Desktop'} · ${br?'Chrome '+br[1]:sf?'Safari '+sf[1]:'Browser'}</b></div><div><span>CPU cores</span><b>${cores}</b></div></div>
 
-<div style="margin:10px 0 2px"><button id="abUpd" title="${window.audiolabDesktop?'Looks for a newer AudioLab, shows what is new and installs it inside the app':'Shows which version this is. The web version is always current.'}">Check for updates</button></div><div class="abc">© 2026 Ilja V. Jakovliev. All rights reserved.</div></div>`}
+${ahfHtml()}<div style="margin:10px 0 2px"><button id="abUpd" title="${window.audiolabDesktop?'Looks for a newer AudioLab, shows what is new and installs it inside the app':'Shows which version this is. The web version is always current.'}">Check for updates</button></div><div class="abc">© 2026 Ilja V. Jakovliev. All rights reserved.</div></div>`}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#abUpd');if(b){e.preventDefault();updOpen()}});
 /* --- CPU / health meter --- */
 const RB={act:0,last:0,acc:0,w0:0,a0:0,cpu:0,on:false};const rbTouch=d=>{const n=performance.now();if(RB.last)RB.acc+=RB.act*(n-RB.last);RB.last=n;RB.act=Math.max(0,RB.act+d)};
@@ -17523,6 +17558,89 @@ async function aeFreeze(L,t0){const fz=L.filter(t=>t.frz);
     '-',{label:'Group the '+n+' selected tracks',key:'⌘G',dot:'#4cc9f0',act:()=>groupTracks(L)},
     {label:'Only '+t.name+'…',sub:'the menu for this track alone',act:()=>setTimeout(()=>_tm.apply(null,args),0)},{label:'Clear the selection',act:()=>{TSEL.clear();hdrMark()}},
     '-',{label:'Delete '+n+' tracks',danger:1,act:()=>aeDel(L)}])}}
+/* ---------- About: "Under the hood" showcase (v0.209, task AD). Every claim traces to docs/backlog-log.md (mapping in its v0.207 entry) or, for features older than the log, to the code named there. ---------- */
+const AHF_ICO={pool:'<circle cx="5" cy="6" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="15" cy="6" r="2"/><circle cx="5" cy="13" r="2"/><circle cx="10" cy="13" r="2"/><circle cx="15" cy="13" r="2" fill="currentColor"/>',
+ block:'<rect x="2" y="5" width="4" height="10" rx="1"/><rect x="8" y="5" width="4" height="10" rx="1"/><rect x="14" y="5" width="4" height="10" rx="1"/><path d="M2 18h16"/>',
+ bits:'<path d="M10 2l6 3v5c0 4-3 6.5-6 8-3-1.5-6-4-6-8V5z"/><path d="M7 10l2 2 4-4"/>',
+ clock:'<circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/>',
+ swap:'<path d="M4 7h11l-3-3M16 13H5l3 3"/>',
+ grid:'<path d="M3 15h14M5 15V9M9 15V6M13 15V8M17 15V11"/>',
+ sleep:'<path d="M15 12.5A6 6 0 1 1 8 4a5 5 0 0 0 7 8.5z"/>',
+ freeze:'<path d="M10 2v16M3 6l14 8M17 6L3 14"/><path d="M8 3l2 2 2-2M8 17l2-2 2 2"/>',
+ stems:'<path d="M3 5h14M3 10h10M3 15h6"/><circle cx="16" cy="13" r="2.5"/>',
+ ai:'<path d="M7 3a3 3 0 0 0-3 3v1a3 3 0 0 0 0 6v1a3 3 0 0 0 6 0V3.5M13 3a3 3 0 0 1 3 3v1a3 3 0 0 1 0 6v1a3 3 0 0 1-6 0"/>',
+ mic:'<rect x="7" y="2" width="6" height="10" rx="3"/><path d="M4 10a6 6 0 0 0 12 0M10 16v2"/>',
+ notes:'<rect x="2" y="11" width="5" height="3" rx="1.5"/><rect x="8" y="7" width="6" height="3" rx="1.5"/><rect x="14" y="4" width="4" height="3" rx="1.5"/>',
+ orbit:'<circle cx="10" cy="10" r="2.5" fill="currentColor"/><ellipse cx="10" cy="10" rx="8" ry="4"/><circle cx="17" cy="8.5" r="1.2" fill="currentColor"/>',
+ bounce:'<path d="M2 17h16"/><path d="M3 5q2 12 5 12q3-9 5 0q1.5-5 3 0"/>',
+ wave:'<path d="M2 10c2-6 4-6 6 0s4 6 6 0 3-4 4-2"/>',
+ pulse:'<path d="M2 14h3V5h1v9h3V8h1v6h3V10h1v4h3"/>',
+ particles:'<circle cx="5" cy="5" r="1.4"/><circle cx="12" cy="4" r="1"/><circle cx="15" cy="10" r="1.6"/><circle cx="8" cy="11" r="1.2"/><circle cx="5" cy="16" r="1"/><circle cx="13" cy="16" r="1.3"/>',
+ browse:'<rect x="2" y="4" width="7" height="12" rx="2"/><rect x="11" y="4" width="7" height="12" rx="2"/><path d="M8 10h4"/>',
+ presets:'<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/>',
+ meter:'<path d="M4 17V9M8 17V5M12 17V11M16 17V7"/>',
+ peak:'<path d="M2 16c3 0 4-11 8-11s5 11 8 11"/><path d="M2 5h16" stroke-dasharray="2 2"/>',
+ duck:'<path d="M2 6h3l2 8h2l2-8h3l2 8h2"/>',
+ cables:'<circle cx="4" cy="5" r="2"/><circle cx="16" cy="15" r="2"/><path d="M6 5c6 0 2 10 8 10"/>',
+ scope:'<rect x="2" y="3" width="16" height="12" rx="2"/><path d="M4 12l3-4 3 2 3-5 3 4M7 18h6"/>',
+ glass:'<rect x="3" y="3" width="14" height="14" rx="4"/><path d="M6 8l3-3M6 12l6-6"/>',
+ auto:'<path d="M3 15a7 7 0 1 1 14 0"/><path d="M10 15l3-5"/>',
+ themes:'<circle cx="10" cy="10" r="7"/><circle cx="7" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="7" r="1" fill="currentColor"/><circle cx="13" cy="12" r="1" fill="currentColor"/>',
+ fast:'<path d="M11 2L4 11h5l-1 7 7-9h-5z"/>',
+ update:'<path d="M16 10a6 6 0 1 1-2-4.5M16 3v4h-4"/>',
+ dac:'<rect x="3" y="6" width="14" height="8" rx="2"/><circle cx="7" cy="10" r="1.3"/><path d="M11 9h4M11 11h3"/>',
+ icon:'<rect x="4" y="4" width="12" height="12" rx="3.5"/><circle cx="10" cy="10" r="2.5"/>'};
+/* [group, colour, [[icon, name, one plain sentence, measured number, highlight]]] */
+const AHF=[
+ ['Audio engine','#4cc9f0',[
+  ['pool','Pooled voice engine','Every track keeps a set of ready voices that are reused note after note, the way hardware synths work, so nothing is built while you play.','32 voices per track, up to 14 oscillators each',1],
+  ['block','Sample-exact block timing','Physics and particle devices step in 64-sample pieces counted from the song start, so a note sounds the same wherever the audio blocks fall, live or in an export.','A note moved by 293 samples: difference 0',1],
+  ['bits','Bit-identical renders','Render a song twice and you get the same file, to the last bit. Every release checks the demo song against the one before.','Same checksums in every release'],
+  ['clock','Look-ahead scheduler','Notes are planned a little ahead on a clock in its own thread, which keeps going even when the window is in the background.','Clock tick every 20 ms'],
+  ['swap','Clean preset switch','Change a preset while the song plays: the old sound is gone almost at once and held notes carry on with the new one.','Old sound gone in 13 to 19 ms',1],
+  ['grid','Every note on time','Switching presets in the middle of a song never drops a note or plays one twice.','23 instruments: 0 missed, 0 doubled'],
+  ['sleep','Sleeping tracks','Tracks whose sound has died away stop computing and wake at once on a key, a pad or Play.','Stopped demo: 22 % of a core down to 3 %'],
+  ['freeze','Background freeze','Tracks you are not changing play from a recording made in the background, and come back live the moment you touch them.','Six heavy tracks: 59 % to 7 % of the audio thread',1]]],
+ ['AI','#b583ff',[
+  ['stems','Neural stem splitter','Splits a finished song into vocals, drums, bass and other parts on your own computer, with the HTDemucs v4 network by Meta.','4 or 6 stems, offline after one download',1],
+  ['ai','AI voices','Make a voice from an example clip of a few seconds; a recording then sings or talks with that voice and keeps its notes.','Held notes within about 4 cents',1],
+  ['bits','Checked AI model','The OpenVoice V2 network runs in its own process in the desktop app, compared against the original model before it shipped.','47.4 dB match to the original'],
+  ['notes','Voice note editing','See a recording as notes, like in Melodyne, and move, split, join or correct them. Pitch is found with the YIN method.','Steady notes read to 0.08 cents'],
+  ['mic','Live voice changer','Pitch correction, formant and a choir of up to 8 voices while you sing, with the TD-PSOLA method that keeps the voice natural.','23.5 ms delay; a choir of 8 uses 5.3 % of a core']]],
+ ['Sound design','#3ecf8e',[
+  ['orbit','Real physics','In Orbit, balls circle a centre mass under real gravity and their paths play the synth.','Energy drift 6e-12 over 60 s'],
+  ['bounce','Bounces on the beat','Bounce and Bouncy Notes work out every bounce with a formula, so each ball lands exactly on the song grid.','7380 landings compared: identical'],
+  ['wave','Clean sub bass','Sub builds its wave from exact overtones, so nothing folds back as noise.','Up to 96 overtones, 168.9 dB clean'],
+  ['wave','Psy Bass','A saw at twice the sample rate, where every note of a roll is the same to the sample.','Same output at any block size'],
+  ['pulse','Fractal','Pulse patterns from slow note lengths up to audio rate, without harsh aliasing.','Up to 4000 pulses a second, aliasing -131.9 dB'],
+  ['particles','Particle instruments','Emit, Vector Grain, Vector FM and Vector Delay turn moving particles into sound, each in its own audio thread.','Up to 192 particles per track in Emit'],
+  ['browse','Live browsing','Swap an instrument or effect while the song plays, with no gap in the sound.','The swap itself takes 0.1 to 0.4 ms'],
+  ['presets','Preset library','Every preset is rendered and checked: none silent, none clipping, levels matched by measurement.','870 presets (451 synth, 419 drums and more)']]],
+ ['Mixing and metering','#f5c84c',[
+  ['meter','Broadcast loudness meter','Meter reads LUFS, loudness range and true peak to ITU-R BS.1770-5 and EBU R128.','All 44 accuracy checks pass'],
+  ['peak','Oversampled true peak','Peaks that fall between samples are found the way the standard asks.','4x oversampling, 48-tap filter'],
+  ['duck','Sidechain Ducker','Ducks a track on every hit of another track at audio rate, also in exports.','-12.6 dB at the default amount'],
+  ['cables','Mixer cables','Sends, groups and sidechains are drawn as cables you drag between channels, with the direction spelled out.','Up to 5 levels of cables'],
+  ['scope','Dockable analyser','Spectrum, spectrogram, stereo field, waveform, loudness and correlation in one window you can dock to any edge.','All six in 1.7 ms a frame']]],
+ ['Interface','#4c8dff',[
+  ['glass','Glass interface','Frosted glass that catches light from the clips behind it, blurred from a ready-made picture to stay light.','Blur works on 1/16 of the pixels'],
+  ['auto','Automatic performance','Measures your screen and picks the richest look that still runs smoothly.','Keeps 95 % of the screen rate'],
+  ['themes','Studio themes','Looks inspired by other studios, with matching faders and meters.','8 themes, 21 fader designs'],
+  ['fast','Fast start','The splash is the real loading screen and appears almost at once.','On screen in 0.20 s'],
+  ['scope','Sharp visualizer','The visualizer stays sharp on high resolution screens at no extra cost.','0.47 ms a frame']]],
+ ['Desktop app','#6fd3c0',[
+  ['update','Updates inside the app','Finds, shows and installs updates, and waits until you are not working.','Installs after 20 s without input'],
+  ['dac','Interface and DAC mode','A bit-perfect checklist, automatic sample-rate switching and a measured round trip for your audio interface.',''],
+  ['icon','App icons','Pick the Dock or taskbar icon, and .audiolab files get their own icon on the Mac.','49 icons in 7 groups']]]];
+const ahfSvg=k=>'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(AHF_ICO[k]||'')+'</svg>';
+function ahfHtml(){const all=AHF.reduce((n,g)=>n+g[2].length,0);let i=0;
+  const hl=AHF.flatMap(([g,c,L])=>L.filter(x=>x[4]).map(x=>[c,x])).map(([c,[k,n,d,v]])=>`<div class="ahfT" style="--c:${c};--i:${i++}" title="${esc(d)}"><span class="ahfI">${ahfSvg(k)}</span><span class="ahfN">${esc(n)}</span><span class="ahfV">${esc(v)}</span></div>`).join('');
+  const grp=([g,c,L],gi)=>`<div class="ahfG" style="--c:${c};--i:${gi}"><div class="ahfGh"><span class="ahfD"></span>${esc(g)}<span class="ahfGn">${L.length}</span></div>${L.map(([k,n,d,v])=>`<div class="ahfR"><span class="ahfI">${ahfSvg(k)}</span><div class="ahfRt"><span class="ahfN">${esc(n)}</span><span class="ahfS">${esc(d)}</span>${v?`<span class="ahfV">${esc(v)}</span>`:''}</div></div>`).join('')}</div>`,groups=[[0,3,5],[1,2,4]].map(col=>`<div class="ahfC">${col.map(gi=>grp(AHF[gi],gi)).join('')}</div>`).join('');
+  return`<div class="ahf" id="ahf"><div class="ahfH"><span class="ahfK">Under the hood</span><span class="ahfL">What runs inside AudioLab Pro, with the numbers we measured</span></div><div class="ahfHl">${hl}</div><button type="button" class="ahfMore" id="ahfMore" aria-expanded="false" aria-controls="ahfAll">Show all ${all} features</button><div class="ahfAll" id="ahfAll" hidden>${groups}<div class="ahfNote">Measured in AudioLab's own tests on a test computer. Your computer may give other numbers. AI voices need the desktop app.</div></div></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#ahfMore,#genHood');if(!b)return;e.preventDefault();
+  if(b.id==='genHood'){showAbout();return}
+  const a=document.getElementById('ahfAll');if(!a)return;const open=a.hidden;a.hidden=!open;b.setAttribute('aria-expanded',String(open));b.textContent=open?'Show less':'Show all '+a.querySelectorAll('.ahfR').length+' features';
+  if(open)requestAnimationFrame(()=>{const sp=document.getElementById('splash');const t=document.getElementById('ahf');if(sp&&t)sp.scrollTo({top:t.offsetTop-24,behavior:AT.reduce||document.body.classList.contains('lite')?'auto':'smooth'})})});
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

@@ -1,7 +1,7 @@
 {
-  "version": "0.208",
-  "sha256": "9546d3976225233358e63c9cec1d12ca73ad18103eada57114366fb0659ddd63",
-  "size": 3357261,
+  "version": "0.209",
+  "sha256": "58888c8247b34f7e763ea778bd4eba585c32d011b4877e646707fae3c4e1156f",
+  "size": 3372981,
   "minShell": "0.147.0",
-  "notes": "Update notices are now a window in the middle of the screen with the logo, the version you have and the new one, what is new and what to do. It never opens while music plays: a small badge waits at the top right instead. Close it with the X or Escape; Later is remembered for that version."
+  "notes": "The About window (click the logo, or Settings, General, \"What's inside AudioLab\") now shows what runs under the hood: six highlights and a \"Show all\" list of 34 features in six groups, each with a plain line and the number we measured. Nothing else changed."
 }

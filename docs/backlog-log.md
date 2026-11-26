@@ -2464,3 +2464,78 @@ Reading: every update notice (a new program version downloaded over the air, and
 
 ### Left
 - A saved link mode (groups that stay linked without selecting, like Studio One groups or Cubase links) and a choice of absolute as the default; linking the devices panel's buttons and the effect knobs of the same effect on several tracks; the Delete key for selected tracks.
+## 26 November 2026, v0.209: About window showcase, "Under the hood" (task AD, from a later message)
+
+> "Let's also add some small things for the About tab. Let's also explain or advertise all the advanced features that our audio workstation has, like voice pooling, block timing, the neural network for splitting stems, the neural AI voice changer, stuff like that, and add all the advanced features in the About, just to brag and make the software look very intelligent and complex."
+
+Reading: the About window (opened by the logo atom; it is the one that credits Ilja V. Jakovliev) gets an "Under the hood" section. Settings has no About tab of its own, only an About line in General, so that line gets a button "What's inside AudioLab" that opens the same window. Run order checked first: task Z2 (v0.206) and task V (v0.203) were released.
+
+### Research (small)
+- Baymard Institute, "Structure descriptions by highlights" (https://baymard.com/blog/structure-descriptions-by-highlights): 2 to 6 highlights, each an icon or picture, a short headline and one paragraph; the rest in an "additional features" part; plain bullet dumps are "rarely inspiring".
+- FabFilter Pro-Q 4 release (https://www.fabfilter.com/news/1733994000/fabfilter-releases-pro-q-4-equalizer-plug-in): bold feature names with a short paragraph, numbers inline ("up to 24 bands"), then a long one-line "Key features" list.
+- Bitwig Studio 5.0 release notes (https://downloads.bitwig.com/5.0/Release-Notes-5.0.html): numbered short titles, details below, grouped by part of the program.
+- Applied: six highlight tiles (icon, name, number) first, then "Show all 34 features" opens six groups with an icon, a short name, one plain sentence and the measured number per feature; a small note that the numbers come from our own tests.
+
+### Built (block "About: Under the hood showcase" before `askChoice`, CSS before `.dacv`; names `AHF`, `AHF_ICO`, `ahfSvg`, `ahfHtml`, `.ahf*`, `#genHood`)
+- The About window is taller (up to 860 px, 92 % of the screen) and scrolls; the logo, wordmark, credits, the version grid, Check for updates and the copyright are kept; the close button stays on screen while scrolling.
+- Collapsed: "Under the hood", "What runs inside AudioLab Pro, with the numbers we measured", six tiles: Pooled voice engine, Sample-exact block timing, Clean preset switch, Background freeze, Neural stem splitter, AI voices. Hovering a tile shows its plain sentence.
+- "Show all 34 features": two columns of groups (Audio engine 8, Mixing and metering 5, Desktop app 3 | AI 5, Sound design 8, Interface 5), each in its own colour (ocean blue, yellow, teal, purple, green, blue), and scrolls to the section. "Show less" closes it.
+- Animation: tiles and groups fade up once (0.4 to 0.5 s, staggered) when shown; CSS only, nothing runs afterwards or while the window is closed; none in Light mode or with reduced motion. Light mode also drops the gradients of the tiles.
+- No em dashes in the text (checked by the test).
+
+### Every claim and its source
+Audio engine
+- Pooled voice engine, "32 voices per track, up to 14 oscillators each": older than this log (v0.145); code `PWL` "AudioLab pooled voice engine (v0.145)" (`LIVE=32`, `NOSC=14`) and the Settings, Performance tooltip "one engine per track with 32 reusable voices".
+- Sample-exact block timing, "A note moved by 293 samples: difference 0": L738 (pieces of 64 samples counted from the start, does not depend on the block size, 128 live, 512 in an export), L600, L632.
+- Bit-identical renders, "Same checksums in every release": the export check in every entry (e.g. L1180), L1325, L1643, and this release's `export_same.py`.
+- Look-ahead scheduler, "Clock tick every 20 ms": older than this log; code "scheduler clock in a worker" (`setInterval(...,20)` in the worker), look-ahead also at L1084.
+- Clean preset switch, "Old sound gone in 13 to 19 ms": L972, L1084.
+- Every note on time, "23 instruments: 0 missed, 0 doubled": L1115.
+- Sleeping tracks, "Stopped demo: 22 % of a core down to 3 %": L2124 (21.6 to 23.9 % before, 2.8 to 3.2 % after).
+- Background freeze, "Six heavy tracks: 59 % to 7 % of the audio thread": L2160 (58.9 % without, 7.1 % with); thaw L2159.
+AI
+- Neural stem splitter, "4 or 6 stems, offline after one download": older than this log; code, the "Split into stems" window ("HTDemucs v4 by Meta ... Downloads 166 MB once, then works offline", 4 and 6 stems), also named in docs/voice-research.md ("the app already loads it for the neural stem split").
+- AI voices, "Held notes within about 4 cents": L2387 (median -2.8, +4.2, -0.7 cents), v0.206.
+- Checked AI model, "47.4 dB match to the original": L2373.
+- Voice note editing, "Steady notes read to 0.08 cents": L2029; YIN L2012.
+- Live voice changer, "23.5 ms delay; a choir of 8 uses 5.3 % of a core": L2014, L2038; TD-PSOLA L2012.
+Sound design
+- Real physics (Orbit), "Energy drift 6e-12 over 60 s": L784.
+- Bounces on the beat, "7380 landings compared: identical": L1477, L1500.
+- Clean sub bass, "Up to 96 overtones, 168.9 dB clean": L1301, L1318.
+- Psy Bass, "Same output at any block size": L1579 (37 against 128), L1571.
+- Fractal, "Up to 4000 pulses a second, aliasing -131.9 dB": L1624, L1638.
+- Particle instruments, "Up to 192 particles per track in Emit": L560.
+- Live browsing, "The swap itself takes 0.1 to 0.4 ms": L939.
+- Preset library, "870 presets (451 synth, 419 drums and more)": L1886 (451), L2206 (419), sum; "none silent, none clipping" L1901, L2234.
+Mixing and metering
+- Broadcast loudness meter, "All 44 accuracy checks pass": L1439; BS.1770-5 L1412.
+- Oversampled true peak, "4x oversampling, 48-tap filter": L1412.
+- Sidechain Ducker, "-12.6 dB at the default amount": L2349 (-12.60 dB).
+- Mixer cables, "Up to 5 levels of cables": L1935.
+- Dockable analyser, "All six in 1.7 ms a frame": L93.
+Interface
+- Glass interface, "Blur works on 1/16 of the pixels": L361 (L350).
+- Automatic performance, "Keeps 95 % of the screen rate": L353, L1361.
+- Studio themes, "8 themes, 21 fader designs": L409, L415.
+- Fast start, "On screen in 0.20 s": L1800 (0.20 to 0.25 s).
+- Sharp visualizer, "0.47 ms a frame": L1792.
+Desktop app
+- Updates inside the app, "Installs after 20 s without input": L460.
+- Interface and DAC mode (no number): L465 to L471.
+- App icons, "49 icons in 7 groups": L2266.
+
+### Named by the user
+- Voice pooling: exists (pooled voice engine, v0.145, before this log); shown with the numbers from the code, none invented.
+- Block timing: exists (64-sample steps from the song start, L738); shown.
+- Neural network for splitting stems: exists in the app (HTDemucs v4, before this log; not described in this log); shown with the facts from its own window.
+- Neural AI voice changer: exists (AI voices, v0.206, desktop app only; the live voice changer is not AI); shown separately and honestly, "AI voices need the desktop app" in the note.
+- Missing: none of the named features. Nothing is shown under "Coming next" (live AI voice is not possible yet, see v0.206).
+
+### Tested
+- `tools/ui-tests/about_showcase.py` (v0.209; 1500 x 950 and 900 x 640, normal and Light mode): 6 tiles, "Show all 34 features", 34 rows after opening, "Show less", no em dash, no sideways scroll, Escape closes, the Settings button opens the window with the showcase, no page errors on load or after. Screenshots looked at: collapsed, expanded, the end of the list, Settings.
+- Demo unchanged: `export_same.py` Fractals Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e), beats 64 to 96, same checksums for every engine.
+- Built on v0.207 (task Y, update window) and v0.208 (task AE, several channels and tracks together), released by other sessions while this one worked; merges at the insertion points and in the log, both sides kept. Version taken: v0.209.
+
+### Not verified
+- On the user's Mac with a real GPU; how the fade looks at 120 Hz.
