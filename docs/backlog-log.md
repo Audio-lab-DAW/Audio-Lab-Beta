@@ -3096,3 +3096,21 @@ Frozen: 0 frames, 0 of the app's 39 repeating timers, 0.0 to 0.2 one-shot timers
 - v0.218 (built on v0.214; other sessions released v0.215, v0.216 and v0.217 in the meantime, so it was applied again on each; the full test ran on the v0.217 base, the quick one and the desktop app test on the final v0.218; the timer for automation and modulators was added after the full run and is covered by the quick one). App copy synced, update note written. `desktop/main.js` and `desktop/preload.js` changed: desktop build as noted below.
 - v0.218: commit 3704a12 on main. Desktop build run 45900585940 dispatched for this commit (no other build was running; it needs to finish before the new desktop app with the window events is out). Artifact 1b07d888 updated to version 241. Project doc `claude/audiolab-background-freeze.md`.
 - The repository now answers under the name Audio-Lab-Pro-Alpha; `gh api` with the old name fails through the proxy (it is redirected to a numeric path), so the build list and the dispatch were done with the GitHub tools instead.
+
+## 26 November 2026, v0.219: W7 shortcut icon (task AH, from a later message)
+
+The shortcut icon of the desktop app is now the "W7" design: the Ocean Yellow logo zoomed 1.5 times into its top right, tilted 6 degrees. Only icon files and the desktop app changed; `index.html` has a new version number and nothing else.
+
+### Done
+- `desktop/build/icon.icns`, `desktop/build/icon.ico` and `desktop/dock-icon.png` replaced by the files from the branch `assets/shortcut-icon` (commit 504a506), byte for byte (not regenerated): the normal logo at 16 to 20 px and at 1024 px, W7 at 24 to 512 px. The sources and their README are kept in `desktop/icon-assets/shortcut/`.
+- Settings > App icon > Ocean Yellow (default). Mac: the Dock gets the new `dock-icon.png` (the code already read that file). Windows: the program, the taskbar and the shortcuts already take the program's own `icon.ico`; what was wrong was going back to Ocean Yellow after another icon, which put the picker picture (the normal logo) on the windows until the next start. `main.js` now sets `icon.ico` there (shipped in the Windows build as `resources/icon.ico`; on Linux, which cannot read an .ico, the Dock picture without its margin).
+- Not touched: `doc.icns`, `doc.ico`, `build/icon.png`, the web favicons and manifest icons, the in-app logos, the 49 picker pictures and thumbnails (Ocean Yellow in the picker stays the normal logo), MIN_SHELL (0.147.0).
+
+### Tested
+- `tools/ui-tests/taskAH_electron.js` (new; real Electron with `main.js` under a virtual screen, 18 checks, all pass). Started as a Mac (platform name faked, a Dock that records): the Dock picture at the start and after choosing Ocean Yellow is `dock-icon.png`, pixel for pixel, and is not the picker picture; Ink Electric still gives its picker picture. Started as it is (the Windows code path): no window icon set at the start, Ink Electric as before, back to Ocean Yellow sets the W7 picture. No page errors in either start.
+- `tools/ui-tests/appicon.py`: 49 choices, Ocean Yellow the default, favicons unchanged, no page errors on load.
+- `tools/engine-tests/export_same.py`: Fractals Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e), unchanged.
+
+### Not verified
+- Nobody has looked at the icon on a real Mac or a real Windows computer. macOS caches app icons: if the old one still shows, log out and back in once (this is in the update note).
+- Windows reading `resources/icon.ico` at run time (going back to Ocean Yellow without a restart) was not run on Windows; the test computer is Linux and used the stand-in picture. If the file could not be read, the window would show the picker picture until the next start, as before.

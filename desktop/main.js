@@ -118,6 +118,15 @@ function iconImage(id, full) {
   if (full) { const s = im.getSize(), m = Math.round(s.width * 50 / 512); im = im.crop({ x: m, y: m, width: s.width - 2 * m, height: s.height - 2 * m }); }
   return im;
 }
+// Off the Mac the default's picture is the program's own icon.ico (the W7 shortcut icon, v0.219), not the picker picture.
+function defaultIcon() {
+  for (const f of [path.join(process.resourcesPath || '', 'icon.ico'), path.join(__dirname, 'build', 'icon.ico')]) {
+    try { if (fs.existsSync(f)) { const im = nativeImage.createFromPath(f); if (!im.isEmpty()) return im; } } catch (e) { /* try the next */ }
+  }
+  // Linux cannot read an .ico: the Dock picture without its Apple margin (100 of 1024 px).
+  try { let im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) { const s = im.getSize(), m = Math.round(s.width * 100 / 1024); return im.crop({ x: m, y: m, width: s.width - 2 * m, height: s.height - 2 * m }); } } catch (e) { /* fall through */ }
+  return null;
+}
 function winIcon() { return !isMac && curIcon && curIcon !== (readIcons().default || 'ocean-yellow') ? iconImage(curIcon, true) : null; }
 function applyIcon(id, startup) {
   curIcon = id;
@@ -125,7 +134,7 @@ function applyIcon(id, startup) {
     if (isMac) { if (app.dock) { const im = iconImage(id, false); if (im) app.dock.setIcon(im); } return; }
     // Windows and Linux: the default is the program's own icon (from icon.ico), so at start nothing needs doing.
     if (startup && id === (readIcons().default || 'ocean-yellow')) return;
-    const im = iconImage(id, true);
+    const im = (id === (readIcons().default || 'ocean-yellow') && defaultIcon()) || iconImage(id, true);
     if (im) for (const w of BrowserWindow.getAllWindows()) { try { w.setIcon(im); } catch (e) { /* ignore */ } }
   } catch (e) { /* the icon is a nicety, never a reason to fail */ }
 }
