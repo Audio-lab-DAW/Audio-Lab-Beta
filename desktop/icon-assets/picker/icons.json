@@ -1,15 +1,39 @@
 {
- "default": "default",
+ "default": "ocean-yellow",
  "groups": [
   {
-   "key": "default",
-   "name": "Default icon",
+   "key": "colours",
+   "name": "Main logo colours",
    "icons": [
     {
-     "id": "default",
-     "name": "Default",
-     "file": "default.png",
-     "design_code": "PR4"
+     "id": "ocean-yellow",
+     "name": "Ocean Yellow",
+     "file": "ocean-yellow.png",
+     "design_code": "KX6"
+    },
+    {
+     "id": "ink-electric",
+     "name": "Ink Electric",
+     "file": "ink-electric.png",
+     "design_code": "KX8"
+    },
+    {
+     "id": "charcoal-ember",
+     "name": "Charcoal Ember",
+     "file": "charcoal-ember.png",
+     "design_code": "KX5"
+    },
+    {
+     "id": "teal-coral",
+     "name": "Teal Coral",
+     "file": "teal-coral.png",
+     "design_code": "KP6"
+    },
+    {
+     "id": "navy-cream",
+     "name": "Navy Cream",
+     "file": "navy-cream.png",
+     "design_code": "KP4"
     }
    ]
   },

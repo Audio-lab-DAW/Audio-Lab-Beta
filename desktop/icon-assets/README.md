@@ -1,18 +1,39 @@
-# AudioLab Pro icon assets (prepared 2026-11-26)
+# AudioLab Pro icon assets: Ocean Yellow
 
-Main logo: **PR4** (Tapered + Satellite, LA1 proportions), white on orange `#F2661C`.
-The colour is not final yet; these files use the current orange. Swapping the colour later means re-rendering these same files.
+Final app icon: the tapered atom with a satellite electron (design code PR4), colour **Ocean Yellow**.
+Ocean blue tile `#1450A8`, white rings `#FFFFFF`, yellow nucleus and electron `#FFD23A`.
 
-| File | Use |
-|---|---|
-| `icon.png` / `icon.svg` | 1024 px app icon on Apple's macOS grid (824 px rounded square, 100 px margin, soft shadow) |
-| `icon.icns` | Mac app icon (16 to 1024 px) -> replaces `desktop/build/icon.icns` |
-| `icon.ico` | Windows app icon (16 to 256 px) -> replaces `desktop/build/icon.ico` |
-| `dock-icon.png` | replaces `desktop/dock-icon.png` (set as Dock icon at start) |
-| `doc.icns` / `doc.ico` / `doc.png` | `.audiolab` document icon: white page with folded corner, orange atom, AUDIOLAB label -> replaces `desktop/build/doc.*` |
-| `PR4-full.*` | full-bleed logo (no margin), for in-app use (About, splash) |
-| `PR4-mark-black.*`, `PR4-mark-white.*` | logo mark alone in one colour, transparent background |
-| `web-*.png` | favicon / web app manifest sizes |
-| `picker/*.png` + `picker/icons.json` | the Settings icon picker: 45 icons (default + 44 choices), 512 px on the same Apple grid, with their display names and groups |
+## Geometry
+- Optically centred: the mark's centre of weight sits at (512, 504) on a 1024 canvas, a few px above the true centre.
+- Three size tiers, each drawn separately (thin lines vanish at small sizes):
 
-Design history and the canvas: project doc `claude/audiolab-app-icon-decisions.md`.
+| Tier | Used at | Rings | Taper | Nucleus / electron |
+|---|---|---|---|---|
+| L | 128 px and up | 44 | 46% | 80 / 46 |
+| M | 48 to 64 px | 56 | 25% | 88 / 52 |
+| S | 16 to 32 px | 80 | none | 118 / 68 |
+
+`icon.icns`, `icon.ico`, `doc.icns`, `doc.ico` and the `web-*` favicons already contain the right tier at each size.
+`source/` has the tier SVG/PNG files (full-bleed `icon-*`, Apple-grid `icon-grid-*`).
+
+## Files
+| File | Goes to | Purpose |
+|---|---|---|
+| icon.icns | desktop/build/icon.icns | Mac app icon (Apple grid: 824 px tile, 100 px margin) |
+| icon.ico | desktop/build/icon.ico | Windows app icon (16–256 px) |
+| icon.png | desktop/build/icon.png | 1024 px source used by electron-builder |
+| dock-icon.png | desktop/dock-icon.png | Mac Dock icon at runtime (main.js) |
+| doc.icns / doc.ico | desktop/build/doc.* | `.audiolab` project file icon |
+| web-16/32/48/180/192/512.png | web app | favicons, apple-touch-icon, manifest |
+| mark-black / mark-white / mark-colour | branding | logo without the tile |
+| picker/*.png + icons.json | Settings → App icon | 49 choices; default `ocean-yellow` |
+
+## Picker groups (icons.json)
+1. **Main logo colours**: Ocean Yellow (default), Ink Electric, Charcoal Ember, Teal Coral, Navy Cream
+2. Spirograph & fractal, Realistic 3D, Decades, 1950s illustration, Scientific illustration, Atom models in history (44 alternates, all with plain names; design codes kept only in `design_code`).
+
+## `.audiolab` question-mark fix
+electron-builder needs the file type exported, not only associated:
+`fileAssociations[0]` keeps `icon: "build/doc"`, and `mac.extendInfo` gets
+`UTExportedTypeDeclarations` for `com.audiolab.project` (conforms to `public.data`, extension `audiolab`, icon `doc.icns`)
+plus `LSItemContentTypes: ["com.audiolab.project"]` and `LSHandlerRank: "Owner"` in the document type.
