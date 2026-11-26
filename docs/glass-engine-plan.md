@@ -146,6 +146,31 @@ How to fit the engine into what exists (from the audit; line numbers are for v0.
 - Nothing in the audio path changes. Check the Fractals levels and the existing glass tests (`tools/ui-tests/glass*.py`) after each step; headless machines have no GPU, so frame rates there prove nothing: correctness and "no backdrop-filter left on docked surfaces" are what can be tested, the frame rate is the user's to confirm.
 - The release routine and editing rules are the ones in the existing task prompts (new JS before `function askChoice(`, new CSS before `.dacv{display:flex;`, Python edit scripts with unique-replacement asserts, `git pull --rebase`, version bump, `sync-app.js`, update note, backlog log, project doc, notification, artifact).
 
+### 3.2 First numbers from the user's Mac (27 Nov) and what they change
+
+M4 Mac mini, Chrome 157, **3840x2027 window (7.8 megapixels) at 240 Hz**, arrangement scrolling, mixer moving, all five panels, lens Wide, blur Light, first version of the bench engine (half-size backdrop, 2D canvas uploaded and blurred on every frame):
+
+| Mode | fps | median ms | 95 % ms | worst ms |
+|---|---|---|---|---|
+| Solid | 240 | 4.20 | 4.60 | 4.7 |
+| Blur (plain `backdrop-filter` blur) | 240 | 4.20 | 4.50 | 4.8 |
+| GL engine, first version | **198** | 4.20 | 8.40 | 8.8 |
+
+Preset test (how often the whole glass fits in one 4.2 ms frame): only "blur light" reached x2; every other preset x1.
+
+What this says, honestly:
+- **The first engine version is not yet faster than Chromium's plain blur at this size.** It drops about one frame in six. At 7.8 megapixels and 240 Hz one full-screen pass is already 1.9 billion pixels a second, and the frame budget is 4.2 ms.
+- Plain blur holding 240 here is for four plain panels with nothing drawn inside them; the app's real glass (lens, content inside, glass on glass, the mixer's meters) is what fell to 135. So this does not mean "use plain blur"; it means the engine has to be cheaper than its first version.
+- **Blur strength does matter on a real GPU** (light fits twice, regular once). The earlier "no measurable difference" came from the cloud's software renderer and was wrong for the Mac. Lens width still shows no difference.
+- The preset test was too coarse (x1 or x2 only). Bench 2 reports the share of frames delivered instead.
+
+Where the first version spends its time, and the fixes now in **Bench 2** (same page, `tools/glass-lab/glass-bench.html`):
+1. **Quarter-size backdrop** (what macOS itself uses): the blur starts from a quarter-size copy made by the GPU's own mipmaps. About a quarter of the blur work.
+2. **Backdrop refreshed every 2nd or 4th frame** while panels still move on every frame: at 240 Hz that is a 120 or 60 per second backdrop under frosted glass, where it cannot be seen. Halves or quarters upload and blur again.
+3. Two check rows: "no upload" (is copying the 2D canvas into the GPU the cost? If yes, the arrangement must be drawn in WebGL or uploaded only on change) and "layer only" (what the extra full-screen layer costs with the engine doing nothing).
+
+**Requirement for the engine (task G2 and glass step 1): on this Mac at this window size it must deliver 100 % of frames with room to spare, or it is not ready.** Design consequences already clear: quarter-size backdrop by default; backdrop refresh decoupled from the screen rate (default every 2nd frame at 240 Hz, every frame at 60 Hz); never upload or blur on a playhead-only frame; keep the engine's canvas no larger than the glass it draws if "layer only" turns out to cost frames. The Bench 2 table from the Mac decides the rest.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
