@@ -2069,3 +2069,116 @@ open('docs/device-backlog-2026-11-25.md','w').write(s)
 
 ### Release
 - v0.200: commit 23ec3c9 on main. Desktop build run 45765956244 succeeded (2 min 27 s). Artifact 1b07d888 updated to version 223 (it was at v0.199). Project doc `claude/audiolab-voice-device.md` (this entry and the research). The desktop shell is unchanged (MIN_SHELL stays 0.147.0); the AI voices will need a new shell.
+
+## 26 November 2026, v0.201: light devices and background freeze (task E of `docs/device-backlog-2026-11-25.md`)
+
+> "I want all these devices to be optimized for CPU use, so everything needs to stay snappy. And for any like heavy physics or any other heavy device, we need a way to dynamically freeze it in the background so it doesn't, so it's not taking up CPU all the time, unless there is too many changing parameters. Maybe we can figure out an algorithm or a way to do things like that."
+
+All numbers: headless Chromium on this 2-core test machine, no GPU. Audio-thread load is the processor time of Chromium's real-time audio thread read from Linux (`/proc/<pid>/task/*/stat`), in % of one core; the app's own meter cannot measure in headless (the buffer is too small for it). Offline cost is the time `renderMix` takes for a fixed phrase. The test machine is much weaker than the user's Mac: the ratios are the result, not the absolute numbers.
+
+### Part 1: what each device costs, and the waste that was removed
+
+**Measured first.** A fixed phrase (8 bars at 120 bpm: a 3-note chord and four eighth notes per bar, 19 s of sound with the tail) rendered offline three times, the fastest kept, with the device and without it. "ms per s" = render time per second of sound.
+
+| device | offline cost, ms of work per s of sound (best of 9 renders; v0.199 = v0.201) | stopped, never played, 10 tracks: v0.199 → v0.201 (the selected track stays awake) | 6 armed tracks after playing, stopped (armed never sleep), v0.201 |
+|---|---|---|---|
+| Saw lead (the reference) | 11 | 6.0 → 2.2 | 7.0 |
+| Plant | 103 | 3.8 → 2.2 | 13.0 |
+| Emit | 64 | 3.5 → 2.2 | 2.5 |
+| Vector Grain | 21 | 3.8 → 2.3 | 5.3 |
+| Vector FM | 53 | 3.3 → 2.3 | 5.8 |
+| Orbit | 53 | 3.5 → 2.5 | 6.3 |
+| Bounce (instrument) | 84 | 3.7 → 2.0 | 7.7 |
+| Growl | 7 | 3.3 → 2.3 | 6.2 |
+| Wavetable | 17 | 3.7 → 2.3 | 8.0 |
+| Sampler | 18 | 3.7 → 2.2 | |
+| Sub | 9 | 3.7 → 2.3 | 6.2 |
+| Psy Bass | 15 | 3.7 → 2.0 | 7.2 |
+| Fractal (instrument) | 45 | 3.5 → 2.3 | 7.2 |
+| Venom | 49 | 3.5 → 2.2 | 8.0 |
+| Bouncy Notes (MIDI effect, on Saw) | +21 | | |
+| Reverb | +37 | 5.5 → 2.2 | 35.7 |
+| Space (convolution) | +14 | 13.0 → 2.3 | 20.5 |
+| Vector Delay | +24 | 49.0 → 11.7 | 20.3 |
+| Bounce Delay | +6 | 25.7 → 3.7 | 12.8 |
+| Fractal (effect) | +38 | 45.2 → 8.2 | 30.5 |
+| Delay | +7 | 14.5 → 3.0 | |
+| Tape delay | +9 | 14.7 → 3.7 | |
+| Blur | +9 | 15.0 → 3.7 | |
+| Phaser | +20 | 21.2 → 3.8 | |
+| Chorus | +26 | 8.7 → 2.8 | |
+| Multiband | | 18.3 → 3.5 | |
+| Resonator | | 17.5 → 2.7 | |
+| Meter | | 27.5 → 4.5 | |
+| Pitch shift | | 14.0 → 2.8 | |
+| Vocoder | | 12.3 → 3.2 | |
+| Limiter, Crusher, Gate, Imager, Transient | | 8.8 to 11.8 → 2.7 to 3.5 | |
+| EQ, Compressor, Drive, Filter, Clipper, Sidechain, OTT | | 4.2 to 9.3 → 1.8 to 2.7 | |
+| (an empty project) | | 2.4 → 2.4 | |
+
+Effects: the cost over Saw alone. Load in % of one core of the audio thread. Vector Delay, the Fractal effect and the Meter still cost something with the selected track awake (one of the ten): about 9, 6 and 2 % for that single track on this machine.
+
+Single offline renders move by up to ±30 % between runs on this machine (other work on 2 cores), so the best of three runs each of v0.198, v0.199 and v0.201 is given; the code that makes the sound was not changed and the renders are bit-identical (below), so this column has no before and after. Vector Map is a modulator with no audio of its own: its offline cost is inside the renders it moves (`vector_map.py`), and it adds nothing while stopped.
+
+**Waste found (and fixed):**
+1. **Nothing slept while the song was stopped.** Every delay, tape delay, blur, phaser, chorus, sidechain, multiband, resonator, Vector Delay, Bounce Delay, Fractal effect, Meter and reverb kept computing silence. A delay with a feedback loop and a wobble LFO never counts as silent for the browser, and a worklet effect is called every block. Fractals demo, stopped: **21.6 to 23.9 % of one core before, 2.8 to 3.2 % now** (an empty project is 2.4 %).
+2. **Analysers kept unplugged chains running.** The browser keeps every analyser that has no output running on its own, and it pulls everything in front of it. Effects keep analysers for their pictures, so a track unplugged by "Sleeping tracks" still computed its whole effect chain. Measured on the demo with every track unplugged: 23.6 % without the fix, 2.8 % with it. This also made sleeping during playback save much less than it was meant to: Fractals playing from bar 1: 23.0 → 14.9 %, from beat 64: 15.5 → 10.6 %; from beat 160 (everything plays) 29.5 → 29.4 % (sleeping cannot lower the busiest moment, as the research said).
+3. Effects taken off a track kept their old chain running for good through their analysers (since long before this version): now their analysers are unplugged.
+4. The Meter plugged its own silent sink straight into the output, which kept its track's whole chain running even while asleep: such connections made while an effect is built now go into the effect's sink too (Meter, 10 tracks stopped: 15.3 → 4.5 %).
+
+**Checked and found clean:**
+- **Instrument engines with no notes**: the worklets of Emit, Vector Grain, Vector FM, Orbit, Sub, Bounce, Psy Bass, Fractal, Venom and the voice engine do almost nothing without notes (column 4: about the cost of a plain track); the grain engine and the voice engine return early when empty. Instrument tracks also sleep now, so their engines are not called at all.
+- **Pictures while nothing moves**: with each device's panel open and the song stopped, the page's main thread used 10.7 to 13.7 % for every device, the same as a plain Saw (11.3 %): the particle pictures only redraw when their engine sends positions (Emit, Vector Grain, Vector FM and Orbit send nothing while no particle exists), nothing to fix there. Vector Delay and Fractal send their picture data 30 times a second while their panel is open (that is how they show the particles moving).
+- **Timers**: the 47 intervals of the app were left alone; the new ones are cheap (500 ms background freeze, 200 ms sleep check that only reads the level of tracks that could go to sleep, 2 s analyser clean-up).
+
+**How sleeping works now** (`slzTail`, `slzPeak`, `slzQuiet`, `slzWake`, `slzSinks`, `slzSweep`; `slpTick` replaced):
+- Every analyser an effect makes (collected while `mkFxNode` runs in the live context) is plugged into a silent sink (a gain of 0, which adds exact zeros) that is plugged in while its track is awake and pulled out while it sleeps.
+- **Stopped**: a track goes to sleep when its own output (after its fader, both channels, every sample, two analysers of 16384 samples read every 200 ms) has been below -100 dB for longer than its effects can ring: 1.5 s, reverbs 2 s + 1.5 x decay, delays, blur and resonator 12 s, vocoder, Fractal, pitch effects 4 s, counted from the stop or the last sound. Groups wake with their tracks, returns with the tracks that send to them.
+- **Playing**: as before (a clip within 2.5 s ahead or within 6 or 12 s behind), and new: a track (also a group or return) whose sound has not died away yet stays awake, so a long delay or reverb tail is never cut.
+- Never sleep: the selected track, armed, recording and monitored tracks, the track the Change browser is working on. Playing a key, a preview, a pad, MIDI input wakes the track before the note is made (the hooks are installed after the devices add their own versions of `voiceOn` and `preview`, and again if anything wraps them later). Play wakes every track with something to play, as before.
+- The setting is the same "Sleeping tracks" switch (Settings › Performance › Savers), its text now says that it also works while stopped.
+
+### Part 2: background freeze (`bgf*`, `BGF`; new block before `askChoice`)
+
+**What the app already had and what this builds on**: the Freeze button of the track (renders the whole track to one audio clip, by hand, `freezeTrack`, `trackRender`), `freeze_match.py`, the note cache (single notes of Plant and the basic synths played from buffers), the clip render of "Bounce to audio" (`bounceRender`), sleeping tracks, the clean switch of v0.184 (`chsTrack`: the old input fades out at a sample-exact moment while the new one takes over and picks up the notes that are sounding).
+
+**What it does**
+- When an instrument track has not changed for 8 seconds and nobody plays it by hand, each of its MIDI clips near the playhead (within 90 s ahead, and every clip inside the loop) is rendered once in the background: an offline render on its own thread, one clip at a time, followed by a rest as long as the render took (at most half of one core). From then on a clip that is played from its start plays that recording into the track instead of the live instrument. The track's effects stay live, so effect knobs, effect automation, modulated effects, tails and sidechains work as always and do not thaw anything.
+- **What is recorded**: exactly what the clip sends into the track: the instrument with its MIDI effects (Bouncy Notes, chord, arp) and the clip's own volume, pan and filter lines, made by the same code as an export (`clipChain` and `synthB`), from the clip start until its tail has died away (the instrument's release + 2 s; if the sound has not died away by then the clip stays live). A recording that is the same on both sides is kept once and played through a two-channel input that copies it to both sides exactly. It starts on a whole sample (a start between two samples would be interpolated and lose treble).
+- **Only from the start**: a clip entered in the middle (Play inside it, a jump, a loop start inside it) plays live, and a clip cut by the loop end plays live, so a recording only ever stands for exactly the notes the live instrument would play.
+- **Thaw, at once**: a change to the instrument (any knob, a preset, MIDI learn), a MIDI effect, the tempo, the clip or its notes, the loop cutting it, arming, recording or monitoring the track, playing its keys or a preview. Checked every screen frame and every 50 ms while recordings play, and on every edit. The thaw is the clean switch of v0.184: the recording fades out a few milliseconds ahead at a sample-exact moment and the live instrument takes over at the same sample, picking up the notes that are sounding. After a change the track waits 8 seconds again before it is recorded again.
+- **Stays live**: the selected track (where the keys go), armed, recording, monitored tracks, the track the Change browser works on; an instrument that a modulator, Vector Map, a macro or automation moves; an instrument that refers to another track; mono and legato instruments (Acid, Psy Bass, Sub, any with mono, legato, glide) where the clip touches another clip of the track (one note would cut or slide into the next); and every instrument that is not on the measured list (below).
+- **Measured list** (`BGFOK`): Vector Grain, Vector FM, Orbit, Wavetable, Sub, Bounce, Acid, Fractal, Growl, Saw lead, Square lead, Sub bass, Square bass, Reese bass, Soft pad, Strings, Pluck, Soft keys, Kick and the four drum synths. Not on it, and why: **Plant, Emit, Psy Bass, Venom** change with the position of the 128-sample blocks by -24 to -3 dB (see the test), so a recording would not match the live sound closely enough; **SFX, drum kit, percussion, Sampler, Grid** make every hit at random. A new instrument stays live until it is measured.
+- **Memory**: at most 384 MB (`UI.bgfMB`), the least recently played recordings go first; recordings of an old sample rate are dropped when the audio engine restarts; switching the setting off drops them all.
+- **Settings › Performance › Savers › Background freeze**: on by default (the tests below show it does not change the sound). Off: everything plays live, recordings are dropped.
+- **Mark**: a small snowflake in the track header (blue, before the name) while the track plays from recordings, or, stopped, would play its next clips from them; the tooltip says what it is and that any change plays it live again.
+- Exports, freeze, bounce never use any of this (`BGF.tst`, the hook in `renderMix`, is only set by the test).
+
+### Tests (all on this machine; files in `tools/engine-tests/`)
+- **`bgfreeze_match.py`** (the mix with and without background freeze, rendered by the app's own `renderMix`, 120 bpm, every instrument on two clips with a clip volume line plus a track with tape delay and reverb after it, beats 4 to 40): with the recording placed at the same block phase as in the live render (B), the mix is **bit-identical** for Vector Grain, Vector FM, Orbit, Wavetable, Sub, Bounce, Acid, Saw lead, Square lead, Sub bass, Square bass, Reese bass, Strings, Pluck, Soft keys, Soft pad, Kick, the snare, clap and hat synths, Bouncy Notes; Fractal differs by at most -94 dB, Kick at -178 dB, Growl and the tom synth by -85 and -80 dB, which is exactly how much they differ from themselves between two renders (they have a random part). With the recording made from the clip start and started on the nearest sample as live playback does (C), the difference is what the block phase changes, the same as between two live plays: below -130 dB for most, Saw lead with Bouncy Notes -77 dB, Bounce -103 dB, Fractal -92 dB, Growl -85 dB, tom -78 dB, Kick -102 dB: far below hearing. Plant (-12 dB), Emit (-24 dB), Psy Bass (-4 dB), Venom (-8 dB) and SFX (random) differ by much more and so stay live.
+- **`bgfreeze_live.py`** (live playback, VFM, Orbit and Acid tracks, a recorder on the VFM track's output): recordings made 13 s after building (8 s still, then rendering), marks on all three tracks while stopped and while playing; an EQ knob on the frozen VFM track: no thaw; an instrument knob: thawed after 1 to 7 ms, 4 notes picked up live, the clip now live; around the thaw the level never fell more than 2 to 3 dB below the 100 ms before (no gap) and the largest step from one sample to the next was 0.080 to 0.105 against 0.091 in the frozen part before (no click); a key played on Orbit thawed it; arming VFM thawed it.
+- **`bgfreeze_cpu.py`** (audio-thread load while playing, with and without, alternating twice): **six particle and wavetable tracks (Vector FM, Orbit, Bounce, Vector Grain, Wavetable, Fractal), dense notes: 58.9 % without, 7.1 % with background freeze**. **Fractals demo**: from beat 160 29.5 → 27.8 %, from beat 288 32.7 → 31.6 %: only Kick, the drum synths, Snare roll and Acid freeze there (they were already cheap), the Plant tracks that make most of its load stay live (see above), so the demo gains little. 190 clip renders took 27.7 s for the demo's sections (146 ms each on average).
+- **Exports bit-identical**: every device of the table rendered with v0.199 and v0.201 with the same project seed: identical checksums for Saw, Plant, Vector FM, Orbit, Wavetable, Sub, Bounce, Psy Bass, Fractal, Venom, Bouncy Notes, Reverb, Space, Vector Delay, Bounce Delay, Fractal effect, Delay, Tape delay, Chorus, Phaser. Emit, Vector Grain, Growl, Sampler and Blur give a different checksum on every page load also in v0.199 (they have random parts that the project seed does not fix), so they cannot be compared this way; their engine tests give the same values.
+- **Engine tests**, v0.199 against v0.201: `emit.py`, `vector_grain.py`, `vector_fm.py`, `vector_delay.py`, `vector_map.py`, `orbit.py`, `bounce_rhythm.py`, `growl.py`: the same values except timings and the lines that also change between two loads of v0.199 (Emit and Vector Grain levels, Vector Map volume by distance: v0.199 gave -36.98 and -37.48 dB on two loads). No errors.
+- Demo unchanged: Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96, solo). No page errors on load.
+- `tools/ui-tests/fxlevels.py` (the Performance tab): same results as before, the only console line is the known 404. Screenshots looked at: the Savers list with the new Background freeze row, the track headers with the mark on Vector FM and Orbit (not on the selected Lead, not on Emit, which stays live).
+
+### Not verified
+- The user's Mac: how much the 384 MB and the background renders cost there, and the audio load on a real audio device (the app's meter works there).
+- Background renders while playing on a 2-core computer compete with the audio thread for the second core; they rest as long as they work, but nobody has listened for dropouts on a weak computer.
+- Nobody has listened to a thaw.
+
+### Left
+- Plant, Emit, Psy Bass and Venom depend on where the 128-sample blocks fall (live playback has the same differences between two plays); making their engines independent of it would let them freeze too, and Plant is most of the Fractals demo's load.
+- Vector Delay, the Fractal effect and Bounce Delay still compute silence while their track is awake (selected, or playing with long gaps between notes): 2 to 4 % of one core each here. A silence skip inside those worklets must keep their moving particles in step to stay bit-identical; not done.
+- A whole-song recording of a track (one buffer across clip boundaries) would also freeze back-to-back clips of mono instruments.
+- The idle load of the page itself while nothing moves (about 11 % of one core here, the same with any device) was not looked at.
+
+### Code (for the next person)
+- One block "v0.201 (task E, part 1)" and one "v0.201 (task E, part 2)" before `askChoice`; CSS `#hdrin .bgfm` before `.dacv`. Names `slz*`/`SLZ` (sleeping) and `bgf*`/`BGF` (background freeze).
+- Wrapped or replaced: `mkFxNode` (live context only: collects analysers and output connections into a sink), `BaseAudioContext.prototype.createAnalyser` and `AudioNode.prototype.connect` (only while an effect is built in the live context), `slpTick` (replaced), `stop`, `syncGraph`, `changed`, `renderHeaders`, `restartAudio`, `pmBuild`; `voiceOn`, `preview`, `padHear` through `bgfHooks` (installed after the devices' own wrappers, re-checked every second).
+- Two lines changed inside `schedule`: a clip played from its start may get `bgfPlay(...)` instead of `clipChain(...)`, and the note loop skips such a clip (`!I.bgf`). One in `renderMix`: `BGF.tst` (null except in the test) may stand in for a clip's notes.
+- Measured with v0.199 plus this work; rebased onto v0.200 (Voice, which arms its track for the microphone, so it never sleeps) before release.
+
+### Release
+- v0.201: see the commit "v0.201: light devices and background freeze (task E)" on main; desktop build, artifact and project doc `claude/audiolab-device-backlog-run-E.md` in the release note below.

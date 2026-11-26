@@ -1674,6 +1674,7 @@ body.w9drag,body.w9drag *{cursor:grabbing!important;user-select:none}body.w9drag
 #vxWin .vxft{padding:5px 10px;font:11px Inter,system-ui,sans-serif;color:rgba(255,255,255,.45);border-top:1px solid rgba(255,255,255,.06)}
 .dev .ndtb .nbtn[data-nact=live].on{background:#3ecf8e;color:#0b0c10;border-color:transparent}
 .dev .nbtn.vxrec{background:#ff3b3b;color:#fff;border-color:#ff3b3b}
+#hdrin .bgfm{display:inline-grid;place-items:center;width:12px;height:12px;margin-right:4px;color:#7fd0ff;opacity:.85;flex:none}#hdrin .bgfm svg{width:10px;height:10px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2760,7 +2761,7 @@ var ms=+localStorage.getItem('audiolab-boot')||1400;document.body.classList.add(
       <section data-page="glass" hidden>
         <div class="gprev" aria-hidden="true"><i class="gb1"></i><i class="gb2"></i><i class="gb3"></i><div class="gpane lg"><b>Glass preview</b><span>Changes show here live</span></div></div>
         <div class="gcards"><div class="gcard gt"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l6-6 12 12" opacity=".5"/></svg></span><div class="gbd"><b>Transparency</b><small>How much of the background shows through panels</small><div class="row trow"><span>Solid</span><input type="range" id="setTrans" min="0" max="100" step="1" aria-label="Transparency"><span>Clear</span><output id="setTransO"></output></div></div></div><div class="gcard gbl"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".55"/><circle cx="12" cy="12" r="10" opacity=".25"/></svg></span><div class="gbd"><b>Blur</b><small>Softens what is behind the glass</small><div class="row trow"><span>Sharp</span><input type="range" id="setBlur" min="0" max="40" step="1" aria-label="Blur amount"><span>Soft</span><output id="setBlurO"></output></div></div></div><div class="gcard ge"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V8a4 4 0 0 1 4-4h12"/><path d="M14 4h6v6" opacity=".5"/></svg></span><div class="gbd"><b>Edge light</b><small>The bright rim along the top edges</small><div class="row trow"><span>Off</span><input type="range" id="setEdge" min="0" max="100" step="1" aria-label="Edge light"><span>Bright</span><output id="setEdgeO"></output></div></div></div><div class="gcard gr"><span class="gic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/><path d="M3 17c3-4 6-4 9 0s6 4 9 0" opacity=".45"/></svg></span><div class="gbd"><b>Refraction</b><small>Bends the background near the edges, like a thick pane</small><div class="row trow"><span>Off</span><input type="range" id="setRefr" min="0" max="100" step="1" aria-label="Refraction"><span>Strong</span><output id="setRefrO"></output></div></div></div></div>
-        <h4>Performance</h4><label class="chk"><input type="checkbox" id="glPlay"> Lighter glass while the song plays (smoother playback; the blur is softer only while playing)</label><label class="chk"><input type="checkbox" id="glBack"> Efficient glass: what shows through the panels is refreshed 20 times a second instead of every frame. The arrangement itself still moves at the full screen rate.</label><label class="chk"><input type="checkbox" id="ncOn"> Note cache: notes that repeat (same sound, pitch and length) are rendered once and played back as audio. Much lighter on the processor for dense songs; exports are not affected.</label><label class="chk"><input type="checkbox" id="slpOn"> Sleeping tracks: while the song plays, tracks with nothing to play are unplugged so their effects stop using the processor. They wake up before their next clip.</label>
+        <h4>Performance</h4><label class="chk"><input type="checkbox" id="glPlay"> Lighter glass while the song plays (smoother playback; the blur is softer only while playing)</label><label class="chk"><input type="checkbox" id="glBack"> Efficient glass: what shows through the panels is refreshed 20 times a second instead of every frame. The arrangement itself still moves at the full screen rate.</label><label class="chk"><input type="checkbox" id="ncOn"> Note cache: notes that repeat (same sound, pitch and length) are rendered once and played back as audio. Much lighter on the processor for dense songs; exports are not affected.</label><label class="chk"><input type="checkbox" id="slpOn"> Sleeping tracks: tracks with nothing to play are unplugged so their effects stop using the processor. While the song plays they wake before their next clip; when it is stopped they sleep once their sound has died away and wake as soon as you play them.</label>
         <p class="hint" id="refrHint">Refraction bends what's behind the glass near its edges, like a thick pane. Edge light adds the bright rim.</p>
       </section>
       <section data-page="colors" hidden>
@@ -3783,10 +3784,10 @@ function schedule(from,to,first){
   for(const t of S.tracks){if(play.only&&t!==play.only)continue;const N=NODES.get(t.id);if(!N)continue;/* a muted (or not soloed) track is silent anyway: don't build its notes. It joins in again within the look-ahead when unmuted. Tracks that drive a sidechain keep playing. */if(UI.skipMuted!==false&&!trkAudible(t,solo)&&!scSrc.has(t.id))continue;try{
     for(const c of t.clips){if(c.mute)continue;const cs=c.start,ce=cs+c.len;if(ce<=from||cs>=to+PW)continue;
       const key=c.id+':'+play.pass;let I=INST.get(key);
-      if(!I){const bFrom=Math.max(0,from-cs),t0=Math.max(ctx.currentTime,tm(cs+bFrom));I=clipChain(ctx,c,bFrom,t0,N.in,60/bpmAt(cs+bFrom),t.read!==false);INST.set(key,I);
+      if(!I){const bFrom=Math.max(0,from-cs),t0=Math.max(ctx.currentTime,tm(cs+bFrom));I=c.notes&&bFrom===0&&t.inst?bgfPlay(t,c,N,cs):null;/* v0.201: a recording made in the background (task E) */if(!I)I=clipChain(ctx,c,bFrom,t0,N.in,60/bpmAt(cs+bFrom),t.read!==false);INST.set(key,I);
         if(!c.notes){const B=srcView(c);if(B){const src=ctx.createBufferSource();src.buffer=B.buf;src.connect(I.in);const[o1,d1]=clipAudioSpan(c,bFrom);src.start(t0,o1,d1);reg(ctx,src)}}
         const II=I;setTimeout(()=>{try{II.out.disconnect()}catch(e){}if(INST.get(key)===II)INST.delete(key)},Math.max(0,(I.end-ctx.currentTime)*1000)+14000)}
-      if(c.notes&&t.inst)for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb>=from&&nb<to){if(tm(nb)<ctx.currentTime-.005){CPU.late++;CPU.lateT=performance.now();laLate()}}if(nb>=from&&nb<to){const w0=Math.max(ctx.currentTime,tm(nb)),du=secSpan(nb,chsEnd(nb,nb+Math.min(n.l,c.off+c.len-n.s))),pe=(pvAny(t.inst)&&!pvBend(c))||(UI.poly!==false&&t.inst.preset==='venom'),ng=pe?I.in:ctx.createGain();if(!pe)ng.connect(I.in);NREC=[];PVCH=I;try{synthB(ctx,t.inst,ng,n.p,w0,du,n.v,c,n.s,spb)}finally{PVCH=null;const L=NREC;NREC=null;if(pe){if(L.length)NGC.push({t:w0+du+noteTail(t.inst),L})}else{L.push(ng);const E={t:w0+du+noteTail(t.inst),L};NGC.push(E);vcap(t,ng,w0,du,E);liveAdd(t,ng,I.in,n,c,w0,du,spb,L)}}}else if(play.chs&&nb<from&&nb+n.l>from)chsNote(t,c,n,nb,I,from,spb)}
+      if(c.notes&&t.inst&&!I.bgf)for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb>=from&&nb<to){if(tm(nb)<ctx.currentTime-.005){CPU.late++;CPU.lateT=performance.now();laLate()}}if(nb>=from&&nb<to){const w0=Math.max(ctx.currentTime,tm(nb)),du=secSpan(nb,chsEnd(nb,nb+Math.min(n.l,c.off+c.len-n.s))),pe=(pvAny(t.inst)&&!pvBend(c))||(UI.poly!==false&&t.inst.preset==='venom'),ng=pe?I.in:ctx.createGain();if(!pe)ng.connect(I.in);NREC=[];PVCH=I;try{synthB(ctx,t.inst,ng,n.p,w0,du,n.v,c,n.s,spb)}finally{PVCH=null;const L=NREC;NREC=null;if(pe){if(L.length)NGC.push({t:w0+du+noteTail(t.inst),L})}else{L.push(ng);const E={t:w0+du+noteTail(t.inst),L};NGC.push(E);vcap(t,ng,w0,du,E);liveAdd(t,ng,I.in,n,c,w0,du,spb,L)}}}else if(play.chs&&nb<from&&nb+n.l>from)chsNote(t,c,n,nb,I,from,spb)}
     }}catch(err){if(!SCHERR.has(t.id)){SCHERR.add(t.id);console.error('AudioLab: scheduling failed on',t.name,err);toast('A part on “'+t.name+'” could not play ('+(err&&err.message||err)+'). The rest keeps playing.')}}}
 }
 const SCHERR=new Set();
@@ -5840,7 +5841,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.200',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.201',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -7351,7 +7352,7 @@ async function renderMix(sr,b0,b1,tail,lim,only,fast,prog){SIDE_B0=b0;RQOFF=RQOK
     const tin=n.tin;
     for(const c of t.clips){if(c.mute)continue;const cs=c.start,ce=cs+c.len;if(ce<=b0||cs>=b1)continue;
       const bFrom=Math.max(0,b0-cs),t0=secSpan(b0,cs+bFrom),ch=clipChain(oc,c,bFrom,t0,tin,60/bpmAt(cs+bFrom),t.read!==false);
-      if(c.notes){if(t.inst)for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb<b0||nb>=b1)continue;PVCH=ch;try{synthB(oc,t.inst,ch.in,n.p,secSpan(b0,nb),secSpan(nb,nb+Math.min(n.l,c.off+c.len-n.s)),n.v,c,n.s,60/bpmAt(nb))}finally{PVCH=null}}}
+      if(c.notes){if(t.inst&&!(BGF.tst&&BGF.tst(oc,t,c,tin,b0)))for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;const nb=cs+n.s-c.off;if(nb<b0||nb>=b1)continue;PVCH=ch;try{synthB(oc,t.inst,ch.in,n.p,secSpan(b0,nb),secSpan(nb,nb+Math.min(n.l,c.off+c.len-n.s)),n.v,c,n.s,60/bpmAt(nb))}finally{PVCH=null}}}
       else{const B=srcView(c);if(B){const x=oc.createBufferSource();x.buffer=B.buf;x.connect(ch.in);const[o1,d1]=clipAudioSpan(c,bFrom);x.start(t0,o1,d1)}}}}
   }finally{SEEDR=null}
   if(prog){const step=Math.max(.5,Math.min(3,len/60));for(let q=step;q<len-.2;q+=step){const qn=oc.renderQuantumSize||128,tq=Math.round(q*sr/qn)*qn/sr;oc.suspend(tq).then(()=>{prog(tq/len);return new Promise(r=>setTimeout(r,0))}).then(()=>oc.resume()).catch(()=>{})}}
@@ -10522,7 +10523,7 @@ function fxBuild(){const sec=document.querySelector('#setBody section[data-page=
    row('glPlay','play','Softer blur while the song plays','Halves the live blur during playback, so each panel takes less work. Only matters with live blur.',sw('glPlay'))+
    row('glBack','back','Half-size picture behind live glass','What shows through live glass is a half-size copy of the arrangement. Through the blur you cannot tell, and the panels are recalculated less often. Only matters with live blur.',sw('glBack'))+
    row('ncOn','note','Note cache','Notes that repeat (same sound, pitch and length) are made once and played back as audio. <i class="lo">Saves a lot of processor</i> in dense songs. Exports are not affected.',sw('ncOn'))+
-   row('slpOn','slp','Sleeping tracks','While the song plays, tracks with nothing to play are unplugged so their effects stop using the processor. They wake up before their next clip.',sw('slpOn'))+`</div>`;
+   row('slpOn','slp','Sleeping tracks','Tracks with nothing to play are unplugged so their effects stop using the processor. While the song plays they wake before their next clip; when it is stopped they sleep once their sound has died away and wake as soon as you play them.',sw('slpOn'))+`</div>`;
   for(const o of sec.querySelectorAll('.sbox,h4,label.chk'))o.remove();
   cards.after(...box.children);if(hint){hint.style.display='none';sec.appendChild(hint)}
   for(const l of sec.querySelectorAll('[data-sw]')){const inp=keep[l.dataset.sw];if(inp){inp.setAttribute('aria-label',l.closest('.prow').querySelector('b').textContent);l.prepend(inp)}}
@@ -13233,7 +13234,7 @@ function pmBuild(){const body=document.getElementById('setBody'),nav=document.ge
   row('glPlay','play','Softer blur while playing','Halves the live blur during playback. Only matters with live blur.','<span data-mv="glPlay"></span>',1)+
   row('glBack','back','Half-size picture behind glass','What shows through live glass is a half-size copy of the arrangement. Only matters with live blur.','<span data-mv="glBack"></span>',1)+
   row('ncOn','note','Note cache','Notes that repeat are made once and played back as audio. Saves a lot of processor in dense songs. Exports are not affected.','<span data-mv="ncOn"></span>',1)+
-  row('slpOn','slp','Sleeping tracks','While the song plays, tracks with nothing to play are unplugged until just before their next clip.','<span data-mv="slpOn"></span>',1)+`</div>`;
+  row('slpOn','slp','Sleeping tracks','Tracks with nothing to play are unplugged: while the song plays until just before their next clip, when it is stopped once their sound has died away. Playing a track wakes it at once.','<span data-mv="slpOn"></span>',1)+`</div>`;
   body.appendChild(sec);
   /* move the existing controls here (same inputs, same handlers) */
   {const c=document.getElementById('liteChk');if(c){const l=document.createElement('label');l.className='bpsw pmsw';l.title='Light mode. On: the slider below is used. Off: Full effects.';c.setAttribute('aria-label','Light mode');l.append(c,document.createElement('i'));sec.querySelector('#pmSwH').replaceWith(l)}}
@@ -15732,6 +15733,178 @@ function w9DEnd(commit,e){const d=W9D;W9D=null;if(!d)return;const gr=d.g.getBoun
  const up=(e,ok)=>{P=null;if(W9D){const fx=document.getElementById('fxin');w9DEnd(ok,e);if(fx)fx.classList.remove('w9drg')}};
  addEventListener('pointerup',e=>up(e,true),true);addEventListener('pointercancel',e=>up(e,false),true);
  addEventListener('keydown',e=>{if(W9D&&e.key==='Escape'){e.preventDefault();e.stopPropagation();up(e,false)}},true)}
+/* ===================== v0.201 (task E, part 1): light devices: tracks also sleep while the song is stopped =====================
+   Measured before (Fractals demo, 30 tracks, stopped, headless Chromium on 2 cores): the audio thread used 22 to 24 % of one core to compute silence.
+   Two causes: (1) nothing slept while the transport was stopped, so every delay, phaser, chorus, sidechain and reverb kept running (a delay with a
+   feedback loop and a wobble LFO never counts as silent for the browser); (2) the browser keeps every analyser that has no output running on its own,
+   and an analyser pulls everything in front of it, so the analysers that effects keep for their pictures held their whole chain awake even when the
+   track was unplugged from the mix (sleeping during playback saved much less than it could).
+   Now: every analyser an effect makes is plugged into a silent sink (gain 0, adds exact zeros) that is plugged in while its track is awake and
+   pulled out while it sleeps; and while the song is stopped a track goes to sleep once its own sound has been silent (below -100 dB, checked on the
+   whole signal, both channels) for longer than its effects can ring (1.5 s, reverbs from their decay, delays 12 s). The selected track, armed,
+   recording and monitored tracks never sleep. Playing a key, a preview or a pad wakes the track at once (before the note is made), and Play wakes
+   every track that has something to play, as before. Sound and exports are not changed: a track only sleeps when it is silent, and offline renders
+   do not use any of this. */
+const SLZ={col:null,root:new WeakMap(),loud:new Map(),wake:new Map(),stopT:-1e9,on:0};
+function slzRoot(c){let r=SLZ.root.get(c);if(!r){r=c.createGain();r.gain.value=0;(SLZ.rawConnect||r.connect).call(r,c.destination);SLZ.root.set(c,r)}return r}
+{const P=BaseAudioContext.prototype,o=P.createAnalyser;P.createAnalyser=function(){const a=o.apply(this,arguments);if(SLZ.col&&this===ctx)SLZ.col.push(a);return a}}
+/* the same for a node an effect plugs straight into the output to keep itself running (the Meter's silent sink): it goes into the sink instead */
+{const P=AudioNode.prototype,o=P.connect;P.connect=function(d){if(SLZ.dcol&&ctx&&d===ctx.destination&&this.context===ctx){SLZ.dcol.push(this);return d}return o.apply(this,arguments)};SLZ.rawConnect=o}
+{const _mk=mkFxNode;mkFxNode=function(c,type){if(!c||c!==ctx)return _mk.apply(this,arguments);const pv=SLZ.col,pd=SLZ.dcol;SLZ.col=[];SLZ.dcol=[];let x=null;
+  try{x=_mk.apply(this,arguments)}finally{const L=SLZ.col,D=SLZ.dcol;SLZ.col=pv;SLZ.dcol=pd;if(x&&((L&&L.length)||(D&&D.length))){try{const sk=c.createGain();sk.gain.value=0;for(const a of L)a.connect(sk);for(const a of D)a.connect(sk);sk.connect(slzRoot(c));x.__sk=sk;x.__skOn=true}catch(e){}}
+    else if(D&&D.length)for(const a of D)try{a.connect(c.destination)}catch(e){}}return x}}
+/* plug the sinks of a track in or out with its sleep */
+function slzSinks(N,on){if(!N||!N.fxm||!ctx)return;for(const x of N.fxm.values()){if(!x||!x.__sk||!!x.__skOn===on)continue;try{if(on)x.__sk.connect(slzRoot(ctx));else x.__sk.disconnect()}catch(e){}x.__skOn=on}}
+/* how long the effects of a track can ring after its last sound (ms) */
+function slzTail(t){let s=1.5;for(const f of t.fx||[]){if(!f.on)continue;const p=f.p||{};if(/reverb|conv/.test(f.type))s=Math.max(s,2+(+p.decay||3)*1.5+(+p.predelay||0)/1000);else if(/delay|blur|reson/.test(f.type))s=Math.max(s,12);else if(/vocoder|crk|pshift|pcorr|tstop/.test(f.type))s=Math.max(s,4)}return s*1000}
+/* the loudest sample of the track's output in the last 0.34 s, both channels (two analysers of 16384 samples, made the first time they are needed) */
+const SLZBUF=new Float32Array(16384);
+function slzPeak(N){if(!N.zL){try{N.zL=ctx.createAnalyser();N.zR=ctx.createAnalyser();N.zL.fftSize=N.zR.fftSize=16384;N.sp.connect(N.zL,0);N.sp.connect(N.zR,1)}catch(e){N.zL=null;return 1}return 1/* nothing collected yet */}
+  let m=0;for(const a of[N.zL,N.zR]){a.getFloatTimeDomainData(SLZBUF);for(let i=0;i<SLZBUF.length;i++){const v=SLZBUF[i];if(v>m)m=v;else if(-v>m)m=-v}if(m>1e-5)return m}return m}
+/* stopped: is this track's sound over? */
+function slzQuiet(t,N,now){if(!N)return true;const w=SLZ.wake.get(t.id)||0;if(w>now)return false;if(N.slp)return true;if(now-SLZ.stopT<1500)return false;
+  if(slzPeak(N)>1e-5){SLZ.loud.set(t.id,now);return false}return now-Math.max(SLZ.loud.get(t.id)||0,SLZ.stopT,w)>slzTail(t)}
+/* wake a track at once (a key, a preview, a pad): it stays awake for its tail after the last wake */
+function slzWake(t){if(!t||!ctx)return;const now=performance.now();SLZ.wake.set(t.id,now+Math.max(3000,slzTail(t)));SLZ.loud.set(t.id,now);const N=NODES.get(t.id);if(N&&N.slp)slpTick(true)}
+slpTick=function(force,beat){if(!ctx)return;const now=performance.now();if(!force&&now-SLP.last<200)return;SLP.last=now;
+  try{const en=UI.fxSleep!==false,on=play.on&&en,b=beat!=null?beat:(on?curBeat():0),spb=60/S.bpm,act=new Map();
+    /* while playing: a track is awake when it has a clip near (as before) or its sound has not died away yet (new: a delay or reverb that still rings is not cut off) */
+    const ring=t=>{const N=NODES.get(t.id);return!!N&&!N.slp&&slzPeak(N)>1e-5};
+    for(const t of S.tracks){const own=t.id===selT||!!t.arm||!!t.rec||!!t.mon||(typeof CHG!=='undefined'&&!!CHG&&CHG.t===t),bus=t.kind==='group'||t.kind==='return';let a;
+      if(!en)a=true;else if(on)a=!bus&&(own||slpNeed(t,b,spb)||ring(t));else a=own||!slzQuiet(t,NODES.get(t.id),now);act.set(t,a)}
+    if(en){for(const t of S.tracks)if(t.kind!=='group'&&t.kind!=='return'&&act.get(t))for(const g of grpAnc(t))act.set(g,true);
+      for(const t of S.tracks)if(t.kind==='return'){for(const m of S.tracks)if(m!==t&&m.sends&&m.sends[t.id]>0&&act.get(m)){act.set(t,true);break}}
+      if(on)for(const t of S.tracks)if((t.kind==='group'||t.kind==='return')&&!act.get(t)&&ring(t)){act.set(t,true);for(const g of grpAnc(t))act.set(g,true)}}
+    let n=0;for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;const want=act.get(t);if(!want)n++;
+      if(!!N.slp===!want){slzSinks(N,want);continue}
+      if(want){try{N.ut.out.connect(N.vol)}catch(e){}N.slp=false;slzSinks(N,true);for(const x of N.fxm.values()){try{if(x.resync)x.resync();else if(x.sync)x.sync(play.on?play.t0-play.b0*60/S.bpm:ctx.currentTime)}catch(e){}}}
+      else{try{N.ut.out.disconnect(N.vol)}catch(e){}N.slp=true;slzSinks(N,false)}}
+    SLP.n=n}catch(e){}};
+{const _st=stop;stop=function(){const was=play.on,r=_st.apply(this,arguments);if(was){SLZ.stopT=performance.now();SLZ.loud.clear()}return r}}
+/* effects taken off a track: their analysers kept their old chain running for good (also before v0.201); now their sinks are pulled out */
+SLZ.trk=new Set();
+function slzSweep(){if(!ctx)return;const live=new Set();for(const N of NODES.values()){if(!N.fxm)continue;for(const x of N.fxm.values())if(x&&x.__sk){live.add(x);SLZ.trk.add(x)}slzSinks(N,!N.slp)}
+  for(const x of SLZ.trk)if(!live.has(x)){SLZ.trk.delete(x);if(x.__skOn){try{x.__sk.disconnect()}catch(e){}x.__skOn=false}}}
+{const _sg=syncGraph;syncGraph=function(){const r=_sg.apply(this,arguments);try{slzSweep()}catch(e){}return r}}
+setInterval(()=>{try{if(SLZ.trk.size)slzSweep()}catch(e){}},2000);
+
+/* ===================== v0.201 (task E, part 2): background freeze =====================
+   When an instrument track has not changed for 8 seconds and nobody plays it by hand, each of its MIDI clips is rendered once in the
+   background (an offline render on another thread, one clip at a time, at most half the time) and from then on the clip plays that
+   recording instead of the live instrument. What is recorded: exactly what the clip sends into the track (the instrument and its MIDI
+   effects, the clip's own volume, pan and filter lines). The track's effects stay live, so their knobs, tails and sidechains work as always.
+   A recording is only used for a clip that is played from its start (a clip entered in the middle, or cut by the loop end, plays live),
+   so it holds exactly the notes the live instrument would play.
+   Any change thaws the track at once: an instrument knob or preset, a MIDI effect, the tempo, a note or the clip itself, arming it,
+   monitoring it or playing its keys. The thaw is the clean switch of v0.184: the recording fades out within a few milliseconds and the
+   live instrument takes over at the same sample, picking up the notes that are sounding.
+   Stays live: the selected track, armed, recording and monitored tracks, an instrument a modulator, Vector Map or automation moves, an
+   instrument that reads another track, instruments not on the measured list (BGFOK below),
+   mono and legato instruments where the clip touches another clip (one note cuts or slides into the next), and a clip whose sound has
+   not died away within its tail. Exports never use any of this.
+   Memory: recordings of the same sound on both sides are kept once (mono); at most UI.bgfMB (384 MB) is kept, the least recently played go first. */
+const BGF={cache:new Map(),bytes:0,busy:false,tsig:new Map(),act:new Set(),ok:new Set(),hdr:new Set(),tst:null,
+  st:{played:0,thaw:0,renders:0,ms:0,fail:0,evict:0},stable:8000};
+/* only instruments measured to give the same sound from a recording (tools/engine-tests/bgfreeze_match.py): with the same block phase the recording is
+   identical to the live render, and moving it by part of a 128-sample block (what live playback does) changes it by less than -76 dB (most below -130 dB).
+   Plant, Emit, Psy Bass and Venom change by more with the block phase (-24 to -3 dB), SFX, drum kit, percussion, sampler and Grid make every hit
+   at random: they stay live. A new instrument stays live until it is measured. */
+const BGFOK=new Set(['vgrain','vfm','orb','wtab','sbass','bball','acid','saw','square','sub','bass','reese','pad','strings','pluck','keys','kick','zsnare','zclap','zhat','ztom','crk','growl']);
+const BGFMONO=new Set(['acid','psyb','sbass']);
+const bgfMax=()=>(UI.bgfMB||384)*1048576;
+const bgfOn=()=>UI.bgFreeze!==false;
+function bgfHash(s){let h1=0xdeadbeef^s.length,h2=0x41c6ce57^s.length;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)+s.length.toString(36)}
+/* everything outside the clip that shapes what the clip sends into the track */
+function bgfTSig(t){try{return JSON.stringify([t.inst,(t.fx||[]).filter(f=>MIDIFX.has(f.type)).map(f=>[f.type,f.on,f.p]),S.bpm,S.tempo||null,S.sigs||null,t.read!==false,ctx?ctx.sampleRate:0,RQOK?(UI.rqOff||512):128])}catch(e){return'x'+Math.random()}}
+const bgfCSig=c=>JSON.stringify(c,(k,v)=>k==='name'||k==='color'||k==='envShow'||k==='sel'?undefined:v);
+const bgfKey=(ts,c)=>bgfHash(ts)+'.'+bgfHash(bgfCSig(c));
+/* does a modulator, Vector Map, a macro or automation move this track's instrument, or does the instrument read another track? */
+function bgfMoved(t){const id=t.id;for(const q of S.tracks)for(const m of q.mods||[]){if(m.off)continue;for(const r of m.routes||[]){const a=String(r.pid||'').split(':');if(a[0]==='f')continue;if(a.includes(id))return true}}
+  const pa=S.pauto||{};for(const k in pa){const L=pa[k];if(!L||!L.length)continue;const a=k.split(':');if(a.includes(id))return true;if(a[0]==='fx'&&!(t.fx||[]).some(f=>a.includes(f.id))&&!S.tracks.some(q=>q!==t&&(q.fx||[]).some(f=>a.includes(f.id))))return true}
+  return false}
+function bgfTrackOK(t){const I=t.inst;if(t.kind!=='inst'||!I||!I.preset||t.frz||!BGFOK.has(I.preset))return false;
+  if(t.id===selT||t.arm||t.rec||t.mon)return false;if(typeof CHG!=='undefined'&&CHG&&CHG.t===t)return false;if(bgfMoved(t))return false;
+  try{const js=JSON.stringify(I);for(const q of S.tracks)if(q!==t&&js.includes('"'+q.id+'"'))return false}catch(e){return false}return true}
+const bgfMono=I=>BGFMONO.has(I.preset)||!!(I.mono||I.legato||I.glide>0||I.porta>0||I.slide);
+/* a mono or legato instrument: a clip that touches another clip of the track (within the tail) stays live */
+function bgfClipOK(t,c){if(c.mute||!c.notes||!c.notes.length)return false;if(!bgfMono(t.inst))return true;const tl=(noteTail(t.inst)+.5)*S.bpm/60,a=c.start,b=c.start+c.len+tl;
+  for(const o of t.clips){if(o===c||o.mute||!o.notes)continue;if(o.start<b&&o.start+o.len+tl>a)return false}return true}
+/* render one clip: what it sends into the track, from its start to the end of its tail. pad = silent samples before the clip (tests use it to keep the block phase of a longer render) */
+async function bgfRender(t,c,sr,pad){pad=pad|0;const cs=c.start,tl=noteTail(t.inst)+2,len=secSpan(cs,cs+c.len)+tl,n=Math.ceil(len*sr)+pad;
+  const rq=RQOK?(UI.rqOff||512):128,sb=SIDE_B0;SIDE_B0=cs-pad/sr*S.bpm/60;let oc;
+  try{oc=quietMeters(rq>128?new OfflineAudioContext({numberOfChannels:2,length:n,sampleRate:sr,renderSizeHint:rq}):new OfflineAudioContext(2,n,sr))}finally{SIDE_B0=sb}
+  await wlLoad(oc);const tin=oc.createGain(),sp=oc.createChannelSplitter(2),mg=oc.createChannelMerger(2);tin.connect(sp);sp.connect(mg,0,0);sp.connect(mg,1,1);mg.connect(oc.destination);
+  const o0=pad/sr,ch=clipChain(oc,c,0,o0,tin,60/bpmAt(cs),t.read!==false);
+  for(const nn of ccSus(c,mfxNotes(t,c.notes))){if(nn.m||nn.s<c.off||nn.s>=c.off+c.len)continue;const nb=cs+nn.s-c.off;PVCH=ch;try{synthB(oc,t.inst,ch.in,nn.p,o0+secSpan(cs,nb),secSpan(nb,nb+Math.min(nn.l,c.off+c.len-nn.s)),nn.v,c,nn.s,60/bpmAt(nb))}finally{PVCH=null}}
+  const b=await oc.startRendering(),L=b.getChannelData(0),R=b.getChannelData(1);
+  /* the sound must have died away before the end of the tail, or the recording would cut it */
+  let last=-1,mono=true;for(let i=L.length-1;i>=0;i--)if(L[i]!==0||R[i]!==0){last=i;break}
+  const end=Math.max(1,last+1);if(last>=0){const q=Math.round(sr*.25);let pk=0;for(let i=Math.max(0,L.length-q);i<L.length;i++){const v=Math.max(Math.abs(L[i]),Math.abs(R[i]));if(v>pk)pk=v}if(pk>1e-4)return{loud:true}}
+  for(let i=0;i<end;i++)if(L[i]!==R[i]){mono=false;break}
+  const out=new AudioBuffer({numberOfChannels:mono?1:2,length:end,sampleRate:sr});out.copyToChannel(L.subarray(0,end),0);if(!mono)out.copyToChannel(R.subarray(0,end),1);
+  return{buf:out,mono,bytes:end*4*(mono?1:2),silent:last<0}}
+/* the scheduler asks: can this clip, starting now from its beginning, play from a recording? Returns a chain like clipChain's or null */
+function bgfPlay(t,c,N,cs){try{if(!bgfOn()||!BGF.ok.has(t.id)||play.only===t||!t.inst||!bgfTrackOK(t))return null;
+  if(S.loop&&!play.past){const B=loopB();if(cs<B-1e-9&&cs+c.len>B+1e-9)return null}
+  const st=BGF.tsig.get(t.id),ts=bgfTSig(t);if(!st||st.s!==ts||performance.now()-st.at<BGF.stable||!bgfClipOK(t,c))return null;
+  const k=bgfKey(ts,c),e=BGF.cache.get(k);if(!e||!e.buf)return null;
+  const sr=ctx.sampleRate,w0=tm(cs);if(!(w0>=ctx.currentTime+.003))return null;const w=Math.round(w0*sr)/sr;/* on a sample: a start between two samples would be interpolated */
+  const g=ctx.createGain();g.channelCount=2;g.channelCountMode='explicit';g.channelInterpretation='speakers';g.connect(N.in);
+  const src=ctx.createBufferSource();src.buffer=e.buf;src.connect(g);src.start(w);e.last=performance.now();BGF.st.played++;
+  const I={in:g,out:g,end:w+e.buf.duration,dest:N.in,bgf:{t,c,k,src,w,cs:bgfCSig(c)}};BGF.act.add(I);return I}catch(err){return null}}
+/* thaw: the recording fades out and the live instrument takes over at the same moment, with the notes that are sounding (the clean switch of v0.184) */
+function bgfThaw(t,why){let any=false;for(const I of BGF.act)if(I.bgf.t===t){any=true;BGF.act.delete(I)}if(!any||!ctx)return false;BGF.st.thaw++;BGF.lastThaw={t:t.name,why,at:performance.now()};
+  const st=BGF.tsig.get(t.id);if(st)st.at=performance.now();
+  try{if(play.on)chsTrack(t,false)}catch(e){console.error('AudioLab: background freeze thaw',e)}bgfMarks();return true}
+/* every frame while recordings play: a change to a track that is playing one thaws it at once */
+function bgfWatch(){if(!BGF.act.size)return;const now=ctx?ctx.currentTime:0;const seen=new Map();
+  for(const I of [...BGF.act]){if(I.end<now||!play.on){BGF.act.delete(I);continue}const t=I.bgf.t;if(!S.tracks.includes(t)){BGF.act.delete(I);continue}
+    let r=seen.get(t);if(r===undefined){r=null;const st=BGF.tsig.get(t.id);if(t.arm||t.rec||t.mon)r='armed';else if(!bgfOn())r='off';else if(!st||bgfTSig(t)!==st.s)r='instrument';else if(bgfMoved(t))r='modulation';seen.set(t,r)}
+    if(!r&&!t.clips.includes(I.bgf.c))r='clip';if(!r&&S.loop&&!play.past){const B=loopB(),c=I.bgf.c;if(c.start<B-1e-9&&c.start+c.len>B+1e-9)r='loop'}if(!r&&bgfCSig(I.bgf.c)!==I.bgf.cs)r='clip';if(r){bgfThaw(t,r);seen.set(t,null)}}}
+{const loop=()=>{try{bgfWatch()}catch(e){}requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+setInterval(()=>{try{bgfWatch()}catch(e){}},50);/* the frame loop stops in a hidden window */
+/* keys, previews and pads wake a sleeping track and thaw a frozen one before the note is made. Installed after the devices have added their own
+   versions of these functions (they are wrapped while the app starts), and again if anything wraps them later. */
+function bgfHooks(){try{
+  if(!voiceOn.__e){const _vo=voiceOn;voiceOn=function(t){try{slzWake(t);if(BGF.act.size)bgfThaw(t,'keys')}catch(e){}return _vo.apply(this,arguments)};voiceOn.__e=1}
+  if(!preview.__e){const _pv=preview;preview=function(t){try{slzWake(t);if(BGF.act.size)bgfThaw(t,'keys')}catch(e){}return _pv.apply(this,arguments)};preview.__e=1}
+  if(!padHear.__e){const _ph=padHear;padHear=function(t){try{slzWake(t);if(BGF.act.size)bgfThaw(t,'keys')}catch(e){}return _ph.apply(this,arguments)};padHear.__e=1}}catch(e){}}
+setTimeout(bgfHooks,0);setInterval(bgfHooks,1000);
+{const _ch=changed;changed=function(){const r=_ch.apply(this,arguments);try{bgfWatch()}catch(e){}return r}}
+/* the background part: signatures, which tracks may freeze, and one render at a time ahead of the playhead */
+function bgfTick(){if(!ctx)return;const now=performance.now();BGF.ok.clear();
+  if(!bgfOn()){if(BGF.cache.size){BGF.cache.clear();BGF.bytes=0}bgfMarks();return}
+  for(const t of S.tracks){if(t.kind!=='inst')continue;const s=bgfTSig(t),o=BGF.tsig.get(t.id);if(!o||o.s!==s){if(o)bgfThaw(t,'instrument');BGF.tsig.set(t.id,{s,at:now})}}
+  const want=[];const ref=play.on?curBeat():pos,ahead=Math.max(32,90*S.bpm/60),LP=S.loop&&!play.past;
+  for(const t of S.tracks){if(!bgfTrackOK(t))continue;const st=BGF.tsig.get(t.id);if(!st||now-st.at<BGF.stable)continue;BGF.ok.add(t.id);
+    for(const c of t.clips){if(!bgfClipOK(t,c))continue;const near=(c.start+c.len>=ref-1&&c.start<=ref+ahead)||(LP&&c.start<loopB()&&c.start+c.len>loopA());if(!near)continue;
+      const k=bgfKey(st.s,c);if(BGF.cache.has(k))continue;want.push({t,c,k,d:c.start>=ref?c.start-ref:(ref-c.start)*4})}}
+  bgfMarks();
+  if(BGF.busy||!want.length||document.visibilityState!=='visible'||(RB&&RB.act>0)||(typeof FRZBUSY!=='undefined'&&FRZBUSY))return;
+  want.sort((a,b)=>a.d-b.d);const j=want[0];BGF.busy=true;const q=performance.now(),sr=ctx.sampleRate;
+  bgfRender(j.t,j.c,sr,0).then(r=>{const ms=performance.now()-q;BGF.st.renders++;BGF.st.ms+=ms;
+      const st=BGF.tsig.get(j.t.id);if(!st||bgfKey(st.s,j.c)!==j.k||!ctx||ctx.sampleRate!==sr){BGF.st.fail++;return ms}/* changed while it rendered: thrown away */
+      if(r.loud||r.silent)BGF.cache.set(j.k,{buf:null,bytes:0,last:performance.now()});else{BGF.cache.set(j.k,{buf:r.buf,bytes:r.bytes,mono:r.mono,last:performance.now()});BGF.bytes+=r.bytes;bgfEvict()}return ms})
+    .catch(e=>{BGF.st.fail++;BGF.cache.set(j.k,{buf:null,bytes:0,last:performance.now()});return 50})
+    .then(ms=>{/* rest as long as the render took: at most half of one core */setTimeout(()=>{BGF.busy=false},Math.min(4000,ms||50))})}
+function bgfEvict(){if(BGF.bytes<=bgfMax())return;const inUse=new Set([...BGF.act].map(I=>I.bgf.k));const L=[...BGF.cache.entries()].filter(([k,e])=>e.buf&&!inUse.has(k)).sort((a,b)=>a[1].last-b[1].last);
+  for(const[k,e] of L){if(BGF.bytes<=bgfMax()*.9)break;BGF.cache.delete(k);BGF.bytes-=e.bytes;BGF.st.evict++}}
+setInterval(()=>{try{bgfTick()}catch(e){console.error('AudioLab: background freeze',e)}},500);
+/* a small mark on the track header while it plays (or, stopped, would play) from recordings */
+function bgfFrozenNow(t){if(!bgfOn())return false;for(const I of BGF.act)if(I.bgf.t===t)return true;if(play.on||!BGF.ok.has(t.id))return false;const st=BGF.tsig.get(t.id);if(!st)return false;
+  for(const c of t.clips){if(!bgfClipOK(t,c))continue;const e=BGF.cache.get(bgfKey(st.s,c));if(e&&e.buf)return true}return false}
+function bgfMarks(){if(typeof hdrin==='undefined'||!hdrin)return;const want=new Set();for(const t of S.tracks)if(t.kind==='inst'&&bgfFrozenNow(t))want.add(t.id);
+  if(want.size===BGF.hdr.size&&[...want].every(id=>BGF.hdr.has(id))&&[...want].every(id=>hdrin.querySelector(`.hdr[data-id="${id}"] .bgfm`)))return;BGF.hdr=want;
+  for(const h of hdrin.querySelectorAll('.hdr[data-id]')){const on=want.has(h.dataset.id),m=h.querySelector('.bgfm');if(on&&!m){const r=h.querySelector('.r1');if(r){const i=document.createElement('i');i.className='bgfm';i.title='Frozen in the background: plays a recording of itself to save processor. Any change plays it live again at once. Settings › Performance › Background freeze.';i.innerHTML='<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M1.7 3.5l8.6 5M10.3 3.5l-8.6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>';r.prepend(i)}}else if(!on&&m)m.remove()}}
+{const _rh=renderHeaders;renderHeaders=function(){const r=_rh.apply(this,arguments);BGF.hdr=new Set();try{bgfMarks()}catch(e){}return r}}
+/* the audio engine restarted (new sample rate, new device): recordings of the old one are dropped */
+{const _ra=restartAudio;restartAudio=function(){BGF.act.clear();BGF.cache.clear();BGF.bytes=0;return _ra.apply(this,arguments)}}
+/* Settings › Performance › Savers: the switch */
+{const _pb=pmBuild;pmBuild=function(){const r=_pb.apply(this,arguments);try{const a=document.querySelector('#setBody .pmr[data-pr=slpOn]');if(a&&!document.getElementById('bgfOn')){const d=document.createElement('div');d.className='pmr';d.dataset.pr='bgf';
+    d.title='Instrument tracks that have not changed for 8 seconds are recorded in the background, one clip at a time, and play the recording instead of the instrument. Their effects stay live. Any change (a knob, a note, the preset, arming the track, playing its keys) plays the instrument live again at once. The selected track always plays live. Exports are not affected.';
+    d.innerHTML='<span class="pic">'+fxSvg('note')+'</span><b class="pmq">Background freeze</b><span class="pmsv">saves</span><label class="bpsw"><input type="checkbox" id="bgfOn" aria-label="Background freeze"><i></i></label>';a.after(d);
+    const inp=d.querySelector('input');inp.checked=bgfOn();d.classList.toggle('on',inp.checked);inp.onchange=()=>{UI.bgFreeze=inp.checked;saveUI();d.classList.toggle('on',inp.checked);if(!inp.checked){for(const t of S.tracks)bgfThaw(t,'off')}bgfTick()}}}catch(e){}return r}}
 
 /* ===================== Voice: a voice changer with note editing (v0.200, task Z; search "Voice: a voice changer") =====================
    Record from the microphone or use a clip; the voice is shown as notes (blobs) with the pitch line through them, like Melodyne. Notes are moved,

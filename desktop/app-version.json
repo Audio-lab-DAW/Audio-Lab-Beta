@@ -1,7 +1,7 @@
 {
-  "version": "0.200",
-  "sha256": "f412b61b054e484d9a02c34dc14b41378ca1817cfbb3ace03cfb7f5f79174ee6",
-  "size": 3115871,
+  "version": "0.201",
+  "sha256": "119d96cd58bd54443f82ee0d78a23933e3a4eff0e6f01208cfa0f4a2a68a8793",
+  "size": 3139733,
   "minShell": "0.147.0",
-  "notes": "New effect Voice for singing and talking: record from your microphone, see your voice as notes like in Melodyne and drag them up or down, tune it from natural to the hard auto-tune sound, turn it into a man, woman, child, choir or doubled voice, or pick a pop vocal chain. AI voice models are not in it yet; they will need a later desktop app."
+  "notes": "Tracks now rest while the song is stopped and their sound has died away, so an idle song uses far less processor, and sleeping tracks really stop working. Heavy instrument tracks you are not changing are recorded in the background and played from the recording, with no change in sound; any change plays them live again at once (Settings, Performance, Background freeze)."
 }
