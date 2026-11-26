@@ -2392,3 +2392,8 @@ Reading: a zero-shot voice (from one example clip, no training), for singing and
 
 ### Left
 - Live AI voice (needs a streaming model with a licence that allows shipping), Core ML and DirectML speed and real times on an M4 and on Windows, AI voices in the web version (onnxruntime-web), importing trained RVC voices.
+
+### Release (v0.206)
+- Commit d0da3a5 on main, then d4e48b0: the first Mac build (run 45774082916) failed because `voice-ai-worker.js` was listed for unpacking from the asar and electron-builder linked it twice (EEXIST); Windows built. Fix: the worker stays inside the asar (Electron's utility process reads it there), only `onnxruntime-node/bin/**` is unpacked. Checked before pushing with a packed Linux app (electron-builder `dir`): the model downloaded, a voice was made and a clip converted from inside the asar, no page errors.
+- Desktop build run 45774597676 succeeded (3 min 9 s). Sizes: Mac dmg 148.6 MB (v0.204: 127.4 MB, +21 MB for ONNX Runtime), Windows installer 150.6 MB (v0.204: 122.0 MB, +28.6 MB with DirectML). The Mac app could not be opened here (no Mac); it is built and ad-hoc signed by the same steps as before, and the same Electron 45 code ran end to end on Linux.
+- MIN_SHELL stays 0.147.0; the page says "Update the app to use AI voices" in older apps. Artifact 1b07d888 updated to version 229. Project doc `claude/audiolab-voice-device.md` updated (AI voices first, then the v0.200 device and the research).
