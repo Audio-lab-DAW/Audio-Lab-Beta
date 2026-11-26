@@ -1,1 +1,1 @@
-Shift and scroll makes clips wider or thinner; zoom and scroll controls are in Settings > Interface > Layout.
+Audio dropped on an instrument track can be turned into MIDI (melody, harmony, chords, drums, or split into stems first); the stem splitter, which did not start before, now works. No desktop update is needed for it.

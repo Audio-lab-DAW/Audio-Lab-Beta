@@ -4235,19 +4235,19 @@ async function stemSplit(buf,prog,P){P=Object.assign({bass:140,vlo:140,vhi:9000,
 const NEUM={n4:{url:'https://huggingface.co/StemSplitio/htdemucs-onnx/resolve/main/htdemucs_fp16weights.onnx',mb:166,stems:['Drums','Bass','Other','Vocals'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5']},
   n6:{url:'https://huggingface.co/StemSplitio/htdemucs-6s-onnx/resolve/main/htdemucs_6s_fp16weights.onnx',mb:136,stems:['Drums','Bass','Other','Vocals','Guitar','Piano'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5','#ff9a3c','#b583ff']}};
 const NEUV='1.20.1',NEUBASE=`https://cdn.jsdelivr.net/npm/onnxruntime-web@${NEUV}/dist/`;
-const NEUW=`let ort=null,sess=null,cur='';
+const NEUW=`let ortm=null,sess=null,cur='';/* not called ort: that name is taken by the engine script itself, and a second declaration makes importScripts fail */
 async function getModel(url){const c=await caches.open('audiolab-models');let r=await c.match(url);if(r){postMessage({t:'st',m:'cached'});return new Uint8Array(await r.arrayBuffer())}
  const res=await fetch(url);if(!res.ok)throw new Error('model download failed ('+res.status+')');const len=+res.headers.get('content-length')||0,rd=res.body.getReader(),parts=[];let got=0,last=0;
  for(;;){const{done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;const now=Date.now();if(now-last>300){last=now;postMessage({t:'dl',p:len?got/len:0,mb:got/1048576})}}
  const all=new Uint8Array(got);let o=0;for(const p of parts){all.set(p,o);o+=p.length}try{await c.put(url,new Response(all))}catch(e){}return all}
 onmessage=async e=>{const d=e.data;try{
- if(!ort){importScripts(d.base+'ort.min.js');ort=self.ort;ort.env.wasm.wasmPaths=d.base;ort.env.wasm.numThreads=self.crossOriginIsolated?Math.min(8,d.cores||4):1}
- if(cur!==d.url){const m=await getModel(d.url);postMessage({t:'st',m:'init'});sess=await ort.InferenceSession.create(m,{executionProviders:['wasm'],graphOptimizationLevel:'all'});cur=d.url}
+ if(!ortm){importScripts(d.base+'ort.min.js');ortm=self.ort;ortm.env.wasm.wasmPaths=d.base;ortm.env.wasm.numThreads=self.crossOriginIsolated?Math.min(8,d.cores||4):1}
+ if(cur!==d.url){const m=await getModel(d.url);postMessage({t:'st',m:'init'});sess=await ortm.InferenceSession.create(m,{executionProviders:['wasm'],graphOptimizationLevel:'disabled'})/* with the optimiser on (any level) the engine runs out of memory turning the half-size weights into full-size ones: 'all' failed with an unreadable error, 'basic' crashed the page; with it off the model loads */;cur=d.url}
  const L=d.L,R=d.R,total=L.length,N=343980,OV=Math.floor(N/4),ST=N-OV,nc=Math.max(1,Math.ceil(total/ST)),ns=d.ns,keep=d.keep;
  const out=keep.map(k=>k?[new Float32Array(total),new Float32Array(total)]:null),wt=new Float32Array(total),win=new Float32Array(N).fill(1);for(let i=0;i<OV;i++){win[i]=i/OV;win[N-1-i]=i/OV}
  const cb=new Float32Array(2*N);
  for(let i=0;i<nc;i++){const s0=i*ST,e0=Math.min(s0+N,total),cl=e0-s0;if(cl<=0)break;cb.fill(0);cb.set(L.subarray(s0,e0),0);cb.set(R.subarray(s0,e0),N);
-  const r=await sess.run({mix:new ort.Tensor('float32',cb,[1,2,N])}),st=r.stems.data;
+  const r=await sess.run({mix:new ortm.Tensor('float32',cb,[1,2,N])}),st=r.stems.data;
   for(let k=0;k<ns;k++){const O=out[k];if(!O)continue;const ro=k*2*N;for(let c=0;c<2;c++){const D=O[c],off=ro+c*N;for(let s=0;s<cl;s++)D[s0+s]+=st[off+s]*win[s]}}
   for(let s=0;s<cl;s++)wt[s0+s]+=win[s];postMessage({t:'p',p:(i+1)/nc})}
  const tr=[];for(const O of out){if(!O)continue;for(const D of O){for(let s=0;s<total;s++)D[s]/=Math.max(wt[s],1e-8);tr.push(D.buffer)}}postMessage({t:'done',out},tr)}catch(err){postMessage({t:'err',m:String(err&&err.message||err)})}};`;
@@ -6084,7 +6084,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.215',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.216',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17713,7 +17713,8 @@ const AHF=[
   ['sleep','Sleeping tracks','Tracks whose sound has died away stop computing and wake at once on a key, a pad or Play.','Stopped demo: 22 % of a core down to 3 %'],
   ['freeze','Background freeze','Tracks you are not changing play from a recording made in the background, and come back live the moment you touch them.','Six heavy tracks: 59 % to 7 % of the audio thread',1]]],
  ['AI','#b583ff',[
-  ['stems','Neural stem splitter','Splits a finished song into vocals, drums, bass and other parts on your own computer, with the HTDemucs v4 network by Meta.','4 or 6 stems, offline after one download',1],
+  ['stems','Neural stem splitter','Splits a finished song into vocals, drums, bass and other parts on your own computer, with the HTDemucs v4 network by Meta.','4 or 6 stems, offline after one download; test: 4 s of sound split in about 35 s on one processor core',1],
+  ['a2d','Audio to MIDI on drop','Drop, copy or paste audio on an instrument track and choose melody, harmony, chord symbols or drums, or split it into stems first and pick the parts.','On clean test sounds: every note found, timing within 5 ms'],
   ['ai','AI voices','Make a voice from an example clip of a few seconds; a recording then sings or talks with that voice and keeps its notes.','Held notes within about 4 cents',1],
   ['bits','Checked AI model','The OpenVoice V2 network runs in its own process in the desktop app, compared against the original model before it shipped.','47.4 dB match to the original'],
   ['notes','Voice note editing','See a recording as notes, like in Melodyne, and move, split, join or correct them. Pitch is found with the YIN method.','Steady notes read to 0.08 cents'],
@@ -18086,7 +18087,7 @@ function a2dChordBlocks(A,cLen){const spb=A.spb,fs=A.H/A.sr,NB=A.NB,TY=[['',[0,4
     for(const x of TY[g.t][1]){const tone=(g.r+x)%12;notes.push({p:55+(((tone-55)%12)+12)%12,s:g.s,l,v})}}
   const names=[];for(const g of segs)if(names[names.length-1]!==g.name)names.push(g.name);return{notes,names}}
 /* the notes for one way of converting; tidy = snap to the sixteenth grid, otherwise the timing of the audio is kept */
-function a2dNotes(A,mode,tidy,cLen){if(mode==='blocks')return a2dChordBlocks(A,cLen);const P={...A2MD,mode:mode==='harmony'?'chords':mode,q:tidy?'1/16':'off',qs:100,qe:true};if(mode==='harmony')P.merge=10;return{notes:a2mNotes(A,P,cLen).notes,names:[]}}
+function a2dNotes(A,mode,tidy,cLen){if(mode==='blocks')return a2dChordBlocks(A,cLen);const P={...A2MD,mode:mode==='harmony'?'chords':mode,q:tidy?'1/16':'off',qs:100,qe:true};if(mode==='harmony')P.merge=10;if(mode==='melody')P.lo=28;/* low enough for a bass line (the pitch finder reaches down to about 45 Hz) */return{notes:a2mNotes(A,P,cLen).notes,names:[]}}
 /* ---- placing ---- */
 function a2dTick(){if(!AKTM)AKTM=setInterval(()=>{if(!AKJ.size){clearInterval(AKTM);AKTM=0}dirty=true},120);dirty=true}
 const a2dDrumTrack=t=>!!(t&&t.inst&&t.inst.pads);

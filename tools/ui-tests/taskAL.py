@@ -232,6 +232,7 @@ pg.click('#a2dNo');pg.wait_for_timeout(200);chk('stems: Cancel after the split c
 reset();dropc(mixid)
 # ---- 13 the neural engine for real
 if NEURAL:
+    mixid=JL(R("SY.put('A1',SY.mix().b,16,'Full mix')"));base=sig()
     grab(mixid,0,2);popup();listened();pg.click('#a2dGo');pg.wait_for_timeout(300);pg.click('#a2d input[value=n6]');pg.click('#a2dGo');t0=time.time();last=''
     while time.time()-t0<1500 and not JL(R("!!document.querySelector('#a2d [data-play]')||!!document.querySelector('#a2d .a2derr')")):
         m=JL(R("(document.getElementById('a2dSp')||{}).textContent||''"))
@@ -241,9 +242,14 @@ if NEURAL:
     names=JL(R("[...document.querySelectorAll('#a2d .a2sr b')].map(e=>e.textContent)"));print('real neural stems',names,err)
     chk('REAL HTDemucs 6-stem model: downloaded, ran and returned six parts',len(names)==6 and not err,(names,err,round(time.time()-t0)))
     if len(names)==6:
-        lv=JL(R("[...document.querySelectorAll('#a2d .a2sr em')].map(e=>e.textContent)"));print('part levels',list(zip(names,lv)))
-        pg.click('#a2dNo');pg.wait_for_timeout(200)
-reset()
+        lv=JL(R("[...document.querySelectorAll('#a2d .a2sr em')].map(e=>e.textContent)"));print('part levels',list(zip(names,lv)),'split took %.0f s'%(time.time()-t0))
+        pg.click('#a2dGo');chk('real stems: the picked parts are converted',wait_jobs(300));s=st();print([(t['n'],t['k'],t['c']) for t in s])
+        BASS=[33,33,36,38,33,33,36,31];tb=[{'p':p_,'s':float(i)} for i,p_ in enumerate(BASS)]
+        i1=notes_of(2);p_,rc_,e_=score(i1,tb,tol=.15);print('bass line from the real bass stem: precision %.3f recall %.3f timing %.1f ms (%d notes)'%(p_,rc_,e_*500,len(i1)))
+        chk('real stems: the bass stem became the bass line on the dropped track (recall at least 0.6)',rc_>=.6,(round(p_,2),round(rc_,2)))
+        chk('real stems: drums on a new drum track with hits',any('Drums' in t['n'] and t['c'] and t['c'][0][5]>=8 for t in s))
+        R("undo()");pg.wait_for_timeout(200);chk('real stems: one Undo restores everything',sig()==base)
+reset();dropc(mixid)
 # ---- 14 no errors, state intact
 chk('no page errors',not al.errors,al.errors)
 chk('demo levels again unchanged',True)

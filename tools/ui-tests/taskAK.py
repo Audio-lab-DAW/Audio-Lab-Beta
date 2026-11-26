@@ -142,8 +142,9 @@ pg.wait_for_timeout(200)
 # ---- 7 arrow keys: down onto the audio track bounces; audio clip on instrument stays
 R("(()=>{selClear();selC='%s';AJ.foc=true;dirty=true})()"%ids[2]);pg.mouse.move(5,5)
 pg.keyboard.press('ArrowDown');pg.wait_for_timeout(250);sa=st();chk('ArrowDown from M3 onto the audio track: bounced there, MIDI removed',len(sa[2]['c'])==0 and len(sa[3]['c'])==1 and not sa[3]['c'][0][2],(sa[2]['c'],sa[3]['c']))
-wait_jobs();pg.keyboard.press('ArrowDown');pg.wait_for_timeout(250);sb=st();chk('ArrowDown of the audio clip onto an instrument track is refused (existing behaviour)',len(sb[3]['c'])==1 and len(sb[4]['c'])==0,R("document.getElementById('toast').textContent")[:80])
-R("undo();undo()");pg.wait_for_timeout(200);chk('undo restores the MIDI clip on M3',st()==base)
+wait_jobs();pg.keyboard.press('ArrowDown');pg.wait_for_timeout(400);sb=st();chk('ArrowDown of the audio clip onto an instrument track opens the audio to MIDI pop-up (task AL replaced the old refusal); Cancel keeps the audio clip where it was',JL(R("!!document.getElementById('a2d')")),R("document.getElementById('toast').textContent")[:80])
+pg.keyboard.press('Escape');pg.wait_for_timeout(300);sb=st();chk('after Cancel the audio clip is back on the audio track, instrument track empty',len(sb[3]['c'])==1 and len(sb[4]['c'])==0)
+R("undo()");pg.wait_for_timeout(200);chk('undo restores the MIDI clip on M3',st()==base)
 # ---- 8 single clip drag onto the audio track
 P=pos(ids[0]);R("selClear();selC=null");pg.mouse.move(P['x']+P['w']*.5,P['y']+P['h']*.7);pg.mouse.down();pg.mouse.move(P['x']+P['w']*.5+10,P['y']+P['h']*.7+10,steps=3);pg.mouse.move(P['x']+P['w']*.5+48,P['y']+P['h']*.7+TH*3,steps=10);pg.mouse.up();pg.wait_for_timeout(250)
 sc=st();chk('single clip dragged onto the audio track: bounced there, original removed',len(sc[0]['c'])==0 and len(sc[3]['c'])==1 and not sc[3]['c'][0][2] and sc[3]['c'][0][0]==6,(sc[0]['c'],sc[3]['c']))
