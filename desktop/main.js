@@ -2,7 +2,7 @@
 // Loads the web app from a private secure scheme so it is cross-origin isolated
 // (SharedArrayBuffer on), grants audio-device / MIDI / file permissions, and adds
 // menus, window memory, .audiolab file opening and auto-update.
-const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen } = require('electron');
+const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 /* The app was called AudioLab Studio before v0.167. Its settings, projects list and downloaded updates stay in the folder with the old name,
@@ -73,7 +73,8 @@ function registerScheme() {
       let p = decodeURIComponent(u.pathname);
       if (p === '/' || p === '') p = '/index.html';
       let file = path.normalize(path.join(root, p));
-      if (!file.startsWith(root)) return new Response('Forbidden', { status: 403 });
+      if (p.startsWith('/app-icons/')) { file = path.normalize(path.join(ICON_DIR, p.slice(11))); if (!file.startsWith(ICON_DIR + path.sep)) return new Response('Forbidden', { status: 403 }); }   // the icon picker's pictures (v0.203)
+      else if (!file.startsWith(root)) return new Response('Forbidden', { status: 403 });
       if (p === '/index.html' && liveIndex) file = liveIndex;
       const data = await fs.promises.readFile(file);
       return new Response(data, {
@@ -91,6 +92,88 @@ function registerScheme() {
     }
   });
 }
+
+/* ---------- app icon: Ocean Yellow by default, any picker icon by choice (v0.203) ----------
+   The choice lives in app-icon.json in the user-data folder. macOS: the Dock icon while the app runs (Finder and Launchpad keep the
+   bundle icon, which cannot change without breaking the app's signature). Windows: every window and the taskbar, plus the Start menu
+   and desktop shortcuts (an .ico written to the user-data folder). */
+const ICON_DIR = path.join(__dirname, 'icon-assets', 'picker');
+let iconList = null;
+function readIcons() {
+  if (iconList) return iconList;
+  try { iconList = JSON.parse(fs.readFileSync(path.join(ICON_DIR, 'icons.json'), 'utf8')); } catch (e) { iconList = { default: 'ocean-yellow', groups: [] }; }
+  return iconList;
+}
+function findIcon(id) { for (const g of readIcons().groups || []) for (const ic of g.icons || []) if (ic.id === id) return ic; return null; }
+const iconPrefFile = () => path.join(app.getPath('userData'), 'app-icon.json');
+function savedIcon() { try { const id = JSON.parse(fs.readFileSync(iconPrefFile(), 'utf8')).id; if (findIcon(id)) return id; } catch (e) { /* none saved */ } return readIcons().default || 'ocean-yellow'; }
+let curIcon = null;
+// The picker pictures are 512 px with the Apple margin (50 px). macOS wants the margin; Windows wants the tile edge to edge.
+function iconImage(id, full) {
+  const def = id === (readIcons().default || 'ocean-yellow');
+  if (def && isMac) { const im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) return im; }
+  const ic = findIcon(id); if (!ic) return null;
+  let im = nativeImage.createFromPath(path.join(ICON_DIR, ic.file));
+  if (im.isEmpty()) return null;
+  if (full) { const s = im.getSize(), m = Math.round(s.width * 50 / 512); im = im.crop({ x: m, y: m, width: s.width - 2 * m, height: s.height - 2 * m }); }
+  return im;
+}
+function winIcon() { return !isMac && curIcon && curIcon !== (readIcons().default || 'ocean-yellow') ? iconImage(curIcon, true) : null; }
+function applyIcon(id, startup) {
+  curIcon = id;
+  try {
+    if (isMac) { if (app.dock) { const im = iconImage(id, false); if (im) app.dock.setIcon(im); } return; }
+    // Windows and Linux: the default is the program's own icon (from icon.ico), so at start nothing needs doing.
+    if (startup && id === (readIcons().default || 'ocean-yellow')) return;
+    const im = iconImage(id, true);
+    if (im) for (const w of BrowserWindow.getAllWindows()) { try { w.setIcon(im); } catch (e) { /* ignore */ } }
+  } catch (e) { /* the icon is a nicety, never a reason to fail */ }
+}
+// A PNG-in-ICO file (Windows Vista and later read these): 256, 48, 32 and 16 px.
+function makeIco(im) {
+  const pngs = [256, 48, 32, 16].map((n) => ({ n, b: im.resize({ width: n, height: n, quality: 'best' }).toPNG() }));
+  const head = Buffer.alloc(6 + 16 * pngs.length);
+  head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(pngs.length, 4);
+  let off = head.length;
+  pngs.forEach((p, i) => { const o = 6 + 16 * i; head.writeUInt8(p.n >= 256 ? 0 : p.n, o); head.writeUInt8(p.n >= 256 ? 0 : p.n, o + 1); head.writeUInt8(0, o + 2); head.writeUInt8(0, o + 3); head.writeUInt16LE(1, o + 4); head.writeUInt16LE(32, o + 6); head.writeUInt32LE(p.b.length, o + 8); head.writeUInt32LE(off, o + 12); off += p.b.length; });
+  return Buffer.concat([head, ...pngs.map((p) => p.b)]);
+}
+// Only the shortcuts the installer made for this very program are touched, and only their icon.
+function updateShortcuts(id) {
+  if (process.platform !== 'win32' || !app.isPackaged) return;
+  try {
+    const def = id === (readIcons().default || 'ocean-yellow');
+    const ud = app.getPath('userData');
+    let ico = process.execPath;
+    if (!def) {
+      const im = iconImage(id, true); if (!im) return;
+      ico = path.join(ud, 'app-icon-' + id + '.ico');   // a new name per icon, so Windows does not show a cached picture
+      if (!fs.existsSync(ico)) fs.writeFileSync(ico, makeIco(im));
+    }
+    for (const f of fs.readdirSync(ud)) if (/^app-icon-.*\.ico$/.test(f) && path.join(ud, f) !== ico) { try { fs.unlinkSync(path.join(ud, f)); } catch (e) { /* ignore */ } }
+    const links = [path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'AudioLab Pro.lnk'), path.join(app.getPath('desktop'), 'AudioLab Pro.lnk')];
+    for (const l of links) {
+      if (!fs.existsSync(l)) continue;
+      let sc; try { sc = shell.readShortcutLink(l); } catch (e) { continue; }
+      if (!sc || String(sc.target || '').toLowerCase() !== process.execPath.toLowerCase()) continue;
+      if (String(sc.icon || '').toLowerCase() === ico.toLowerCase()) continue;
+      shell.writeShortcutLink(l, 'update', { icon: ico, iconIndex: 0 });
+    }
+  } catch (e) { /* shortcuts keep their icon */ }
+}
+ipcMain.handle('al:app-icons', () => {
+  const L = readIcons();
+  return { default: L.default || 'ocean-yellow', current: curIcon || savedIcon(), base: `${SCHEME}://${HOST}/app-icons/`, platform: process.platform,
+    groups: (L.groups || []).map((g) => ({ key: g.key, name: g.name, icons: (g.icons || []).map((ic) => ({ id: ic.id, name: ic.name, file: ic.file })) })) };
+});
+ipcMain.handle('al:set-app-icon', (e, id) => {
+  id = String(id || '');
+  if (!findIcon(id)) return { ok: false, current: curIcon || savedIcon() };
+  try { fs.writeFileSync(iconPrefFile(), JSON.stringify({ id })); } catch (x) { /* still applied for this run */ }
+  applyIcon(id, false);
+  setTimeout(() => updateShortcuts(id), 50);
+  return { ok: true, current: id };
+});
 
 /* ---------- permissions: audio devices, MIDI, files ---------- */
 const ALLOWED = new Set(['media', 'audioCapture', 'speaker-selection', 'midi', 'midiSysex', 'fileSystem', 'clipboard-read', 'clipboard-sanitized-write', 'fullscreen', 'window-management', 'persistent-storage', 'storage-access', 'unlimited-storage']);
@@ -118,6 +201,7 @@ function createWindow() {
     minHeight: 560,
     backgroundColor: '#0c0e14',
     title: 'AudioLab Pro',
+    ...(winIcon() ? { icon: winIcon() } : {}),
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
@@ -421,7 +505,7 @@ ipcMain.handle('al:tear', (e, d) => {
   let x = Number.isFinite(d.x) ? d.x : undefined, y = Number.isFinite(d.y) ? d.y : undefined;
   if (x != null) x = Math.max(disp.x, Math.min(disp.x + disp.width - 200, x));
   if (y != null) y = Math.max(disp.y, Math.min(disp.y + disp.height - 100, y));
-  const kw = new BrowserWindow({ width: w, height: h, x, y, minWidth: 700, minHeight: 420, backgroundColor: '#0c0e14', title: (d.name || 'Project') + ' · AudioLab Pro', webPreferences: kidPrefs() });
+  const kw = new BrowserWindow({ width: w, height: h, x, y, minWidth: 700, minHeight: 420, backgroundColor: '#0c0e14', title: (d.name || 'Project') + ' · AudioLab Pro', ...(winIcon() ? { icon: winIcon() } : {}), webPreferences: kidPrefs() });
   const id = kw.webContents.id;
   kids.set(id, { win: kw, data: d });
   kw.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/i.test(url)) shell.openExternal(url); return { action: 'deny' }; });
@@ -502,8 +586,9 @@ if (!gotLock) {
     if (f) pendingFile = f;
     // macOS only reveals audio-device names after microphone permission; ask once, quietly.
     if (isMac) { try { if (systemPreferences.getMediaAccessStatus('microphone') === 'not-determined') systemPreferences.askForMediaAccess('microphone'); } catch (e) { /* ignore */ } }
-    // Show the current icon in the Dock even if macOS cached an older one from a previous version.
-    if (isMac && app.dock) { try { const { nativeImage } = require('electron'); const im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) app.dock.setIcon(im); } catch (e) { /* ignore */ } }
+    // The chosen icon (Ocean Yellow unless another was picked) in the Dock, also when macOS cached an older one from a previous version.
+    applyIcon(savedIcon(), true);
+    if (curIcon !== (readIcons().default || 'ocean-yellow')) setTimeout(() => updateShortcuts(curIcon), 4000);   // an app update puts the installer's shortcuts back
     createWindow();
     setupUpdater();
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });

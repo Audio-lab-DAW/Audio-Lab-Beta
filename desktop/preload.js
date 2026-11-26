@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   onDock: (cb) => ipcRenderer.on('al:dock', (e, d) => cb(d)),
   onFromChild: (cb) => ipcRenderer.on('al:from-child', (e, m) => cb(m)),
   onDockHover: (cb) => ipcRenderer.on('al:dock-hover', (e, h) => cb(h)),
+  // v0.203: the app icon picker in Settings (Ocean Yellow by default)
+  listAppIcons: () => ipcRenderer.invoke('al:app-icons'),
+  setAppIcon: (id) => ipcRenderer.invoke('al:set-app-icon', id),
   dac: process.platform === 'darwin' ? {
     list: () => ipcRenderer.invoke('al:dac-list'),
     get: (uid) => ipcRenderer.invoke('al:dac-get', uid),
