@@ -1,7 +1,7 @@
 {
-  "version": "0.219",
-  "sha256": "5a9b3c5e9776a33814694777e1dc7a1981e79b4566201f82159448fdbde28134",
-  "size": 3581883,
+  "version": "0.220",
+  "sha256": "0d4ad33178d158936d6d8fb4c572d226adbadb1f294bef4dc25c923b208de9a8",
+  "size": 5811713,
   "minShell": "0.147.0",
-  "notes": "New shortcut icon; needs the new desktop app. If the old icon still shows on a Mac, log out and back in once."
+  "notes": "Starts with the Fractals song as the only open song, 10 dB quieter on the master."
 }

@@ -3122,3 +3122,48 @@ The shortcut icon of the desktop app is now the "W7" design: the Ocean Yellow lo
   - Windows (`AudioLab-Pro-Setup-0.219.0.exe`): all ten pictures of the new `icon.ico` (16 to 256 px) sit byte for byte in `AudioLab Pro.exe`; `resources/icon.ico` and the uninstaller icon are the new file (sha256 62cbbba8...); the packed app holds the new `dock-icon.png` and the new `main.js`.
 - The repository answers as Audio-Lab-Pro-Alpha; the `gh api` dispatch with the old name is refused by the proxy, so the build was started with the GitHub tools (first try).
 - Branches `assets/shortcut-icon` and `assets/app-icons` could **not** be deleted from here (the push and the API call were both refused; this session may not delete branches). Everything on them is on main in `desktop/icon-assets/`, so they can be deleted on GitHub by hand.
+
+## 26 November 2026, v0.220: starts with the Fractals song only, master 10 dB down (task AI)
+
+Three changes to what a fresh install and every start look like. The audio engine is not touched; no desktop file changed (no desktop build needed).
+
+### Done
+- **One open song at every start: the Fractals song.** At a start every tab that would be restored is closed (also torn-off windows, the old "Demo song", "Psytrance demo" and "Shrine Legion" tabs, which are no longer added by themselves), and the Fractals song opens as the only tab, at beat 0, not playing, without an unsaved mark. There is no empty untitled song next to it: the short stand-in that holds the place while the song is unpacked (under the start screen) is removed when the song is in.
+- **Which Fractals song.** The newest remake that is in the repository: the embedded "Fractals remake v6" (`DEMO_FRACTALS`, 30 tracks plus the audio track "Vocals (original)", 289 bars at 145 BPM), the one every regression figure refers to. The v7 and v8 remakes of 26 November exist only as project docs (their sessions could not push), so there is no v8 file to ship; see "Open".
+- **Ships inside the app.** The project was already inside `index.html`. Its audio track was not: the ten vocal samples were fetched from `vox/*.wav` next to the page, which the desktop app does not have, so there the track was missing (and in the browser v0.219 added the track a moment after the song opened, and dropped it when another demo tab took the front in that moment). The samples are now inside `index.html` as FLAC (lossless, the same samples as the WAV files; 1.67 MB, 2.2 MB as text), decoded at the start; the WAV files stay as a fallback. `index.html` grows from 3.58 MB to 5.81 MB. The decoded samples are stored once under fixed names, so they do not pile up in the browser storage from start to start.
+- **Unsaved work is not thrown away.** A closed tab that is marked unsaved is first put under New project > Saved projects (same name; two with one name get "(2)"; an edited Fractals song is kept as "Fractals_remake (edited)"), and a notice says how many were kept. A tab saved in a file is closed without a copy (it is on disk). Playing a song also marks it unsaved (the work timer), so the Fractals song is compared with the shipped one and only kept when something else differs; the v0.219 Fractals tab (master 0 dB) counts as the shipped one. If the browser storage is full, the unsaved projects stay open next to the Fractals song instead. The stored tabs are only removed once the Fractals song is ready, so quitting during the start loses nothing.
+- Closing the Fractals song and opening others works as before (it cannot be closed while it is the only tab, as for any last tab). "Demo: Fractals remake" in the + menu opens it again, or switches to it when it is open.
+- **Master 10 dB down.** The master of the song is -10 dB (was 0 dB). Nothing else in the project file changed: the edit script checks that the project with the master put back is identical to the old one, and the test compares the open song with the v0.219 one (tracks, notes, devices, levels, sends, sections, tempo: equal).
+
+### Measured (`tools/engine-tests/taskAI_levels.py`, offline render at 44.1 kHz with the app's -6 dB output trim, whole song in 32-bar pieces)
+| | v0.219, master 0 dB | v0.220, master -10 dB | change |
+|---|---|---|---|
+| Whole song, sample peak | +0.08 dBFS | -3.24 dBFS | -3.32 dB |
+| Whole song, true peak | +0.42 dBTP | -2.92 dBTP | -3.34 dB |
+| Whole song, loudness | -9.69 LUFS | -18.98 LUFS | -9.29 LU |
+| Whole song, RMS | -10.93 dB | -20.34 dB | -9.41 dB |
+| Mix, beats 64 to 96: peak / loudness | -1.05 dBFS / -10.55 LUFS | -7.99 dBFS / -20.27 LUFS | -6.94 dB / -9.72 LU |
+| Mix, beats 640 to 704: peak / loudness | -0.15 dBFS / -8.71 LUFS | -4.54 dBFS / -18.04 LUFS | -4.39 dB / -9.33 LU |
+| Solo Kick, beats 64 to 96 | -9.75669 dB (0496bb147f6c) | -19.05560 dB (fb577dd5202b) | -9.30 dB |
+| Solo Bass, beats 64 to 96 | -25.48699 dB (09e0415bec5e) | -35.48685 dB (392ec52590c7) | -10.00 dB |
+
+- **The master effects behave differently, and the song is not exactly 10 dB quieter.** In AudioLab the master fader sits before the master effects (tracks > master fader > Compressor > Soft Clipper > output). With the fader 10 dB lower the Compressor (threshold -12 dB, 1.5:1) and the Soft Clipper (gain 6 dB, threshold -4 dB) get 10 dB less and do much less: the loudness falls by 9.3 LU instead of 10, the peaks only by 3.3 dB, and the sound is less squashed (peak to loudness: 9.8 dB before, 15.7 dB after). If the old clipped sound at exactly 10 dB less is wanted, the way is the Soft Clipper's Output at -10 dB with the master back at 0 dB; that is a change to a device, which this task did not allow.
+- **The regression figures are measured after the master**, so they change: as the song opens, solo Kick is -19.05560 dB and Bass -35.48685 dB (not exactly 10 dB lower, for the reason above: the clipper worked on the kick). With the master put back to 0 dB they are the old -9.75669 dB and -25.48699 dB with the old checksums, which shows the tracks are unchanged. `export_same.py` now prints both pairs; `taskAN.py`, `taskAL.py` and `taskAO.py` accept either.
+- The safety limiter on the output is not part of an export and was not measured; live it sees 3.3 dB lower peaks, so it has less to do.
+
+### Tested
+- `tools/ui-tests/taskAI.py` (new, 31 checks, all pass): fresh start with no vox files served (as in the desktop app): one tab, 31 tracks, 10 vocal clips with their audio, master -10 dB in the song and in the read-out, not playing, start screen gone, no page errors; song equal to the v0.219 one; the FLAC samples decode to the same audio as the WAV files; Space plays and stops; after only playing, the next start keeps nothing; another song opens, the Fractals song closes, the menu opens it again and a second click only switches; coming from v0.219 (three demo tabs, Fractals played): one tab, nothing kept; four stored tabs and a torn-off one with real unsaved work: one tab, three projects under Saved projects, notice shown, one opens again from there; another start: still one tab, 10 stored samples, not more; storage full: the unsaved project stays open.
+- `tools/engine-tests/export_same.py` on v0.219 and v0.220: Saw, Pad, Acid, Wavetable and Venom the same checksums (Plant, both Samplers and the Drum kit give another one on every page load, as before).
+- `tools/ui-tests/play.py` and `taskAN.py` (66 checks) pass. `loadtime.py`, normal start, 3 runs: start screen visible at 0.49 s (0.27 s before: the file is larger), start screen gone at 2.1 to 2.4 s (2.6 to 4.7 s before: one song is prepared instead of three).
+- `taskAK.py`: one check ("reverb clip: level within 0.5 dB") fails at random, in v0.219 too (1 of 2 runs there); `appicon.py` times out at its page load here, in v0.219 too. Neither comes from this task.
+
+### Not verified
+- Not run in the real desktop app (no build was needed). There the page is the same; a .audiolab file opened by double-click at the start opens next to the Fractals song and keeps the focus (by the code, not tested).
+- Nobody has listened. The numbers say quieter and less clipped.
+
+### Open
+- The v8 remake (`claude/audiolab-remake-v8-fractals.md`) is not in the repository. To ship it instead, its `.audiolab` file has to be pushed or attached; the start code takes any project put in `DEMO_FRACTALS`.
+- Not touched, as told: the mixer fader default ("Flat bars", task D1).
+
+### Release
+- v0.220. App copy synced, update note written ("Starts with the Fractals song as the only open song, 10 dB quieter on the master."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-fixes-run-AI.md`. Next in the chain: D2.
