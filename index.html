@@ -1548,6 +1548,65 @@ body.fxmin #prHead{box-shadow:none}
 #gpv .gpl{position:absolute;left:20%;right:20%;top:30px;bottom:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;text-align:center;padding:0 8px}
 #gpv .gpl b{font-size:13px;color:#eef1f6;text-shadow:0 1px 3px rgba(0,0,0,.55)}#gpv .gpl span{font-size:10.5px;color:#c9ccd6;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .gpch{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}.gpch button{height:24px;min-height:24px;padding:0 11px;border-radius:12px;font-size:11px}.gpch button.on{background:#4c8dff;border-color:#4c8dff;color:#fff}
+/* ===== v0.196: device layout with side headers (task T): a strip on the left (on/off, name, remove), the picture at full height, presets on top of the parameters, a strip on the right (pin, show and hide parameters) ===== */
+#fxin .dev.du.ds{flex-direction:row!important;align-items:stretch!important;position:relative;padding:0!important}
+#fxin .dev.du.ds>.devh{flex-direction:column!important;align-items:center!important;justify-content:flex-start;width:28px!important;min-width:28px!important;height:auto!important;min-height:0;padding:6px 0 5px!important;gap:6px;border-bottom:0!important;border-right:1px solid rgba(255,255,255,.07)!important;background:color-mix(in srgb,var(--c,#888) 9%,rgba(255,255,255,.03))!important;cursor:default}
+#fxin .dev.du.ds>.devh>.pw{width:22px;min-width:22px;height:22px;min-height:22px;padding:0;flex:none}
+#fxin .dev.du.ds>.devh>svg{width:20px;height:20px;flex:none}
+#fxin .dev.du.ds>.devh>span{writing-mode:vertical-rl!important;transform:rotate(180deg);flex:1 1 auto!important;min-height:0!important;max-height:none;overflow:hidden!important;text-overflow:ellipsis;white-space:nowrap;margin:0!important;text-align:end;font-size:12px;line-height:22px;letter-spacing:.01em}
+#fxin .dev.du.ds>.devh>span.frwmh{writing-mode:horizontal-tb!important;transform:none;position:relative;width:22px;overflow:visible!important}
+#fxin .dev.du.ds>.devh>span.frwmh svg.frwm{position:absolute;left:50%;top:0;width:82px;height:22px;transform-origin:0 0;transform:rotate(-90deg) translate(-82px,-11px)}
+#fxin .dev.du.ds>.devh>.dsrm,#fxin .dev.du.ds.dushut.dushut.dushut>.devh.dsl.dsl>.dsrm.dsrm.dsrm.dsrm{display:inline-flex!important;align-items:center;justify-content:center;width:22px;min-width:22px;height:22px;min-height:22px;padding:0!important;margin:0!important;flex:none;color:#7f8593;background:transparent!important;border:0!important;border-radius:6px;cursor:pointer;position:static!important;font-size:0}
+#fxin .dev.du.ds>.devh>.dsrm svg{width:14px;height:14px;display:block}
+#fxin .dev.du.ds>.devh>.dsrm:hover{color:#ff7a7a;background:rgba(255,90,90,.15)!important}
+#fxin .dev.du.ds>.devb{flex:1 1 auto;min-width:0;position:relative}
+#fxin .dev.du.ds>.dsr{flex:none;width:26px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 5px;border-left:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03)}
+:is(#fxin,.pinb) .dev.du.ds>.dsr>.pinbtn{width:22px;min-width:22px;height:22px;min-height:22px;padding:0!important;margin:0;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#8d93a1;background:transparent!important;border:0!important;border-radius:6px;cursor:pointer}
+:is(#fxin,.pinb) .dev.du.ds>.dsr>.pinbtn:hover{color:#fff;background:rgba(255,255,255,.09)!important}
+:is(#fxin,.pinb) .dev.du.ds>.dsr>.pinbtn.on{color:#ffd166;background:rgba(255,209,102,.15)!important}
+#fxin .dev.du.ds>.dsr>.duar{flex:1 1 auto;width:22px;min-height:40px;height:auto;padding:5px 0!important;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;color:#cfd3db;background:rgba(255,255,255,.035)!important;border:0!important;border-radius:6px;cursor:pointer;overflow:hidden}
+#fxin .dev.du.ds>.dsr>.duar svg{width:13px;height:13px;flex:none;display:block}
+#fxin .dev.du.ds>.dsr>.duar span{writing-mode:vertical-rl;transform:rotate(180deg);text-align:end;font:600 10px/1 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#8d93a1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0;flex:1 1 auto}
+#fxin .dev.du.ds>.dsr>.duar:hover{background:rgba(255,255,255,.09)!important;color:#fff}
+#fxin .dev.du.ds>.dsr>.duar:hover span{color:#dfe3ea}
+#fxin .dev.du.ds.dushut>.dsr>.duar{background:rgba(var(--bl3,76,141,255),.14)!important;color:#cfe0ff}
+#fxin .dev.du.ds.dushut>.dsr>.duar span{color:#b9cdf5}
+#fxin .dev.du.ds .dspr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;flex:none;width:0;min-width:100%;font-size:11px}
+#fxin .dev.du.ds .dspr>*{flex:none;margin:0}
+#fxin .dev.du.ds .dspr button,#fxin .dev.du.ds .dspr select{min-height:22px;height:22px;font-size:11px}
+#fxin .dev.du.ds .dspr .kpre{display:flex!important;align-items:center;gap:2px;width:auto}
+#fxin .dev.du.ds .dspr .kpre select{width:120px;max-width:120px;min-width:0}
+#fxin .dev.du.ds .dspr .kpre button{min-width:18px;width:18px;padding:0}
+#fxin .dev.du.ds .dspr .duchg{padding:0 8px}
+#fxin .dev.du.ds .dspr.dsfl{position:absolute;top:6px;right:8px;width:auto;min-width:0;max-width:calc(100% - 16px);z-index:3;padding:3px 4px;border-radius:8px;background:rgba(10,11,16,.86);border:1px solid rgba(255,255,255,.09)}
+#fxin .dev.gridd.du.ds .dspr.dsfl{right:auto;left:8px}
+#fxin .dev.du.ds.dushut .dspr{display:none!important}
+#fxin .dev.pbx.du.ds,.dev.pbx.du.ds{width:922px}
+#fxin .dev.pbx.emd.du.ds,.dev.pbx.emd.du.ds{width:970px}
+#fxin .dev.pbx.du.ds.dushut,#fxin .dev.pbx.emd.du.ds.dushut{width:462px}
+/* ===== v0.196: the devices panel's own tab and the overflow cues of the track tabs (task T) ===== */
+#fx.dsh .fxbtns{right:10px!important}
+#fx.dsh>#fxTitle{right:calc(var(--dshw,96px) + 16px)!important}
+#fx .fxbtns #fxHide.dshb{position:relative;display:flex!important;align-items:center;gap:6px;width:auto;height:25px!important;min-height:25px!important;padding:0 9px 0 10px!important;margin-bottom:-1px;border-radius:9px 9px 0 0;border:1px solid rgba(255,255,255,.14);border-bottom:0;background:rgba(var(--gtr2),1)!important;color:#dfe3ea;font:600 11.5px Inter,system-ui,sans-serif;letter-spacing:.01em;box-shadow:0 -4px 12px rgba(0,0,0,.25);z-index:9}
+#fx .fxbtns #fxHide.dshb::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:rgba(var(--gtr2),1)}
+#fx .fxbtns #fxHide.dshb svg{width:14px;height:14px;flex:none}
+#fx .fxbtns #fxHide.dshb .dshp{width:15px;height:15px;opacity:.75}
+#fx .fxbtns #fxHide.dshb:hover{color:#fff;background:color-mix(in srgb,rgb(var(--gtr2)) 88%,#fff)!important}
+#fx .fxbtns #fxHide.dshb:hover::after{background:color-mix(in srgb,rgb(var(--gtr2)) 88%,#fff)}
+#fx .fxbtns #fxHide.dshb.dsoff{color:#cfe0ff;border-color:rgba(var(--bl3,76,141,255),.5);background:color-mix(in srgb,rgb(var(--bl3,76,141,255)) 18%,rgb(var(--gtr2)))!important}
+#fx .fxbtns #fxHide.dshb.dsoff::after{display:none}
+body.fx-top #fx .fxbtns #fxHide.dshb{border-radius:0 0 9px 9px;border:1px solid rgba(255,255,255,.14);border-top:0;margin:-1px 0 0;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+body.fx-top #fx .fxbtns #fxHide.dshb::after{bottom:auto;top:-2px}
+#fxTitle .fxsw.fxall button.fxov{position:absolute!important;bottom:0;height:21px;z-index:5;display:none;align-items:center;gap:3px;max-width:none;padding:0 6px!important;border:1px solid rgba(255,255,255,.18)!important;border-bottom:0!important;border-radius:8px 8px 0 0!important;background:rgba(36,40,52,.98)!important;color:#eef1f7;font:700 10.5px Inter,system-ui,sans-serif;cursor:pointer;overflow:visible}
+#fxTitle .fxsw.fxall button.fxov::before{display:none}
+#fxTitle .fxsw.fxall button.fxov.l{left:0;box-shadow:10px 0 12px 2px rgba(8,9,13,.8)!important}
+#fxTitle .fxsw.fxall button.fxov.r{right:0;box-shadow:-10px 0 12px 2px rgba(8,9,13,.8)!important}
+#fxTitle .fxsw.fxall.dsovl button.fxov.l,#fxTitle .fxsw.fxall.dsovr button.fxov.r{display:flex}
+#fxTitle .fxsw.fxall button.fxov svg{width:12px;height:12px;flex:none}
+#fxTitle .fxsw.fxall button.fxov b{min-width:15px;height:15px;padding:0 4px;border-radius:8px;display:grid;place-items:center;background:rgba(var(--bl3,76,141,255),.45);color:#fff;font-size:10px}
+#fxTitle .fxsw.fxall button.fxov b:empty{display:none}
+#fxTitle .fxsw.fxall button.fxov:hover{background:rgba(58,64,82,1)!important}
+body.fx-top #fxTitle .fxsw.fxall button.fxov{bottom:auto;top:0;border-radius:0 0 8px 8px!important;border:1px solid rgba(255,255,255,.18)!important;border-top:0!important}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5714,7 +5773,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.195',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.196',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -14705,6 +14764,74 @@ gpDraw=function(now){try{pmFpsDraw(now)}catch(e){}const sec=document.querySelect
   if(now-GPVV.f>450){GPVV.f=now;const t=FPS.fps+' of '+(FPS.hz||'?')+' frames per second',a=document.getElementById('gpFps'),b=document.getElementById('pbFps');if(a&&a.textContent!==t)a.textContent=t;if(b)b.textContent='Now: '+t}
   if(now-GPVV.t<32)return;GPVV.t=now;const V=gpvGet(cv);if(!V)return;const sp=pv.querySelector('.gpl span'),tx=(GPVV.sel==='now'?'Your setting, ':'')+V.desc;if(sp&&sp.textContent!==tx)sp.textContent=tx;
   gpvFrame(cv,V,(now/1000*36)%GPVP)};
+/* ===== v0.196: device layout with side headers (task T) =====
+   Every instrument, effect, MIDI effect and analyser (in the panel and in pinned windows) is laid out after duLayout and pinButtons:
+   - a strip on the left (.dsl, the old .devh turned upright): on/off (effects) or the logo (instruments) at the top, the name read from bottom to top, remove at the bottom.
+     Remove is always in that corner, as far as possible from on/off and pin; on an instrument it offers to delete the track (the instrument is the track).
+   - the picture gets the full height (there is no title row any more).
+   - the preset menu, Change and the device's own buttons sit in a row on top of the parameters (.dspr); a device without a parameter side (Grid) has the row floating in its picture.
+   - a strip on the right (.dsr): pin at the top, below it the show and hide parameters button over the rest of the height; the parameters slide out of it to the left.
+   Nothing here changes sound or presets. */
+const DSTR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg>';
+function dsDev(D){const H=D.querySelector(':scope>.devh'),B=D.querySelector(':scope>.devb');if(!H||!B||!D.classList.contains('du'))return;
+  if(D._ds){for(const p of H.querySelectorAll(':scope>.pinbtn'))p.remove();return}
+  if(H.querySelector('.kdsub'))return;D._ds=1;const isFx=D.dataset.d==='fx';
+  const pw=H.querySelector(':scope>.pw'),logo=H.querySelector(':scope>svg'),nm=H.querySelector(':scope>span:not(.dusp)'),x=H.querySelector(':scope>.x'),ar=H.querySelector(':scope>.duar'),pin=H.querySelector(':scope>.pinbtn');
+  const row=[...H.children].filter(c=>c!==pw&&c!==logo&&c!==nm&&c!==x&&c!==ar&&c!==pin&&!c.classList.contains('dusp'));
+  /* left strip */
+  let rm=x;if(rm){rm.title='Remove this effect from the chain. Undo (⌘Z / Ctrl+Z) brings it back.'}else if(!isFx){rm=document.createElement('button');rm.type='button';rm.dataset.dsrm='inst';rm.title='Remove: the instrument is the heart of its track, so this deletes the track (it asks first, and Undo brings it back). To keep the track and try another instrument, use Change.'}
+  if(rm){rm.classList.add('dsrm');rm.innerHTML=DSTR;rm.setAttribute('aria-label',isFx?'Remove this effect':'Delete this track')}
+  if(nm&&!nm.title)nm.title=nm.textContent.trim();
+  if(pw&&!pw.title.includes('Click'))pw.title='On / off: switch this effect off to hear the sound without it';
+  H.replaceChildren(...[pw||logo,nm,rm].filter(Boolean));H.classList.add('dsl');
+  /* the row of presets, Change and the device's own buttons */
+  if(row.length){const R=document.createElement('div');R.className='dspr';R.append(...row);const S=B.querySelector(':scope>.dfs,:scope>.eqside');if(S)S.prepend(R);else{R.classList.add('dsfl');B.append(R)}}
+  /* right strip */
+  const Rs=document.createElement('div');Rs.className='dsr';if(pin)Rs.append(pin);
+  if(ar){const shut=D.classList.contains('dushut');ar.innerHTML=DUAR(shut)+`<span>${shut?'Show parameters':'Parameters'}</span>`;ar.title=shut?'Show the parameters: they slide out to the left':'Hide the parameters: only the picture stays';ar.setAttribute('aria-label',ar.title);Rs.append(ar)}
+  D.append(Rs);D.classList.add('ds');
+  /* measured without the slide-in animation (it starts at width 0), then the animation goes on to the new width */
+  const SA=D.querySelector(':scope>.devb>.dfs.duin,:scope>.devb>.eqside.duin');if(SA)SA.classList.remove('duin');
+  try{duFit(D)}catch(e){}
+  {const S=D.querySelector(':scope>.devb>.dfs,:scope>.devb>.eqside'),R=S&&S.querySelector(':scope>.dspr');if(R&&!D.classList.contains('pbx')&&!D.classList.contains('dushut')){let need=0;for(const c of R.children)need=Math.max(need,c.offsetWidth);if(S.clientWidth<need)S.style.minWidth=need+'px'}}
+  if(SA){SA.style.setProperty('--duw',SA.offsetWidth+'px');void SA.offsetWidth;SA.classList.add('duin');setTimeout(()=>SA.classList.remove('duin'),220)}}
+function dsAll(root){for(const D of root.querySelectorAll(':scope>.dev.du[data-d=inst],:scope>.dev.du[data-d=fx]')){try{dsDev(D)}catch(e){console.error('AudioLab side headers',e)}}}
+{const _pb=pinButtons;pinButtons=function(root){const r=_pb.apply(this,arguments);if(root)dsAll(root);return r}}
+{const _ph=pinHarvest;pinHarvest=function(){const r=_ph.apply(this,arguments);for(const w of PIN.wins.values()){const pb=w._dev&&w._dev.querySelector(':scope>.dsr>.pinbtn');if(pb&&!pb.classList.contains('on')){pb.classList.add('on');pb.title='Unpin: put this device back in the device panel';pb.setAttribute('aria-label','Unpin');pb.setAttribute('aria-pressed','true')}}return r}}
+/* remove on an instrument: asks, then deletes the track */
+addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-dsrm=inst]');if(!b)return;e.stopImmediatePropagation();e.preventDefault();const t=curT();if(!t||t.kind==='master')return;
+  askChoice('Delete the track “'+t.name+'”?','The instrument is part of its track, so removing it removes the track with its clips and effects. Undo brings it back. To try another instrument instead, use Change.',[{label:'Keep it',v:null},{label:'Delete track',v:1,cls:'dng pri'}],ICDEL).then(ok=>{if(ok&&S.tracks.includes(t))delTrack(t)})},true);
+/* ===== v0.196: the devices panel's own tab (show and hide) and overflow cues on its track tabs (task T) =====
+   #fxHide becomes a tab of the panel itself: the same fill as the panel and no line under it, so it reads as part of the box below (the track tabs and Master choose what the
+   panel shows; this tab folds the panel). The word Devices and a chevron that points where the panel will go. With the panel hidden it is the handle left on the edge.
+   The track tabs: when they do not all fit, each side that has more shows a button with an arrow and how many tabs are hidden there (click: scroll by most of a width). */
+const DSHC=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d?'M6 9l6 6 6-6':'M6 15l6-6 6 6'}"/></svg>`;
+const DSHP='<svg class="dshp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M3.5 13h17"/><path d="M8 16h2M12 16h4"/></svg>';
+function dsHideSync(){const b=document.getElementById('fxHide'),fx=document.getElementById('fx');if(!b||!fx)return;const top=document.body.classList.contains('fx-top'),hid=!!UI.fxHide||!!UI.devPop;
+  b.classList.add('dshb');b.classList.toggle('dsoff',hid);fx.classList.add('dsh');
+  /* bottom panel: shown, the chevron points down (it folds down); hidden, up. A panel at the top: the other way round */
+  b.innerHTML=DSHP+'<span>Devices</span>'+DSHC(top?hid:!hid);
+  b.title=UI.devPop?'Devices are in their own window. Click to put them back in this panel':hid?'Show the devices panel':'Hide the devices panel (click). Drag this tab up to pop the devices out into a window';
+  b.setAttribute('aria-label',hid?'Show devices':'Hide devices');b.setAttribute('aria-expanded',String(!hid));
+  fx.style.setProperty('--dshw',(b.offsetWidth||96)+'px')}
+{const _dh=devHide;devHide=function(){const r=_dh.apply(this,arguments);try{dsHideSync()}catch(e){}return r}}
+{const _dp=devPop;devPop=function(){const r=_dp.apply(this,arguments);try{dsHideSync()}catch(e){}return r}}
+{const _al=applyLayout;applyLayout=function(){const r=_al.apply(this,arguments);try{dsHideSync()}catch(e){}return r}}
+/* overflow cues */
+function dsOvUpd(box){const sc=box&&box.querySelector(':scope>.fxsc');if(!sc)return;const L=box.querySelector(':scope>.fxov.l'),R=box.querySelector(':scope>.fxov.r');if(!L||!R)return;
+  const r=sc.getBoundingClientRect();let nl=0,nr=0;for(const t of sc.children){const q=t.getBoundingClientRect();if(!q.width)continue;if(q.left+q.width/2<r.left+2)nl++;else if(q.right-q.width/2>r.right-2)nr++}
+  const over=sc.scrollWidth>sc.clientWidth+2;box.classList.toggle('dsovl',over&&sc.scrollLeft>2);box.classList.toggle('dsovr',over&&sc.scrollLeft<sc.scrollWidth-sc.clientWidth-2);
+  L.querySelector('b').textContent=nl||'';R.querySelector('b').textContent=nr||'';
+  L.title=nl?nl+(nl>1?' more tracks':' more track')+' this way. Click to scroll left, or drag the tabs':'Scroll the tabs left';R.title=nr?nr+(nr>1?' more tracks':' more track')+' this way. Click to scroll right, or drag the tabs':'Scroll the tabs right'}
+function dsOvWire(){const box=document.querySelector('#fxTitle .fxsw.fxall'),sc=box&&box.querySelector(':scope>.fxsc');if(!sc)return;
+  if(!box.querySelector(':scope>.fxov')){const mk=s=>{const b=document.createElement('button');b.type='button';b.className='fxov '+s;b.innerHTML=s==='l'?DUAR(true)+'<b></b>':'<b></b>'+DUAR(false);
+      b.addEventListener('pointerdown',e=>{e.stopPropagation()});b.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();sc.scrollBy({left:(s==='l'?-1:1)*Math.max(120,sc.clientWidth*.7),behavior:AT&&AT.reduce?'auto':'smooth'})});return b};
+    box.append(mk('l'),mk('r'))}
+  if(!sc._dsov){sc._dsov=1;let q=0;const u=()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;dsOvUpd(box)})};sc.addEventListener('scroll',u,{passive:true});try{new ResizeObserver(u).observe(sc)}catch(e){}}
+  dsOvUpd(box);requestAnimationFrame(()=>dsOvUpd(box))}
+{const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{dsOvWire()}catch(e){}return r}}
+addEventListener('resize',()=>{const b=document.querySelector('#fxTitle .fxsw.fxall');if(b)dsOvUpd(b)});
+setTimeout(()=>{try{dsHideSync();dsOvWire()}catch(e){}},0);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

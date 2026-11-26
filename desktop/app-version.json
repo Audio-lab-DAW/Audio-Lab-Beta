@@ -1,7 +1,7 @@
 {
-  "version": "0.195",
-  "sha256": "2724a72b12e976166a254751a7c34438082434f066ea824054961e1c3aa28aa7",
-  "size": 2903099,
+  "version": "0.196",
+  "sha256": "968f071657ad46913b3cc3292ffa69f0fd4a7c3d4d3db214c5ee3831a1d79477",
+  "size": 2920680,
   "minShell": "0.147.0",
   "notes": "AudioLab now opens faster: the loading screen shows at once, follows the real loading and is gone as soon as everything is ready (no more Click to skip). The visualizer can dock at the top and is sharp on high resolution screens, right-click the map or the visualizer to turn either on or off, the Glass and light preview plays a ready-made loop for each setting, and zooming in and out of the song overview keeps the clips where they are, now with their names."
 }
