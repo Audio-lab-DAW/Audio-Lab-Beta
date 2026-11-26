@@ -210,3 +210,75 @@ For singing, keep the melody's octave (shift by 0 or 12 semitones) and use mostl
 - Keep a pure-JS pYIN or YIN as a zero-download fallback (pYIN recall about 0.98 on synthetic singing, https://core.ac.uk/download/30696897.pdf). Skip PESTO unless LGPL-3.0 obligations are acceptable (https://github.com/SonyCSLParis/pesto).
 
 **Pitch and formant editing without AI:** use WORLD (modified BSD, https://github.com/mmorise/World) or a TD-PSOLA path for per-note pitch, drift and vibrato edits, with a true-envelope phase vocoder for the "man / woman / child" formant presets. This gives the Melodyne-style editor and the character presets with no model download at all; AI conversion becomes an optional add-on.
+
+---
+
+## 9. AI voices (task Z2, v0.206): research again, decision, measurements
+
+Research date: 26 November 2026. This section checks section 8 against what the user asked for in the later message: "you should be able to use an example clip, then use that as a voice, and then you can sing, and it will use the example clip to morph your voice into that". That is **zero-shot** conversion (a voice from a short example, no training), which section 8's choice (RVC, a model trained per voice on about 10 minutes) does not do. "Measured" means measured in this run on the build machine (a cloud machine with 2 x86 cores, no GPU); "guess" marks my own estimates.
+
+### 9.1 Candidates for zero-shot conversion (singing and talking)
+
+| Model | Zero-shot | Code / weights licence | Size | Keeps the sung notes | Notes |
+|---|---|---|---|---|---|
+| OpenVoice V2 tone-colour converter (MyShell) | yes, 1 clip | MIT / MIT ([licence](https://raw.githubusercontent.com/myshell-ai/OpenVoice/main/LICENSE), [weights card](https://huggingface.co/myshell-ai/OpenVoiceV2)) | 131 MB PyTorch; ONNX fp16 66 MB ([moonbox-dev/OpenVoiceV2-ONNX](https://huggingface.co/moonbox-dev/OpenVoiceV2-ONNX)) | no: moves the pitch toward the example's range (measured, 9.3) | linear spectrogram in, 22.05 kHz audio out; posterior encoder + flow + HiFi-GAN decoder; no separate content encoder or vocoder |
+| Seed-VC (Plachta) | yes, singing model too | GPL-3.0 ([HF tag](https://huggingface.co/Plachta/Seed-VC), [PyPI](https://pypi.org/project/seed-vc/)) | 25M to 200M params plus Whisper/XLSR encoders (section 1) | yes (f0-conditioned singing model) | GPL: shipping it would put the app under GPL; not used |
+| Vevo / Vevo1.5 / Vevo2 (Amphion) | yes, speech and singing | Vevo2 weights CC BY-NC-ND 4.0 ([HF](https://huggingface.co/RMSnow/Vevo2)); Vevo licence not confirmed here | large (several hundred M params, guess) | Vevo2 has prosody control ([paper](https://arxiv.org/abs/2508.16332)) | non-commercial, no derivatives: not used |
+| kNN-VC (Stellenbosch) | yes, needs minutes of reference | MIT ([LICENSE](https://raw.githubusercontent.com/bshall/knn-vc/master/LICENSE); section 1 said "other", this corrects it) | WavLM-Large (about 316M params, about 1.2 GB fp32, guess from the parameter count) + HiFi-GAN | no: frames are replaced by the example's frames, so the pitch comes from the example (by design, [repo](https://github.com/bshall/knn-vc/)) | too big for a first download, and the notes would not survive |
+| FreeVC | one-shot | MIT (section 1) | WavLM + VITS | speech only | not tested |
+| RVC / Applio, so-vits-svc, DDSP-SVC, Diff-SVC | no (training per voice) | MIT / AGPL / MIT / AGPL (section 1) | | yes (explicit f0) | do not meet "a voice from an example clip"; RVC import stays a later option for users with trained voices |
+| YingMusic-SVC, R2-SVC (2025 papers) | zero-shot singing | not checked in this run | | f0 conditioned | research results ([YingMusic-SVC](https://arxiv.org/pdf/2512.04793), [R2-SVC](https://arxiv.org/pdf/2510.20677)); weights and licences not confirmed, so not usable yet |
+| Zero-VC (2026 paper) | streaming, zero look-ahead | not checked | | | the kind of model a live AI voice would need ([paper](https://arxiv.org/pdf/2606.20218)) |
+
+**Decision: OpenVoice V2, inside an own pipeline.** It is the only zero-shot model found whose code and weights are MIT, it is small (66 MB as ONNX fp16) and runs on a processor. Its weakness for this app is that it moves the pitch (9.3), so the pipeline around it (9.4) puts the notes back and keeps Melodyne-style edits working. Nothing from the model is bundled with the app: it is downloaded on first use from Hugging Face at a pinned revision (`1be2e319a10a88ff2d268eb1ec2977740df729f2`), and each file is checked against its SHA-256 (`converter.onnx` 64,313,099 bytes `22a79ab8...a4c3`, `ref_encoder.onnx` 1,635,922 bytes `50742432...6321`).
+
+**The ONNX files were checked against the original** (measured): the official PyTorch model (OpenVoice code at `main`, weights `myshell-ai/OpenVoiceV2/converter/checkpoint.pth`) and the ONNX graphs, given the same spectrogram, noise and embeddings: fp16 build 47.4 dB SNR, embeddings cosine 0.999995; int8 build only 4.0 dB SNR (audibly different), so the int8 build is not used. An fp32 export of my own was only 10 % faster on the processor (1.83 s against 2.01 s for 4.8 s of audio), not worth hosting a 128 MB file.
+
+### 9.2 Running it from the desktop app
+
+- **onnxruntime-node 1.31.1** (published 26 October 2026, MIT; [npm](https://www.npmjs.com/package/onnxruntime-node)): N-API, so one build works in Electron 45. Prebuilt binaries in the package: darwin arm64 45.3 MB (`libonnxruntime.1.dylib`, the binding links only that one; the identical `libonnxruntime.1.31.1.dylib` is left out of the Mac app), win32 x64 66 MB (with DirectML). Linux and the other architectures are left out of each build.
+- `session.run()` blocks the JavaScript thread (measured: 0 timer ticks during a 4.5 s run), so the model runs in an **Electron utility process** (`desktop/voice-ai-worker.js`), started on first use and closed after 3 minutes without work. Memory of that process during a conversion: 634 to 661 MB (measured, includes Node).
+- Execution providers: the processor (default, the reference result). "Faster (test)" asks for Core ML on a Mac and DirectML on Windows and falls back to the processor by itself when that fails; not measured in this run (no Mac or Windows machine here).
+- onnxruntime-web in the page would also work (the app already loads it for the neural stem split), which could bring AI voices to the web version later; not done now because the desktop path is faster and keeps the 66 MB out of the browser cache.
+- PyTorch with MPS through a bundled Python: rejected (hundreds of MB, a second runtime to maintain).
+
+### 9.3 What the model does to the pitch (measured)
+
+- With the example's own embedding the model moves the whole melody toward the example voice's range: a woman singing around 441 Hz into a man talking around 120 Hz came out 2,340 cents lower (to about 111 Hz); a man talking at 119 Hz into a woman talking at 214 Hz came out 990 cents higher. The contour stays, the range follows the example.
+- With the source's own embedding on both sides the pitch stays (0 cents median).
+- Moving the example to the singer's range before taking its embedding keeps the notes: with the example moved by the WORLD vocoder the result landed -100 to +55 cents from the sung notes; with the app's TD-PSOLA it landed 2.2 to 5.6 semitones low (PSOLA over 17 semitones makes rough spectra the encoder does not read as high). The pipeline therefore redraws the example's spectrogram at the new pitch (9.4): -1.2 to -2.2 semitones with all frames, **+0.2 to +1.3 semitones with only the voiced frames**, which is what the app uses.
+- Chunks: the model needs context. With the same noise per frame, 4 s chunks with 0.5 s of context on each side are identical to the whole file (log-spectral distance 0.08 dB), 0.25 s of context is not (1.83 dB). So a live version would hear you at least half a second late plus the computing time: **live AI voice is not offered**; recordings are converted after recording.
+
+### 9.4 The pipeline in the app (v0.206)
+
+1. Make a voice: a clip from the project or a file (up to 60 s; at least 2 s of voice), mono, 22,050 Hz; its middle pitch (the Voice device's YIN) and its embedding (frames more than 45 dB under the loudest left out). Saved in `userData/voice-ai/voices` with the example, so it works in every project.
+2. Convert: the clip's original recording (never changed) at 22,050 Hz; the target embedding is the voice's embedding at the wanted range (the voice's spectrogram redrawn at the singer's pitch, plus the Notes and Pitch range choices), blended with the singer's own by Amount. A short stretch (the most voiced 6 s, or the whole clip when short) is converted first and the result's pitch measured; the range is moved by what is left over, at most three tries (measured: 49 cents left on the sung phrase after one try; -74 then -29 on the synthetic phrase). Then the whole clip in 4 s chunks with 0.75 s context. The result, resampled back to the project rate (Kaiser-windowed sinc, 16 zero crossings), is saved with the project as the clip's converted take.
+3. Notes (stage 2, no AI, also in the web version): per 5 ms frame, the converted take is moved by TD-PSOLA so that it lands on the edited pitch line: target = sung pitch + note edits + range; what the model left over is measured (modulo an octave, median of 5, held through gaps) and corrected; formant and level edits as in the note view; Formant moves the new voice's colour. Breath and consonants: where the recording is unvoiced but audible, the recording is mixed back in; its air band above 9 kHz goes under the whole take (the model stops at 11 kHz). Level matched to the recording's voiced parts. Moving a note re-renders only this stage (fast); Convert again is needed only for a new voice, Amount, Notes or Pitch range.
+4. Choir: up to 3 more voices (saved or built in), each converted separately (each costs as much as the lead), then detuned (+9, -11, +6 cents), delayed (14, 21, 29 ms), panned (-0.7, +0.7, 0) and mixed under the lead.
+
+### 9.5 Built-in voices
+
+There is no ready-made voice from one person: every recorded voice is a real person. The three built-in voices are **blends**: the average of the embeddings of many singers from VocalSet (Wilkins, Seetharaman, Wahl, Pardo, ISMIR 2018; CC BY 4.0; [mirror](https://huggingface.co/datasets/Bill13579/vocalset-mirror)), each singer's 16 s of talking and straight singing first moved by WORLD to the same pitch: **Low blend** (11 men, middle 139 Hz), **High blend** (6 women, 239 Hz), **Mixed blend** (all 17, 169 Hz); stored as int8 embeddings every 3 semitones from -24 to +24 (19 kB in index.html, cosine 0.99993 to the float values). Measured: a phrase converted into High blend scores 0.52 to 0.65 against three of its own members (the same singer against herself scores 0.74 on this measure), so it does not imitate any of them.
+
+### 9.6 Measurements (tools/ui-tests/aivoice.py and aivoice_electron.py)
+
+Test audio: LibriSpeech speaker 1272 (CC BY 4.0, [dummy set](https://huggingface.co/datasets/hf-internal-testing/librispeech_asr_dummy)), VocalSet singers f1 and f2 (CC BY 4.0), and a synthetic sung phrase with known notes. Speaker similarity: cosine of [WavLM-base-plus-sv](https://huggingface.co/microsoft/wavlm-base-plus-sv) x-vectors (its card uses 0.86 as the same-speaker threshold); this measure depends strongly on pitch, so a voice that keeps the singer's notes cannot reach the example's own score.
+
+| Test | Before | AI, Keep my notes | AI, other Notes choice |
+|---|---|---|---|
+| Woman singing (VocalSet f1) into Speaker A (man talking, LibriSpeech) | 0.628 | 0.736 | 0.904 (nearest octave of the voice) |
+| Man talking (LibriSpeech) into Singer B (VocalSet f2 talking) | 0.378 | 0.486 | 0.740 (the voice's own range) |
+
+- Held notes (synthetic E4, G4, D4) after conversion, cents off the pitch line, measured with YIN (librosa, independent of the app): median -2.8, +4.2, -0.7 (10 to 90 %: -8.0 to +9.5); after moving note 2 up 2 semitones: -2.8, +2.7, -0.7. An FFT peak method agrees within 3 cents.
+- Real sung phrase (VocalSet f1 arpeggios), frame by frame against the sung pitch: median +10.9 cents, median absolute 17.3 cents, 90 % within 64 cents (the larger values are at note changes).
+- Clicks: largest sample step against the 99.9th percentile of steps: 1.6 (sung) and 1.9 (talking) after, 1.5 and 1.7 before; no clicks. Levels: 0.0 dB (sung) and -0.4 dB (talking) against the recording.
+- Time on the build machine (2 x86 cores): the model alone about 1.0 times real time (31.8 s for 24.7 s of audio while other tests ran, 28.6 s for 29.5 s alone); a whole conversion with the pitch fitting 1.0 to 3.2 times the clip length (short clips reuse the fitting run). Apple silicon: not measured in this run. Guess: an M4 with 4 performance cores is 4 to 8 times faster per conversion, so roughly 0.15 to 0.35 times the clip length (a 3-minute vocal in 30 to 60 s).
+- Model download inside the Electron app (66 MB from Hugging Face, checksum checked): 3.4 to 3.6 s on the build machine's connection; a file with a wrong checksum is deleted and not used (tested).
+- Originals: the recording's samples are identical before and after every conversion (checksum per clip). No page errors in the browser or in the Electron app. Demo renders unchanged (Fractals Kick -9.75669 dB, Bass -25.48699 dB, beats 64 to 96).
+
+### 9.7 Left for later
+
+- Live AI voice (needs a streaming model such as the kind in the Zero-VC paper, with weights under a licence that allows shipping).
+- Speed with Core ML and DirectML, and the real time on an M4 and on Windows (measure on the machines).
+- The web version: run the same ONNX files with onnxruntime-web (the app already loads it for the stem split).
+- Importing trained RVC voices for users who have them.

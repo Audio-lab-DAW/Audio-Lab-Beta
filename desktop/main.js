@@ -591,6 +591,7 @@ if (!gotLock) {
     if (curIcon !== (readIcons().default || 'ocean-yellow')) setTimeout(() => updateShortcuts(curIcon), 4000);   // an app update puts the installer's shortcuts back
     createWindow();
     setupUpdater();
+    try { require('./voice-ai').setup({ ipcMain, app }); } catch (e) { console.warn('AI voices', e); }  // task Z2: AI voices (desktop/voice-ai.js)
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
 
