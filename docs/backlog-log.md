@@ -2467,6 +2467,9 @@ Reading: every update notice (a new program version downloaded over the air, and
 
 ### Left
 - A saved link mode (groups that stay linked without selecting, like Studio One groups or Cubase links) and a choice of absolute as the default; linking the devices panel's buttons and the effect knobs of the same effect on several tracks; the Delete key for selected tracks.
+### Release
+- v0.208: commit e97ce44 on main, on top of v0.207 (task Y, released by another session while this one worked; the version moved from 0.207 to 0.208 and both sides of the conflict were kept). Desktop build run 45776476015 succeeded. Artifact 1b07d888 updated to version 231 (it was at v0.207). Project doc `claude/audiolab-run-AE.md`.
+
 ## 26 November 2026, v0.209: About window showcase, "Under the hood" (task AD, from a later message)
 
 > "Let's also add some small things for the About tab. Let's also explain or advertise all the advanced features that our audio workstation has, like voice pooling, block timing, the neural network for splitting stems, the neural AI voice changer, stuff like that, and add all the advanced features in the About, just to brag and make the software look very intelligent and complex."
@@ -2543,5 +2546,3 @@ Desktop app
 ### Not verified
 - On the user's Mac with a real GPU; how the fade looks at 120 Hz.
 
-### Release
-- v0.208: commit e97ce44 on main, on top of v0.207 (task Y, released by another session while this one worked; the version moved from 0.207 to 0.208 and both sides of the conflict were kept). Desktop build run 45776476015 succeeded. Artifact 1b07d888 updated to version 231 (it was at v0.207). Project doc `claude/audiolab-run-AE.md`.
