@@ -1915,4 +1915,4 @@ Total in this part: 229 presets before, 451 after. Sub, Psy Bass and Bounce were
 
 ### Release
 - v0.197: commit 1424e8c, project doc `claude/audiolab-preset-research.md` (same text as `docs/preset-research.md`), artifact version 220.
-- Desktop build: run 45756249392 dispatched for this commit (still running when this note was written).
+- Desktop build: run 45756249392 for this commit succeeded (2 min 36 s).
