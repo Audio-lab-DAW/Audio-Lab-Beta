@@ -1,7 +1,7 @@
 {
-  "version": "0.190",
-  "sha256": "03acb6bda127849988911af2c18aaad3fbd1c8e9e05ff60c3c9f72d06ac534eb",
-  "size": 2772837,
+  "version": "0.191",
+  "sha256": "c5b12fa704a4387d8755bb3cd69d268812990cea0f5a984c5c651e018e610bef",
+  "size": 2825137,
   "minShell": "0.147.0",
-  "notes": "New instrument Bounce: every note drops a ball, and every landing strikes wood, glass, metal, a string or a drum, louder and brighter the harder it hits, free or bouncing in time with the song. Bouncy Notes gets chord steps that change through the bar and a rhythm per ball; in Orbit you can throw a ball by dragging, remove one with a right-click, change its mass by scrolling over it, and see each ball's orbit."
+  "notes": "New instrument Psy Bass, made for the psytrance rolling bass: every note of the roll is exactly the same, each note ends cleanly before the next kick, and a roll pattern can play the 16ths in time with the song from one long note. It comes with 18 presets for full-on, progressive, dark and forest, hi-tech and Goa."
 }
