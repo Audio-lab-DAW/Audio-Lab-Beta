@@ -1431,6 +1431,61 @@ body.fxmin .sbox,body.fxmin .pmhero,body.fxmin .pmfps,body.fxmin .pmlist,body.fx
 .phshp,.phcol{display:flex;flex-wrap:wrap;gap:5px;flex:1}.phshp button{display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;padding:4px 2px;font-size:10.5px}.phshp canvas{width:40px;height:30px;border-radius:4px}
 .phshp button.on,.phcol button.on{outline:2px solid var(--blue);outline-offset:-1px}.phcol button{min-width:26px;height:26px;padding:0 6px;border-radius:6px;background:var(--c)!important;color:#06140d;font-size:10.5px;font-weight:600}.phcus{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--mut);cursor:pointer}.phcus input{width:26px;height:26px;padding:0;border:0;background:none}.phrst{align-self:flex-start}
 #phFlag>.phl{position:static!important;grid-column:1;display:flex;justify-content:flex-end;align-items:center;gap:3px}#phFlag>s{grid-column:2}#phFlag>u{grid-column:3}#phFlag s{text-decoration:none;width:.62em;text-align:center}#phFlag u{text-decoration:none;text-align:left}#phFlag>*{pointer-events:auto}#hdrcol .cap{text-shadow:0 1px 2px rgba(0,0,0,.7)}
+/* v0.193: the MIDI panel rework (task Q) */
+#pr.open.prdk{height:var(--prh,262px)!important;transition:none!important;border-bottom:0!important}
+#pr.open.prgap{margin-bottom:25px}
+body.prdrag,body.prdrag *{cursor:row-resize!important;user-select:none}
+.prhd{display:none}
+#pr.prdk>.prhd{display:block;position:absolute;left:0;right:0;z-index:9;touch-action:none;cursor:row-resize}
+#pr.prdk>#prTopH{top:0;height:5px}
+#pr.prdk>#prDiv{bottom:0;height:7px;display:none}
+#pr.prdk.pradj:not(.prcol)>#prDiv{display:flex;align-items:flex-end;justify-content:center}
+#prDiv>i{display:block;width:46px;height:3px;margin-bottom:1px;border-radius:2px;background:rgba(255,255,255,.22);transition:background .12s}
+#prDiv:hover>i,body.prdrag #prDiv>i{background:#4c8dff}
+#prTopH:hover{background:linear-gradient(rgba(76,141,255,.6),transparent)}
+/* toolbar: one tidy row of groups */
+#pr .prbar{row-gap:5px}
+#pr .prbar .prsel{flex:none}
+#pr .prbar .ptools{flex:none}
+#pr .prbar #prTitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;flex:0 1 auto;min-width:40px}
+#prLock svg{width:15px;height:15px;color:#7fb0ff}#prLock{justify-content:center;padding:0 6px!important}
+/* compact: smaller buttons, icons only */
+#pr.prcmp .prbar{gap:4px 6px!important;padding:3px 6px!important}
+#pr.prcmp .ptools button{min-width:23px!important;height:23px!important;min-height:23px!important;padding:0 3px!important}
+#pr.prcmp .ptools button svg{width:13px!important;height:13px!important}
+#pr.prcmp .ptools kbd{display:none}
+#pr.prcmp .ptools .car{font-size:6px;right:1px}
+#pr.prcmp .prsel{height:23px!important;min-height:23px!important;padding:0 2px 0 5px!important;gap:3px!important;font-size:11px!important}
+#pr.prcmp .prsel svg{width:13px!important;height:13px!important}
+#pr.prcmp .prsel select{font-size:11px!important;min-height:20px!important;max-width:78px;padding:0 1px!important}
+#pr.prcmp #prRoot{max-width:44px}
+#pr.prcmp .prsel .prw{display:none}
+#pr.prcmp #prGhost,#pr.prcmp #prFeel,#pr.prcmp #prLock{padding:0 5px!important}
+#pr.prcmp .prbar #prTitle{font-size:12px;max-width:150px}
+#pr.prcmp .prwin button{min-width:23px!important;height:23px!important;min-height:23px!important}
+#pr.prcmp .prwin button svg{width:13px;height:13px}
+/* window mode: a head like the mixer's, the rest borderless */
+#pr.float{overflow:visible!important;border:0!important;border-radius:10px 0 10px 10px!important;box-shadow:0 18px 54px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.35)!important;min-width:380px!important;min-height:200px!important}
+#pr.float>.prbar{border-radius:10px 0 0 0;cursor:default!important;background:var(--pn)}
+#pr.float>.cv{overflow:hidden;border-radius:0 0 10px 10px}
+#pr.float #prTitle{display:none}
+#prHead{display:none}
+#pr.float>#prHead{display:flex;position:absolute;top:-34px;right:0;z-index:6;height:34px;max-width:100%;box-sizing:border-box;align-items:center;gap:6px;padding:4px 4px 4px 12px;border-radius:10px 10px 0 0;background:rgb(var(--gtr2));border:1px solid rgba(255,255,255,.24);border-bottom:0;cursor:grab;touch-action:none}
+#pr.float>#prHead[hidden]{display:none}
+#pr.float>#prHead.grab{cursor:grabbing}
+#prHead .prgrip{flex:none;width:22px;height:14px;border-radius:4px;background:radial-gradient(circle,rgba(255,255,255,.35) 1.1px,transparent 1.3px) 0 0/6px 5px;opacity:.7}
+#prHead .prwt{font:600 11.5px Inter,system-ui,sans-serif;color:#c9ccd6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;min-width:0;padding-right:4px}
+#prHead .prwin{margin-left:0;gap:4px;flex:none}
+#prHead .prwin button{height:26px!important;min-height:26px!important;width:28px;min-width:28px;padding:0!important;display:grid;place-items:center;border-radius:7px}
+#pr.float.prcmp>#prHead{height:30px;top:-30px;padding:3px 3px 3px 9px}
+#pr.float.prcmp>#prHead .prwin button{height:23px!important;min-height:23px!important;width:25px;min-width:25px}
+/* glass band behind the track tabs */
+#fxband{position:absolute;left:0;right:0;pointer-events:none;background:linear-gradient(rgba(var(--gtr2),calc(var(--ga) * .45)),rgba(var(--gtr2),calc(var(--ga) * .8)));box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.05 + var(--edge,.6) * .14)),inset 0 -1px 0 rgba(0,0,0,.22)}
+#fxband.btop{background:linear-gradient(rgba(var(--gtr2),calc(var(--ga) * .8)),rgba(var(--gtr2),calc(var(--ga) * .45)));box-shadow:inset 0 -1px 0 rgba(255,255,255,calc(.05 + var(--edge,.6) * .14))}
+#fxband.blive{backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+#fxband.bsolid,body.fxmin #fxband,body.fxzero #fxband{background:rgb(var(--gtr2))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.fxmin #fxband{box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important}
+body.fxmin #prHead{box-shadow:none}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5592,7 +5647,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.192',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.193',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -14271,6 +14326,96 @@ function phSetSync(){const P=phCfg(),u=UI.ph||{},sh=$('#phShp'),co=$('#phCol');i
   for(const b of sh.children){b.classList.toggle('on',b.dataset.s===P.s);const c=b.querySelector('canvas'),g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,40,30);g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,0,40,30);phDraw(g,20-P.w/2,0,30,P.c,b.dataset.s,P.w)}
   for(const b of co.querySelectorAll('[data-c]'))b.classList.toggle('on',b.dataset.c===(u.c||''));const cc=$('#phCC');if(cc)cc.value=/^#[0-9a-f]{6}$/i.test(P.c)?P.c:'#3ecf8e';
   $('#phW').value=P.w;$('#phWO').textContent=P.w+' px';$('#phT').checked=P.t;phPrevRun()}
+/* ===================== v0.193: the MIDI panel rework (task Q) =====================
+   Docked: the piano roll sits directly above the devices panel and is as high as the devices panel (UI.prDH, empty = follow the devices panel).
+   When the devices are hidden its top edge stays where it is and it grows down into their space; when they come back it goes back.
+   The bar at its bottom edge (#prDiv) moves the border between the two (UI.prDH and UI.fxDH), the top edge (#prTopH) changes its own height.
+   Window mode: a head like the mixer's (#prHead: grip, title, the window buttons), the rest borderless, resizable from every edge and corner (rzScan).
+   Compact buttons (class prcmp) in a window smaller than PRCW x PRCH, and docked when the panel is narrower than PRCDW.
+   Glass: a band behind the track tabs above the devices panel (#fxband). It shows the same ready-made blurred picture of the arrangement as the devices panel
+   (no blur pass of its own), refraction only when that effect is on, a live blur only where there is no picture, solid in Lighter and Lightest. */
+const PRCW=1000,PRCH=460,PRCDW=1240,PRMIN=150,FXMIN=215,PRSTRIP=25,PRHEADH=34;
+const PRDK={fxh:0,drag:null};
+function prFxOpenH(){const fx=$('#fx');if(fx&&!fx.classList.contains('collapsed')&&!fx.classList.contains('popped')&&fx.offsetHeight>40)PRDK.fxh=fx.offsetHeight;return PRDK.fxh||UI.fxDH||262}
+/* the devices panel directly under the piano roll in the same dock (only the glass layers between them) */
+function prAdj(){const pr=$('#pr'),fx=$('#fx');if(!pr||!fx||UI.devPop||fx.classList.contains('popped')||document.body.classList.contains('split'))return false;
+  let n=pr.nextElementSibling;while(n&&(n.id==='fxglass'||n.id==='fxband'))n=n.nextElementSibling;return n===fx}
+function prDockFit(){const el=$('#pr'),fx=$('#fx');if(!el||!fx)return;
+  const dk=!!PR.open&&!el.classList.contains('full')&&!el.classList.contains('float');
+  const adj=dk&&prAdj(),col=fx.classList.contains('collapsed');
+  const fh=adj&&!col&&UI.fxDH?UI.fxDH+'px':'';if(fx.style.height!==fh)fx.style.height=fh;
+  if(!dk){if(el.classList.contains('prdk')){el.classList.remove('prdk','prgap','prcol');el.style.removeProperty('--prh')}return}
+  const fxh=prFxOpenH();let h=(UI.prDH||fxh)+(adj&&col?fxh:0);
+  const st=$('#stage');let others=0;for(const c of el.parentElement.children){if(c===el||c.id==='fxglass'||c.id==='fxband')continue;others+=c===fx?(col?0:(UI.fxDH&&adj?UI.fxDH:c.offsetHeight)):c.offsetHeight}
+  const gap=adj?PRSTRIP:0,mx=Math.max(90,(st?st.clientHeight:innerHeight/ZOOM)-others-gap-2);h=Math.round(Math.max(Math.min(PRMIN,mx),Math.min(h,mx)));
+  el.classList.add('prdk');el.classList.toggle('prgap',!!adj);el.classList.toggle('prcol',!!(adj&&col));el.classList.toggle('pradj',!!adj);
+  const v=h+'px';if(el.style.getPropertyValue('--prh')!==v){el.style.setProperty('--prh',v);dirty=true}}
+/* compact buttons */
+function prCmpSync(){const el=$('#pr');if(!el)return;const fl=el.classList.contains('float'),w=el.offsetWidth,h=el.offsetHeight;
+  const c=PR.open&&w>0&&(fl?(w<PRCW||h<PRCH):w<PRCDW);if(el.classList.contains('prcmp')!==!!c){el.classList.toggle('prcmp',!!c);dirty=true}}
+/* window mode: the head */
+function prClampW(){const el=$('#pr');if(!el.classList.contains('float'))return;const z=ZOOM,vw=innerWidth/z,vh=innerHeight/z,w=el.offsetWidth,h=el.offsetHeight;
+  let x=el.offsetLeft,y=el.offsetTop;x=Math.min(Math.max(x,Math.min(0,vw-w)+0),Math.max(0,vw-Math.min(w,vw)));y=Math.min(Math.max(y,PRHEADH),Math.max(PRHEADH,vh-60));
+  if(Math.abs(x-el.offsetLeft)>.5)el.style.left=x+'px';if(Math.abs(y-el.offsetTop)>.5)el.style.top=y+'px'}
+function prHeadSync(){const el=$('#pr');if(!el)return;const fl=el.classList.contains('float'),win=el.querySelector('.prwin'),bar=el.querySelector('.prbar');let h=document.getElementById('prHead');
+  if(fl&&!h){h=document.createElement('div');h.id='prHead';h.title='Drag to move the piano roll window';
+    h.innerHTML='<span class="prgrip" aria-hidden="true"></span><b class="prwt"></b>';el.appendChild(h);
+    h.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button,select,input'))return;const z=ZOOM;PRDK.mv={x0:e.clientX,y0:e.clientY,l:el.offsetLeft,t:el.offsetTop};h.setPointerCapture(e.pointerId);h.classList.add('grab');e.preventDefault()});
+    h.addEventListener('pointermove',e=>{const d=PRDK.mv;if(!d)return;const z=ZOOM;el.style.left=d.l+(e.clientX-d.x0)/z+'px';el.style.top=Math.max(PRHEADH,d.t+(e.clientY-d.y0)/z)+'px'});
+    const up=()=>{if(!PRDK.mv)return;PRDK.mv=null;h.classList.remove('grab');prClampW();prSaveW()};h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)}
+  if(fl){if(win&&win.parentElement!==h)h.appendChild(win);h.hidden=false;const t=$('#prTitle');h.querySelector('.prwt').textContent=t?t.textContent:'Piano roll'}
+  else{if(h)h.hidden=true;if(win&&bar&&win.parentElement!==bar){const sp=bar.querySelector('.sp');if(sp)sp.after(win);else bar.appendChild(win)}}}
+/* the handles: top edge and the border to the devices */
+function prHandles(){const el=$('#pr');if(!el||$('#prTopH'))return;
+  el.insertAdjacentHTML('beforeend','<div id="prTopH" class="prhd" title="Drag to make the piano roll taller or shorter. Double-click to give it the height of the devices panel again."></div><div id="prDiv" class="prhd" title="Drag to move the border between the piano roll and the devices. Double-click to make them the same height again."><i></i></div>');
+  const start=(e,k)=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();const fx=$('#fx');
+    PRDK.drag={k,y0:e.clientY,p0:el.offsetHeight,f0:fx.offsetHeight,col:fx.classList.contains('collapsed'),fxh:prFxOpenH()};e.target.setPointerCapture(e.pointerId);document.body.classList.add('prdrag')};
+  const move=e=>{const d=PRDK.drag;if(!d)return;const dy=(e.clientY-d.y0)/ZOOM;
+    if(d.k==='div'){const tot=d.p0+d.f0,f=Math.round(Math.min(Math.max(d.f0-dy,FXMIN),tot-PRMIN));UI.fxDH=f;UI.prDH=tot-f;PRDK.fxh=f}
+    else{const p=Math.max(PRMIN,d.p0-dy);UI.prDH=Math.round(d.col?Math.max(PRMIN,p-d.fxh):p)}
+    prDockFit();dirty=true};
+  const end=()=>{if(!PRDK.drag)return;PRDK.drag=null;document.body.classList.remove('prdrag');saveUI();prDockFit();try{FITV++}catch(e){}dirty=true};
+  for(const [id,k] of[['prTopH','top'],['prDiv','div']]){const h=document.getElementById(id);h.addEventListener('pointerdown',e=>start(e,k));h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end)}
+  $('#prTopH').addEventListener('dblclick',()=>{UI.prDH=0;saveUI();prDockFit()});
+  $('#prDiv').addEventListener('dblclick',()=>{const tot=$('#pr').offsetHeight+$('#fx').offsetHeight;UI.fxDH=0;PRDK.fxh=0;$('#fx').style.height='';const f=prFxOpenH();UI.prDH=0;UI.fxDH=0;saveUI();prDockFit()})}
+/* Feel and Ghost: their words in a span, so the compact layout can show only the icon */
+function prWords(){for(const id of['prFeel','prGhost']){const b=document.getElementById(id);if(!b||b.dataset.w)continue;b.dataset.w=1;
+  for(const n of[...b.childNodes])if(n.nodeType===3&&/[A-Za-z]/.test(n.textContent)){const s=document.createElement('span');s.className='prw';s.textContent=n.textContent.trim();n.replaceWith(s);b.insertBefore(document.createTextNode(' '),s)}
+  const sp=b.querySelector('span:not(.prw)');if(sp)sp.classList.add('prw')}
+  const lk=document.getElementById('prLock');if(lk&&!lk.dataset.w){lk.dataset.w=1;lk.setAttribute('aria-label','Scale lock');lk.innerHTML='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>'}
+  const tips={prSnapL:'Snap: the grid notes lock to',prScaleL:'Scale: the key that is highlighted',prChordL:'Chord: draw a whole chord with one click',prGhost:'Ghost notes: other tracks faintly behind this clip',prFull:'Full screen',prFloat:'Floating window',prDev:'Devices under the full-screen piano roll',prClose:'Close the piano roll (Esc)'};
+  for(const k in tips){const e=document.getElementById(k);if(e&&!e.title)e.title=tips[k]}
+  for(const b of document.querySelectorAll('#prTools button,#prFx button'))if(!b.title)b.title=b.getAttribute('aria-label').replace(/^./,c=>c.toUpperCase())}
+function prAll(){try{prHeadSync();prDockFit();prClampW();prCmpSync();fxBandSync()}catch(e){console.warn(e)}}
+{const _pm=prMode;prMode=function(m){const el=$('#pr');if(m!=='float'&&el.classList.contains('float')){const h=document.getElementById('prHead');if(h)h.hidden=true}
+  const r=_pm.apply(this,arguments);if(m==='float'){el.style.minWidth='';prClampW()}prAll();requestAnimationFrame(prAll);return r}}
+{const _op=openPR;openPR=function(){const r=_op.apply(this,arguments);prWords();prAll();return r}}
+{const _cp=closePR;closePR=function(){const r=_cp.apply(this,arguments);prAll();return r}}
+{const _dh=devHide;devHide=function(on){prFxOpenH();const r=_dh.apply(this,arguments);prAll();return r}}
+{const _dp=devPop;devPop=function(){const r=_dp.apply(this,arguments);prAll();setTimeout(prAll,60);return r}}
+{const _al=applyLayout;applyLayout=function(){const r=_al.apply(this,arguments);try{prAll()}catch(e){}return r}}
+addEventListener('resize',()=>requestAnimationFrame(prAll));
+
+/* ---- the glass band behind the track tabs ---- */
+function fxBandR(){const b=document.getElementById('fxband');return b&&b.classList.contains('bpic')&&b.style.display!=='none'&&b.offsetHeight>2?b.getBoundingClientRect():null}
+function fxBandSync(){const fx=$('#fx');if(!fx||!fx.parentElement)return;let b=document.getElementById('fxband');
+  if(!b){b=document.createElement('div');b.id='fxband';b.setAttribute('aria-hidden','true')}
+  if(b.parentElement!==fx.parentElement)fx.parentElement.insertBefore(b,fx);
+  const B=document.body.classList,on=UI.fxBand!==false&&fx.parentElement.classList.contains('dock')&&!fx.classList.contains('popped')&&!fx.classList.contains('prdev')&&!B.contains('split')&&!B.contains('prfull');
+  const top=B.contains('fx-top'),y=top?fx.offsetTop+fx.offsetHeight:fx.offsetTop-PRSTRIP;
+  const f=fxGet(),fg=document.getElementById('fxglass'),fgOn=!!fg&&fg.style.display!=='none'&&fg.offsetHeight>4,
+    mode=!on||B.contains('fxmin')||(f.blur==='off'&&!f.refr)?'solid':(gbOn()&&(f.blur==='copy'||fgOn))?'pic':f.blur==='live'?'live':'solid';
+  const k=[on,y,mode,top].join('|');if(b._k===k)return;const was=b._k;b._k=k;
+  b.style.display=on?'':'none';b.style.top=y+'px';b.style.height=PRSTRIP+'px';b.classList.toggle('bpic',mode==='pic');b.classList.toggle('blive',mode==='live');b.classList.toggle('bsolid',mode==='solid');b.classList.toggle('btop',top);
+  if(on&&!B.contains('fxmin')&&typeof rfAttach==='function'&&!RFX.has(b))try{rfAttach(b)}catch(e){}else if(RFX.has(b))try{rfUpdate(b)}catch(e){}
+  if(was!==undefined)try{GB.lt=0;gbCopy()}catch(e){}}
+{const _fp=fxPic;fxPic=function(el){return _fp(el)||(!!el&&el.id==='fxband'&&el.classList.contains('bpic'))}}
+/* the arrangement is clipped away under the band too, so the blurred picture shows there (no filter pass) */
+{const _gc=gbClip;gbClip=function(){try{const q=GB.on&&fxBandR();if(q){const a=arr.getBoundingClientRect(),z=ZOOM;if(a.height){if((q.top+q.bottom)/2>(a.top+a.bottom)/2)GB.b=Math.max(GB.b||0,Math.min(a.height,Math.max(0,a.bottom-q.top))/z);else GB.t=Math.max(GB.t||0,Math.min(a.height,Math.max(0,q.bottom-a.top))/z)}}}catch(e){}return _gc.apply(this,arguments)}}
+{const _ab=abDraw;abDraw=function(){const r=_ab.apply(this,arguments);try{if(fxGet().blur==='live'&&ABL.cv&&ABL.cv.style.display!=='none'){const q=fxBandR(),fg=document.getElementById('fxglass');if(q&&fg){const a=arr.getBoundingClientRect(),g=fg.getBoundingClientRect(),z=ZOOM,t=Math.min(g.top,q.top),bo=Math.max(g.bottom,q.bottom),px=v=>(Math.max(0,v)/z).toFixed(1)+'px',c=`inset(${px(t-a.top-2)} 0px ${px(a.bottom-bo-2)} 0px)`;if(c!==ABL.clip){ABL.clip=c;ABL.cv.style.clipPath=c}}}}catch(e){}return r}}
+{const _fs=fxGlassSync;fxGlassSync=function(){const r=_fs.apply(this,arguments);try{fxBandSync()}catch(e){}return r}}
+{const _at=applyTrans;applyTrans=function(){const b=document.getElementById('fxband');if(b)b._k='';const r=_at.apply(this,arguments);try{fxBandSync()}catch(e){}return r}}
+setTimeout(()=>{try{prHandles();prWords();fxBandSync();const ro=new ResizeObserver(()=>{if(!PRDK.drag)requestAnimationFrame(prAll);else prCmpSync()});ro.observe($('#pr'));ro.observe($('#stage'));ro.observe($('#fx'));if(PR.open)prAll()}catch(e){console.warn(e)}},250);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

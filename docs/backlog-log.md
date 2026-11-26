@@ -1705,3 +1705,38 @@ No blurred boxes at the top left (under the project tabs, above Controls and the
 - v0.192, built on v0.191 (Fractal, task P), which another session released while this one was testing; one merge of two additions in index.html.
 - **Artifact**: version 215 of artifact 1b07d888 (index.html only, lines 3 to 10 removed).
 - **Desktop build**: run 45749404233 for commit 8c0c7b4 succeeded (2 min 19 s).
+
+## 26 November 2026, v0.193: the MIDI panel rework (task Q, from a later message)
+> "Let's rework the MIDI panel. Right now, when you expand the MIDI panel at the same time with the devices, a lot of buttons are cut off and it takes over the whole screen. [...] I want the MIDI panel above the devices panel at the same height as the devices panel. [...] when you minimize the devices panel, I want the top part of the MIDI window to stay there and the bottom part to expand [...] window mode [...] the same top head that we have with the mixer panel [...] the rest of the window to be borderless [...] buttons to be different and smaller [...] make it resizable [...] bigger buttons like you had before [...] glass effects on the top of the devices panel"
+
+### What was wrong
+- The docked piano roll was 46% of the window high and sat on top of the devices panel inside the bottom dock, which is anchored to the bottom of the stage. At 1280 x 720 its top (the whole toolbar) was pushed 21 px above the stage and the track tabs of the devices panel covered the bottom 25 px of its velocity lane.
+
+### Built (new block "v0.193: the MIDI panel rework (task Q)" before `askChoice`, CSS before `.dacv`)
+- **Docked** (`prDockFit`, `prAdj`, `prFxOpenH`, state `PRDK`): with the devices panel directly under it, the piano roll is exactly as high as the devices panel (262 px by default) and ends where the track tabs start (25 px gap, class `prgap`), so nothing covers it. Its height comes from `--prh` (class `prdk`). It is never taller than what is left of the stage (the toolbar can no longer leave the screen).
+- **Devices hidden**: the piano roll's top edge stays where it is and it grows down by the devices panel's height (class `prcol`); showing the devices puts it back (checked to the pixel).
+- **The border between them** (`#prDiv`, a small bar at the bottom edge of the piano roll): drag it to move the border; the piano roll grows and the devices panel shrinks by the same amount, the top stays. Remembered in `UI.prDH` and `UI.fxDH` (the devices panel's height is only changed while the piano roll is docked above it; with the piano roll closed it is the normal 262 px). Double-click: both the same height again. Devices at least 215 px (below that the channel strip's A/B row is cut), piano roll at least 150 px.
+- **The top edge** (`#prTopH`): drag to make the piano roll taller or shorter without touching the devices; double-click to follow the devices height again. With the devices hidden the same drag keeps the top-stays rule (it stores the height for the shown state).
+- **MIDI alone** (devices popped out into their window, or placed elsewhere in the layout): same default height (`UI.prDH`, else the devices panel's height).
+- **Window mode** (`prHeadSync`, `prClampW`): a head like the mixer's (`#prHead`, same look as `#mixWin>.fwh`: grip dots, the clip's name, then the Dock, Full screen and Close buttons moved in from the toolbar, solid `rgb(var(--gtr2))`, 34 px, sitting on the top right edge); the rest is borderless (no border, rounded corners, only the shadow). Drag the head to move; it cannot leave the top of the screen. Resizable from every edge and corner (the app's `rzScan` handles, min 380 x 200). Position and size remembered (`UI.prW`, as before).
+- **Compact buttons** (`prCmpSync`, class `prcmp`): smaller buttons (23 px instead of 28 to 30), no key letters on the tools, Ghost and Feel show only their icons, narrower lists, a smaller head. Used in a window smaller than **1000 x 460 px** (`PRCW`, `PRCH`); at that size or larger the normal buttons come back. Docked, compact is used when the panel is narrower than **1240 px** (`PRCDW`), so the toolbar stays on one row down to about 1000 px; narrower windows wrap to a second row (all buttons visible).
+- **Toolbar**: every control listed (title, 9 tools, Timing, Length and Shape menus, Snap, Scale root and Scale, Scale lock, Chord, Ghost, Feel, Devices (full screen only), Window, Full screen, Close, and the Velocity list in the lane): 26 counted in the test. Scale lock now has a drawn lock icon instead of the emoji; buttons without a tooltip got one (`prWords`).
+- **Glass** (`fxBandSync`, `fxBandR`; wrappers of `fxPic`, `gbClip`, `abDraw`, `fxGlassSync`, `applyTrans`): a glass band (`#fxband`) behind the track tabs on top of the devices panel (below it when the devices are at the top). It shows the same ready-made blurred picture of the arrangement as the devices panel (the arrangement canvas is clipped away under it, so there is no blur pass of its own), refraction on top when that effect is on (Full effects), a live blur only when there is no picture, a lit top rim that follows the edge light strength. Solid in Lighter and Lightest (and with blur and refraction off). Hidden in full screen, split view and when the devices are a window. `UI.fxBand=false` turns it off (no setting for it yet).
+- Wrappers: `prMode`, `openPR`, `closePR`, `devHide`, `devPop`, `applyLayout`, plus a ResizeObserver on the piano roll, the stage and the devices panel.
+
+### Tested (`tools/ui-tests/midipanel.py`, headless, Fractals demo)
+- At 1280 x 720, 1440 x 900, 1920 x 1080 and 2560 x 1440 (also 1024 x 700 and 900 x 640): both open, devices hidden, MIDI alone, window 640 x 330, window as large as fits (up to 1500 x 760), docked again. In every case all 26 controls are visible, fully inside the panel or its head, on screen, not covered by anything (checked at three points each) and have a tooltip. 77 checks, 0 failures.
+- Top edge stays when the devices are hidden (to the pixel) and comes back when they are shown. Small window compact, large window normal buttons.
+- Mouse drags: the divider 40 px down (piano roll +40, devices -40, top unchanged); the top edge 80 px up (piano roll +80, devices unchanged); devices hidden after that keeps the top; sizes after a reload; double-click on the divider; a window corner from 700 x 380 to 1120 x 540 (compact to normal buttons); the head (moves, cannot leave the top); window position and size after a reload.
+- Glass at each stop: Full effects (picture plus refraction, `backdrop-filter: url(#rf..)` only), Optimised (picture, no filter), Lighter and Lightest (solid, no filter).
+- Frame time while playing (1600 x 1000, software drawing), band on against off, alternated 4 times: Full effects 27.0 against 28.3 ms, Optimised 17.5 against 18.0 ms: no measurable cost.
+- No page errors on load at any size. Demo unchanged: Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96, solo).
+- Screenshots looked at: all of the above at the four sizes, the divider drag, the band at each stop.
+
+### Not verified
+- A real GPU and the user's Mac (the refraction on a 25 px high band, full width, should be cheap: the map is small and the picture behind it changes only when the arrangement is redrawn).
+- Touch and pen. Theme colours other than the default on the new head and band (they use the theme's panel colour).
+
+### Left
+- A setting to switch the glass band off (only `UI.fxBand=false` for now).
+- The full-screen piano roll keeps its old layout (devices 222 px under it), unchanged.
