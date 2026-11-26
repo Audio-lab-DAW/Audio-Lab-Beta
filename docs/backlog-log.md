@@ -1814,3 +1814,4 @@ The visualizer should dock at the top too and be sharper on high resolution scre
 
 ### Left
 - The splash cannot animate the logo while the code is being read (the page cannot draw then); only the bar moves, and a soft glow stands in for the logo until the code is ready.
+- Artifact version 218 (1b07d888). Desktop build run 45754961657 dispatched for commit 4224859. Project doc `claude/audiolab-ui-run-U.md`.
