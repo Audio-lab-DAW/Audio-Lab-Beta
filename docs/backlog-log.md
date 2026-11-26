@@ -1740,3 +1740,4 @@ No blurred boxes at the top left (under the project tabs, above Controls and the
 ### Left
 - A setting to switch the glass band off (only `UI.fxBand=false` for now).
 - The full-screen piano roll keeps its old layout (devices 222 px under it), unchanged.
+- Artifact version 216 (1b07d888). Desktop build run 45750489821 dispatched for commit 530d246. Project doc `claude/audiolab-ui-run-Q.md`.
