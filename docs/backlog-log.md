@@ -2421,6 +2421,9 @@ Reading: every update notice (a new program version downloaded over the air, and
 - A real Windows electron-updater download and a real Mac app replacement; how the Dock icon cache behaves after replacing the app.
 - App builds before v0.207 still show the system dialog for a new desktop app (their `main.js` does not know the page window); over-the-air notices use the window in every app build.
 
+### Release (v0.207)
+- Commit 73a892b on main. Desktop build run 45776189489 succeeded (Windows 1 min 14 s, Mac 1 min 46 s for the build step). Artifact 1b07d888 updated to version 230 (it was at v0.206). Project doc `claude/audiolab-ui-run-Y.md`. v0.208 (task AE) and v0.209 (task AD) were released on top by other sessions while this one finished; the update window is still in place there.
+
 ## 26 November 2026, v0.208: change several channels and tracks together (task AE, from a later message)
 > "I want to be able to select multiple channels and move multiple related parameters at the same time. So let's say I select kick, bass, and riff, and then I slide down on one volume level. I want them all to follow, and do some research online how it should follow, in proportion or relative or any other way. I want the same for the panning, mute, and all the other buttons that are the same over and over again on the channels. And let's do exactly the same for tracks as well ... One small thing on the mixer: the tab to pull it down is a little bit overlapping over 'output to group' ... I like that it's thin and not taking up a lot of space. Let's keep that."
 
