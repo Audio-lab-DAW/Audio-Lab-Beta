@@ -5773,7 +5773,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.196',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.197',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -14832,6 +14832,549 @@ function dsOvWire(){const box=document.querySelector('#fxTitle .fxsw.fxall'),sc=
 {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{dsOvWire()}catch(e){}return r}}
 addEventListener('resize',()=>{const b=document.querySelector('#fxTitle .fxsw.fxall');if(b)dsOvUpd(b)});
 setTimeout(()=>{try{dsHideSync();dsOvWire()}catch(e){}},0);
+/*PSLIB-START*/
+/* ===== Preset library, part 1: the synth instruments (v0.191) =====
+ Every preset of the synths, sorted into groups (Init first, then Lead, Bass, Pad, Pluck, Keys, Arp, Stab, FX and Psytrance), each with a
+ one-line tooltip in the preset menu (what it is for and where on the keyboard it sounds best) and the mark "psy" on presets made for
+ psytrance outside the Psytrance group. PSMETA[inst][key]={g:group,t:tooltip,p:made for psytrance,r:role used by the tests}.
+ PSLV[inst][key] is a level trim in dB found by measurement (tools/engine-tests/presets_all.py) so all presets of one instrument sound about
+ as loud, with basses and leads a little above pads. Only preset data changes here: no engine and no sound calculation. Preset keys used by
+ the demos and as defaults keep their exact values (Plant: lush, supersaw, psybass, pluck; Acid: psy; every instrument's default).
+ psLib() is called once after the last instrument is defined (see the line after VN-END). */
+const PSMETA={},PSLV={};
+const psTip=(inst,k)=>{const m=(PSMETA[inst]||{})[k];if(!m)return'';return m.t+(m.p?' Made for psytrance.':'')};
+function psMenus(){const sig=psMenus.sig||(psMenus.sig=(()=>{const o={};for(const i in PSMETA)if(IPRE[i])o[Object.keys(IPRE[i][0]).join(',')]=i;return o})());
+  for(const s of document.querySelectorAll('select[data-s=ipre]:not([data-ps])')){const ks=[...s.options].map(o=>o.value),inst=sig[ks.join(',')];s.dataset.ps='1';if(!inst)continue;
+    const T=IPRE[inst][0],M=PSMETA[inst],cur=s.value,G=new Map();for(const k in T){const m=M[k]||{g:'Other'};if(!G.has(m.g))G.set(m.g,[]);const nm=String(T[k].n||k).replace(/^[^·]*· /,'');
+      G.get(m.g).push(`<option value="${k}" title="${esc(psTip(inst,k))}"${k===cur?' selected':''}>${esc(nm+(m.p&&m.g!=='Psytrance'?'  · psy':''))}</option>`)}
+    s.innerHTML=[...G].map(([g,a])=>`<optgroup label="${esc(g)}">${a.join('')}</optgroup>`).join('');s.value=cur;if(!T[cur])s.selectedIndex=0;
+    const sh=()=>{s.title=psTip(inst,s.value)||'Presets: ready-made settings for this device'};sh();s.addEventListener('change',sh)}
+  for(const o of document.querySelectorAll('select[data-vnp] option:not([title])'))o.title=psTip('venom',o.value)}
+function psLib(){PS_LEVELS();const meta=(inst,k,g,t,o)=>{(PSMETA[inst]=PSMETA[inst]||{})[k]=Object.assign({g,t},o||{})},
+  trim=(inst,k,v)=>{const d=(PSLV[inst]||{})[k]||0;return Math.round(v*Math.pow(10,d/20)*1000)/1000},reset=T=>{for(const k of Object.keys(T))delete T[k]},
+  WV={W:'sawtooth',Q:'square',T:'triangle',N:'sine'},PR={B:'bass',U:'sub',L:'lead',P:'pluck',D:'pad',K:'keys',F:'fx',A:'acid'},
+  op=s=>{const o={};if(!s)return o;if(s.includes('p'))o.p=1;const r=s.match(/[BULPDKFA]/);if(r)o.r=PR[r[0]];if(s.includes('f'))o.slow=0;if(s.includes('X'))o.tr=24;return o};
+  /* the nine basic instruments: [key, group, name, wave, detune ct, cutoff Hz, resonance, attack, decay, sustain, release, level, tooltip, flags]
+     flags: p = made for psytrance; one capital letter = the role the tests play it in (B bass, U sub, L lead, P pluck, D pad, K keys, F fx) */
+  const basic=(inst,init,f0,list)=>{const T=DUBI[inst],d0=T.def;reset(T);T.def=Object.assign({},d0,{n:'Init'});meta(inst,'def','Init',init,op(f0));
+    for(const[k,g,n,w,det,cut,res,a,d,s,r,gain,t,f] of list){T[k]={n,wave:WV[w],det,cutoff:cut,res,a,d,s,r,gain:Math.min(1,trim(inst,k,gain))};meta(inst,k,g,t,op(f))}};
+  PS_BASIC(basic);
+  PS_REST({meta,trim,reset,op});
+  psMenus.sig=null;
+  {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{psMenus()}catch(e){console.error('AudioLab preset menus',e)}return r}}}
+/* level trims in dB per preset, measured by tools/engine-tests/presets_all.py (loudest 100 ms of a phrase in the preset's own register, K-weighted) against the instrument's default preset, or against a demo preset of the same role; pads 3 dB, keys 1.5 dB and plucks 1 dB lower */
+function PS_LEVELS(){Object.assign(PSLV,{"saw":{"bright":1.2,"soft":-0.9,"dark":-2.3,"mono":-2.4,"anthem":0.6,"brass":1.0,"wide":-5.1,"stab":-0.9,"hstab":-2.9,"rave":-1.0,"pluck":0.9,"lpluck":-2.3,"arp":3.5,"seq":-0.9,"bass":-1.3,"psyfo":-2.7,"psygoa":-2.4,"psyhook":-1.3},"square":{"flute":-1.5,"chip":2.3,"buzz":1.9,"reed":-1.5,"retro":0.9,"blip":4.0,"reso":1.2,"arp":5.2,"stab":-1.4,"organ":-5.9,"pad":-5.7,"bass":0.7,"goa":-1.6,"goapl":5.2},"pad":{"bright":1.0,"dark":-1.5,"glass":-3.7,"warm":-1.4,"trance":-0.8,"choir":-5.6,"sine":-8.0,"hollow":-6.7,"ambient":-5.1,"short":1.1,"deep":-2.9,"reso":-2.0,"chord":2.8,"psy":-1.9,"psydark":-4.4},"strings":{"dark":-1.6,"wide":1.2,"machine":-6.7,"low":-2.5,"high":0.8,"epic":-0.6,"glass":-4.9,"warm":-0.3,"short":1.6,"stacc":3.5,"pizz":5.5,"psy":-1.9},"pluck":{"soft":-5.0,"bright":3.8,"long":-4.9,"square":-1.9,"reso":0.9,"trance":-1.6,"house":2.7,"future":2.5,"harp":-6.5,"koto":-4.4,"glass":-3.9,"muted":3.7,"mallet":-9.2,"marimba":-6.5,"tick":5.5,"deep":-0.8,"psy":1.5,"psyarp":2.6,"psyblip":0.4},"keys":{"bright":0.9,"mellow":-3.0,"reedy":-0.6,"house":2.3,"dark":0.4,"clav":2.5,"box":2.8,"vibes":-3.8,"bell":1.7,"organ":0.9,"church":-0.3,"chord":7.1,"psy":-0.6},"sub":{"long":-0.7,"punch":4.3,"tri":2.7,"thump":6.0,"eight":0.3,"square":-2.7,"saw":1.0,"bounce":3.9,"knock":4.2,"psy":12.0},"bass":{"dark":-1.6,"bite":2.6,"pluck":7.0,"saw":5.6,"organ":5.0,"funk":3.8,"offbeat":8.0,"rumble":-0.5,"fat":4.3,"acid":8.5,"electro":2.7,"psyroll":12.0,"psydark":12.0,"psygoa":9.1},"reese":{"slow":0.9,"tight":-0.4,"dark":-1.2,"thin":1.5,"classic":2.2,"oldschool":1.1,"neuro":-0.7,"square":-5.3,"sub":-2.5,"pad":-6.3,"psy":2.1},"plant":{"init":1.9,"trance":-0.8,"bigroom":-0.7,"fifths":1.4,"hoover":0.4,"fmlead":4.0,"psylead":0.7,"fullon":-0.9,"electric":-1.1,"squelch":2.8,"acidlead":2.2,"hitech":6.0,"fmblip":5.9,"zap":6.7,"psypluck":6.6,"psyroll":10.5,"juno":-1.7,"dream":-1.3,"choirpad":-0.6,"glasspad":-3.2,"bellpad":1.7,"pwm":-1.5,"drone":0.4,"darkdrone":-1.9,"noisepad":1.4,"trancepluck":1.3,"housepl":-1.5,"sash":3.2,"pizz":12.0,"koto":2.1,"marimba":2.5,"arp":4.2,"seq":12.0,"bright16":5.9,"keys":-5.7,"rhodes":-1.2,"fmep":-2.7,"organ":-3.5,"houseorg":-0.5,"bell":-4.6,"chowning":-4.0,"chime":-3.9,"reese":2.6,"wreese":4.8,"wobble":2.2,"growl":2.9,"analogbass":6.6,"fmbass":7.6,"plbass":5.9,"offbass":7.1,"sub808":5.7,"stab":-1.5,"brass":-2.1,"ravestab":-1.7,"air":2.1,"riser":-0.4,"impact":3.8,"laser":4.7,"wind":1.0},"wtab":{"supersaw":6.1,"sawlead":-1.2,"sqlead":-4.0,"pwmlead":4.7,"vowel":3.9,"glass":2.4,"digilead":7.8,"fullon":-2.8,"goasync":-0.7,"psyroll":5.7,"acidwt":5.7,"psypluck":12.0,"zap":4.2,"psypad":-3.6,"pwmbass":8.5,"growl":5.7,"growl2":5.0,"reese":-2.2,"subp":6.1,"syncb":2.4,"digib":9.6,"sspad":-6.3,"pwmpad":-0.6,"talk":-2.5,"choir":-1.6,"glassp":-1.8,"evol":-4.3,"spec":2.1,"digi2":0.5,"strings":-7.1,"metalp":0.3,"bellp":1.6,"metal":6.0,"glasspl":3.2,"sweeppl":3.9,"wep":-0.7,"organ":-5.3,"organs":-6.0,"digi":12.0,"syncarp":4.5,"riser":-0.4,"hpsweep":2.5,"down":-4.2,"metalhit":5.0},"acid":{"phuture":-2.9,"squelch":-1.2,"rubber":-1.2,"deep":1.8,"liquid":0.7,"soft":1.6,"round":3.2,"hard":-1.0,"rave":-0.8,"dark":-1.6,"industrial":-3.3,"scream":-0.9,"minimal":-0.9,"squirt":-1.9,"fullon":-0.8,"forest":-3.2,"hitech":-2.4,"night":-1.9,"goasq":-1.4,"lowbass":2.0,"rubber2":-1.2,"electro":-1.3,"lead":-0.3,"whistle":-0.4,"zap":-3.7},"venom":{"l_super":-1.0,"l_scream":-2.7,"l_sync":12.0,"l_fmbell":-4.2,"l_trance":-3.9,"l_fold":-5.9,"l_digi":4.4,"l_vox":7.5,"l_reese":-2.6,"l_hoov":0.8,"l_pwm":-3.6,"l_pluck":2.4,"k_pluck":2.2,"k_trance":1.7,"k_house":2.5,"k_arp":6.1,"a_sq":12.0,"k_fmep":-7.8,"k_ep":-10.0,"k_hpiano":-5.1,"k_bell":-5.2,"k_org":-6.4,"c_pluck":-0.4,"p_super":-4.7,"p_warm":-4.9,"p_choir":-0.5,"p_glass":-5.6,"p_dark":-5.0,"p_talk":2.3,"p_bell":-3.1,"b_riddim":-9.6,"b_wob4":-10.3,"b_wob8t":-9.5,"b_gate":-7.9,"b_reese":-4.4,"b_formant":-7.0,"b_screech":-1.9,"b_hoover":4.4,"b_sub":-2.4,"b_808":-8.8,"b_fmwub":-7.4,"b_metal":-5.9,"b_hardsaw":-8.5,"b_talk":-3.7,"b_laser":-5.4,"b_mid":-10.7,"b_roll":-0.6,"b_dub":-9.1,"b_trap":-7.0,"b_wetg":-8.1,"b_howl":-7.6,"p_fo":-7.8,"p_eu":-2.7,"p_goa":5.6,"p_vox":12.0,"p_acid":-5.9,"p_roll":12.0,"p_arp":-1.1,"p_zap":-1.8,"p_hitech":2.6,"p_pad":-6.0,"f_riser":12.0,"f_down":-2.5,"f_drop":-3.8,"f_noise":-2.1,"f_alien":-5.2,"f_impact":-11.2},"growl":{"init":1.5,"wub":-0.5,"riddim":-2.4,"screech":-4.4,"robot":1.1,"tear":-1.8,"deep":-1.4,"metal":-2.8,"halftime":-1.4,"oo2ah":-1.2,"electro":-1.0,"complex":-1.0,"midtempo":-0.9,"bark":-0.5,"talkbox":1.3,"bigroom":-1.0,"future":1.7,"trap":-1.6,"neuro":-0.3,"chair":-2.0,"chair2":0.3,"chair3":-3.5,"door":-2.6,"foghorn":-1.4,"stab":-2.5,"jump":-1.7,"tearing":-0.9,"rubber":-1.9,"liquid":-0.3,"hoover":2.5,"psyvox":-0.7,"psyyoi":-2.5,"forest":-3.5,"psyzap":-2.9},"vfm":{"init":12.0,"church":3.8,"chown":0.7,"chime":2.4,"keys":4.9,"ep":1.2,"tine":1.2,"stack":3.4,"organ2":4.8,"brass":12.0,"reed":12.0,"soft":12.0,"pluck":12.0,"wood":12.0,"pad":2.7,"harm":2.3,"drone":12.0,"wob":12.0,"fmbass":12.0,"fmbass7":12.0,"psylead":5.7,"psyblip":12.0,"psyzap":12.0,"psypad":1.3,"metal":9.9,"riser":12.0},"orb":{"init":12.0,"pad":0.5,"nebula":0.7,"glasspad":0.3,"ring":0.7,"keys":2.9,"ep":2.1,"bells":-1.6,"chime2":1.1,"lead":11.6,"brass":8.0,"comet":0.9,"arp":12.0,"pluck":8.3,"swarm":3.1,"sling":2.1,"binary":12.0,"fmbass":12.0,"growlb":7.5,"psylead":2.8,"psyarp":12.0,"psyzap":8.8,"blackhole":12.0}})}
+function PS_BASIC(basic){
+ basic('saw','The plain saw lead of this instrument: two saws, a little detune. Start here. Best from C3 to C6.','L',[
+  ['bright','Lead','Bright saw lead','W',9,6000,3,.003,.2,.7,.2,.3,'A clean, bright hook lead that cuts through a mix. Best from C4 to C6.'],
+  ['soft','Lead','Soft saw lead','W',5,1500,1.5,.02,.3,.6,.35,.38,'A rounder lead for calm melodies and breakdowns. Best from C4 to C5.'],
+  ['trance','Lead','Trance anthem lead','W',14,4200,2,.012,.3,.93,.09,.32,'Wide, held trance lead (12 ms attack, 93 % sustain, 90 ms release, as in classic trance recipes). Best from C4 to C6.'],
+  ['dark','Lead','Dark lead','W',6,900,3,.01,.4,.7,.25,.4,'A muffled, moody lead for low melodies. Best from C3 to C5.'],
+  ['mono','Lead','Thin mono lead','W',0,3000,2,.003,.2,.8,.12,.4,'One saw, no detune: a narrow lead that leaves room for other parts. Best from C4 to C6.'],
+  ['anthem','Lead','Detuned anthem lead','W',24,5000,1.5,.005,.3,.85,.3,.3,'Two saws far apart: a big, beating festival lead. Use sparingly in chords. Best from C4 to C5.'],
+  ['brass','Lead','Eighties brass lead','W',10,1800,1.5,.04,.35,.65,.2,.36,'Soft 40 ms attack and a filter that closes: a brassy synth lead. Best from C3 to C5.'],
+  ['wide','Lead','Swelling lead','W',18,2800,1.5,.12,.4,.75,.6,.3,'Fades in over 120 ms: for long notes and slow melodies. Best from C4 to C6.','D'],
+  ['stab','Stab','Short stab','W',7,4000,2.5,.002,.12,0,.12,.38,'A short bright hit for off-beat chords. Best from C3 to C5.','K'],
+  ['hstab','Stab','House chord stab','W',12,2600,3,.002,.25,.15,.15,.36,'Classic house chord hit with a short body. Play 3 or 4 note chords from C3 to C5.','K'],
+  ['rave','Stab','Rave stab','W',22,3200,4,.002,.18,.3,.1,.32,'A detuned, buzzy 90s rave hit. Best for chords from C3 to C5.','K'],
+  ['pluck','Pluck','Saw pluck','W',5,2600,6,.002,.2,0,.2,.38,'A short resonant pluck for melodies and arps. Best from C4 to C6.','P'],
+  ['lpluck','Pluck','Long saw pluck','W',8,1800,4,.002,.6,0,.5,.38,'A pluck with a long tail: for slow melodies with space. Best from C3 to C5.','P'],
+  ['arp','Arp','Tight arp','W',3,3500,3,.001,.09,0,.06,.38,'Very short notes for fast 16th arpeggios. Best from C4 to C6.','P'],
+  ['seq','Arp','Resonant sequence','W',0,800,11,.001,.16,0,.1,.38,'A squelchy, resonant 16th sequence sound. Best from C3 to C5.','Pp'],
+  ['bass','Bass','Saw bass','W',9,450,2,.002,.3,.9,.1,.4,'A simple saw bass for house and trance. Best from C1 to C3.','B'],
+  ['psyfo','Psytrance','Full-on lead','W',4,700,5,.002,.22,.75,.12,.4,'Narrow full-on lead: saws a few cents apart, filter at 700 Hz with some resonance, 75 % sustain. Best from C4 to C6.','pL'],
+  ['psygoa','Psytrance','Goa lead','W',6,1100,9,.002,.3,.6,.15,.38,'Resonant, singing Goa-style lead. Best from C4 to C6.','pL'],
+  ['psyhook','Psytrance','Bright psy hook','W',3,2400,4,.002,.15,.8,.08,.36,'A brighter, shorter psy hook for call and answer phrases. Best from C4 to C6.','pL']]);
+ basic('square','The plain square lead of this instrument. Start here. Best from C3 to C6.','L',[
+  ['flute','Lead','Hollow flute','Q',2,1600,1.5,.03,.25,.75,.3,.32,'Soft, hollow square tone like a synth flute. Best from C4 to C6.'],
+  ['chip','Lead','Chip lead','Q',0,9000,1,.002,.08,.8,.08,.24,'Bright, clean square like an old game console. Best from C4 to C6.'],
+  ['buzz','Lead','Buzzy square','Q',10,4200,5,.005,.2,.65,.2,.26,'Two detuned squares with some bite. Best from C3 to C5.'],
+  ['reed','Lead','Woody reed','Q',0,1200,2,.02,.2,.85,.15,.34,'Odd overtones only, filtered: a clarinet-like reed. Best from C3 to C5.'],
+  ['retro','Lead','Bright retro lead','Q',6,6000,2,.002,.25,.8,.15,.26,'A bright 80s style square lead. Best from C4 to C6.'],
+  ['tri','Lead','Soft triangle lead','T',4,4000,1,.01,.3,.8,.25,.4,'Gentle and pure: for quiet top melodies. Best from C5 to C7.'],
+  ['blip','Pluck','Short blip','Q',3,3000,3,.002,.1,0,.1,.32,'A short square blip for rhythmic parts. Best from C4 to C6.','P'],
+  ['reso','Pluck','Resonant square pluck','Q',0,1200,12,.002,.18,0,.15,.3,'A pluck with a singing filter. Best from C3 to C5.','P'],
+  ['arp','Arp','Square arp','Q',0,1500,9,.001,.07,0,.05,.32,'Short notes for arpeggios. Best from C4 to C6.','P'],
+  ['stab','Stab','Square stab','Q',9,3000,3,.002,.18,.1,.12,.3,'A hollow chord stab. Play chords from C3 to C5.','K'],
+  ['organ','Keys','Square organ','Q',2,3000,.8,.004,.1,.95,.08,.28,'Simple combo-organ tone that holds. Best for chords from C3 to C5.','K'],
+  ['pad','Pad','Square pad','Q',8,1400,1,.4,.8,.85,1.2,.26,'A hollow, slow pad. Best for chords from C3 to C5.','D'],
+  ['bass','Bass','Square bass','Q',0,500,4,.002,.2,.7,.08,.36,'A round, punchy square bass. Best from C1 to C3.','B'],
+  ['goa','Psytrance','Goa square lead','Q',3,900,8,.002,.25,.6,.15,.32,'Resonant square lead in the Goa trance style. Best from C4 to C6.','pL'],
+  ['goapl','Psytrance','Goa pluck','Q',0,500,3,.002,.08,0,.05,.34,'Very short, dark square pluck (about 40 ms) for fast Goa sequences. Best from C3 to C5.','pP']]);
+ basic('pad','The plain soft pad of this instrument. Start here. Best for chords from C3 to C5.','D',[
+  ['swell','Pad','Slow swell','W',14,1100,1,.9,.8,.85,2,.22,'Fades in over almost a second. For long chords under a breakdown. C3 to C5.'],
+  ['bright','Pad','Bright pad','W',12,3600,1,.25,.5,.8,1,.18,'Open and airy. Keep it high (C4 to C6) so it does not crowd the mix.'],
+  ['dark','Pad','Dark pad','W',10,600,1.2,.45,.7,.85,1.6,.26,'Warm, closed pad for the background. C3 to C5.'],
+  ['glass','Pad','Glass pad','T',8,5000,2,.2,.6,.7,1.4,.3,'Soft and clear, like glass. Best from C4 to C6.'],
+  ['warm','Pad','Warm analog pad','W',6,1800,1.5,.3,1,.8,.7,.24,'A classic warm analog pad with gentle detune. C3 to C5.'],
+  ['ssaw','Pad','Supersaw pad','W',16,2400,1,.22,.7,.9,.4,.2,'Wide detuned saws (220 ms attack, 370 ms release, from a classic trance pad recipe). C3 to C5.'],
+  ['trance','Pad','Trance pad','W',12,2000,1.5,.2,.6,.85,.6,.22,'Held chords for trance breakdowns. C3 to C5.'],
+  ['choir','Pad','Soft choir','T',6,1600,1.5,.5,1,.85,1.5,.3,'A soft, breathy choir-like pad. C3 to C5.'],
+  ['sine','Pad','Sine pad','N',4,2000,1,.6,1,.9,1.8,.32,'Pure and soft: for very calm parts. C4 to C6.'],
+  ['hollow','Pad','Hollow pad','Q',7,1300,1,.5,.8,.85,1.4,.24,'Odd overtones only: hollow and old-school. C3 to C5.'],
+  ['ambient','Pad','Ambient wash','T',10,3000,1,1.6,1.5,.9,2.4,.3,'Very slow in and out (1.6 s, 2.4 s): a wash of sound. C3 to C6.'],
+  ['short','Pad','Short warm pad','W',8,1500,1,.12,.5,.7,.5,.22,'A pad that follows the rhythm of the chords. C3 to C5.','Df'],
+  ['deep','Pad','Deep low pad','W',6,400,1,.7,1,.9,2,.28,'Low and dark, fills the space under other parts. C2 to C4.'],
+  ['reso','Pad','Resonant pad','W',10,800,9,.6,1.4,.7,1.8,.22,'A pad with a singing filter peak. C3 to C5.'],
+  ['chord','Stab','Chord hit','W',10,2200,1.5,.06,.8,.3,.8,.22,'A softer chord hit that fades. C3 to C5.','K'],
+  ['psy','Psytrance','Psy atmosphere','W',6,1200,3,.35,.8,.85,1.8,.24,'Two saws about 6 cents apart, filter at 1.2 kHz, 350 ms attack (psytrance pad recipe). C3 to C5.','pD'],
+  ['psydark','Psytrance','Dark psy drone','W',9,450,5,1.5,1,1,3,.26,'A dark held drone for night and forest psytrance. C2 to C4.','pD']]);
+ basic('strings','The plain string section of this instrument. Start here. Best for chords from C3 to C5.','D',[
+  ['slow','Strings','Slow strings','W',11,2200,.7,.45,.5,.85,1.1,.22,'A soft string section that fades in. C3 to C5.'],
+  ['dark','Strings','Dark strings','W',10,1200,.8,.22,.45,.85,.8,.26,'Warm, low strings. C2 to C4.'],
+  ['wide','Strings','Wide section','W',20,2800,.7,.2,.4,.85,.8,.2,'A big, wide ensemble. C3 to C5.'],
+  ['machine','Strings','Seventies string machine','Q',9,6000,.7,.15,.3,1,.6,.24,'Pulse waves, bright top: the old string machine sound. C3 to C5.'],
+  ['medium','Strings','Medium strings','W',13,3000,.7,.025,.4,.85,2.5,.22,'Quick start (25 ms), very long release: chords that ring on. C3 to C5.','f'],
+  ['low','Strings','Low strings','W',7,900,.8,.15,.5,.9,.6,.28,'Cello-like low strings. C2 to C4.'],
+  ['high','Strings','High violins','W',9,4500,.7,.18,.4,.85,.9,.2,'Bright high strings for counter melodies. C4 to C6.'],
+  ['epic','Strings','Epic swell','W',16,2000,.9,1.2,.8,.95,1.8,.22,'A slow, wide swell for big moments. C3 to C5.'],
+  ['glass','Strings','Glassy strings','T',9,5000,.8,.3,.5,.85,1,.3,'Soft and shiny strings. C4 to C6.'],
+  ['warm','Strings','Warm ensemble','W',12,1800,.7,.3,.5,.9,1.2,.22,'A warm, full section. C3 to C5.'],
+  ['short','Stab','Short strings','W',8,3200,.8,.03,.25,.6,.25,.24,'Short string chords for rhythms. C3 to C5.','K'],
+  ['stacc','Stab','Staccato strings','W',9,3500,.8,.01,.15,.3,.15,.24,'Very short, bouncing strings. C3 to C5.','K'],
+  ['pizz','Pluck','Pizzicato','T',2,2200,1.5,.002,.12,0,.12,.32,'Plucked strings. Best from C3 to C5.','P'],
+  ['psy','Psytrance','Psy string bed','W',8,1600,2,.4,.7,.85,1.4,.24,'Soft strings under a psytrance breakdown. C3 to C5.','pD']]);
+ basic('pluck','The plain pluck of this instrument. Start here. Best from C4 to C6.','P',[
+  ['soft','Pluck','Soft pluck','N',0,2000,1,.006,.35,0,.4,.52,'A soft, round pluck. C4 to C6.'],
+  ['bright','Pluck','Bright pluck','W',4,7000,4,.002,.14,0,.16,.36,'A bright, short pluck that cuts. C4 to C6.'],
+  ['long','Pluck','Long pluck','T',2,4200,5,.002,.5,0,.6,.48,'A pluck with a long ring. C4 to C6.'],
+  ['square','Pluck','Square pluck','Q',3,3000,5,.002,.16,0,.18,.36,'A hollow pluck. C4 to C6.'],
+  ['reso','Pluck','Resonant pluck','W',0,1800,11,.002,.2,0,.22,.34,'A pluck with a strong filter peak. C3 to C5.'],
+  ['trance','Pluck','Trance pluck','W',5,2000,7,.002,.55,0,.25,.4,'Long trance pluck (550 ms decay, resonant filter, from a classic trance recipe). Add a 1/4 delay. C4 to C6.'],
+  ['house','Pluck','House chord pluck','W',7,1300,3,.002,.21,0,.02,.36,'Chord pluck with a 210 ms decay and an instant stop, for house chords. C3 to C5.'],
+  ['future','Pluck','Future bass pluck','W',12,3000,3,.002,.3,0,.3,.34,'A wide chord pluck for future bass. C3 to C5.'],
+  ['harp','Pluck','Harp','T',0,5000,1.5,.002,.8,0,.9,.48,'Clear, ringing plucks like a harp. C3 to C6.'],
+  ['koto','Pluck','Koto pluck','Q',2,2600,7,.002,.35,0,.25,.34,'A twangy, nasal pluck. C3 to C5.'],
+  ['glass','Pluck','Glass pluck','Q',6,9000,2,.001,.35,0,.45,.36,'A shiny, bright pluck. C5 to C7.'],
+  ['muted','Pluck','Muted pluck','Q',0,450,1,.003,.2,0,.1,.36,'Dull and short like a muted guitar. C3 to C5.'],
+  ['mallet','Keys','Soft mallet','N',0,3000,1,.002,.4,0,.4,.55,'A soft mallet tone. C4 to C6.','K'],
+  ['marimba','Keys','Marimba','Q',0,900,2,.001,.2,0,.15,.4,'A wooden, short mallet tone. C3 to C5.','K'],
+  ['tick','Arp','Tiny tick arp','Q',0,5000,2,.001,.04,0,.03,.34,'Tiny, clicky notes for fast arps. C4 to C6.'],
+  ['deep','Bass','Deep pluck bass','T',0,400,2,.002,.3,0,.2,.6,'A round, plucked low note. C1 to C3.','B'],
+  ['psy','Psytrance','Psy pluck','Q',0,600,4,.002,.07,0,.04,.4,'Dark square pluck with a 40 ms tail for fast psy sequences. C3 to C5.','pP'],
+  ['psyarp','Psytrance','Full-on arp pluck','W',3,1500,7,.002,.12,0,.08,.36,'Resonant saw blip for full-on 16th arps. C4 to C6.','pP'],
+  ['psyblip','Psytrance','Rubber blip','W',0,400,14,.001,.12,0,.05,.4,'A rubbery, resonant blip for psy fills. C3 to C5.','pP']]);
+ basic('keys','The plain soft keys of this instrument. Start here. Best for chords from C3 to C5.','K',[
+  ['bright','Keys','Bright keys','T',4,7000,1.2,.003,.8,.2,.4,.42,'Clear keys for chords. C3 to C6.'],
+  ['mellow','Keys','Mellow keys','N',2,1800,1,.006,1.1,.3,.6,.5,'Soft and warm. C3 to C5.'],
+  ['reedy','Keys','Reedy piano','Q',2,1800,1.2,.003,.9,.2,.35,.32,'A reedy, older electric piano. C3 to C5.'],
+  ['house','Keys','House piano stab','T',5,5000,1.5,.002,.5,.1,.3,.4,'A bright, short piano-like stab for 90s house. C3 to C5.'],
+  ['dark','Keys','Dark electric piano','W',3,600,1,.004,1.6,.2,.6,.5,'Deep and soft. C2 to C4.'],
+  ['clav','Keys','Clav','Q',0,3500,3,.001,.3,.1,.1,.32,'A funky, short clav. C3 to C5.'],
+  ['box','Keys','Music box','T',0,8000,1,.001,.6,0,.5,.42,'A small, clear music box. C5 to C7.'],
+  ['vibes','Keys','Vibraphone','N',6,4000,1,.002,2,0,1.6,.5,'Soft bars with a slow shimmer. C4 to C6.'],
+  ['lofi','Keys','Lo-fi keys','T',2,1400,1,.008,.9,.25,.5,.45,'Dull, warm keys for lo-fi beats. C3 to C5.'],
+  ['bell','Keys','Bell keys','T',9,9000,2,.002,1.4,0,1.2,.4,'Bell-like keys. C4 to C6.'],
+  ['organ','Organ','Square organ','Q',2,2600,1,.006,.1,.9,.12,.26,'A held organ. C3 to C5.'],
+  ['church','Organ','Soft church organ','T',3,3500,.8,.05,.1,1,.5,.42,'Soft, held, airy organ. C3 to C5.'],
+  ['chord','Stab','Chord stab keys','W',8,2500,2,.002,.3,.15,.25,.32,'A short saw chord. C3 to C5.'],
+  ['psy','Psytrance','Psy bell keys','Q',7,4000,4,.002,.5,0,.8,.4,'Bright bell keys for psytrance breakdowns. C4 to C6.','pK']]);
+ basic('sub','The plain sub bass of this instrument. Start here. Best from C1 to C2.','U',[
+  ['long','Sub','Long sub','N',0,700,1,.01,.3,1,.35,.6,'A clean sine that holds. C1 to C2.'],
+  ['punch','Sub','Punchy sub','N',0,1400,1.5,.002,.1,.3,.08,.62,'A sub with a punch at the start. C1 to C2.'],
+  ['tri','Sub','Triangle sub','T',0,1100,1,.004,.2,.85,.12,.55,'A little more edge, so it is heard on small speakers. C1 to C2.'],
+  ['thump','Sub','Short thump','N',0,900,1,.002,.16,0,.1,.65,'A short sub hit. C1 to C2.'],
+  ['eight','Sub','Long decay sub','N',0,600,1,.002,1.2,0,.6,.62,'Falls slowly like an 808 bass. C1 to C2.'],
+  ['square','Sub','Warm square sub','Q',0,220,1,.003,.2,.9,.12,.6,'A filtered square: warm, with a hint of overtones. C1 to C2.'],
+  ['saw','Sub','Filtered saw sub','W',0,180,1,.003,.2,.9,.1,.62,'A filtered saw: round with a little growl. C1 to C2.'],
+  ['bounce','Sub','Bouncy sub','T',0,800,2,.002,.25,.4,.1,.58,'A short, bouncing sub for garage and house. C1 to C2.'],
+  ['knock','Sub','Resonant sub knock','T',0,300,6,.001,.15,.6,.08,.55,'A sub with a knock from a resonant filter. C1 to C2.'],
+  ['psy','Psytrance','Psy sub','N',0,400,1,.002,.07,0,.03,.65,'Very short sub notes to sit under a rolling bass. C1 to C2.','pU']]);
+ basic('bass','The plain square bass of this instrument. Start here. Best from C1 to C3.','B',[
+  ['dark','Bass','Dark and round','Q',2,320,2,.004,.22,.85,.14,.46,'A deep, warm bass. C1 to C3.'],
+  ['bite','Bass','Bright bite','Q',5,1500,6,.002,.16,.6,.1,.34,'A bass with bite for small speakers. C1 to C3.'],
+  ['pluck','Bass','Plucked bass','W',3,700,3,.002,.25,0,.15,.42,'A short, plucked bass. C1 to C3.'],
+  ['saw','Bass','Saw bass','W',6,700,3.5,.003,.2,.8,.12,.36,'A brighter saw bass. C1 to C3.'],
+  ['organ','Bass','House organ bass','T',0,600,1,.002,.3,.2,.1,.5,'A short, round organ-like bass for house. C1 to C3.'],
+  ['funk','Bass','Funky synth bass','Q',0,1100,8,.002,.25,.3,.08,.36,'A bouncing, squelchy bass. C1 to C3.'],
+  ['offbeat','Bass','Offbeat trance bass','W',4,900,3,.002,.18,.2,.08,.38,'Short bass notes for off-beat trance lines. C1 to C3.'],
+  ['rumble','Bass','Techno rumble','Q',0,250,4,.005,.4,.7,.2,.48,'A dark, rumbling low bass for techno. C1 to C2.'],
+  ['fat','Bass','Fat analog bass','W',3,450,2.5,.003,.3,.6,.1,.42,'A thick, warm analog bass. C1 to C3.'],
+  ['acid','Bass','Acid-style bass','W',0,400,12,.002,.2,.2,.08,.34,'Strong filter peak, short notes: a simple acid bass. C1 to C3.'],
+  ['electro','Bass','Electro bass','Q',8,1800,4,.002,.2,.7,.08,.32,'A bright, buzzing electro bass. C1 to C3.'],
+  ['psyroll','Psytrance','Rolling bass, simple','W',0,500,4,.001,.08,0,.03,.44,'One saw, filter at 500 Hz, notes over in about 80 ms: the psytrance K-B-B-B roll. Play 16ths on A1 to G2.','pB'],
+  ['psydark','Psytrance','Dark rolling bass','W',0,300,6,.001,.07,0,.03,.48,'A darker, tighter roll for night psytrance. Play 16ths on E1 to G2.','pB'],
+  ['psygoa','Psytrance','Goa square roller','Q',0,650,5,.001,.09,0,.03,.42,'A square roller in the older Goa style. Play 16ths on F1 to A2.','pB']]);
+ basic('reese','The plain reese bass of this instrument. Start here. Best from C1 to C3.','B',[
+  ['slow','Bass','Slow and wide','W',32,700,2,.04,.4,.9,.35,.33,'Slow beating between two saws far apart. C1 to C3.'],
+  ['tight','Bass','Tight reese','W',14,1200,3,.004,.2,.85,.12,.35,'A tighter reese with less movement. C1 to C3.'],
+  ['dark','Bass','Dark growl','W',26,420,5,.01,.3,.9,.2,.38,'Dark and moving. C1 to C2.'],
+  ['thin','Bass','Bright and thin','W',18,2600,2,.006,.25,.8,.18,.3,'Thinner and brighter, cuts on small speakers. C1 to C3.'],
+  ['classic','Bass','Classic reese','W',40,4000,1.5,.005,.3,.85,.1,.3,'Two saws as far apart as this instrument allows (the classic sound uses about 55 cents), filter open. C1 to C2.'],
+  ['oldschool','Bass','Old-school reese','W',25,1800,2,.005,.13,.85,.1,.33,'A jungle-era reese: 85 % sustain, 100 ms release. C1 to C2.'],
+  ['neuro','Bass','Neuro reese','W',20,900,7,.005,.3,.9,.1,.36,'A resonant, nasal reese for neurofunk. C1 to C2.'],
+  ['square','Bass','Square reese','Q',18,900,3,.005,.3,.9,.15,.36,'Two detuned squares: hollow and moving. C1 to C2.'],
+  ['sub','Bass','Sub reese','W',8,300,1,.01,.3,.95,.2,.42,'Mostly low end, a slow wobble. C1 to C2.'],
+  ['lead','Lead','Reese lead','W',28,3500,2,.005,.3,.85,.2,.3,'The reese played high as a lead. C3 to C5.','L'],
+  ['hoover','Lead','Hoover-style lead','W',40,2000,3,.03,.4,.8,.3,.3,'A wide, dark rave lead. C2 to C4.','L'],
+  ['pad','Pad','Reese pad','W',24,1400,1.5,.5,.8,.9,1.2,.3,'Slow, beating chords. C2 to C4.','D'],
+  ['psy','Psytrance','Psy reese layer','W',10,600,4,.002,.12,.3,.05,.38,'Short, moving reese notes to layer over a roller. C1 to C3.','pB']]);
+}
+function PS_REST(h){const{meta,trim,reset,op}=h,cp=o=>JSON.parse(JSON.stringify(o));
+ /* ---------- Plant: [w1,w2,morph,voices,detune,stereo,cutoff,reso,bloom,a,d,s,r,lfo rate,motion,space,sub,noise,fm,fm ratio,level] ---------- */
+ {const O=cp(PLPRE),KEEP=['lush','supersaw','psybass','pluck'],F=['w1','w2','morph','uni','det','width','cut','res','fenv','a','d','s','r','lfo','lamt','space','sub','noise','fm','ratio','gain'],WV={W:'sawtooth',Q:'square',T:'triangle',N:'sine'};reset(PLPRE);
+  const pl=(k,g,n,v,t,f)=>{let p;if(v==='old'){p=cp(O[k]);if(n)p.n=n}else{p={n};F.forEach((q,i)=>p[q]=i<2?WV[v[i]]:v[i])}if(!KEEP.includes(k))p.gain=Math.min(1,trim('plant',k,p.gain));PLPRE[k]=p;meta('plant',k,g,t,op(f))};
+  pl('init','Init','Init',['W','W',0,1,0,0,18000,.7,0,.003,.3,1,.05,.3,0,0,0,0,0,2,.5],'One saw, filter open, no effects: the clean start for your own sound. Any key.','L');
+  pl('supersaw','Lead','Supersaw lead','old','Seven detuned saws with a little sub and space: the big EDM lead. Best from C4 to C6.');
+  pl('trance','Lead','Trance anthem lead',['W','W',.2,7,30,100,5000,1.2,10,.012,.3,.93,.09,5,0,37,0,0,0,2,.4],'Wide held trance lead (12 ms attack, 93 % sustain, 90 ms release, from a classic trance recipe). Best from C4 to C6.');
+  pl('bigroom','Lead','Big room lead',['W','Q',.3,5,25,90,7000,1.5,20,.003,.2,.9,.15,.3,0,25,10,0,0,2,.4],'Bright saw and square stack for festival drops. Best from C4 to C5.');
+  pl('spacelead','Lead','Space lead','old','A soft, echoing lead with a long tail for breakdowns. Best from C4 to C6.');
+  pl('fifths','Lead','Hollow duo lead','old','Saw and square together: a hollow, classic synth lead. Best from C3 to C5.');
+  pl('hoover','Lead','Hoover','old','The 90s rave hoover: many detuned saws with FM. Best from C2 to C4.');
+  pl('softsine','Lead','Soft sine lead',['N','T',.4,2,6,60,6000,1,10,.02,.3,.85,.3,5,0,35,0,0,12,2,.45],'A pure, gentle lead for quiet melodies. Best from C5 to C7.');
+  pl('fmlead','Lead','FM bright lead',['W','N',.5,2,8,60,5000,2,30,.003,.3,.8,.2,.3,0,25,0,0,40,2,.4],'A sharp lead with FM bite. Best from C4 to C6.');
+  pl('psylead','Psytrance','Psy lead','old','A resonant psy lead with a fast filter envelope. Best from C4 to C6.','pL');
+  pl('fullon','Psytrance','Full-on lead, narrow',['W','W',.15,3,6,60,650,6,45,.002,.25,.75,.12,5,6,20,0,0,0,2,.45],'Three saws a few cents apart, filter at 650 Hz with resonance, 75 % sustain: the full-on lead recipe. Best from C4 to C6.','pL');
+  pl('electric','Psytrance','Melodic full-on lead',['W','Q',.25,4,8,60,1600,4,40,.003,.3,.8,.2,5.5,5,30,0,0,0,2,.42],'Brighter, singing lead for uplifting full-on melodies. Add a 3/16 ping-pong delay. Best from C4 to C6.','pL');
+  pl('squelch','Psytrance','Squelch mid',['W','Q',.2,1,0,0,500,11,70,.002,.2,.3,.1,.3,0,15,0,0,0,2,.48],'One oscillator, strong resonance, fast filter: squelchy full-on mid sounds. Best from C3 to C5.','pL');
+  pl('acidlead','Psytrance','Goa acid lead','old','A 303-like acid lead with strong resonance. Best from C3 to C5.','pL');
+  pl('hitech','Psytrance','Hi-tech scream',['W','W',.5,2,10,40,3000,9,70,.002,.12,.4,.06,.3,0,15,0,0,30,3,.42],'Harsh, resonant and fast for hi-tech psytrance. Best from C4 to C6.','pL');
+  pl('fmblip','Psytrance','Psy FM blip',['N','N',0,1,0,0,9000,.7,0,.001,.1,0,.08,.3,0,30,0,0,70,3.5,.5],'Short metallic FM blips for psy fills. Best from C4 to C6.','pP');
+  pl('zap','Psytrance','Filter zap',['W','W',0,1,0,0,150,14,100,.001,.25,0,.1,.3,0,30,0,0,0,2,.45],'A very resonant filter falling fast from the top: a zap. One note every few bars. Any key from C3.','pF');
+  pl('psypluck','Psytrance','Psy pluck arp',['Q','W',.35,1,0,0,900,8,80,.002,.1,0,.06,.3,0,25,0,0,0,2,.48],'A short, resonant pluck for fast psy arpeggios. Best from C3 to C5.','pP');
+  pl('psybass','Psytrance','Psy bass','old','The rolling bass of the psytrance demo: saw, resonant filter, short notes, sub. Play 16ths on F1 to A2.','pB');
+  pl('psyroll','Psytrance','Square rolling bass',['Q','Q',0,1,0,0,520,5,60,.001,.07,0,.03,.3,0,0,0,0,0,2,.55],'A square K-B-B-B roller, notes over in about 70 ms. Play 16ths on F1 to A2.','pB');
+  pl('psypad','Psytrance','Psy atmosphere',['W','W',0,3,6,70,1200,3,10,.35,1,.85,2,.1,30,60,0,0,0,2,.42],'Saws about 6 cents apart, filter at 1.2 kHz moving slowly, 350 ms attack: the psytrance pad recipe. C3 to C5.','pD');
+  pl('lush','Pad','Lush pad','old','A wide, soft pad with slow movement. Chords from C3 to C5.');
+  pl('sspad','Pad','Supersaw pad',['W','W',.2,7,20,100,2400,1,10,.22,.7,.9,.37,.2,10,50,0,0,0,2,.4],'Seven saws, 220 ms attack, 370 ms release (classic trance pad recipe). Chords from C3 to C5.','D');
+  pl('juno','Pad','Warm analog pad',['W','Q',.5,3,10,80,2200,2,0,.5,1,.8,1,.3,8,45,30,0,0,2,.42],'Saw and pulse with a sub and slow movement, like an 80s analog pad. Chords from C3 to C5.','D');
+  pl('dream','Pad','Dream pad','old','Slow, wide and bright. Chords from C3 to C5.');
+  pl('choirpad','Pad','Vocal pad','old','A soft, breathy choir-like pad. Chords from C3 to C5.');
+  pl('glasspad','Pad','Glass pad','old','A clear FM pad that shimmers. Chords from C4 to C6.');
+  pl('bellpad','Pad','Bell pad','old','Bells that fade into a pad. Chords from C4 to C6.');
+  pl('strings','Pad','String ensemble','old','A synth string section. Chords from C3 to C5.');
+  pl('pwm','Pad','PWM strings','old','Pulse-wave strings, a little hollow. Chords from C3 to C5.');
+  pl('drone','Pad','Ambient drone','old','A very slow drone for intros and ambient parts. One note from C2 to C4.');
+  pl('darkdrone','Pad','Dark drone','old','A dark, low drone with sub. One note from C1 to C3.');
+  pl('noisepad','Pad','Noise sweep pad','old','A pad with noise and a sweeping filter. Chords from C3 to C5.');
+  pl('pluck','Pluck','Future pluck','old','Wide, short chord pluck for future bass and EDM. Chords from C3 to C5.');
+  pl('trancepluck','Pluck','Trance pluck',['W','T',.3,5,18,85,3200,3,70,.002,.4,0,.35,.3,0,45,5,0,0,2,.42],'A bright trance pluck. Best from C4 to C6 with a 1/4 delay.');
+  pl('housepl','Pluck','House chord pluck',['W','W',0,7,7,80,400,3,60,.002,.21,0,.02,.3,0,30,0,0,0,2,.45],'Seven saws, 210 ms decay and an instant stop (house chord recipe). Chords from C3 to C5.','P');
+  pl('sash','Pluck','Long trance pluck',['T','T',0,1,0,0,300,6,90,.002,.55,0,.2,.3,0,50,35,0,45,1,.45],'Triangle with FM and a sub, 550 ms decay, resonant filter (classic trance pluck recipe). Best from C4 to C6.','P');
+  pl('pizz','Pluck','Pizzicato','old','Plucked strings. Best from C3 to C5.');
+  pl('koto','Pluck','Koto pluck',['Q','T',.3,1,0,0,1800,6,60,.002,.35,0,.25,.3,0,20,0,0,20,3,.45],'Twangy, nasal pluck. Best from C3 to C5.','P');
+  pl('marimba','Pluck','Marimba',['N','N',0,1,0,0,6000,.7,0,.001,.3,0,.25,.3,0,15,0,0,30,4,.5],'A wooden mallet sound from FM. Best from C3 to C5.','P');
+  pl('arp','Arp','Arp pluck','old','Short notes for fast arpeggios. Best from C4 to C6.');
+  pl('seq','Arp','Resonant sequence',['W','W',0,1,0,0,700,10,85,.001,.09,0,.05,.3,0,20,0,0,0,2,.45],'A squelchy 16th sequence sound. Best from C3 to C5.','P');
+  pl('bright16','Arp','Bright 16th arp',['Q','Q',0,2,5,60,4000,2,40,.001,.06,0,.04,.3,0,25,0,0,0,2,.45],'Tiny bright notes for fast arps. Best from C4 to C6.','P');
+  pl('keys','Keys','Shimmer keys','old','Soft keys with a slow shimmer. Chords from C3 to C5.');
+  pl('rhodes','Keys','Soft keys','old','A gentle electric-piano-like tone. Chords from C3 to C5.');
+  pl('fmep','Keys','FM electric piano',['N','N',0,2,4,50,9000,.7,0,.003,1.4,.1,.6,4,0,25,0,0,28,1,.5],'A sine pair with FM: a bright digital electric piano. Chords from C3 to C5.','K');
+  pl('organ','Keys','Organ','old','A held organ. Chords from C3 to C5.');
+  pl('houseorg','Keys','House organ',['T','Q',.4,1,0,0,2500,1,40,.002,.2,.9,.1,.3,0,15,0,0,0,2,.42],'Triangle and square through a low-pass filter: the 90s house organ. Best from C2 to C4.','K');
+  pl('bell','Keys','FM glass bell','old','A glassy FM bell. Best from C4 to C6.');
+  pl('chowning','Keys','Chowning bell',['N','N',0,1,0,0,14000,.7,0,.002,3,0,3,.3,0,45,0,0,60,1.4,.5],'FM at the ratio 1 to 1.4 from the first FM bell (Chowning, 1973), long decay. Best from C4 to C6.','K');
+  pl('chime','Keys','Chime','old','Small, bright chimes. Best from C5 to C7.');
+  pl('reese','Bass','Reese bass','old','Detuned saws beating against each other, with sub. Best from C1 to C2.');
+  pl('wreese','Bass','Wobble reese',['W','W',.5,3,42,50,700,4,10,.01,.3,.9,.2,2.4,60,10,35,0,0,2,.42],'A reese with a wobbling filter. Best from C1 to C2.','B');
+  pl('wobble','Bass','Wobble bass','old','A classic wobble bass. Best from C1 to C2.');
+  pl('growl','Bass','Sub growl','old','A growling FM bass with a strong sub. Best from C1 to C2.');
+  pl('analogbass','Bass','Analog bass','old','A warm, short analog bass. Best from C1 to C3.');
+  pl('fmbass','Bass','FM bass',['N','W',.3,1,0,0,1200,1.5,30,.002,.25,.7,.1,.3,0,0,40,0,45,1,.5],'Sine with FM at 1 to 1 and a sub: a punchy digital bass. Best from C1 to C3.','B');
+  pl('plbass','Bass','Pluck bass',['Q','W',.2,1,0,0,300,2,40,.002,.3,0,.15,.3,0,0,50,0,0,2,.52],'A short, plucked saw bass. Best from C1 to C3.','B');
+  pl('offbass','Bass','Offbeat bass',['W','Q',.3,2,6,20,900,3,50,.002,.15,.2,.06,.3,0,0,20,0,0,2,.5],'Short notes for off-beat trance and house bass lines. Best from C1 to C3.','B');
+  pl('sub808','Bass','Sub sine','old','A clean sine sub. Best from C1 to C2.','U');
+  pl('stab','Stab','Chord stab','old','A bright chord hit. Chords from C3 to C5.');
+  pl('brass','Stab','Brass stab','old','A synth brass hit with a soft attack. Chords from C3 to C5.');
+  pl('ravestab','Stab','Rave stab',['W','Q',.5,7,40,90,3000,2,50,.002,.2,.1,.15,.3,0,30,0,0,0,2,.4],'A wide, detuned 90s rave chord hit. Chords from C3 to C5.','K');
+  pl('air','FX','Air texture','old','Breathy noise texture. Hold one note.','F');
+  pl('riser','FX','Noise riser',['W','W',0,5,20,100,1200,5,0,3,2,1,2,.2,80,60,0,80,0,2,.38],'Noise and saws fading in over 3 seconds with a moving filter: hold a note for a build-up.','F');
+  pl('impact','FX','Impact boom',['N','N',0,1,0,0,300,1,0,.001,1.5,0,1.5,.3,0,40,100,10,50,.5,.5],'A low boom for the first beat of a drop. Play C1 to C2.','F');
+  pl('laser','FX','Laser sweep',['W','W',0,1,0,0,100,15,100,.001,.35,0,.3,.3,0,45,0,0,0,2,.45],'A singing filter sweeping down fast. Any key from C3.','F');
+  pl('wind','FX','Wind',['N','N',0,1,0,100,800,8,0,1,1,1,2,.15,60,60,0,100,0,2,.4],'Filtered noise that blows and moves. Hold one note.','F');
+ }
+ /* ---------- Acid: [wave,cutoff,reso,env,decay,accent,slide,dist]; level .35 then the measured trim ---------- */
+ {const O=cp(ACPRE),WV={S:'sawtooth',Q:'square',T:'triangle'};reset(ACPRE);
+  const ac=(k,g,n,v,t,f)=>{let p;if(v==='old'){p=cp(O[k]);if(n)p.n=n}else{const[w,cut,res,env,dec,acc,slide,dist]=v;p={n,wave:WV[w],cut,res,env,dec,acc,slide,dist}}if(k!=='psy')p.gain=Math.min(1,trim('acid',k,.35));ACPRE[k]=p;meta('acid',k,g,t,Object.assign({r:'acid'},op(f)))};
+  ac('classic','Init','Init (classic acid)',['S',380,18,70,.18,60,.06,30],'The classic saw acid line: medium resonance, accent and slide, a little drive. Start here. C1 to C3.');
+  ac('phuture','Classic','First acid',['Q',300,28,30,.45,50,.06,25],'Square wave, resonance almost at the top, long 450 ms decay (recipe of the first acid records). C1 to C3.');
+  ac('squelch','Classic','Squelch','old','Fast and very squelchy. C1 to C3.');
+  ac('rubber','Classic','Rubber square','old','A rounder square acid. C1 to C3.');
+  ac('bubble','Classic','Bubble','old','Low cutoff, big envelope: bubbling notes. C1 to C3.');
+  ac('wah','Classic','Wah','old','A slower, talking wah on every note. C1 to C3.');
+  ac('deep','Classic','Deep acid','old','Low, soft and deep. C1 to C2.');
+  ac('liquid','Classic','Liquid',['S',340,14,65,.6,40,.15,20],'Long decay and long slides: notes melt into each other. C1 to C3.');
+  ac('soft','Classic','Soft acid','old','Triangle wave, little resonance: gentle acid for warm parts. C1 to C3.');
+  ac('round','Classic','Round triangle acid',['T',250,18,80,.5,40,.1,0],'A clean, round acid without drive. C1 to C3.');
+  ac('hard','Techno','Hard acid','old','Bright, accented and heavily driven for hard techno. C1 to C3.');
+  ac('rave','Techno','Squelch rave','old','A squelchy rave line. C1 to C3.');
+  ac('dark','Techno','Dark acid','old','A dark square acid with drive. C1 to C2.');
+  ac('industrial','Techno','Industrial acid',['S',600,26,70,.08,100,.03,100],'Very short notes, full drive: harsh and metallic. C1 to C3.');
+  ac('scream','Techno','Screamer','old','Open filter, strong drive: a screaming acid. C2 to C4.');
+  ac('minimal','Techno','Minimal tick acid',['Q',180,10,50,.15,30,.05,15],'Small, ticking acid notes for minimal grooves. C1 to C3.');
+  ac('psy','Psytrance','Psy twister','old','The acid of the psytrance demo: fast, resonant, driven. C1 to C3.','p');
+  ac('squirt','Psytrance','Psy squirt','old','Very short squirts with high accent. C1 to C3.','p');
+  ac('goa','Psytrance','Goa acid, singing',['S',450,27,75,.3,70,.07,40],'Resonance near the top and a longer decay: the singing Goa acid. C1 to C3.','p');
+  ac('fullon','Psytrance','Full-on squelch',['S',380,20,85,.1,75,.03,55],'Short and squelchy for the peak of a full-on track. C1 to C3.','p');
+  ac('forest','Psytrance','Forest twister',['Q',150,29,95,.07,90,.02,70],'Very dark, very resonant, very short: forest and dark psy. C1 to C2.','p');
+  ac('hitech','Psytrance','Hi-tech zap line',['S',900,22,100,.05,100,.02,80],'Bright clicks and zaps for hi-tech psytrance. C2 to C4.','p');
+  ac('night','Psytrance','Night acid',['Q',220,25,70,.14,85,.04,60],'A dark square acid for night full-on. C1 to C2.','p');
+  ac('prog','Psytrance','Progressive acid',['S',320,15,55,.4,40,.08,25],'Softer and slower for progressive psytrance. C1 to C3.','p');
+  ac('goasq','Psytrance','Goa square acid',['Q',400,24,80,.22,65,.07,35],'A square acid in the old Goa style. C1 to C3.','p');
+  ac('lowbass','Bass','Acid bass, low and round',['S',150,6,30,.25,20,.1,10],'A bass line with only a hint of acid. C1 to C2.');
+  ac('rubber2','Bass','Rubber bass','old','A rubbery square bass. C1 to C2.');
+  ac('electro','Bass','Electro acid bass',['Q',700,12,60,.18,50,.05,40],'A brighter square acid bass for electro. C1 to C3.');
+  ac('lead','Lead','Acid lead, bright',['S',1200,18,60,.4,50,.1,50],'The acid line played higher as a lead. C3 to C5.');
+  ac('whistle','Lead','Whistling acid lead',['T',900,22,70,.5,40,.12,60],'A whistling, driven triangle acid. C3 to C5.');
+  ac('zap','FX','Acid zap',['S',100,30,100,.05,100,.01,70],'Resonance at the top and the shortest decay: zaps and blips. C2 to C4.');
+ }
+ /* ---------- Wavetable ---------- */
+ {const O=cp(WTPRE);reset(WTPRE);
+  const wt=(k,g,n,o,t,f)=>{const p=o==='old'?cp(O[k]):Object.assign({n},wt0,o);p.n=n;if(k!=='init')p.gain=Math.min(1,trim('wtab',k,p.gain));WTPRE[k]=p;meta('wtab',k,g,t,op(f))};
+  wt('init','Init','Init','old','The first wave of the basic table, filter open. Start here and turn Position. Any key.','L');
+  wt('supersaw','Lead','Wave supersaw lead','old','Five detuned voices on a bright wave. Best from C4 to C6.');
+  wt('sawlead','Lead','Saw lead',{pos:.29,uni:3,det:8,width:60,cut:6000,a:.003,d:.3,s:.8,r:.2,gain:.45},'The saw of the basic table, three voices. Best from C4 to C6.','L');
+  wt('sqlead','Lead','Square lead',{pos:.43,uni:2,det:5,cut:5000,a:.004,s:.8,r:.2,gain:.42},'The square of the basic table. Best from C4 to C6.','L');
+  wt('pwmlead','Lead','PWM lead','old','A pulse that moves its width: a living lead. Best from C4 to C6.');
+  wt('vowel','Lead','Vowel lead (A to U)','old','A lead that moves through vowels. Best from C4 to C5.');
+  wt('glass','Lead','Glass lead','old','A clear, glassy lead. Best from C4 to C6.');
+  wt('sync','Lead','Sync lead','old','A hard sync sweep: tearing and bright. Best from C3 to C5.');
+  wt('digilead','Lead','Digital lead',{wt:'digital',pos:.3,penv:20,pd:.3,uni:2,det:6,cut:8000,a:.003,s:.75,r:.2,gain:.42},'A hard digital lead. Best from C4 to C6.','L');
+  wt('fullon','Psytrance','Full-on lead',{pos:.29,uni:3,det:6,width:50,cut:700,res:5,fenv:40,a:.002,d:.25,s:.75,r:.12,gain:.48},'Saw voices a few cents apart, filter at 700 Hz with resonance: the full-on lead recipe. Best from C4 to C6.','pL');
+  wt('goasync','Psytrance','Goa sync lead',{wt:'sync',pos:.25,lamt:40,lfoRate:5.5,uni:2,det:5,cut:4000,res:3,a:.003,s:.75,r:.15,gain:.42},'A sync lead that wobbles fast: old Goa colour. Best from C4 to C6.','pL');
+  wt('psyroll','Psytrance','Psy rolling (sweep env)','old','A rolling bass whose wave opens on every note. Play 16ths on F1 to A2.','pB');
+  wt('acidwt','Psytrance','Acid wave','old','Wave and filter close fast with resonance: acid colour. C1 to C3.','pA');
+  wt('psypluck','Psytrance','Psy pluck',{wt:'pwm',pos:.2,cut:900,res:6,fenv:80,a:.002,d:.1,s:0,r:.06,gain:.5},'A thin pulse pluck for fast psy sequences. Best from C3 to C5.','pP');
+  wt('zap','Psytrance','Psy zap',{wt:'sweep',pos:1,penv:-100,pd:.15,cut:9000,a:.001,d:.2,s:0,r:.1,gain:.45},'The wave falls from bright to dull in 150 ms: a zap. One note now and then, from C3.','pF');
+  wt('psypad','Psytrance','Psy glass pad',{wt:'glass',pos:.4,lamt:35,lfoRate:.1,uni:4,det:8,width:90,cut:3000,res:2,a:.4,d:1,s:.85,r:2,gain:.42},'A slowly scanning glass pad for psy breakdowns. Chords from C3 to C5.','pD');
+  wt('pwmbass','Bass','PWM bass','old','A moving pulse bass with sub. Best from C1 to C3.');
+  wt('growl','Bass','Growl bass','old','A growling, scanning bass. Best from C1 to C2.');
+  wt('growl2','Bass','Growl wobble 1/8','old','The growl table scanned fast. Best from C1 to C2.');
+  wt('reese','Bass','Reese wave','old','Two wide voices with sub: a reese. Best from C1 to C2.');
+  wt('subp','Bass','Sub pulse','old','A low pulse with lots of sub. Best from C1 to C2.');
+  wt('syncb','Bass','Sync bass','old','A sync sweep on every bass note. Best from C1 to C3.');
+  wt('digib','Bass','Digital bass',{wt:'digital',pos:.2,cut:1200,res:2,fenv:30,sub:40,a:.002,d:.2,s:.7,r:.08,gain:.5},'A hard digital bass with sub. Best from C1 to C3.','B');
+  wt('wsub','Bass','Wavetable sub',{pos:0,cut:400,sub:50,a:.003,d:.3,s:.95,r:.1,gain:.6},'Sine and sub: a clean low end. Best from C1 to C2.','U');
+  wt('sspad','Pad','Supersaw pad',{pos:.29,uni:5,det:20,width:100,cut:2600,a:.4,d:1,s:.85,r:1.5,gain:.4},'Five wide saw voices with a slow attack. Chords from C3 to C5.','D');
+  wt('pwmpad','Pad','PWM pad',{wt:'pwm',pos:.3,lamt:40,lfoRate:.3,uni:4,det:10,width:90,cut:3000,a:.5,d:1,s:.85,r:1.5,gain:.42},'Pulse voices that move their width: a warm analog pad. Chords from C3 to C5.','D');
+  wt('talk','Pad','Talking pad','old','A pad that slowly speaks vowels. Chords from C3 to C5.');
+  wt('choir','Pad','Formant choir','old','A choir made from vowels. Chords from C3 to C5.');
+  wt('glassp','Pad','Glass pad','old','A clear, scanning glass pad. Chords from C4 to C6.');
+  wt('evol','Pad','Evolving pad','old','A pad that changes slowly over time. Chords from C3 to C5.');
+  wt('spec','Pad','Spectral pad','old','A thin, digital pad. Chords from C3 to C5.');
+  wt('digi2','Pad','Digital pad','old','A bright digital pad. Chords from C3 to C5.');
+  wt('strings','Pad','Wave strings','old','Strings from a wavetable. Chords from C3 to C5.');
+  wt('metalp','Pad','Metal drone','old','A dark metallic drone. One note from C2 to C4.');
+  wt('bellp','Pluck','Bell pluck','old','A bell-like pluck. Best from C4 to C6.');
+  wt('metal','Pluck','Metal pluck','old','A metallic pluck. Best from C3 to C5.');
+  wt('glasspl','Pluck','Glass pluck',{wt:'glass',pos:.6,penv:-40,pd:.3,cut:9000,a:.001,d:.3,s:0,r:.3,gain:.48},'A short, shiny pluck. Best from C4 to C6.','P');
+  wt('sweeppl','Pluck','Sweep pluck',{wt:'sweep',pos:.1,penv:70,pd:.1,cut:6000,res:2,a:.002,d:.2,s:0,r:.15,gain:.48},'The wave opens and closes on every note. Best from C3 to C5.','P');
+  wt('bell','Keys','Digital bell','old','A long digital bell. Best from C4 to C6.');
+  wt('wep','Keys','Wave electric piano',{wt:'bell',pos:.1,penv:-30,pd:.8,cut:7000,a:.002,d:1.2,s:.1,r:.5,gain:.48},'A soft electric piano from the bell table. Chords from C3 to C5.','K');
+  wt('organ','Keys','Drawbar organ','old','A held drawbar organ. Chords from C3 to C5.');
+  wt('organs','Keys','Organ sweep','old','An organ whose drawbars move. Chords from C3 to C5.');
+  wt('digi','Arp','Digital edge arp','old','Hard, short digital notes for arps. Best from C4 to C6.');
+  wt('syncarp','Arp','Sync arp',{wt:'sync',pos:.1,penv:60,pd:.1,cut:7000,a:.001,d:.12,s:0,r:.08,gain:.48},'A short sync blip for 16th arps. Best from C4 to C6.','P');
+  wt('riser','FX','Sweep riser','old','A slow sweep that rises. Hold a note for a build-up.');
+  wt('hpsweep','FX','High-pass shimmer','old','A thin, high shimmer. Hold one note.');
+  wt('down','FX','Downlifter',{wt:'sweep',pos:1,penv:-100,pd:2.5,uni:3,det:15,cut:8000,a:.01,d:3,s:0,r:2,gain:.42},'Bright to dark over a few seconds: after a drop. Any key from C3.','F');
+  wt('metalhit','FX','Metal hit',{wt:'metal',pos:.8,penv:-80,pd:.5,cut:9000,a:.001,d:1.5,s:0,r:1.2,gain:.45},'A metallic hit with a long ring. Any key from C3.','F');
+  for(const k in WTPRE){const m=PSMETA.wtab[k];if(m&&!m.r){const r={Bass:'bass',Pad:'pad',Pluck:'pluck',Keys:'keys',Arp:'pluck',FX:'fx'}[m.g];if(r)m.r=r}}
+ }
+ PS_VENOM(h);PS_GROWL(h);PS_PARTICLE(h);
+}
+function PS_VENOM(h){const{meta,trim,reset,op}=h;
+ /* Venom keeps its own "Group · Name" names (its big window groups by them); new presets are made the same way as its own (vp) */
+ const L1=1,L2=2,E2=3,VEL=4,M1=6,M2=7,M3=8,CUT=1,RES=2,APOS=4,AWRP=6,PIT=10,AMP=14,DET=13;
+ const mxr=a=>{const ms=[0,0,0,0,0,0,0,0],mt=[0,0,0,0,0,0,0,0],ma=[0,0,0,0,0,0,0,0];a.forEach((q,i)=>{ms[i]=q[0];mt[i]=q[1];ma[i]=q[2]});return{ms,mt,ma}};
+ const mk=(n,o,m)=>{const mm=(m||[]).slice(0,5);while(mm.length<5)mm.push([0,0,0]);mm.push([M3,DET,.5],[M1,CUT,.5],[M2,APOS,.5]);return Object.assign({n},JSON.parse(JSON.stringify(VND)),o,mxr(mm))};
+ const O=Object.assign({},VNPRE);
+ O.p_fo=mk('Psytrance · Full-on Lead',{aw:0,ap:.667,aun:3,aud:.08,abl:.5,ft:0,fc:700,fr:.45,fd:.25,fe:.45,a2:.001,d2:.22,s2:.3,a1:.002,d1:.3,s1:.75,r1:.12,dt:1,dd:.25,dm:.5,mb:250,l1r:5,l1f:.3,vol:.45},[[L1,PIT,.008],[VEL,CUT,.15]]);
+ O.p_eu=mk('Psytrance · Electric Melody',{aw:0,ap:.667,aun:4,aud:.1,abl:.6,bw:15,bp:.3,bl:.5,boc:-1,ft:1,fc:1800,fr:.35,fe:.35,d2:.3,s2:.3,a1:.003,d1:.3,s1:.8,r1:.2,cm:.2,l1r:5.5,l1f:.4,mb:250,vol:.42},[[VEL,CUT,.2],[L1,PIT,.006]]);
+ O.p_acid=mk('Psytrance · Acid Squelch',{aw:0,ap:.667,mono:1,gl:.06,ft:0,fc:300,fr:.85,fe:.7,d2:.18,s2:0,dt:1,dd:.5,dm:.8,a1:.002,d1:.3,s1:1,r1:.05,vol:.45},[[VEL,CUT,.25]]);
+ O.p_zap=mk('Psytrance · Zap',{aw:0,ap:0,a1:.001,d1:.25,s1:0,r1:.08,d2:.15,s2:0,ft:1,fc:12000,vol:.5},[[E2,PIT,1]]);
+ O.p_hitech=mk('Psytrance · Hi-tech Laser',{aw:4,ap:.5,awm:2,awa:.6,a1:.001,d1:.15,s1:0,r1:.08,d2:.08,s2:0,ft:1,fc:9000,dt:1,dd:.3,dm:.6,vol:.45},[[E2,PIT,1],[E2,AWRP,.4]]);
+ O.p_roll=mk('Psytrance · Rolling Bass',{aw:0,ap:.667,mono:1,a1:.001,d1:.08,s1:0,r1:.03,ft:0,fc:500,fr:.3,fe:.2,d2:.04,s2:0,vol:.55},[[VEL,AMP,.3]]);
+ O.p_goa=mk('Psytrance · Goa Saw Lead',{aw:9,ap:.4,aun:2,aud:.1,ft:0,fc:1200,fr:.55,fe:.3,d2:.3,s2:.2,a1:.002,d1:.3,s1:.7,r1:.15,cm:.3,l1y:1,l1i:3,vol:.42},[[L1,CUT,.15]]);
+ O.p_arp=mk('Psytrance · FM Arp',{aw:5,ap:.3,a1:.001,d1:.12,s1:0,r1:.08,d2:.1,s2:0,ft:1,fc:6000,vol:.5},[[E2,APOS,.5],[VEL,CUT,.3]]);
+ O.p_pad=mk('Psytrance · Atmosphere',{aw:0,ap:.667,aun:4,aud:.15,abl:1,bw:15,bp:.2,bl:.3,boc:1,a1:.4,d1:1,s1:.85,r1:2,ft:1,fc:1200,fr:.3,l1r:.1,cm:.4,vol:.36},[[L1,CUT,.12]]);
+ O.p_vox=mk('Psytrance · Talking Mid',{aw:13,ap:.3,l1y:1,l1i:3,l1s:1,ft:6,fc:1200,fr:.5,a1:.003,d1:.3,s1:.85,r1:.1,dt:1,dd:.3,dm:.5,vol:.42},[[L1,APOS,.4]]);
+ O.k_trance=mk('Pluck · Trance Pluck',{aw:0,ap:.5,aun:3,aud:.1,sl:.35,soc:-1,ft:0,fc:300,fr:.45,fe:.8,d2:.25,s2:0,a1:.001,d1:.55,s1:0,r1:.2,cm:.2,vol:.5},[[VEL,CUT,.2]]);
+ O.k_house=mk('Pluck · House Chord',{aw:0,ap:.667,aun:8,aud:.07,ft:0,fc:400,fr:.22,fe:.7,d2:.215,s2:0,a1:.001,d1:.3,s1:0,r1:.015,vol:.45},[[VEL,CUT,.2]]);
+ O.k_ep=mk('Keys · Soft E-Piano',{aw:5,ap:.15,a1:.002,d1:1.6,s1:.1,r1:.5,d2:.5,s2:0,ft:1,fc:6000,cm:.25,cr:.5,vol:.48},[[E2,APOS,.25],[VEL,APOS,.15]]);
+ O.k_hpiano=mk('Keys · House Piano',{aw:7,ap:.2,bw:0,bp:.667,bl:.4,a1:.001,d1:.6,s1:.1,r1:.3,ft:1,fc:7000,fe:.2,d2:.2,s2:0,vol:.45},[[VEL,CUT,.2]]);
+ O.k_bell=mk('Keys · Long Bell',{aw:7,ap:.6,a1:.001,d1:3,s1:0,r1:2.5,ft:1,fc:14000,d2:2,s2:0,vol:.45},[[E2,APOS,-.4]]);
+ O.a_sq=mk('Arp · Square Arp',{aw:15,ap:.2,a1:.001,d1:.1,s1:0,r1:.06,ft:0,fc:2500,fr:.3,fe:.3,d2:.08,s2:0,vol:.48},[[VEL,CUT,.2]]);
+ O.p_warm=mk('Pad · Warm Analog',{aw:1,ap:.3,aun:3,aud:.12,abl:.8,a1:.5,d1:1,s1:.85,r1:1.2,ft:0,fc:1800,fr:.2,l1r:.4,cm:.5,vol:.4},[[L1,APOS,.25]]);
+ const L=[
+ ['init','Init','The default Venom: one wave, filter open. Start here. Any key.','L'],
+ ['l_super','Lead','Seven wide voices plus an octave: the big supersaw. C4 to C6.'],
+ ['l_scream','Lead','Distorted, screaming lead for dubstep and electro. C4 to C6.'],
+ ['l_sync','Lead','A hard sync sweep. C3 to C5.'],
+ ['l_fmbell','Lead','A bell-like FM lead. C4 to C6.'],
+ ['l_trance','Lead','A lead chopped in 1/16 steps: the trance gate. C4 to C6.'],
+ ['l_fold','Lead','Wavefolded, buzzy lead. C3 to C5.'],
+ ['l_digi','Lead','A hard digital lead. C4 to C6.'],
+ ['l_vox','Lead','A singing vowel lead. C4 to C5.'],
+ ['l_reese','Lead','A reese played high as a lead. C3 to C5.'],
+ ['l_hoov','Lead','A detuned rave stab lead. C3 to C5.'],
+ ['l_pwm','Lead','A warm pulse lead. C4 to C6.'],
+ ['l_pluck','Pluck','A short poly pluck with a filter snap. C4 to C6.','P'],
+ ['k_pluck','Pluck','The classic EDM pluck. C4 to C6.','P'],
+ ['k_trance','Pluck','Long trance pluck: 550 ms decay, resonant filter, sub (classic trance pluck recipe). C4 to C6.','P'],
+ ['k_house','Pluck','Eight saws, 215 ms filter decay and an instant stop: house chords. C3 to C5.','P'],
+ ['k_glass','Pluck','A glassy pluck. C4 to C6.','P'],
+ ['k_arp','Arp','Short saw notes for arpeggios. C4 to C6.','P'],
+ ['a_sq','Arp','Short square notes with a little filter snap for 16th arps. C4 to C6.','P'],
+ ['k_fmep','Keys','An FM electric piano. Chords from C3 to C5.','K'],
+ ['k_ep','Keys','A soft FM electric piano that gets brighter when played harder. C3 to C5.','K'],
+ ['k_hpiano','Keys','A bright, short piano-like stab for 90s house. C3 to C5.','K'],
+ ['k_bell','Keys','A long metallic bell. C4 to C6.','K'],
+ ['k_org','Keys','A digital organ. Chords from C3 to C5.','K'],
+ ['c_stab','Chord','A big EDM chord stab. C3 to C5.','K'],
+ ['c_pluck','Chord','A wide future bass chord pluck. C3 to C5.','K'],
+ ['p_super','Pad','A wide supersaw pad. C3 to C5.','D'],
+ ['p_warm','Pad','Pulse voices that move: a warm 80s analog pad with chorus. C3 to C5.','D'],
+ ['p_choir','Pad','A choir from vowels. C3 to C5.','D'],
+ ['p_glass','Pad','A glass pad that changes slowly. C4 to C6.','D'],
+ ['p_dark','Pad','A dark drone. C2 to C4.','D'],
+ ['p_talk','Pad','A pad that talks slowly. C3 to C5.','D'],
+ ['p_bell','Pad','A cloud of bells. C4 to C6.','D'],
+ ['b_riddim','Bass','Riddim growl that moves in 1/8 steps. C1 to C2.','B'],
+ ['b_wob4','Bass','A wobble on every beat. C1 to C2.','B'],
+ ['b_wob8t','Bass','A wobble in 1/8 triplets. C1 to C2.','B'],
+ ['b_gate','Bass','A gated riddim bass. C1 to C2.','B'],
+ ['b_reese','Bass','A dark, moving neuro reese. C1 to C2.','B'],
+ ['b_formant','Bass','A talking formant bass. C1 to C2.','B'],
+ ['b_screech','Bass','A screeching sync bass. C1 to C3.','B'],
+ ['b_hoover','Bass','A hoover played as a bass. C1 to C2.','B'],
+ ['b_sub','Bass','Mostly sub, very clean. C1 to C2.','U'],
+ ['b_808','Bass','An 808-style bass with a pitch slide. C1 to C2.','U'],
+ ['b_fmwub','Bass','An FM wub. C1 to C2.','B'],
+ ['b_metal','Bass','A metallic, grinding bass. C1 to C2.','B'],
+ ['b_hardsaw','Bass','A distorted saw bass. C1 to C2.','B'],
+ ['b_talk','Bass','A talking bass. C1 to C2.','B'],
+ ['b_donk','Bass','The bouncy donk bass of hard house. C1 to C3.','B'],
+ ['b_laser','Bass','A tearout laser bass. C1 to C2.','B'],
+ ['b_mid','Bass','A roaring mid-range bass. C1 to C3.','B'],
+ ['b_roll','Bass','A rolling pulse bass. C1 to C2.','B'],
+ ['b_dub','Bass','The classic dubstep wobble. C1 to C2.','B'],
+ ['b_trap','Bass','A distorted trap 808. C1 to C2.','U'],
+ ['b_wetg','Bass','A wet, gurgling growl. C1 to C2.','B'],
+ ['b_howl','Bass','A howling, folded bass. C1 to C2.','B'],
+ ['p_fo','Psytrance','Narrow full-on lead: saws a few cents apart, 24 dB filter at 700 Hz with resonance, drive, a little vibrato. C4 to C6.','pL'],
+ ['p_eu','Psytrance','Uplifting melodic full-on lead: saws and a square one octave down, brighter filter, chorus. Add a 3/16 delay. C4 to C6.','pL'],
+ ['p_goa','Psytrance','A resonant saw stack whose filter moves in 1/8 notes: Goa colour. C4 to C6.','pL'],
+ ['p_vox','Psytrance','A talking mid sound moving in 1/8 notes. C3 to C5.','pL'],
+ ['p_acid','Psytrance','Mono acid with glide, 24 dB filter near self-oscillation, drive after the filter. C1 to C3.','pA'],
+ ['p_roll','Psytrance','A tight K-B-B-B roller, notes over in about 80 ms. Play 16ths on F1 to A2.','pB'],
+ ['p_arp','Psytrance','FM blips that get brighter when played harder, for fast psy arps. C4 to C6.','pP'],
+ ['p_zap','Psytrance','A sine falling two octaves in about 150 ms: the psy zap. One note now and then, from C3.','pF'],
+ ['p_hitech','Psytrance','A sync laser falling fast: hi-tech zaps. From C3.','pF'],
+ ['p_pad','Psytrance','Wide saws with a glassy layer and a slowly moving filter for psy breakdowns. C3 to C5.','pD'],
+ ['f_riser','FX','A rising sweep for build-ups. Hold one note.','F'],
+ ['f_down','FX','A falling sweep after a drop. Hold one note.','F'],
+ ['f_zap','FX','A laser zap. From C3.','F'],
+ ['f_drop','FX','A sub that drops. C1 to C3.','F'],
+ ['f_noise','FX','A noise sweep. Hold one note.','F'],
+ ['f_alien','FX','A strange, moving alien sound. Any key.','F'],
+ ['f_impact','FX','A big impact boom for the first beat of a drop. C1 to C2.','F']];
+ reset(VNPRE);for(const[k,g,t,f] of L){const p=O[k];if(!p)continue;if(k!=='init'&&(PSLV.venom||{})[k])p.vol=Math.min(1,trim('venom',k,p.vol));const nm=p.n.split(' · ');if(nm.length>1&&nm[0]!==g)p.n=g+' · '+nm.slice(1).join(' · ');VNPRE[k]=p;meta('venom',k,g,t,op(f))}
+ for(const k in O)if(!VNPRE[k]){VNPRE[k]=O[k];meta('venom',k,O[k].n.split(' · ')[0],O[k].n.split(' · ')[1]||'')}
+}
+function PS_GROWL(h){const{meta,trim,reset,op}=h;
+ const O=Object.assign({},GWPRE),d0={};for(const[q,v] of Object.entries(GWP))d0[q]=v[2];
+ const gw=(k,n,o,g)=>{O[k]=Object.assign({n,g,rate:'1/8',lsh:'sine'},d0,o)};
+ gw('psyvox','Talking psy mid',{fm:30,ratio:1,shape:70,va:20,vb:80,q:16,mfm:20,drive:45,squash:60,sub:0,tone:9000,rate:'1/16',lsh:'tri',r:.03},'Psytrance');
+ gw('psyyoi','Psy yoi',{fm:45,ratio:2,shape:55,va:85,vb:10,q:14,mfm:40,drive:55,squash:70,sub:0,rate:'1/8',lsh:'yoi',r:.03,a:.002},'Psytrance');
+ gw('forest','Forest gurgle',{fm:60,ratio:3,shape:30,va:0,vb:50,q:18,mfm:60,drive:60,fold:20,squash:75,sub:0,rate:'1/16T',lsh:'rnd',tone:7000},'Psytrance');
+ gw('psyzap','Squelch zap',{fm:70,ratio:1,shape:60,va:100,vb:0,q:20,depth:100,mfm:80,gl:12,gt:.06,drive:50,squash:70,sub:0,rate:'1/2',lsh:'down',r:.02,a:.001},'Psytrance');
+ gw('halftime','Halftime snarl',{fm:55,ratio:1.5,shape:45,va:30,vb:75,q:12,mfm:35,drive:70,squash:80,sub:60,rate:'1/2',lsh:'tri'},'Dubstep');
+ gw('wob16','Wobble 1/16 roll',{fm:40,shape:60,va:10,vb:70,q:9,mfm:50,drive:60,squash:70,sub:55,rate:'1/16',lsh:'sine'},'Dubstep');
+ gw('oo2ah','Slow OO to AH',{fm:35,shape:40,va:0,vb:40,q:13,mfm:20,drive:45,squash:60,sub:65,rate:'1/1',lsh:'rise',tone:5000},'Dubstep');
+ gw('bigroom','Big room growl',{fm:50,ratio:2,shape:80,va:40,vb:90,q:8,mfm:40,drive:80,squash:85,sub:45,rate:'1/4',lsh:'up',tone:12000,r:.06},'EDM');
+ gw('future','Future bass wobble',{fm:25,ratio:1,shape:70,det:12,va:30,vb:70,q:7,mfm:30,drive:40,squash:60,sub:40,rate:'1/4T',lsh:'sine',wide:60,tone:9000},'EDM');
+ gw('trap','Trap growl',{fm:50,ratio:1,shape:50,va:15,vb:60,q:10,mfm:40,gl:-7,gt:.08,drive:65,squash:70,sub:70,rate:'1/8T',lsh:'yoi'},'EDM');
+ gw('liquid','Liquid soft reese',{fm:20,ratio:1,shape:65,det:20,va:20,vb:45,q:6,mfm:20,drive:35,squash:50,sub:60,tone:4500,rate:'1/1',lsh:'tri',wide:50,a:.01,r:.12},'Drum and bass');
+ gw('hoover','Hoover growl',{fm:30,ratio:.5,shape:85,det:30,va:40,vb:70,q:7,mfm:30,gl:-12,gt:.15,drive:60,squash:70,sub:40,rate:'1/2',lsh:'up',wide:70},'Drum and bass');
+ const L=[['init','Init','The plain growl: the sound every other preset starts from. Start here. C1 to C2.'],
+ ['yoi','Dubstep','A talking "yoi" on every beat: fast open, slow close. C1 to C2.'],['wub','Dubstep','The classic 1/8 wub. C1 to C2.'],['riddim','Dubstep','Grinding riddim in 1/8 triplets with fold. C1 to C2.'],
+ ['screech','Dubstep','A rising screech with a squeal on top. C1 to C3.'],['robot','Dubstep','Random robot vowels. C1 to C2.'],['tear','Dubstep','A tearout machine gun in 1/16 notes. C1 to C2.'],
+ ['deep','Dubstep','A deep, slow growl with a big sub. C1 to C2.'],['metal','Dubstep','A metallic gargle. C1 to C2.'],['halftime','Dubstep','A slow snarl over half a bar for halftime drops. C1 to C2.'],
+ ['wob16','Dubstep','A fast 1/16 wobble roll for fills. C1 to C2.'],['oo2ah','Dubstep','One slow mouth movement from OO to AH over the note. C1 to C2.'],
+ ['electro','EDM','A bright electro house growl. C1 to C3.'],['complex','EDM','A short complextro stab with a pitch drop. C1 to C3.'],['midtempo','EDM','A snarling midtempo bass with some reese. C1 to C2.'],
+ ['bark','EDM','A short bass house bark. C1 to C3.'],['talkbox','EDM','A talk box lead: the mouth moves on every note. C3 to C5.'],['bigroom','EDM','A bright, driven big room growl. C1 to C3.'],
+ ['future','EDM','A soft, wide future bass wobble in 1/4 triplets. C1 to C3.'],['trap','EDM','A trap growl that slides down into the note. C1 to C2.'],
+ ['neuro','Drum and bass','A neuro reese growl. C1 to C2.'],['chair','Drum and bass','The moving chair: stick-slip scraping with a rising squeal. C1 to C3.'],['chair2','Drum and bass','A long, low chair drag. C1 to C2.'],
+ ['chair3','Drum and bass','A short chair screech. C2 to C4.','L'],['door','Drum and bass','A squeaky door. C2 to C4.','L'],['foghorn','Drum and bass','A huge, low foghorn. C1 to C2.'],['stab','Drum and bass','A short neuro stab. C1 to C3.'],
+ ['jump','Drum and bass','A jump up squelch with a pitch slide. C1 to C3.'],['tearing','Drum and bass','A tearing reese moving in 1/8 notes. C1 to C2.'],['rubber','Drum and bass','A rubber squeak. C2 to C4.','L'],
+ ['liquid','Drum and bass','A soft, wide reese for liquid drum and bass. C1 to C2.'],['hoover','Drum and bass','A hoover that bends up into the note. C1 to C2.'],
+ ['psyvox','Psytrance','Vowels moving in 1/16 notes without sub: a talking mid layer over a rolling bass. C2 to C4.','pL'],
+ ['psyyoi','Psytrance','A short yoi on every 1/8 for darker psytrance. C2 to C4.','pL'],['forest','Psytrance','Random gurgling vowels in 1/16 triplets: forest psy. C2 to C4.','pL'],
+ ['psyzap','Psytrance','A squelchy zap that slides down an octave. One note now and then, C2 to C4.','pF']];
+ reset(GWPRE);for(const[k,g,t,f] of L){const p=O[k];if(!p)continue;p.g=g;if(k==='init')p.n='Init';if(k!=='yoi'&&k!=='init')p.gain=Math.min(1,trim('growl',k,p.gain??.6));GWPRE[k]=p;meta('growl',k,g,t,Object.assign({r:'bass'},op(f)))}
+ for(const k in O)if(!GWPRE[k]){GWPRE[k]=O[k];meta('growl',k,O[k].g||'Other','',{r:'bass'})}
+}
+function PS_PARTICLE(h){const{meta,trim,reset,op}=h;
+ /* Vector FM and Orbit: every voice is an FM pair; where it is and how it moves changes ratio, index, pan, pitch or the filter */
+ {const O=Object.assign({},VFMPRE),v=(k,n,o)=>{O[k]=Object.assign({n},o)};
+  v('ep','Electric piano',{pn:true,rat:2,idx:1,ei:80,att:.002,dec:2.2,sus:0,rel:.6,ax:40,tx:'pan',ay:15,ty:'index',cen:40,grav:40,kick:40,gain:.7});
+  v('tine','Tine piano',{pn:true,rat:14,idx:.8,ei:100,att:.001,dec:1.2,sus:.05,rel:.5,ax:50,tx:'pan',cen:40,grav:40,kick:40,gain:.7});
+  v('organ2','Bright organ',{num:6,ops:2,alg:'o',rat:2,rn:true,idx:.8,att:.005,dec:.2,sus:1,rel:.1,ax:100,tx:'pan',am:4,tm:'detune',gain:.55});
+  v('chown','Chowning bell',{num:1,rat:1.4,idx:4,ei:100,att:.002,dec:4,sus:0,rel:4,ax:30,tx:'pan',spd:30,gain:.65});
+  v('brass','FM brass',{num:3,rat:1,idx:2.5,ei:60,att:.06,dec:.4,sus:.8,rel:.25,ax:60,tx:'pan',ay:20,ty:'index',am:8,tm:'detune',gain:.6});
+  v('reed','Reed lead',{num:2,rat:.667,idx:2,att:.03,dec:.3,sus:.85,rel:.2,ax:40,tx:'pan',am:6,tm:'detune',gain:.65});
+  v('soft','Soft sine lead',{num:2,rat:1,idx:.6,att:.02,dec:.4,sus:.85,rel:.3,ax:50,tx:'pan',am:5,tm:'detune',gain:.7});
+  v('fmbass','FM bass',{num:1,ggn:1,rat:1,idx:2,ei:70,cpit:-24,att:.002,dec:.3,sus:.7,rel:.1,ft:'lp',cut:1500,q:1,ax:0,spd:40,gain:.7});
+  v('fmbass7','Punchy FM bass',{num:1,ggn:1,rat:7,idx:1.5,ei:100,cpit:-24,att:.002,dec:.08,sus:.6,rel:.1,ax:0,spd:40,gain:.7});
+  v('pluck','FM pluck',{num:3,rat:2,idx:2.5,ei:100,att:.001,dec:.25,sus:0,rel:.2,ax:100,tx:'pan',ay:20,ty:'index',gain:.65});
+  v('wood','Wood mallet',{num:2,rat:.6875,idx:3,ei:100,att:.001,dec:.2,sus:0,rel:.15,ax:60,tx:'pan',gain:.65});
+  v('psylead','Psy FM lead',{num:3,rat:1,idx:3,ei:40,att:.003,dec:.3,sus:.75,rel:.12,ft:'lp',cut:1500,q:3,ax:60,tx:'pan',ay:30,ty:'index',am:6,tm:'detune',spd:140,gain:.6});
+  v('psyblip','Psy FM blips',{num:4,rat:3.5,idx:3,ei:100,att:.001,dec:.12,sus:0,rel:.08,ax:100,tx:'pan',ay:40,ty:'ratio',spd:200,kick:80,gain:.6});
+  v('psyzap','Zap swarm',{num:6,rat:2,idx:4,ei:100,att:.001,dec:.2,sus:0,rel:.15,cpit:12,ax:100,tx:'pan',ay:60,ty:'pitch',spd:300,kick:100,gain:.55});
+  v('psypad','Psy shimmer pad',{num:8,rat:2,rn:true,idx:.9,att:.6,dec:1,sus:.85,rel:2,ft:'lp',cut:3000,q:1,ax:100,tx:'pan',ay:40,ty:'index',ad:30,td:'cut',am:10,tm:'detune',spd:50,gain:.6});
+  v('riser','Metallic riser',{num:10,ops:3,alg:'i',rat:3.7,idx:5,att:2.5,dec:2,sus:1,rel:2,ft:'hp',cut:800,q:2,ax:100,tx:'pan',ay:70,ty:'index',spd:250,gain:.5});
+  v('init','Init',{num:1,rat:1,idx:1,ei:0,att:.005,dec:.3,sus:.85,rel:.2,ax:0,ay:0,ad:0,as:0,am:0,spd:0,gain:.6});
+  const L=[['init','Init','One still particle: a plain FM pair at 1 to 1. Start here and turn Ratio and Index. Any key.','L'],['glass','Bells','Glass bells drifting across the stereo field. C4 to C6.','K'],['church','Bells','A big tower bell, one octave down. C3 to C5.','K'],
+   ['chown','Bells','One FM pair at 1 to 1.4, the first FM bell (Chowning, 1973). C4 to C6.','K'],['chime','Bells','Chimes that pick notes of a major pentatonic scale. C5 to C7.','K'],
+   ['keys','Keys','One particle for every key you hold. Chords from C3 to C5.','K'],['ep','Keys','A soft FM electric piano, one particle per key. Chords from C3 to C5.','K'],
+   ['tine','Keys','A tine piano: modulator at 14 times the note, like the classic FM electric piano. Chords from C3 to C5.','K'],
+   ['stack','Keys','A stacked organ. Chords from C3 to C5.','K'],['organ2','Keys','A bright organ with moving drawbars. Chords from C3 to C5.','K'],
+   ['brass','Lead','FM brass: the index follows the loudness, 60 ms attack (brass recipe from Chowning). C3 to C5.','L'],
+   ['reed','Lead','Odd overtones from a 3 to 2 pair: a clarinet-like lead. C3 to C5.','L'],['soft','Lead','A soft, near pure lead. C4 to C6.','L'],
+   ['pluck','Pluck','A bright FM pluck. C4 to C6.','P'],['wood','Pluck','A wooden mallet from a 16 to 11 pair (Chowning). C3 to C5.','P'],
+   ['pad','Pad','A pad that moves while particles drift. Chords from C3 to C5.','D'],['harm','Pad','Overtones that drift over time. Chords from C3 to C5.','D'],['drone','Pad','A slow, dark drone. One note from C2 to C4.','D'],
+   ['wob','Bass','A wobble bass two octaves down. C2 to C3 (it plays two octaves lower).','BX'],['fmbass','Bass','A clean FM bass. C3 to C4 (it plays two octaves lower).','BX'],
+   ['fmbass7','Bass','An FM bass with a click from a 7 to 1 pair. C3 to C4 (it plays two octaves lower).','BX'],
+   ['psylead','Psytrance','A resonant FM lead whose index moves with the particles. C4 to C6.','pL'],['psyblip','Psytrance','Short metallic FM blips for psy fills and arps. C4 to C6.','pP'],
+   ['psyzap','Psytrance','A swarm of falling zaps. One note now and then, from C3.','pF'],['psypad','Psytrance','A shimmering pad for psy breakdowns. C3 to C5.','pD'],
+   ['metal','FX','A swarm of metallic particles. Any key.','F'],['riser','FX','A metallic noise that rises over 2.5 s: hold a note for a build-up.','F']];
+  reset(VFMPRE);for(const[k,g,t,f] of L){const p=O[k];if(!p)continue;if(k!=='glass')p.gain=Math.min(1,trim('vfm',k,p.gain??.6));VFMPRE[k]=p;meta('vfm',k,g,t,op(f))}
+  for(const k in O)if(!VFMPRE[k]){VFMPRE[k]=O[k];meta('vfm',k,'Other','')}}
+ {const O=Object.assign({},ORBPRE),v=(k,n,o)=>{O[k]=Object.assign({n},o)};
+  v('ep','Moon piano',{pn:true,rat:1,rn:true,idx:1.3,ei:80,att:.002,dec:1.6,sus:.1,rel:.6,ax:40,tx:'pan',as:20,ts:'index',cen:50,grav:50,kick:35,gain:.7});
+  v('chime2','Ringing moons',{num:3,rat:1.4,idx:3,ei:100,att:.002,dec:3,sus:0,rel:3,ax:100,tx:'pan',ad:30,td:'index',cen:50,grav:40,kick:40});
+  v('lead','Orbiting lead',{num:3,rat:1,rn:true,idx:2,ei:30,att:.004,dec:.3,sus:.8,rel:.2,ft:'lp',cut:3000,q:1.5,ax:70,tx:'pan',as:40,ts:'index',ad:20,td:'cut',cen:50,grav:60,kick:45,gain:.6});
+  v('brass','Planet brass',{num:4,rat:1,idx:2.5,ei:60,att:.05,dec:.4,sus:.75,rel:.25,ax:80,tx:'pan',as:30,ts:'index',cen:50,grav:50,kick:45,gain:.6});
+  v('fmbass','Moon bass',{num:1,ggn:1,cpit:-24,rat:1,rn:true,idx:1.8,ei:60,att:.002,dec:.3,sus:.7,rel:.1,ft:'lp',cut:1200,q:1.2,ax:0,as:60,ts:'index',cen:60,grav:60,kick:30,spd:120,gain:.7});
+  v('growlb','Orbit growl',{num:2,cpit:-24,rat:1,idx:1.5,att:.004,dec:.4,sus:.9,rel:.15,ggn:1,ft:'lp',cut:500,q:3,ax:40,tx:'pan',as:100,ts:'index',ad:50,td:'cut',cen:70,grav:70,kick:30,spd:220,gain:.6});
+  v('pluck','Moon pluck',{num:4,rat:2,rn:true,idx:2.2,ei:100,att:.001,dec:.25,sus:0,rel:.2,ax:100,tx:'pan',ad:40,td:'index',cen:50,grav:50,kick:45,gain:.65});
+  v('nebula','Nebula pad',{num:10,spd:30,rat:1,rn:true,idx:.8,att:1.2,dec:1.5,sus:.9,rel:3,ft:'lp',cut:1800,q:1,ax:100,tx:'pan',ad:40,td:'cut',ay:30,ty:'detune',cen:40,grav:40,kick:50,rm:60,gain:.6});
+  v('glasspad','Glass planets',{num:6,spd:60,rat:3,idx:1,att:.8,dec:1,sus:.85,rel:2.4,ax:100,tx:'pan',ad:50,td:'index',cen:50,grav:50,kick:50,gain:.55});
+  v('arp','Planet arp',{num:6,rat:2,rn:true,idx:1.5,ei:80,att:.001,dec:.15,sus:0,rel:.1,ax:100,tx:'pan',ad:70,td:'pitch',snap:'minor pentatonic',as:40,ts:'index',cen:55,grav:55,kick:45,spd:150});
+  v('psylead','Psy orbit lead',{num:3,rat:1,rn:true,idx:2.6,ei:40,att:.003,dec:.3,sus:.75,rel:.12,ft:'lp',cut:1400,q:3,ax:60,tx:'pan',as:50,ts:'index',ad:30,td:'cut',cen:60,grav:60,kick:40,spd:160,gain:.6});
+  v('psyarp','Phrygian orbit arp',{num:5,rat:3.5,idx:2,ei:100,att:.001,dec:.12,sus:0,rel:.08,ax:100,tx:'pan',ad:60,td:'pitch',snap:'phrygian',as:50,ts:'index',cen:60,grav:60,kick:50,spd:200,gain:.6});
+  v('psyzap','Falling moons',{num:4,rat:2,idx:4,ei:100,att:.001,dec:.18,sus:0,rel:.12,cpit:12,ax:100,tx:'pan',ad:90,td:'pitch',as:60,ts:'index',cen:70,grav:80,kick:90,spd:300,gain:.55});
+  v('psypad','Psy orbit pad',{num:8,spd:40,rat:2,rn:true,idx:.9,att:.6,dec:1,sus:.85,rel:2,ft:'lp',cut:2000,q:1.5,ax:100,tx:'pan',ad:40,td:'cut',as:20,ts:'detune',cen:50,grav:50,kick:50,gain:.6});
+  v('blackhole','Black hole riser',{num:12,rat:2.76,idx:3,att:3,dec:2,sus:1,rel:2,ax:100,tx:'pan',ad:80,td:'index',as:80,ts:'pitch',cen:90,grav:100,kick:20,spd:200,gain:.5});
+  v('init','Init',{num:1,rat:1,idx:1,ei:0,att:.005,dec:.3,sus:.85,rel:.2,ax:0,ay:0,ad:0,as:0,am:0,spd:0,gain:.6});
+  const L=[['init','Init','One ball at rest: a plain FM pair at 1 to 1. Start here, then add balls. Any key.','L'],['sun','Keys','Six planets on a major pentatonic scale; their distance sets the note. The default. Chords or melodies from C3 to C5.','K'],
+   ['pad','Pad','Slow planets: a soft, moving pad. Chords from C3 to C5.','D'],['nebula','Pad','Ten slow particles with a moving filter: a wide, dark pad. C3 to C5.','D'],
+   ['glasspad','Pad','Glassy planets with a bright index. C4 to C6.','D'],['ring','Keys','A ring of moons: an organ-like chord sound. C3 to C5.','K'],
+   ['keys','Keys','One moon for every key you hold. Chords from C3 to C5.','K'],['ep','Keys','A soft FM electric piano, one moon per key. Chords from C3 to C5.','K'],
+   ['bells','Keys','Bells whose brightness follows the orbit. C4 to C6.','K'],['chime2','Keys','Three moons ringing at 1 to 1.4, a long bell. C4 to C6.','K'],
+   ['lead','Lead','A lead whose tone opens and closes with the orbit. C4 to C6.','L'],['brass','Lead','Soft FM brass. C3 to C5.','L'],
+   ['comet','Arp','Comets on a minor pentatonic scale, notes from far and close. C4 to C6.','P'],['arp','Arp','Six fast planets picking minor pentatonic notes. C4 to C6.','P'],
+   ['pluck','Pluck','A bright pluck whose index follows the orbit. C4 to C6.','P'],['swarm','FX','Sixteen asteroids on all twelve notes. Any key.','F'],['sling','FX','Fast slingshot orbits on a whole tone scale. C4 to C6.','P'],
+   ['binary','Bass','A double star two octaves down. C3 to C4 (it plays two octaves lower).','BX'],['fmbass','Bass','A clean moon bass. C3 to C4 (it plays two octaves lower).','BX'],
+   ['growlb','Bass','A growling band-pass bass that moves with the orbit. C3 to C4 (it plays two octaves lower).','BX'],
+   ['psylead','Psytrance','A resonant lead whose filter follows the orbit. C4 to C6.','pL'],['psyarp','Psytrance','Fast moons picking Phrygian notes: an orbiting psy arp. C4 to C6.','pP'],
+   ['psyzap','Psytrance','Moons falling inwards: zaps. One note now and then, from C3.','pF'],['psypad','Psytrance','A slowly orbiting pad for psy breakdowns. C3 to C5.','pD'],
+   ['blackhole','FX','Everything falls into the middle over 3 s: a riser. Hold one note.','F']];
+  reset(ORBPRE);for(const[k,g,t,f] of L){const p=O[k];if(!p)continue;if(k!=='sun')p.gain=Math.min(1,trim('orb',k,p.gain??.6));ORBPRE[k]=p;meta('orb',k,g,t,op(f))}
+  for(const k in O)if(!ORBPRE[k]){ORBPRE[k]=O[k];meta('orb',k,'Other','')}}
+}
+/*PSLIB-END*/
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -16346,6 +16889,7 @@ function vnWinDraw(){const w=document.getElementById('vnWin');if(!w||w.hidden)re
  IBG.find(g=>g[0]==='Synths')[2].unshift('venom');IBWIDE.add('venom');PHAUTO.venom='bass'}
 
 /*VN-END*/
+psLib();/* preset library, part 1 (defined before askChoice) */
 function wtNow(I,age,act){let pos=I.pos??.2;if(act&&age>=0){pos+=(I.lamt||0)/100*.5*Math.sin(2*Math.PI*(I.lfoRate||.4)*age)+(I.penv||0)/100*Math.exp(-age/(Math.max(.02,I.pd||.5)/3))}else pos+=(I.lamt||0)/100*.5*Math.sin(performance.now()/1000*(I.lfoRate||.4)*2*Math.PI)*.0;return clamp(pos,0,1)}
 function wtDev(t,I,kn){const K=k=>kn('wt:'+k,WTL[k],k==='uni'?specSnap(WTP[k],1):specD(WTP[k]),()=>I[k]??WTP[k][2],v=>{I[k]=v;changed(false)});
  const sel=(k,opts)=>`<label class="wtl">${k==='wt'?'Table':'Filter'}<select data-wt="${k}">${opts.map(([v,n])=>`<option value="${v}"${(I[k]||opts[0][0])===v?' selected':''}>${n}</option>`).join('')}</select></label>`;
