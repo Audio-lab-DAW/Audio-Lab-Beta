@@ -3094,3 +3094,5 @@ Frozen: 0 frames, 0 of the app's 39 repeating timers, 0.0 to 0.2 one-shot timers
 
 ### Release
 - v0.218 (built on v0.214; other sessions released v0.215, v0.216 and v0.217 in the meantime, so it was applied again on each; the full test ran on the v0.217 base, the quick one and the desktop app test on the final v0.218; the timer for automation and modulators was added after the full run and is covered by the quick one). App copy synced, update note written. `desktop/main.js` and `desktop/preload.js` changed: desktop build as noted below.
+- v0.218: commit 3704a12 on main. Desktop build run 45900585940 dispatched for this commit (no other build was running; it needs to finish before the new desktop app with the window events is out). Artifact 1b07d888 updated to version 241. Project doc `claude/audiolab-background-freeze.md`.
+- The repository now answers under the name Audio-Lab-Pro-Alpha; `gh api` with the old name fails through the proxy (it is redirected to a numeric path), so the build list and the dispatch were done with the GitHub tools instead.
