@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>AudioLab Glass Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* LAYOUT: a full-window fake arrangement with AudioLab-sized glass panels over it; one control card top right. Single dark look on purpose (it imitates the app). */
+:root{color-scheme:dark;--bg:#0a0a0c;--card:#14161c;--fg:#ececf1;--mut:#8f96a6;--line:#2a2e3a;--acc:#ffd23a;--accink:#1c1500;--data:ui-monospace,'SF Mono',Menlo,monospace}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:13px/1.4 Inter,system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0;overflow:hidden}
+#scene,#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#gl{pointer-events:none}
+.gp{position:absolute;left:0;top:0;border-radius:var(--r);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);background:rgba(22,28,42,.5);color:var(--mut);font-size:11px;padding:6px 10px;pointer-events:none}
+.m-none .gp{background:rgba(22,28,42,.94)}
+.m-gl .gp{background:none;border-color:transparent;box-shadow:none}
+.m-blur .gp{backdrop-filter:blur(9px) saturate(1.72);-webkit-backdrop-filter:blur(9px) saturate(1.72)}
+.m-gl #gl{display:block}#gl{display:none}
+#hud{position:fixed;z-index:10;top:calc(12px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(350px,calc(100% - 32px));max-height:calc(100% - 24px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+#hud h1{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#hud p{margin:0;color:var(--mut);font-size:12px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:#0c0d11;border-radius:8px;padding:3px}
+.seg button{font:600 12px inherit;font-family:inherit;color:var(--mut);background:none;border:0;border-radius:6px;padding:6px 2px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--accink)}
+.rowx{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12px}
+.rowx label{display:flex;gap:5px;align-items:center}
+select,button.b{font:inherit;color:var(--fg);background:#20232c;border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+button.b{cursor:pointer;font-weight:600}button.go{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#live{font:500 12px var(--data);background:#0c0d11;border-radius:8px;padding:8px;white-space:pre-wrap}
+#res{font:500 11px/1.5 var(--data);background:#0c0d11;border-radius:8px;padding:8px;white-space:pre;overflow:auto;margin:0;user-select:all;-webkit-user-select:all}
+#hud.min>:not(h1){display:none}
+</style>
+
+<div id="stage" class="m-gl">
+  <canvas id="scene"></canvas>
+  <canvas id="gl"></canvas>
+  <svg id="fsvg" width="0" height="0" style="position:absolute" color-interpolation-filters="sRGB" aria-hidden="true"></svg>
+</div>
+<div id="hud">
+  <h1>AudioLab Glass Bench <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
+  <p>The same glass panels drawn four ways over a moving arrangement. Press Run and send me the table.</p>
+  <div class="seg" role="group" aria-label="How the glass is drawn">
+    <button data-m="none" aria-pressed="false" title="No glass at all: the ceiling">Solid</button>
+    <button data-m="blur" aria-pressed="false" title="backdrop-filter blur only">Blur</button>
+    <button data-m="lens" aria-pressed="false" title="backdrop-filter with the SVG refraction lens: what AudioLab does today">Lens now</button>
+    <button data-m="gl" aria-pressed="true" title="One shared blurred backdrop, every panel a shader with a rim lens">GL engine</button>
+  </div>
+  <div class="rowx">
+    <label for="scn">Underneath</label>
+    <select id="scn"><option value="scroll">scrolling (worst case)</option><option value="play">playhead only</option><option value="still">still</option></select>
+    <label><input type="checkbox" id="drag" checked> move the mixer</label>
+  </div>
+  <div class="rowx" id="pch"></div>
+  <div class="rowx"><label for="lv">GL blur</label><select id="lv"><option value="2">light</option><option value="3" selected>regular</option><option value="4">heavy</option></select>
+    <label><input type="checkbox" id="dirty" checked> GL redraws only on change</label></div>
+  <div class="rowx"><label for="bw">Lens width</label><input type="range" id="bw" min="0" max="80" step="2" value="20" style="flex:1;min-width:90px"><output id="bwo" style="font-family:var(--data);min-width:9ch">20 px Apple</output></div>
+  <div id="live">measuring…</div>
+  <div class="rowx"><button class="b go" id="run">Run (about 30 s)</button><button class="b" id="copy">Copy table</button></div>
+  <pre id="res">No run yet.</pre>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),stage=$('#stage'),S=$('#scene'),G=$('#gl'),sx=S.getContext('2d',{alpha:false});
+let W=0,H=0,D=1,mode='gl',t0=performance.now(),sceneDirty=true,glDirty=true;
+const PD=[{k:'hdr',n:'Track headers',on:1},{k:'tr',n:'Transport',on:1},{k:'dev',n:'Device panel',on:1},{k:'mix',n:'Mixer window',on:1},{k:'pill',n:'Pill',on:1}];
+const P={};
+$('#pch').innerHTML=PD.map(p=>`<label><input type="checkbox" id="p_${p.k}" checked> ${p.n}</label>`).join('');
+PD.forEach(p=>{const e=document.createElement('div');e.className='gp';e.textContent=p.n;stage.appendChild(e);P[p.k]={el:e,on:true,x:0,y:0,w:0,h:0,r:14,dx:0};$('#p_'+p.k).onchange=ev=>{P[p.k].on=ev.target.checked;layout()}});
+
+function layout(){const trH=48,devH=Math.min(262,H*.3|0),top=40;
+  Object.assign(P.hdr,{x:0,y:top,w:Math.min(216,W*.3|0),h:H-top-trH-devH,r:0});
+  Object.assign(P.tr,{x:0,y:H-trH,w:W,h:trH,r:0});
+  Object.assign(P.dev,{x:0,y:H-trH-devH,w:W,h:devH,r:0});
+  const mw=Math.min(1100,W-60),mh=Math.min(430,H-trH-140);Object.assign(P.mix,{x:(W-mw)/2|0,y:70,w:mw,h:mh,r:16});
+  Object.assign(P.pill,{x:W-170,y:H-trH-devH-44,w:150,h:32,r:16});
+  for(const k in P){const p=P[k],e=p.el;e.hidden=!p.on;e.style.width=p.w+'px';e.style.height=p.h+'px';e.style.setProperty('--r',p.r+'px');e.style.translate=`${p.x+p.dx}px ${p.y}px`}
+  if(mode==='lens')lensAttach();glDirty=true}
+function size(){D=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;S.width=G.width=Math.round(W*D);S.height=G.height=Math.round(H*D);glSize();sceneDirty=true;layout()}
+
+/* ---------- the fake arrangement (2D canvas, redrawn in full like the app does while playing) ---------- */
+const COL=['#e5534b','#4c8dff','#e3b341','#f0883e','#3ecf8e','#b77bff','#45c4d6','#e36fb0'];
+function drawScene(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0,rh=64*D,bw=120*D;
+  sx.fillStyle='#0a0a0c';sx.fillRect(0,0,S.width,S.height);
+  for(let r=0,y=40*D;y<S.height;r++,y+=rh){const c=COL[r%8];
+    for(let i=-1;i<S.width/bw+9;i++){const seed=(i*7+r*13)%11;if(seed<3)continue;const x=i*bw-off*D%(bw*8)+ (r%2)*bw*.5;
+      sx.fillStyle=c+'88';sx.fillRect(x+1,y+2*D,bw-2,rh-4*D);sx.fillStyle=c;sx.fillRect(x+1,y+2*D,bw-2,14*D);
+      sx.fillStyle='#ffffff55';for(let k=0;k<8;k++)sx.fillRect(x+6*D+k*bw/8.5,y+rh*.55,bw/14,3*D)}
+    sx.fillStyle='#00000066';sx.fillRect(0,y+rh-1,S.width,1)}
+  sx.fillStyle='#ffffff10';for(let x=-(off*D%bw);x<S.width;x+=bw)sx.fillRect(x,0,1,S.height);
+  if(scn!=='still'){const px=scn==='scroll'?S.width*.5:((t*.15*D)%S.width);sx.fillStyle='#3ecf8e';sx.fillRect(px,0,Math.max(1,D),S.height)}}
+
+const BW=()=>+$('#bw').value,bandOf=p=>Math.max(.5,Math.min(BW(),Math.min(p.w,p.h)/2.2)),amtOf=p=>BW()?Math.min(Math.min(p.w,p.h)/2,Math.max(24,BW()*1.2)):0;
+/* ---------- today's way: SVG displacement lens in backdrop-filter ---------- */
+function lensMap(w,h,r,band){const q=4,cw=Math.max(8,w/q|0),ch=Math.max(8,h/q|0),c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d'),im=x.createImageData(cw,ch),d=im.data;r=Math.max(r,1);
+  for(let py=0;py<ch;py++)for(let px=0;px<cw;px++){const X=(px+.5)*w/cw-w/2,Y=(py+.5)*h/ch-h/2,qx=Math.abs(X)-(w/2-r),qy=Math.abs(Y)-(h/2-r);let dist,nx=0,ny=0;
+    if(qx>0&&qy>0){const L=Math.hypot(qx,qy)||1;dist=r-L;nx=qx/L*Math.sign(X);ny=qy/L*Math.sign(Y)}else if(qx>qy){dist=w/2-Math.abs(X);nx=Math.sign(X)}else{dist=h/2-Math.abs(Y);ny=Math.sign(Y)}
+    const t=Math.min(1,Math.max(0,dist/band)),k=1-Math.sqrt(Math.max(0,1-(1-t)*(1-t))),i=(py*cw+px)*4;d[i]=128+127*nx*k;d[i+1]=128+127*ny*k;d[i+2]=128;d[i+3]=255}
+  x.putImageData(im,0,0);return c.toDataURL()}
+function lensAttach(){const svg=$('#fsvg');let h='';for(const k in P){const p=P[k];if(!p.on)continue;const band=bandOf(p);
+    h+=`<filter id="lf_${k}" filterUnits="userSpaceOnUse" x="0" y="0" width="${p.w}" height="${p.h}"><feImage href="${lensMap(p.w,p.h,p.r,band)}" x="0" y="0" width="${p.w}" height="${p.h}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${-2*amtOf(p)}" xChannelSelector="R" yChannelSelector="G"/></filter>`}
+  svg.innerHTML=h;for(const k in P)P[k].el.style.backdropFilter=`url(#lf_${k}) blur(9px) saturate(1.72)`}
+function lensDetach(){for(const k in P)P[k].el.style.backdropFilter=''}
+
+/* ---------- the proposed way: one shared backdrop, dual-Kawase pyramid, SDF rim lens per panel ---------- */
+const gl=G.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,powerPreference:'high-performance'});
+let glOK=!!gl,prog={},src,lev=[],vao;
+const VS=`#version 300 es
+out vec2 v;void main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);v=p;gl_Position=vec4(p*2.-1.,0.,1.);}`;
+const FDOWN=`#version 300 es
+precision highp float;in vec2 v;uniform sampler2D t;uniform vec2 px;uniform float flip;out vec4 o;
+void main(){vec2 u=vec2(v.x,mix(v.y,1.-v.y,flip));o=texture(t,u)*4.;o+=texture(t,u-px);o+=texture(t,u+px);o+=texture(t,u+vec2(px.x,-px.y));o+=texture(t,u-vec2(px.x,-px.y));o/=8.;}`;
+const FUP=`#version 300 es
+precision highp float;in vec2 v;uniform sampler2D t;uniform vec2 px;out vec4 o;
+void main(){o=texture(t,v+vec2(-px.x*2.,0.));o+=texture(t,v+vec2(-px.x,px.y))*2.;o+=texture(t,v+vec2(0.,px.y*2.));o+=texture(t,v+px)*2.;o+=texture(t,v+vec2(px.x*2.,0.));o+=texture(t,v+vec2(px.x,-px.y))*2.;o+=texture(t,v+vec2(0.,-px.y*2.));o+=texture(t,v-px)*2.;o/=12.;}`;
+const FGLASS=`#version 300 es
+precision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc;uniform float rad,band,amt,dpr;out vec4 o;
+float sd(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
+void main(){vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y),hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.);if(a<=0.)discard;
+ vec2 e=vec2(1.,0.);vec2 n=normalize(vec2(sd(l+e.xy,hb,rad)-sd(l-e.xy,hb,rad),sd(l+e.yx,hb,rad)-sd(l-e.yx,hb,rad))+1e-5);
+ float x=clamp(-d/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));
+ vec2 sp=p-n*k*amt;vec3 c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;
+ float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,1.3);c=mix(c,vec3(.086,.11,.165),.5);
+ float rim=smoothstep(1.6*dpr,0.,-d),lit=abs(dot(n,vec2(-.7071,-.7071)));c+=rim*(.06+.3*lit);
+ o=vec4(c*a,a);}`;
+function mk(fs){const p=gl.createProgram();for(const[ty,s]of[[gl.VERTEX_SHADER,VS],[gl.FRAGMENT_SHADER,fs]]){const sh=gl.createShader(ty);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh));gl.attachShader(p,sh)}gl.linkProgram(p);const u={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);u[a.name]=gl.getUniformLocation(p,a.name)}return{p,u}}
+function tex(w,h){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);for(const[k,v]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,k,v);return t}
+function glInit(){if(!glOK)return;try{prog.d=mk(FDOWN);prog.u=mk(FUP);prog.g=mk(FGLASS);vao=gl.createVertexArray()}catch(e){glOK=false;console.warn(e)}}
+function glSize(){if(!glOK)return;for(const l of lev){gl.deleteTexture(l.t);gl.deleteFramebuffer(l.f);gl.deleteTexture(l.t2);gl.deleteFramebuffer(l.f2)}lev=[];if(src)gl.deleteTexture(src);src=tex(G.width,G.height);
+  let w=G.width,h=G.height;for(let i=0;i<4;i++){w=Math.max(2,w>>1);h=Math.max(2,h>>1);const L={w,h};for(const s of['','2']){L['t'+s]=tex(w,h);L['f'+s]=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,L['f'+s]);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,L['t'+s],0)}lev.push(L)}glDirty=true}
+function pass(pr,t,fb,w,h,pw,ph,flip){gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.viewport(0,0,w,h);gl.useProgram(pr.p);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform2f(pr.u.px,.5/pw*2,.5/ph*2);if(pr.u.flip)gl.uniform1f(pr.u.flip,flip?1:0);gl.drawArrays(gl.TRIANGLES,0,3)}
+function glFrame(newScene){gl.bindVertexArray(vao);gl.disable(gl.BLEND);gl.disable(gl.SCISSOR_TEST);gl.activeTexture(gl.TEXTURE0);const n=+$('#lv').value;
+  if(newScene){gl.bindTexture(gl.TEXTURE_2D,src);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,gl.RGBA,gl.UNSIGNED_BYTE,S);
+    pass(prog.d,src,lev[0].f,lev[0].w,lev[0].h,lev[0].w,lev[0].h,true);
+    for(let i=1;i<n;i++)pass(prog.d,lev[i-1].t,lev[i].f,lev[i].w,lev[i].h,lev[i].w,lev[i].h,false);
+    let t=lev[n-1].t;for(let i=n-2;i>=0;i--){pass(prog.u,t,lev[i].f2,lev[i].w,lev[i].h,lev[i].w,lev[i].h);t=lev[i].t2}}
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,G.width,G.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.useProgram(prog.g.p);gl.bindTexture(gl.TEXTURE_2D,n>1?lev[0].t2:lev[0].t);gl.uniform2f(prog.g.u.res,G.width,G.height);gl.uniform1f(prog.g.u.dpr,D);gl.enable(gl.SCISSOR_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+  for(const k of['hdr','dev','tr','pill','mix']){const p=P[k];if(!p.on)continue;const x=(p.x+p.dx)*D,y=p.y*D,w=p.w*D,h=p.h*D,sh=Math.min(p.w,p.h);
+    gl.scissor(Math.max(0,Math.floor(x)-1),Math.max(0,Math.floor(G.height-y-h)-1),Math.ceil(w)+2,Math.ceil(h)+2);
+    gl.uniform4f(prog.g.u.rc,x,y,w,h);gl.uniform1f(prog.g.u.rad,p.r*D);gl.uniform1f(prog.g.u.band,bandOf(p)*D);gl.uniform1f(prog.g.u.amt,amtOf(p)*D);gl.drawArrays(gl.TRIANGLES,0,3)}}
+
+/* ---------- loop and measuring ---------- */
+let last=0,ring=[],acc=null;
+function setMode(m){if(m==='gl'&&!glOK)m='blur';mode=m;stage.className='m-'+m;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));if(m==='lens')lensAttach();else lensDetach();glDirty=sceneDirty=true;ring=[]}
+function stats(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),q=p=>s[Math.min(s.length-1,Math.floor(p*s.length))],sum=a.reduce((x,y)=>x+y,0);return{fps:1000*a.length/sum,med:q(.5),p95:q(.95),worst:s[s.length-1],n:a.length}}
+function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&dt<1000){ring.push(dt);if(ring.length>720)ring.shift();if(acc)acc.push(dt)}
+  const scn=$('#scn').value;let moved=false;
+  if($('#drag').checked&&P.mix.on){const nx=Math.round(Math.sin((t-t0)/900)*Math.min(160,W*.12));if(nx!==P.mix.dx){P.mix.dx=nx;P.mix.el.style.translate=`${P.mix.x+nx}px ${P.mix.y}px`;moved=true}}
+  const redraw=scn!=='still'||sceneDirty;if(redraw){drawScene(t-t0);sceneDirty=false}
+  if(mode==='gl'&&glOK){const need=redraw||moved||glDirty||!$('#dirty').checked;if(need){glFrame(redraw||glDirty||!$('#dirty').checked);glDirty=false}}}
+setInterval(()=>{const s=stats(ring);if(s)$('#live').textContent=`${s.fps.toFixed(0)} fps   median ${s.med.toFixed(2)} ms   95% ${s.p95.toFixed(2)} ms   worst ${s.worst.toFixed(1)} ms\n${W}x${H} @ ${D}x = ${(S.width*S.height/1e6).toFixed(1)} MP${glOK?'':'   (WebGL2 not available)'}`},500);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function run(){const b=$('#run');b.disabled=true;const keep=mode,rows=[],names={none:'Solid (ceiling)',blur:'Blur only',lens:'Lens now',gl:'GL engine'};
+  const lensWorks=CSS.supports('backdrop-filter','url(#a) blur(2px)');
+  for(const m of['none','blur','lens','gl']){if(m==='gl'&&!glOK){rows.push([names[m],'WebGL2 not available']);continue}if(m==='lens'&&!lensWorks){rows.push([names[m],'not supported in this browser']);continue}
+    setMode(m);b.textContent='Measuring: '+names[m];await sleep(1500);acc=[];await sleep(5500);const s=stats(acc);acc=null;rows.push([names[m],s])}
+  setMode(keep);b.disabled=false;b.textContent='Run (about 30 s)';
+  const gi=glOK&&gl.getExtension('WEBGL_debug_renderer_info'),ren=gi?gl.getParameter(gi.UNMASKED_RENDERER_WEBGL):'?';
+  $('#res').textContent=`AudioLab Glass Bench\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · GL blur ${$('#lv').value} · lens width ${$('#bw').value}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n\n`+
+   'mode              fps   median   95%    worst\n'+rows.map(([n,s])=>typeof s==='string'?n.padEnd(17)+s:n.padEnd(17)+s.fps.toFixed(0).padStart(4)+s.med.toFixed(2).padStart(8)+s.p95.toFixed(2).padStart(8)+s.worst.toFixed(1).padStart(8)).join('\n')}
+$('#run').onclick=run;
+$('#copy').onclick=async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText($('#res').textContent);b.textContent='Copied'}catch(x){const r=document.createRange();r.selectNodeContents($('#res'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'}setTimeout(()=>b.textContent='Copy table',1500)};
+$('#minb').onclick=e=>{const m=$('#hud').classList.toggle('min');e.currentTarget.textContent=m?'Open':'Fold'};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$('#bw').oninput=()=>{const v=BW();$('#bwo').textContent=v+' px'+(v==20?' Apple':v==0?' off':'');glDirty=true;if(mode==='lens')lensAttach()};$('#scn').onchange=()=>{sceneDirty=true};$('#lv').onchange=()=>{glDirty=true};
+addEventListener('resize',size);glInit();size();setMode(glOK?'gl':'blur');requestAnimationFrame(frame);
+window.__bench={run,setMode,stats:()=>stats(ring)};
+</script>
+
+</body></html>
