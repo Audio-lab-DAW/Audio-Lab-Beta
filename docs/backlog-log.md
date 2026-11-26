@@ -2181,4 +2181,4 @@ Single offline renders move by up to ±30 % between runs on this machine (other 
 - Measured with v0.199 plus this work; rebased onto v0.200 (Voice, which arms its track for the microphone, so it never sleeps) before release.
 
 ### Release
-- v0.201: see the commit "v0.201: light devices and background freeze (task E)" on main; desktop build, artifact and project doc `claude/audiolab-device-backlog-run-E.md` in the release note below.
+- v0.201: commit 775d6e7 on main. Desktop build run 45770668109 succeeded. Artifact 1b07d888 updated to version 224. Project doc `claude/audiolab-device-backlog-run-E.md`.
