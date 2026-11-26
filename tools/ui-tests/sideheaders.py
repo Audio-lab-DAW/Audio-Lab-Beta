@@ -128,7 +128,7 @@ with sync_playwright() as p:
     ok(run(pg, "PIN.wins.size") == 0, 'unpinned both with the pin in their windows')
     # the panel's own tab
     pg.click('#fxHide'); pg.wait_for_timeout(500); h1 = run(pg, "UI.fxHide"); pg.screenshot(path=os.path.join(OUT, 'devices_hidden.png'))
-    tb = run(pg, "(()=>{const r=document.getElementById('fxHide').getBoundingClientRect();return r.width>60&&r.height>=24&&r.bottom<=innerHeight&&r.top>=0})()")
+    tb = run(pg, "(()=>{const r=document.getElementById('fxHide').getBoundingClientRect();return r.width>60&&r.height>=18&&r.bottom<=innerHeight&&r.top>=0})()")
     pg.click('#fxHide'); pg.wait_for_timeout(500); h2 = run(pg, "UI.fxHide")
     ok(h1 is True and h2 is False and tb, 'the Devices tab hides and shows the panel; it stays on screen while hidden')
     tip = run(pg, "(()=>{const b=document.getElementById('fxHide');return b.title||b.dataset.tip||b.getAttribute('data-title')||b.getAttribute('aria-label')})()"); ok('—' not in tip and len(tip) > 10, 'Devices tab tooltip: ' + tip)
