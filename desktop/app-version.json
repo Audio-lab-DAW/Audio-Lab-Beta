@@ -1,7 +1,7 @@
 {
-  "version": "0.199",
-  "sha256": "8f7a9594c818d8841c57e36619fff86183fb29656caccc5fbc11501c6759d636",
-  "size": 3047190,
+  "version": "0.200",
+  "sha256": "f412b61b054e484d9a02c34dc14b41378ca1817cfbb3ace03cfb7f5f79174ee6",
+  "size": 3115871,
   "minShell": "0.147.0",
-  "notes": "The mixer cables are clearer: up to 5 levels with a label on each line saying where it comes from and where it goes, arrows and flowing dots that show the direction, a pulse along sidechain cables on every hit and a moving wave on modulation cables. Dragging the top of the cable area now gives the cables more room inside the window, the bottom edge makes only the cable area taller or lower, and the corner still resizes the whole mixer."
+  "notes": "New effect Voice for singing and talking: record from your microphone, see your voice as notes like in Melodyne and drag them up or down, tune it from natural to the hard auto-tune sound, turn it into a man, woman, child, choir or doubled voice, or pick a pop vocal chain. AI voice models are not in it yet; they will need a later desktop app."
 }
