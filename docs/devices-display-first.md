@@ -128,7 +128,9 @@ Rules for the implementation so that floating glass stays cheap:
 - On the picture goes away while the rail is open, and comes back when it is closed.
 - User's words: "The glass rail is not for everything", so the picks above stay as each device's own starting state.
 
-How this was read (to confirm with the user):
+**Confirmed by the user on 26 November: this is the spec for the implementation, and it applies to every device, including instruments and effects added in the future.**
+
+Starting state per device:
 
 | Device | Starts with | Closed state shows |
 |---|---|---|
@@ -139,12 +141,13 @@ How this was read (to confirm with the user):
 | Echo delay (and Reverb) | rail closed | hover reveal |
 | Voice | rail open | hover reveal |
 
-Assumptions made in the prototype, not yet confirmed:
+Rules, all confirmed by the user:
 
-- Every device has all three states, also the ones that start closed (Compressor, Echo delay, Pro EQ can still open a rail from the eye).
+- Every device has all three states, also the ones that start closed (Compressor, Echo delay and Pro EQ can still open a rail from the eye).
 - A plain click on the eye opens and closes the rail; the right-click menu also has "Open / Close the glass rail". On touch the menu opens with a long press.
-- The choice between hover reveal and on the picture is kept per device (per instance), like today's open or shut parameters (`kOpen`). Whether it should instead be one setting for the whole app is open.
-- Devices of the same family as a picked one take its starting state. The roughly sixty devices not shown in round 1 need a default: suggested rule, rail open when the device has more than about eight parameters or pages, otherwise closed with hover reveal.
+- The choice between hover reveal and on the picture is kept per device (per instance), like today's open or shut parameters (`kOpen`). It is not one setting for the whole app.
+- Devices of the same family as a picked one take its starting state. For the roughly sixty devices not shown in round 1, and for every new device: the rail starts open when the device has more than about eight parameters or has pages, otherwise it starts closed with hover reveal.
+- A new instrument or effect is built display first from the start: sideways title strip, the display filling the device, a glass rail, a hover-reveal dock, and positions for on the picture where its controls have a place in the display.
 
 The prototype of this behaviour is the first section of the pick page ("Your pick: one device, three states"): six devices, each starting in its picked state, with the eye and its right-click menu working.
 
@@ -157,6 +160,6 @@ Notes for the implementation:
 
 ## 8. What happens next
 
-1. Done: the user picked (section 7). Open: confirm the assumptions listed there.
+1. Done: the user picked and confirmed the rules (section 7).
 2. Implementation device by device in index.html (serial work, after or together with G3, since the floating glass uses the glass engine with the flat-picture feed for canvases).
 3. The page source is in the artifact; it can be read back from the link above.
