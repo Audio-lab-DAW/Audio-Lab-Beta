@@ -2546,3 +2546,8 @@ Desktop app
 ### Not verified
 - On the user's Mac with a real GPU; how the fade looks at 120 Hz.
 
+
+### Release (v0.209)
+- Commit 3ecb7dd on main, on top of v0.207 (task Y) and v0.208 (task AE), which other sessions released while this one worked. The commit message says "mapping in the v0.208 entry". It means this v0.209 entry: the version moved during the rebase.
+- Desktop build run 45776686657 succeeded (Windows 1 min 38 s, Mac 3 min 35 s). MIN_SHELL stays 0.147.0.
+- Artifact 1b07d888 updated to version 232 (it was at v0.208). Project doc `claude/audiolab-about-showcase.md`.
