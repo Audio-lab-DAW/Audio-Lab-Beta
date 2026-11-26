@@ -2551,3 +2551,47 @@ Desktop app
 - Commit 3ecb7dd on main, on top of v0.207 (task Y) and v0.208 (task AE), which other sessions released while this one worked. The commit message says "mapping in the v0.208 entry". It means this v0.209 entry: the version moved during the rebase.
 - Desktop build run 45776686657 succeeded (Windows 1 min 38 s, Mac 3 min 35 s). MIN_SHELL stays 0.147.0.
 - Artifact 1b07d888 updated to version 232 (it was at v0.208). Project doc `claude/audiolab-about-showcase.md`.
+
+## 26 November 2026, v0.210: mixer flicker and sidechain window layout (task AG, from a later message)
+> "Whenever you turn a device on and off on the mixer, it looks like some elements flicker, like the stereo field and the level meters ... Let's fix that. And let's improve the sidechaining cable window a little bit when it comes to arranging the buttons, and maybe improve the style of the buttons a little bit. The delete button is in the wrong place, I think. Look online how a sidechain like this should look ... make it a little bit more clear what is what, and use more illustrations and icons, but not too much, just subtle."
+
+### What was there before (found by measuring)
+- The power dot on an effect slot did `changed(true)` and then `renderMixer()`; `changed(true)` runs `renderHeaders()`, which also calls `renderMixer()`. So one click rebuilt the whole mixer twice. Every rebuild made new canvases: for one frame each channel picture was empty (transparent, pixel sum 0), the fader meters had no clip (drawn full height), the master loudness and peak showed "–" until the slow read-out caught up (about a quarter of a second, longer when stopped: then it stayed "–"), and the stereo field lost its trails. The audio analysers were not the cause: they stay in `NODES` and the effect chain is reconnected in one step.
+- The same happened on every other mixer rebuild (mute, solo, adding an effect, the devices panel's power button).
+- Sidechain window (v0.205): names with an arrow, then 8 knobs in two rows in no particular order, Listen to, the Focus knob alone on a row, then Hear the trigger (an emoji), Presets, Swap, Device in one row and the delete button alone at the bottom right, with no undo note.
+
+### Research
+- **FabFilter Pro-C sidechain section** (fabfilter.com/help/pro-c/using/sidechainsection): the trigger controls are a separate section under the main controls, shown with a Side Chain button; level of the trigger, Audition (click, or hold for a moment) to hear "the filtered and stereo-linked signal that will be used to trigger compression", input choice, stereo link, then the trigger EQ.
+- **Ableton Compressor sidechain** and **Bitwig Audio Sidechain modulator** (read for task AB, see the v0.205 entry): source first, gain, filter and listen; dynamics settings on the main panel.
+- **Cableguys ShaperBox / Kickstart 2 / VolumeShaper**: the curve is the centre of the window and the amount (Mix) is the main control; ShaperBox switches to audio trigger with an "External Sidechain" button and keeps the trigger detection in a small separate setup panel (Cableguys ShaperBox 3 support page; the VolumeShaper manual page that was asked for returned the ShaperBox FAQ instead, so VolumeShaper's own layout was not read). Kickstart's picture of the curve over the kick was already the model in v0.205.
+- **Trackspacer** (v0.205 entry): one big amount, the frequency range second.
+- **NN/g, "Dangerous UX: consequential options close to benign options"** (nngroup.com/articles/proximity-consequential-options/): "Avoid placing highly consequential actions ... directly next to options that are benign"; add space and other cues (colour, icon), it is fine to make the dangerous one a little harder to hit.
+- **Smashing Magazine, "How to manage dangerous actions in user interfaces"** (2024): undo is smoother than a confirmation for reversible actions; confirmations get clicked "on autopilot"; dangerous actions in a separated area at the bottom. (The last part of the page came through as a summary only.)
+- Taken from this: who triggers whom first; the picture of the duck next; then the amount and shape, the timing, and what the trigger listens to (the sidechain filter and audition grouped together, like Pro-C); Remove in a footer, on the left, away from the other buttons, red only as text, no question first but an Undo button right where the window was (removing is one undo step).
+
+### Built (block "v0.210: mixer flicker and sidechain window layout (task AG)" before `askChoice`, CSS before `.dacv`; names `ag*`, `AG`)
+- **Device on and off**: the slot's power dot and "Turn on / Turn off" in the slot menu run inside `agOnly`: the mixer is not rebuilt, `agSlotsOnly` only switches the `off` look of the slots (and redraws the cables); if anything else differs it falls back to a full rebuild. The pause button of the sidechain window does the same.
+- **Every other rebuild** (`renderMixer` wrapper, outermost): before the rebuild it keeps each channel's canvas and fader meter; after it, the old canvas (with its drawing, trails and cached state) and the old meter (with its peak line) are moved into the new channel in place of the new ones (attributes copied, never width or height, since setting them clears a canvas), and the master loudness, peak and clip light keep their last values. `MXV` is updated.
+- **Sidechain window** (`abxBuild` is now `agBuild`):
+  - Header: small captions Trigger and Ducks over the two coloured names, the arrow, a swap button next to it; pause and close on the right.
+  - A line in words (orange "Paused: ..." when paused).
+  - Picture: while playing the live picture of v0.205; when stopped or paused a preview of one duck (`agPaint`): the hit of the trigger, the level of the ducked track with attack, hold and release marked under it, the depth in dB, "preview · play to see it live". Drawn only when a setting or the size changes.
+  - Sections with a small icon and a heading: How much (Duck amount, Curve, Trigger level, trigger gain, and Presets on the heading's right), Timing "after each hit" (Attack, Hold, Release, Look-ahead), Listen to "what part of Kick makes it duck" (All, Lows, Band, Highs, each with a small filter shape; Hear it with a headphones icon; Focus as a slider on its own line with a label).
+  - Footer: Remove (bin icon, red text, no frame until hover) on the left, Show device on the right.
+  - Remove: the sidechain goes at once (one undo step) and a small bar appears where the window was: "Pad no longer ducks under Kick." with Undo (and ✕), for 8 seconds; Undo brings back the Ducker and opens its window again; if something else changed meanwhile it says so instead of undoing the wrong step.
+  - Every button and control has a tooltip; no em dashes in the new text.
+
+### Tested (`tools/ui-tests/taskAG.py`, headless Chromium; the same test on v0.209 for comparison)
+- No page errors on load or in any step.
+- Stereo field view, Kick channel with a neutral Imager added for the test, playing from beat 72, Imager off and on, every frame recorded (canvas element, pixel sum, fader meter clip, master loudness): v0.210 one canvas element, no blank frame, no full meter, no "–", no mixer rebuild, biggest change next to a toggle 28467 against 34350 for the music alone. v0.209: 3 canvas elements, a blank frame and a full meter at the toggle, "–" in the loudness, 2 rebuilds, a change of 212329 next to the toggle (the music alone 28881).
+- Meter view, Bass channel: v0.210 one canvas, nothing blank, 298641 next to a toggle against 372910 for the music; v0.209 3 canvases, a blank frame, "–" twice.
+- Stopped: v0.210 nothing changes; v0.209 new canvases and the loudness stays "–" after the toggle.
+- Mute on and off (a full rebuild): v0.210 one canvas element, no blank frame; v0.209 3 elements and a blank frame.
+- Sidechain window (Kick to Pad): sections How much, Timing, Listen to; footer Remove, Show device; 0 controls without a tooltip. Remove: the Ducker is gone, the window closes, the bar reads "Pad no longer ducks under Kick.", one undo step; Undo: the Ducker is back and its window open, the bar gone. Pause: off, line "Paused: Pad plays at full level". Band shows the Focus slider. Screenshots before and after (stopped with the preview, playing, paused, the undo bar) looked at.
+- Demo unchanged: `tools/engine-tests/export_same.py` Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96), same checksums.
+
+### Not verified
+- The user's Mac, trackpad and real GPU; the devices panel redraws its own pictures when its power button is used (another run's area, not touched).
+
+### Left
+- Clicking and holding Hear it to listen only while held (Pro-C does this); a preview curve in the devices panel's Ducker.

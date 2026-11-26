@@ -1,7 +1,7 @@
 {
-  "version": "0.209",
-  "sha256": "58888c8247b34f7e763ea778bd4eba585c32d011b4877e646707fae3c4e1156f",
-  "size": 3372981,
+  "version": "0.210",
+  "sha256": "f63b4a2ed3e33af2535d0ca7cc6cf6ff71553bd2c3378bf5f1a7287bfaa51307",
+  "size": 3392019,
   "minShell": "0.147.0",
   "notes": "The About window (click the logo, or Settings, General, \"What's inside AudioLab\") now shows what runs under the hood: six highlights and a \"Show all\" list of 34 features in six groups, each with a plain line and the number we measured. Nothing else changed."
 }

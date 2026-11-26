@@ -1,1 +1,1 @@
-The About window (click the logo, or Settings, General, "What's inside AudioLab") now shows what runs under the hood: six highlights and a "Show all" list of 34 features in six groups, each with a plain line and the number we measured. Nothing else changed.
+Turning a device on or off in the mixer no longer makes the stereo field, meters and loudness flicker. The sidechain window is laid out more clearly, with a picture of the duck, small icons, and Remove at the bottom with an Undo.

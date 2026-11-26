@@ -1811,6 +1811,23 @@ body #splash.ab .about{padding-bottom:6px;max-width:min(700px,calc(94vw - 32px))
 body.lite .ahfT,body.lite .ahfG{background:#15171d;box-shadow:none}
 body.lite .ahfT:hover{background:#1a1d25}
 .genhood{margin-left:8px}
+/* v0.210 (task AG): the sidechain window */
+.abxw.agw{width:344px;padding:9px 11px 0}
+.agh{gap:4px;align-items:center}.agdir{display:flex;align-items:flex-end;gap:5px;min-width:0;flex:1}.agrl{display:flex;flex-direction:column;gap:1px;min-width:0}.agrl small{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#7f8594;padding-left:4px}
+.agdir .abxar{margin-bottom:6px}.agib{min-height:24px!important;width:26px;padding:0!important;display:grid;place-items:center;background:transparent!important;border:1px solid transparent!important;border-radius:7px!important;color:#aab0bd}.agib svg{width:15px;height:15px}.agib:hover{color:#fff;background:rgba(255,255,255,.08)!important}
+.agdir .agsw{margin-bottom:1px;width:24px;color:#8f96a5}.agdir .agsw svg{width:14px;height:14px}.agh .abxpw{margin-left:auto}.agh .abxpw.on{color:#7dff9a}
+.agw .abxwt{margin:4px 2px 7px}.agw.off .abxwt{color:#ffb04f}.agw .abxcv{height:80px;margin-bottom:2px}
+.ags{border-top:1px solid rgba(255,255,255,.06);margin-top:6px;padding-top:5px}.agsh{display:flex;align-items:center;gap:5px;color:#9aa0ad;font-size:10.5px;margin:0 2px 3px;min-height:20px}.agsh>svg{width:13px;height:13px;flex:none;opacity:.75}.agsh b{color:#cfd3db;font-weight:600}.agsh span{color:#737a88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.agpre{margin-left:auto;min-height:20px!important;padding:0 7px!important;font-size:10.5px!important;display:inline-flex;align-items:center;gap:4px;border-radius:6px!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.1)!important;color:#cfd3db}.agpre svg{width:12px;height:12px}.agpre:hover{background:rgba(255,255,255,.1)!important}
+.agw .abxk{margin:0}
+.agfo{display:flex;align-items:center;gap:6px}.agfo .abxseg{flex:1}.agfo .abxseg button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:3px;min-height:24px;padding:0 4px}.agfo .abxseg button svg{width:13px;height:13px;opacity:.8}
+.agls{min-height:26px!important;padding:0 8px!important;font-size:11px!important;display:inline-flex;align-items:center;gap:4px;border-radius:7px!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.12)!important;color:#cfd3db;white-space:nowrap}.agls svg{width:13px;height:13px}.agls.on{background:color-mix(in srgb,var(--sc) 32%,transparent)!important;border-color:var(--sc)!important;color:#fff}
+.agff{display:flex;align-items:center;gap:8px;margin-top:6px}.agff>span{font-size:10.5px;color:#9aa0ad;padding-left:2px}.agff .hb{height:20px}
+.agft{display:flex;align-items:center;gap:6px;margin:8px -11px 0;padding:7px 11px 8px;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);border-radius:0 0 12px 12px}
+.agft button{min-height:24px!important;padding:0 9px!important;font-size:11px!important;display:inline-flex;align-items:center;gap:5px;border-radius:7px!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.12)!important;color:#cfd3db}.agft button svg{width:13px;height:13px}.agft button:hover{background:rgba(255,255,255,.1)!important;color:#fff}
+.agft .agrm{background:transparent!important;border-color:transparent!important;color:#e58c8c;margin-right:auto}.agft .agrm:hover{background:rgba(255,90,90,.14)!important;border-color:rgba(255,107,107,.4)!important;color:#ffb3b3}
+#agUndo{position:fixed;z-index:9790;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;border-radius:10px;background:rgba(22,23,30,.97);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5);color:#dfe2ea;font:12px Inter,system-ui,sans-serif;max-width:420px}
+#agUndo>svg{width:14px;height:14px;fill:none;stroke:#e58c8c;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}#agUndo button{min-height:24px;padding:0 9px;display:inline-flex;align-items:center;gap:4px;border-radius:7px;font-size:11px}#agUndo button svg{width:13px;height:13px}#agUndo .agux{width:24px;padding:0;justify-content:center;background:transparent;border-color:transparent;color:#9aa0ad}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5375,7 +5392,7 @@ function drawChain(){let sv=fxin.querySelector('svg.chain');const ds=[...fxin.qu
 /* device clipboard + menu (Live-style copy with exact settings) */
 let DEVCLIP=null,DEVT='Devices';
 const cloneFx=f=>({...JSON.parse(JSON.stringify(f)),id:rid()});
-function fxMenu(x,y,t,f){const i=t.fx.indexOf(f);openMenu(x,y,[{head:FXDEF[f.type].name+' · '+t.name},{label:f.on?'Turn off':'Turn on',act:()=>{pushUndo();f.on=!f.on;changed(true);renderMixer()}},{label:'Copy device',sub:'With all its settings',act:()=>{DEVCLIP=cloneFx(f);toast(FXDEF[f.type].name+' copied. Right-click another track\'s devices or mixer slots to paste.')}},
+function fxMenu(x,y,t,f){const i=t.fx.indexOf(f);openMenu(x,y,[{head:FXDEF[f.type].name+' · '+t.name},{label:f.on?'Turn off':'Turn on',act:()=>{pushUndo();f.on=!f.on;agOnly(()=>{changed(true);renderMixer()})}},{label:'Copy device',sub:'With all its settings',act:()=>{DEVCLIP=cloneFx(f);toast(FXDEF[f.type].name+' copied. Right-click another track\'s devices or mixer slots to paste.')}},
   {label:'Paste after this',dis:!DEVCLIP,act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(DEVCLIP));changed(true);renderMixer()}},{label:'Duplicate',act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(f));changed(true);renderMixer()}},'-',{label:'Delete',danger:1,act:()=>{pushUndo();t.fx.splice(i,1);changed(true);renderMixer()}}])}
 function chainMenu(x,y,t){openMenu(x,y,[{head:'Devices · '+t.name},{label:'Paste device',dis:!DEVCLIP,sub:DEVCLIP?FXDEF[DEVCLIP.type].name:'Copy a device first',act:()=>{pushUndo();t.fx.push(cloneFx(DEVCLIP));changed(true);renderMixer()}},'-',{head:'Add effect'},...Object.entries(FXDEF).map(([k,d])=>({label:d.name,act:()=>{pushUndo();t.fx.push(mkFx(k));changed(true);renderMixer()}}))])}
 fxin.addEventListener('contextmenu',e=>{const t=curT();if(!t)return;const d=e.target.closest('.dev[data-d=fx]');e.preventDefault();e.stopPropagation();const z=ZOOM;if(d){const f=t.fx.find(q=>q.id===d.dataset.id);if(f)fxMenu(e.clientX/z,e.clientY/z,t,f)}else chainMenu(e.clientX/z,e.clientY/z,t)});
@@ -5521,7 +5538,7 @@ document.addEventListener('click',e=>{const w=W0();if(!w||!w.contains(e.target))
   if(e.target.closest('#mxClip')){MXH.get('master').max=-90;return}
   const t=S.tracks.find(x=>x.id===s.dataset.id);if(!t)return;const a=e.target.closest('[data-a]');
   if(a){const k=a.dataset.a;if(k==='arm'){armTrack(t).then(renderMixer);return}pushUndo();t[k]=!t[k];changed(true);renderMixer();return}
-  const sl=e.target.closest('.slot');if(sl){if(sl.dataset.add){const r=sl.getBoundingClientRect();fxAddPop(r.left/ZOOM,r.bottom/ZOOM+2,t);return}if(e.target.closest('.pw')){const f=t.fx.find(q=>q.id===sl.dataset.fid);pushUndo();f.on=!f.on;changed(true);renderMixer();return}selectTrack(t.id);return}
+  const sl=e.target.closest('.slot');if(sl){if(sl.dataset.add){const r=sl.getBoundingClientRect();fxAddPop(r.left/ZOOM,r.bottom/ZOOM+2,t);return}if(e.target.closest('.pw')){const f=t.fx.find(q=>q.id===sl.dataset.fid);pushUndo();f.on=!f.on;agOnly(()=>{changed(true);renderMixer()});return}selectTrack(t.id);return}
   if(!e.target.closest('[data-c]'))selectTrack(t.id)});
 document.addEventListener('contextmenu',e=>{const w=W0();if(!w||!w.contains(e.target))return;const s=e.target.closest('.mx');if(!s||s.dataset.id==='master')return;e.preventDefault();const t=S.tracks.find(x=>x.id===s.dataset.id),sl=e.target.closest('.slot[data-fid]'),z=ZOOM;
   if(sl)fxMenu(e.clientX/z,e.clientY/z,t,t.fx.find(q=>q.id===sl.dataset.fid));else chainMenu(e.clientX/z,e.clientY/z,t)});
@@ -5980,7 +5997,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.209',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.210',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17172,7 +17189,7 @@ function abxPos(W,A){const F=abxFind(W.fid);if(!F)return;const{f}=F,el=W.el,z=ZO
 const ABXL2=new Map();
 function abxTick(force){const w=document.getElementById('mixWin'),open=w&&!w.hidden;
  if(ABXW.size){for(const W of ABXW.values()){const F=abxFind(W.fid);if(!F){abxClose(W.fid);continue}if(!open){W.el.hidden=true;if(W.ln)W.ln.setAttribute('d','');continue}abxPos(W,abxAnchor(F.f,F.t));
-   const cv=W.cv;if(cv&&!W.el.hidden){const dp=Math.min(2,(devicePixelRatio||1)*(ZOOM||1)),cw=cv.clientWidth,ch=cv.clientHeight;if(cw&&ch){if(cv.width!==Math.round(cw*dp)){cv.width=Math.round(cw*dp);cv.height=Math.round(ch*dp)}const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);abxPaint(g,cw,ch,F.f,abxX(F.t,F.f),true)}}}}
+   const cv=W.cv;if(cv&&!W.el.hidden){const dp=Math.min(2,(devicePixelRatio||1)*(ZOOM||1)),cw=cv.clientWidth,ch=cv.clientHeight;if(cw&&ch){if(cv.width!==Math.round(cw*dp)){cv.width=Math.round(cw*dp);cv.height=Math.round(ch*dp)}const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);agPaint(g,cw,ch,F.f,abxX(F.t,F.f))}}}}
  if(!open)return;abxLights(w)}
 function abxLights(w){const now=performance.now(),L=new Map(),put=(id,v,c,role)=>{const o=L.get(id)||{v:0,c,r:''};if(v>=o.v){o.v=v;o.c=c}o.r=o.r.includes(role)?o.r:o.r+role;L.set(id,o)};
  for(const t of S.tracks){for(const f of t.fx||[]){if(f.type!=='duck'||!f.on)continue;const s=abxSrc(f);if(!s)continue;const X=abxX(t,f),live=X&&now-X.m.t<300,gr=live?clamp(1-X.m.g,0,1):0,kv=live&&X.m.k>1e-5?clamp((20*Math.log10(X.m.k)+48)/48,0,1):0;
@@ -17641,6 +17658,100 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   if(b.id==='genHood'){showAbout();return}
   const a=document.getElementById('ahfAll');if(!a)return;const open=a.hidden;a.hidden=!open;b.setAttribute('aria-expanded',String(open));b.textContent=open?'Show less':'Show all '+a.querySelectorAll('.ahfR').length+' features';
   if(open)requestAnimationFrame(()=>{const sp=document.getElementById('splash');const t=document.getElementById('ahf');if(sp&&t)sp.scrollTo({top:t.offsetTop-24,behavior:AT.reduce||document.body.classList.contains('lite')?'auto':'smooth'})})});
+/* ===== v0.210: mixer flicker and sidechain window layout (task AG) =====
+   Research and sources in docs/backlog-log.md. Names start with ag / AG.
+   - Turning a device on or off in a mixer channel only changes that slot: the mixer is not rebuilt (agOnly, agSlotsOnly).
+   - Any other mixer rebuild keeps each channel's picture (canvas with what it has drawn, stereo field trails included), its level meter
+     with the peak line, and the master's loudness read-outs, so nothing goes blank or jumps for a frame (agKeep).
+   - Sidechain window: who triggers whom at the top (with swap), a picture of the duck (a preview of one duck when stopped, live when playing),
+     then How much (amount, curve, trigger level, trigger gain, presets), Timing (attack, hold, release, look-ahead), Listen to (with small
+     pictures, focus, hear the trigger), and a footer with Remove on the left, away from the rest, with Undo right where the window was. */
+const AG={slot:0};
+function agOnly(fn){AG.slot++;try{fn()}finally{AG.slot--}}
+/* only the effect slots: their on and off look. false when anything else differs, then the mixer is rebuilt as usual */
+function agSlotsOnly(w){const ms=w.querySelector('.mxs');if(!ms)return false;const L=ms.querySelectorAll('.mx[data-id]:not(.master)');if(L.length!==S.tracks.length)return false;
+ for(let i=0;i<L.length;i++){const st=L[i],t=S.tracks[i];if(st.dataset.id!==t.id)return false;const sl=st.querySelectorAll('.mxi .slot[data-fid]');if(sl.length!==t.fx.length)return false;
+  for(let j=0;j<sl.length;j++)if(sl[j].dataset.fid!==t.fx[j].id)return false}
+ for(let i=0;i<L.length;i++){const t=S.tracks[i],sl=L[i].querySelectorAll('.mxi .slot[data-fid]');for(let j=0;j<sl.length;j++){const off=!t.fx[j].on;if(sl[j].classList.contains('off')!==off)sl[j].classList.toggle('off',off)}}
+ try{cabSoon()}catch(e){}return true}
+/* move the old canvas and meter into the new channel, so the picture goes on where it was */
+function agKeep(w,K,M){for(const st of w.querySelectorAll('.mx[data-id]')){const k=K.get(st.dataset.id);if(!k)continue;K.delete(st.dataset.id);
+  const cv=st.querySelector('canvas.mxv'),oc=k.cv;if(cv&&oc&&cv!==oc&&!oc.isConnected){const sz=n=>n==='width'||n==='height';/* never touch the size: setting it clears the picture */for(const a of[...oc.attributes])if(!sz(a.name)&&!cv.hasAttribute(a.name))oc.removeAttribute(a.name);for(const a of[...cv.attributes])if(!sz(a.name)&&oc.getAttribute(a.name)!==a.value)oc.setAttribute(a.name,a.value);
+   delete oc._st;cv.replaceWith(oc)}
+  const fm=st.querySelector('.fm'),of=k.fm;if(fm&&of&&fm!==of&&!of.isConnected){of.className=fm.className;fm.replaceWith(of)}else if(oc)delete oc._fm}
+ if(M){for(const[id,o] of[['mxLu',M.lu],['mxPk',M.pk]]){const e=document.getElementById(id);if(e&&o&&e.textContent==='–'&&o.t)e.textContent=o.t}const c=document.getElementById('mxClip');if(c&&M.cl)c.className=M.cl.c}
+ MXV=[...w.querySelectorAll('canvas.mxv')]}
+{const _rmAG=renderMixer;renderMixer=function(){const w=document.getElementById('mixWin');let K=null,M=null;
+ if(w&&!w.hidden){if(AG.slot&&agSlotsOnly(w))return;K=new Map();for(const st of w.querySelectorAll('.mx[data-id]')){const id=st.dataset.id;if(!K.has(id))K.set(id,{cv:st.querySelector('canvas.mxv'),fm:st.querySelector('.fm')})}
+  const g=i=>{const e=document.getElementById(i);return e?{t:e.textContent,c:e.className}:null};M={lu:g('mxLu'),pk:g('mxPk'),cl:g('mxClip')}}
+ const r=_rmAG.apply(this,arguments);try{if(K&&K.size)agKeep(w,K,M)}catch(e){console.error('AudioLab mixer keep',e)}return r}}
+/* ---- the sidechain window ---- */
+const AGIC={clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',ear:'<path d="M7 9a5 5 0 0 1 10 0c0 3-3 4-3 7a2.5 2.5 0 0 1-5 0"/><path d="M10 9.5a2 2 0 0 1 4 0"/>',list:'<path d="M5 7h14M5 12h14M5 17h9"/>',
+ hp:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',dev:'<rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="8.5" cy="12" r="2"/><path d="M13 10h5M13 14h4"/>',
+ all:'<path d="M2 12c2-6 4-6 5 0s3 6 5 0 3-6 5 0 3 6 5 0"/>',low:'<path d="M2 8h9c4 0 5 8 11 9"/>',band:'<path d="M2 18c6 0 5-11 10-11s4 11 10 11"/>',high:'<path d="M2 17c6-1 7-9 11-9h9"/>',undo:'<path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12h-2" transform="translate(0 -6)"/>'};
+const agI=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AGIC[k]||ABXIC[k]||''}</svg>`;
+function agBuild(W){const F=abxFind(W.fid);if(!F){abxClose(W.fid);return}const{t,f}=F,s=abxSrc(f),el=W.el,sn=s?s.name:'?',sc=s?s.color||'#ff7a7a':'#777',dc=t.color||'#4cc9f0',p=f.p,E=esc;
+ for(const k of[...CT.keys()])if(k.startsWith('abx:'+f.id+':'))CT.delete(k);
+ const nm=k=>k==='amt'?'Duck '+t.name:k==='gain'?sn+' level':ABXL[k];
+ const kn=(k,kind)=>{const d=ABXP[k];return ctl(kind||'kn','abx:'+f.id+':'+k,nm(k),specD(d),()=>p[k]??d[2],v=>{p[k]=v;abxSet(t,f)})};
+ const fo=p.fo||'all',FO=[['all','All','Listen to all of '+sn],['low','Lows','Listen only to the low end of '+sn+' (kick, bass). Best for a kick'],['band','Band','Listen to one band around the Focus frequency, for a voice or a snare'],['high','Highs','Listen only to the top of '+sn+' (hats, snare)']];
+ el.classList.add('agw');el.style.setProperty('--sc',sc);el.style.setProperty('--dc',dc);el.classList.toggle('off',!f.on);
+ el.innerHTML=`<div class="abxwh agh" title="Drag to move this window. It stays where you put it for this cable. Double-click to put it back">
+   <div class="agdir"><span class="agrl"><small>Trigger</small><span class="abxch" style="--c:${sc}" title="${E(sn)} is the trigger: when it plays, ${E(t.name)} ducks">${E(sn)}</span></span>
+   <svg class="abxar" viewBox="0 0 40 12" aria-hidden="true"><path d="M2 6h32" stroke="currentColor" stroke-width="2"/><path d="M30 1.5 37 6l-7 4.5z" fill="currentColor"/></svg>
+   <span class="agrl"><small>Ducks</small><span class="abxch" style="--c:${dc}" title="${E(t.name)} is the one that ducks">${E(t.name)}</span></span>
+   <button type="button" class="agib agsw" data-w="sw" title="Swap the direction: ${E(sn)} ducks when ${E(t.name)} plays" aria-label="Swap the direction">${abxI('swap')}</button></div>
+   <button type="button" class="agib abxpw${f.on?' on':''}" data-w="on" title="${f.on?'Pause the ducking ('+E(t.name)+' plays at full level)':'Turn the ducking back on'}" aria-label="${f.on?'Pause':'Turn on'}">${abxI('off')}</button><button type="button" class="agib" data-w="x" title="Close this window. The sidechain keeps working. Click the cable to open it again" aria-label="Close">✕</button></div>
+  <p class="abxwt">${f.on?`<b>${E(t.name)}</b> ducks every time <b>${E(sn)}</b> plays`:`Paused: <b>${E(t.name)}</b> plays at full level`}</p>
+  <canvas class="abxcv" title="Stopped: the shape of one duck after a hit of ${E(sn)}, with attack, hold and release. Playing: ${E(sn)} filled, how far ${E(t.name)} ducks as a line, the trigger level dashed"></canvas>
+  <section class="ags"><div class="agsh">${abxI('duck')}<b>How much</b><button type="button" class="agpre" data-w="pre" title="Ready-made settings for the ducking">${agI('list')}Presets</button></div><div class="abxk">${['amt','cv','th','gain'].map(k=>kn(k)).join('')}</div></section>
+  <section class="ags"><div class="agsh">${agI('clock')}<b>Timing</b><span>after each hit</span></div><div class="abxk">${['at','hd','rl','la'].map(k=>kn(k)).join('')}</div></section>
+  <section class="ags"><div class="agsh">${agI('ear')}<b>Listen to</b><span>what part of ${E(sn)} makes it duck</span></div>
+   <div class="agfo"><div class="abxseg">${FO.map(([k,n,tp])=>`<button type="button" data-fo="${k}" class="${fo===k?'on':''}" title="${E(tp)}">${agI(k)}${n}</button>`).join('')}</div><button type="button" data-w="ls" class="agls${p.ls?' on':''}" title="Hear only what triggers the ducking (${E(sn)} as the Ducker hears it) through ${E(t.name)}, to set Listen to and Focus. Click again to stop" aria-pressed="${p.ls?'true':'false'}">${agI('hp')}Hear it</button></div>
+   ${fo!=='all'?`<div class="agff" style="--c:${sc}"><span title="The frequency the trigger listens to">Focus</span>${kn('ff','hb')}</div>`:''}</section>
+  <div class="agft"><button type="button" class="agrm" data-w="rm" title="Remove the sidechain: ${E(t.name)} stops ducking. You can undo it">${abxI('rm')}Remove</button><button type="button" data-w="dev" title="Show the Ducker in the devices of ${E(t.name)}">${agI('dev')}Show device</button></div>`;
+ for(const k of['amt','th','gain','at','hd','rl','cv','la','ff']){const c=el.querySelector(`[data-c="abx:${f.id}:${k}"]`);if(c&&ABXT[k])c.title=nm(k)+': '+ABXT[k]+'. Drag '+(k==='ff'?'sideways':'up or down')+', Shift for fine, double-click to reset'}
+ paintAll(el);W.cv=el.querySelector('canvas');if(W.cv)W.cv._agk='';
+ if(!el._ag){el._ag=1;
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-w],[data-fo]');if(!b)return;const F2=abxFind(W.fid);if(!F2)return;const{t:t2,f:f2}=F2;
+   if(b.dataset.fo){pushUndo();f2.p.fo=b.dataset.fo;abxSet(t2,f2);agBuild(W);return}
+   const k=b.dataset.w;if(k==='x')abxClose(W.fid);else if(k==='on'){pushUndo();f2.on=!f2.on;agOnly(()=>changed(true));agBuild(W)}else if(k==='ls'){f2.p.ls=!f2.p.ls;abxSet(t2,f2);agBuild(W)}
+   else if(k==='rm')agRemove(W,t2,f2);else if(k==='sw'){const c=cabList().find(x=>x.fx===f2);abxClose(W.fid);if(c)abxSwap(c)}else if(k==='dev'){selectTrack(t2.id);try{renderFx()}catch(x){}}
+   else if(k==='pre'){const r=b.getBoundingClientRect(),P=FXPRE.duck||{};openMenu(r.left,r.bottom+4,[{head:'Ducker presets'},...Object.entries(P).map(([pk,[nm2,pv]])=>({label:String(nm2).split('|').pop(),check:f2.p.pre===pk,act:()=>{pushUndo();const keep={src:f2.p.src};Object.assign(f2.p,JSON.parse(JSON.stringify(pv)),keep,{pre:pk});abxSet(t2,f2);agBuild(W);try{renderFx()}catch(x){}}}))])}});
+  let D=null;
+  el.addEventListener('pointerdown',e=>{abxFront(W);const hd=e.target.closest('.abxwh');if(!hd||e.target.closest('button')||e.button!==0)return;e.preventDefault();const F2=abxFind(W.fid);if(!F2)return;D={x:e.clientX,y:e.clientY,dx:F2.f.abw.dx,dy:F2.f.abw.dy,f:F2.f};try{hd.setPointerCapture(e.pointerId)}catch(x){}el.classList.add('mv')});
+  el.addEventListener('pointermove',e=>{if(!D)return;const z=ZOOM||1;D.f.abw={dx:Math.round(D.dx+(e.clientX-D.x)/z),dy:Math.round(D.dy+(e.clientY-D.y)/z)};abxTick(true)});
+  const up=()=>{if(!D)return;D=null;el.classList.remove('mv');changed(false)};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('dblclick',e=>{if(!e.target.closest('.abxwh')||e.target.closest('button'))return;const F2=abxFind(W.fid);if(!F2)return;const r=el.getBoundingClientRect();F2.f.abw={dx:70,dy:-Math.round(r.height/(ZOOM||1))-34};abxTick(true)})}}
+abxBuild=agBuild;
+/* remove: no question first, an Undo button where the window was (one undo step, the window comes back) */
+function agRemove(W,t,f){const r=W.el.getBoundingClientRect(),fid=W.fid,sn=(abxSrc(f)||{}).name||'the trigger',c=cabList().find(x=>x.fx===f);
+ if(c)cabRemove(c);else{pushUndo();t.fx=t.fx.filter(x=>x!==f);changed(true)}abxClose(fid);agUndoBar(r,t.name+' no longer ducks under '+sn+'.',fid)}
+function agUndoBar(r,msg,fid){let u=document.getElementById('agUndo');if(u)u.remove();u=document.createElement('div');u.id='agUndo';u.setAttribute('role','status');const n=UNDO.length,z=ZOOM||1;
+ u.innerHTML=`${abxI('rm')}<span>${esc(msg)}</span><button type="button" title="Bring the sidechain back, with its window (or press ⌘Z / Ctrl+Z)">${agI('undo')}Undo</button><button type="button" class="agux" title="Close" aria-label="Close">✕</button>`;document.body.appendChild(u);
+ const w=u.offsetWidth;u.style.left=clamp(r.left/z,6,innerWidth/z-w-6)+'px';u.style.top=clamp(r.bottom/z-44,6,innerHeight/z-40)+'px';
+ const T=setTimeout(()=>u.remove(),8000);
+ u.querySelector('button').onclick=()=>{clearTimeout(T);u.remove();if(UNDO.length!==n){toast('Something else changed since. Use Undo in the Edit menu to step back.');return}undo();setTimeout(()=>{if(abxFind(fid))abxOpen(fid)},60)};
+ u.querySelector('.agux').onclick=()=>{clearTimeout(T);u.remove()}}
+/* the picture: a preview of one duck while stopped, the live picture while playing */
+function agPaint(g,w,h,f,X){const cv=g.canvas,live=X&&X.m&&performance.now()-X.m.t<400,s=abxSrc(f),t=(abxFind(f.id)||{}).t;if(live||!s||!t){cv._agk='';return abxPaint(g,w,h,f,X,true)}
+ const p=f.p,key=[w,h,p.amt,p.at,p.hd,p.rl,p.cv,p.th,s.color,s.name,t.color,t.name,f.on,ZOOM].join('|');if(cv._agk===key)return;cv._agk=key;
+ const sc=s.color||'#ff7a7a',dc=t.color||'#4cc9f0',num=(v,d)=>{v=+v;return isFinite(v)?v:d},amt=clamp(num(p.amt,70)/100,0,1),at=Math.max(0,num(p.at,1)),hd=Math.max(0,num(p.hd,30)),rl=Math.max(10,num(p.rl,200)),pw=Math.pow(2,-num(p.cv,0)/50);
+ g.fillStyle='#07080c';g.fillRect(0,0,w,h);const T=15,B=h-12,Hh=B-T,x0=Math.round(w*.09),Tm=Math.max(420,(at+hd+rl)*1.22),X0=ms=>x0+ms/Tm*(w-x0-4);
+ g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;for(const q of[.25,.5,.75]){const y=Math.round(T+Hh*q)+.5;g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}
+ /* the hit of the trigger */
+ g.fillStyle=sc;g.globalAlpha=.42;g.beginPath();g.moveTo(x0,B);for(let ms=0;ms<=Math.min(Tm,260);ms+=4)g.lineTo(X0(ms),B-Hh*.78*Math.exp(-ms/55));g.lineTo(X0(Math.min(Tm,260)),B);g.closePath();g.fill();g.globalAlpha=1;
+ g.fillStyle=sc;g.fillRect(x0-1,T,2,B-T);
+ /* the level of the ducked track */
+ const gain=ms=>{let e=0;if(ms>=0){if(ms<at)e=ms/at;else if(ms<at+hd)e=1;else if(ms<at+hd+rl)e=1-(ms-at-hd)/rl}return 1-amt*Math.pow(e,pw)},Y=v=>T+Hh*clamp(1-v,0,1);
+ g.beginPath();g.moveTo(0,T);for(let x=0;x<=w;x+=1.5){const ms=(x-x0)/(w-x0-4)*Tm;g.lineTo(x,Y(gain(ms)))}g.lineTo(w,T);g.closePath();g.fillStyle=dc;g.globalAlpha=.16;g.fill();g.globalAlpha=1;
+ g.beginPath();for(let x=0;x<=w;x+=1.5){const ms=(x-x0)/(w-x0-4)*Tm,y=Y(gain(ms));x?g.lineTo(x,y):g.moveTo(x,y)}g.strokeStyle=dc;g.lineWidth=2;g.stroke();
+ /* attack, hold and release under the curve */
+ g.font='500 9px Inter,system-ui,sans-serif';g.textBaseline='alphabetic';g.textAlign='center';const seg=[['attack',0,at],['hold',at,at+hd],['release',at+hd,at+hd+rl]];
+ for(const[l,a,b] of seg){const xa=X0(a),xb=X0(b);g.fillStyle='rgba(255,255,255,.22)';g.fillRect(Math.round(xb)-.5,B,1,4);if(xb-xa>=g.measureText(l).width+6){g.fillStyle='rgba(255,255,255,.45)';g.fillText(l,(xa+xb)/2,h-2)}}
+ const dd=amt>=.999?'silent':'−'+(-20*Math.log10(1-amt)).toFixed(1)+' dB';g.textBaseline='top';g.font='600 9.5px Inter,system-ui,sans-serif';g.textAlign='left';g.fillStyle=sc;g.fillText(s.name+' hits',x0+4,2);
+ g.textAlign='right';g.fillStyle=dc;g.fillText(t.name+' '+dd,w-4,2);g.textAlign='left';
+ g.fillStyle='rgba(255,255,255,.35)';g.textAlign='right';g.textBaseline='alphabetic';g.fillText('preview · play to see it live',w-4,B-3);g.textAlign='left'}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
