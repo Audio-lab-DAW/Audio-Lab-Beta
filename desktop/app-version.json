@@ -1,7 +1,7 @@
 {
-  "version": "0.216",
-  "sha256": "e54a54446446bbf78ef46a095c5ed1487b41fc2977cc7fd61ca7d7417e6a9ca3",
-  "size": 3464853,
+  "version": "0.217",
+  "sha256": "b6dbf46d6752eb9375ddbaa2ca68d6e86ac60b9a19b32f27c4aee67566e583dc",
+  "size": 3559721,
   "minShell": "0.147.0",
-  "notes": "Audio dropped on an instrument track can be turned into MIDI (melody, harmony, chords, drums, or split into stems first); the stem splitter, which did not start before, now works. No desktop update is needed for it."
+  "notes": "Every effect has new presets: grouped by what they are for, a tooltip on each, a Psytrance group, and levels matched so switching presets does not jump. The Timeless delay's echoes now die away by themselves (its old building-up sound is still there as \"Warm tape, building up\")."
 }

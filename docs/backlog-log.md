@@ -2825,3 +2825,180 @@ Basic Pitch (Spotify, Apache 2.0, small network, TS and ONNX ports exist) is the
 
 ### Release
 - v0.216 on main (v0.215 was task AN, merged). Desktop build dispatched only if listed below. Project doc `claude/audiolab-audio-to-midi.md`; artifact 1b07d888 updated.
+
+## 26 November 2026, v0.217: preset library, part 3: every effect and MIDI effect (from the user's message: "redesign every preset ... the best possible sounding presets from your research")
+Part 3 of 3 (part 1: the synths, v0.197; part 2: the other instruments, v0.202). Only preset data, the preset menus and the level of presets changed; no effect's sound processing. Released on top of v0.216 (other sessions released v0.214, v0.215 and v0.216 while this one worked; the block was inserted again on v0.215 and v0.216, the full measurement ran on v0.215 with the block, and the load, menu and demo checks were repeated on v0.216).
+
+### Effects in the browser and MIDI effects, their parameters and presets before and after
+| Group | Effect (key) | Parameters | Presets before | After |
+|---|---|---|---|---|
+| Dynamics | Compressor (comp) | threshold, ratio, attack, release, makeup | 32 | 39 |
+| Dynamics | OTT (ott) | depth, time, up, down, lo, mid, hi, out | 19 | 22 |
+| Dynamics | Sidechain (side) | depth, shape, punch, sustain | 19 | 23 |
+| Dynamics | Limiter (limit) | gain, ceil, rel, look, out | 16 | 18 |
+| Dynamics | Soft Clipper (clip) | gain, thr, ceil, bias, mix, out | 15 | 18 |
+| Dynamics | Gate (gate) | thr, hyst, floor, att, hold, rel, look, hpf, lpf, ratio | 18 | 20 |
+| Dynamics | Multiband Dynamics (mband) | x1, x2, t1, r1, a1, l1, g1, t2, r2, a2, l2, g2, t3, r3, a3, l3, g3, out | 14 | 17 |
+| Dynamics | Transient Shaper (trans) | attack, sustain, speed, sens, out | 19 | 21 |
+| Dynamics | De-Esser (deess) | freq, q, thr, ratio, range, att, rel, out | 17 | 19 |
+| Dynamics | Resonance Suppressor (reson) | depth, sel, sharp, lo, hi, att, rel, max | 16 | 18 |
+| Dynamics | Ducker (duck) | amt, th, gain, at, hd, rl, cv, la, ff | 5 | 13 |
+| Delay & space | Echo delay (delay) | time, feedback, mix, lowcut, highcut | 30 | 34 |
+| Delay & space | Timeless delay (tdelay) | time, feedback, mix, lowcut, highcut, drive, wow, rate, width | 23 | 28 |
+| Delay & space | Space reverb (reverb) | decay, predelay, damp, lowcut, mix | 31 | 36 |
+| Delay & space | Blur (blur) | size, blur, hold, tone, mix | 21 | 23 |
+| Delay & space | Convolution Reverb (conv) | decay, pdel, size, damp, lowcut, width, mix, out | 20 | 23 |
+| Delay & space | Tape Stop / Stutter (tstop) | stop | 14 | 16 |
+| Delay & space | Vector Delay (vdelay) | num, sc, spd, mix, time, glide, fb, pitch, fine, pan, gain, cut, q, ax, ay, ad, as, am, grav, mag, cen, drag, flow, det, dri, mass, rm, chg, kick, ... | 14 | 16 |
+| Delay & space | Bounce Delay (bdelay) | time, bounce, taps, decay, pan, fb, tone, mix | 7 | 14 |
+| Tone & colour | Pro EQ (eq) | bands, out | 40 | 47 |
+| Tone & colour | Low-pass filter (filter) | freq, q | 25 | 28 |
+| Tone & colour | Drive (drive) | drive, mix | 20 | 23 |
+| Tone & colour | Auto Filter (afilt) | freq, res, drive, lamt, lrate, env, erel, mix, vowel | 38 | 40 |
+| Tone & colour | Bitcrusher (crush) | bits, rate, jit, dith, aa, post, drive, mix, out | 18 | 20 |
+| Tone & colour | Pitch & Formant (pshift) | pitch, fine, formant | 21 | 23 |
+| Tone & colour | Pitch Correction (pcorr) | speed, amount, tune | 14 | 15 |
+| Tone & colour | Voice (voice) | corr, spd, pitch, fm, nv, spr, det, fsp, wd, dbl, tune, mix | 23 | 23 |
+| Modulation | Phaser (phaser) | rate, depth, fb, mix | 20 | 22 |
+| Modulation | Chorus / Flanger (chorus) | rate, depth, delay, fb, width, mix, lowcut, highcut | 22 | 24 |
+| Modulation | LFO Shaper (shaper) | depth, rate, phase, fbase | 28 | 32 |
+| Modulation | Vocoder (vocoder) | bands, pitch, detune, oct, noise, sib, formant, bw, att, rel, mix, out | 16 | 18 |
+| Modulation | Frequency Shifter (fshift) | shift, fb, mix, lfoRate, lfoDepth, out | 18 | 20 |
+| Modulation | Fractal (crk) | ns, l1, l2, l3, l4, l5, l6, l7, l8, spd, len, shp, sm, sw, rl, rt, seed, mix, spr, dep, pha, phr, phf | 20 | 20 |
+| MIDI | Chord (chord) | strum, vel | 22 | 28 |
+| MIDI | Bouncy Notes (bnotes) | grav, mass, fric, speed, voices, life, vh, vfade, len, rlen, rdir, range, seed | 28 | 28 |
+| MIDI | Arpeggiator (arp) | oct, gate, swing, len | 26 | 29 |
+| MIDI | MIDI Toolkit (mutil) | trans, root, lo, hi, vcomp, voff, vfix, vrnd, hum, humlen, chance, h1, h2, strum, echo, efb, etr | 30 | 33 |
+| Analysis | Spectrum (spec) | top, floor, slope, smooth, decay, lo, hi | 12 | 12 |
+| Analysis | Loudness (loud) | target, tpmax | 13 | 13 |
+| Analysis | Tuner (tuner) | ref, trans | 13 | 13 |
+| Analysis | Meter (measure) | slope, smooth, decay, tlufs, ttp, lo, hi | 8 | 8 |
+| Stereo & utility | Stereo Imager (imager) | x1, x2, x3, w1, w2, w3, w4, mg, sg, out | 18 | 20 |
+
+Total: 843 presets before, 957 after (EQ and Chord included).
+
+MIDI effects: Chord, Bouncy Notes, Arpeggiator, MIDI Toolkit (group MIDI). Analysis effects (Spectrum, Loudness, Tuner, Meter) do not change the sound; their presets are views and targets.
+
+### Research (sources read for this part)
+Numbers marked "general knowledge" are widely published starting points that I did not find on a page read in this run; "guess" means my own choice.
+
+- **Compression per source.** Sound On Sound (drum compression): snare 5:1, fast attack, medium release, 4 to 5 dB of gain reduction; close mics 3 to 4 dB each, then smaller amounts on the drum bus and "a touch more" on the mix bus; kick outside mic 6 dB or more with fast attack and medium release; a room mic 8:1 with fast attack and release, driven ([SOS](https://www.soundonsound.com/techniques/drum-compression)). Bass: 3:1 to 4:1, attack about 100 ms backed off until the transient survives, release 20 to 40 ms, 5 to 8 dB of reduction; serial stages of 2 to 3 dB at 2:1 to 3:1 ([EDMProd](https://www.edmprod.com/compress-bass/)). Kick and bass group in psytrance: 1.5:1, 30 ms attack, 1 to 2 dB (project doc, Myloops). Bus glue (general knowledge, SSL-style bus compressor): 2:1 or 4:1, attack 10 or 30 ms, release 0.1 s or auto, 1 to 3 dB. Vocal: fast 1176-style 4:1 to 12:1 with 3 to 6 dB, or optical 3:1 with slow release (general knowledge).
+- **Sidechain pumping.** Reason compressor at 123 BPM: threshold -36 dB and the fastest attack for full pumping, release about 39 ms, threshold -14 dB for a subtle bounce ([MusicRadar](https://www.musicradar.com/tuition/tech/how-to-create-classic-pumping-sidechain-compression-624915)); "a few dB" of bass ducking with fast attack and medium-fast release ([Attack Magazine](https://attackmagazine.com/technique/tutorials/ten-tips-better-drums/3)). Psytrance (project doc, Myloops): light 2 to 4 dB back to 0 in 40 to 70 ms; medium 4:1 to 8:1, 6 to 10 dB, release 80 to 120 ms; drawn volume shape silent on the beat, hold 30 to 50 ms, back over 60 to 80 ms; the whole duck must end inside one 16th (103.4 ms at 145 BPM).
+- **Multiband.** Crossovers for a full mix 120 Hz and at least 2.5 kHz, heavy top work above 6 kHz; bass guitar 50 to 60 Hz and a few hundred Hz; voice 150 Hz and 4 kHz; a mastering mid band 1.1:1 at -35 dB; bass release about twice the mid release and the top band half of it ([SOS](https://www.soundonsound.com/techniques/multi-band-compression-tips)). Glue start for all bands 2:1 with 100 ms attack and release, crossovers 200 Hz and 2 kHz ([iZotope](https://www.izotope.com/en/learn/multiband-compression-basics-izotope-mastering-tips.html)). OTT (general knowledge): Xfer's free OTT is Ableton's Multiband Dynamics "OTT" preset, crossovers 88 Hz and 2.5 kHz, depth usually 20 to 50 % on a mix and up to 100 % on sound design.
+- **Limiting and clipping for club masters.** A limiter usually does no more than about 2 dB, ceiling -1.0 to -0.1 dBFS; heavy settings (3 to 5 dB) audibly distort vocals; a loud dance master example ends near -8 LUFS ([iZotope limiters](https://www.izotope.com/en/learn/an-introduction-to-limiters-and-how-to-use-them)). A soft clipper before the limiter takes peaks first and can give up to about 6 dB ([iZotope soft clipping](https://www.izotope.com/en/learn/what-is-soft-clipping)); 2 dB of clipping plus 2 dB of gain sounds cleaner than 4 dB of clipping ([Slate Bus Clipper manual](https://docs.slatedigital.com/Bus_Clipper/Bus_Clipper.html)); clip after EQ and before the limiter, high-pass or leave the bass out of a clipper ([Mastering The Mix](https://masteringthemix.com/blogs/learn/how-to-use-a-clipper-when-mastering)). Psytrance master (project doc): mix peaks -6 dBFS into the limiter, at most 4 dB of limiting, ceiling -1 dBTP, about -8 LUFS integrated, -6.5 LUFS short-term in the drop; Electric Universe albums measure DR5 to DR3.
+- **EQ per source.** Kick 60 to 80 Hz punch, 200 to 500 Hz box cut, 1 to 5 kHz beater; snare 150 to 250 Hz body, 400 to 700 Hz ring, 2 to 3.5 kHz attack; hats 3 to 7 kHz harshness; bass 300 to 500 Hz mud, 800 Hz to 1 kHz attack; vocal high-pass 100 to 250 Hz, 500 Hz to 1.2 kHz nasal, 5 to 8 kHz harsh, 10 kHz air shelf ([iZotope EQ cheat sheet](https://www.izotope.com/en/learn/eq-cheat-sheet)); kick 50 to 60 Hz, 400 Hz hollow, 3 to 5 kHz; bass 50 to 80, 700 Hz, 2.5 kHz; vocal 120, 240, 5 kHz presence, 10 to 15 kHz air (Owsinski via [Produce Like A Pro](https://producelikeapro.com/blog/eq-cheat-sheet/)). Psytrance (project doc): high-pass pads and FX at 300 Hz, reverb returns at 500 Hz, everything except kick and bass at 120 Hz at least; leads lose their side signal under 300 Hz; mono under 120 to 150 Hz.
+- **Reverb.** Cut the low end of a reverb from 100 to 200 Hz down, tame metallic highs from 4 to 8 kHz, a little pre-delay keeps the dry sound in front ([MusicRadar](https://www.musicradar.com/how-to/explainers-reverb-parameters-and-how-they-work)). Gated reverb: hold about 70 ms, release about 140 ms ([SOS gates](https://www.soundonsound.com/techniques/production-techniques-using-gates-expanders)). Psytrance atmospheres: pads with heavy reverb in the background; long tails printed and cut ([Bonedo](https://www.bonedo.de/artikel/psytrance-produzieren-3-psy-fx-atmosphaeren/)). Pre-delay and decay against the tempo (general knowledge): pre-delay a 1/64 or 1/32 note (26 or 52 ms at 145 BPM), decay that ends before the next beat or bar (one bar is 1.66 s at 145 BPM).
+- **Delay.** Psytrance FX and leads: long ping-pong delays ([Bonedo](https://www.bonedo.de/artikel/psytrance-produzieren-3-psy-fx-atmosphaeren/)); lead delay at a low mix ([IDM Mag](https://idmmag.com/tech/tutorials/waio-style-psytrance-leads-transitions/)); a tape delay at 1/16 on percussion and a reverb after a delay at about 35 % mix on an arp ([Attack Magazine](https://www.attackmagazine.com/technique/tutorials/adding-atmosphere-with-delay-and-reverb/)). Dotted eighths (0.75 beat, 310 ms at 145 BPM) and 3/16 echoes are the trance and psytrance default; slapback 70 to 120 ms; doubling 10 to 30 ms (general knowledge).
+- **De-essing.** Sibilance 2 to 12 kHz, most offensive 5 to 8 kHz; 3 to 4 dB of reduction normal, up to about 10 dB for strong esses ([Splice](https://splice.com/blog/?p=23640)).
+- **Gates.** Drum gates: attack from zero up until the click goes, release for a natural fade, hold allows short releases ([SOS gates](https://www.soundonsound.com/techniques/production-techniques-using-gates-expanders)). Psytrance bass gate: attack 0.01 to 0.1 ms, hold 100 to 130 ms, release 15 to 40 ms, at least -40 dB (project doc; treated as suspect because it mutes the first bass note).
+- **Lo-fi.** E-mu SP-1200: 12-bit linear at 26.04 kHz ([Wikipedia](https://en.wikipedia.org/wiki/E-mu_SP-1200)), so a rate divider of about 1.7 at 44.1 kHz.
+- **Chorus.** Roland Juno-60 chorus: two buttons with modulation rates of 0.4 Hz and 0.6 Hz, both together a stronger chorus ([Wikipedia](https://en.wikipedia.org/wiki/Juno_60)).
+- **Guesses (no published numbers)**: the particle and drawn effects (Vector Delay, Bounce Delay, Fractal, Blur, LFO Shaper curves), Frequency Shifter amounts, vocoder band counts per style, pitch-correction speeds outside the classic hard-tune, every tooltip's "best on" advice, and the level targets between groups.
+
+### Which real device each AudioLab effect is closest to
+| AudioLab | Closest real devices | What that means for its presets |
+|---|---|---|
+| Compressor | a VCA or FET channel compressor (SSL bus, 1176), Web Audio's compressor with its own make-up gain | presets by source (drums, bass, vocals, synths, bus); matched to each other, not to bypass (see rules) |
+| OTT | Xfer OTT (Ableton's Multiband Dynamics "OTT" preset) | the classic full setting first, lower depth for mixes, upward-only and downward-only |
+| Multiband Dynamics | FabFilter Pro-MB, Ozone Dynamics | crossovers 120 Hz and 2.5 kHz for a mix, slower lows and faster top |
+| Limiter, Soft Clipper | FabFilter Pro-L, Ozone Maximizer; StandardCLIP, KClip | clip a little before limiting; at most 4 dB of limiting, -1 dB true peak for psytrance |
+| Sidechain, Ducker, LFO Shaper, Fractal | Kickstart, a ducking compressor, LFO Tool and ShaperBox | duck lengths against the beat; psytrance: back within one 16th (103 ms at 145 BPM) |
+| Gate, Transient Shaper, De-Esser, Resonance Suppressor | drum gates, SPL Transient Designer, FabFilter Pro-DS, soothe | by source; a gated-reverb snare (hold 70 ms, release 140 ms) |
+| Echo delay, Timeless delay, Vector Delay, Bounce Delay | a stock delay, Soundtoys EchoBoy or Valhalla Delay in tape mode, multi-tap delays | note values against the tempo; dotted 8ths for trance and psytrance; filtered and low in the mix on leads |
+| Space reverb, Convolution reverb, Blur | Valhalla Room and Plate, Altiverb, a freeze or granular cloud | rooms, plates, halls, chambers; psytrance: short pre-delay on leads, long dark washes with the low end cut for atmospheres |
+| Drive, Bitcrusher, Low-pass filter, Auto Filter | Decapitator or Saturn, Decimort, a resonant low-pass, Ableton Auto Filter | by amount (subtle, medium, heavy) and use; the 12-bit, 26 kHz sampler sound |
+| Phaser, Chorus / Flanger, Frequency Shifter | a pedal phaser, the Juno and Dimension choruses, a jet flanger, a Bode shifter and ring modulator | classics plus slow, resonant psy sweeps on hats and leads |
+| Pitch & Formant, Pitch Correction, Voice, Vocoder | Little AlterBoy, Auto-Tune, a classic vocoder | voice changes, hard-tune, spoken psytrance samples |
+| Pro EQ | FabFilter Pro-Q | per source; a psytrance group from the project's mixing rules |
+| Arpeggiator, MIDI Toolkit, Chord, Bouncy Notes | the arpeggiators and MIDI tools of every DAW | patterns by style; E phrygian, phrygian dominant, dotted 8th note echoes, 3/16 accents |
+
+### Rules added in part 3
+1. Every effect: groups by use (source, task or character) and a "Psytrance" group; a one-line tooltip per preset says what it is for, and the menu adds the main settings in brackets (for example "4:1 from -18 dB, attack 30 ms, release 120 ms"). Presets made for psytrance outside the Psytrance group show "· psy".
+2. Effects that started with no preset of their own (Compressor, Echo delay, Space reverb, Drive, Low-pass filter, Phaser) get "Init: Default settings" first, equal to a new effect. For every other effect the first preset, which a new effect starts on, keeps its sound, except the Timeless delay (see 5) and two levels that were clearly wrong (Multiband "Master glue" was 9.7 LU louder than bypass, the Vocoder "Classic robot" 13 LU quieter).
+3. Every preset is filled with the settings of a new effect for the keys it does not set, so it sounds the same whichever preset was chosen before; choosing a preset copies its values (the effect no longer shares drawn shapes and arrays with the preset table).
+4. Level: where an effect has an Output, presets are trimmed so the loudness against the dry sound stays within 1 LU (the Limiter and the Soft Clipper's mastering presets are louder on purpose). The Compressor adds its own make-up gain and Make-up cannot go below 0, so its presets are matched to each other at about +4 LU. Effects without an Output (Drive, Sidechain punch and sustain) keep their own levels.
+5. Feedback: the Timeless delay's drive stage raises the loop gain to k/tanh(k) with k = 1 + drive x 0.06, and each filter adds about 1 dB, so its feedback is set from the drive for a chosen loop gain (0.45 to 0.78, each repeat 2 to 7 dB down). Its old default "Warm tape" (key tape) and "Ping-pong 1/8" (ping) build up for ever; the demos use them, so they stay, in a group "Endless (repeats build up)", and a new Timeless delay starts on a stable "Warm tape". The Echo delay is linear: at most 80 % feedback (90 % ran away and clipped 22 times over).
+6. Old keys stay with their old values unless a value was wrong; renamed where a name had an artist, a brand or a product in it ("Dotted 1/8 (The Edge)", "Hard-tune (T-Pain)", "Kick tight 1176", "SP-1200 style", "Daft chord", "Kraftwerk", "Juno-style", "Dimension D", "NES", "Game Boy"), and where it promised something the effect cannot do (Compressor "Parallel crush" has no mix knob: now "Drums crushed, for a send"; reverb "Infinite freeze" stops at 8 s).
+7. Tests for part 3: `tools/engine-tests/fx_materials.py` (test material), `fx_presets.py` (every preset), `fx_trims.py` (level trims), `fx_demo_same.py` (demos and new-effect settings), `tools/ui-tests/preset_menus3.py` (menus).
+
+### What was built
+- New block `/*PSLIB3-START*/ ... /*PSLIB3-END*/` before `askChoice`; `fxLib()` runs once after `psLib2()`. `FXMETA[type][key]` holds group, tooltip, test material, psy mark and hidden flag; `FXLV` the level trims; `FXSPEC()` the data of every effect (old keys renamed, regrouped and fixed where a value was wrong; new keys added); `EQLIB()` groups the Pro EQ presets and adds a Psytrance group; `CHLIB()` groups the Chord shapes with tooltips (new: Minor add 9, Minor with flat 2nd, Octave down and fifth, Minor and octave, 7 sus4, Half-diminished).
+- Every preset is filled with the settings of a new effect for the keys it does not set, so a preset sounds the same whichever preset came before.
+- Menus: `preOpts()` (every effect's preset menu and the Pro EQ menu) puts a tooltip on every entry (what it is for, then its main settings in brackets), leaves hidden near copies out and marks psytrance presets outside the Psytrance group "· psy"; the Chord menu is grouped (`chOpts()`). Choosing a preset now copies its values; before, an effect shared drawn shapes and arrays with the preset table, so drawing on an LFO Shaper changed the preset itself.
+- Psytrance group on every effect where it makes sense (35 effects plus the Pro EQ and Chord), from the project's numbers: Sidechain, Ducker and LFO Shaper shapes that are back within one 16th at 145 BPM (103 ms) for a rolling bass, a light 3 dB version, pads under the kick; Compressor kick and bass glue 1.5:1 with 30 ms attack, a release of one 16th on the drum bus; dotted 8th (310 ms) delays on leads at a low mix with low cut 500 Hz, half-note ping-pong FX throws, quarter-note dark atmospheres; reverbs with a 1/64 pre-delay (26 ms) on leads, two-bar (3.3 s) vocal sample halls with 1/32 pre-delay, 6 s atmosphere washes high-passed at 500 Hz; Pro EQ high-passes at 120, 300 and 500 Hz and the two ways to share the low end (kick owns the sub: bass high-passed at 85 Hz; shared root); a psy master chain (clip about 2 dB, limit about 4 dB into -1 dB true peak, mono under 150 Hz, multiband split at 120 Hz and 2.5 kHz); E phrygian, phrygian dominant and dotted 8th note echoes in the MIDI Toolkit; 3/16 accents and a K-B-B-B roll in the Arpeggiator; hat swirls on the Phaser, Chorus and Frequency Shifter.
+- Fixes in old presets: Timeless delay feedback set from its drive (20 of 23 built up into an endless loop; see the rules); Echo delay "Self-oscillating dub" went over 22 times full scale, now 80 % feedback ("Dub, nearly endless"), three ambient echoes shortened so they end; Auto Filter "Choppy 1/16" and "Acid squelch" clipped (resonance and drive lowered); Multiband presets clipped and were 8 to 13 LU louder than bypass; Pitch Correction "Hard-tune A minor" and "Minor scale gentle" used the same notes as the C major ones (now A harmonic minor, and C minor); Pitch & Formant "Add octave below (mix)", "Add octave above (mix)" and "Dreamy fifth" were the same as "Octave down", "Octave up" and "Fifth up" (that effect has no mix knob), now three different sounds; names with artists, brands or products renamed; Compressor "Parallel crush" (it has no mix knob) renamed "Drums crushed, for a send", Space reverb "Infinite freeze" (stops at 8 s) renamed "Longest tail, 8 s".
+
+### Tests
+Material (`tools/engine-tests/fx_materials.py`, rendered by the app at 145 BPM, 8 beats, peak -6 dBFS): a psytrance kit beat, the kit's kick alone (the Ducker's trigger), a K-B-B-B rolling bass on A (Psy Bass), a held A minor pad, a saw lead line, three of the Fractals voice samples, the Fractals demo (beats 64 to 72), a 4 ms click, pink noise and a saw gliding an octave up and down. The app renders all of these centred, so the mix and the pad were given a side signal like a real mix (mono under 300 Hz, a 7 ms copy at -9 dB above). The Limiter plays the mix at -1 dBFS peak.
+
+`tools/engine-tests/fx_presets.py index.html materials.npz` renders every preset of every effect on the material that fits its group, twice, with a tail (16 s for space effects), each effect in a fresh browser (hundreds of renders in one page ran it out of memory). Final numbers (full run on v0.215 plus this block; Compressor, Sidechain, Vector Delay, Arpeggiator and Tape Stop again after the last changes):
+- **No NaN, no preset clips (highest peak 0.94), every tail ends** (last second 50 dB under the loudest 400 ms) except the three marked to hold on purpose (Timeless delay "Frozen loop" and the two "Endless" presets, Blur's freeze presets). Before: 20 Timeless delay presets and 4 Echo delay presets did not end, the Echo delay "Self-oscillating dub" peaked at 22.5 (27 dB over full scale), Auto Filter "Choppy 1/16" 1.54 and "Acid squelch" 1.05, three Multiband presets 1.07 to 1.14.
+- **Analysis effects** (Spectrum, Loudness, Tuner, Meter): output equal to the input for every preset.
+- **Bit-identical twice**: all but OTT (15 presets) and Multiband (15), which differ by at most 9e-8 (Web Audio's own compressor node), Auto Filter (7, at most 3e-6), and Blur (22) and Echo delay ping-pong (8), which differ by up to 0.4 and 0.2 from the first repeat on. The Blur and Echo delay differences are the same on v0.213 (two renders of the old presets differ the same way), so they come from the engine, not from the preset data; not fixed here (no processing changes in this task).
+- **Delay times against the tempo**: the first repeat of the click is on time (within 0.02 beat) on all 34 Echo delay presets and 22 of 28 Timeless delay presets; the other Timeless delay ones come early on the very first repeat because its delay time glides in over 50 ms when playback starts (engine), plus the two that build up.
+- **Reverb decay against the setting**: measured RT60 (fit from -5 to -35 dB) is 0.86 to 1.00 of the set decay on all 36 Space reverb presets and 0.86 to 0.91 on all 23 Convolution presets.
+- **Psytrance ducks on a rolling bass**: on the K-B-B-B bass itself, Sidechain "Rolling bass gap (145)" changes the loudness by +0.5 LU and "Bass under the kick" by -0.3 LU: the duck is over before the first 16th of the bass, as the rule asks. On a held pad (where the presets were compared) they cut 2 to 4 dB.
+- **Levels** (table below): loudness against the dry sound over the 8 beats. Trims were measured in two passes (`fx_trims.py`) and written into `FXLV`. Compressor presets were -2.2 to +12.5 LU from bypass and are now +3.3 to +7.2 (Web Audio adds its own make-up, so they are matched to each other); OTT -2.8 to +8.2 now -0.9 to +1.4; Multiband +0.0 to +13.5 now -0.1 to +1.5; Vocoder -21 to -6 now -9.5 to +0.1 ("Lush detuned" and "Parallel" are at the top of the Output knob); Soft Clipper drum and colour presets +4 to +9 now 0 to +5 (its Output works before the clipper on some shapes, so "Wavefolder crunch" stays +7.3); De-Esser, Transient Shaper, Bitcrusher, Frequency Shifter, Convolution and Stereo Imager within about 1 LU where the knob allows. Left with their own levels (no Output knob): Drive (+3.5 to +11.7 on the rolling bass, the shaper brings a quiet bass up), Sidechain "Drum snap" and "Fat sustain" (+9 to +10), Auto Filter (the band and comb presets take most of a pad away), Resonance Suppressor, Fractal, Ducker (a deep pump is quieter by nature), Pro EQ (the curves are the point) and the Limiter and Soft Clipper mastering presets (louder on purpose).
+- **Closest pairs** (spectrum over time of left and right, 24 bands by 12 slices, level taken out; space and modulation effects compared on what they add): table below. Pairs at 0.00 are presets that do the same thing on that material by nature: modes with the same notes (C major and D dorian in the MIDI Toolkit), gates that stay open on a full drum loop, a clipper that does not reach its threshold on a -6 dBFS mix, the analysis effects. Voice "Lower voice", "Higher voice" and "Child" render the same offline (its character voices are not available in this test). Changed because they were the same sound: Pitch Correction "Hard-tune A minor" and "Minor scale gentle" (same notes as the C major ones), Pitch & Formant "Add octave below (mix)", "Add octave above (mix)" and "Dreamy fifth", Tape Stop "Double-speed fill" (the same beat as "Double up on 4"), and four new presets that measured too close to an old one.
+
+| Effect | Presets | Loudness change against the dry sound (LU) | Highest peak | Not identical twice | Closest pair (dB) |
+|---|---|---|---|---|---|
+| ott | 22 | -0.9 to +1.4 | 0.30 | 15 (up to 6e-08) | smash / direction-downward-only 0.28 |
+| side | 23 | -1.3 to +9.9 | 0.84 | 0 | bass-psy-bass-duck / psyroll 0.21 |
+| tdelay | 28 | +0.3 to +6.9 | 0.36 | 0 | ambient-ambient-bloom / ambient-dark-wash 0.96 |
+| blur | 23 | +0.7 to +3.4 | 0.32 | 22 (up to 0.4) | haze / texture-lo-fi-blur 1.34 |
+| comp | 39 | +3.3 to +7.2 | 0.46 | 0 | bass-bass-even / bass-sub-steady 0.08 |
+| reverb | 36 | -2.5 to -0.1 | 0.20 | 0 | halls-vocal-ballad / chambers-stone-chamber 1.02 |
+| delay | 34 | -0.5 to +1.6 | 0.36 | 8 (up to 0.2) | slapback-rockabilly-slap / slapback-1-16-slap 0.89 |
+| drive | 23 | +3.5 to +11.7 | 0.33 | 0 | heavy-distortion / heavy-fuzz 0.11 |
+| filter | 28 | -0.6 to +2.9 | 0.75 | 0 | soft-tape-roll-off / soft-de-harsh 0.08 |
+| phaser | 22 | -1.1 to +2.7 | 0.30 | 0 | fast-fast / fast-rotary-ish 0.57 |
+| bnotes | 28 | +2.4 to +11.0 | 0.66 | 0 | one / rubber 0.89 |
+| spec | 12 | +0.0 to +0.0 | 0.20 | 0 | bass / hi 0.00 |
+| loud | 13 | +0.0 to +0.0 | 0.20 | 0 | amazon / atsc 0.00 |
+| limit | 18 | -2.8 to +4.8 | 0.40 | 0 | syn / hard 0.03 |
+| clip | 18 | -0.0 to +7.3 | 0.42 | 0 | gentle / safe 0.00 |
+| afilt | 40 | -24.2 to +13.2 | 0.94 | 7 (up to 3e-06) | open / dubduck 0.49 |
+| chorus | 24 | -2.0 to +2.0 | 0.26 | 0 | juno / string 0.74 |
+| crush | 20 | -0.6 to +0.8 | 0.22 | 0 | 8bit / psyhat 0.47 |
+| gate | 20 | -0.2 to -0.0 | 0.20 | 0 | room / psygated 0.00 |
+| shaper | 32 | -3.9 to +2.6 | 0.37 | 0 | sc4 / scdeep 0.08 |
+| arp | 29 | -2.3 to +3.6 | 0.31 | 0 | ud / psyfull 0.47 |
+| mutil | 33 | -1.7 to +6.5 | 0.81 | 0 | cmaj / dm 0.00 |
+| tuner | 13 | +0.0 to +0.0 | 0.20 | 0 | a415 / a444 0.00 |
+| imager | 20 | -0.1 to +0.1 | 0.26 | 0 | mast / psymaster 0.02 |
+| mband | 17 | -0.1 to +1.5 | 0.33 | 15 (up to 9e-08) | trans / psymaster 0.21 |
+| trans | 21 | -0.9 to +1.7 | 0.46 | 0 | gtr / piano 0.04 |
+| deess | 19 | -1.0 to +0.2 | 0.24 | 0 | voc / sing 0.06 |
+| vocoder | 18 | -9.5 to +0.1 | 0.34 | 0 | choir / ep 0.64 |
+| fshift | 20 | -4.3 to +0.2 | 0.32 | 0 | small / detune 0.69 |
+| pshift | 23 | -6.4 to +1.7 | 0.22 | 0 | detune / detdn 0.50 |
+| pcorr | 15 | -3.8 to -0.4 | 0.30 | 0 | light / pop 0.40 |
+| conv | 23 | -0.9 to +0.9 | 0.23 | 0 | swell / wash 0.69 |
+| reson | 18 | -10.6 to +0.0 | 0.20 | 0 | air / dehar 0.19 |
+| tstop | 16 | -1.1 to +0.5 | 0.20 | 0 | dbl2 / st8 0.08 |
+| vdelay | 16 | +0.3 to +3.6 | 0.30 | 0 | cloud / back 2.04 |
+| bdelay | 14 | +1.9 to +4.4 | 0.42 | 0 | ratchet / psyroll 1.74 |
+| measure | 8 | +0.0 to +0.0 | 0.20 | 0 | club / levels 0.00 |
+| crk | 20 | -19.0 to -1.1 | 0.20 | 0 | stut64 / psyr 0.58 |
+| voice | 23 | -1.6 to +0.6 | 0.20 | 0 | man / child 0.00 |
+| duck | 13 | -15.8 to +7.0 | 0.48 | 0 | kick / house 0.27 |
+| eq | 47 | -7.3 to +5.1 | 0.37 | 0 | master-warm / creative-sub-clean 0.08 |
+| chord | 28 | +3.6 to +7.0 | 0.86 | 0 | sus7 / m7b5 0.39 |
+
+- Menus (`tools/ui-tests/preset_menus3.py`): all 40 effect menus, the Pro EQ and the Chord menu: 957 entries in groups, every entry has a tooltip, no dash characters, every visible preset is in its menu, choosing the 4th entry applies its values without sharing arrays with the table, a new effect shows its first preset. Pictures of the Compressor, Space reverb and Sidechain menus opened were looked at (groups and names show). Parts 1 and 2's `preset_menus.py` and `preset_menus2.py` still pass.
+- Unchanged (`tools/engine-tests/fx_demo_same.py`, v0.216 against v0.217): no page errors on load; Fractals demo solo Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96) with the same checksums; the effect settings of every track of the Fractals demo, "Psytrance demo" and "Shrine Legion" are identical. `demos_same.py` renders of the two code-built demos: Kick, Rolling bass and Vocals identical; the tracks with Blur, delays and reverbs differ from run to run on v0.215 itself (Atmosphere pad -35.34 then -35.96 dB in two runs of the same version), so they cannot be compared bit for bit. A new effect starts with the same settings as before except the Timeless delay (stable "Warm tape"), the Multiband Dynamics (Output -9.5 dB) and the Vocoder (Output +12 dB), on purpose.
+
+### Not verified, and what is a guess
+- **Nobody has listened to any of it.** Values come from the sources above and from measurement; tooltips' "for what" advice, the particle and drawn effects, the Frequency Shifter, Vocoder and Fractal values, and the level targets between groups are my choices.
+- The similarity measure takes level out, so two gentle compressor settings on the same material can measure close (Compressor "Bass even" and "Sub steady" 0.08) while they act differently on other material.
+- The Limiter test mix peaks at -1 dBFS; the psy master presets were set for a mix that peaks near -6 dBFS (9 dB in, about 4 dB of limiting), the level the project's mixing rules ask for.
+- Pitch Correction and Voice were measured on a gliding saw and on spoken samples, not on singing.
+
+### Left
+- Listening with the user, above all the Psytrance groups (ducks against a real kick and bass, the master chain, delay and reverb levels on leads).
+- Engine issues found, not fixed (no processing changes in this task): the Timeless delay's drive makes the loop gain larger than its Feedback knob says (the stable feedback is now computed per preset, but a user turning Feedback up with Drive on still gets a runaway loop); Blur and the Echo delay's ping-pong do not render the same twice; the Timeless delay time glides in over 50 ms at the start of playback; Web Audio's compressor adds its own make-up gain, so the Compressor and Multiband are louder than bypass at Make-up 0.
+- Drive has no Output knob, so its presets keep different levels.
+
+### Release
+- v0.217 (first built on v0.213 as v0.214; other sessions released v0.214, v0.215 and v0.216 in the meantime, so the block was inserted again on v0.215 and on v0.216; all checks above were repeated on v0.216 as noted).
