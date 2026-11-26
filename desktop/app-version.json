@@ -1,7 +1,7 @@
 {
-  "version": "0.206",
-  "sha256": "ef72d704f40373259f6268cb0a7d05d285b50b4a5f084aea1331bedd5d76cb53",
-  "size": 3323122,
+  "version": "0.207",
+  "sha256": "44d3979a2c3a56a48f9414760a0b750b5481a4160f205a97e7148177654b8c63",
+  "size": 3345602,
   "minShell": "0.147.0",
-  "notes": "New in Voice: AI voice. Make a voice from an example clip and let your singing or talking take on that voice while keeping your notes and note edits; the AI model (66 MB) is downloaded once and runs on your computer. AI voices need the new desktop app (download it once from the Releases page; Windows updates by itself)."
+  "notes": "Update notices are now a window in the middle of the screen with the logo, the version you have and the new one, what is new and what to do. It never opens while music plays: a small badge waits at the top right instead. Close it with the X or Escape; Later is remembered for that version."
 }
