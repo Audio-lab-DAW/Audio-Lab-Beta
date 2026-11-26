@@ -2789,3 +2789,6 @@ First thing in the Layout box, directly under the scale. Saved with the other se
 - Zoomed out with Shift alone the song can become about a tenth of the width before the Overview opens; that is the view's existing limit, not changed.
 - Inside the Overview the keys are as before (Ctrl or pinch zooms).
 - The shortcuts window lists keys only, so these scroll keys are not in it.
+
+### Release
+- v0.215: commit 09da3d0 on main, app copy synced, update note written, desktop build not dispatched (as asked). Artifact 1b07d888 updated to version 238. Project doc `claude/audiolab-fixes-run-AN.md`.
