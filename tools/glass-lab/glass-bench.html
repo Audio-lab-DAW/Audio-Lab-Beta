@@ -49,8 +49,8 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
     <label><input type="checkbox" id="drag" checked> move the mixer</label>
   </div>
   <div class="rowx" id="pch"></div>
-  <div class="rowx"><label for="lens">Lens</label><select id="lens"><option value="off">off</option><option value="fine">fine (up to 12 px)</option><option value="apple" selected>Apple (up to 20 px)</option><option value="wide">wide (up to 40 px)</option></select>
-    <label for="lv">Blur</label><select id="lv"><option value="2">light</option><option value="3" selected>regular</option><option value="4">heavy</option></select></div>
+  <div class="rowx"><label for="lens">Lens</label><select id="lens"><option value="off">off</option><option value="fine">fine (up to 12 px)</option><option value="apple">Apple (up to 20 px)</option><option value="wide" selected>wide (up to 45 px)</option></select>
+    <label for="lv">Blur</label><select id="lv"><option value="2" selected>light</option><option value="3">regular</option><option value="4">heavy</option></select></div>
   <div class="rowx">
     <label><input type="checkbox" id="dirty" checked> GL redraws only on change</label></div>
   <div id="live">measuring…</div>
@@ -89,7 +89,7 @@ function drawScene(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0
   if(scn!=='still'){const px=scn==='scroll'?S.width*.5:((t*.15*D)%S.width);sx.fillStyle='#3ecf8e';sx.fillRect(px,0,Math.max(1,D),S.height)}}
 
 /* lens presets: the width follows the size of each panel, so a thin bar gets a thinner lens than a tall side panel */
-const LENS={off:[0,0],fine:[4,12],apple:[4,20],wide:[3,40]},bandOf=p=>{const[dv,mx]=LENS[$('#lens').value],sh=Math.min(p.w,p.h);return dv?Math.max(.5,Math.min(mx,sh/dv)):.5},amtOf=p=>LENS[$('#lens').value][0]?Math.min(Math.min(p.w,p.h)/2,Math.max(24,bandOf(p)*1.2)):0;
+const LENS={off:[0,0],fine:[4,12],apple:[4,20],wide:[3,45]},bandOf=p=>{const[dv,mx]=LENS[$('#lens').value],sh=Math.min(p.w,p.h);return dv?Math.max(.5,Math.min(mx,sh/dv)):.5},amtOf=p=>LENS[$('#lens').value][0]?Math.min(Math.min(p.w,p.h)/2,Math.max(24,bandOf(p)*1.2)):0;
 /* ---------- the engine: one shared backdrop, dual-Kawase pyramid, SDF rim lens per panel ---------- */
 const gl=G.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,powerPreference:'high-performance'});
 let glOK=!!gl,prog={},src,lev=[],vao;
