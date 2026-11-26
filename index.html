@@ -3161,9 +3161,10 @@ let IBCTX=null;const curT=()=>IBCTX||(selT==='__m'?MSTO:S.tracks.find(t=>t.id===
 function findClip(id){for(const t of S.tracks){const c=t.clips.find(c=>c.id===id);if(c)return{t,c}}return null}
 const songEnd=()=>{let e=0;for(const t of S.tracks)for(const c of t.clips)e=Math.max(e,c.start+c.len);return e};
 const loopEnd=()=>Math.max(4,Math.ceil(songEnd()/4)*4);
+let LPV=null;const LMIN=1;/* LPV: the loop being drawn, moved or resized while the song plays; the transport keeps the old loop until the mouse is let go. LMIN: shortest loop, one beat */
 const loopA=()=>S.loopRange?S.loopRange.a:0,loopB=()=>S.loopRange?S.loopRange.b:loopEnd();
 /* loop section: a bold brace on the ruler, lines running down the arrangement while it is on, and a quiet grey ghost of it while it is off */
-const loopShow=()=>S.loopRange?{a:S.loopRange.a,b:S.loopRange.b,on:!!S.loop}:(S.loop?{a:0,b:loopEnd(),on:true}:null);
+const loopShow=()=>LPV?{a:LPV.a,b:LPV.b,on:LPV.on}:S.loopRange?{a:S.loopRange.a,b:S.loopRange.b,on:!!S.loop}:(S.loop?{a:0,b:loopEnd(),on:true}:null);
 function loopIcon(g,cx,cy,r,col){g.save();g.strokeStyle=col;g.fillStyle=col;g.lineWidth=1.5;g.lineCap='round';for(let k=0;k<2;k++){const a0=k*Math.PI+.45,a1=k*Math.PI+Math.PI-.15;g.beginPath();g.arc(cx,cy,r,a0,a1);g.stroke();const P=[cx+r*Math.cos(a1),cy+r*Math.sin(a1)],T=[-Math.sin(a1),Math.cos(a1)],N=[Math.cos(a1),Math.sin(a1)];g.beginPath();g.moveTo(P[0]+T[0]*3.4,P[1]+T[1]*3.4);g.lineTo(P[0]+N[0]*2.6,P[1]+N[1]*2.6);g.lineTo(P[0]-N[0]*2.6,P[1]-N[1]*2.6);g.closePath();g.fill()}g.restore()}
 function loopX(){const L=loopShow();if(!L)return null;return{L,x1:X0+(L.a-V.x)*V.ppb,x2:X0+(L.b-V.x)*V.ppb}}
 /* loop on the ruler: a quiet band with 1 px edges; the lines carry on down through the section strip (under the section names) and the tracks */
@@ -3827,7 +3828,7 @@ function laSec(){const base=UI.lite?.3:.15;if(UI.laFix>0)return UI.laFix;if(LA.h
 function laGap(){const n=performance.now(),g=LA.t?(n-LA.t)/1000:0;LA.t=n;if(g>.06&&g<5){if(g>LA.max)LA.max=g;const need=Math.min(.6,g*1.5+.1);if(need>=LA.hold){LA.hold=need;LA.ht=n}}}
 function laLate(){LA.hold=Math.max(LA.hold,.45);LA.ht=performance.now()}
 function tick(){
-  laGap();
+  laGap();loopSync();
   if(GJ.size)for(const j of GJ)grainPump(j);
   for(let k=0;k<3;k++){
     const end=loopB(),ahead=beatOf(secOf(play.b0)+(ctx.currentTime+laSec()-play.t0));
@@ -3849,7 +3850,7 @@ function awStop(){AWL.clear();for(const t of S.tracks){if(t._awBase){t.vol=t._aw
 function warmSounds(){/* build generated samples and reverb spaces before they are needed, so the first time a section plays never stalls the scheduler */try{for(const t of S.tracks){const I=t.inst;if(!I)continue;if(I.preset==='sampler'&&I.buf){const B=sampleBuf(I.buf);if(B&&I.rev)sampRev(B)}}if(ctx)irFor(ctx,3)}catch(e){}}
 setTimeout(()=>{try{(window.requestIdleCallback||setTimeout)(()=>warmSounds())}catch(e){}},3000);
 const PLEAD={s:.2};/* head start between pressing Play and the first sound: 0.2 s the very first time (everything is cold), then measured */
-function start(){play.past=!!(S.loop&&pos>=loopB()-1e-6&&S.loopRange);play.wrapped=false;ensureCtx();warmSounds();ctx.resume();syncGraph();play.on=true;play.pass++;const spb=60/S.bpm,ci=UI.countIn?(UI.countBars||1)*4:0,t00=ctx.currentTime+PLEAD.s;play.t0=t00+ci*spb;play.counting=ci>0;play.b0=pos;play.sched=pos;play.first=true;LA.t=0;setTimeout(ndResync,0);
+function start(){play.past=!!(S.loop&&pos>=loopB()-1e-6&&S.loopRange);play.wrapped=false;play.la=loopA();play.lb=loopB();play.lo=!!S.loop;ensureCtx();warmSounds();ctx.resume();syncGraph();play.on=true;play.pass++;const spb=60/S.bpm,ci=UI.countIn?(UI.countBars||1)*4:0,t00=ctx.currentTime+PLEAD.s;play.t0=t00+ci*spb;play.counting=ci>0;play.b0=pos;play.sched=pos;play.first=true;LA.t=0;setTimeout(ndResync,0);
   if(ci&&UI.clickCount!==false){const P=pat(),N=P.length,st=4/N;for(let b=0;b<ci-1e-9;b+=st){const k=Math.round((b%4)/st)%N;if(P[k])clickSound(ctx,clickOut,t00+b*spb,P[k],UI.clickSnd)}}
   {const tb0=play.t0-play.b0*spb;for(const N of NODES.values())for(const x of N.fxm.values())if(x.sync)x.sync(tb0)}
   {const tq=performance.now();tick();/* how long the first round took decides how much head start the next Play gets, so the first notes are never late */PLEAD.s=clamp((performance.now()-tq)/1000*1.3+.03,.05,.4)}play.timer=setInterval(tick,25);sclk('go');URS.n=0;URS.last=urNow();$('#bPlay').classList.add('on');$('#bStop').classList.remove('cur')}
@@ -5848,7 +5849,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.203',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.204',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6456,7 +6457,7 @@ arr.addEventListener('pointermove',e=>{
       if(ad.sc){ad.sc.start=Math.min(ad.b0,e2);ad.sc.len=Math.max(1,Math.abs(e2-ad.b0))}dirty=true;return}
     const d=snapS(b-ad.b0),sc=ad.sc;if(!d&&!ad.moved)return;if(!ad.pushed){pushUndo();ad.pushed=true}ad.moved=true;
     if(ad.mode==='move'){const want=ad.s0+(b-ad.b0),bd=[...new Set((S.sections||[]).flatMap(q=>[q.start,q.start+q.len]).concat([0]))].filter(q=>q<ad.s0-1e-6||q>ad.s0+ad.l0+1e-6);let best=null,bv=1e9;for(const q of bd){const tgt=q>ad.s0?q-ad.l0:q,dd=Math.abs(tgt-want);if(dd<bv){bv=dd;best=q}}ad.dst=best;PREVT=null;PREVMAP=best==null?null:rippleMap(ad.s0,ad.l0,best);dirty=true;return}else if(ad.mode==='l'){const ns=clamp(ad.s0+d,0,ad.s0+ad.l0-1);sc.len=ad.s0+ad.l0-ns;sc.start=ns}else sc.len=Math.max(1,ad.l0+d);
-    if(S.loopRange&&S.loopRange.id===sc.id)S.loopRange={id:sc.id,a:sc.start,b:sc.start+sc.len};dirty=true;return}
+    if(S.loopRange&&S.loopRange.id===sc.id)loopSet({id:sc.id,a:sc.start,b:sc.start+sc.len},!!S.loop);dirty=true;return}
   if(ad.k==='lcv'){const a=ad.left,z=ad.right,vt=1-(y-ad.LA.top-3)/(LH-6),dv=z.v-a.v;if(Math.abs(dv)>.02)a.c=Math.round(crvC((vt-a.v)/dv)*100)/100;arr.style.cursor='ns-resize';dirty=true;return}
   if(ad.k==='lpt'){const c=ad.c,b=V.x+(x-X0)/V.ppb;ad.q.b=clamp(b-c.start,0,c.len);ad.q.v=clamp(1-(y-ad.LA.top-3)/(LH-6),0,1);ad.pts.sort((a2,z)=>a2.b-z.b);dirty=true;return}
   if(ad.k==='block'){const b=V.x+(x-X0)/V.ppb,dB=snapA(b-ad.b0,e.altKey),dR=trackAt(y-AY+V.y)-ad.r0;ad.moved=true;
@@ -6464,9 +6465,9 @@ arr.addEventListener('pointermove',e=>{
     for(const it of ad.items){it.c.start=Math.max(0,it.s0+dB);const ti=clamp(it.ti+dR,0,S.tracks.length-1),tt=S.tracks[ti],ok=tt&&((tt.kind==='inst')===!!it.c.notes),dest=ok?tt:S.tracks[it.ti];if(dest!==it.t){it.t.clips=it.t.clips.filter(q=>q!==it.c);dest.clips.push(it.c);it.t=dest}}if(ad.R){SELR={...ad.R,b0:ad.R.b0+dB,b1:ad.R.b1+dB,r0:clamp(ad.R.r0+dR,0,S.tracks.length-1),r1:clamp(ad.R.r1+dR,0,S.tracks.length-1)}}dirty=true;return}
   if(ad.k==='pan'){if(FLOCK()){const dx=x-(ad.fx??ad.x0);if(Math.abs(dx)>42&&Math.abs(x-ad.x0)>Math.abs(y-ad.y0)*.6){ad.fx=x;if(phFlash()){ad.vx=V.x;ad.x0=x}}}else V.x=ad.vx-(x-ad.x0)/V.ppb;V.y=ad.vy-(y-ad.y0);clampV();dirty=true;return}
   const b=V.x+(x-X0)/V.ppb;
-  if(ad.k==='loopmv'){if(!ad.moved&&Math.abs(x-ad.x0)<4)return;if(!ad.moved){pushUndo();ad.moved=true}const d=(x-ad.x0)/V.ppb;if(ad.edge==='a'){S.loopRange={a:clamp(snapA(ad.a+d,e.altKey),0,ad.b-.25),b:ad.b}}else if(ad.edge==='b'){S.loopRange={a:ad.a,b:Math.max(ad.a+.25,snapA(ad.b+d,e.altKey))}}else{const na=Math.max(0,snapA(ad.a+d,e.altKey));S.loopRange={a:na,b:na+(ad.b-ad.a)}}dirty=true;return}
+  if(ad.k==='loopmv'){if(!ad.moved&&Math.abs(x-ad.x0)<4)return;if(!ad.moved){pushUndo();ad.moved=true}const d=(x-ad.x0)/V.ppb;loopSet(ad.edge==='a'?{a:clamp(snapA(ad.a+d,e.altKey),0,Math.max(0,ad.b-LMIN)),b:ad.b}:ad.edge==='b'?{a:ad.a,b:Math.max(ad.a+LMIN,snapA(ad.b+d,e.altKey))}:(na=>({a:na,b:na+(ad.b-ad.a)}))(Math.max(0,snapA(ad.a+d,e.altKey))),!!S.loop);return}
   if(ad.k==='ruler'){if(ad.still&&!ad.zoom&&!ad.lr&&Math.abs(x-ad.x0)>6&&Math.abs(x-ad.x0)>Math.abs(y-ad.y0))ad.lr=true;
-    if(ad.lr){const bb=snapA(b,e.altKey),a0=snapA(ad.beat,e.altKey),lo=Math.min(a0,bb),hi=Math.max(a0,bb);if(!ad.pushed){pushUndo();ad.pushed=true}if(hi-lo>=.25){S.loopRange={a:Math.max(0,lo),b:hi};S.loop=true;syncTransportUI();dirty=true}return}
+    if(ad.lr){const bb=snapA(b,e.altKey),a0=snapA(ad.beat,e.altKey),lo=Math.min(a0,bb),hi=Math.max(a0,bb);if(!ad.pushed){pushUndo();ad.pushed=true}if(hi-Math.max(0,lo)>=LMIN-1e-9)loopSet({a:Math.max(0,lo),b:hi},true);else if(LPV){LPV=null;dirty=true}return}
     if(ad.y0<AY&&(ad.zoom||Math.abs(y-ad.y0)>5)){ad.zoom=true;pos=ad.p0;V.ppb=ad.ppb*Math.exp((y-ad.y0)*.012);clampV();V.x=ad.beat-(ad.x0-X0)/V.ppb-(x-ad.x0)/V.ppb;clampV();dirty=true;return}
     if(ad.still)return;pos=Math.max(0,snapA(b,e.altKey));dirty=true;return}
   if(!ad.pushed){pushUndo();ad.pushed=true}
@@ -16814,6 +16815,22 @@ async function apicPick(id){const D=apicData;if(!D||!D.groups)return;const ic=D.
   /* loaded the first time the Colours page is shown, so Settings opens as fast as before */
   const go=()=>{if(apicData)return;apicData={loading:1};apicLoad().then(d=>{apicData=d;apicRender()}).catch(()=>{apicData={err:1};apicRender()})};
   if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting)){io.disconnect();go()}});io.observe(box)}else go()}}
+/* Loop bar while playing (task AC). Before, every mouse move of a loop drag went straight to the transport: a loop drawn slowly from just
+   behind the playhead was a tiny loop behind the playhead for a moment, and the scheduler went round it up to three times every 25 ms
+   ("plays really fast, glitches"). Now, like Ableton, Bitwig, Logic and REAPER: while the song plays the new loop is only drawn (LPV) and
+   the transport keeps the old one until the mouse is let go; a loop is at least one beat (LMIN), snapped to the grid.
+   loopSync() runs in every tick and handles any change of the loop while playing (this drag, the loop button, undo, the assistant):
+   if what was already handed to the audio engine (play.sched, about 0.15 s ahead) lies inside the new loop or before it, nothing happens
+   and the scheduler goes round the new loop at its end. If it lies past the new end, the notes already handed over play out and the song
+   carries on inside the loop at the same place in the beat (start + distance modulo length): the same step the scheduler takes at every
+   loop end, so no restart, no gap, no note twice, and never more than one such step for a change. */
+function loopSet(R,on){if(play.on){LPV={...R,on};dirty=true;return}LPV=null;S.loopRange=R;S.loop=on;syncTransportUI();dirty=true}
+function loopCommit(){const R=LPV;LPV=null;if(!R)return;S.loopRange=R.id?{id:R.id,a:R.a,b:R.b}:{a:R.a,b:R.b};S.loop=R.on;syncTransportUI();dirty=true;loopSync()}
+function loopSync(){const a=loopA(),b=loopB(),on=!!S.loop;if(!play.on||!ctx){play.la=a;play.lb=b;play.lo=on;return false}
+  if(a===play.la&&b===play.lb&&on===play.lo)return false;const first=play.la==null;play.la=a;play.lb=b;play.lo=on;if(!on||first)return false;
+  const e=1e-6,p=play.sched,L=b-a;play.past=false;if(ctx.currentTime>=play.t0)play.wrapped=false;if(p<=b+e||L<e)return false;
+  let q=a+((p-a)%L);if(q>=b-e||q<a)q=a;play.t0+=secOf(p)-secOf(play.b0);play.b0=q;play.sched=q;play.wrapped=true;play.first=true;play.pass++;setTimeout(ndResync,0);return false}
+arr.addEventListener('pointerup',()=>{if(LPV)loopCommit()},true);arr.addEventListener('pointercancel',()=>{if(LPV)loopCommit()},true);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

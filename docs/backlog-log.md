@@ -2284,3 +2284,34 @@ Ran after task E (v0.201) was finished. Icon files from the branch `assets/app-i
 - v0.203: commit bdde4ed; desktop build run 45772449717 succeeded (release v0.203.0: Mac dmg, Windows setup). The Mac dmg was opened (7z): Info.plist has exactly one document type (AudioLab Pro project, Editor, Owner, LSItemContentTypes com.audiolab.project, extension audiolab, icon doc.icns) and the UTExportedTypeDeclarations entry; Contents/Resources holds doc.icns and icon.icns identical to `desktop/build/`; app.asar holds the picker pictures. MIN_SHELL stays 0.147.0.
 - The branch `assets/app-icons` could not be deleted from here (the connection drops on a branch delete); its files are on main in `desktop/icon-assets/`. Delete it on GitHub (Branches) when convenient.
 - Next: the user tries the new app on the Mac (Dock icon, .audiolab icon in Finder after one log out and in) and on Windows (shortcuts).
+
+## 26 November 2026, v0.204: loop bar fix (task AC, from a later message)
+> "Sometimes when your song is playing and you start selecting, it starts playing really fast: when you drag the selection and it's still small, it starts looping really fast inside. [...] it sounds like it's glitching."
+
+### What was wrong
+- A drag on the ruler (drawing a loop), on the loop (moving it), on its edges (resizing) or on a looped section wrote `S.loopRange` on every mouse move, and the transport reads `loopB()` every 25 ms in `tick()`. A loop drawn slowly from just behind the playhead is, for most of the drag, a short loop whose end is behind the playhead or inside the look-ahead. The scheduler then saw `play.sched >= end` and wrapped, up to three times per tick (the `k<3` loop), with notes already handed to the engine past the end: fast looping, notes twice, glitches.
+- Reproduced in the new test on v0.202: 10 rounds of a loop in a 2.4 s drag; resizing let a quarter-beat loop be active (the old minimum was 0.25 beat).
+- The same wrap happened when the loop button was turned on while the playhead was past the loop.
+
+### Research
+- Ableton Live, Bitwig, REAPER, Cubase: the loop brace or locators can be dragged while playing; the transport only takes the loop over once it is set, and a loop is never thrown at the playhead while the mouse is still moving. Logic Pro: the cycle area is drawn in the ruler and the playback follows the finished cycle; with the playhead outside it, playback goes into the cycle. These are from memory of the programs plus the pages found (not read in full): forum.ableton.com/viewtopic.php?p=451858 (should the play position jump when adjusting the loop), forum.ableton.com/viewtopic.php?p=1791144 (moving the loop brace while playing), help.apple.com/logicpro/mac/10.2.1/en.lproj/lgcp9ede81be.html (cycle area), help.apple.com/logicpro/mac/9.1.6/en/logicpro/usermanual/chapter_5_section_6.html (Using Cycle Mode), cockos.com/wiki/index.php/Preferences_Audio_Playback (REAPER seek and loop options).
+- Taken over: the loop is applied on release; a minimum length; no restart of the transport; the jump into the loop keeps the beat.
+
+### What was built
+- `LPV` (the pending loop) and `loopSet(R,on)`: while the song plays a drag only draws the new loop (`loopShow()` shows `LPV`), the transport keeps the old one; when stopped the loop follows the mouse as before. `loopCommit()` on pointerup or pointercancel of the arrangement (capture listeners) writes it.
+- `LMIN = 1`: a loop is at least one beat, snapped to the grid (draw, move, both edges). A drawn drag shorter than that shows and changes nothing.
+- `loopSync()`, first thing in `tick()`, for any change of the loop while playing (drag, loop button, undo, assistant, looped section): if what the scheduler has already handed over (`play.sched`) is inside or before the new loop, nothing happens and the scheduler goes round at the new end. If it is past the new end, the notes already handed over play out and the song carries on inside the loop at the same place in the beat (`a + (sched - a) mod length`): the same step the scheduler takes at every loop end (`t0`, `b0`, `sched`, `wrapped`, `first`, `pass`), so no stop and start, no gap, nothing scheduled twice, and at most one step per change. `start()` records the loop it plays (`play.la`, `play.lb`, `play.lo`). Cost: three comparisons per tick.
+- Edits outside the new block: `loopA` line (declarations), `loopShow`, `tick`, `start`, the ruler, loop and section drag lines in the arrangement's pointermove.
+
+### Tests
+- `tools/ui-tests/loopbar.py` (new): plays the Fractals demo, records the transport every frame and every scheduler call. Draw a loop slowly from one beat behind the playhead (slower than the playhead, then faster), move it by one bar, shrink it towards nothing and grow it: during each drag no active loop under one beat, the transport's loop unchanged, 0 restarts, the old loop comes round only at its own pace; after release the loop is the new region, the first jump lands inside it, every later jump goes from the end to the start (error 0.001 to 0.033 beats with frame time taken out), 0 restarts, nothing scheduled twice; stopped: the loop follows the mouse; no page errors. Passes on v0.204 (on v0.202 it failed 8 checks).
+- Loop button turned on while the playhead is past the loop: one step into the loop, then normal rounds.
+- `tools/ui-tests/playhead.py` and `tools/ui-tests/play.py` pass. Fractals demo unchanged: solo Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96).
+
+### Not verified
+- Listening on real speakers (the test browser has no audio output; the check is on the schedule, which is what decides double notes).
+- A clean preset switch (`chsResched`) inside the 0.15 s right after a loop change that jumped: its pending-round branch assumes the round ended at the loop end. Rare, not seen in tests.
+- Touch.
+
+### Release
+- v0.204, built on v0.203 (task V, app icon) released by another session while this one worked; one merge of two new blocks in index.html, both kept.
