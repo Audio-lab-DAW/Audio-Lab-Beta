@@ -3166,4 +3166,5 @@ Three changes to what a fresh install and every start look like. The audio engin
 - Not touched, as told: the mixer fader default ("Flat bars", task D1).
 
 ### Release
+- v0.220: commit 0b0a8de on main (rebased twice on other sessions' doc and glass-lab commits; `index.html` was not touched by them).
 - v0.220. App copy synced, update note written ("Starts with the Fractals song as the only open song, 10 dB quieter on the master."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-fixes-run-AI.md`. Next in the chain: D2.
