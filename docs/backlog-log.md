@@ -2595,3 +2595,5 @@ Desktop app
 
 ### Left
 - Clicking and holding Hear it to listen only while held (Pro-C does this); a preview curve in the devices panel's Ducker.
+### Release
+- v0.210: commit 7abff48 on main. Desktop build run 45781476825 dispatched through the GitHub connector (the gh dispatch was refused by the proxy: numeric-ID repository path); it was running when this was written. Artifact 1b07d888 updated to version 233 (it was at v0.209). Project doc `claude/audiolab-fixes-run-AG.md`.
