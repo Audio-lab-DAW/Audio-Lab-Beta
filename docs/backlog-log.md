@@ -1912,3 +1912,7 @@ Total in this part: 229 presets before, 451 after. Sub, Psy Bass and Bounce were
 ### Left
 - Part 2: the other instruments (samplers, drums, Emit, Vector Grain, FX, Grid; Sub, Psy Bass, Bounce, Fractal only if needed). Part 3: the effects.
 - Listening with the user; a mod wheel route for the basic synths, Plant and Wavetable (engine work); a preset browser with search and tags across instruments.
+
+### Release
+- v0.197: commit 1424e8c, project doc `claude/audiolab-preset-research.md` (same text as `docs/preset-research.md`), artifact version 220.
+- Desktop build: run 45756249392 dispatched for this commit (still running when this note was written).
