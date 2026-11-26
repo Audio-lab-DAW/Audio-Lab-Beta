@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   updateCheck: (o) => ipcRenderer.invoke('al:update-check', o || {}),
   updateStatus: () => ipcRenderer.invoke('al:update-status'),
   updateApp: () => ipcRenderer.invoke('al:update-app'),
+  installApp: () => ipcRenderer.invoke('al:install-app'),   // v0.207: Windows, install a downloaded new app now
   // torn-off projects in their own windows
   isFullScreen: () => ipcRenderer.invoke('al:is-fullscreen'),
   displayHz: () => ipcRenderer.invoke('al:display-hz'),

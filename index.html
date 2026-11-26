@@ -1749,6 +1749,26 @@ body.fxmin #mixWin .mx.abxl .fwrap{box-shadow:0 0 0 1px var(--abxc)}
 #vaiWin .vabtns{display:flex;gap:8px;margin-top:3px}
 #vaiWin .vaprog{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}#vaiWin .vaprog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7ad9,#4cc9f0);transition:width .15s}
 #vaiWin .vamsg{min-height:16px;color:rgba(255,255,255,.7)}
+/* v0.207: update window (task Y) */
+#uywM{position:fixed;inset:0;z-index:2147480400;display:grid;place-items:center;background:rgba(4,5,8,.38);animation:uywf .16s ease-out}
+@keyframes uywf{from{opacity:0}to{opacity:1}}@keyframes uywp{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.uyww{position:relative;width:min(470px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:auto;padding:26px 24px 18px;border-radius:18px;background:rgba(var(--gtr),max(var(--ga,.6),.55));backdrop-filter:var(--blur2);-webkit-backdrop-filter:var(--blur2);border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.07);animation:uywp .2s cubic-bezier(.2,.8,.3,1);color:#e8eaf0}
+.uywx{position:absolute;top:12px;right:12px;width:30px;height:30px;padding:0!important;border-radius:9px;font-size:13px;line-height:1}
+.uywlogo{width:64px;height:64px;margin:0 auto 10px;border-radius:15px;overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08);display:grid;place-items:center}
+.uywlogo img{width:100%;height:100%;display:block}.uywlogo img.pick{transform:scale(1.24)}
+.uywlogo.sm{width:40px;height:40px;margin:0;border-radius:10px;flex:none;border:0;background:none}
+.uywbody h3{margin:0;text-align:center;font:650 18px Inter,system-ui,sans-serif;color:#f2f4f8}.uywsub{margin:4px 0 14px;text-align:center;font-size:12px;color:#9ba0ad}
+.uywv{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 14px}.uywv span{display:grid;justify-items:center;min-width:92px;padding:7px 12px;border-radius:10px;background:rgba(6,7,10,.55);border:1px solid rgba(255,255,255,.09)}
+.uywv small{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#8b8f9c}.uywv b{font:600 15px ui-monospace,Menlo,monospace;color:#e6e8ee}.uywv span.new{border-color:rgba(255,210,58,.5);background:rgba(255,210,58,.08)}.uywv span.new b{color:#ffd23a}.uywv i{font-style:normal;color:#8b8f9c;font-size:16px}
+.uywsec{margin:0 0 12px}.uywsec h5{margin:0 0 6px;font:600 10.5px Inter,system-ui,sans-serif;color:#9a9da9;text-transform:uppercase;letter-spacing:.06em}
+.uywn{margin:0;padding:10px 12px;border-radius:10px;font-size:12.5px;line-height:1.5;color:#dfe2ea;background:rgba(76,141,255,.1);border:1px solid rgba(76,141,255,.35)}
+.uywrl{margin:0;padding:0;list-style:none;display:grid;gap:5px;max-height:150px;overflow:auto}.uywrl li{display:flex;gap:8px;font-size:11.5px;line-height:1.4;color:#b9bdc8;cursor:pointer;border-radius:6px;padding:2px 4px}.uywrl li:hover{background:rgba(255,255,255,.05)}
+.uywrl li b{flex:none;min-width:40px;font:600 11px ui-monospace,Menlo,monospace;color:#7be0b0}.uywrl li span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.uywrl li.open span{display:block}
+.uywst{margin:0;padding:0 0 0 20px;display:grid;gap:5px;font-size:12.5px;line-height:1.45;color:#d9dce4}
+.uywnote{margin:8px 0 0;padding:8px 10px;border-radius:9px;font-size:12px;line-height:1.45;color:#f6dfb4;background:rgba(245,160,76,.1);border:1px solid rgba(245,160,76,.4)}
+.uywb{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.uywb button{min-width:96px;height:32px;border-radius:9px}.uywb button.pri{background:#3ecf8e;color:#04140c;border-color:#3ecf8e;font-weight:600}.uywb button.pri:hover{filter:brightness(1.08)}
+#uywB{position:fixed;top:44px;right:12px;z-index:2147480300;display:flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 5px;border-radius:13px;font-size:11.5px;font-weight:600;color:#ffe48a;background:rgba(var(--gtr),.88);backdrop-filter:var(--blur2);-webkit-backdrop-filter:var(--blur2);border:1px solid rgba(255,210,58,.45);box-shadow:0 6px 18px rgba(0,0,0,.4);cursor:pointer}
+#uywB[hidden]{display:none}#uywB img{border-radius:4px}#uywB:hover{border-color:#ffd23a}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5918,7 +5938,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.206',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.207',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17328,6 +17348,97 @@ async function vaiMakeUI(name,from,x,sr){if(VAI.busy){toast('Wait for the curren
  try{const id=await vaiMake(name,from,x,sr);if(VAI.f){VAI.f.p.aiV=id;changed(false)}vaiSet('The voice "'+name+'" is ready. Press Convert to use it on this clip.',1)}
  catch(e){vaiSet(e.message,0);toast(e.message)}finally{VAI.busy=null;vaiPaint()}}
 
+/* ---------- v0.207: update window (task Y) ----------
+   "The update notification should be a window popping up in the center with an X and some more information. And let's have the logo on the top."
+   One centred glass window for every update notice: a new program version that the desktop app has downloaded (over the air, kind 'ota')
+   and a new desktop app (kind 'app': Windows downloads and installs it by itself, the Mac needs a download from the Releases page).
+   Logo (the icon chosen in Settings, App icon; Ocean Yellow by default, built in so it shows even offline), from and to version, what is new
+   (update-notes.txt from the manifest, plus the last releases), what to do, buttons for it, an X and Escape to close.
+   It never opens while something plays, records or exports: then only a small badge at the top right shows (it opens the window), and the
+   window opens by itself once the sound has stopped for a moment. "Later" is remembered per version (al-upd-later): that version then only
+   shows the badge. The window takes no keys except Escape, and folds into the badge if playback starts while it is open. */
+const UYWLOGO='data:image/webp;base64,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';
+const UYW={i:null,open:false,ob:false,wait:0,fold:0,closed:'',rel:null,appV:'',pic:null};
+const UYW_ICON='0.203';   /* the desktop app whose icon changed (task V): older Mac apps get the log-out note when they are replaced */
+const uywK=i=>i?i.kind+':'+(i.kind==='app'?(i.stage||'needed'):'')+':'+i.to:'';
+function uywLater(){try{return localStorage.getItem('al-upd-later')||''}catch(e){return''}}
+function uywBusy(){try{if(play.on||REC.on)return true;if(typeof BUSYN!=='undefined'&&BUSYN>0)return true;const g=document.getElementById('exGo');return!!(g&&g.disabled)}catch(e){return false}}
+/* the logo: the icon in use (desktop app: its icon folder; browser: the picker pictures), else the built-in Ocean Yellow */
+async function uywPic(){if(UYW.pic!=null)return UYW.pic;let src='';try{const h=typeof apicHost==='function'&&apicHost();
+  if(h&&typeof h.listAppIcons==='function'){const r=await h.listAppIcons();if(r&&r.current&&r.current!==(r.default||APIC_DEF)&&r.base)src=r.base+'thumb/'+r.current+'.png'}
+  else if(!h){const id=localStorage.getItem(APIC_KEY);if(id&&id!==APIC_DEF&&/^[a-z0-9-]+$/.test(id))src=APIC_WEB+'thumb/'+id+'.png'}}catch(e){}
+  return UYW.pic=src}
+function uywLogo(src){return src?`<img class="pick" src="${esc(src)}" alt="" width="64" height="64" decoding="async" onerror="this.onerror=null;this.className='';this.src=UYWLOGO">`:`<img src="${UYWLOGO}" alt="" width="64" height="64">`}
+/* the last releases: first lines of the release commits (cached by updNotes) */
+function uywRel(){if(UYW.rel)return;UYW.rel='…';updNotes().then(L=>{UYW.rel=L||[];if(UYW.open)uywPaint()}).catch(()=>{UYW.rel=[]})}
+function uywBadge(on){let b=document.getElementById('uywB');
+  if(!on){if(b)b.hidden=true;return}
+  if(!b){b=document.createElement('button');b.id='uywB';b.type='button';b.addEventListener('click',()=>uywOpen(true));document.body.appendChild(b)}
+  const i=UYW.i||{};b.innerHTML=`<img src="${UYWLOGO}" alt="" width="16" height="16"><span>${i.kind==='app'?'New app':'Update'} ${esc(updV(i.to))}</span>`;
+  b.title=(uywBusy()?'An update is ready. It waits until the music stops. ':'')+'Click to see what is new and how to install it';b.hidden=false}
+/* entry point: info = {kind:'ota'|'app', to, notes, stage:'needed'|'ready', auto (Windows installs by itself), app (the app's version)} */
+function uywShow(info){if(!info||!info.to)return false;UYW.i=Object.assign({},info,{from:info.from||VERSION});uywBadge(true);uywRel();
+  if(UYW.open){uywPaint();return true}
+  const k=uywK(UYW.i);if(uywLater()===k||UYW.closed===k)return true;   /* "Later" for this version, or closed this session: the badge only */
+  if(uywBusy())uywWait();else uywOpen(false);return true}
+/* while something plays: wait until it has been quiet for 1.5 s */
+function uywWait(){clearInterval(UYW.wait);let q=0;UYW.wait=setInterval(()=>{if(!UYW.i||UYW.open){clearInterval(UYW.wait);return}
+  if(uywBusy()){q=0;return}if(++q>=3){clearInterval(UYW.wait);const k=uywK(UYW.i);if(uywLater()!==k&&UYW.closed!==k)uywOpen(false)}},500)}
+async function uywOpen(byUser){if(!UYW.i)return;if(!byUser&&uywBusy()){uywWait();return}
+  let m=document.getElementById('uywM');
+  if(!m){m=document.createElement('div');m.id='uywM';m.innerHTML='<div class="uyww" role="dialog" aria-modal="true" aria-labelledby="uywT"><button type="button" class="uywx" data-uy="x" title="Close (Esc). The update stays ready: the badge at the top right opens this again." aria-label="Close">✕</button><div class="uywlogo"></div><div class="uywbody"></div></div>';document.body.appendChild(m);
+    m.addEventListener('click',e=>{const b=e.target.closest('[data-uy]');if(b){uywAct(b.dataset.uy);return}const r=e.target.closest('.uywrl li');if(r){r.classList.toggle('open');return}if(e.target===m)uywClose()});
+    document.addEventListener('keydown',uywKey,true)}
+  UYW.open=true;UYW.ob=uywBusy();uywBadge(false);uywPaint();
+  const src=await uywPic();const l=m.querySelector('.uywlogo');if(l&&l.dataset.s!==src){l.dataset.s=src;l.innerHTML=uywLogo(src)}
+  if(D_()&&!UYW.appV){try{UYW.appV=String(await window.audiolabDesktop.version()||'');uywPaint()}catch(e){}}
+  clearInterval(UYW.fold);UYW.fold=setInterval(()=>{if(!UYW.open){clearInterval(UYW.fold);return}const b=uywBusy();if(b&&!UYW.ob)uywClose(true);else if(!b)UYW.ob=false},400)}
+function D_(){return window.audiolabDesktop||null}
+function uywKey(e){if(!UYW.open||e.key!=='Escape')return;e.preventDefault();e.stopPropagation();uywClose()}
+/* fold=true: playback started while it was open, so it goes back to the badge and opens again when the sound stops */
+function uywClose(fold){const m=document.getElementById('uywM');if(m)m.remove();document.removeEventListener('keydown',uywKey,true);clearInterval(UYW.fold);UYW.open=false;
+  if(!UYW.i)return;uywBadge(true);if(fold)uywWait();else UYW.closed=uywK(UYW.i)}
+function uywPaint(){const m=document.getElementById('uywM');if(!m||!UYW.i)return;const i=UYW.i,D=D_(),plat=(D&&D.platform)||'',mac=plat==='darwin',app=i.kind==='app';
+  const appV=updV(i.app||UYW.appV||''),from=updV(app?(i.stage==='ready'&&appV?appV:i.from):i.from),to=updV(i.to);
+  const B=(k,t,tip,pri)=>`<button type="button" data-uy="${k}"${pri?' class="pri"':''} title="${esc(tip)}">${t}</button>`;
+  let title,sub,steps=[],btn=[],note='';
+  if(!app){title=`AudioLab ${esc(to)} is ready`;sub='The new version is downloaded and checked.';
+    steps=['Restart now: AudioLab saves your open projects, restarts its window in about a second and opens them again as they were.','Later: keep working. The new version starts the next time you open AudioLab.'];
+    btn=[B('later','Later','Keep working. The new version starts the next time you open AudioLab. This window does not open again for this version.'),B('go','Restart now','Save the open projects and restart with version '+to,1)]}
+  else if(!mac&&i.auto&&i.stage==='ready'){title=`The new AudioLab app ${esc(to)} is ready`;sub='The new desktop app is downloaded. Installing it replaces this app.';
+    steps=['Restart and install: AudioLab saves your open projects, closes, installs the new app and opens again.','Later: it installs by itself the next time you quit AudioLab.'];
+    btn=[B('later','Later','It installs by itself the next time you quit AudioLab. This window does not open again for this version.'),B('install','Restart and install','Save the open projects, close AudioLab, install the new app and open it again',1)]}
+  else if(!mac&&i.auto){title=`Version ${esc(to)} needs a new app`;sub='The new desktop app is downloading by itself.';
+    steps=['Nothing to do yet: keep working while it downloads.','When it is ready this window comes back with a button to install it. Your projects are kept.'];
+    btn=[B('later','OK','Close this. It comes back when the new app is ready to install.',1)]}
+  else{title=`Version ${esc(to)} needs a new app`;sub=mac?'The Mac app cannot replace itself. It takes a minute, once.':'This app cannot replace itself. It takes a minute, once.';
+    steps=mac?['Download the new app (the .dmg file) from the Releases page.','Quit AudioLab, open the .dmg and drag AudioLab Pro into Applications. Choose Replace.','Open AudioLab again. Your projects, settings and sounds are kept.']
+      :['Download the installer (the Setup .exe file) from the Releases page.','Quit AudioLab and run the installer.','Open AudioLab again. Your projects, settings and sounds are kept.'];
+    if(mac&&(!appV||updCmp(appV,UYW_ICON)<0))note='The new app has a new icon. If the Dock, Finder or Launchpad still shows the old one after you replace the app, log out of your Mac and log in again (or restart it).';
+    btn=[B('later','Later','Remind me with the badge only. This window does not open again for this version.'),B('dl','Download the new app','Open the Releases page to download the new app',1)]}
+  const notes=String(i.notes||'').trim(),R=Array.isArray(UYW.rel)?UYW.rel:[];
+  const rel=R.filter(n=>updCmp(n.v,i.to)<=0).slice(0,5);
+  m.querySelector('.uywbody').innerHTML=`<h3 id="uywT">${title}</h3><p class="uywsub">${esc(sub)}</p>
+    <div class="uywv" title="The version you have now and the new one"><span><small>You have</small><b>${esc(from||'?')}</b></span><i aria-hidden="true">→</i><span class="new"><small>New</small><b>${esc(to)}</b></span></div>
+    ${notes?`<div class="uywsec"><h5>What is new</h5><p class="uywn">${esc(notes)}</p></div>`:''}
+    ${rel.length?`<div class="uywsec"><h5>Recent releases</h5><ul class="uywrl">${rel.map(x=>`<li title="Click to read all of it"><b>${esc(x.v)}</b><span>${esc(x.t)}</span></li>`).join('')}</ul></div>`:''}
+    <div class="uywsec"><h5>What to do</h5><ol class="uywst">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>${note?`<p class="uywnote" title="macOS keeps a copy of app icons and sometimes shows the old one until you log in again">${esc(note)}</p>`:''}</div>
+    <div class="uywb">${btn.join('')}</div>`}
+async function uywAct(k){const i=UYW.i,D=D_();if(!i)return;
+  if(k==='x'){uywClose();return}
+  if(k==='later'){try{localStorage.setItem('al-upd-later',uywK(i))}catch(e){}uywClose();return}
+  if(uywBusy()){toast('Stop playback, recording or the export first.');return}
+  if(k==='go'){if(!D||!D.applyUpdate){toast('Restart AudioLab to use the new version.');return}uywBusyBtn('go','Restarting…');if(!(await updApply(i.to,false))){uywBusyBtn('go','Restart now',1);toast('The update could not be started. Try again, or restart AudioLab.')}return}
+  if(k==='install'){if(!D||!D.installApp){toast('Quit AudioLab to install the new app.');return}uywBusyBtn('install','Closing…');try{window.audiolabHost.beforeReload()}catch(e){}try{await D.installApp()}catch(e){uywBusyBtn('install','Restart and install',1)}return}
+  if(k==='dl'){try{if(D&&D.updateApp){const w=await D.updateApp();if(w==='auto'){UYW.i=Object.assign({},i,{auto:true,stage:'needed'});uywPaint()}}else window.open(UPDU.rel,'_blank')}catch(e){window.open(UPDU.rel,'_blank')}}}
+function uywBusyBtn(k,t,on){const b=document.querySelector('#uywM [data-uy="'+k+'"]');if(b){b.textContent=t;b.disabled=!on}}
+/* hooks: the desktop app calls audiolabHost.updateReady (every app build) and, from v0.207, audiolabHost.appUpdate for a new desktop app.
+   "Install updates automatically" keeps its own small card (it installs by itself when it is safe). */
+{const H=window.audiolabHost,_ur=H.updateReady;
+  H.updateReady=(v,notes)=>{UPD.ready={v:String(v),notes:notes||''};if(UI.updAuto)return _ur(v,notes);try{return uywShow({kind:'ota',to:String(v),notes:notes||''})}catch(e){return _ur(v,notes)}};
+  H.appUpdate=o=>{try{o=o||{};return uywShow({kind:'app',to:String(o.version||''),notes:o.notes||'',stage:o.stage||'needed',auto:!!o.auto,app:o.app||''})}catch(e){return false}};
+  /* the Updates window (Check for updates) gets the same logo */
+  const _uo=updOpen;updOpen=function(){const x=_uo.apply(this,arguments);try{const c=document.querySelector('#updDlg .updh .cdi');if(c&&!c.dataset.uy){c.dataset.uy=1;c.className='uywlogo sm';c.innerHTML=uywLogo('');uywPic().then(s=>{if(s&&c.isConnected)c.innerHTML=uywLogo(s)})}}catch(e){}return x}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

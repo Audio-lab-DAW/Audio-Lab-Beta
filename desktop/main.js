@@ -400,8 +400,8 @@ function setupUpdater() {
   if (!isMac && app.isPackaged) {
     try { ({ autoUpdater } = require('electron-updater')); autoUpdater.logger = null; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
       autoUpdater.on('update-downloaded', (info) => {
-        dialog.showMessageBox(win, { type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab Pro ${info.version} is ready`, detail: 'Save your project first, then restart to finish updating.' })
-          .then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
+        // v0.207 (task Y): the page's own update window first ("Restart and install" calls al:install-app); a system dialog for older programs
+        appUpdateToPage({ version: info.version, stage: 'ready', auto: true }).then((ok) => { if (!ok) appReadyDialog(info); });
       });
       autoUpdater.on('error', () => {});
     } catch (e) { autoUpdater = null; }
@@ -411,18 +411,37 @@ function setupUpdater() {
   setInterval(() => checkUpdates(false), 3600 * 1000);   // once an hour
   setInterval(() => { if (updReady) offerRestart(false); }, 6 * 3600 * 1000);   // a dismissed notice comes back after 6 hours
 }
+// v0.207 (task Y): a new desktop app is shown in the page's centred update window (audiolabHost.appUpdate); false when the program is older
+function appUpdateToPage(o) {
+  if (!win || win.isDestroyed() || !appReady) return Promise.resolve(false);
+  const arg = JSON.stringify(Object.assign({ app: app.getVersion(), notes: (updLast && updLast.notes) || '' }, o));
+  return win.webContents.executeJavaScript(`!!(window.audiolabHost&&window.audiolabHost.appUpdate&&window.audiolabHost.appUpdate(${arg}))`, true).catch(() => false);
+}
+function appReadyDialog(info) {
+        dialog.showMessageBox(win, { type: 'info', buttons: ['Restart and update', 'Later'], defaultId: 0, cancelId: 1, message: `AudioLab Pro ${info.version} is ready`, detail: 'Save your project first, then restart to finish updating.' })
+          .then((r) => { if (r.response === 0) { quitOK = true; autoUpdater.quitAndInstall(); } });
+}
 let shellAsked = null;
 function needNewApp(m, manual) {
   if (!manual && shellAsked === m.version) return;   // ask once per version, not at every check
   shellAsked = m.version;
-  if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); if (manual) dialog.showMessageBox(win, { type: 'info', message: `Version ${m.version} needs a newer app`, detail: 'It is being downloaded. You will be asked to restart when it is ready.' }); return; }
+  if (!manual) {   // v0.207 (task Y): the page's window, a system dialog only for older programs
+    if (autoUpdater) autoUpdater.checkForUpdates().catch(() => {});
+    appUpdateToPage({ version: m.version, notes: m.notes || '', stage: 'needed', auto: !!autoUpdater }).then((ok) => { if (!ok) { shellAsked = null; needNewAppDialog(m, false, true); } });
+    return;
+  }
+  needNewAppDialog(m, manual, false);
+}
+function needNewAppDialog(m, manual, checked) {
+  shellAsked = m.version;
+  if (autoUpdater) { if (!checked) autoUpdater.checkForUpdates().catch(() => {}); if (manual) dialog.showMessageBox(win, { type: 'info', message: `Version ${m.version} needs a newer app`, detail: 'It is being downloaded. You will be asked to restart when it is ready.' }); return; }
   dialog.showMessageBox(win, { type: 'info', buttons: ['Open download page', 'Later'], defaultId: 0, cancelId: 1, message: `Version ${m.version} needs a newer app`, detail: 'This one time, download the new app and replace this one. After that, updates install by themselves again.' })
     .then((r) => { if (r.response === 0) shell.openExternal(RELEASES); });
 }
 function offerRestart(manual) {
   if (!updReady || !win || win.isDestroyed()) return;
   const v = updReady.version;
-  // Preferred: a card inside the window (top right) that stays until accepted or dismissed. Older program versions don't have it: then a dialog.
+  // Preferred: the page's own notice (since v0.207 a centred update window, before that a card at the top right). Older program versions don't have it: then a dialog.
   if (!manual) {
     win.webContents.executeJavaScript(`!!(window.audiolabHost&&window.audiolabHost.updateReady&&window.audiolabHost.updateReady(${JSON.stringify(v)},${JSON.stringify(updReady.notes || '')}))`, true)
       .then((ok) => { if (!ok) offerDialog(); }).catch(() => offerDialog());
@@ -450,7 +469,7 @@ async function checkUpdates(manual) {
   const say = (message, detail, type) => { if (manual && win && !win.isDestroyed()) dialog.showMessageBox(win, { type: type || 'info', message, detail }); };
   const r = await updCheck(true);
   if (r.status === 'ready') offerRestart(manual);
-  else if (r.status === 'needs-app') needNewApp({ version: r.latest }, manual);
+  else if (r.status === 'needs-app') needNewApp({ version: r.latest, notes: r.notes }, manual);
   else if (r.status === 'current') say('AudioLab is up to date.', 'Version ' + r.installed);
   else if (r.status === 'reverted') say(`Version ${r.latest} did not start on this computer`, 'AudioLab stays on version ' + r.installed + ' until a newer one is published.', 'warning');
   else if (r.status === 'publishing') say('The update is still being published.', 'Try again in a few minutes.');
@@ -458,6 +477,7 @@ async function checkUpdates(manual) {
 }
 ipcMain.handle('al:update-check', (e, o) => updCheck(!!(o && o.download)));
 ipcMain.handle('al:update-status', () => Object.assign({}, updLast, { installed: liveVer || app.getVersion(), app: app.getVersion(), ready: updReady ? updReady.version : null, platform: process.platform }));
+ipcMain.handle('al:install-app', () => { if (!autoUpdater) return false; askQuit(() => { quitOK = true; autoUpdater.quitAndInstall(); }); return true; });   // v0.207: "Restart and install" in the page's update window
 ipcMain.handle('al:update-app', () => { if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); return 'auto'; } shell.openExternal(RELEASES); return 'page'; });
 ipcMain.handle('al:version', () => app.getVersion());
 ipcMain.handle('al:program-version', () => liveVer || app.getVersion());
