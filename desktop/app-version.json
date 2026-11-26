@@ -1,7 +1,7 @@
 {
-  "version": "0.197",
-  "sha256": "37818a1317c3b3aed494f4d645c4c4dd3c7c5ab3042df2df4b3afc3e69233375",
-  "size": 2994024,
+  "version": "0.198",
+  "sha256": "5d19c277795a719e63c0dfde722c3665078881ad8a8eb192e2d70e047b5dc528",
+  "size": 3019227,
   "minShell": "0.147.0",
   "notes": "All the synths have new presets: 451 instead of 229, sorted into groups (Lead, Bass, Pad, Pluck, Keys, FX and Psytrance), each with a short tip in the menu that says what it is for and where on the keyboard it sounds best, and all at an even level. Presets made for psytrance are marked."
 }
