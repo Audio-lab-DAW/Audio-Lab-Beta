@@ -184,3 +184,15 @@ Read by research helpers through a web fetch tool that returns a summary of each
 - The m3.material.io pages (Material 3 Expressive motion and shape numbers) did not load.
 - Not covered: Komplete Kontrol, Arturia V Collection, OP-1 field, u-he, Logic, Studio One; no first-party design write-up for Arc or the current Framer editor.
 - Earlier AudioLab research this builds on: `claude/audiolab-liquid-glass-research.md` (how the glass is drawn and what it costs).
+
+## 9. Round 1 result (26 November 2026, evening)
+
+**The user's picks: A0, B0, C1, D3, E0, F4, G2, H0.** Today's overall look, colours, buttons and icons stay; Inter on the strict scale; full glass on panels; glass mixer strips; display-first devices. This differs from the recommendation in section 1 ("Calm glass", yellow accent): the user keeps the current identity and wants more glass, not less, made fast.
+
+Kept on purpose: the half pan with a dial, the mixer header, the stereo field displays, the cable system, the original "Flat bars" fader design (not "Flat bars 2") as the standard, sideways device titles with the display as large as possible and floating buttons in it.
+
+Asked for: the sidechain outline only when the sender or receiver is selected.
+
+New design philosophy from the user: scientific (the atom, JPL and Caltech, Jupiter, Hubble and Webb, measurements, mathematical beauty); "smart and sciencey, clear, intuitive, snappy".
+
+What happens next, the glass engine and the task list: `docs/glass-engine-plan.md` (project: `claude/audiolab-glass-engine-plan.md`).
