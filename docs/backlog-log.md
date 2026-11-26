@@ -2679,3 +2679,36 @@ Research: Ableton Live duplicates with Ctrl/Cmd+D and Ctrl/Option+drag, Logic wi
 - Shortcuts window: rows for Shift+drag, arrows, Shift+arrows, Alt+arrows (fixed keys). The clip tooltip mentions them.
 - Test tools/ui-tests/taskAJ.py: single and group duplicate, Undo/Redo, shift-click still selects, steps at 300, 80, 24, 12 and 3 px per beat (Right, Shift+Left, Alt+Right), time 0 limit, up/down and blocked cases, held key = one step, text field and focus guard, 354 clips moved 20 times in 5 ms, no console errors. Fractals Kick -9.75669 dB, Bass -25.48699 dB unchanged.
 - Release: commit on main, app copy synced, desktop build not dispatched (as asked). Project doc `claude/audiolab-fixes-run-AJ.md`.
+
+## 26 November 2026, v0.213: Devices button and Clap designer (task AF, from a later message)
+> "Let's improve the button for the devices when you want to expand devices. [...] move it a little bit up and have it rounded as a full button on the bottom. [...] it can stick out of the bar when it's collapsed. Actually, when it's collapsed, there should not be a blurred bar to the left. [...] when you scroll the devices and you have like the colour on the top, so let's say you are in Clap and the top is orange, the devices button overlaps with that. [...] It does not need the blurred out bar on the left. [...] just have all the tabs, the master, and then just nothing, just free, no blur or anything. And the Clap designer looks a bit broken when it's in the devices. All the buttons look wrong."
+
+### What changed for the user
+- **Folded away:** only the Devices button is left, a fully rounded pill at the right, raised 6 px off the edge so it floats over the song instead of sitting in a bar. No tabs and no blurred bar along the edge any more: open space where the panel was. A click opens the panel (the track tabs come back with it).
+- **Open:** the track tabs and Master stand on the panel's top edge with nothing behind them; the blurred band that ran across the whole width is gone and the song shows through the gaps. The Devices button is the same pill at the right end of that tab row, above the panel's edge, so no device ever scrolls under it: a device's coloured top (Clap's orange, any other colour) stays clear while scrolling sideways or up and down.
+- **Clap designer:** it had four flat bars (Hands, Spread, Burst, Tail), a Room fader next to Level and three dials stacked in a column, so it looked unlike the other drum designers. It now has eight dials in two rows (Hands, Spread, Burst, Tail; Tone, Focus, Room, Drive) and the Level fader, like the Tom designer. The Hat designer's preset row wrapped Change and Play onto a second line; the drum designers now share one width (270 px) so the row is one line on all four.
+
+### Why it looked broken
+- The device layout picks a control by the parameter's name: "time-like" names (Hands, Spread, Burst, Tail, Room) become bars, and a later pass turns Size, Length and Room into a fader beside the gain. The Clap designer is the only drum designer whose names hit those rules, so it got bars, a second fader and only three dials. The drum designers (Snare, Clap, Hat, Tom) now keep every setting as a dial in their own order, with Level as the only fader, and up to 8 dials go in two rows.
+
+### Built
+- CSS block "v0.212: the Devices button and the tab bar without a strip (task AF)" before `.dacv` (written while v0.212 was the next number; released as v0.213): `#fx.dsh>#fxTitle` has no background, blur or shadow (normal, Light mode, Lighter, Lightest, panel on top); `#fxband` (the glass band behind the tabs from v0.193) is hidden, which also stops the arrangement being clipped under it; `#fxHide.dshb` is a 22 px pill (radius 999 px, opaque panel colour, small shadow; blue tint while folded away); open, `.fxbtns` sits at 24 px above the panel (1 px clear of the edge); folded away, `#fxTitle` is hidden and the pill sits 28 px above the edge (6 px gap); mirrored for a panel at the top. `.dev.du.pzd .dfs` min-width 270 px.
+- `devLayout`: for `.pzd` devices every control but Level is a dial, in the preset's order. `duDev`: the Size/Length/Room-to-fader pass skips `.pzd`. `duFit`: `.pzd` with up to 8 dials uses at most 2 rows.
+- Nothing in the sound code or the presets was touched.
+
+### Tested (`tools/ui-tests/taskAF.py`, new; Fractals demo, 1600 x 1000)
+- Normal (glass on) and Light mode, open and folded away: the button is a full pill (radius >= half its height); open: tabs shown with a transparent background, no blur, no shadow, the pill's bottom 589 above the panel's top 590; folded: no tabs, no bar, the pill's bottom 846 with the edge at 852; `#fxband` 0 px high (it was 25 px); tooltips on every control in the row; the pill folds and opens the panel.
+- Overlap check in code: for all 26 tracks and Master, the devices scrolled sideways in 13 steps and up and down (top, middle, end), every device's rectangle against the pill's: no overlap. Also with a 200 px panel.
+- Drum designers: Clap 8 dials, Snare 11, Hat 6, Tom 8; no bars; only Level as a fader; the preset row one line (24 px; Hat was 50 px); nothing outside the device; tooltips on every control.
+- The same test on v0.212 fails in 12 checks (the strip, the 19 px button with 6 px corners, the folded bar, the band, Clap's Room fader and bars, Hat's two-line row), so it does catch the old look.
+- `devices_header.py` (task AA) changed to the new design (button above the edge, tabs hidden when folded; the "click a tab of the folded panel" check removed, there are no tabs then): 0 failures. `sideheaders.py`: 0 failures. `devices_all.py` (all instruments and effects, nothing outside, shut and open again): all 74 instruments and effects, nothing outside, 0 errors.
+- Panel at the top (fx before the arrangement) open and folded, and the Devices window, looked at: pill in the right place, no errors.
+- Screenshots looked at (2x): open and folded, left and right ends, normal and Light mode, Clap's orange top passing the pill's x range, the four drum designers.
+- No page errors on load. Demo unchanged: Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96, solo).
+
+### Not verified
+- The user's Mac with real glass on a real GPU (headless renders the glass, but the refraction effect was not checked). Themes Lighter and Lightest were not looked at (the rules cover them).
+- With the strip gone, the empty part of the tab row (after the last tab when there are few tracks) still catches clicks as before; it is 25 px high.
+
+### Release
+- v0.213 (v0.212 was taken by task AJ while this ran; merged, both sides kept). Commit, desktop build and artifact: see the release note below.

@@ -1854,6 +1854,29 @@ body.fx-top #fx .fxbtns #fxHide.dshb{border:1px solid rgba(255,255,255,.09);bord
 #fx.dsh.collapsed>#fxTitle{display:flex!important;border-radius:10px 10px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 -8px 18px rgba(0,0,0,.16)!important}
 #fx.dsh.collapsed>#fxTitle .fxsw.fxall button.on{height:20px;border-bottom:0!important}
 body.fx-top #fx.dsh.collapsed>#fxTitle{border-radius:0 0 10px 10px}
+/* ===== v0.212: the Devices button and the tab bar without a strip (task AF) =====
+ Open: the track tabs and Master stand on the panel's top edge with nothing behind them (no blurred strip across the width; the song shows
+ through the gaps). The Devices button is a fully rounded pill at the right end of that tab row, above the panel's edge, so devices scrolled
+ sideways or up and down never pass under it (a device's coloured top stays clear). Folded away: only the pill, raised a little off the edge,
+ no bar and no tabs, open space where the panel was. */
+#fx.dsh>#fxTitle,body.lite #fx.dsh>#fxTitle,body.fxmin #fx.dsh>#fxTitle,body.fxzero #fx.dsh>#fxTitle,body.fx-top #fx.dsh>#fxTitle{background:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;border-radius:0!important}
+#fx.dsh .fxbtns::before{display:none}
+#fx.dsh .fxbtns{padding:0 8px 0 6px;align-items:flex-start!important;background:none!important}
+#fx .fxbtns #fxHide.dshb,body.fx-top #fx .fxbtns #fxHide.dshb{height:22px!important;min-height:22px!important;margin:0!important;padding:0 11px 0 9px!important;gap:5px;border-radius:999px!important;border:1px solid rgba(255,255,255,.16)!important;background:rgba(var(--gtr2),.97)!important;color:#dfe3ea;box-shadow:0 2px 8px rgba(0,0,0,.35)!important}
+#fx .fxbtns #fxHide.dshb:hover{color:#fff;background:color-mix(in srgb,rgb(var(--gtr2)) 84%,#fff)!important;border-color:rgba(255,255,255,.26)!important}
+#fx .fxbtns #fxHide.dshb.dsoff{color:#e6efff;border-color:rgba(var(--bl3,76,141,255),.6)!important;background:color-mix(in srgb,rgb(var(--bl3,76,141,255)) 26%,rgb(var(--gtr2)))!important;box-shadow:0 3px 12px rgba(0,0,0,.45)!important}
+#fx .fxbtns #fxHide.dshb.dsoff:hover{background:color-mix(in srgb,rgb(var(--bl3,76,141,255)) 38%,rgb(var(--gtr2)))!important}
+/* open: the pill sits in the tab row, 1 px clear of the panel's edge */
+#fx.dsh:not(.collapsed) .fxbtns{top:-24px!important;height:22px}
+body.fx-top #fx.dsh:not(.collapsed) .fxbtns{top:auto!important;bottom:-24px}
+/* folded away: no strip and no tabs, only the pill, raised 6 px off the edge */
+#fx.dsh.collapsed>#fxTitle{display:none!important}
+/* the blurred band behind the tabs (#fxband) is gone, open and folded: the song shows through (the arrangement is no longer clipped under it either) */
+#fxband{display:none!important}
+#fx.dsh.collapsed .fxbtns{top:-28px!important;height:22px}
+body.fx-top #fx.dsh.collapsed .fxbtns{top:auto!important;bottom:-28px}
+/* the drum designers share one width, so the preset row (menu, Change, play) stays on one line on the Hat designer too */
+#fxin .dev.du.pzd:not(.dushut)>.devb>.dfs,.dev.du.pzd:not(.dushut)>.devb>.dfs{min-width:270px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6023,7 +6046,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.212',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.213',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8823,7 +8846,7 @@ function devLayout(){const root=document.getElementById('fxin');if(!root)return;
     if(PS.length)for(const P of [PS[0]]){const els=PS.flatMap(Q=>[...Q.querySelectorAll('[data-c]')]);for(const Q of PS.slice(1))Q.remove();if(els.length<2)continue;
       const L=els.map(el=>({el,id:el.dataset.c,C:CT.get(el.dataset.c)})).filter(o=>o.C&&o.C.spec);const envN=L.filter(o=>PGENV.test(o.C.label||'')).length,envOK=!isFx&&envN>=3;
       const G={kn:[],env:[],hb:[],lev:[]};for(const o of L)G[pgKind(o.C.label||'',envOK)].push(o);
-      if(G.hb.length<=2){G.kn.push(...G.hb);G.hb=[]}const mk=(o,k)=>ctl(k,o.id,o.C.label,o.C.spec,o.C.get,o.C.set,o.C.after),order=['attack','a','hold','decay','d','sustain','s','release','r'];G.env.sort((x,y)=>order.indexOf(x.C.label.toLowerCase())-order.indexOf(y.C.label.toLowerCase()));
+      if(G.hb.length<=2){G.kn.push(...G.hb);G.hb=[]}if(D.classList.contains('pzd')){G.kn=L.filter(o=>pgKind(o.C.label||'',false)!=='lev');G.hb=[];G.env=[]}/* v0.212 (task AF): the drum designers (snare, clap, hat, tom) keep all their settings as dials in their own order, so the Clap designer looks like the others (it had four bars, a Room fader and a lone dial) */const mk=(o,k)=>ctl(k,o.id,o.C.label,o.C.spec,o.C.get,o.C.set,o.C.after),order=['attack','a','hold','decay','d','sustain','s','release','r'];G.env.sort((x,y)=>order.indexOf(x.C.label.toLowerCase())-order.indexOf(y.C.label.toLowerCase()));
       const nk=G.kn.length,rows=nk>4?2:1;
       P.innerHTML=`<div class="pgrid">${nk?`<div class="pg-kn" style="grid-template-rows:repeat(${rows},minmax(0,auto))">${G.kn.map(o=>mk(o,'kn')).join('')}</div>`:''}${G.env.length?`<div class="pg-env"><span class="pgl">Envelope</span><div>${G.env.map(o=>mk(o,'vb')).join('')}</div></div>`:''}${G.hb.length?`<div class="pg-hb">${G.hb.map(o=>mk(o,'hb')).join('')}</div>`:''}${G.lev.length?`<div class="pg-lv">${G.lev.map(o=>mk(o,'vb')).join('')}</div>`:''}</div>`;
       P.classList.add('pgx')}
@@ -12740,7 +12763,7 @@ function duDev(D,t){const isFx=D.dataset.d==='fx',own=isFx?t.fx.find(q=>q.id===D
   if(S&&S.isConnected){S.style.minWidth='';S.classList.remove('h2','h2g','hm');
     const pg=dfc&&dfc.querySelector('.pgrid');
     if(pg){/* a Size or Length control stands as a bar next to the gain */
-      for(const el of[...pg.querySelectorAll('[data-c]')]){const C=CT.get(el.dataset.c);if(!C||!DUSZ.test(C.label||'')||el.classList.contains('vb'))continue;let lv=pg.querySelector(':scope>.pg-lv');if(!lv){lv=document.createElement('div');lv.className='pg-lv';pg.append(lv)}const grp=el.parentElement;el.remove();lv.insertAdjacentHTML('beforeend',ctl('vb',el.dataset.c,C.label,C.spec,C.get,C.set,C.after));const nv=lv.lastElementChild;if(el.title&&el.title.indexOf(': drag')<0)nv.title=el.title;if(grp&&!grp.children.length)grp.remove()}
+      for(const el of[...pg.querySelectorAll('[data-c]')]){const C=CT.get(el.dataset.c);if(!C||!DUSZ.test(C.label||'')||el.classList.contains('vb')||D.classList.contains('pzd'))continue;let lv=pg.querySelector(':scope>.pg-lv');if(!lv){lv=document.createElement('div');lv.className='pg-lv';pg.append(lv)}const grp=el.parentElement;el.remove();lv.insertAdjacentHTML('beforeend',ctl('vb',el.dataset.c,C.label,C.spec,C.get,C.set,C.after));const nv=lv.lastElementChild;if(el.title&&el.title.indexOf(': drag')<0)nv.title=el.title;if(grp&&!grp.children.length)grp.remove()}
       pg.classList.remove('pgbig','pgcol')}}
   /* ---- the gain: the last control, bottom right ---- */
   if(!sub){const id=isFx?'fx:og:'+own.id:'fx:og:inst',g=document.createElement('div');g.className='dug';g.innerHTML=ctl('vb',id,'Gain',SPEC_OG,()=>+(isFx?own.p.og:own.og)||0,v=>{if(isFx){own.p.og=v;sgSoon()}else instOG(own,v);changed(false)});g.firstElementChild.title='Gain: turn this device up or down (-24 to +24 dB). Double-click for 0 dB.';B.append(g)}
@@ -12752,7 +12775,7 @@ function duFit(D){const S=D.querySelector(':scope>.devb>.dfs'),dfc=S&&S.querySel
     /* a row of choices never sticks out, and when it wraps into many lines the side gets wider instead of squeezing the knobs */
     if(tb&&!pbx){need=0;for(const c of tb.children)need=Math.max(need,c.offsetWidth);if(S.clientWidth<need)S.style.minWidth=need+'px';const req=dfc.querySelector('.vb')?104:hb?Math.min(150,hb.children.length*21):58;let n=0;while(tb.offsetHeight>24&&(dfc.clientHeight<req||S.scrollHeight>S.clientHeight+1)&&n++<10)S.style.minWidth=(S.offsetWidth+48)+'px'}
     if(hb){const n=hb.children.length,av=hb.parentElement.clientHeight;hb.classList.toggle('duc',n*25-5>av);if(n*22-2>av&&!pbx){hb.classList.add('du2');hb.style.gridTemplateRows=`repeat(${Math.ceil(n/2)},auto)`}}
-    if(!kn)break;const n=kn.children.length,avail=kn.parentElement.clientHeight;let rows=clamp(Math.floor((avail+4)/58),1,maxRows);rows=Math.min(rows,n);let cols=Math.ceil(n/rows);{const others=[...kn.parentElement.children].reduce((a,c)=>a+(c===kn?0:c.offsetWidth+10),0);cols=Math.max(cols,Math.min(n,Math.floor((need-others)/54)))}rows=Math.ceil(n/cols);kn.style.gridTemplateRows=`repeat(${rows},minmax(0,auto))`;kn.style.gridAutoFlow='row';kn.style.gridTemplateColumns=`repeat(${cols},var(--dukw,54px))`;
+    if(!kn)break;const n=kn.children.length,avail=kn.parentElement.clientHeight;let rows=clamp(Math.floor((avail+4)/58),1,maxRows);rows=Math.min(rows,n);if(D.classList.contains('pzd')&&n<=8)rows=Math.min(rows,2);let cols=Math.ceil(n/rows);{const others=[...kn.parentElement.children].reduce((a,c)=>a+(c===kn?0:c.offsetWidth+10),0);cols=Math.max(cols,Math.min(n,Math.floor((need-others)/54)))}rows=Math.ceil(n/cols);kn.style.gridTemplateRows=`repeat(${rows},minmax(0,auto))`;kn.style.gridAutoFlow='row';kn.style.gridTemplateColumns=`repeat(${cols},var(--dukw,54px))`;
     if(kn.parentElement.clientHeight>=rows*54+(rows-1)*4-1||rows<=1)break;maxRows=rows-1}
   if(tb&&!pbx&&S.clientWidth<need)S.style.minWidth=need+'px'}
 function duLayout(){const root=document.getElementById('fxin');if(!root)return;const t=curT();if(!t)return;const fresh=[];

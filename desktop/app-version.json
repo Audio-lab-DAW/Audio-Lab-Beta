@@ -1,7 +1,7 @@
 {
-  "version": "0.212",
-  "sha256": "c6792ef59bd5d82a564da0d4c956ad501549ae4f8e03a348d8797d34e65c9581",
-  "size": 3407701,
+  "version": "0.213",
+  "sha256": "311413715215b084c25c4ee2e16945fe4ba0b80374b99d5191925c5512947897",
+  "size": 3410826,
   "minShell": "0.147.0",
-  "notes": "Shift-drag duplicates clips; arrow keys move clips, the step follows the zoom."
+  "notes": "The Devices button is now a round pill that floats above the panel and never covers a device, with no blurred bar behind the tabs. The Clap designer has proper dials like the other drum designers."
 }
