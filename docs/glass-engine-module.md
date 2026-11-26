@@ -88,6 +88,8 @@ Main `opts`: `lens`, `blur`, `quality`, `tint` and `solid` (panel colours, defau
 | 1 low | quarter size | at most 30 per second | screen rate |
 | 0 static | none: plain tint with fine noise | none (nothing is uploaded) | screen rate |
 
+The cap also holds for fed display canvases (`markFlatDirty`): a device display that repaints every frame under a floating window is picked up 60 or 30 times per second at medium and low.
+
 Sizes are counted in **CSS pixels**. On a 2x (Retina) screen the first level is therefore a quarter of the device pixels at "high" and an eighth at "medium": the blur looks the same on every screen and a Retina screen pays no more than a normal one. This differs from the Glass Bench, which counted device pixels (so its blur was half as wide on a 2x screen and cost four times as much there).
 
 ### Fallbacks and accessibility
@@ -134,7 +136,7 @@ The test page is built exactly this way (two engines, docked and floating), so i
 
 ## 5. What was tested (headless, cloud machine)
 
-`python3 tools/glass-lab/engine_test.py`: **86 checks, all pass**, no console errors or warnings. The cloud machine has **no GPU** (SwiftShader software renderer), so **its frame rates mean nothing**; only correctness was tested.
+`python3 tools/glass-lab/engine_test.py`: **88 checks, all pass**, no console errors or warnings. The cloud machine has **no GPU** (SwiftShader software renderer), so **its frame rates mean nothing**; only correctness was tested.
 
 - **Rim bends, middle flat**: with a picture whose colour is its own coordinate, the place each glass pixel is taken from was read back. The shift follows the quarter-circle profile on the left, top and right edges for Fine, Apple and Wide (worst error 1 px); nothing bends beyond the band; the middle is the same pixel with every lens preset; band width follows the panel (48 px bar about 12 px, 32 px pill about 8 px).
 - **No corner seam**: the bending direction is continuous across the corner diagonal for radius 0, 6 and 16.
@@ -164,4 +166,14 @@ Open `tools/glass-lab/engine-test.html` in Chrome (or the artifact), full window
 
 - **Live readout**: frames per second, median / 95 % / worst frame time, CPU time spent in the engine's calls per frame, and per second: backdrop uploads, blur rebuilds, face redraws. "Underneath: still" or "playhead only" with the mixer moving must show 0 uploads and 0 rebuilds.
 - **Measure (5 s)** gives a table to copy. **Compare presets** counts how many times the whole glass fits into one screen frame for each lens, blur and quality choice (same method as the Glass Bench).
+- **Find the cost (about 30 s)** (added after the first Mac run, see section 7): first times each piece alone with the graphics card made to finish (upload, blur, faces, per layer), then runs the page in twelve steps from no glass to all glass and counts the frames that arrived on time.
 - Switches: lens, blur, quality, face (bench look or Apple's matrix), Reduce transparency, Increase contrast, lose and restore the graphics context, each panel on or off.
+
+## 7. First numbers from the user's Mac (26 November 2026)
+
+M4, Chrome 157, 3840x2027 at 1x (7.8 MP), 240 Hz screen, worst case (arrangement scrolling, mixer moving, all panels, both layers):
+
+- Measure: 109 fps, median 8.40 ms, 95 % 12.50 ms, worst 24.9 ms; engine calls 0.364 ms of CPU per frame; 220 uploads and 220 blur rebuilds per second (both layers, every frame).
+- Compare presets: screen frame 4.20 ms (238 Hz) with the plain tint; every lens, blur and quality preset landed on 8.2 to 8.4 ms, that is every second screen frame.
+
+What this says: the plain tint with the arrangement scrolling holds 238 Hz; any live glass in the worst case costs more than one 4.2 ms frame in total, so the page falls to every second frame. Lens and blur presets make no difference, as designed. That medium and low did not help pointed at work that was not capped: the device display under the floating layer repainted every frame and was uploaded and re-blurred every frame at any quality. That is fixed (the cap now covers fed canvases). Which piece is the expensive one (uploading a 7.8 MP canvas twice, the blur, or the faces) is not known yet; "Find the cost" was added to answer it.
