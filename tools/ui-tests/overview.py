@@ -64,7 +64,7 @@ with sync_playwright() as p:
         pg.keyboard.press('g');pg.wait_for_timeout(230);k+=1
         if run(pg,"OVW.on"):break
     print('key presses',k,st(pg))
-    for i in range(10):
+    for i in range(40):  # v0.194: the overview starts at the normal view's scale, so from a far zoom-out it takes more steps
         pg.keyboard.press('h');pg.wait_for_timeout(230)
         if not run(pg,"OVW.on"):break
     pg.wait_for_timeout(400);print('zoom-in keys to leave',i+1,st(pg))
