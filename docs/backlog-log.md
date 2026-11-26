@@ -2251,3 +2251,4 @@ Total 258 before, 419 after. Fractal (`crk`, 20 presets, a day old, grouped) was
 
 ### Release
 - v0.202 (first built as v0.201; another session released its own v0.201, task E, in the meantime, so the block was inserted again on top of it). Checked again on this base: no page errors on load; the two demo songs' settings and every instrument's new-track settings identical to v0.201; Fractals Kick -9.75669 dB and Bass -25.48699 dB with the same checksums; all menus (`preset_menus2.py`) pass; the Kick designer and Psy Bass renders give the same numbers as above.
+- v0.202: commit 104f304 (research doc heading fixed in dfc18d7); desktop build run 45771160780 for this commit succeeded; project doc `claude/audiolab-preset-research.md` updated (same text as `docs/preset-research.md`); artifact version 225.
