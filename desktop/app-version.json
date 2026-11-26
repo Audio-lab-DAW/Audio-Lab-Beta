@@ -1,7 +1,7 @@
 {
-  "version": "0.198",
-  "sha256": "5d19c277795a719e63c0dfde722c3665078881ad8a8eb192e2d70e047b5dc528",
-  "size": 3019227,
+  "version": "0.199",
+  "sha256": "8f7a9594c818d8841c57e36619fff86183fb29656caccc5fbc11501c6759d636",
+  "size": 3047190,
   "minShell": "0.147.0",
-  "notes": "All the synths have new presets: 451 instead of 229, sorted into groups (Lead, Bass, Pad, Pluck, Keys, FX and Psytrance), each with a short tip in the menu that says what it is for and where on the keyboard it sounds best, and all at an even level. Presets made for psytrance are marked."
+  "notes": "The mixer cables are clearer: up to 5 levels with a label on each line saying where it comes from and where it goes, arrows and flowing dots that show the direction, a pulse along sidechain cables on every hit and a moving wave on modulation cables. Dragging the top of the cable area now gives the cables more room inside the window, the bottom edge makes only the cable area taller or lower, and the corner still resizes the whole mixer."
 }
