@@ -1,1 +1,1 @@
-The Devices button is now a round pill that floats above the panel and never covers a device, with no blurred bar behind the tabs. The Clap designer has proper dials like the other drum designers.
+Right-click drag selects partly covered clips; MIDI dropped or copied onto an audio track is bounced to audio automatically.

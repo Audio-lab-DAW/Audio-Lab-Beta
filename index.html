@@ -4426,7 +4426,7 @@ function drawArr(phOnly){DPX=(window.devicePixelRatio||1)*ZOOM;
     for(const c of t.clips){if(BOOTF!=null&&hashU(c.id)>=BOOTF)continue;const G=clipGeom(i,c);if(G.x>w||G.x+G.w<0)continue;drawClipC(g,t,c,G,w)}
     if(REC.on&&t.arm&&play.on&&!play.counting){const b=curDisp(),a=REC.b0<=b?REC.b0:loopA(),x0=X0+(a-V.x)*V.ppb;g.fillStyle='rgba(255,60,60,.18)';g.fillRect(x0,y+2,(b-a)*V.ppb,V.th-5);g.fillStyle='#ff4d4d';g.fillRect(x0,y+2,(b-a)*V.ppb,2);const ns=REC.notes.get(t.id)||[];g.fillStyle='rgba(255,200,200,.9)';for(const n of ns)g.fillRect(X0+(n.s-V.x)*V.ppb,y+V.th-8-((n.p%24)/24)*(V.th-14),Math.max(2,n.l*V.ppb),2)}});
   drawMasterLane(g,w,h);
-  drawXfades(g,w,h);g.restore();drawLoopLines(g,w,h);drawCapGhost(g,w,h);drawGhostTrack(g,w,h);ajDraw(g,w,h);
+  drawXfades(g,w,h);g.restore();drawLoopLines(g,w,h);drawCapGhost(g,w,h);drawGhostTrack(g,w,h);ajDraw(g,w,h);akDraw(g,w,h);
   const RCL=0;g.fillStyle=TH.ruler;g.fillRect(RCL,TY,Math.max(0,w-RCL),RUL);g.fillStyle=TH.secBg||TH.sep;g.fillRect(RCL,TY+RUL,Math.max(0,w-RCL),SECH);/* nothing at all is painted left of the song start */
   g.save();g.beginPath();g.rect(RCL,TY,Math.max(0,w-RCL),h-TY);g.clip();/* nothing of the ruler or sections is drawn left of the song start or under the track headers */
   drawLoopRuler(g,w);
@@ -5014,11 +5014,13 @@ function normalize(c){const B=srcView(c),full=B.full,P=B.peaks,N=P.length/2;let 
   if(pk<1e-5)return;pushUndo();c.gain=clamp(-20*Math.log10(pk)-.3,-24,24);changed(false);toast('Clip gain set to '+(c.gain>0?'+':'')+c.gain.toFixed(1)+' dB (peak at −0.3 dB).')}
 function reverseClip(c){const B=BUFS.get(c.buf).buf,r=ctx.createBuffer(B.numberOfChannels,B.length,B.sampleRate);for(let ch=0;ch<B.numberOfChannels;ch++){const s=B.getChannelData(ch),d=r.getChannelData(ch);for(let i=0,n=s.length;i<n;i++)d[i]=s[n-1-i]}
   pushUndo();c.buf=addBuf(r);c.off=Math.max(0,fullBeats(c)-c.off-c.len);[c.fi,c.fo]=[c.fo||0,c.fi||0];c.name=c.name.endsWith(' (rev)')?c.name.slice(0,-6):c.name+' (rev)';changed(false)}
-async function bounceRender(t,c,prog){const sr=44100,spb=60/S.bpm,tail=3,len=c.len*spb+tail,oc=quietMeters(new OfflineAudioContext(2,Math.ceil(len*sr),sr));await wlLoad(oc);
+async function bounceRender(t,c,prog,rq,seed,tail0){const sr=44100,spb=60/S.bpm,tail=tail0>0?tail0:3,len=c.len*spb+tail,oc=quietMeters(rq>128&&RQOK?new OfflineAudioContext({numberOfChannels:2,length:Math.ceil(len*sr),sampleRate:sr,renderSizeHint:rq}):new OfflineAudioContext(2,Math.ceil(len*sr),sr));await wlLoad(oc);
+  try{if(seed!=null&&UI.exSeed!==false){if(S.seed==null)S.seed=(Math.random()*1e9)|0;SEEDR=seedRng(S.seed+'|'+seed)}/* same seeding as an export: a bounce of the same clip sounds the same every time */
   const tin=oc.createGain();let prev=tin;for(const f of t.fx){if(!f.on)continue;const x=mkFxNode(oc,f.type);x.set(f.p);prev.connect(x.in);prev=x.out}prev.connect(oc.destination);
   const ch=clipChain(oc,c,0,0,tin,spb,t.read!==false);
   for(const n of ccSus(c,mfxNotes(t,c.notes))){if(n.m||n.s<c.off||n.s>=c.off+c.len)continue;synthB(oc,t.inst,ch.in,n.p,(n.s-c.off)*spb,Math.min(n.l,c.off+c.len-n.s)*spb,n.v,c,n.s,spb)}
-  if(prog){const step=Math.max(.05,len/40);for(let q=step;q<len-.02;q+=step){const tq=Math.round(q*sr/128)*128/sr;oc.suspend(tq).then(()=>{prog(tq/len);return new Promise(r=>setTimeout(r,16))}).then(()=>oc.resume()).catch(()=>{})}}
+  }finally{SEEDR=null}
+  if(prog){const step=Math.max(.05,len/40);for(let q=step;q<len-.02;q+=step){const qn=oc.renderQuantumSize||128,tq=Math.round(q*sr/qn)*qn/sr;oc.suspend(tq).then(()=>{prog(tq/len);return new Promise(r=>setTimeout(r,16))}).then(()=>oc.resume()).catch(()=>{})}}
   return oc.startRendering()}
 /* bounce window: renders in front of you, left to right, then you grab the clip and drop it anywhere */
 async function bounce(t,c){const z=ZOOM,W=640,w=fwin('bncWin','Bounce · '+esc(c.name),{x:Math.round(innerWidth/z/2-W/2),y:Math.round(innerHeight/z/2-150),w:W,h:270},()=>{});
@@ -6046,7 +6048,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.213',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.214',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6618,7 +6620,7 @@ arr.addEventListener('contextmenu',e=>{e.preventDefault();if(RS&&!RS.fake){RS.ct
   if(H.c){if(H.zone==='wm'){pushUndo();H.c.warp.pts.splice(H.pt,1);changed(false);return}if(H.zone==='envpt'){pushUndo();const pts=H.c.env[H.c.envShow];pts.splice(pts.indexOf(H.pt),1);changed(false);return}clipMenu(e.clientX,e.clientY,H.t,H.c)}
   else if(H.t){selectTrack(H.t.id);trackMenu(e.clientX,e.clientY,H.t,H.b)}else emptyMenu(e.clientX,e.clientY)});
 arr.addEventListener('pointerdown',e=>{
-  focusArea='arr';if(e.button===2){const{x,y}=arrPt(e);if(y>=AY&&x>=X0){const i=trackAt(y-AY+V.y);RS={x0:x,y0:y,b0:V.x+(x-X0)/V.ppb,r0:clamp(i,0,S.tracks.length-1),moved:false,alt:e.altKey};arr.setPointerCapture(e.pointerId)}return}
+  focusArea='arr';if(e.button===2){const{x,y}=arrPt(e);if(y>=AY&&x>=X0){const i=trackAt(y-AY+V.y);RS={x0:x,y0:y,b0:V.x+(x-X0)/V.ppb,r0:clamp(i,0,S.tracks.length-1),moved:false,alt:e.altKey,sh:e.shiftKey,yc0:y-AY+V.y,base:new Set([...SELCS,...(selC?[selC]:[])])};arr.setPointerCapture(e.pointerId)}return}
   if(e.button!==0)return;const{x,y}=arrPt(e);
   {const P=loopX(),inBtn=LOOPHIT&&x>=LOOPHIT.x&&x<=LOOPHIT.x+LOOPHIT.w&&y>=LOOPHIT.y&&y<=LOOPHIT.y+LOOPHIT.h,inMid=P&&S.loopRange&&y>=TY&&y<TY+RUL&&x>P.x1+9&&x<P.x2-9,edge=P&&S.loopRange&&y>=TY-2&&y<TY+RUL?(Math.abs(x-P.x1)<=8?'a':Math.abs(x-P.x2)<=8?'b':null):null;
     if(inBtn||inMid||edge){arr.setPointerCapture(e.pointerId);ad={k:'loopmv',btn:inBtn,edge:inBtn||inMid?null:edge,x0:x,a:S.loopRange.a,b:S.loopRange.b,moved:false,beat:V.x+(x-X0)/V.ppb};return}}
@@ -6647,7 +6649,7 @@ arr.addEventListener('pointerdown',e=>{
 });
 arr.addEventListener('pointermove',e=>{
   const{x,y}=arrPt(e);
-  if(RS&&!RS.fake){if(!RS.moved&&Math.hypot(x-RS.x0,y-RS.y0)<6)return;RS.moved=true;const b=V.x+(x-X0)/V.ppb,i=clamp(trackAt(y-AY+V.y),0,S.tracks.length-1),fr=e.altKey,b0=Math.max(0,snapA(Math.min(RS.b0,b),fr)),b1=Math.max(b0+.0625,snapA(Math.max(RS.b0,b),fr));SELR={b0,b1,r0:RS.r0,r1:i};SELCS.clear();for(const t of rowsOf(RS.r0,i))for(const c of t.clips)if(c.start>=b0-1e-6&&c.start+c.len<=b1+1e-6)SELCS.add(c.id);selC=null;dirty=true;return}
+  if(RS&&!RS.fake){if(!RS.moved&&Math.hypot(x-RS.x0,y-RS.y0)<5)return;RS.moved=true;if(!RS.alt){akMarq(x,y);return}const b=V.x+(x-X0)/V.ppb,i=clamp(trackAt(y-AY+V.y),0,S.tracks.length-1),fr=e.shiftKey,b0=Math.max(0,snapA(Math.min(RS.b0,b),fr)),b1=Math.max(b0+.0625,snapA(Math.max(RS.b0,b),fr));SELR={b0,b1,r0:RS.r0,r1:i};SELCS.clear();for(const t of rowsOf(RS.r0,i))for(const c of t.clips)if(c.start>=b0-1e-6&&c.start+c.len<=b1+1e-6)SELCS.add(c.id);selC=null;dirty=true;return}
   if(!ad){const H=arrHit(x,y);if(x>=X0&&laneAt(x,y)){const LA0=laneAt(x,y),c0=laneClip(LA0.t,V.x+(x-X0)/V.ppb);let onH=false;if(c0&&c0.env&&c0.env[LA0.k]){const pts=c0.env[LA0.k],xx=X0+(c0.start-V.x)*V.ppb;onH=pts.some((p2,i2)=>{if(i2<1)return false;const a=pts[i2-1];return(p2.b-a.b)*V.ppb>=30&&Math.hypot(xx+(a.b+p2.b)/2*V.ppb-x,LA0.top+3+(1-(a.v+(p2.v-a.v)*crvF(.5,a.c)))*(LH-6)-y)<8})}arr.style.cursor=onH?'ns-resize':CUR_PEN;return}const hc=H.c?H.c.id:null;if(hc!==hovC){hovC=hc;dirty=true}const phx=X0+(curDisp()-V.x)*V.ppb;if(y>=TY+RUL&&y<TY+RUL+SECH){const sc=secAt(V.x+(x-X0)/V.ppb);if(sc){const xs=X0+(sc.start-V.x)*V.ppb,xe=xs+sc.len*V.ppb;arr.style.cursor=x-xs<6||xe-x<6?'ew-resize':'pointer'}else arr.style.cursor='copy';return}arr.style.cursor=FB&&x>=FB.x&&x<=FB.x+FB.w&&y>=FB.y&&y<=FB.y+FB.h?'pointer':Math.abs(x-phx)<6?'ew-resize':y<AY?'pointer':H.c?(e.altKey&&H.zone==='move'?'text':CUR[H.zone]):'grab';return}
   if(ad.k==='ajsh'&&!ajShStart(x,y))return;
   if(ad.k==='sec'||ad.k==='secnew'){const b=V.x+(x-X0)/V.ppb;
@@ -6658,9 +6660,10 @@ arr.addEventListener('pointermove',e=>{
     if(S.loopRange&&S.loopRange.id===sc.id)loopSet({id:sc.id,a:sc.start,b:sc.start+sc.len},!!S.loop);dirty=true;return}
   if(ad.k==='lcv'){const a=ad.left,z=ad.right,vt=1-(y-ad.LA.top-3)/(LH-6),dv=z.v-a.v;if(Math.abs(dv)>.02)a.c=Math.round(crvC((vt-a.v)/dv)*100)/100;arr.style.cursor='ns-resize';dirty=true;return}
   if(ad.k==='lpt'){const c=ad.c,b=V.x+(x-X0)/V.ppb;ad.q.b=clamp(b-c.start,0,c.len);ad.q.v=clamp(1-(y-ad.LA.top-3)/(LH-6),0,1);ad.pts.sort((a2,z)=>a2.b-z.b);dirty=true;return}
-  if(ad.k==='block'){const b=V.x+(x-X0)/V.ppb,dB=snapA(b-ad.b0,e.altKey),dR=trackAt(y-AY+V.y)-ad.r0;ad.moved=true;
+  if(ad.k==='block'){const b=V.x+(x-X0)/V.ppb,dB=snapA(b-ad.b0,e.altKey);let dR=trackAt(y-AY+V.y)-ad.r0;ad.moved=true;
+    if(!ad.rip){/* task AK: rows are kept; a row that does not exist blocks the whole row move */const nT=S.tracks.length,lo=Math.min(...ad.items.map(i=>i.ti)),hi=Math.max(...ad.items.map(i=>i.ti));if(lo+dR<0||hi+dR>nT-1){if(!ad.blk){ad.blk=1;toast('There is no track there. The clips stay on their rows.')}dR=ad.dR0||0}else{ad.blk=0;ad.dR0=dR}}
     if(ad.rip){const s=ad.R.b0,L=ad.R.b1-ad.R.b0;ad.dst=Math.max(0,s+dB);PREVMAP=ad.dst>s-1e-6&&ad.dst<s+L+1e-6?(q=>q+ (ad.dst-s)*(q>=s-1e-6&&q<s+L-1e-6?1:0)):rippleMap(s,L,ad.dst);dirty=true;return}
-    for(const it of ad.items){it.c.start=Math.max(0,it.s0+dB);const ti=clamp(it.ti+dR,0,S.tracks.length-1),tt=S.tracks[ti],ok=tt&&((tt.kind==='inst')===!!it.c.notes),dest=ok?tt:S.tracks[it.ti];if(dest!==it.t){it.t.clips=it.t.clips.filter(q=>q!==it.c);dest.clips.push(it.c);it.t=dest}}if(ad.R){SELR={...ad.R,b0:ad.R.b0+dB,b1:ad.R.b1+dB,r0:clamp(ad.R.r0+dR,0,S.tracks.length-1),r1:clamp(ad.R.r1+dR,0,S.tracks.length-1)}}dirty=true;return}
+    ad.stay=0;for(const it of ad.items){it.c.start=Math.max(0,it.s0+dB);const ti=clamp(it.ti+dR,0,S.tracks.length-1),tt=S.tracks[ti],ok=tt&&akOk(it.c,tt),dest=ok?tt:S.tracks[it.ti];if(!ok&&dR)ad.stay++;if(dest!==it.t){it.t.clips=it.t.clips.filter(q=>q!==it.c);dest.clips.push(it.c);it.t=dest}}if(ad.R){SELR={...ad.R,b0:ad.R.b0+dB,b1:ad.R.b1+dB,r0:clamp(ad.R.r0+dR,0,S.tracks.length-1),r1:clamp(ad.R.r1+dR,0,S.tracks.length-1)}}dirty=true;return}
   if(ad.k==='pan'){if(FLOCK()){const dx=x-(ad.fx??ad.x0);if(Math.abs(dx)>42&&Math.abs(x-ad.x0)>Math.abs(y-ad.y0)*.6){ad.fx=x;if(phFlash()){ad.vx=V.x;ad.x0=x}}}else V.x=ad.vx-(x-ad.x0)/V.ppb;V.y=ad.vy-(y-ad.y0);clampV();dirty=true;return}
   const b=V.x+(x-X0)/V.ppb;
   if(ad.k==='loopmv'){if(!ad.moved&&Math.abs(x-ad.x0)<4)return;if(!ad.moved){pushUndo();ad.moved=true}const d=(x-ad.x0)/V.ppb;loopSet(ad.edge==='a'?{a:clamp(snapA(ad.a+d,e.altKey),0,Math.max(0,ad.b-LMIN)),b:ad.b}:ad.edge==='b'?{a:ad.a,b:Math.max(ad.a+LMIN,snapA(ad.b+d,e.altKey))}:(na=>({a:na,b:na+(ad.b-ad.a)}))(Math.max(0,snapA(ad.a+d,e.altKey))),!!S.loop);return}
@@ -6672,8 +6675,8 @@ arr.addEventListener('pointermove',e=>{
   const d=b-ad.b0,c=ad.c,G=ad.G;
   if(ad.k==='move'){c.start=Math.max(0,snapA(ad.s0+d,e.altKey));
     const yy=y-AY+V.y,ti=trackAt(yy),t2=S.tracks[ti];ad.ghost=null;
-    if(yy>=TOTH)ad.ghost={row:S.tracks.length,kind:ad.t.kind};else if(t2&&t2.kind!==ad.t.kind)ad.ghost={row:ti+1,kind:ad.t.kind};
-    else if(t2&&t2!==ad.t&&t2.kind===ad.t.kind){ad.t.clips=ad.t.clips.filter(q=>q!==c);t2.clips.push(c);ad.t=t2;selectTrack(t2.id)}}
+    if(yy>=TOTH)ad.ghost={row:S.tracks.length,kind:ad.t0.kind};else if(t2&&!akOk(c,t2,ad.t0))ad.ghost={row:ti+1,kind:ad.t0.kind};
+    else if(t2&&t2!==ad.t){ad.t.clips=ad.t.clips.filter(q=>q!==c);t2.clips.push(c);ad.t=t2;selectTrack(t2.id)}}
   else if(ad.k==='res'){let l=Math.max(.25,snapA(ad.l0+d,e.altKey)||.25);if(!c.notes)l=Math.min(l,fullBeats(c)-c.off);c.len=l;if(!c.notes){c.fo=Math.min(c.fo||0,l);c.fi=Math.min(c.fi||0,l)}}
   else if(ad.k==='resl'){let ns=snapA(ad.s0+d,e.altKey);ns=clamp(ns,ad.s0-ad.o0,ad.s0+ad.l0-.25);ns=Math.max(0,ns);const sh=ns-ad.s0;c.start=ns;c.off=ad.o0+sh;c.len=ad.l0-sh;
     for(const k in ad.env0){c.env[k]=ad.env0[k].map(q=>({b:q.b-sh,v:q.v})).filter(q=>q.b>=0&&q.b<=c.len)}if(!c.notes)c.fi=Math.min(c.fi||0,c.len)}
@@ -6688,7 +6691,8 @@ arr.addEventListener('pointermove',e=>{
 arr.addEventListener('pointerup',e=>{
   if(RS){const r=RS;RS=null;if(r.moved){RSEND=performance.now();return}SELR=null;if(r.ctx){const ev=new MouseEvent('contextmenu',{clientX:r.ctx.clientX,clientY:r.ctx.clientY,bubbles:true,cancelable:true});RS={fake:1};arr.dispatchEvent(ev);RS=null}return}
   if(ad&&ad.k==='ajsh'){const a=ad;ad=null;ajToggle(a.c);return}
-  if(ad&&ad.k==='block'){if(ad.rip&&ad.dst!=null){const s=ad.R.b0,L=ad.R.b1-ad.R.b0,ts=rowsOf(ad.R.r0,ad.R.r1);PREVMAP=null;PREVT=null;for(const it of ad.items)it.c.start=it.s0;if(rippleMove(s,L,ad.dst,ts)){const d2=ad.dst>s?ad.dst-L:ad.dst;SELR={...ad.R,b0:d2,b1:d2+L}}}PREVMAP=null;PREVT=null;ad=null;changed(false);return}
+  if(ad&&ad.k==='move'&&ad.c&&ad.c.notes&&ad.t.kind==='audio'&&ad.t0&&ad.t0!==ad.t){const a=ad;ad=null;akCommit([{c:a.c,t:a.t,ti:S.tracks.indexOf(a.t0)}]);changed(true);return}
+  if(ad&&ad.k==='block'){if(ad.rip&&ad.dst!=null){const s=ad.R.b0,L=ad.R.b1-ad.R.b0,ts=rowsOf(ad.R.r0,ad.R.r1);PREVMAP=null;PREVT=null;for(const it of ad.items)it.c.start=it.s0;if(rippleMove(s,L,ad.dst,ts)){const d2=ad.dst>s?ad.dst-L:ad.dst;SELR={...ad.R,b0:d2,b1:d2+L}}}PREVMAP=null;PREVT=null;{const a=ad;ad=null;const nb=a.rip?0:akCommit(a.items,a.dup);if(!nb&&a.stay)toast(a.stay+' clip'+(a.stay>1?'s':'')+' stayed on '+(a.stay>1?'their':'its')+' own track: the track under '+(a.stay>1?'them':'it')+' can’t hold that kind of clip (audio clips only go on audio tracks).');changed(!!nb)}return}
   if(ad&&ad.k==='sec'&&ad.mode==='move'&&ad.moved){const a2=ad;ad=null;PREVMAP=null;if(a2.dst!=null&&rippleMove(a2.s0,a2.l0,a2.dst,S.tracks))toast(`Moved “${a2.sc.name}”. The rest of the song moved out of the way.`);changed(false);return}
   if(ad&&ad.k==='loopmv'){const A=ad;ad=null;if(A.moved){changed(false);dirty=true;return}if(A.btn){const b=$('#bLoop');if(b)b.click();else{S.loop=!S.loop;syncTransportUI();changed(false)}}else{const was=play.on;pos=Math.max(0,snapA(A.beat,false));if(was){stop();start()}}dirty=true;return}
   if(ad&&(ad.k==='sec'||ad.k==='secnew')){if(ad.k==='sec'&&!ad.moved)loopSection(ad.sc);else if(ad.sc||ad.pushed){if(ad.k==='secnew'&&ad.sc)renameSection(ad.sc,true);changed(false)}ad=null;return}if(ad){if(ad.k==='pan')arr.style.cursor='grab';if(ad.k==='ruler'&&ad.was){start()}else if(ad.pushed)changed(false)}ad=null});
@@ -7996,7 +8000,7 @@ function capBuild(){const G=capGroup();if(!G.length)return null;const timed=UI.c
   const q=UI.capQ||0;if(q)for(const n of ns){n.s=Math.round(n.s/q)*q;n.l=Math.max(q,Math.round(n.l/q)*q)}
   const a=timed?Math.floor(Math.min(...ns.map(n=>n.s))/4)*4:Math.floor(Math.min(...ns.map(n=>n.s))),b=Math.max(a+4,Math.ceil(Math.max(...ns.map(n=>n.s+n.l))/4)*4);
   let src=S.tracks.find(x=>x.id===G[G.length-1].tr[0]&&x.kind==='inst');return{G,timed,len:b-a,notes:ns.map(n=>({p:n.p,s:n.s-a,l:n.l,v:n.v})),at:timed?a:null,src}}
-function capInsert(C,t,start){pushUndo();const c=mkClip({start,len:C.len,name:'Captured',notes:C.notes.map(n=>({id:rid(),...n,s:Math.max(0,n.s)}))});t.clips.push(c);RETRO.notes=RETRO.notes.filter(n=>!C.G.includes(n));if(t.id!==selT)selectTrack(t.id);selC=c.id;changed(true);capPaint();return c}
+function capInsert(C,t,start){pushUndo();let c=mkClip({start,len:C.len,name:'Captured',notes:C.notes.map(n=>({id:rid(),...n,s:Math.max(0,n.s)}))});if(t.kind==='audio')c=akBounceInto(t,c,C.src||S.tracks.find(x=>x.kind==='inst'));else t.clips.push(c);RETRO.notes=RETRO.notes.filter(n=>!C.G.includes(n));if(t.id!==selT)selectTrack(t.id);selC=c.id;changed(true);capPaint();return c}
 function capMidi(){const C=capBuild();if(!C){toast('Nothing played yet. Play something on the keyboard or a MIDI controller, then capture it.');return}
   let t=C.src;if(!t){const c=curT();t=c&&c.kind==='inst'?c:S.tracks.find(x=>x.kind==='inst')}if(!t){toast('Add an instrument track first.');return}
   const start=C.at!=null?C.at:Math.floor(pos/4)*4;capInsert(C,t,start);toast(`Captured ${C.G.length} note${C.G.length>1?'s':''} into ${t.name} at bar ${Math.floor(start/4)+1}${C.at!=null?', exactly where you played them':''}.`)}
@@ -8004,7 +8008,7 @@ function capMidi(){const C=capBuild();if(!C){toast('Nothing played yet. Play som
 let CAPDRAG=null;
 function capDragStart(e){const C=capBuild();if(!C)return false;const gh=document.createElement('div');gh.id='capGhost';gh.innerHTML=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 6v7M12 6v7M16 6v7"/></svg>${C.G.length} notes`;document.body.appendChild(gh);CAPDRAG={C,gh,t:null,b:null,newT:false};capDragMove(e);return true}
 function capDragMove(e){const D=CAPDRAG;if(!D)return;D.gh.style.left=e.clientX+12+'px';D.gh.style.top=e.clientY+10+'px';const r=arr.getBoundingClientRect();const inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;D.t=null;D.newT=false;D.b=null;
-  if(inside){const{x,y}=arrPt(e);if(x>=X0&&y>=AY){D.b=Math.max(0,snapS(V.x+(x-X0)/V.ppb-D.C.len*0));const yy=y-AY+V.y;if(yy>=TOTH){D.newT=true;D.row=S.tracks.length}else{const i=trackAt(yy),t=S.tracks[i];if(t&&t.kind==='inst'){D.t=t;D.row=i}else{D.newT=true;D.row=i+1}}}}
+  if(inside){const{x,y}=arrPt(e);if(x>=X0&&y>=AY){D.b=Math.max(0,snapS(V.x+(x-X0)/V.ppb-D.C.len*0));const yy=y-AY+V.y;if(yy>=TOTH){D.newT=true;D.row=S.tracks.length}else{const i=trackAt(yy),t=S.tracks[i];if(t&&(t.kind==='inst'||(t.kind==='audio'&&!t.frz&&(D.C.src||S.tracks.some(x=>x.kind==='inst'))))){D.t=t;D.row=i}else{D.newT=true;D.row=i+1}}}}
   D.gh.classList.toggle('ok',D.b!=null);D.gh.dataset.where=D.b==null?'':D.t?'→ '+D.t.name:'→ new track';dirty=true}
 function capDragEnd(e){const D=CAPDRAG;if(!D)return;CAPDRAG=null;D.gh.remove();dirty=true;if(D.b==null)return;let t=D.t;
   if(!t){const src=D.C.src||S.tracks.find(x=>x.kind==='inst');pushUndo();t=mkTrack('inst',src&&src.inst?src.inst.preset:'saw',null);if(src&&src.inst)t.inst=JSON.parse(JSON.stringify(src.inst));t.name=(src?src.name:'Instrument')+' capture';S.tracks.splice(Math.min(D.row,S.tracks.length),0,t)}
@@ -8533,7 +8537,7 @@ hdrin.addEventListener('contextmenu',e=>{const b=e.target.closest&&e.target.clos
    else if(z==='fi'||z==='fo'||z==='fic'||z==='foc'){ti='Fade';de='Drag the corner handle to fade in or out. Drag the small dot to curve the fade.'}
    else if(z==='gain'){ti='Clip gain';de='Drag up or down to make this clip louder or quieter.'}
    else if(z==='envpt'||z==='envline'){ti='Automation point';de='Drag to change. Double-click to delete. Click the line to add a point.';vi='autlanes'}
-   else{cur={k:key};return;/* the general clip tip lives in tutorial mode only */ti=(mid?'MIDI clip · ':'Audio clip · ')+c.name;de=(mid?'Double-click to edit the notes in the piano roll. ':'Double-click to edit warp and gain. ')+'Drag to move, ⇧-drag to duplicate, ⇧-click to select more, ⌥-click to split here, ⌘D to duplicate, arrow keys to nudge. Right-click for more (rename, colour, '+(mid?'bounce to audio':'warp')+').';vi='clipmove'}
+   else{cur={k:key};return;/* the general clip tip lives in tutorial mode only */ti=(mid?'MIDI clip · ':'Audio clip · ')+c.name;de=(mid?'Double-click to edit the notes in the piano roll. ':'Double-click to edit warp and gain. ')+'Drag to move, ⇧-drag to duplicate, ⇧-click to select more, right-drag to select an area, ⌥-click to split here, ⌘D to duplicate, arrow keys to nudge'+(mid?'. Drop it on an audio track to bounce it to audio':'')+'. Right-click for more (rename, colour, '+(mid?'bounce to audio':'warp')+').';vi='clipmove'}
    const r=arr.getBoundingClientRect(),Z=ZOOM;fe.style.left=(e.clientX/Z)+'px';fe.style.top=(e.clientY/Z+6)+'px';fe.dataset.tip=ti+'|'+de+(vi?'|'+vi:'');cur={k:key};tT=setTimeout(()=>{if(cur)tipShow(fe)},850)},{passive:true});
  arr.addEventListener('pointerleave',stop);arr.addEventListener('pointerdown',stop,true)}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.fxsw button.on')){e.stopPropagation();e.preventDefault()}},true);
@@ -17871,13 +17875,14 @@ function ajMove(dx,dr,rep){const ids=SELCS.size?SELCS:(selC?new Set([selC]):new 
   let dest=null,stay=0;
   if(dr){dest=new Map();const n=S.tracks.length;
     for(const it of items){let j=it.ti+dr;while(S.tracks[j]&&HIDT.has(S.tracks[j]))j+=dr;if(j<0||j>=n){ajHint(dr<0?'Already on the first track.':'Already on the last track.');return 0}
-      const tt=S.tracks[j],okk=!tt.frz&&(it.c.notes?tt.kind==='inst':tt.kind==='audio');if(okk)dest.set(it,tt);else stay++}
-    if(!dest.size){const it=items[0],tt=S.tracks[it.ti+dr];ajHint((it.c.notes?'MIDI':'Audio')+' clips can’t go on '+(tt?tt.name:'that track')+(tt&&tt.kind!=='inst'&&tt.kind!=='audio'?' (a '+tt.kind+' track)':tt&&tt.kind==='inst'?', an instrument track':', an audio track')+'.');return 0}}
+      const tt=S.tracks[j],okk=!tt.frz&&(it.c.notes?(tt.kind==='inst'||tt.kind==='audio'):tt.kind==='audio');if(okk)dest.set(it,tt);else stay++}
+    if(!dest.size){const it=items[0],tt=S.tracks[it.ti+dr];ajHint((it.c.notes?'MIDI':'Audio')+' clips can’t go on '+(tt?tt.name:'that track')+(tt&&tt.kind!=='inst'&&tt.kind!=='audio'?' (a '+tt.kind+' track)':tt&&tt.kind==='inst'?', an instrument track (only MIDI goes there)':tt&&tt.frz?', a frozen track':', an audio track')+'.');return 0}}
   if(!dr&&Math.abs(dx)<1e-9){if(dx===0&&items.some(i=>i.c.start===0))ajHint('Already at the start.');return 0}
   const now=performance.now();if(!(rep&&now-AJ.t<700&&UNDO.length&&UNDO[UNDO.length-1]===AJ.top))pushUndo();AJ.top=UNDO[UNDO.length-1];AJ.t=now;
-  for(const it of items){if(dx)it.c.start=Math.max(0,Math.round((it.c.start+dx)*1e6)/1e6);const d=dest&&dest.get(it);if(d&&d!==it.t){it.t.clips=it.t.clips.filter(q=>q!==it.c);d.clips.push(it.c);it.t=d}}
+  const akc=new Map();for(const it of items){if(dx)it.c.start=Math.max(0,Math.round((it.c.start+dx)*1e6)/1e6);const d=dest&&dest.get(it);if(d&&d!==it.t){it.t.clips=it.t.clips.filter(q=>q!==it.c);if(it.c.notes&&d.kind==='audio'){const na=akBounceInto(d,it.c,it.t);akc.set(it.c.id,na.id);it.c=na}else d.clips.push(it.c);it.t=d}}
+  if(akc.size){const mp=i=>akc.get(i)||i;if(SELCS.size)SELCS=new Set([...SELCS].map(mp));if(selC)selC=mp(selC);toast('Bouncing '+akc.size+' MIDI clip'+(akc.size>1?'s':'')+' to audio…')}
   if(SELR){const nr=S.tracks.length-1;SELR={...SELR,b0:Math.max(0,SELR.b0+dx),b1:Math.max(0,SELR.b0+dx)+(SELR.b1-SELR.b0),r0:stay?SELR.r0:clamp(SELR.r0+dr,0,nr),r1:stay?SELR.r1:clamp(SELR.r1+dr,0,nr)}}
-  if(stay)ajHint(stay+' clip'+(stay>1?'s':'')+' stayed where '+(stay>1?'they were':'it was')+': MIDI clips only go on instrument tracks, audio clips on audio tracks.');
+  if(stay)ajHint(stay+' clip'+(stay>1?'s':'')+' stayed where '+(stay>1?'they were':'it was')+': audio clips only go on audio tracks, MIDI clips on instrument tracks (or on audio tracks, bounced to audio).');
   const pf=findClip(selC)||{c:items[0].c,t:items[0].t};if(dr)selectTrack(pf.t.id);
   {const vis=Math.max(1,arrW)/V.ppb;if(pf.c.start<V.x)V.x=Math.max(0,pf.c.start-vis*.05);else if(pf.c.start>V.x+vis*.95)V.x=pf.c.start-vis*.8;
    const ti=S.tracks.indexOf(pf.t),y0=TRY[ti]??0,vh=Math.max(60,(arr.clientHeight||600)-AY);if(y0<V.y)V.y=y0;else if(y0+V.th>V.y+vh)V.y=y0+V.th-vh;clampV()}
@@ -17886,6 +17891,51 @@ document.addEventListener('pointerdown',e=>{AJ.foc=!!(e.target&&e.target.closest
 document.addEventListener('keydown',e=>{const k=e.key;if(k!=='ArrowLeft'&&k!=='ArrowRight'&&k!=='ArrowUp'&&k!=='ArrowDown')return;if(ajBlock(e))return;
   if(!(SELCS.size||selC&&findClip(selC)))return;e.preventDefault();
   if(k==='ArrowLeft'||k==='ArrowRight'){const st=e.altKey?.0625:ajStep()*(e.shiftKey?4:1);ajMove((k==='ArrowRight'?1:-1)*st,0,e.repeat)}else ajMove(0,k==='ArrowUp'?-1:1,e.repeat)});
+/* ---------- task AK: right-drag selects every clip it touches; a MIDI clip dropped, copied, pasted or nudged onto an audio track is bounced to audio there ---------- */
+const AKJ=new Map(),AKRES=new Map(),AKTAIL=8;let AKQ=Promise.resolve(),AKTM=0,AKA=0;
+/* may this clip sit on that track? (t0 = the track a single clip started on) */
+function akOk(c,tt,t0){if(!tt)return false;if(c.notes)return tt.kind==='inst'||(tt.kind==='audio'&&!tt.frz);return t0?tt.kind===t0.kind:tt.kind!=='inst'}
+const akSeed=(t,c)=>'akb|'+t.id+'|'+c.len+'|'+(c.notes||[]).length;
+function akSrcOf(src){const t=src&&src.id&&S.tracks.find(x=>x.id===src.id&&x.kind==='inst');return t||{kind:'inst',name:(src&&src.name)||'Instrument',color:(src&&src.color)||'#4cc9f0',inst:src&&src.inst,fx:(src&&src.fx)||[],read:true,vol:1,pan:0}}
+/* the one place where a MIDI clip becomes audio: puts a clip with the same start and length on the audio track `dst` at once (marked busy), renders the MIDI through the instrument and effects of `srcT`
+   offline in the background (the same renderer as Bounce, in the export block size) and fills the clip in with the audio and its tail when it is done. The caller removes the MIDI clip when the action was a move. */
+function akBounceInto(dst,mc,srcT){const spb=60/S.bpm,id=rid(),a=mkClip({start:mc.start,len:mc.len,name:(mc.name||'Clip')+' (bounced)',buf:null,dur:mc.len*spb,gain:0,fi:0,fo:0,mute:!!mc.mute,akj:id});
+  dst.clips.push(a);const snap=JSON.parse(JSON.stringify(Object.assign({},srcT,{clips:[]}))),clip=JSON.parse(JSON.stringify(mc));clip.id=id;
+  AKJ.set(id,{p:0,len:mc.len});AKQ=AKQ.then(()=>akRun(id,snap,clip,spb)).catch(e=>akFail(id,e));
+  if(!AKTM)AKTM=setInterval(()=>{if(!AKJ.size){clearInterval(AKTM);AKTM=0}dirty=true},120);dirty=true;setTimeout(()=>{if(PR.open&&!prClip())closePR()},0);return a}
+async function akRun(id,snap,clip,spb){ensureCtx();const J=AKJ.get(id),rq=RQOK?(UI.rqOff||512):128,full=await bounceRender(snap,clip,f=>{if(J)J.p=f;dirty=true},rq,akSeed(snap,clip),AKTAIL);
+  /* the clip is as long as the MIDI clip, or longer when the sound rings on (reverb, delay, release): up to the last audible sample (−80 dB) and 50 ms more; the silence after that is not kept */
+  const sr=full.sampleRate,nc=full.numberOfChannels;let last=0;for(let ch=0;ch<nc;ch++){const d=full.getChannelData(ch);for(let i=d.length-1;i>last;i--)if(Math.abs(d[i])>1e-4){last=i;break}}
+  const keep=Math.min(full.length,Math.max(Math.ceil(clip.len*spb*sr),last+1+Math.round(.05*sr))),buf=ctx.createBuffer(nc,keep,sr);for(let ch=0;ch<nc;ch++)buf.copyToChannel(full.getChannelData(ch).subarray(0,keep),ch);
+  const len=keep<=Math.ceil(clip.len*spb*sr)?clip.len:Math.floor(keep/sr/spb*1e6)/1e6,cut=last>=full.length-Math.round(.06*sr)&&keep/sr/spb>clip.len+.3;/* still ringing after the longest tail: a short fade instead of a hard end */
+  AKRES.set(id,{buf:addBuf(buf),dur:buf.duration,len,base:clip.len,fo:cut?.25:0});AKJ.delete(id);if(akResolve())changed(true);dirty=true}
+function akFail(id,e){AKJ.delete(id);for(const t of S.tracks)t.clips=t.clips.filter(c=>c.akj!==id);dirty=true;changed(true);toast('The bounce failed: '+((e&&e.message)||e))}
+/* fills in every finished bounce (also in a state brought back by Undo or Redo) */
+function akResolve(){let n=0;for(const t of S.tracks)for(const c of t.clips)if(c.akj&&AKRES.has(c.akj)){const r=AKRES.get(c.akj);c.buf=r.buf;c.dur=r.dur;if(Math.abs(c.len-r.base)<1e-6){c.len=r.len;if(r.fo)c.fo=r.fo}else c.len=Math.min(c.len,r.len);delete c.akj;n++}return n}
+{const _r=restore;restore=function(){const r=_r.apply(this,arguments);if(akResolve())changed(true);return r}}
+/* after a drag or a move: MIDI clips that ended on an audio track are bounced there (items: {c, t: track now, ti: row it came from}); returns how many */
+function akCommit(items){const mp=new Map();for(const it of items){if(it.c.notes&&it.t.kind==='audio'){const srcT=S.tracks[it.ti]||it.t;it.t.clips=it.t.clips.filter(q=>q!==it.c);const na=akBounceInto(it.t,it.c,srcT);mp.set(it.c.id,na.id);it.c=na}}
+  if(mp.size){const m=i=>mp.get(i)||i;if(SELCS.size)SELCS=new Set([...SELCS].map(m));if(selC)selC=m(selC);toast('Bouncing '+mp.size+' MIDI clip'+(mp.size>1?'s':'')+' to audio…')}return mp.size}
+/* right-drag: a rectangle that selects every clip it touches, also partly (Shift adds to the selection); Alt+right-drag keeps the old range box */
+function akMarq(x,y){const R=RS;R.px=x;R.py=y;const ax=X0+(R.b0-V.x)*V.ppb,ay=AY+R.yc0-V.y,x0=Math.min(ax,x),x1=Math.max(ax,x),y0=Math.min(ay,y),y1=Math.max(ay,y);R.rect={x0,y0,x1,y1};
+  const ids=new Set(R.sh?R.base:[]);S.tracks.forEach((t,i)=>{if(HIDT.has(t))return;for(const c of t.clips){const G=clipGeom(i,c);if(G.x<=x1&&G.x+G.w>=x0&&G.y<=y1&&G.y+G.h>=y0)ids.add(c.id)}});
+  SELR=null;if(ids.size>1){SELCS=ids;selC=[...ids][0]}else{SELCS.clear();selC=ids.size?[...ids][0]:null}dirty=true;if(!AKA)AKA=requestAnimationFrame(akAuto)}
+function akAuto(){AKA=0;if(!RS||RS.fake||!RS.moved||RS.alt)return;const x=RS.px,y=RS.py,rh=arr.getBoundingClientRect().height/ZOOM;let dx=0,dy=0;
+  if(x<X0+24)dx=x-(X0+24);else if(x>X0+arrW-24)dx=x-(X0+arrW-24);if(y<AY+16)dy=y-(AY+16);else if(y>rh-16)dy=y-(rh-16);
+  if(dx||dy){const ox=V.x,oy=V.y;V.x+=dx*.5/V.ppb;V.y+=dy*.5;clampV();if(V.x!==ox||V.y!==oy)akMarq(x,y)}AKA=requestAnimationFrame(akAuto)}
+function akDraw(g,w,h){
+  if(RS&&!RS.fake&&RS.moved&&!RS.alt&&RS.rect){const r=RS.rect;g.save();g.beginPath();g.rect(X0,AY,w-X0,h-AY);g.clip();g.fillStyle='rgba(120,170,255,.16)';g.fillRect(r.x0,r.y0,r.x1-r.x0,r.y1-r.y0);g.strokeStyle='rgba(150,190,255,.95)';g.lineWidth=1;g.setLineDash([5,3]);g.strokeRect(Math.round(r.x0)+.5,Math.round(r.y0)+.5,Math.round(r.x1-r.x0),Math.round(r.y1-r.y0));g.setLineDash([]);g.restore()}
+  const dk=ad&&(ad.k==='block'||ad.k==='move')?ad:null;
+  if(dk){const its=dk.k==='block'?dk.items:[{c:dk.c,t:dk.t}];g.save();g.beginPath();g.rect(X0,AY,w-X0,h-AY);g.clip();g.font='600 10px Inter,system-ui,sans-serif';
+    for(const it of its){if(!it.c||!it.c.notes||!it.t||it.t.kind!=='audio')continue;const i=S.tracks.indexOf(it.t);if(i<0)continue;const G=clipGeom(i,it.c);if(G.x>w||G.x+G.w<X0)continue;
+      g.strokeStyle='#4cc9f0';g.lineWidth=1.5;g.setLineDash([5,3]);g.strokeRect(G.x+.75,G.y+.75,Math.max(2,G.w-1.5),G.h-1.5);g.setLineDash([]);const tx='∿ becomes audio',tw=g.measureText(tx).width+10,bx=Math.max(G.x,X0)+4,by=G.y+G.h-18;if(G.h>26){g.fillStyle='rgba(8,12,22,.85)';g.fillRect(bx,by,tw,14);g.fillStyle='#4cc9f0';g.fillText(tx,bx+5,by+10.5)}}g.restore()}
+  const now=performance.now();let fin=0;
+  S.tracks.forEach((t,i)=>{for(const c of t.clips){if(!c.akj)continue;const J=AKJ.get(c.akj);if(!J){if(AKRES.has(c.akj)){fin++;continue}const G=clipGeom(i,c);if(G.x>w||G.x+G.w<X0||G.w<70)continue;g.save();g.beginPath();g.rect(Math.max(G.x,X0),G.y,Math.max(1,Math.min(G.x+G.w,w)-Math.max(G.x,X0)),G.h);g.clip();g.fillStyle='rgba(8,12,22,.5)';g.fillRect(G.x,G.y,G.w,G.h);g.fillStyle='#ffd166';g.font='600 11px Inter,system-ui,sans-serif';g.fillText('Bounce did not finish',Math.max(G.x,X0)+8,G.y+G.h/2+4);g.restore();continue}
+    const G=clipGeom(i,c);if(G.x>w||G.x+G.w<X0)continue;
+    g.save();g.beginPath();g.rect(Math.max(G.x,X0),G.y,Math.max(1,Math.min(G.x+G.w,w)-Math.max(G.x,X0)),G.h);g.clip();g.fillStyle='rgba(8,12,22,.5)';g.fillRect(G.x,G.y,G.w,G.h);
+    g.strokeStyle='rgba(255,255,255,.1)';g.lineWidth=6;const off=(now/40)%24;for(let sx=G.x-G.h-24+off;sx<G.x+G.w+24;sx+=24){g.beginPath();g.moveTo(sx,G.y+G.h);g.lineTo(sx+G.h,G.y);g.stroke()}
+    g.fillStyle='#4cc9f0';g.fillRect(G.x,G.y+G.h-4,G.w*Math.max(.02,J.p),4);g.fillStyle='#e8f6ff';g.font='600 11px Inter,system-ui,sans-serif';if(G.w>60)g.fillText('Bouncing to audio… '+Math.round(J.p*100)+'%',Math.max(G.x,X0)+8,G.y+G.h/2+4);g.restore()}});
+  if(fin)setTimeout(()=>{if(akResolve())changed(true)},0)/* a bounce that finished while another project was in front */}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -18225,6 +18275,8 @@ const SCA=[
  {id:'ajdup',g:'edit',l:'Duplicate clips: start dragging with Shift held',d:'Shift+Drag',lock:1,ic:'M7 7h9v9H7zM4 13V4h9',run:()=>{}},
  {id:'ajnudge',g:'edit',l:'Move selected clips in time (the step follows the zoom)',d:'ArrowLeft+ArrowRight',lock:1,ic:'M3 10h14M6 7l-3 3 3 3M14 7l3 3-3 3',run:()=>{}},
  {id:'ajtrack',g:'edit',l:'Move selected clips to the track above or below',d:'ArrowUp+ArrowDown',lock:1,ic:'M10 3v14M7 6l3-3 3 3M7 14l3 3 3-3',run:()=>{}},
+ {id:'akmarq',g:'edit',l:'Select clips with a rectangle (every clip it touches, also partly; Shift adds)',d:'Right-click+Drag',lock:1,ic:'M3 4h14v12H3zM6 7h5v5H6z',run:()=>{}},
+ {id:'akbounce',g:'edit',l:'Drop, copy or paste a MIDI clip on an audio track: it is bounced to audio',d:'Drag',lock:1,ic:'M3 10h3l2-5 3 10 2-5h4',run:()=>{}},
  {id:'ajbig',g:'edit',l:'Move clips by a bigger step (4 times)',d:'Shift+ArrowLeft+ArrowRight',lock:1,ic:'M3 10h14M6 7l-3 3 3 3M14 7l3 3-3 3',run:()=>{}},
  {id:'ajfine',g:'edit',l:'Move clips by the finest step (1/64 note)',d:'Alt+ArrowLeft+ArrowRight',lock:1,ic:'M3 10h14M6 7l-3 3 3 3M14 7l3 3-3 3',run:()=>{}},
  {id:'mixer',g:'view',l:'Mixer window',d:'Shift+M',ic:'M5 3v14M10 3v14M15 3v14M3.5 7h3M8.5 12h3M13.5 6h3',run:()=>{const w=$('#mixWin');if(w&&!w.hidden){const x=w.querySelector('.fwc');if(x)x.click()}else openMixer()}},
@@ -18286,7 +18338,7 @@ window.addEventListener('keydown',e=>{if(!SCCAP)return;e.preventDefault();e.stop
 let CLIPB=null;const cj=o=>JSON.parse(JSON.stringify(o));
 function clipCollect(){
   if(PR.open&&focusArea==='pr'){const f=findClip(PR.cid);if(f&&f.c.notes){const ns=f.c.notes.filter(n=>n.sel);if(ns.length){const b=Math.min(...ns.map(n=>n.s));return{v:1,kind:'notes',notes:ns.map(n=>({...cj(n),s:n.s-b,sel:true}))}}}}
-  const base=(items)=>{if(!items.length)return null;const b0=Math.min(...items.map(i=>i.c.start)),r0=Math.min(...items.map(i=>i.ri));return{v:1,kind:'clips',rows:items.map(i=>{const t=S.tracks[i.ri],k=cj(i.c);k.start-=b0;return{ri:i.ri-r0,tk:t.kind,src:{kind:t.kind,name:t.name,color:t.color,inst:t.inst?cj(t.inst):null,fx:cj(t.fx||[])},c:k}}),len:Math.max(...items.map(i=>i.c.start+i.c.len))-b0}};
+  const base=(items)=>{if(!items.length)return null;const b0=Math.min(...items.map(i=>i.c.start)),r0=Math.min(...items.map(i=>i.ri));return{v:1,kind:'clips',rows:items.map(i=>{const t=S.tracks[i.ri],k=cj(i.c);k.start-=b0;return{ri:i.ri-r0,tk:t.kind,src:{id:t.id,kind:t.kind,name:t.name,color:t.color,inst:t.inst?cj(t.inst):null,fx:cj(t.fx||[])},c:k}}),len:Math.max(...items.map(i=>i.c.start+i.c.len))-b0}};
   if(SELR){const snap=JSON.stringify(S.tracks.map(t=>t.clips)),L=rangeLift(SELR),items=L.map(({t,c})=>({ri:S.tracks.indexOf(t),c:cj(c)}));const old=JSON.parse(snap);S.tracks.forEach((t,i)=>t.clips=old[i]);dirty=true;return base(items)}
   const ids=SELCS.size?[...SELCS]:(selC?[selC]:[]);if(ids.length){const items=[];S.tracks.forEach((t,ri)=>t.clips.forEach(c=>{if(ids.includes(c.id))items.push({ri,c:cj(c)})}));return base(items)}
   const t=S.tracks.find(q=>q.id===selT);if(t&&focusArea==='arr'&&!SELR){return{v:1,kind:'track',track:cj(t)}}
@@ -18300,9 +18352,11 @@ function clipPaste(e){let P=null;const txt=e&&e.clipboardData?e.clipboardData.ge
   if(P.kind==='notes'){const f=findClip(PR.cid);if(!f||!f.c.notes){return false}const at=clamp(curDisp()-f.c.start,0,Math.max(0,f.c.len-.1));f.c.notes.forEach(n=>n.sel=false);for(const n of P.notes)f.c.notes.push({...cj(n),s:n.s+at,sel:true});changed(false);toast('Pasted '+P.notes.length+' notes');return true}
   if(P.kind==='track'){const t=cj(P.track);t.id=rid();for(const f of t.fx||[])f.id=rid();for(const c of t.clips||[])c.id=rid();const i=Math.max(0,S.tracks.findIndex(q=>q.id===selT));S.tracks.splice(i+1,0,t);selT=t.id;changed(true);toast('Pasted track '+t.name);return true}
   const at=Math.max(0,Math.round(curDisp()*4)/4),ti0=Math.max(0,S.tracks.findIndex(q=>q.id===selT)),ids=new Set();let made=0,last=null;const rowMap=new Map();
-  for(const it of P.rows){let ti=ti0+it.ri,t=S.tracks[ti];if(!t||t.kind!==it.tk){const key=it.ri;if(rowMap.has(key))t=rowMap.get(key);else{t=mkTrack(it.src.kind,it.src.kind==='inst'&&it.src.inst?it.src.inst.preset:null,it.src.name,it.src.color);if(it.src.inst)t.inst=cj(it.src.inst);t.fx=cj(it.src.fx||[]).map(f=>({...f,id:rid()}));S.tracks.push(t);rowMap.set(key,t);made++}}
+  let bn=0;for(const it of P.rows){let ti=ti0+it.ri,t=S.tracks[ti];
+    if(t&&t.kind==='audio'&&!t.frz&&it.tk==='inst'&&it.c.notes){const c=cj(it.c);c.id=rid();c.start=at+it.c.start;const na=akBounceInto(t,c,akSrcOf(it.src));ids.add(na.id);last=na.id;bn++;continue}
+    if(!t||t.kind!==it.tk){const key=it.ri;if(rowMap.has(key))t=rowMap.get(key);else{t=mkTrack(it.src.kind,it.src.kind==='inst'&&it.src.inst?it.src.inst.preset:null,it.src.name,it.src.color);if(it.src.inst)t.inst=cj(it.src.inst);t.fx=cj(it.src.fx||[]).map(f=>({...f,id:rid()}));S.tracks.push(t);rowMap.set(key,t);made++}}
     const c=cj(it.c);c.id=rid();c.start=at+it.c.start;t.clips.push(c);ids.add(c.id);last=c.id}
-  SELR=null;SELCS=new Set(ids);selC=last;changed(!!made);toast('Pasted '+P.rows.length+' clip'+(P.rows.length>1?'s':'')+' at bar '+(Math.floor(at/4)+1)+(made?' · added '+made+' track'+(made>1?'s':''):''));return true}
+  SELR=null;SELCS=new Set(ids);selC=last;changed(!!made||!!bn);toast('Pasted '+P.rows.length+' clip'+(P.rows.length>1?'s':'')+' at bar '+(Math.floor(at/4)+1)+(made?' · added '+made+' track'+(made>1?'s':''):'')+(bn?' · bouncing '+bn+' MIDI clip'+(bn>1?'s':'')+' to audio…':''));return true}
 for(const ev of['copy','cut','paste'])document.addEventListener(ev,e=>{const tg=e.target;if(tg&&(tg.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(tg.tagName)))return;if(!$('#ib').hidden||!$('#dlg').hidden||!$('#np').hidden)return;if(ev==='paste')clipPaste(e);else clipCopy(e,ev==='cut')});
 /* ---------- loop ---------- */
 const barsStr=b=>{if(!sigFlat()){const P=barPos(b),u=4/P.sig.d,x=P.inBar/u,bt=Math.floor(x)+1,fr=x%1,six=Math.floor(fr*4)+1,tk=Math.floor(((fr*4)%1)*120);return`${String(P.bar+1).padStart(3,' ')}. ${bt}. ${six}. ${String(tk).padStart(3,' ')}`}const bar=Math.floor(b/4)+1,bt=Math.floor(b%4)+1,six=Math.floor((b%1)*4)+1,tk=Math.floor(((b*4)%1)*120);return`${String(bar).padStart(3,' ')}. ${bt}. ${six}. ${String(tk).padStart(3,' ')}`};
@@ -19453,7 +19507,7 @@ function tutVirt(){const out=[];try{const R=arr.getBoundingClientRect(),z=ZOOM,W
   box(X0,TY,W,TY+RUL,'Ruler|Double-click to play from that spot. Drag along it to draw a loop; drag the loop to move it or its edges to resize it; right-click the loop to remove it. Drag up or down on the ruler to zoom.|loop');
   box(X0,TY+RUL,W,AY,'Sections|Coloured blocks that name parts of the song (Intro, Drop…). Click one to loop it, drag to move it, right-click for more. Double-click to rename.|section');
   {let n=0;const Hh=R.height/z;S.tracks.forEach((t,i)=>{if(n>300||HIDT.has(t))return;for(const c of t.clips){const G=clipGeom(i,c);if(G.y+G.h<AY||G.y>Hh||G.x+G.w<X0||G.x>W)continue;n++;const mid=!!c.notes;
-    box(Math.max(G.x,X0),Math.max(G.y,AY),Math.min(G.x+G.w,W),Math.min(G.y+G.h,Hh),(mid?'MIDI clip · ':'Audio clip · ')+c.name+'|'+(mid?'Double-click to edit the notes in the piano roll. ':'Double-click to edit warp and gain. ')+'Drag to move, ⇧-drag to duplicate, ⇧-click to select more, ⌥-click to split here, ⌘D to duplicate, arrow keys to nudge. Right-click for more (rename, colour, '+(mid?'bounce to audio, export as MIDI':'warp, bounce')+').|clipmove')}})}
+    box(Math.max(G.x,X0),Math.max(G.y,AY),Math.min(G.x+G.w,W),Math.min(G.y+G.h,Hh),(mid?'MIDI clip · ':'Audio clip · ')+c.name+'|'+(mid?'Double-click to edit the notes in the piano roll. ':'Double-click to edit warp and gain. ')+'Drag to move, ⇧-drag to duplicate, ⇧-click to select more, right-drag to select an area, ⌥-click to split here, ⌘D to duplicate, arrow keys to nudge'+(mid?'. Drop it on an audio track to bounce it to audio':'')+'. Right-click for more (rename, colour, '+(mid?'bounce to audio, export as MIDI':'warp, bounce')+').|clipmove')}})}
   const my=AY+TOTH+MSY0-V.y,mh=mshOf();box(X0,AY,W,Math.min(my-2,R.height/z),'Arrangement|Your clips on a timeline, one row per track. Double-click empty space to make a MIDI clip (or import audio on an audio track). Drag clips to move them; hover a clip for its own tips.|clipmove');
   if(my<R.height/z)box(X0,my,W,Math.min(my+mh,R.height/z),'Master loudness map|How loud the whole mix is over time: tall and red is loud. It fills in by itself when you change things and while the song plays.')}catch(e){}return out}
 function tutShow(el){const V2=el&&el.virt?el:null,raw=V2?V2.virt:tutText(el);if(!raw)return;const[ti,de,vi]=raw.split('|');const icon=!V2&&el.querySelector&&el.querySelector('svg');let c=document.getElementById('tutcard');if(!c){c=document.createElement('div');c.id='tutcard';document.body.appendChild(c)}
