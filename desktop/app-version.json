@@ -1,7 +1,7 @@
 {
-  "version": "0.192",
-  "sha256": "3cada23a4a0c9fd652daaaffcf8d1f8f8a5147f1f65fc421a691f1017f37fbad",
-  "size": 2837041,
+  "version": "0.193",
+  "sha256": "3475f54f4abb2249b93d49b3ef0ef355781090f1f6056f7d5cff315076bfcc6f",
+  "size": 2854334,
   "minShell": "0.147.0",
-  "notes": "New device Fractal, as an instrument and as an effect: a row of short pulses with one level dial per step chops a sound, from a sidechain pump or trance gate in time with the song up to a rattle, growl, buzz or crackle at audio speed, in tune with the key if you want. It has its own phaser and 3D spread, one click adds Phaser or Vector Delay after it, and it comes with 20 presets."
+  "notes": "The piano roll now sits above the devices panel at the same height, nothing is cut off, and it grows down when you hide the devices; drag the bar between them to change the sizes. Its window has a head like the mixer's, no border, smaller buttons when it is small, and the track tabs above the devices are now glass."
 }
