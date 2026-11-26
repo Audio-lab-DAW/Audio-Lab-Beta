@@ -1607,6 +1607,15 @@ body.fx-top #fx .fxbtns #fxHide.dshb::after{bottom:auto;top:-2px}
 #fxTitle .fxsw.fxall button.fxov b:empty{display:none}
 #fxTitle .fxsw.fxall button.fxov:hover{background:rgba(58,64,82,1)!important}
 body.fx-top #fxTitle .fxsw.fxall button.fxov{bottom:auto;top:0;border-radius:0 0 8px 8px!important;border:1px solid rgba(255,255,255,.18)!important;border-top:0!important}
+/* v0.195 mixer cables (task S2) */
+#mixWin svg.cabs .cfl{fill:none;stroke:#fff;opacity:0;stroke-linecap:round;pointer-events:none}#mixWin svg.cabs .cfl-send,#mixWin svg.cabs .cfl-out{stroke-dasharray:1.2 10.8}#mixWin svg.cabs .cfl-sc{stroke-dasharray:10 300}#mixWin svg.cabs .cfl-mod{stroke-dasharray:4 6;stroke:#eaf7ff}
+#mixWin svg.cabs.cstill .cflg{display:none}#mixWin svg.cabs.hov .cfl{opacity:.12!important}
+#mixWin svg.cabs .cbus{fill:none;stroke:#0c0d11;stroke-width:1;opacity:.75;pointer-events:none}
+#mixWin svg.cabs .cchv{fill:none;stroke:rgba(255,255,255,.85);stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#mixWin svg.cabs.hov .cchv,#mixWin svg.cabs.hov .cbus{opacity:.18}
+#mixWin svg.cabs .cpan{fill:#0e0f13;pointer-events:all}#mixWin svg.cabs .cpanl{stroke:rgba(255,255,255,.16);stroke-width:1;fill:none}
+#mixWin svg.cabs .clab{font:600 9.5px Inter,system-ui,sans-serif}
+#mixWin.mxcab>.rz-s::after{content:'';position:absolute;left:50%;bottom:2px;width:44px;height:3px;margin-left:-22px;border-radius:2px;background:rgba(255,255,255,.18);transition:background .12s}#mixWin.mxcab>.rz-s:hover::after,#mixWin.mxcab>.rz-s.on::after{background:rgba(255,255,255,.55)}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5773,7 +5782,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.197',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.198',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -15375,6 +15384,157 @@ function PS_PARTICLE(h){const{meta,trim,reset,op}=h;
   for(const k in O)if(!ORBPRE[k]){ORBPRE[k]=O[k];meta('orb',k,'Other','')}}
 }
 /*PSLIB-END*/
+/* ====================== v0.195: mixer cables (task S2) ======================
+   Window size: the grip on the top edge of the cable area moves the split INSIDE the window (the window keeps its size). First the channels give way
+   down to the height their controls need (cs2ChMin); after that the cable area slides up over the lower part of the channels like a drawer
+   (an opaque panel, so nothing under it is clickable). The bottom edge of the window (cables on) changes only the cable area: the window grows or
+   shrinks with it and the channels keep their size. The bottom right corner and every other edge and corner still resize the whole window.
+   UI.mxs.cabH: the total height of the cable area as dragged (0 = automatic). cabH() is the part that takes room from the channels, cs2T() the total.
+   Look (research in docs/backlog-log.md): audio (sends and group outputs) solid, group outputs as a thicker bus with a dark core; sidechain dashed;
+   modulation a wave. Direction: an arrow into the target, chevrons along every shared line, and while the sound plays light dots that flow from the
+   source to the target (speed and brightness follow the source level). Sidechain: a pulse runs along the cable on every hit of the source (follower)
+   or on every pump (Sidechain effect). Modulation: the wave moves while the modulator moves, brightness follows its value.
+   Up to 5 levels as the space allows, a label per line (from where to where) that shortens or hides when there is no room.
+   Cost: animation runs only while the mixer is open (from drawMixer, every second frame), only for cables in view, writes to the page only when a
+   value changes, and stops when nothing moves. No animation in Lighter and Lightest (and with reduced motion): the still look stays. */
+CABK.out.da='';CABK.out.w=3.2;CABK.sc.da='6 3.5';CABK.sc.w=2.4;
+CABK.mod={n:'Modulation',da:'',w:1.8,tip:'Modulation: a modulator on one channel moves a control on another channel'};
+const CS2={an:[],ctx:null,still:-1,lt:0};
+const cs2K=()=>UI.mxCompact?.8:1;
+const cs2Min=()=>Math.max(38,Math.round(CABLANE*cs2K()));
+/* the height the channels need above the cable area before their controls run over each other */
+const cs2ChMin=()=>UI.mxCompact?CS2CMIN:378;let CS2CMIN=230;
+function cs2Ms(){const ms=document.querySelector('#mixWin .mxs');return ms&&ms.clientHeight>0?ms:null}
+function cs2Max(){const ms=cs2Ms();return ms?Math.max(cs2Min(),Math.min(620,ms.clientHeight-70)):400}
+/* total height of the cable area */
+function cs2T(){const o=mxsO(),mn=cs2Min();if(o.cabH)return Math.round(clamp(o.cabH*cs2K(),mn,cs2Max()));if(!cabTidy())return mn;
+  const sg=cabSig()+'|'+JSON.stringify(o.cabHide||{})+(o.cabSel?selT:'');if(!CAB.ph||CAB.ph.sig!==sg){const TI=new Map(S.tracks.map((t,i)=>[t.id,i*100]));CAB.ph={sig:sg,n:cabPlan(cabList(),id=>id==='master'?S.tracks.length*100:TI.get(id),14).n}}
+  const ms=cs2Ms(),room=ms?ms.clientHeight-cs2ChMin():150,rows=Math.min(5,CAB.ph.n);
+  return Math.round(clamp((52+16*Math.max(0,rows-1))*cs2K(),mn,Math.max(mn,Math.min(150,room))))}
+/* the part of it that the channels give room for (the padding under the strips); the rest slides over the channels */
+cabH=function(){const T=cs2T(),ms=cs2Ms();if(!ms)return T;return Math.min(T,Math.max(cs2Min(),ms.clientHeight-cs2ChMin()))};
+/* modulation cables: a modulator on one track with targets on another track */
+{const _cl=cabList;cabList=function(){const L=_cl.apply(this,arguments);for(const t of S.tracks)for(const m of t.mods||[]){if(!m||m.type==='side'||!m.routes)continue;const by=new Map();
+    for(const r of m.routes){const id=String(r.pid||'').split(':')[1];if(!id||id===t.id)continue;const b=trkById(id);if(!b)continue;let c=by.get(id);if(!c)by.set(id,c={k:'mod',a:t,b,mm:m,rs:[]});c.rs.push(r)}
+    for(const c of by.values())L.push(c)}return L}}
+{const _cw=cabWhat;cabWhat=function(c){if(c.k==='mod')return(MODT[c.mm.type]||{n:'Modulator'}).n+' moves '+c.rs.map(r=>paLabel(r.pid)).join(', ')+(c.mm.off?' (switched off)':'');return _cw.apply(this,arguments)}}
+{const _cr=cabRemove;cabRemove=function(c){if(c.k!=='mod')return _cr.apply(this,arguments);pushUndo();const m=c.mm;for(const r of c.rs)if(r.b!=null){const en=PAREG.get(r.pid);if(en)try{en.set(en.spec.v(r.b))}catch(e){}}
+  m.routes=(m.routes||[]).filter(r=>!c.rs.includes(r));changed(false);try{renderFx()}catch(e){}cabSoon()}}
+{const _cp=cabPop;cabPop=function(c){const r=_cp.apply(this,arguments);if(c.k!=='mod')return r;const p=document.getElementById('cabPop');if(!p)return r;const T=MODT[c.mm.type]||{n:'Modulator'};
+  const q=p.querySelector('p');if(q){q.textContent=`The ${T.n} on ${c.a.name} moves ${c.rs.length>1?'these controls':'this control'} on ${c.b.name}${c.mm.off?' (switched off)':''}:`;q.insertAdjacentHTML('afterend',`<ul>${c.rs.map(x=>`<li>${esc(paLabel(x.pid))} <b>${Math.round(x.d*100)}%</b></li>`).join('')}</ul>`)}
+  const rm=p.querySelector('[data-cb="rm"]');if(rm)rm.textContent=c.rs.length>1?'Remove these links':'Remove this link';return r}}
+/* tidy layout with a limit on the number of levels: what does not fit goes onto the level where it overlaps least */
+cabPlan=function(L,xOf,pad,maxR){const G=new Map();L.forEach((c,i)=>{if(!cabVis(c))return;const xa=xOf(c.a.id),xb=xOf(c.b.id);if(xa==null||xb==null)return;const key=c.k+'>'+c.b.id;let g=G.get(key);if(!g)G.set(key,g={k:c.k,b:c.b,xb,lo:xb,hi:xb,it:[]});g.it.push(i);g.lo=Math.min(g.lo,xa);g.hi=Math.max(g.hi,xa)});
+  const A=[...G.values()].sort((p,q)=>(p.hi-p.lo)-(q.hi-q.lo)||p.lo-q.lo),lv=[],R=maxR||1e9;
+  for(const g of A){let put=false;for(let n=0;n<Math.min(R,lv.length+1);n++){const row=lv[n]||(lv[n]=[]);if(row.every(r=>g.hi<r.lo-pad||g.lo>r.hi+pad)){row.push(g);g.lv=n;put=true;break}}
+    if(!put){let best=0,bo=1e18;for(let n=0;n<lv.length;n++){let o=0;for(const r of lv[n])o+=Math.max(0,Math.min(g.hi,r.hi)-Math.max(g.lo,r.lo)+pad);if(o<bo){bo=o;best=n}}lv[best].push(g);g.lv=best;g.ov=1}}
+  return{groups:A,n:lv.filter(r=>r.length).length,rows:lv}};
+/* text width for the labels (measured once per text) */
+const CS2TW=new Map();function cs2Tw(s){let v=CS2TW.get(s);if(v!=null)return v;if(!CS2.ctx){const c=document.createElement('canvas');CS2.ctx=c.getContext('2d');CS2.ctx.font='600 9.5px Inter,system-ui,sans-serif'}v=CS2.ctx.measureText(s).width+2;if(CS2TW.size>2000)CS2TW.clear();CS2TW.set(s,v);return v}
+/* a wave along a horizontal line from x1 to x2 at y */
+function cs2Wave(x1,x2,y,a){const n=Math.max(1,Math.round(Math.abs(x2-x1)/9)),st=(x2-x1)/n;let d='';for(let j=0;j<n;j++){const xm=x1+st*(j+.5),xe=x1+st*(j+1);d+=`Q${xm.toFixed(1)} ${(y+(j%2?a:-a)*2).toFixed(1)} ${xe.toFixed(1)} ${y.toFixed(1)}`}return d}
+const CS2W={send:'Send',out:'Out',sc:'Sidechain',mod:'Mod'};
+cabDraw=function(){const w0=document.getElementById('mixWin');if(w0){w0.classList.toggle('mxcab',cabOn());if(cabOn()){const hh=cabH();if(CAB.h!==hh){CAB.h=hh;w0.style.setProperty('--cabh',hh+'px');if(!w0.hidden){try{mxFit()}catch(e){}return}}}}
+  const G=cabGeo();if(!G)return;const{w,ms,P}=G;let sv=ms.querySelector(':scope>svg.cabs');
+  if(!cabOn()){if(sv)sv.remove();cabLegend(w,false);cabGrip(w,null);CS2.an=[];return}
+  if(!sv){sv=document.createElementNS(CABSVG,'svg');sv.setAttribute('class','cabs');ms.appendChild(sv);cabWireSvg(sv);CS2.still=-1}
+  const SW=Math.ceil(G.right+12);sv.setAttribute('width',SW);sv.setAttribute('height',Math.max(10,Math.floor(G.H)));
+  const over=Math.max(0,cs2T()-(CAB.h||cabH()));const sy=G.sy-over;G.sy2=sy;G.over=over;
+  const L=cabList();CAB.list=L;CAB.G=G;const TI=new Map(S.tracks.map((t,i)=>[t.id,i]));let pan='',back='',front='',hit='',ends='',over2='',lab='',flow='';const FL=[];
+  if(over>0)pan=`<rect class="cpan" x="0" y="${(sy-13).toFixed(1)}" width="${SW}" height="${(G.H-sy+13).toFixed(1)}"/><path class="cpanl" d="M0 ${(sy-13).toFixed(1)}H${SW}"/>`;
+  const outN=new Map(),outI=new Map();L.forEach(c=>{if(cabVis(c))outN.set(c.a.id,(outN.get(c.a.id)||0)+1)});
+  const tip=(c,i,d)=>`<path class="chit" data-i="${i}" d="${d}"><title>${esc(c.a.name)} to ${esc(c.b.name)}: ${esc(cabWhat(c))}. Click to change or remove.</title></path>`;
+  const addFlow=(c,i,d,x0,x1)=>{const k=c.k,pl=k==='sc'?' pathLength="100"':'';flow+=`<path class="cfl cfl-${k}" data-i="${i}" d="${d}"${pl} stroke-width="${k==='sc'?CABK.sc.w+1.8:k==='mod'?1.6:Math.max(1.4,CABK[k].w-.6)}"/>`;FL.push({c,i,k,x0:Math.min(x0,x1),x1:Math.max(x0,x1)})};
+  if(cabTidy()){
+    const y0=sy+18,avail=G.H-22-y0,R=avail>=12?clamp(1+Math.floor(avail/14),1,5):avail>=5?2:1,PL=cabPlan(L,id=>{const A=P.get(id);return A?A.cx:null},14,R),nR=Math.max(1,PL.n),gap=nR>1?clamp(avail/(nR-1),3,44):0,tgN=new Map(),tgI=new Map(),labOn=gap>=12||nR===1;
+    for(const g of PL.groups)tgN.set(g.b.id,(tgN.get(g.b.id)||0)+1);
+    const occ=PL.rows.map(()=>[]);/* label room taken on each level */const lgE=w.querySelector('.cablg'),lgL=lgE?(lgE.getBoundingClientRect().left-G.R.left)/G.k+ms.scrollLeft-8:1e9;const Mst=ms.querySelector('.mx.master'),vL=ms.scrollLeft+4,vR=ms.scrollLeft+ms.clientWidth-(Mst&&!w.classList.contains('mxunpin')?Mst.offsetWidth+8:0)-4;
+    for(const g of PL.groups){const B=P.get(g.b.id),K=CABK[g.k],nT=tgN.get(g.b.id),jT=tgI.get(g.b.id)||0;tgI.set(g.b.id,jT+1);
+      const xT=B.cx+(jT-(nT-1)/2)*8,y=y0+g.lv*gap,tc=g.b.color||'#cfd3db',top=sy+7,da=K.da?` stroke-dasharray="${K.da}"`:'',isM=g.k==='mod';let lo=xT,hi=xT;const xs=[];
+      for(const i of g.it){const c=L[i],A=P.get(c.a.id),nA=outN.get(c.a.id),jA=outI.get(c.a.id)||0;outI.set(c.a.id,jA+1);const x1=A.cx+(jA-(nA-1)/2)*Math.min(5,A.w*.3/Math.max(1,nA));xs.push([i,x1]);lo=Math.min(lo,x1);hi=Math.max(hi,x1)}
+      const r=isM?0:Math.min(5,y-top-1);
+      /* the shared line, in the colour of the channel it goes into */
+      let td;if(isM){td=`M${lo.toFixed(1)} ${y.toFixed(1)}`+cs2Wave(lo,hi,y,1.6)+`M${xT.toFixed(1)} ${y.toFixed(1)}V${top}`}
+      else{td=xT<=lo+.5?`M${xT.toFixed(1)} ${top}V${(y-r).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${(xT+r).toFixed(1)} ${y.toFixed(1)}`:`M${(lo+r).toFixed(1)} ${y.toFixed(1)}`;
+        td+=xT>=hi-.5?`H${(xT-r).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${xT.toFixed(1)} ${(y-r).toFixed(1)}V${top}`:`H${(hi-r).toFixed(1)}`;if(xT>lo+.5&&xT<hi-.5)td+=`M${xT.toFixed(1)} ${y.toFixed(1)}V${top}`}
+      back+=`<path class="cbk" d="${td}" stroke-width="${K.w+2.6}"/>`;front+=`<path class="ctr ctr-${g.k}" d="${td}" stroke="${tc}" stroke-width="${K.w}"${da}/>`;if(g.k==='out')front+=`<path class="cbus" d="${td}"/>`;
+      ends+=`<path class="carr" d="M${(xT-4).toFixed(1)} ${sy+12}L${xT.toFixed(1)} ${sy+5}L${(xT+4).toFixed(1)} ${sy+12}z" fill="${tc}"/>`;
+      /* chevrons along the shared line, pointing to the channel the cables go into */
+      if(!isM){const seg=(a,b)=>{const s=b>a?1:-1,len=Math.abs(b-a);if(len<44)return;const n=Math.max(1,Math.floor(len/80));for(let j=1;j<=n;j++){const x=a+s*len*j/(n+1);ends+=`<path class="cchv" d="M${(x-s*2.6).toFixed(1)} ${(y-3).toFixed(1)}L${(x+s*.8).toFixed(1)} ${y.toFixed(1)}L${(x-s*2.6).toFixed(1)} ${(y+3).toFixed(1)}"/>`}};seg(lo,xT);seg(hi,xT)}
+      /* label: from where to where, as long as the room on this level allows */
+      if(labOn&&(gap>=12||g.lv===0)&&(!g.ov||gap>=16)){const row=PL.rows[g.lv]||[];let fl=-1e9,fr=1e9;for(const o of row){if(o===g)continue;if(o.hi<g.lo)fl=Math.max(fl,o.hi+8);else if(o.lo>g.hi)fr=Math.min(fr,o.lo-8)}
+        fl=Math.max(fl,Math.min(lo,xT)-60,vL);fr=Math.min(fr,Math.max(hi,xT)+60,y>G.H-24?lgL:vR);
+        const src=[...new Set(g.it.map(i=>L[i].a.name))],tn=g.b.name,kw=CS2W[g.k];let first='';
+        if(isM&&g.it.length===1){const c=L[g.it[0]];first=`${(MODT[c.mm.type]||{n:'Mod'}).n} on ${c.a.name} → ${paLabel(c.rs[0].pid)}${c.rs.length>1?' +'+(c.rs.length-1):''}`}
+        const cand=[first,`${kw}: ${src.join(', ')} → ${tn}`,`${src.join(', ')} → ${tn}`,src.length>2?`${src[0]}, ${src[1]} +${src.length-2} → ${tn}`:'',src.length>1?`${src[0]} +${src.length-1} → ${tn}`:'',`→ ${tn}`].filter(Boolean);
+        const right=xT>=hi-.5,oc=occ[g.lv]||(occ[g.lv]=[]);for(const s of cand){const tw=cs2Tw(s);if(fr-fl<tw)continue;
+          /* where it would like to be, then just after every label already on this level, kept inside the part of the line that is in view */
+          const want=right?xT-9-tw:(xT<=lo+.5?xT+9:lo+6),pos=[want,...oc.map(([a,b])=>b+6),...oc.map(([a,b])=>a-6-tw)].map(x=>clamp(x,fl,fr-tw));let x1=null;
+          for(const x of pos.sort((p,q)=>Math.abs(p-want)-Math.abs(q-want)))if(!oc.some(([a,b])=>x+tw>a-4&&x<b+4)){x1=x;break}if(x1==null)continue;const x2=x1+tw;oc.push([x1,x2]);lab+=`<text class="clab" x="${x1.toFixed(1)}" y="${(y-3.5).toFixed(1)}" fill="${tc}">${esc(s)}</text>`;break}}
+      for(const[i,x1] of xs){const c=L[i],col=c.a.color||'#cfd3db',s=x1<xT?1:-1,rr=isM?0:Math.min(r,Math.abs(xT-x1)/2),op=c.k==='send'?(.55+.45*Math.min(1,c.lv/.7)).toFixed(2):(c.mod&&c.mod.off)||(c.mm&&c.mm.off)?'.4':'1';
+        const dd=isM?`M${x1.toFixed(1)} ${sy}V${y.toFixed(1)}`:`M${x1.toFixed(1)} ${sy}V${(y-rr).toFixed(1)}Q${x1.toFixed(1)} ${y.toFixed(1)} ${(x1+s*rr).toFixed(1)} ${y.toFixed(1)}`;
+        const full=isM?dd+cs2Wave(x1,xT,y,1.6)+`V${top}`:dd+`H${(xT-s*rr).toFixed(1)}Q${xT.toFixed(1)} ${y.toFixed(1)} ${xT.toFixed(1)} ${(y-rr).toFixed(1)}V${top}`;
+        back+=`<path class="cbk" d="${dd}" stroke-width="${K.w+2.6}"/>`;front+=`<path class="cfr" data-i="${i}" d="${dd}" stroke="${col}" stroke-width="${K.w}" opacity="${op}"${da}/>`;
+        over2+=`<path class="cfu" data-i="${i}" d="${full}" stroke="${col}"/>`;hit+=tip(c,i,full);addFlow(c,i,full,x1,xT)}}}
+  else{const inc=new Map(),incN=new Map(),maxSag=Math.max(6,G.H-sy-17);L.forEach(c=>{if(cabVis(c))incN.set(c.b.id,(incN.get(c.b.id)||0)+1)});
+   L.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B||!cabVis(c))return;
+    const nB=incN.get(c.b.id),jB=inc.get(c.b.id)||0;inc.set(c.b.id,jB+1);const nA=outN.get(c.a.id),jA=outI.get(c.a.id)||0;outI.set(c.a.id,jA+1);
+    const spB=Math.min(9,B.w*.5/Math.max(1,nB)),spA=Math.min(4,A.w*.3/Math.max(1,nA));
+    const x1=A.cx+(jA-(nA-1)/2)*spA,x2=B.cx+(jB-(nB-1)/2)*spB+(nB>1?0:(c.k==='send'?-2:c.k==='sc'?2:0)),dx=Math.abs(x2-x1);
+    const sag=clamp(maxSag*(1-Math.exp(-dx/240))+5-(dx>160?((TI.get(c.a.id)||0)%4)*3:0)+(c.k==='out'?-2:c.k==='sc'?3:0),5,maxSag),d=cabPath(x1,sy,x2,sy,sag),K=CABK[c.k],col=c.a.color||'#cfd3db';
+    const op=c.k==='send'?(.5+.5*Math.min(1,c.lv/.7)).toFixed(2):(c.mod&&c.mod.off)||(c.mm&&c.mm.off)?'.4':'1',da=K.da?` stroke-dasharray="${K.da}"`:c.k==='mod'?' stroke-dasharray="1 4"':'';
+    back+=`<path class="cbk" data-i="${i}" d="${d}" stroke-width="${K.w+2.6}"${da}/>`;
+    front+=`<path class="cfr" data-i="${i}" d="${d}" stroke="${col}" stroke-width="${K.w}" opacity="${op}"${da}/>`;if(c.k==='out')front+=`<path class="cbus" d="${d}"/>`;
+    ends+=`<circle class="cend" data-i="${i}" cx="${x2.toFixed(1)}" cy="${sy}" r="2.6" fill="${col}"/>`;hit+=tip(c,i,d);addFlow(c,i,d,x1,x2)})}
+  let socks='';for(const t of S.tracks){const A=P.get(t.id);if(!A)continue;socks+=`<circle class="cabsk" data-sk="${t.id}" cx="${A.cx.toFixed(1)}" cy="${sy}" r="5" stroke="${t.color||'#cfd3db'}"><title>Drag from here to another channel to send, route or sidechain ${esc(t.name)}</title></circle>`}
+  {const M=P.get('master');if(M)socks+=`<circle class="cabsk mst" cx="${M.cx.toFixed(1)}" cy="${sy}" r="5" stroke="#cfd3db"><title>Master: drop a cable here to send a grouped channel straight to the master</title></circle>`}
+  sv.innerHTML=`<g class="cpg">${pan}</g><g class="cbg">${back}</g><g class="cfg">${front}</g><g class="cflg">${flow}</g><g class="ceg">${ends}</g><g class="clg">${lab}</g><g class="cog">${over2}</g><g class="chg">${hit}</g><g class="csk">${socks}</g><path class="cabtmp" d=""/>`;
+  sv.classList.toggle('cover',over>0);
+  /* keep the animation state of cables that are still there */
+  const old=new Map(CS2.an.map(a=>[a.key,a]));CS2.an=[];const els=sv.querySelectorAll('.cfl');FL.forEach((f,j)=>{const c=f.c,key=c.k+c.a.id+'>'+c.b.id,o=old.get(key)||{};CS2.an.push({key,c,k:f.k,el:els[j],x0:f.x0,x1:f.x1,lv:o.lv||0,ph:o.ph||0,t:o.t??null,n:o.n,mv:o.mv,s:''})});
+  CAB.hov=-1;cabLegend(w,true,L);cabGrip(w,G);cs2Bot(w);CS2.lt=0;cs2Tick(true)};
+/* the grip on the top edge of the cable area: moves the split inside the window; double-click: automatic */
+cabGrip=function(w,G){const fb=w.querySelector('.fwb');let gp=w.querySelector('.cabrz');if(!G||!fb){if(gp)gp.remove();return}
+  if(!gp){gp=document.createElement('div');gp.className='cabrz';gp.innerHTML='<i></i>';gp.title='Drag up or down to give the cables more or less room inside the window. The window keeps its size. Double-click to let it fit the cables by itself.';fb.appendChild(gp);
+    gp.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();try{gp.setPointerCapture(e.pointerId)}catch(x){}const ms=w.querySelector('.mxs'),k=(ms.getBoundingClientRect().height/(ms.offsetHeight||1))||1;CAB.rz={y:e.clientY,h:cs2T(),k,wh:w.offsetHeight};gp.classList.add('on')});
+    gp.addEventListener('pointermove',e=>{const D=CAB.rz;if(!D)return;const h=Math.round(clamp(D.h+(D.y-e.clientY)/D.k,cs2Min(),cs2Max()));const st=Math.round(h/cs2K());if(st===mxsO().cabH)return;UI.mxs=Object.assign({},UI.mxs||{},{cabH:st});if(w.offsetHeight!==D.wh)w.style.height=D.wh+'px';cabSoon()});
+    const up=()=>{const D=CAB.rz;if(!D)return;CAB.rz=null;gp.classList.remove('on');saveUI();try{mxFit()}catch(x){}};gp.addEventListener('pointerup',up);gp.addEventListener('pointercancel',up);
+    gp.addEventListener('dblclick',e=>{e.preventDefault();mxsSet('cabH',0)})}
+  const fr=fb.getBoundingClientRect(),top=(G.R.top-fr.top)/G.k+G.ms.clientTop+(G.sy2??G.sy)-(G.over>0?13:10);gp.style.top=(top-3).toFixed(1)+'px'};
+/* the bottom edge of the window: only the cable area gets taller or lower, the channels keep their size */
+function cs2Bot(w){const h=w.querySelector(':scope>.rz-s');if(h&&!h._cs2){h._cs2=1;h.title='Drag to make the cable area taller or lower. The channels keep their size. Use the corner to resize the whole window.'}}
+{let D=null;
+ addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('#mixWin>.rz-s');if(!h||e.button!==0||!cabOn())return;const w=h.parentElement;e.preventDefault();e.stopImmediatePropagation();try{h.setPointerCapture(e.pointerId)}catch(x){}
+   D={w,h,y:e.clientY,wh:w.offsetHeight,t:cs2T(),k:ZOOM||1};h.classList.add('on');document.body.classList.add('rzing')},true);
+ addEventListener('pointermove',e=>{if(!D)return;const{w}=D,dy=(e.clientY-D.y)/D.k,maxW=innerHeight/D.k-w.offsetTop-4;let d=clamp(dy,cs2Min()-D.t,620-D.t);d=Math.min(d,maxW-D.wh);
+   const st=Math.round((D.t+d)/cs2K());w.style.height=Math.round(D.wh+d)+'px';if(st!==mxsO().cabH){UI.mxs=Object.assign({},UI.mxs||{},{cabH:st})}cabSoon()},true);
+ const up=()=>{if(!D)return;const{w,h}=D;D=null;h.classList.remove('on');document.body.classList.remove('rzing');UI.win=UI.win||{};UI.win.mixWin={x:w.offsetLeft,y:w.offsetTop,w:w.offsetWidth,h:w.offsetHeight};UI.winSized=UI.winSized||{};UI.winSized.mixWin=true;saveUI();try{mxFit()}catch(x){}};
+ addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true)}
+/* the legend: one sample per kind in its own look */
+cabLegend=function(w,on,L){let lg=w.querySelector('.cablg');if(!on){if(lg)lg.remove();return}const fb=w.querySelector('.fwb');if(!fb)return;
+  if(!lg){lg=document.createElement('div');lg.className='cablg';fb.appendChild(lg);lg.addEventListener('pointerdown',e=>e.stopPropagation());
+    lg.addEventListener('click',e=>{const b=e.target.closest('[data-cl]');if(!b)return;e.stopPropagation();const o=mxsO(),k=b.dataset.cl;
+      if(k==='sel')mxsSet('cabSel',o.cabSel?0:1);else if(k==='sty')mxsSet('cabSty',cabTidy()?'curve':'tidy');else{const h=Object.assign({},o.cabHide||{});if(h[k])delete h[k];else h[k]=1;mxsSet('cabHide',h)}})}
+  const o=mxsO(),hd=o.cabHide||{},has=new Set((L||[]).map(c=>c.k));
+  const sw=k=>{const K=CABK[k];let p=k==='mod'?`<path d="M1 4${cs2Wave(1,25,4,1.4)}" stroke="#cfd3db" stroke-width="1.5" fill="none"/>`:`<path d="M1 4H25" stroke="#cfd3db" stroke-width="${K.w}" fill="none" stroke-linecap="round"${K.da?` stroke-dasharray="${K.da}"`:''}/>`;
+    if(k==='out')p+='<path d="M1 4H25" stroke="#0c0d11" stroke-width="1" opacity=".75"/>';if(k==='send')p+='<path d="M7 1.6 10 4 7 6.4M17 1.6 20 4 17 6.4" stroke="#fff" stroke-width="1.1" fill="none" opacity=".8"/>';if(k==='sc')p+='<circle cx="19" cy="4" r="2.6" fill="#fff"/>';
+    return`<svg viewBox="0 0 26 8" width="26" height="8">${p}</svg>`};
+  const kinds=Object.keys(CABK).filter(k=>k!=='mod'||has.has('mod')||hd.mod);
+  const h=`${kinds.map(k=>`<button type="button" data-cl="${k}" class="${hd[k]?'':'on'}" aria-pressed="${!hd[k]}" title="${esc(CABK[k].tip)}. ${k==='sc'?'A pulse runs along it on every hit. ':k==='mod'?'The wave moves while the modulator moves. ':'Light dots flow from where the sound comes from to where it goes. '}Click to ${hd[k]?'show':'hide'} these cables.">${sw(k)}${CABK[k].n}</button>`).join('')}<button type="button" data-cl="sel" class="cl2${o.cabSel?' on':''}" aria-pressed="${!!o.cabSel}" title="Selected only: show just the cables that start or end at the selected channel. Click a channel to see where it goes.">Selected only</button><button type="button" data-cl="sty" class="cl2 on" title="${cabTidy()?'Tidy: cables into the same channel share one straight line, up to 5 levels with a label each. Click for loose curved cables.':'Curved: every cable hangs loose. Click for tidy straight lines.'}">${cabTidy()?'Tidy':'Curved'}</button><em>${L&&L.length?'Arrows point where the sound goes. Click a cable to change it':'Drag from a dot under a channel to connect it'}</em>`;if(lg._h!==h){lg._h=h;lg.innerHTML=h}};
+/* ---- the animation ---- */
+function cs2Sync(s){const m=/^(\d+)\/(\d+)(t?)$/.exec(String(s||''));if(!m)return 1;return 4*m[1]/m[2]*(m[3]?2/3:1)}
+function cs2Lv(id){const H0=MXH.get(id);if(!H0||!ctx||ctx.state!=='running')return{v:0,hit:0};const pk=Math.max(H0.l[H0.i]||0,H0.r[H0.i]||0);return{v:pk>1e-4?clamp((20*Math.log10(pk)+54)/54,0,1):0,hit:H0.h?H0.h[H0.i]:0}}
+function cs2Set(a,off,op){const s=off==null?'h':off.toFixed(1)+'|'+op.toFixed(2);if(a.s===s)return;a.s=s;const el=a.el;if(!el)return;if(off==null){el.style.opacity='0';return}el.style.strokeDashoffset=off.toFixed(1);el.style.opacity=op.toFixed(2)}
+function cs2Tick(force){const A=CS2.an,w=document.getElementById('mixWin');if(!A||!A.length||!w||w.hidden)return;const sv=w.querySelector('.mxs>svg.cabs');if(!sv)return;
+  const still=!fxGet().anim||AT.reduce||document.body.classList.contains('fxmin')?1:0;if(still!==CS2.still){CS2.still=still;sv.classList.toggle('cstill',!!still)}if(still)return;
+  const now=performance.now(),dt=CS2.lt?Math.min(.1,(now-CS2.lt)/1000):0;CS2.lt=now;const ms=sv.parentElement,sl=ms.scrollLeft,cw=ms.clientWidth,beat=play.on?curDisp():null;let act=0;
+  for(const a of A){if(a.x1<sl-20||a.x0>sl+cw+20)continue;const c=a.c,L=cs2Lv(c.a.id);a.lv+=(L.v-a.lv)*(L.v>a.lv?.5:.12);
+    if(a.k==='send'||a.k==='out'){const v=a.lv*(a.k==='send'?Math.min(1,.35+(c.lv||0)/.7):1);if(v>.03){act=1;a.ph=(a.ph+dt*(16+44*v))%12;cs2Set(a,-a.ph,.2+.8*v)}else cs2Set(a,null)}
+    else if(a.k==='sc'){if(c.fx){if(beat!=null){const n=Math.floor(beat/cs2Sync(c.fx.p&&c.fx.p.sync));if(n!==a.n){a.n=n;a.t=0}}}else if(L.hit&&!(c.mod&&c.mod.off)&&(a.t==null||a.t>.5))a.t=0;
+      if(a.t!=null){a.t+=dt/.42;if(a.t>1){a.t=null;cs2Set(a,null)}else{act=1;cs2Set(a,10-a.t*112,1-a.t*.55)}}else cs2Set(a,null)}
+    else if(a.k==='mod'){const st=MOD.st.get(c.mm.id),v=st&&st.v2!=null?st.v2:0,mv=a.mv==null?0:Math.abs(v-a.mv);a.mv=v;if(!c.mm.off&&(mv>1e-4||(play.on&&st))){act=1;a.ph=(a.ph+dt*26)%10;cs2Set(a,-a.ph,.35+.65*Math.min(1,Math.abs(v)))}else cs2Set(a,null)}}
+  CS2.idle=!act}
+{const _dm=drawMixer;drawMixer=function(){const r=_dm.apply(this,arguments);try{if(!(FRN%2)&&CS2.an.length)cs2Tick()}catch(e){console.error('AudioLab cables',e)}return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
