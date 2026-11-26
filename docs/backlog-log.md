@@ -2066,3 +2066,6 @@ s=s.rstrip('\n')+"""
 Status: done in v0.200 without the AI part, see "Where it stands" and the log.
 """
 open('docs/device-backlog-2026-11-25.md','w').write(s)
+
+### Release
+- v0.200: commit 23ec3c9 on main. Desktop build run 45765956244 succeeded (2 min 27 s). Artifact 1b07d888 updated to version 223 (it was at v0.199). Project doc `claude/audiolab-voice-device.md` (this entry and the research). The desktop shell is unchanged (MIN_SHELL stays 0.147.0); the AI voices will need a new shell.
