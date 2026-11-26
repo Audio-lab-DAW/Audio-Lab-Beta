@@ -1703,3 +1703,5 @@ No blurred boxes at the top left (under the project tabs, above Controls and the
 
 ### Release
 - v0.192, built on v0.191 (Fractal, task P), which another session released while this one was testing; one merge of two additions in index.html.
+- **Artifact**: version 215 of artifact 1b07d888 (index.html only, lines 3 to 10 removed).
+- **Desktop build**: run 45749404233 for commit 8c0c7b4 succeeded (2 min 19 s).
