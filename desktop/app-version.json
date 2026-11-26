@@ -1,7 +1,7 @@
 {
-  "version": "0.189",
-  "sha256": "3ed894b96c566123e53515ea1371f368ba8cbe867ac15114f4787aec5f3afaac",
-  "size": 2726220,
+  "version": "0.190",
+  "sha256": "03acb6bda127849988911af2c18aaad3fbd1c8e9e05ff60c3c9f72d06ac534eb",
+  "size": 2772837,
   "minShell": "0.147.0",
   "notes": "New instrument Bounce: every note drops a ball, and every landing strikes wood, glass, metal, a string or a drum, louder and brighter the harder it hits, free or bouncing in time with the song. Bouncy Notes gets chord steps that change through the bar and a rhythm per ball; in Orbit you can throw a ball by dragging, remove one with a right-click, change its mass by scrolling over it, and see each ball's orbit."
 }
