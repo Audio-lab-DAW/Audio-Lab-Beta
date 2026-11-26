@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>AudioLab glass engine test</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* LAYOUT: a full-window fake arrangement, the engine's glass over it in two layers (docked, floating), one control card top right. Single dark look on purpose (it imitates the app). */
+:root{color-scheme:dark;--bg:#0a0a0c;--card:#14161c;--well:#0c0d11;--fg:#ececf1;--mut:#8f96a6;--line:#2a2e3a;--acc:#ffd23a;--accink:#1c1500;--edge:rgba(255,255,255,.14);--data:ui-monospace,'SF Mono',Menlo,monospace}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:13px/1.4 Inter,system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0;overflow:hidden}
+#stage canvas.full{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#scene{z-index:0}#ph{position:absolute;z-index:1;top:0;left:0;width:1px;height:100%;background:#3ecf8e;will-change:transform}
+.glA{z-index:2;pointer-events:none}.glB{z-index:4;pointer-events:none}
+.gp{position:absolute;left:0;top:0;z-index:3;border-radius:var(--r);border:1px solid var(--edge);color:var(--mut);font-size:11px;padding:6px 10px;pointer-events:none}
+.gp.fl{z-index:5}
+#disp{position:absolute;z-index:3;border-radius:6px;border:1px solid var(--edge)}
+#hud{position:fixed;z-index:10;top:calc(12px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(360px,calc(100% - 32px));max-height:calc(100% - 24px - env(safe-area-inset-top,0px));overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+#hud h1{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#hud p{margin:0;color:var(--mut);font-size:12px}
+.rowx{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12px}
+.rowx label{display:flex;gap:5px;align-items:center}
+select,button.b{font:inherit;color:var(--fg);background:#20232c;border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+button.b{cursor:pointer;font-weight:600}button.go{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#live{font:500 12px var(--data);font-variant-numeric:tabular-nums;background:var(--well);border-radius:8px;padding:8px;white-space:pre-wrap}
+#res{font:500 11px/1.5 var(--data);background:var(--well);border-radius:8px;padding:8px;white-space:pre;overflow:auto;margin:0;user-select:all;-webkit-user-select:all}
+#hud.min>:not(h1){display:none}
+</style>
+
+<div id="stage">
+  <canvas id="scene" class="full"></canvas>
+  <div id="ph" hidden></div>
+  <canvas id="disp"></canvas>
+</div>
+<div id="hud">
+  <h1>Glass engine test <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
+  <p>The AudioLab glass engine (glass-engine.js) with AudioLab-sized panels over a moving arrangement. Docked glass is one layer, floating glass a second one that also sees a flat picture of what it covers.</p>
+  <div class="rowx">
+    <label for="scn">Underneath</label>
+    <select id="scn"><option value="scroll">scrolling (worst case)</option><option value="play">playhead only (own layer)</option><option value="still">still</option></select>
+    <label><input type="checkbox" id="drag" checked> move the mixer</label>
+  </div>
+  <div class="rowx" id="pch"></div>
+  <div class="rowx"><label for="lens">Lens</label><select id="lens"><option value="off">off</option><option value="fine">fine (up to 12 px)</option><option value="apple" selected>Apple (up to 20 px)</option><option value="wide">wide (up to 40 px)</option></select>
+    <label for="blur">Blur</label><select id="blur"><option value="light">light</option><option value="regular" selected>regular</option><option value="heavy">heavy</option></select></div>
+  <div class="rowx"><label for="qual">Quality</label><select id="qual"><option value="3" selected>high: half-size blur</option><option value="2">medium: quarter-size, 60 per second</option><option value="1">low: quarter-size, 30 per second</option><option value="0">static: plain tint</option></select></div>
+  <div class="rowx"><label for="face">Face</label><select id="face"><option value="bench" selected>as in the Glass Bench</option><option value="apple">Apple's numbers (0.125 / 1.125)</option></select></div>
+  <div class="rowx"><label><input type="checkbox" id="rt"> Reduce transparency</label><label><input type="checkbox" id="ic"> Increase contrast</label></div>
+  <div class="rowx"><button class="b" id="lose">Lose the graphics context</button><button class="b" id="rest">Restore it</button><label><input type="checkbox" id="soft"> allow software drawing</label></div>
+  <div id="live">measuring…</div>
+  <div class="rowx"><button class="b go" id="run">Measure (5 s)</button><button class="b" id="cmp">Compare presets (about 1 min)</button><button class="b" id="copy">Copy table</button></div>
+  <pre id="res">No run yet.</pre>
+</div>
+
+<script src="glass-engine.js"></script>
+<script>
+const $=s=>document.querySelector(s),stage=$('#stage'),S=$('#scene'),sx=S.getContext('2d',{alpha:false}),DC=$('#disp'),dx=DC.getContext('2d',{alpha:false}),PH=$('#ph');
+let W=0,H=0,D=1,t0=performance.now(),sceneDirty=true,gA=null,gB=null,cA=null,cB=null,wake=true;
+/* layer A = docked glass (under the DOM of the docked panels), layer B = floating glass (over it) */
+const PD=[{k:'hdr',n:'Track headers',L:'A',kind:'docked'},{k:'tr',n:'Transport',L:'A',kind:'docked'},{k:'band',n:'Tab band',L:'A',kind:'docked'},{k:'dev',n:'Device panel',L:'A',kind:'docked'},
+  {k:'mix',n:'Mixer window',L:'B',kind:'window'},{k:'menu',n:'Menu',L:'B',kind:'menu'},{k:'pill',n:'Pill',L:'B',kind:'pill'}];
+const P={},FLAT=[.13,.15,.2,1];
+$('#pch').innerHTML=PD.map(p=>`<label><input type="checkbox" id="p_${p.k}" checked> ${p.n}</label>`).join('');
+PD.forEach(p=>{const e=document.createElement('div');e.className='gp'+(p.L==='B'?' fl':'');e.textContent=p.n;stage.appendChild(e);P[p.k]={...p,el:e,on:true,x:0,y:0,w:0,h:0,r:0,dx:0};$('#p_'+p.k).onchange=ev=>{P[p.k].on=ev.target.checked;layout()}});
+const eng=p=>p.L==='A'?gA:gB;
+
+function layout(){const trH=48,devH=Math.min(262,H*.3|0),bandH=28,top=40,devTop=H-trH-devH;
+  Object.assign(P.hdr,{x:0,y:top,w:Math.min(216,W*.3|0),h:devTop-bandH-top,r:0});
+  Object.assign(P.tr,{x:0,y:H-trH,w:W,h:trH,r:0});
+  Object.assign(P.band,{x:0,y:devTop-bandH,w:W,h:bandH,r:0});
+  Object.assign(P.dev,{x:0,y:devTop,w:W,h:devH,r:0});
+  const mw=Math.min(1100,W-60),mh=Math.min(430,H-trH-140);Object.assign(P.mix,{x:(W-mw)/2|0,y:70,w:mw,h:mh,r:16});
+  Object.assign(P.menu,{x:Math.min(250,W-236),y:devTop-90,w:220,h:Math.min(230,devH+40),r:12});
+  Object.assign(P.pill,{x:W-170,y:devTop-bandH-44,w:150,h:32,r:16});
+  const dw=Math.max(60,Math.min(420,W-250)),dh=Math.max(40,devH-56),dX=Math.min(232,W-dw-12),dY=devTop+38;
+  DC.style.cssText=`left:${dX}px;top:${dY}px;width:${dw}px;height:${dh}px`;DC.hidden=!P.dev.on;if(DC.width!==Math.round(dw*D)||DC.height!==Math.round(dh*D)){DC.width=Math.round(dw*D);DC.height=Math.round(dh*D)}drawDisp(0);
+  for(const k in P){const p=P[k],e=p.el;e.hidden=!p.on;e.style.width=p.w+'px';e.style.height=p.h+'px';e.style.setProperty('--r',p.r+'px');e.style.translate=`${p.x+p.dx}px ${p.y}px`;
+    const g=eng(p);if(g)g.addPanel({id:k,rect:[p.x+p.dx,p.y,p.w,p.h],radius:p.r,kind:p.kind,visible:p.on,over:p.L==='B'?'flats':'backdrop',z:k==='mix'?0:1})}
+  /* what floating glass sees where it covers the docked panels: their flat colour and the device display */
+  if(gB){for(const k of['hdr','tr','band','dev'])gB.setFlat(k,{rect:[P[k].x,P[k].y,P[k].w,P[k].h],color:FLAT,hidden:!P[k].on});gB.setFlat('disp',{rect:[dX,dY,dw,dh],radius:6,source:DC,hidden:!P.dev.on})}
+  wake=true}
+function size(){D=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;S.width=Math.round(W*D);S.height=Math.round(H*D);sceneDirty=true;if(gA)gA.resize(W,H,D);if(gB)gB.resize(W,H,D);layout()}
+
+/* ---------- the fake arrangement (2D canvas, redrawn in full like the app does while it scrolls) ---------- */
+const COL=['#e5534b','#4c8dff','#e3b341','#f0883e','#3ecf8e','#b77bff','#45c4d6','#e36fb0'];
+function drawScene(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0,rh=64*D,bw=120*D;
+  sx.fillStyle='#0a0a0c';sx.fillRect(0,0,S.width,S.height);
+  for(let r=0,y=40*D;y<S.height;r++,y+=rh){const c=COL[r%8];
+    for(let i=-1;i<S.width/bw+9;i++){const seed=(i*7+r*13)%11;if(seed<3)continue;const x=i*bw-off*D%(bw*8)+(r%2)*bw*.5;
+      sx.fillStyle=c+'88';sx.fillRect(x+1,y+2*D,bw-2,rh-4*D);sx.fillStyle=c;sx.fillRect(x+1,y+2*D,bw-2,14*D);
+      sx.fillStyle='#ffffff55';for(let k=0;k<8;k++)sx.fillRect(x+6*D+k*bw/8.5,y+rh*.55,bw/14,3*D)}
+    sx.fillStyle='#00000066';sx.fillRect(0,y+rh-1,S.width,1)}
+  sx.fillStyle='#ffffff10';for(let x=-(off*D%bw);x<S.width;x+=bw)sx.fillRect(x,0,1,S.height);
+  if(scn==='scroll'){sx.fillStyle='#3ecf8e';sx.fillRect(S.width*.5,0,Math.max(1,D),S.height)}}
+/* a device display: a DOM canvas on top of the docked glass, also fed to the floating layer as a flat picture */
+function drawDisp(t){const w=DC.width,h=DC.height;dx.fillStyle='#000';dx.fillRect(0,0,w,h);dx.strokeStyle='#ffd23a';dx.lineWidth=1.5*D;dx.beginPath();
+  for(let x=0;x<=w;x+=3){const u=x/w,y=h/2+Math.sin(u*14+t/300)*Math.sin(u*3.1+t/1700)*h*.36;x?dx.lineTo(x,y):dx.moveTo(x,y)}dx.stroke();if(gB)gB.markFlatDirty('disp')}
+
+/* ---------- engines ---------- */
+function boot(){for(const g of[gA,gB])if(g)g.destroy();for(const c of[cA,cB])if(c)c.remove();
+  const mkc=cls=>{const c=document.createElement('canvas');c.className='full '+cls;stage.appendChild(c);return c};cA=mkc('glA');cB=mkc('glB');
+  const o=()=>({allowSoftware:$('#soft').checked||/[?#&]soft/.test(location.href),lens:$('#lens').value,blur:$('#blur').value,quality:+$('#qual').value,autoResize:false,requestRender:()=>{wake=true},
+    reduceTransparency:$('#rt').checked?true:null,increaseContrast:$('#ic').checked?true:null,face:FACE[$('#face').value]});
+  gA=AudioLabGlass.create(cA,o());gB=AudioLabGlass.create(cB,o());gA.setBackdrop(S);gB.setBackdrop(S);gA.resize(W,H,D);gB.resize(W,H,D);layout();last2=null;
+  window.__t={gA,gB,P,S,DC,stats,costSync,compare,measure,boot,layout}}
+const FACE={bench:{sat:1.3,mul:1,add:0},apple:{sat:1.3,mul:1.125,add:.125}},both=f=>{f(gA);f(gB);wake=true};
+$('#lens').onchange=e=>both(g=>g.setLensPreset(e.target.value));$('#blur').onchange=e=>both(g=>g.setBlurPreset(e.target.value));
+$('#qual').onchange=e=>both(g=>g.setQuality(+e.target.value));$('#face').onchange=e=>both(g=>g.setFace(FACE[e.target.value]));
+$('#rt').onchange=e=>both(g=>g.setAccessibility({reduceTransparency:e.target.checked?true:null}));$('#ic').onchange=e=>both(g=>g.setAccessibility({increaseContrast:e.target.checked?true:null}));
+$('#lose').onclick=()=>both(g=>g.debug.lose());$('#rest').onclick=()=>both(g=>g.debug.restore());$('#soft').onchange=boot;
+$('#scn').onchange=()=>{sceneDirty=true};
+
+/* ---------- loop and measuring ---------- */
+let last=0,ring=[],acc=null,stress=1,cpu=0,cpuN=0,last2=null,rate={up:0,py:0,dr:0},cpuAvg=0;
+function stats(a){a=a||ring;if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),q=p=>s[Math.min(s.length-1,Math.floor(p*s.length))],sum=a.reduce((x,y)=>x+y,0);return{fps:1000*a.length/sum,med:q(.5),p95:q(.95),worst:s[s.length-1],n:a.length}}
+function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&dt<1000){ring.push(dt);if(ring.length>720)ring.shift();if(acc)acc.push(dt)}
+  const scn=$('#scn').value;
+  if($('#drag').checked&&P.mix.on){const nx=Math.round(Math.sin((t-t0)/900)*Math.min(160,W*.12));if(nx!==P.mix.dx){P.mix.dx=nx;P.mix.el.style.translate=`${P.mix.x+nx}px ${P.mix.y}px`;gB.updatePanel('mix',{rect:[P.mix.x+nx,P.mix.y,P.mix.w,P.mix.h]})}}
+  PH.hidden=scn!=='play';if(scn==='play')PH.style.transform=`translateX(${((t-t0)*.15)%W}px)`;
+  if(scn==='scroll'||sceneDirty){drawScene(t-t0);sceneDirty=false;gA.markDirty();gB.markDirty();if(scn==='scroll'&&P.dev.on)drawDisp(t-t0)}
+  const a=performance.now();gA.render(t);gB.render(t);
+  for(let i=1;i<stress;i++)both(g=>{g.debug.rebuild();g.debug.draw()});
+  cpu+=performance.now()-a;cpuN++;wake=false}
+const names=['static','low','medium','high'];
+setInterval(()=>{const s=stats(),n={up:gA.stats.uploads+gB.stats.uploads,py:gA.stats.pyramids+gB.stats.pyramids+gA.stats.flatPyramids+gB.stats.flatPyramids,dr:gA.stats.draws+gB.stats.draws,t:performance.now()};
+  if(last2){const k=1000/(n.t-last2.t);rate={up:(n.up-last2.up)*k,py:(n.py-last2.py)*k,dr:(n.dr-last2.dr)*k}}last2=n;cpuAvg=cpuN?cpu/cpuN:0;cpu=cpuN=0;
+  const st=g=>g.mode==='gl'?(g.info.isStatic?'plain tint':'glass'):'fallback tint ('+g.reason+')';
+  if(s)$('#live').textContent=`${s.fps.toFixed(0)} fps   median ${s.med.toFixed(2)} ms   95% ${s.p95.toFixed(2)} ms   worst ${s.worst.toFixed(1)} ms\nengine calls ${cpuAvg.toFixed(3)} ms per frame (CPU side)\nper second: backdrop uploads ${rate.up.toFixed(0)} · blur rebuilds ${rate.py.toFixed(0)} · face redraws ${rate.dr.toFixed(0)}\ndocked layer: ${st(gA)} · floating layer: ${st(gB)}\n${W}x${H} @ ${D}x = ${(S.width*S.height/1e6).toFixed(1)} MP`},500);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function head(){let ren='?';try{const g=gA.gl,gi=g&&g.getExtension('WEBGL_debug_renderer_info');if(gi)ren=g.getParameter(gi.UNMASKED_RENDERER_WEBGL)}catch(e){}
+  return `${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n`}
+async function measure(ms=5000){const b=$('#run');b.disabled=true;b.textContent='Measuring…';await sleep(800);acc=[];const c0={...last2};await sleep(ms);const s=stats(acc);acc=null;b.disabled=false;b.textContent='Measure (5 s)';
+  $('#res').textContent=`AudioLab glass engine test\n${head()}lens ${$('#lens').value} · blur ${$('#blur').value} · quality ${names[+$('#qual').value]} · face ${$('#face').value} · ${gA.mode}/${gB.mode}\n\n fps   median   95%    worst\n`+s.fps.toFixed(0).padStart(4)+s.med.toFixed(2).padStart(8)+s.p95.toFixed(2).padStart(8)+s.worst.toFixed(1).padStart(8)+
+   `\n\nengine calls ${cpuAvg.toFixed(3)} ms per frame (CPU side)\nper second: backdrop uploads ${rate.up.toFixed(0)}, blur rebuilds ${rate.py.toFixed(0)}, face redraws ${rate.dr.toFixed(0)}`;return s}
+/* what does each preset cost? The screen caps the frame rate, so we count how many times the whole glass (blur pyramids + all faces, both layers) can be drawn per frame before frames start to drop. */
+const PRE=[['lens off','off','regular',3],['lens fine','fine','regular',3],['lens Apple','apple','regular',3],['lens wide','wide','regular',3],['blur light','apple','light',3],['blur regular','apple','regular',3],['blur heavy','apple','heavy',3],['quality medium','apple','regular',2],['quality low','apple','regular',1]];
+const setPre=(l,v,q)=>both(g=>{g.setLensPreset(l);g.setBlurPreset(v);g.setQuality(q);g.markDirty()});
+async function compare(){if(gA.mode!=='gl')return;const b=$('#cmp'),keep=[$('#lens').value,$('#blur').value,+$('#qual').value];b.disabled=$('#run').disabled=true;
+  setPre(keep[0],keep[1],0);b.textContent='Measuring the screen';await sleep(800);acc=[];await sleep(1500);const base=stats(acc).med;acc=null;const rows=[];
+  for(const[n,l,v,q]of PRE){setPre(l,v,q);b.textContent='Measuring: '+n;let ok=0,k=1,fail=null;
+    while(k<=256){stress=k;await sleep(350);acc=[];await sleep(900);const m=stats(acc).med;acc=null;if(m<=base*1.2){ok=k;k*=2}else{fail=m;break}}
+    stress=1;rows.push(n.padEnd(16)+(ok?('x'+ok).padStart(6)+('<= '+(base/ok).toFixed(2)+' ms').padStart(14):'  <1x'+((fail||0).toFixed(1)+' ms/frame').padStart(16)))}
+  setPre(...keep);b.disabled=$('#run').disabled=false;b.textContent='Compare presets (about 1 min)';
+  $('#res').textContent=`AudioLab glass engine test: cost of each preset\n${head()}screen frame ${base.toFixed(2)} ms (${(1000/base).toFixed(0)} Hz)\n\npreset          spare   cost per frame\n`+rows.join('\n')+'\n\nspare = how many times the whole glass fits in one frame'}
+/* direct timing (forces the GPU to finish; for machines without a screen cap) */
+function costSync(n=10){const out={},px=new Uint8Array(4),keep=[$('#lens').value,$('#blur').value,+$('#qual').value],fin=()=>both(g=>g.gl.readPixels(0,0,1,1,g.gl.RGBA,g.gl.UNSIGNED_BYTE,px));
+  for(const[nm,l,v,q]of PRE){setPre(l,v,q);gA.render();gB.render();fin();const t=performance.now();for(let i=0;i<n;i++)both(g=>{g.debug.rebuild();g.debug.draw()});fin();out[nm]=+((performance.now()-t)/n).toFixed(2)}setPre(...keep);return out}
+$('#run').onclick=()=>measure();$('#cmp').onclick=compare;
+$('#copy').onclick=async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText($('#res').textContent);b.textContent='Copied'}catch(x){const r=document.createRange();r.selectNodeContents($('#res'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'}setTimeout(()=>b.textContent='Copy table',1500)};
+$('#minb').onclick=e=>{const m=$('#hud').classList.toggle('min');e.currentTarget.textContent=m?'Open':'Fold'};
+addEventListener('resize',size);D=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;S.width=Math.round(W*D);S.height=Math.round(H*D);boot();requestAnimationFrame(frame);
+</script>
+
+</body></html>
