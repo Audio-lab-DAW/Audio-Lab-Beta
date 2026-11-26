@@ -2667,5 +2667,6 @@ Method: two tracks play the same notes; A starts on preset k0 and is switched th
 - Direct edits: `renderFx` (keeps the tab row's position), `fxswWire` (no centring), `instApply` and `kickApply` (no test note), the al-poly worklet's picked-up note (oscillator, sub and FM phases at their age), `chsKeys` (age for al-poly and al-grain, plays through `chsVo`), the drum pad tooltip.
 
 ### Release
+- Commit c822696 on main. Desktop build run 45788160099 dispatched (through the GitHub connector; the gh dispatch was refused by the proxy). Artifact 1b07d888 updated to version 234 (it was at v0.210). Project doc `claude/audiolab-fixes-run-AA.md`.
 - v0.211, built on v0.203 to v0.210 (tasks V, AC, AB, Z2, Y, AE, AD, AG), which other sessions released while this one worked; merged at the insertion points (both sides kept).
 
