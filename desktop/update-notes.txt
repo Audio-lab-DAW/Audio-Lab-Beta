@@ -1,1 +1,1 @@
-Right-click drag selects partly covered clips; MIDI dropped or copied onto an audio track is bounced to audio automatically.
+Shift and scroll makes clips wider or thinner; zoom and scroll controls are in Settings > Interface > Layout.
