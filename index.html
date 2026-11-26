@@ -1901,6 +1901,9 @@ body.fx-top #fx.dsh.collapsed .fxbtns{top:auto!important;bottom:-28px}
 .a2de{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);font-size:12px;color:#e6e8ee}.a2de.dis{opacity:.5}.a2de small{display:block;color:#a9acb8}.a2de em{display:block;font-style:normal;color:#8fb8ff;font-size:11px;margin-top:2px}
 .a2dbar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.a2dbar i{display:block;height:100%;background:#4cc9f0;transition:width .2s}
 .a2sr{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12px}.a2sr>i{width:10px;height:10px;border-radius:50%}.a2sr em{font-style:normal;color:#8a8d99;font-size:11px}.a2sr button{min-width:30px;min-height:28px}.a2sr select{min-height:26px}
+/* v0.218 (task AO): while AudioLab is in the background every CSS animation stands still (the class sits on the root element) */
+html.aobg *,html.aobg *::before,html.aobg *::after{animation-play-state:paused!important}
+#setBody .aoinf{margin:2px 2px 8px 46px;font-size:10.5px;line-height:1.35;color:#8a8d99}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3123,6 +3126,24 @@ var ms=+localStorage.getItem('audiolab-boot')||1400;document.body.classList.add(
 
 <script>
 {
+/* v0.218 (task AO): the app activity gate. Every screen frame, repeating timer and one-shot timer of the page is asked for through these few lines, so one switch can stop them all while AudioLab is in the background and start them again where they were. The rules (when to stop what) are in the block "v0.218: app activity" further down. Nothing changes while AO.gate is false and AO.lv is 0. */
+const AO=(()=>{const W=window,nraf=W.requestAnimationFrame.bind(W),ncaf=W.cancelAnimationFrame.bind(W),nsi=W.setInterval.bind(W),nci=W.clearInterval.bind(W),nst=W.setTimeout.bind(W),nct=W.clearTimeout.bind(W);
+ const A={lv:0,gate:false,q:new Map(),al:new Map(),qn:0,iv:new Map(),held:new Map(),nraf,ncaf,nsi,nci,nst,nct};
+ /* frames: while the gate is shut a frame that is asked for, or that comes due, waits in A.q (it keeps its number, so cancelling still works) */
+ W.requestAnimationFrame=function(f){if(A.gate){const id=--A.qn;A.q.set(id,f);return id}let id;id=nraf(function(t){if(A.gate){A.q.set(id,f);return}f(t)});return id};
+ W.cancelAnimationFrame=function(id){if(A.q.delete(id))return;const a=A.al.get(id);if(a!=null){A.al.delete(id);ncaf(a);return}if(id>0)ncaf(id)};
+ A.open=function(){A.gate=false;const L=[...A.q];A.q.clear();for(const[id,f]of L){const nid=nraf(function(t){A.al.delete(id);if(A.gate){A.q.set(id,f);return}f(t)});A.al.set(id,nid)}};
+ A.pump=function(){const L=[...A.q];A.q.clear();const t=performance.now();for(const[,f]of L){try{f(t)}catch(e){console.error('AudioLab frame',e)}}};
+ /* repeating timers: remembered, so they can be taken away and put back with the same number */
+ W.setInterval=function(f,ms,...a){if(typeof f!=='function')return nsi(f,ms,...a);const r={f,ms,a,nid:0,id:0,off:false,vis:null};r.id=r.nid=nsi(f,ms,...a);A.iv.set(r.id,r);return r.id};
+ W.clearInterval=function(id){const r=A.iv.get(id);if(r){A.iv.delete(id);if(!r.off)nci(r.nid)}else if(!A.held.delete(id))nci(id)};
+ A.ivOff=function(pred){for(const r of A.iv.values())if(!r.off&&(!pred||pred(r))){nci(r.nid);r.off=true}};
+ A.ivOn=function(pred){for(const r of A.iv.values())if(r.off&&(!pred||pred(r))){r.nid=nsi(r.f,r.ms,...r.a);r.off=false}};
+ /* one-shot timers: one that was set before the freeze and comes due during it waits until the freeze ends; one that is set during the freeze (a job that is still working) runs as usual */
+ W.setTimeout=function(f,ms,...a){if(typeof f!=='function')return nst(f,ms,...a);const born=A.lv;let id;id=nst(function(){if(A.lv===2&&born<2){A.held.set(id,[f,a]);return}f.apply(W,a)},ms);return id};
+ W.clearTimeout=function(id){if(A.held.delete(id))return;if(A.iv.has(id)){W.clearInterval(id);return}nct(id)};
+ A.flush=function(){const L=[...A.held];A.held.clear();for(const[,[f,a]]of L)nst(function(){f.apply(W,a)},0)};
+ return A})();
 const CHILDN=location.hash==='#alchild-native',CHILD=window.name==='alchild'||CHILDN,ORIG_HTML=CHILD?'':'<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 const $=s=>document.querySelector(s);
 const PAL=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'];
@@ -4516,7 +4537,7 @@ async function mapAnalyze(){const end=mapSongEnd();if(!end||MAP.busy||!S.tracks.
   if(!MAP.d||MAP.d.N!==N||MAP.d.bpm!==bpm)MAP.d=mapGrow(MAP.d,N,end,bpm);
   const D=MAP.d,nch=Math.ceil(end/MAPCH),sr=11025,spq=sr*60/bpm/4,k1=1-Math.exp(-6.2832*200/sr),k2=1-Math.exp(-6.2832*2000/sr);
   try{const cur=Math.floor((V.x+arrW/V.ppb/2)/MAPCH),order=[...Array(nch).keys()].sort((a,b)=>Math.abs(a-cur)-Math.abs(b-cur));
-    const SG=mapSigs();for(const ci of order){if(play.on||S.bpm!==bpm||MAP.d!==D){MAP.again=1;break}const hs=mapHash(ci,SG);if(D.h[ci]===hs)continue;
+    const SG=mapSigs();for(const ci of order){if(play.on||!AOS.fg||S.bpm!==bpm||MAP.d!==D){MAP.again=1;break}const hs=mapHash(ci,SG);if(D.h[ci]===hs)continue;
       try{const b0=Math.max(0,ci*MAPCH-mapPre(ci*MAPCH)),b1=Math.min(end,(ci+1)*MAPCH),buf=await renderMix(sr,b0,b1,0,false,null,true);if(MAP.d!==D)break;
         const L=buf.getChannelData(0),R=buf.getChannelData(buf.numberOfChannels>1?1:0),KL=kFilter(L,sr),KR=buf.numberOfChannels>1?kFilter(R,sr):KL,q0=ci*MAPCH*4,qN=Math.min(N,(ci+1)*MAPCH*4),off=(ci*MAPCH-b0)*60/bpm*sr,n=qN-q0;
         const mn=new Float32Array(n),mx=new Float32Array(n),lo=new Float32Array(n),md=new Float32Array(n),hi=new Float32Array(n),ms=new Float32Array(n),pk=new Float32Array(n),cn=new Float32Array(n);let l1=0,l2=0;
@@ -6084,7 +6105,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.217',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.218',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -19381,6 +19402,126 @@ function CHLIB(){const A=(k,n,iv)=>{if(!CHPRE[k])CHPRE[k]=[n,iv]};
 function chOpts(cur){const G=new Map();for(const[k,v]of Object.entries(CHPRE)){const m=CHMETA[k]||{g:'More',t:''};if(!G.has(m.g))G.set(m.g,[]);G.get(m.g).push(`<option value="${k}"${k===cur?' selected':''} title="${esc(m.t+' Notes: '+v[1].join(', ')+' semitones.')}">${esc(v[0])}</option>`)}
  return[...G].map(([g,a])=>`<optgroup label="${esc(g)}">${a.join('')}</optgroup>`).join('')}
 /*PSLIB3-END*/
+/* ===== v0.218: app activity, freeze in the background (task AO) =====
+   One state for the whole app. FRONT: the window is visible and has the focus, or the mouse is over it. AWAY: hidden, minimised, on another desktop,
+   or another app has the focus. Levels while away:
+     1 = drawing off (something plays, records or works; or the 2 s grace; or the audio has to stay on): no screen frames, no meter or display timers,
+         CSS animations paused. Audio and its timers run at full quality.
+     2 = frozen (nothing plays or works): also every repeating timer is taken away, timers that come due wait, and the audio engine is suspended.
+   Coming back puts everything back in one go: audio first, timers, then the waiting frames. Names start with ao / AOS; the gate itself (AO) is at the top of the script.
+   Other code can keep the app awake during a job of its own with aoHold('name') and aoRelease('name'). */
+const AOG={db:150,grace:2000,ring:20000,boot:15000,midi:30000};
+const AOS={left:false,emb:(()=>{try{return window.top!==window.self}catch(e){return true}})(),fg:true,lv:0,over:false,overT:0,inT:-1e9,gone:false,host:null,ha:null,hk:'',peers:new Map(),bc:null,id:Math.random().toString(36).slice(2),why:'',bgT:0,busyT:0,backT:0,susp:false,sk:0,cx:null,keep:'',last:null,hb:0,hbMs:0,db:0,pump:0,snd:0,midiT:-1e9,wk:-1e9,off:0,net:0,jobs:new Set(),lb:0,n:{frz:0,wake:0,front:0}};
+function aoOn(){return UI.aoFreeze!==false}
+function aoVisKeep(){return !!UI.aoVisuals}
+function aoHold(k){AOS.jobs.add(k||'job');if(AOS.lv===2)aoEval('job')}
+function aoRelease(k){AOS.jobs.delete(k||'job');AOS.busyT=performance.now()}
+function aoFgNow(){const now=performance.now(),vis=document.visibilityState==='visible';
+  if(vis&&now-AOS.inT<3000)return true;/* a click, a key or the wheel in this window: it is in use, whatever anything else says */
+  if(!vis||AOS.gone||(AOS.host&&AOS.host.visible===false))return false;
+  if(AOS.emb)return true;/* inside another page (an embedded copy) the focus says nothing about the browser window: only being visible counts there */
+  if(document.hasFocus()||(AOS.host&&AOS.host.focused===true))return true;
+  for(const p of AOS.peers.values())if(p.foc&&now-p.t<6000)return true;/* another AudioLab window (a torn-off project) has the focus */
+  return AOS.over&&now-AOS.overT<60000}
+function aoPlaying(){try{return !!(play.on||(REC&&REC.on))}catch(e){return false}}
+function aoJob(){try{if(EXFZ||FRZBUSY||RB.act>0||BUSYN>0||(VAI&&VAI.busy))return true}catch(e){}
+  return AOS.off>0||AOS.net>0||AOS.jobs.size>0}
+function aoSounding(){try{return LIVE.size>0||!!(ctx&&ctx.state==='running'&&ctx.currentTime-LHIT<3)}catch(e){return false}}
+/* why the audio engine has to stay on although nothing plays ('' = it may be suspended) */
+function aoAudioKeep(){try{if(UI.keepAwake)return 'Keep the audio engine awake is switched on (Settings, Audio)';
+  const t=S.tracks.find(t=>t.arm||t.rec||t.mon);if(t)return 'the track "'+t.name+'" is armed or monitored, so its input stays live';
+  if(performance.now()-AOS.midiT<AOG.midi)return 'keys or a MIDI controller were played in the last 30 seconds'}catch(e){}return ''}
+/* is the master silent? A steady or slowly drifting offset is not sound (a stopped voice can leave one until its track goes to sleep), so the straight line through the 46 ms that are read is taken away first; what is left has to stay under -80 dB */
+function aoSilent(){try{if(!anL||!ctx||ctx.state!=='running')return true;const b=AOS.sb||(AOS.sb=new Float32Array(2048)),n=b.length;for(const an of[anL,anR]){an.getFloatTimeDomainData(b);let a0=0,a1=0;for(let i=0;i<64;i++){a0+=b[i];a1+=b[n-64+i]}a0/=64;a1/=64;const k=(a1-a0)/(n-64),c=a0-k*31.5;for(let i=0;i<n;i+=2){const v=b[i]-(c+k*i);if(v>1e-4||v<-1e-4)return false}}}catch(e){}return true}
+/* repeating timers that only update the screen, or prepare things ahead (background freeze of tracks, the note cache): they stop as soon as the app is away, also while it plays. Everything the sound needs keeps running. */
+const AOVIS=/lmPaint|trx-tod|trx-sect|spfv|syncSigUI|'latV'|lvCss|fxGlassSync|gbLayout|rzScan|elSoon|mtrSet|dacPick|DAC\.uid|capDrawWave|tutScan|abxTick|AKJ\.size|data-page="dac"|UYW\.|bgfTick\(\)|ncOn\(\)/;
+function aoVisIv(r){if(r.vis==null)r.vis=AOVIS.test(String(r.f).slice(0,400));return r.vis}
+function aoGainUp(c){try{const g=MON&&MON.out&&MON.out.gain,t=c.currentTime;if(g){g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(MONDIM&&!UI.bitPerfect?.178:1,t+.012)}}catch(e){}}
+function aoSuspend(){aoCtxHook();if(!ctx||ctx.state!=='running'||AOS.susp)return;AOS.susp=true;const c=ctx,k=++AOS.sk;
+  try{const g=MON&&MON.out&&MON.out.gain,t=c.currentTime;if(g){g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(0,t+.03)}}catch(e){}
+  AO.nst(()=>{if(AOS.susp&&AOS.sk===k&&AOS.lv===2&&ctx===c)c.suspend().catch(()=>{})},60)}
+function aoResume(){if(!AOS.susp)return;AOS.susp=false;AOS.sk++;const c=ctx;if(!c)return;try{WD.lastWall=0;WD.stall=0;WD.susp=0}catch(e){}
+  const up=()=>aoGainUp(c);if(c.state==='suspended')c.resume().then(up,up);else up()}
+function aoCtxHook(){try{if(ctx&&ctx!==AOS.cx){AOS.cx=ctx;AOS.susp=false;const c=ctx;c.addEventListener('statechange',()=>{if(c===ctx&&c.state==='running'&&AOS.susp&&AOS.lv===2){/* a key, a preview or Play woke the audio while the app was frozen */AOS.susp=false;aoGainUp(c);AOS.busyT=performance.now();aoEval('audio')}})}}catch(e){}}
+function aoHost(){const HA=AOS.ha;if(!HA||!HA.set)return;const s={playing:aoPlaying(),frozen:AOS.lv===2,level:AOS.lv},k=s.playing+'|'+s.level;if(k!==AOS.hk){AOS.hk=k;try{HA.set(s)}catch(e){}}}
+function aoBeat(on){const ms=on?(AOS.lv===2?1000:500):0;if(ms===AOS.hbMs)return;if(AOS.hb){AO.nci(AOS.hb);AOS.hb=0}AOS.hbMs=ms;if(ms)AOS.hb=AO.nsi(()=>{if(AOS.peers.size)aoSay(true);aoEval('beat')},ms)}
+/* the frame loop also does three things for the sound: parameter automation (paTick), modulators (modTick) and the reference track (refSync). While the drawing is off and something sounds, these run from a timer of their own, 30 times a second, so a song sounds the same in the background. */
+function aoSoundTick(){const now=performance.now();try{paTick(now)}catch(e){}try{if(S.tracks.some(t=>t.mods&&t.mods.length))modTick(now)}catch(e){}try{refSync(false)}catch(e){}}
+function aoSound(on){if(on&&!AOS.snd)AOS.snd=AO.nsi(aoSoundTick,33);else if(!on&&AOS.snd){AO.nci(AOS.snd);AOS.snd=0}}
+function aoPump(on){if(on&&!AOS.pump)AOS.pump=AO.nsi(()=>AO.pump(),250);else if(!on&&AOS.pump){AO.nci(AOS.pump);AOS.pump=0}}
+function aoLevel(lv){const was=AOS.lv;if(lv===was)return;AOS.lv=lv;const vk=aoVisKeep();
+  if(lv<2&&was===2){aoResume();AO.lv=1;AO.ivOn(vk?null:r=>!aoVisIv(r));AO.flush();AOS.n.wake++}
+  if(!vk){if(!AO.gate){AO.gate=true;document.documentElement.classList.add('aobg')}if(lv===2){AO.ivOff();AO.lv=2}else{AO.ivOff(aoVisIv);AO.lv=1}}
+  else AO.lv=lv?1:0;/* visuals kept: drawing and timers run on, only the audio engine pauses */
+  if(lv===2){aoSuspend();AOS.n.frz++;if(AOS.last&&!AOS.last.frz)AOS.last.frz=performance.now()-AOS.bgT}}
+function aoFront(why){const was=AOS.lv;AOS.fg=true;AOS.lv=0;AO.lv=0;aoResume();AO.ivOn();AO.flush();aoPump(false);aoSound(false);document.documentElement.classList.remove('aobg');
+  try{dirty=true;MT2.hl=MT2.hr=-90;trackMeters.z=0}catch(e){}
+  AO.open();AOS.backT=performance.now();AOS.n.front++;if(AOS.last&&!AOS.last.back)AOS.last.back=Date.now();aoHost();aoBeat(!document.hasFocus());try{aoInfoSync()}catch(e){}}
+function aoEval(why){const now=performance.now(),on=aoOn(),fg=!on||now<AOG.boot||!AOS.left||aoFgNow();/* AOS.left: the window was seen going away (lost the focus, was hidden). A page that never had the focus (opened with the cursor still in the address bar) is not taken for a background window. */
+  if(fg){if(AOS.db){AO.nct(AOS.db);AOS.db=0}if(!AOS.fg||AOS.lv)aoFront(why);else aoBeat(on&&!document.hasFocus());return}
+  if(AOS.fg){/* just left: wait a moment, the focus may only be moving to another AudioLab window */
+    if(!AOS.db)AOS.db=AO.nst(()=>{AOS.db=0;if(aoOn()&&AOS.fg&&AOS.left&&performance.now()>=AOG.boot&&!aoFgNow()){AOS.fg=false;AOS.bgT=performance.now();AOS.last={t:Date.now(),frz:0,back:0,keep:''};aoEval('away')}},AOG.db);aoBeat(true);return}
+  const pl=aoPlaying(),job=aoJob(),busy=pl||job||aoSounding();if(busy)AOS.busyT=now;const since=now-Math.max(AOS.busyT,AOS.bgT,AOS.wk);/* AOS.wk: the last message to or from a worker, or the last piece of a download */let lv=2,keep='';
+  if(busy||since<AOG.grace){lv=1;AOS.why=pl?'playing':job?'working':busy?'sounding':'grace'}else if((keep=aoAudioKeep())){lv=1;AOS.why='audio kept'}else if(AOS.lv!==2&&since<AOG.ring&&!aoSilent()){lv=1;AOS.why='ringing'}/* a tail still rings: wait for it, at most 20 s */else AOS.why='frozen';
+  if(keep&&keep!==AOS.keep){try{wdLog('Audio kept running in the background: '+keep)}catch(e){}if(AOS.last)AOS.last.keep=keep}AOS.keep=keep;
+  aoLevel(lv);aoPump(lv===1&&job&&!aoVisKeep());aoSound(lv===1&&!aoVisKeep()&&(pl||!!keep||aoSounding()));aoHost();aoBeat(true)}
+function aoMidi(){const now=performance.now();AOS.midiT=now;if(AOS.lv===2){AOS.busyT=now;aoLevel(1);aoHost();aoBeat(true)}if(AOS.lv===1&&!AOS.snd&&!aoVisKeep())aoSound(true)}
+function aoSay(who){try{if(AOS.bc)AOS.bc.postMessage({id:AOS.id,foc:document.visibilityState==='visible'&&document.hasFocus(),who:!!who})}catch(e){}}
+/* --- what tells the state --- */
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')AOS.left=true;if(document.visibilityState==='visible'&&AOS.ha&&AOS.ha.get)try{Promise.resolve(AOS.ha.get()).then(d=>{AOS.host=d||null;aoEval('host')}).catch(()=>{})}catch(e){}aoSay();aoEval('visibility')});
+addEventListener('focus',()=>{AOS.left=false;aoSay();aoEval('focus')});
+addEventListener('blur',()=>{AOS.left=true;AOS.over=false;AOS.inT=-1e9;aoSay();aoEval('blur')});
+addEventListener('pageshow',()=>{AOS.gone=false;aoEval('pageshow')});
+addEventListener('pagehide',()=>{AOS.gone=true;AOS.left=true;try{if(AOS.bc)AOS.bc.postMessage({id:AOS.id,bye:true})}catch(e){}aoEval('pagehide')});
+document.documentElement.addEventListener('mouseenter',()=>{AOS.over=true;AOS.overT=performance.now();if(!AOS.fg||AOS.lv||AOS.db)aoEval('mouse')});
+document.documentElement.addEventListener('mouseleave',()=>{AOS.over=false;if(!document.hasFocus())aoEval('mouse')});
+for(const ev of['pointermove','pointerdown','keydown','wheel'])addEventListener(ev,e=>{const now=performance.now();if(ev!=='keydown'){AOS.over=true;AOS.overT=now}if(ev!=='pointermove'&&e.isTrusted)AOS.inT=now;if(!AOS.fg||AOS.lv||AOS.db)aoEval('input')},{capture:true,passive:true});
+try{AOS.bc=new BroadcastChannel('audiolab-ao');AOS.bc.onmessage=e=>{const d=e.data;if(!d||d.id===AOS.id)return;if(d.bye)AOS.peers.delete(d.id);else{const was=AOS.peers.get(d.id);if(was&&was.foc&&!d.foc)AOS.left=true;/* the AudioLab window that had the focus lost it */AOS.peers.set(d.id,{foc:!!d.foc,t:performance.now()});if(d.who)aoSay()}if(!AOS.fg||AOS.lv||!document.hasFocus())aoEval('peer')};aoSay(true)}catch(e){}
+/* the desktop app tells what the web page cannot see: the focus of the whole app, hide, minimise (newer desktop apps only; without it the web events above do the work) */
+try{const HA=window.audiolabDesktop&&window.audiolabDesktop.activity;if(HA&&typeof HA.on==='function'){AOS.ha=HA;HA.on(d=>{if(d&&d.focused===false&&!(AOS.host&&AOS.host.focused===false)){AOS.over=false;AOS.inT=-1e9}if(d&&(d.focused===false||d.visible===false))AOS.left=true;AOS.host=d||null;aoEval('host')});if(HA.get)Promise.resolve(HA.get()).then(d=>{AOS.host=d||null;aoEval('host')}).catch(()=>{})}}catch(e){}
+/* --- what counts as work: offline renders (export, bounce, freeze, render), downloads, worker jobs --- */
+{const P=window.OfflineAudioContext&&OfflineAudioContext.prototype;if(P&&P.startRendering&&!P.__ao){const f=P.startRendering;P.__ao=1;P.startRendering=function(){AOS.off++;const d=()=>{AOS.off=Math.max(0,AOS.off-1);AOS.busyT=performance.now()};let p;try{p=f.apply(this,arguments)}catch(e){d();throw e}if(p&&p.then)p.then(d,d);else d();return p}}}
+{const f=window.fetch;if(f&&!f.__ao){const dn=()=>{AOS.net=Math.max(0,AOS.net-1);AOS.wk=performance.now()},g=function(){AOS.net++;let p;try{p=f.apply(this,arguments)}catch(e){dn();throw e}p.then(dn,dn);return p};g.__ao=1;window.fetch=g;
+  const RP=window.Response&&Response.prototype;if(RP)for(const k of['arrayBuffer','blob','json','text']){const o=RP[k];if(typeof o==='function')RP[k]=function(){AOS.net++;let p;try{p=o.apply(this,arguments)}catch(e){dn();throw e}p.then(dn,dn);return p}}
+  const RR=window.ReadableStreamDefaultReader&&ReadableStreamDefaultReader.prototype;if(RR&&RR.read){const rd=RR.read;RR.read=function(){AOS.wk=performance.now();return rd.apply(this,arguments)}}}}
+{const P=window.Worker&&Worker.prototype;if(P&&!P.__ao){P.__ao=1;const pm=P.postMessage;P.postMessage=function(){try{if(this!==SCLKW){AOS.wk=performance.now();if(!this.__aol){this.__aol=1;this.addEventListener('message',()=>{AOS.wk=performance.now();if(AOS.lv===2)aoEval('worker')})}}}catch(e){}return pm.apply(this,arguments)}}}
+/* --- Play, Stop, keys and MIDI: wake the audio part first, tell the desktop app whether something plays --- */
+{const _s=start;start=function(){if(AOS.lv===2){AOS.busyT=performance.now();aoLevel(1);aoBeat(true)}const r=_s.apply(this,arguments);AOS.busyT=performance.now();if(AOS.lv===1&&!aoVisKeep())aoSound(true);aoHost();return r};
+ const _p=stop;stop=function(){const r=_p.apply(this,arguments);AOS.busyT=performance.now();aoHost();return r};
+ const _n=noteOn;noteOn=function(){aoMidi();return _n.apply(this,arguments)};const _c=midiCC;midiCC=function(){aoMidi();return _c.apply(this,arguments)};const _l=ccLive;ccLive=function(){aoMidi();return _l.apply(this,arguments)};
+ /* the watchdog must not take a wanted pause for a broken audio device */
+ const _w=wdTick;wdTick=function(){if(AOS.susp)return;return _w.apply(this,arguments)}}
+AO.nst(()=>aoEval('boot'),AOG.boot+50);
+/* --- the two logos: always moving while AudioLab is in front ---
+   The button's logo was painted from the frame loop only while "not calm": 3 seconds after the last click or drag (with nothing playing) it stood still.
+   It is now painted from the part of the frame loop that always runs (30 times a second, 15 in the lighter looks), and the Settings logo's loop is started
+   again whenever Settings is open without it. Only the system setting "reduce motion" keeps them still; the lighter looks no longer do. Both stop with every other frame while the app is away. */
+function aoStill(){return AT.red0!=null?!!AT.red0:!!AT.reduce}
+function aoLogoBtn(now){const cv=document.getElementById('atomC');if(!cv)return;const st=aoStill();if(st&&cv.dataset.done)return;if(UI.lite&&cv.dataset.done&&now-AOS.lb<60)return;AOS.lb=now;cv.dataset.done=1;paintAtom(cv,28,Math.min(4,(window.devicePixelRatio||1)*ZOOM*2),AT.btn,st?2:now/1000)}
+drawAtom=function(){const cv=document.getElementById('atomC');if(cv&&!cv.dataset.done)aoLogoBtn(performance.now())};
+setLoop=function(now){if($('#set').hidden){SLP2.on=false;return}requestAnimationFrame(setLoop);
+  if(now-SLP2.l>=(UI.lite?31:6.2)){const nc=document.getElementById('navAtomC');if(nc&&nc.clientWidth>2){const st=aoStill();if(!(st&&nc.dataset.done)){SLP2.l=now;nc.dataset.done=1;paintAtom(nc,132,Math.min(2.5,window.devicePixelRatio||1)*ZOOM,AT.big,st?2:now/1000)}}}
+  try{gpDraw(now)}catch(e){}};
+{const _hx=hxTick;hxTick=function(){try{aoLogoBtn(performance.now());if(!SLP2.on&&!$('#set').hidden){SLP2.on=true;requestAnimationFrame(setLoop)}}catch(e){}return _hx.apply(this,arguments)}}
+/* --- Settings, Performance, Savers: the two switches and a line that says what happened last time --- */
+function aoInfo(){if(!aoOn())return 'Off: AudioLab keeps running in the background.';const L=AOS.last;if(!L)return 'AudioLab has not been in the background since it started.';
+  const away=L.back?Math.max(0,Math.round((L.back-L.t)/1000)):0,dur=away>=90?Math.round(away/60)+' minutes':away+' seconds';
+  if(L.frz)return 'Last time in the background ('+dur+'): frozen after '+(L.frz/1000).toFixed(1)+' seconds.';
+  if(L.keep)return 'Last time in the background ('+dur+'): drawing stopped, the audio engine stayed on because '+L.keep+'.';
+  return 'Last time in the background ('+dur+'): drawing stopped. Not frozen, because something was playing or working, or you were back within 2 seconds.'}
+function aoInfoSync(){const a=document.getElementById('aoFrz'),b=document.getElementById('aoVis'),i=document.getElementById('aoInf');if(a){a.checked=aoOn();a.closest('.pmr').classList.toggle('on',a.checked)}if(b){b.checked=aoVisKeep();b.closest('.pmr').classList.toggle('on',b.checked);b.disabled=!aoOn()}if(i)i.textContent=aoInfo()}
+{const _pb=pmBuild;pmBuild=function(){const r=_pb.apply(this,arguments);try{const a=document.querySelector('#setBody .pmr[data-pr=bgf]')||document.querySelector('#setBody .pmr[data-pr=slpOn]');if(a&&!document.getElementById('aoFrz')){
+    const ic='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="14" height="10" rx="2"/><path d="M8.5 7.5v3M11.5 7.5v3M7 17h6"/></svg>',
+      row=(pr,id,name,tip,sv)=>{const d=document.createElement('div');d.className='pmr';d.dataset.pr=pr;d.title=tip;d.innerHTML='<span class="pic">'+ic+'</span><b class="pmq">'+name+'</b><span class="pmsv">'+(sv?'saves':'')+'</span><label class="bpsw"><input type="checkbox" id="'+id+'" aria-label="'+name+'"><i></i></label>';return d};
+    const d1=row('aoF','aoFrz','Freeze when in the background','When you switch to another app or another desktop, or minimise AudioLab, and nothing is playing: after about 2 seconds AudioLab stops all drawing, all timers and the audio engine, so it uses almost no processor. It is back at once when you return, move the mouse over it, press Play on a controller or play a MIDI key. Playing, recording, exports, bounces, conversions and downloads carry on in the background; only the drawing stops. An armed or monitored track keeps the audio engine on.',1),
+      d2=row('aoV','aoVis','Keep visuals in the background','Meters, the playhead and every other picture keep moving while AudioLab is in the background. This uses more processor. With this on, only the audio engine pauses when nothing plays.',0),
+      inf=document.createElement('div');inf.className='aoinf';inf.id='aoInf';inf.title='What AudioLab did the last time it was in the background';
+    a.after(d1);d1.after(d2);d2.after(inf);
+    d1.querySelector('input').onchange=e=>{UI.aoFreeze=e.target.checked;saveUI();aoInfoSync();aoEval('setting')};
+    d2.querySelector('input').onchange=e=>{UI.aoVisuals=e.target.checked;saveUI();aoInfoSync();aoEval('setting')}}
+  aoInfoSync()}catch(e){console.error('AudioLab background settings',e)}return r}}
+{const _ps=pmSync;pmSync=function(){const r=_ps.apply(this,arguments);try{aoInfoSync()}catch(e){}return r}}
+
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

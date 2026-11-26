@@ -3002,3 +3002,95 @@ Material (`tools/engine-tests/fx_materials.py`, rendered by the app at 145 BPM, 
 
 ### Release
 - v0.217 (first built on v0.213 as v0.214; other sessions released v0.214, v0.215 and v0.216 in the meantime, so the block was inserted again on v0.215 and on v0.216; all checks above were repeated on v0.216 as noted).
+
+## 26 November 2026, v0.218: logos that keep moving, and a freeze while AudioLab is in the background (task AO, from a later message)
+> "The animated AudioLab logo on the settings and the animated AudioLab settings button pauses after a bit. I don't want it like that. I want it to be always animated, unless AudioLab is in the background. And let's have a system where AudioLab doesn't take up any CPU in the background, unless it's playing. But if nothing is playing and you go to a different desktop, or you start using another application, I want AudioLab to go into some sort of freeze mode where it stops everything temporarily until you return. And it needs to be dynamic."
+
+Not to be mixed up with "Background freeze" of v0.201 (task E): that one plays tracks from recordings while the app is in use. This one is about the whole app when it is not in use.
+
+### Why the logos stopped
+- **The settings button (top bar).** Its logo was painted from the frame loop only while "not calm". Calm means: nothing plays and 3 seconds have passed since the last click, drag or movement over a device picture (`frame0`: `if(!calm)drawAtom(...)`, added in v0.170 so the glass of the top bar is not recalculated for it). So it stood still 3 seconds after you stopped working. Reproduced on v0.214: mouse at rest, Settings open, 150 s: the button logo moved in 1 of 30 samples.
+- **The logo in Settings.** It has its own loop (`setLoop`, v0.170) and in the same 150 s test on v0.214 it moved in 30 of 30 samples. **I could not make it pause here**, so its cause on the Mac is not proven. Two things that do keep both logos still are known: the Lighter and Lightest looks (and the automatic switch to Lighter on a slow screen) drew them as a still picture, and the loop was only started by `openSettings`.
+- **Now:** the button logo is painted from the part of the frame loop that always runs (30 pictures a second, 15 in Lighter and Lightest); the Settings logo's loop is started again whenever Settings is open without it; and the lighter looks no longer keep the logos still. Only the system setting "reduce motion" does. Both stop with everything else when the app is in the background.
+- Cost, measured (headless, software drawing): one button picture 0.10 ms, so 0.3 % of one core at 30 a second; the Settings logo 3.7 to 4.3 ms a picture here (only while Settings is open, as before). Whole page in front, idle, before and after: Full effects 27.8 / 27.7 %, Optimised 26.0 / 28.4 %, Lighter 20.8 / 21.4 % of one core. Putting the logo on its own layer above the bar did not lower it (28.1 %), so it stays where it is.
+
+### What was built
+**One activity state for the whole app** (block "v0.218: app activity" before `askChoice`, names `ao*` / `AOS`; a few lines "the app activity gate" (`AO`) at the very top of the script, see below).
+- **In front**: the window is visible and has the focus, or is visible and the mouse is over it (a move within the last 60 s), or another AudioLab window (a torn-off project) has the focus. A click, a key or the wheel always counts as in front.
+- **Away**: hidden, minimised, on another desktop, or another app has the focus. Read from `document.visibilityState`, focus and blur, pagehide and pageshow, mouse enter and leave, a `BroadcastChannel` between AudioLab windows, and in the desktop app the window events of `main.js` (below). 150 ms wait before "away" counts, so the focus moving between two AudioLab windows changes nothing.
+- A page that never had the focus and was never seen going away (opened with the cursor still in the address bar) is left alone. Inside another page (an embedded copy, such as the published artifact) only being visible counts, because the focus says nothing there. Nothing freezes in the first 15 s after the start.
+
+**Three levels**
+| | when | what stops | what runs |
+|---|---|---|---|
+| 0, in front | | nothing | everything |
+| 1, drawing off | away, and something plays, records or works (export, bounce, freeze, render, conversion, download, AI job), or a key was just played, or the 2 s grace, or the audio has to stay on | every screen frame (`requestAnimationFrame`), the 16 repeating timers that only update the screen or prepare things ahead (meters, loudness read-out, clock, glass, tutorial, track background freeze, note cache), CSS animations (class `aobg` on the root), the song map analysis | audio at full quality with all its timers (scheduler, look-ahead, dynamic EQ, grain pump, sleeping tracks), and the three things the frame loop does for the sound (parameter automation `paTick`, modulators `modTick`, the reference track `refSync`) from a timer of their own, 30 times a second |
+| 2, frozen | away for 2 s with nothing playing or working, and the master silent | also every other repeating timer (all 39 of the app), timers that come due wait, and the audio engine is suspended (`ctx.suspend`, after a 30 ms fade) | one check a second by the freeze itself |
+
+- **While a job runs in the background** the frames that are waiting are run 4 times a second, so code that waits for a frame carries on.
+- **Back in front**: one call does everything in this order: `ctx.resume()`, the timers are put back, waiting timers run, the class comes off, the arrangement is marked for a full redraw, then the waiting frames are released. No loop is restarted, each one continues where it stood.
+- **Play, a key or MIDI while frozen** (from a controller or a shortcut): the audio part wakes at once (level 1), the drawing stays off. After Stop: 2 s, then frozen again.
+- **The audio engine stays on (level 1 instead of 2)** when: a track is armed, recording or monitored (its input stays live); "Keep the audio engine awake" is on in Settings; keys or a MIDI controller were played in the last 30 s; or a tail still rings (waited for, at most 20 s). The reason is written to the audio engine's log ("Audio kept running in the background: the track "Kick" is armed or monitored, so its input stays live") and shown in Settings.
+- **Hover effects**: there is no hover without the mouse over the window, and with the mouse over it the app is in front, so nothing had to be switched off.
+- **Settings › Performance › Savers**: "Freeze when in the background" (on) and "Keep visuals in the background" (off; with it on the drawing and timers run on and only the audio engine pauses), both with tooltips, and a line under them that says what happened the last time ("Last time in the background (41 seconds): frozen after 2.3 seconds.").
+- `aoHold('name')` and `aoRelease('name')` let other code keep the app awake during a job of its own.
+
+**How everything is stopped without touching every loop** (`AO`, the first lines of the main script, the one place where this task could not follow "new JS before askChoice": timers made before that point would not be known): `requestAnimationFrame`, `setInterval` and `setTimeout` (and their cancel functions) go through a small gate. Shut, a frame that is asked for or comes due waits in a list and keeps its number; repeating timers are remembered so they can be taken away and put back under the same number; a one-shot timer that was set before the freeze and comes due during it waits, one that is set during the freeze (a job still working) runs. With the gate open the only cost is one small function per call.
+- Work is counted in one place: every `OfflineAudioContext.startRendering` (export, bounce, freeze, render, clip renders), every `fetch` and body read (downloads), messages to and from workers (stems, voice, AI, time stretch; not the playback clock), plus the app's own flags (`EXFZ`, `FRZBUSY`, `RB.act`, `BUSYN`, `VAI.busy`).
+- In place, one condition each: `mapAnalyze` stops between two chunks while the app is away (`!AOS.fg`) and carries on after the return. Wrapped: `start`, `stop`, `noteOn`, `midiCC`, `ccLive` (wake, and tell the desktop app whether something plays), `wdTick` (the watchdog must not take a wanted pause for a broken audio device), `hxTick`, `pmBuild`, `pmSync`. Replaced: `drawAtom`, `setLoop`.
+
+**Desktop app** (`desktop/main.js`, `desktop/preload.js`; the page checks for `audiolabDesktop.activity`, the old app keeps working with the web events only; MIN_SHELL not raised)
+- `main.js` listens to blur, focus, hide, show, minimize and restore of every window (and the app becoming active or not on the Mac) and sends `{focused, visible, minimized}` to all windows: `focused` is true when any AudioLab window has the focus.
+- The page answers `{playing, frozen}`: `powerSaveBlocker` ("prevent-app-suspension") is held only while something plays; `backgroundThrottling` is switched on for a frozen window and off again the moment it is not frozen (it was always off before).
+- `audiolabDesktop.metrics()` returns Electron's own processor numbers per process.
+
+### Processor use, before and after
+Test computer: 2 cores, no GPU (drawing in software), Fractals demo, Full effects, nothing playing unless said, 20 s per number, % of one core. The Mac is much faster; the ratios are the result.
+
+**Desktop app (Electron 45, `app.getAppMetrics`, `tools/ui-tests/taskAO_electron.js`)**
+| | v0.214 app: page | main | GPU process | all | v0.218: page | main | GPU process | all |
+|---|---|---|---|---|---|---|---|---|
+| in front | 10.71 | 0.10 | 15.61 | 26.82 | 11.59 | 0.07 | 15.53 | 27.62 |
+| another app in front, window visible | 10.09 | 0.07 | 15.43 | **26.00** | 0.02 | 0.02 | 0.00 | **0.07** |
+| hidden | 10.02 | 0.02 | 15.24 | **25.68** | 0.02 | 0.02 | 0.02 | **0.07** |
+| hidden and playing | | | | | 10.49 | 0.00 | 0.00 | 10.94 |
+| back in front | 9.79 | 0.05 | 15.01 | 25.22 | 11.66 | 0.07 | 15.11 | 27.27 |
+
+**Headless Chromium (processor time from Linux, `tools/ui-tests/taskAO_cpu.py`)**: page process + everything else (browser, GPU process, audio service)
+| | v0.214 | v0.218 |
+|---|---|---|
+| in front | 27.03 + 46.66 | 25.97 + 43.26 |
+| another app in front, window visible | 26.48 + 45.36 | **0.05 + 0.00** |
+| hidden or minimised | 25.57 + 41.26 | **0.05 + 0.05** |
+| hidden, playing from beat 64 | 78.92 + 89.80 | 22.78 + 1.00 |
+| in front, playing from beat 64 | 91.48 + 85.38 | 90.92 + 85.22 |
+
+Frozen: 0 frames, 0 of the app's 39 repeating timers, 0.0 to 0.2 one-shot timers a second; what is left is the freeze's own check once a second. In front nothing got slower.
+
+### Tested (`tools/ui-tests/taskAO.py`, headless Chromium, 61 checks, all pass; visibility and focus emulated, every native frame and timer call-back counted underneath the app)
+- Logos: mouse at rest, Settings open, 130 s: button logo moved in 26 of 26 samples, Settings logo in 26 of 26; in Lighter 5 of 5 each; still in the background, CSS animations paused, moving again after the return.
+- Another app in front, and hidden: drawing stops at once (0 frames a second), frozen 2.5 s later, audio engine suspended; back: the first frame starts 1.4 to 2.5 ms after the return and the whole first picture is done after 34 to 50 ms, the audio engine was told to resume in the same call and ran again after 51 to 77 ms; the same audio engine, the watchdog did not step in, position, selection, view and project unchanged; the arrangement and the mixer are drawn again.
+- Mouse over the unfocused window: in front again; mouse leaves: frozen after 2.2 s.
+- Playing in the background (solo Kick from beat 64, 4 s from the first hit recorded from the master through a worklet): sent to the background 1 s after Play, and Play started from the frozen state: 0 frames a second, the recording differs from a play in front by -39.5 and -39.9 dB while two plays in front differ by -40.2 dB (live plays are never identical, also in front; over ten background plays in all runs the figure was -32.6 to -39.9 dB, in front -38.2 to -42.2 dB), the audio clock ran at 0.9997 of the wall clock, the browser counted no new underruns (in one earlier run of five it counted 2 at the moment the audio device restarted), and automation and modulators were still applied 30 times a second without the frame loop. After Stop: frozen again after 2.4 s.
+- A MIDI key while frozen: audio runs again, no drawing; stays on for the 30 s, then freezes. An armed track: drawing off, audio on, the log says why; disarmed: frozen after 2.1 s.
+- Settings: both switches with tooltips, the line with the last time; Keep visuals: 180 frames a second in the background, audio suspended; Freeze off: nothing stops.
+- An export (Kick alone, beats 0 to 384) sent to the background 60 ms after its start carried on (the app stayed at level 1, "working") and finished in 3.4 s, bit-identical to two exports made in front (4fc1ce241dac).
+- Desktop events mocked: focus lost with the window visible, another AudioLab window focused (in front), minimised or hidden, restored (first frame after 0.8 ms); the page tells the app when it plays and when it is frozen. A page that never had the focus is not frozen.
+- Real desktop app (`taskAO_electron.js`, Electron under a virtual screen): `main.js` told the page about blur and hide, the page froze 2.6 s later, Play while hidden: sound on, drawing off, power blocker on; Stop: frozen after 5.5 s, power blocker off; shown again: in front. The virtual screen has no window manager, so blur and focus were emitted on the window by the test; hide and show were real.
+- Regression: `taskAK.py`, `taskAF.py`, `taskAG.py`, `taskAN.py`, `play.py`, `updwin.py`, `appicon.py`, `setfind.py`, `fxlevels.py`, `loadtime.py` pass on the build with this change. `export_same.py`: Fractals Kick -9.75669 dB (0496bb147f6c) and Bass -25.48699 dB (09e0415bec5e), Saw, Pad, Acid, Wavetable and Venom the same checksums as v0.214 (Plant, both Samplers and the Drum kit give another checksum on every page load, in v0.214 too). The master -10 dB of task AI is not in.
+
+### Not verified
+- **A song with automation or modulators in the background was not listened to or compared.** The frame loop used to apply them; in the background a timer does now, and the test only counts that it runs. In a hidden browser tab they stood still before this version (the browser stops frames there), so this is better than before in the browser and should be the same as before in the desktop app.
+- **The Mac.** Whether macOS sends blur when you switch desktops with AudioLab not focused, how fast `ctx.resume()` is on a real audio device (51 to 77 ms here on a silent test device), and whether the first note from a MIDI keyboard after a long freeze comes late by that much. Nobody has listened to a return or looked at it.
+- The Settings logo pausing on the Mac was not reproduced (above). If it still pauses in v0.218, the next thing to look at is the automatic performance step on that screen.
+- Real MIDI and audio interfaces after a freeze (none here). The audio engine object is the same one after the return, and nothing reopens a device, but that is all the test can say.
+- Two torn-off project windows in the browser (the channel between windows is built, not tested with two real windows).
+
+### Seen, not changed
+- **After Stop a small steady offset stays on the master until the track goes to sleep** (v0.214 too): solo Kick, 0.018 right after Stop growing to 0.15 after 3.75 s, then exactly 0. It is not sound (no zero crossing), but it is why the test reads silence only after taking a straight line away, and it is cut hard when the track sleeps.
+- **Long exports are not always the same twice** (v0.215 before this work, in front): the whole mix, beats 64 to 192, gave three different checksums in three renders of one page; Kick alone over beats 0 to 384 gave another checksum in 1 of 4. The short regression render (beats 64 to 96) is stable. Once, on v0.215 without this work, `export_same.py` gave Bass -26.74483 dB instead of -25.48699 dB right after the page loaded. Worth its own look.
+- The idle page costs about 11 % of a core in the desktop app and 26 % in headless Chromium while in front (the frame loop and 39 timers), as before.
+- Auto-install of updates waits for the return when the app is frozen (its timer is one of those that stop).
+
+### Release
+- v0.218 (built on v0.214; other sessions released v0.215, v0.216 and v0.217 in the meantime, so it was applied again on each; the full test ran on the v0.217 base, the quick one and the desktop app test on the final v0.218; the timer for automation and modulators was added after the full run and is covered by the quick one). App copy synced, update note written. `desktop/main.js` and `desktop/preload.js` changed: desktop build as noted below.

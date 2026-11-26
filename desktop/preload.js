@@ -21,6 +21,13 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   onDock: (cb) => ipcRenderer.on('al:dock', (e, d) => cb(d)),
   onFromChild: (cb) => ipcRenderer.on('al:from-child', (e, m) => cb(m)),
   onDockHover: (cb) => ipcRenderer.on('al:dock-hover', (e, h) => cb(h)),
+  // v0.218: app activity. on(cb): { focused, visible, minimized } whenever the app or this window goes to the front or away; set({ playing, frozen }) lets the app save power
+  activity: {
+    on: (cb) => { const f = (e, d) => cb(d); ipcRenderer.on('al:activity', f); return () => ipcRenderer.removeListener('al:activity', f); },
+    get: () => ipcRenderer.invoke('al:activity-get'),
+    set: (s) => ipcRenderer.send('al:activity-set', { playing: !!(s && s.playing), frozen: !!(s && s.frozen) })
+  },
+  metrics: () => ipcRenderer.invoke('al:metrics'),
   // v0.203: the app icon picker in Settings (Ocean Yellow by default)
   listAppIcons: () => ipcRenderer.invoke('al:app-icons'),
   setAppIcon: (id) => ipcRenderer.invoke('al:set-app-icon', id),

@@ -2,7 +2,7 @@
 // Loads the web app from a private secure scheme so it is cross-origin isolated
 // (SharedArrayBuffer on), grants audio-device / MIDI / file permissions, and adds
 // menus, window memory, .audiolab file opening and auto-update.
-const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, protocol, session, shell, dialog, ipcMain, systemPreferences, screen, nativeImage, powerSaveBlocker } = require('electron');
 const path = require('path');
 const fs = require('fs');
 /* The app was called AudioLab Studio before v0.167. Its settings, projects list and downloaded updates stay in the folder with the old name,
@@ -519,6 +519,51 @@ function overTabs(kw) {
 }
 ipcMain.handle('al:display-hz', () => { try { const d = win && !win.isDestroyed() ? screen.getDisplayMatching(win.getBounds()) : screen.getPrimaryDisplay(); return d.displayFrequency || 0; } catch (e) { return 0; } });
 ipcMain.handle('al:is-fullscreen', () => !!(win && !win.isDestroyed() && win.isFullScreen()));
+/* ---------- app activity (v0.218, task AO): tell every window whether AudioLab is in front, and save power while it is not ----------
+   The page cannot see everything itself: which of the app's windows has the focus, hide (Cmd+H) and minimise. Every change is sent to all windows as
+   { focused: one of AudioLab's windows has the focus, visible: this window is shown and not minimised, minimized }. The page answers with
+   { playing, frozen }: while something plays the computer is kept from suspending the app (powerSaveBlocker, only then); while a window is frozen
+   Chromium may throttle it (backgroundThrottling on), and it runs at full speed again the moment it is not frozen. */
+function actState(w) {
+  let focused = false, visible = true, minimized = false;
+  try { focused = !!BrowserWindow.getFocusedWindow(); } catch (e) { /* ignore */ }
+  try { minimized = w.isMinimized(); visible = w.isVisible() && !minimized; } catch (e) { /* ignore */ }
+  return { focused, visible, minimized };
+}
+let actT = null;
+function actSend() {
+  actT = null;
+  for (const w of BrowserWindow.getAllWindows()) { try { if (!w.isDestroyed()) w.webContents.send('al:activity', actState(w)); } catch (e) { /* ignore */ } }
+}
+// the focus moving from one AudioLab window to another gives a blur and then a focus: wait a moment so the page sees one change
+function actSoon() { if (!actT) actT = setTimeout(actSend, 60); }
+app.on('browser-window-created', (e, w) => { for (const ev of ['blur', 'focus', 'hide', 'show', 'minimize', 'restore']) w.on(ev, actSoon); });
+app.on('did-become-active', actSoon);
+app.on('did-resign-active', actSoon);
+const actBy = new Map();   // webContents id -> { playing, frozen }
+let actPsb = null;
+function actPower() {
+  let playing = false;
+  for (const s of actBy.values()) if (s.playing) playing = true;
+  try {
+    if (playing && actPsb == null) actPsb = powerSaveBlocker.start('prevent-app-suspension');
+    else if (!playing && actPsb != null) { powerSaveBlocker.stop(actPsb); actPsb = null; }
+  } catch (e) { /* ignore */ }
+}
+ipcMain.handle('al:activity-get', (e) => { const w = BrowserWindow.fromWebContents(e.sender); return w ? actState(w) : { focused: true, visible: true, minimized: false }; });
+ipcMain.on('al:activity-set', (e, s) => {
+  const wc = e.sender, id = wc.id, st = { playing: !!(s && s.playing), frozen: !!(s && s.frozen) };
+  if (!actBy.has(id)) wc.once('destroyed', () => { actBy.delete(id); actPower(); });
+  actBy.set(id, st);
+  try { wc.setBackgroundThrottling(st.frozen); } catch (e2) { /* ignore */ }
+  actPower();
+});
+// processor use of every process of the app, as Electron measures it (for the freeze test and for looking into slowness)
+ipcMain.handle('al:metrics', () => {
+  try { return { power: actPsb != null, procs: app.getAppMetrics().map((m) => ({ pid: m.pid, type: m.type, name: m.name || m.serviceName || '', cpu: m.cpu ? m.cpu.percentCPUUsage : 0, wakeups: m.cpu ? m.cpu.idleWakeupsPerSecond : 0 })) }; }
+  catch (e) { return { power: false, procs: [] }; }
+});
+
 ipcMain.handle('al:tear', (e, d) => {
   const disp = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
   const w = Math.round(disp.width * 0.7), h = Math.round(disp.height * 0.75);
