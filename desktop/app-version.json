@@ -1,7 +1,7 @@
 {
-  "version": "0.205",
-  "sha256": "b3f759244a7f10387469cdebd472c9402274da81db5e024df2033254e288b97a",
-  "size": 3269738,
+  "version": "0.206",
+  "sha256": "ef72d704f40373259f6268cb0a7d05d285b50b4a5f084aea1331bedd5d76cb53",
+  "size": 3323122,
   "minShell": "0.147.0",
-  "notes": "Mixer sidechain made clear: drag a cable from the Kick to the Pad and it says \"Pad will duck when Kick plays\"; choose it and a small sidechain window opens on the cable with how much the Pad ducks, the trigger level, attack, hold, release, curve, look-ahead and what part of the Kick it listens to, with the ducking shown live. Cable menus have icons and plain descriptions, linked faders light up, faders follow the mouse every frame, and only the tab in the middle of the mixer's bottom edge changes the cable area."
+  "notes": "New in Voice: AI voice. Make a voice from an example clip and let your singing or talking take on that voice while keeping your notes and note edits; the AI model (66 MB) is downloaded once and runs on your computer. AI voices need the new desktop app (download it once from the Releases page; Windows updates by itself)."
 }

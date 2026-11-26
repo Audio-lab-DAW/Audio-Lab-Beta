@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Pro",
-  "version": "0.205.0",
+  "version": "0.206.0",
   "description": "AudioLab Pro - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -16,7 +16,8 @@
     "release:win": "npm run sync && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "onnxruntime-node": "1.31.1"
   },
   "devDependencies": {
     "electron": "^45.4.1",
@@ -38,7 +39,9 @@
       "icon-assets/picker/icons.json",
       "icon-assets/picker/thumb/*.png",
       "app/**/*",
-      "package.json"
+      "package.json",
+      "voice-ai.js",
+      "voice-ai-worker.js"
     ],
     "publish": [
       {
@@ -102,6 +105,12 @@
           "from": "build/doc.icns",
           "to": "doc.icns"
         }
+      ],
+      "files": [
+        "!node_modules/onnxruntime-node/bin/napi-v6/linux/**",
+        "!node_modules/onnxruntime-node/bin/napi-v6/win32/**",
+        "!node_modules/onnxruntime-node/bin/napi-v6/darwin/x64/**",
+        "!node_modules/onnxruntime-node/bin/napi-v6/darwin/arm64/libonnxruntime.1.*.*.dylib"
       ]
     },
     "dmg": {
@@ -126,6 +135,11 @@
           "role": "Editor",
           "icon": "build/doc"
         }
+      ],
+      "files": [
+        "!node_modules/onnxruntime-node/bin/napi-v6/linux/**",
+        "!node_modules/onnxruntime-node/bin/napi-v6/darwin/**",
+        "!node_modules/onnxruntime-node/bin/napi-v6/win32/arm64/**"
       ]
     },
     "nsis": {
@@ -135,6 +149,10 @@
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico"
     },
-    "afterPack": "scripts/afterPack.js"
+    "afterPack": "scripts/afterPack.js",
+    "asarUnpack": [
+      "node_modules/onnxruntime-node/bin/**",
+      "voice-ai-worker.js"
+    ]
   }
 }
