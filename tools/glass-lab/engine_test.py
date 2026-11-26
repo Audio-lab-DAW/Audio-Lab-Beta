@@ -173,6 +173,9 @@ def unit_tests(b):
     ok('flat picture: floating glass sees the backdrop, the flat panel colour and the fed display canvas', r['overBackdrop'][2] > 200 and r['overPanel'][0] > 200 and r['overPanel'][2] < 40 and r['overDisp'][1] > 200, [r['overBackdrop'][:3], r['overPanel'][:3], r['overDisp'][:3]])
     ok('flat picture: docked glass does not see it', r['dock'][2] > 200 and r['dock'][0] < 30, r['dock'][:3])
     ok('flat picture: moving the floating glass rebuilds nothing; a changed display rebuilds only the flat pyramid', r['move']['flatPyramids'] == r['st']['flatPyramids'] == 1 and r['move']['uploads'] == 1 and r['fd']['flatPyramids'] == 2 and r['fd']['uploads'] == 1 and r['fd']['pyramids'] == r['st']['pyramids'], [r['st'], r['fd']])
+    rc = pg.evaluate(r"""()=>{ const g=T.make(256,256,{quality:1}); g.setBackdrop(T.stripes(256,256,0)); const d=T.flat(32,32,'#0f0'); g.setFlat('d',{rect:[0,0,256,256],source:d}); g.addPanel({id:'w',rect:[20,20,100,100],kind:'menu',over:'flats'});
+      g.render(0); const s0={...g.stats}; let pend=0; for(let i=1;i<=240;i++){ g.markFlatDirty('d'); g.render(i*1000/240); if(g.pending) pend++; } const o={fu:g.stats.flatUploads-s0.flatUploads,fp:g.stats.flatPyramids-s0.flatPyramids,pend}; g.destroy(); return o; }""")
+    ok('quality low: a fed display that repaints every frame is also refreshed only 30 times per second', 29 <= rc['fu'] <= 31 and rc['fp'] == rc['fu'] and rc['pend'] > 150, rc)
     ok('flat removed: the glass sees the backdrop again', r['noflat'][2] > 200, r['noflat'][:3])
 
     r = pg.evaluate(r"""()=>{ const g=T.make(512,256,{blur:'light',rim:{base:0,lit:0},backdropColor:[1,1,0]}); g.setBackdrop(T.flat(100,50,'rgb(0,0,255)'),{rect:[256,0,256,256]});
@@ -341,6 +344,9 @@ def page_tests(b, dsf):
         ok('costSync runs for every preset', len(cost) == 9 and all(v > 0 for v in cost.values()))
         pg.evaluate("()=>{document.querySelector('#hud').hidden=false}")
         s = pg.evaluate("async()=>{const s=await __t.measure(1200);return {s,t:document.querySelector('#res').textContent,live:document.querySelector('#live').textContent}}")
+        bk = pg.evaluate("async()=>{await __t.breakdown();return {t:document.querySelector('#res').textContent,a:__t.gA.info,on:Object.values(__t.P).every(p=>p.on)}}")
+        print(bk['t'], flush=True)
+        ok('Find the cost runs, fills both tables and puts every setting back', 'all glass, low' in bk['t'] and 'floating layer: blur' in bk['t'] and bk['a']['quality'] == 3 and bk['on'], '')
         ok('Measure fills the table and the live readout shows frame time', 'median' in s['t'] and 'fps' in s['live'] and 'blur rebuilds' in s['live'], s['live'].split('\n')[0])
     ctx.close()
 

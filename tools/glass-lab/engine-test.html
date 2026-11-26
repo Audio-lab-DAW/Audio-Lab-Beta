@@ -48,7 +48,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
   <div class="rowx"><label><input type="checkbox" id="rt"> Reduce transparency</label><label><input type="checkbox" id="ic"> Increase contrast</label></div>
   <div class="rowx"><button class="b" id="lose">Lose the graphics context</button><button class="b" id="rest">Restore it</button><label><input type="checkbox" id="soft"> allow software drawing</label></div>
   <div id="live">measuring…</div>
-  <div class="rowx"><button class="b go" id="run">Measure (5 s)</button><button class="b" id="cmp">Compare presets (about 1 min)</button><button class="b" id="copy">Copy table</button></div>
+  <div class="rowx"><button class="b go" id="run">Measure (5 s)</button><button class="b" id="cmp">Compare presets (about 1 min)</button><button class="b" id="brk">Find the cost (about 30 s)</button><button class="b" id="copy">Copy table</button></div>
   <pre id="res">No run yet.</pre>
 </div>
 
@@ -102,7 +102,7 @@ function boot(){for(const g of[gA,gB])if(g)g.destroy();for(const c of[cA,cB])if(
   const o=()=>({allowSoftware:$('#soft').checked||/[?#&]soft/.test(location.href),lens:$('#lens').value,blur:$('#blur').value,quality:+$('#qual').value,autoResize:false,requestRender:()=>{wake=true},
     reduceTransparency:$('#rt').checked?true:null,increaseContrast:$('#ic').checked?true:null,face:FACE[$('#face').value]});
   gA=AudioLabGlass.create(cA,o());gB=AudioLabGlass.create(cB,o());gA.setBackdrop(S);gB.setBackdrop(S);gA.resize(W,H,D);gB.resize(W,H,D);layout();last2=null;
-  window.__t={gA,gB,P,S,DC,stats,costSync,compare,measure,boot,layout}}
+  window.__t={gA,gB,P,S,DC,stats,costSync,compare,measure,breakdown,boot,layout}}
 const FACE={bench:{sat:1.3,mul:1,add:0},apple:{sat:1.3,mul:1.125,add:.125}},both=f=>{f(gA);f(gB);wake=true};
 $('#lens').onchange=e=>both(g=>g.setLensPreset(e.target.value));$('#blur').onchange=e=>both(g=>g.setBlurPreset(e.target.value));
 $('#qual').onchange=e=>both(g=>g.setQuality(+e.target.value));$('#face').onchange=e=>both(g=>g.setFace(FACE[e.target.value]));
@@ -111,13 +111,13 @@ $('#lose').onclick=()=>both(g=>g.debug.lose());$('#rest').onclick=()=>both(g=>g.
 $('#scn').onchange=()=>{sceneDirty=true};
 
 /* ---------- loop and measuring ---------- */
-let last=0,ring=[],acc=null,stress=1,cpu=0,cpuN=0,last2=null,rate={up:0,py:0,dr:0},cpuAvg=0;
+let noDisp=false,last=0,ring=[],acc=null,stress=1,cpu=0,cpuN=0,last2=null,rate={up:0,py:0,dr:0},cpuAvg=0;
 function stats(a){a=a||ring;if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),q=p=>s[Math.min(s.length-1,Math.floor(p*s.length))],sum=a.reduce((x,y)=>x+y,0);return{fps:1000*a.length/sum,med:q(.5),p95:q(.95),worst:s[s.length-1],n:a.length}}
 function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&dt<1000){ring.push(dt);if(ring.length>720)ring.shift();if(acc)acc.push(dt)}
   const scn=$('#scn').value;
   if($('#drag').checked&&P.mix.on){const nx=Math.round(Math.sin((t-t0)/900)*Math.min(160,W*.12));if(nx!==P.mix.dx){P.mix.dx=nx;P.mix.el.style.translate=`${P.mix.x+nx}px ${P.mix.y}px`;gB.updatePanel('mix',{rect:[P.mix.x+nx,P.mix.y,P.mix.w,P.mix.h]})}}
   PH.hidden=scn!=='play';if(scn==='play')PH.style.transform=`translateX(${((t-t0)*.15)%W}px)`;
-  if(scn==='scroll'||sceneDirty){drawScene(t-t0);sceneDirty=false;gA.markDirty();gB.markDirty();if(scn==='scroll'&&P.dev.on)drawDisp(t-t0)}
+  if(scn==='scroll'||sceneDirty){drawScene(t-t0);sceneDirty=false;gA.markDirty();gB.markDirty();if(scn==='scroll'&&P.dev.on&&!noDisp)drawDisp(t-t0)}
   const a=performance.now();gA.render(t);gB.render(t);
   for(let i=1;i<stress;i++)both(g=>{g.debug.rebuild();g.debug.draw()});
   cpu+=performance.now()-a;cpuN++;wake=false}
@@ -145,7 +145,21 @@ async function compare(){if(gA.mode!=='gl')return;const b=$('#cmp'),keep=[$('#le
 /* direct timing (forces the GPU to finish; for machines without a screen cap) */
 function costSync(n=10){const out={},px=new Uint8Array(4),keep=[$('#lens').value,$('#blur').value,+$('#qual').value],fin=()=>both(g=>g.gl.readPixels(0,0,1,1,g.gl.RGBA,g.gl.UNSIGNED_BYTE,px));
   for(const[nm,l,v,q]of PRE){setPre(l,v,q);gA.render();gB.render();fin();const t=performance.now();for(let i=0;i<n;i++)both(g=>{g.debug.rebuild();g.debug.draw()});fin();out[nm]=+((performance.now()-t)/n).toFixed(2)}setPre(...keep);return out}
-$('#run').onclick=()=>measure();$('#cmp').onclick=compare;
+/* where does the time go? Part 1 times each piece directly (the graphics card is made to finish before the clock stops). Part 2 runs the page in steps, from no glass to all glass, and counts frames that arrived on time. */
+async function breakdown(){if(gA.mode!=='gl')return;const b=$('#brk'),btns=[b,$('#run'),$('#cmp')],px=new Uint8Array(4),set=(id,v)=>{const e=$(id);if(e.type==='checkbox')e.checked=v;else e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}))};
+  const keep={scn:$('#scn').value,q:$('#qual').value,drag:$('#drag').checked,on:Object.fromEntries(PD.map(p=>[p.k,P[p.k].on]))};btns.forEach(x=>x.disabled=true);
+  const show=ks=>PD.forEach(p=>{const v=ks.includes(p.k);if(P[p.k].on!==v){$('#p_'+p.k).checked=v;P[p.k].on=v}}),A=['hdr','tr','band','dev'],B=['mix','menu','pill'];
+  show([...A,...B]);layout();set('#scn','scroll');set('#qual','3');set('#drag',true);await sleep(500);
+  b.textContent='Timing the pieces';const fin=g=>g.gl.readPixels(0,0,1,1,g.gl.RGBA,g.gl.UNSIGNED_BYTE,px),tm=(g,fn,n=40)=>{fn();fin(g);const t=performance.now();for(let i=0;i<n;i++)fn();fin(g);return(performance.now()-t)/n},d=[];
+  for(const[nm,g]of[['docked layer',gA],['floating layer',gB]]){d.push([nm+': upload the picture',tm(g,()=>g.debug.upload())]);d.push([nm+': blur',tm(g,()=>g.debug.rebuild())]);d.push([nm+': draw the faces',tm(g,()=>g.debug.draw())]);await sleep(50)}
+  both(g=>g.markDirty());
+  b.textContent='Measuring the screen';show([]);layout();await sleep(700);acc=[];await sleep(1500);const base=stats(acc).med;acc=null;
+  const steps=[['no glass, arrangement scrolling',[],3,'scroll',1,0],['plain tint, all panels',[...A,...B],0,'scroll',1,0],['docked glass only',A,3,'scroll',1,0],['docked glass only, medium',A,2,'scroll',1,0],['docked glass only, low',A,1,'scroll',1,0],['floating glass only',B,3,'scroll',1,0],['all glass, device display still',[...A,...B],3,'scroll',1,1],['all glass',[...A,...B],3,'scroll',1,0],['all glass, medium',[...A,...B],2,'scroll',1,0],['all glass, low',[...A,...B],1,'scroll',1,0],['all glass, picture still, mixer moving',[...A,...B],3,'still',1,0],['all glass, playhead only, mixer still',[...A,...B],3,'play',0,0]],rows=[];
+  for(const[nm,ks,q,scn,drag,nd]of steps){b.textContent='Measuring: '+nm;show(ks);layout();set('#scn',scn);set('#qual',''+q);set('#drag',!!drag);noDisp=!!nd;await sleep(600);acc=[];await sleep(1500);const a=acc;acc=null;const s=stats(a),ont=a.filter(x=>x<base*1.5).length/a.length;
+    rows.push(nm.padEnd(40)+s.fps.toFixed(0).padStart(5)+s.med.toFixed(2).padStart(8)+s.p95.toFixed(2).padStart(8)+(ont*100).toFixed(0).padStart(7)+' %')}
+  noDisp=false;show(Object.keys(keep.on).filter(k=>keep.on[k]));layout();set('#scn',keep.scn);set('#qual',keep.q);set('#drag',keep.drag);btns.forEach(x=>x.disabled=false);b.textContent='Find the cost (about 30 s)';
+  $('#res').textContent=`AudioLab glass engine test: where the time goes\n${head()}screen frame ${base.toFixed(2)} ms (${(1000/base).toFixed(0)} Hz)\n\n1. each piece alone, ms\n`+d.map(([n,v])=>n.padEnd(40)+v.toFixed(2).padStart(8)).join('\n')+`\n\n2. the page in steps\n${''.padEnd(40)}  fps  median     95%  on time\n`+rows.join('\n')}
+$('#brk').onclick=breakdown;$('#run').onclick=()=>measure();$('#cmp').onclick=compare;
 $('#copy').onclick=async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText($('#res').textContent);b.textContent='Copied'}catch(x){const r=document.createRange();r.selectNodeContents($('#res'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'}setTimeout(()=>b.textContent='Copy table',1500)};
 $('#minb').onclick=e=>{const m=$('#hud').classList.toggle('min');e.currentTarget.textContent=m?'Open':'Fold'};
 addEventListener('resize',size);D=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;S.width=Math.round(W*D);S.height=Math.round(H*D);boot();requestAnimationFrame(frame);

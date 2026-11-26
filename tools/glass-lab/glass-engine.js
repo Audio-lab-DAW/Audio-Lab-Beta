@@ -86,7 +86,7 @@
     var W = 0, H = 0, D = 1, quality = 3;
     var panels = new Map(), order = [], seq = 0, flats = new Map();
     var src = null, srcRect = null, srcTex = null, srcReady = false, lastUp = -1e9;
-    var srcDirty = false, pyrDirty = true, bDirty = true, panelsDirty = true;
+    var srcDirty = false, pyrDirty = true, bDirty = true, panelsDirty = true, lastFlat = -1e9, flatWait = false;
     var pyrA = null, pyrB = null, regs = null, regKey = '';
     var acc = { rt: o.reduceTransparency, ic: o.increaseContrast };
     var mRT = mq('(prefers-reduced-transparency: reduce)'), mIC = mq('(prefers-contrast: more)');
@@ -390,7 +390,7 @@
       get gl() { return gl; },
       get mode() { return mode; },            /* 'gl' or 'fallback' */
       get reason() { return reason; },        /* why the fallback is on */
-      get pending() { return mode === 'gl' && srcDirty && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
+      get pending() { return mode === 'gl' && (srcDirty || flatWait) && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
       get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, quality: quality, lens: opt.lens, blur: opt.blur, levels: plan(), rate: QSET[quality].rate, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
 
       addPanel: function (d) {
@@ -460,7 +460,10 @@
             if (rk !== regKey) { regKey = rk; pyrDirty = true; }
             if (needA && (pyrDirty || !pyrA)) { if (!pyrA) pyrA = makePyr(); build(pyrA, false); pyrDirty = false; rebuilt = true; }
             if (needB) {
-              flats.forEach(function (f) { if (f.source && f.dirty) { if (!f.tex) f.tex = tex(0, 0); f.ok = upload(f.tex, f.source); f.dirty = false; stats.flatUploads++; bDirty = true; } });
+              /* fed canvases follow the same refresh cap as the backdrop */
+              var fdue = !rate || now - lastFlat >= 1000 / rate - 2, fup = false; flatWait = false;
+              flats.forEach(function (f) { if (f.source && f.dirty) { if (fdue || !f.tex) { if (!f.tex) f.tex = tex(0, 0); f.ok = upload(f.tex, f.source); f.dirty = false; stats.flatUploads++; bDirty = fup = true; } else flatWait = true; } });
+              if (fup) lastFlat = now;
               if (bDirty || !pyrB) { if (!pyrB) pyrB = makePyr(); build(pyrB, true); bDirty = false; rebuilt = true; }
             }
           }
@@ -471,6 +474,7 @@
 
       /* for tests and the bench page */
       debug: {
+        upload: function () { if (mode === 'gl' && src) upload(srcTex, src); },
         rebuild: function () { if (mode === 'gl' && srcReady) { if (pyrA) build(pyrA, false); if (pyrB) build(pyrB, true); } },
         draw: function () { if (mode === 'gl') drawPanels(); },
         lose: function () { loseExt = gl && !gl.isContextLost() && gl.getExtension('WEBGL_lose_context'); if (loseExt) loseExt.loseContext(); return !!loseExt; },
