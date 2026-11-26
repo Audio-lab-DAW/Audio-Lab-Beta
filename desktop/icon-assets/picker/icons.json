@@ -1,0 +1,317 @@
+{
+ "default": "default",
+ "groups": [
+  {
+   "key": "default",
+   "name": "Default icon",
+   "icons": [
+    {
+     "id": "default",
+     "name": "Default",
+     "file": "default.png",
+     "design_code": "PR4"
+    }
+   ]
+  },
+  {
+   "key": "spiro",
+   "name": "Spirograph & fractal",
+   "icons": [
+    {
+     "id": "golden-recursion",
+     "name": "Golden Recursion",
+     "file": "golden-recursion.png",
+     "design_code": "A4"
+    },
+    {
+     "id": "twelvefold",
+     "name": "Twelvefold",
+     "file": "twelvefold.png",
+     "design_code": "B2"
+    },
+    {
+     "id": "lotus-orbits",
+     "name": "Lotus Orbits",
+     "file": "lotus-orbits.png",
+     "design_code": "B4"
+    },
+    {
+     "id": "rose-curves",
+     "name": "Rose Curves",
+     "file": "rose-curves.png",
+     "design_code": "B5"
+    },
+    {
+     "id": "spirograph",
+     "name": "Spirograph",
+     "file": "spirograph.png",
+     "design_code": "B6"
+    },
+    {
+     "id": "frosted-spirograph",
+     "name": "Frosted Spirograph",
+     "file": "frosted-spirograph.png",
+     "design_code": "2G"
+    },
+    {
+     "id": "neon-spirograph",
+     "name": "Neon Spirograph",
+     "file": "neon-spirograph.png",
+     "design_code": "C1"
+    },
+    {
+     "id": "kaleido-tunnel",
+     "name": "Kaleido Tunnel",
+     "file": "kaleido-tunnel.png",
+     "design_code": "C4"
+    },
+    {
+     "id": "menger-core",
+     "name": "Menger Core",
+     "file": "menger-core.png",
+     "design_code": "D1"
+    },
+    {
+     "id": "nested-gyroscope",
+     "name": "Nested Gyroscope",
+     "file": "nested-gyroscope.png",
+     "design_code": "D4"
+    },
+    {
+     "id": "newton-atom",
+     "name": "Newton Atom",
+     "file": "newton-atom.png",
+     "design_code": "E3"
+    },
+    {
+     "id": "electric-seahorse",
+     "name": "Electric Seahorse",
+     "file": "electric-seahorse.png",
+     "design_code": "E4"
+    },
+    {
+     "id": "dendrite",
+     "name": "Dendrite",
+     "file": "dendrite.png",
+     "design_code": "F3"
+    },
+    {
+     "id": "phyllotaxis-core",
+     "name": "Phyllotaxis Core",
+     "file": "phyllotaxis-core.png",
+     "design_code": "F4"
+    }
+   ]
+  },
+  {
+   "key": "real",
+   "name": "Realistic 3D",
+   "icons": [
+    {
+     "id": "three-rings",
+     "name": "Three Rings",
+     "file": "three-rings.png",
+     "design_code": "RC2"
+    },
+    {
+     "id": "four-rings",
+     "name": "Four Rings",
+     "file": "four-rings.png",
+     "design_code": "RC3"
+    }
+   ]
+  },
+  {
+   "key": "decades",
+   "name": "Decades",
+   "icons": [
+    {
+     "id": "deco-medallion",
+     "name": "Deco Medallion",
+     "file": "deco-medallion.png",
+     "design_code": "FA5"
+    },
+    {
+     "id": "manhattan-blueprint",
+     "name": "Manhattan Blueprint",
+     "file": "manhattan-blueprint.png",
+     "design_code": "FA6"
+    },
+    {
+     "id": "space-race",
+     "name": "Space Race",
+     "file": "space-race.png",
+     "design_code": "FC4"
+    },
+    {
+     "id": "atomic-orange",
+     "name": "Atomic Orange",
+     "file": "atomic-orange.png",
+     "design_code": "FC8"
+    },
+    {
+     "id": "concentric-stripes",
+     "name": "Concentric Stripes",
+     "file": "concentric-stripes.png",
+     "design_code": "FD8"
+    },
+    {
+     "id": "synthwave",
+     "name": "Synthwave",
+     "file": "synthwave.png",
+     "design_code": "FE1"
+    },
+    {
+     "id": "home-computer",
+     "name": "Home Computer",
+     "file": "home-computer.png",
+     "design_code": "FE3"
+    },
+    {
+     "id": "pastel-tech",
+     "name": "Pastel Tech",
+     "file": "pastel-tech.png",
+     "design_code": "FE5"
+    },
+    {
+     "id": "laser-grid",
+     "name": "Laser Grid",
+     "file": "laser-grid.png",
+     "design_code": "FE8"
+    }
+   ]
+  },
+  {
+   "key": "fifties",
+   "name": "1950s illustration",
+   "icons": [
+    {
+     "id": "halftone-print",
+     "name": "Halftone Print",
+     "file": "halftone-print.png",
+     "design_code": "VA3"
+    },
+    {
+     "id": "sputnik",
+     "name": "Sputnik",
+     "file": "sputnik.png",
+     "design_code": "VA4"
+    },
+    {
+     "id": "science-fair",
+     "name": "Science Fair",
+     "file": "science-fair.png",
+     "design_code": "VA10"
+    }
+   ]
+  },
+  {
+   "key": "sci",
+   "name": "Scientific illustration",
+   "icons": [
+    {
+     "id": "blueprint",
+     "name": "Blueprint",
+     "file": "blueprint.png",
+     "design_code": "VB1"
+    },
+    {
+     "id": "chalkboard",
+     "name": "Chalkboard",
+     "file": "chalkboard.png",
+     "design_code": "VB3"
+    },
+    {
+     "id": "cutaway-nucleus",
+     "name": "Cutaway Nucleus",
+     "file": "cutaway-nucleus.png",
+     "design_code": "VB6"
+    },
+    {
+     "id": "cyanotype",
+     "name": "Cyanotype",
+     "file": "cyanotype.png",
+     "design_code": "VB7"
+    },
+    {
+     "id": "patent-drawing",
+     "name": "Patent Drawing",
+     "file": "patent-drawing.png",
+     "design_code": "VB5"
+    }
+   ]
+  },
+  {
+   "key": "models",
+   "name": "Atom models in history",
+   "icons": [
+    {
+     "id": "dalton-1808",
+     "name": "Dalton 1808",
+     "file": "dalton-1808.png",
+     "design_code": "FF1"
+    },
+    {
+     "id": "dalton-single",
+     "name": "Dalton Single",
+     "file": "dalton-single.png",
+     "design_code": "FF2"
+    },
+    {
+     "id": "dalton-sphere",
+     "name": "Dalton Sphere",
+     "file": "dalton-sphere.png",
+     "design_code": "VC4"
+    },
+    {
+     "id": "thomson-1904",
+     "name": "Thomson 1904",
+     "file": "thomson-1904.png",
+     "design_code": "FF3"
+    },
+    {
+     "id": "nagaoka-1904",
+     "name": "Nagaoka 1904",
+     "file": "nagaoka-1904.png",
+     "design_code": "FF4"
+    },
+    {
+     "id": "rutherford-1911",
+     "name": "Rutherford 1911",
+     "file": "rutherford-1911.png",
+     "design_code": "FF5"
+    },
+    {
+     "id": "rutherford-scattering",
+     "name": "Rutherford Scattering",
+     "file": "rutherford-scattering.png",
+     "design_code": "VC2"
+    },
+    {
+     "id": "bohr-1913",
+     "name": "Bohr 1913",
+     "file": "bohr-1913.png",
+     "design_code": "FF6"
+    },
+    {
+     "id": "sommerfeld-1916",
+     "name": "Sommerfeld 1916",
+     "file": "sommerfeld-1916.png",
+     "design_code": "FF7"
+    },
+    {
+     "id": "chadwick-1932",
+     "name": "Chadwick 1932",
+     "file": "chadwick-1932.png",
+     "design_code": "FF8"
+    },
+    {
+     "id": "orbital-wireframe",
+     "name": "Orbital Wireframe",
+     "file": "orbital-wireframe.png",
+     "design_code": "VC6"
+    }
+   ]
+  }
+ ]
+}
