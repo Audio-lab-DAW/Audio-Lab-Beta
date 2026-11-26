@@ -1486,6 +1486,60 @@ body.prdrag,body.prdrag *{cursor:row-resize!important;user-select:none}
 #fxband.bsolid,body.fxmin #fxband,body.fxzero #fxband{background:rgb(var(--gtr2))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 body.fxmin #fxband{box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important}
 body.fxmin #prHead{box-shadow:none}
+/* mixer strip rework (task S1, v0.194) */
+/* pan: slider with a centre tick and a live balance triangle under the track */
+#mixWin .mxp .cs .cr{position:relative}.mxsp .mxsr:has([data-mxpan])>span{white-space:nowrap}
+#mixWin .mxp .pbc{position:absolute;left:50%;top:-3px;width:1px;height:10px;margin-left:-.5px;background:rgba(255,255,255,.28);pointer-events:none}
+#mixWin .mxp .cs .pbm{position:absolute;top:4px;left:calc((100% - 14px) * var(--b,.5) + 7px);width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#f5c84c;box-shadow:0 0 0 1.5px #07080b;pointer-events:none;z-index:2}
+#mixWin .mxp.pbok .pbm{background:#3ecf8e}#mixWin .mxp.pbok .pbc{background:#3ecf8e}
+#mixWin .mxp.pbs .pbm{display:none}
+/* thin strips: the slider runs edge to edge, the handle is a slim bar */
+#mixWin.mxpc .mxp{padding:0 1px!important}#mixWin.mxpc .mxp .cs{gap:0}#mixWin.mxpc .mxp .cs output{display:none}
+#mixWin.mxpc .mxp .cs .cr::before{background:#2c3039;height:3px;top:5.5px}#mixWin.mxpc .mxp .cs .ck{width:6px!important;height:13px!important;top:.5px!important;border-radius:2px!important;background:linear-gradient(#fff,#c9ccd4)!important}
+#mixWin.mxpc .mxp .cs .pbm{left:calc((100% - 6px) * var(--b,.5) + 3px);width:5px;height:5px;margin-left:-2.5px;top:4.5px}
+/* half and full dial in the mixer */
+#mixWin .mxp .hpd,#mixWin .mxp .kn{flex-direction:row;justify-content:center;align-items:center;gap:3px;width:auto!important;margin:0 auto}
+#mixWin .mxp .hpd span,#mixWin .mxp .kn span{display:none}
+#mixWin .mxp .hpd svg{width:42px;height:25px;overflow:visible}#mixWin .mxp .kn svg{width:28px;height:28px;overflow:visible}
+#mixWin .mxp .hpd output,#mixWin .mxp .kn output{font:600 9px ui-monospace,Menlo,monospace;color:#cfd3db;margin:0;min-width:22px;text-align:left}
+#mixWin.mxpn .mxp .hpd output,#mixWin.mxpn .mxp .kn output{display:none}
+#mixWin.mxpn .mxp .hpd svg{width:38px;height:23px}#mixWin.mxpn .mxp .kn svg{width:24px;height:24px}
+#mixWin .mxp svg .pbm{fill:#f5c84c;stroke:#07080b;stroke-width:.8}#mixWin .mxp svg .pbz{stroke:rgba(255,255,255,.35);stroke-width:1.4;stroke-linecap:round}
+#mixWin .mxp.pbok svg .pbm{fill:#3ecf8e}#mixWin .mxp.pbok svg .pbz{stroke:#3ecf8e}#mixWin .mxp.pbs svg .pbm{display:none}
+/* compact channels show pan too, very small */
+#mixWin.mxcmp:not(.mxnopan) .mx:not(.master) .mxp{display:block!important;min-height:0}
+/* device strip pan bar: the same balance marker */
+.hb.pan .pbm{position:absolute;bottom:-1px;left:calc(var(--b,.5) * 100%);width:7px;height:4px;margin-left:-3.5px;background:#f5c84c;clip-path:polygon(50% 0,100% 100%,0 100%);pointer-events:none;z-index:3}
+.hb.pan.pbok .pbm{background:#3ecf8e}.hb.pan.pbs .pbm{display:none}
+/* width slider: the bracket is the setting, the strip behind it the live stereo field; dim red ends are out of phase */
+.wsl2{grid-template-rows:auto 16px}.wsl2>output{grid-row:1;grid-column:2}
+.wsl2 .wst{height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,rgba(255,77,109,.13) 0 25%,rgba(255,255,255,.045) 25% 75%,rgba(255,77,109,.13) 75%),#0b0c10;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)}
+.wsl2 .wst::before,.wsl2 .wst::after{content:'';position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.16)}.wsl2 .wst::before{left:25%}.wsl2 .wst::after{left:75%}
+.wsl2 .wsc{position:absolute;inset:0;width:100%;height:100%;display:block}
+.wsl2 .wst b{top:0;bottom:0;background:rgba(255,255,255,.22)}
+.wsl2 .wst i{top:1px;bottom:1px;border-radius:2px;background:color-mix(in srgb,var(--c) 20%,transparent);border-left:2px solid #eef1f6;border-right:2px solid #eef1f6;box-sizing:border-box;min-width:2px}
+/* master pin */
+#mixWin .mx.master .mxn{position:relative}
+#mixWin .mxpin{position:absolute;right:0;top:50%;transform:translateY(-50%);width:20px;height:18px;min-height:0;padding:0;display:grid;place-items:center;border-radius:5px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#7d8292;box-shadow:none}
+#mixWin .mxpin:hover{color:#e6e8ee;background:rgba(255,255,255,.06)}#mixWin .mxpin.on{color:#4cc9f0;border-color:rgba(76,201,240,.55);background:rgba(76,201,240,.14)}
+#mixWin.mxunpin .mx.master{position:relative!important;right:auto!important;box-shadow:none!important}
+/* double right-click: the channel lights up */
+@keyframes mxflash{0%,40%{box-shadow:0 0 0 2px #4cc9f0,0 0 18px rgba(76,201,240,.7)}100%{box-shadow:0 0 0 2px transparent}}
+#mixWin .mx.mxflash{animation:mxflash 1.5s ease-out}
+/* compact channels: everything closer, the master smaller */
+#mixWin.mxcmp .mxs{gap:3px!important}
+#mixWin.mxcmp .mx:not(.master){gap:3px!important}
+#mixWin.mxcmp .mx.master{width:112px!important;gap:3px!important;padding:4px 5px!important}#mixWin.mxcmp .mx.master .mxlu small{display:none}#mixWin.mxcmp .mx.master .mxlu{justify-content:space-around!important}
+#mixWin.mxcmp .mx.master .mxme,#mixWin.mxcmp .mx.master .mxmon{display:none!important}
+#mixWin.mxcmp .mx:not(.master) .mxb button{height:17px;min-height:17px;font-size:9px}
+/* transport: a bigger mixer button, still joined to the level meter, glowing while the mixer is open */
+#tr .mgrp #mBtn{height:30px;gap:6px;padding:0 10px 0 8px!important;color:#dfe3ec!important;font:700 11px Inter,system-ui,sans-serif;background:linear-gradient(rgba(255,255,255,.09),rgba(255,255,255,.025))!important;border-right:1px solid rgba(255,255,255,.14)!important;cursor:pointer}
+#tr .mgrp #mBtn .mbi{width:16px;height:16px;flex:none;color:#4cc9f0}
+#tr .mgrp #mBtn:hover{background:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.05))!important}
+#tr .mgrp #mBtn.on{color:#eafaff!important;background:linear-gradient(rgba(76,201,240,.38),rgba(76,201,240,.16))!important;box-shadow:inset 0 0 0 1px rgba(76,201,240,.75),inset 0 0 12px rgba(76,201,240,.35)!important}
+#tr .mgrp #mBtn.on .mbi{color:#fff;filter:drop-shadow(0 0 4px #4cc9f0)}
+#tr .mgrp.mxon{border-color:rgba(76,201,240,.7)!important;box-shadow:0 0 0 1px rgba(76,201,240,.35),0 0 14px rgba(76,201,240,.45)!important}
+#tr .tmc.mgrp #mBtn>.mbi:not(#mBtnV){display:block!important}#tr .tmc.mgrp #mBtn{padding:0 9px 0 8px!important}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2433,7 +2487,7 @@ body.tredit #tr .tmh{display:flex!important;opacity:.28}
   <div class="lcd"><svg class="ti c-clk" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.6V8l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span id="posTime">0:00:00.000</span></div>
   <div class="cb" role="group" aria-label="Undo and redo"><button id="bUndo" title="Undo (⌘Z). Steps back through your edits: clips, notes, automation, track settings. Redo is ⇧⌘Z." style="color:#cfd3db"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4 2.5 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button><button id="bRedo" title="Redo (⇧⌘Z). Brings back the last edit you undid." style="color:#cfd3db"><svg class="ti" style="transform:scaleX(-1)" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4 2.5 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button><button id="bTM" title="Time Machine: every saved version of this project on a visual timeline. Go back to any point, or fork from it." style="color:#cfd3db" aria-label="Time Machine"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.6 8A5.4 5.4 0 1 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M1.8 2.6v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 5v3.2l2.1 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
   <span class="sp"></span>
-  <div class="mgrp" role="group" aria-label="Mixer and master level"><button id="mBtn" title="Mixer. Click to open or close the mixer: one strip per track with level meters, wave, spectrum and stereo views (right-click a view to change colours). Right-click this button for the master fader.">Mixer <b id="mBtnV">0.0 dB</b></button><canvas id="mtr" aria-label="Master meter left and right"></canvas><button id="peakBox" title="Peak level of the master output in dB. Red means the signal is clipping (above 0 dB). Click to reset the readout."><span id="pkNow">-∞ dB</span><small id="pkMax">max -∞</small></button></div>
+  <div class="mgrp" role="group" aria-label="Mixer and master level"><button id="mBtn" title="Mixer. Click to open or close the mixer: one strip per track with level meters, wave, spectrum and stereo views (right-click a view to change colours). Right-click this button for the master fader."><svg class="mbi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><rect x="3.5" y="13" width="5" height="3" rx="1" fill="currentColor"/><rect x="9.5" y="7" width="5" height="3" rx="1" fill="currentColor"/><rect x="15.5" y="11" width="5" height="3" rx="1" fill="currentColor"/></svg><span class="mbl">Mixer</span> <b id="mBtnV">0.0 dB</b></button><canvas id="mtr" aria-label="Master meter left and right"></canvas><button id="peakBox" title="Peak level of the master output in dB. Red means the signal is clipping (above 0 dB). Click to reset the readout."><span id="pkNow">-∞ dB</span><small id="pkMax">max -∞</small></button></div>
   <button id="cpu" class="cpum" aria-label="Performance and audio engine"><i id="engDot" class="eng idle"></i><canvas id="cpuC"></canvas><b id="cpuV">0%</b><span id="latV" title="Latency: the time from the audio engine to your ears (output buffer plus the device). Lower feels tighter when you play live.">– ms</span></button><div id="cpuPop" class="lg" hidden></div>
 </div>
 
@@ -5095,7 +5149,7 @@ function mxFit(){const w=$('#mixWin');if(!w||w.hidden)return;const ms=w.querySel
   const others=fixed('.mxn')+fixed('.mxp')+fixed('.mxb')+ (probe.querySelector('.mxf output')?probe.querySelector('.mxf output').offsetHeight+3:0)+5*6+12;
   const maxN=Math.max(1,...strips.map(t=>t.querySelectorAll('.slot').length));
   const CMIN=40,FMIN=64,FMAX=156;
-  let fxH=maxN*(sh+2)+4;const room=H-others;
+  let fxH=w.classList.contains('mxcmp')||w.classList.contains('mxnofx')?0:maxN*(sh+2)+4;const room=H-others;
   if(fxH>room-CMIN-FMIN){const avail=room-CMIN-FMIN;sh=Math.max(9,Math.floor((avail-4)/maxN)-2);fxH=maxN*(sh+2)+4}
   const rest=room-fxH,fh=clamp(rest-CMIN,FMIN,FMAX);
   ms.style.setProperty('--sh',sh+'px');ms.style.setProperty('--fh',fh+'px');ms.style.setProperty('--fxh',fxH+'px');ms.classList.toggle('slotsm',sh<15);ms.classList.toggle('slottiny',sh<12)}
@@ -5647,7 +5701,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.193',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.194',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8993,7 +9047,7 @@ setTimeout(()=>{try{fxGlassSync();new ResizeObserver(fxGlassSync).observe(docume
 /* ---------- mixer settings, master strip extras, fader designs (v0.159) ----------
    One settings object (UI.mxs, defaults in MXSD) edited from two places that stay in sync: the settings button in the mixer's tab (#mxSetB opens #mxsPop)
    and Settings > Layout > Mixer (#mxsSet). Every control carries data-mxs (a UI.mxs key), data-mxm (a UI.mtr key) or data-fd (a fader design number). */
-const MXSD={w:96,mw:136,fh:0,fx:1,snd:1,view:1,pan:1,btn:1,num:1,sc:1,val:1,pkr:0,gband:0,fd:1,mLu:1,mTp:1,mTgt:1,mCorr:1};
+const MXSD={w:96,mw:136,fh:0,fx:1,snd:1,view:1,pan:1,btn:1,num:1,sc:1,val:1,pkr:0,gband:0,fd:22,panst:'auto',pin:1,mLu:1,mTp:1,mTgt:1,mCorr:1};
 const mxsO=()=>Object.assign({},MXSD,UI.mxs||{});
 const fdLn=(h,c)=>`linear-gradient(transparent ${h/2-1}px,${c} ${h/2-1}px,${c} ${h/2+1}px,transparent ${h/2+1}px)`;
 const fdCap=(w,h,r,bg,sh,fw)=>`§ .fv i::after{left:${((fw||34)-w)/2}px!important;right:${((fw||34)-w)/2}px!important;top:${-h/2}px!important;height:${h}px!important;border-radius:${r}!important;background:${bg}!important;box-shadow:${sh}!important}§ .fv:hover i::after,§ .fv.act i::after{filter:brightness(1.15)}`;
@@ -10381,7 +10435,7 @@ setTimeout(()=>{try{fxBuild()}catch(e){console.error('AudioLab glass settings',e
    and the controls it starts with (fd: fader and meter design, mcol: meter colours). thPaint() runs after applyTheme() and writes all of it;
    thPick() is the click on a card in Settings. Only colours and general shapes are taken from the reference programs. */
 const THEMES=[
- {id:'audiolab',n:'AudioLab',d:'Dark blue glass, see-through clips',bgL:40,tintH:215,tintA:25,gridB:50,clipA:36,fd:1,mcol:'classic',pal:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'],
+ {id:'audiolab',n:'AudioLab',d:'Dark blue glass, see-through clips',bgL:40,tintH:215,tintA:25,gridB:50,clipA:36,fd:22,mcol:'classic',pal:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'],
   pf:{cw:14,ch:6,cr:1.5,cf:'#d9dce4'}},
  {id:'ableton',n:'Live style',d:'Flat grey, amber, pastel blocks',bgL:52,tintH:40,tintA:3,gridB:50,clipA:100,fd:7,mcol:'lime',sharp:1,knw:2,
   pal:['#fd95a7','#fda43a','#f7f384','#c0f932','#39fdaa','#65fee8','#8dc6fd','#93a9fc','#d670e2','#e3569f','#f46c20','#44c121'],
@@ -14416,6 +14470,105 @@ function fxBandSync(){const fx=$('#fx');if(!fx||!fx.parentElement)return;let b=d
 {const _fs=fxGlassSync;fxGlassSync=function(){const r=_fs.apply(this,arguments);try{fxBandSync()}catch(e){}return r}}
 {const _at=applyTrans;applyTrans=function(){const b=document.getElementById('fxband');if(b)b._k='';const r=_at.apply(this,arguments);try{fxBandSync()}catch(e){}return r}}
 setTimeout(()=>{try{prHandles();prWords();fxBandSync();const ro=new ResizeObserver(()=>{if(!PRDK.drag)requestAnimationFrame(prAll);else prCmpSync()});ro.observe($('#pr'));ro.observe($('#stage'));ro.observe($('#fx'));if(PR.open)prAll()}catch(e){console.warn(e)}},250);
+/* ---------- mixer strip rework (task S1, v0.194) ----------
+   Pan control in the mixer: slider, half dial or full dial (Settings: UI.mxs.panst = auto | slider | half | full; auto = slider, half dial when a strip is under 80 px).
+   Every pan control in the mixer and the pan bar in the device strip shows a live balance marker: where the sound actually sits, worked out from the
+   energy of left and right (b=(R²-L²)/(R²+L²), shown at the pan position that would give that balance with the app's equal-power panner: p=2/π·asin b).
+   Green at the centre, amber off centre, hidden when the channel is silent.
+   Width slider: the bracket shows the setting, the strip behind it shows the live stereo field (where the energy of each sample pair sits from left to right, out of phase at the red ends).
+   Flat bars 2 (design 22) is the default fader and meter design. Master pin. Compact mode shrinks the height too. Double-click and double right-click on channels. */
+const S1BL=new Float32Array(512),S1BR=new Float32Array(512);
+/* left and right energy of the newest 512 samples of two analysers; returns null when silent (below about -70 dB) */
+function s1Bal(aL,aR){if(!aL||!aR||!ctx)return null;aL.getFloatTimeDomainData(S1BL);aR.getFloatTimeDomainData(S1BR);let sl=0,sr=0;for(let i=0;i<512;i++){const l=S1BL[i],r=S1BR[i];sl+=l*l;sr+=r*r}
+  if(sl+sr<512*1e-7)return null;const b=(sr-sl)/(sr+sl);return Math.asin(clamp(b,-1,1))*2/Math.PI}
+function s1PanKind(){const o=mxsO(),sw=UI.mxCompact?46:o.w,st=o.panst||'auto';return st==='half'?'hp':st==='full'?'kn':st==='slider'?'cs':(sw<80?'hp':'cs')}
+const S1PZ='<line class="pbz" x1="24" y1="1.5" x2="24" y2="5"/>';
+/* builds the pan control of every mixer channel in the chosen style (same control id, so it stays linked with the header and the device strip) */
+function s1PanBuild(w){w=w||document.getElementById('mixWin');if(!w)return;const kind=s1PanKind(),o=mxsO(),narrow=(UI.mxCompact?46:o.w)<80;
+  w.classList.toggle('mxpc',kind==='cs'&&narrow);w.classList.toggle('mxpn',narrow);w.dataset.pk=kind;
+  for(const mx of w.querySelectorAll('.mx[data-id]:not(.master)')){const p=mx.querySelector('.mxp');if(!p)continue;if(p.dataset.k===kind&&p.firstElementChild)continue;
+    const id='mx:'+mx.dataset.id+':pan',C=CT.get(id);if(!C)continue;p.innerHTML=ctl(kind,id,'Pan',C.spec,C.get,C.set,C.after);p.dataset.k=kind;const el=p.firstElementChild;
+    if(kind==='cs'){const cr=el.querySelector('.cr');cr.insertAdjacentHTML('afterbegin','<b class="pbc"></b>');cr.insertAdjacentHTML('beforeend','<i class="pbm"></i>');el.title='Pan: drag sideways, shift for fine, double-click to centre. The small triangle shows where the sound really sits: green when it is in the centre.'}
+    else{const sv=el.querySelector('svg');if(kind==='hp')sv.insertAdjacentHTML('beforeend',S1PZ+'<circle class="pbm" r="2.3" cx="24" cy="2.5"/>');else{sv.setAttribute('viewBox','-2 -2 40 40');sv.insertAdjacentHTML('beforeend','<line class="pbz" x1="18" y1="-1.5" x2="18" y2="2"/><circle class="pbm" r="2" cx="18" cy="0"/>')}
+      el.title='Pan: drag '+(kind==='hp'?'sideways':'up or down')+', shift for fine, double-click to centre. The dot on the rim shows where the sound really sits: green when it is in the centre.'}
+    p._bk='';paintCtl(el)}}
+/* live balance marker of one pan control; p in -1..1 or null for silence */
+function s1Mark(host,el,p){const k=p===null?'s':p.toFixed(3);if(host._bk===k)return;host._bk=k;const sil=p===null,cen=!sil&&Math.abs(p)<(host._cen?.06:.04);host._cen=cen;host.classList.toggle('pbs',sil);host.classList.toggle('pbok',cen);if(sil)return;
+  const m=el.querySelector('.pbm');if(!m)return;
+  if(m.tagName==='circle'){const kn=el.classList.contains('kn'),a=p*(kn?135:90)*Math.PI/180,r=kn?18:21.5,cx=kn?18:24,cy=kn?18:24;m.setAttribute('cx',(cx+r*Math.sin(a)).toFixed(2));m.setAttribute('cy',(cy-r*Math.cos(a)).toFixed(2))}
+  else m.style.setProperty('--b',((p+1)/2).toFixed(4))}
+/* called with every mixer picture update (every second frame): visible channels only */
+function s1MixTick(w){const o=mxsO();if(!o.pan)return;const ms=w.querySelector('.mxs');if(!ms)return;const sl=ms.scrollLeft,cw=ms.clientWidth;
+  for(const mx of w.querySelectorAll('.mx[data-id]:not(.master)')){const x=mx.offsetLeft-sl;if(x+mx.offsetWidth<-10||x>cw+10)continue;const p=mx.querySelector('.mxp');if(!p||!p.firstElementChild)continue;
+    const N=NODES.get(mx.dataset.id),H0=MXH.get(mx.dataset.id),b=N&&ctx&&ctx.state==='running'?s1Bal(N.aL,N.aR):null;
+    let v=null;if(b!==null&&H0){H0.bp=H0.bp==null||H0.bs?b:H0.bp*.6+b*.4;H0.bs=0;v=H0.bp}else if(H0)H0.bs=1;s1Mark(p,p.firstElementChild,v)}}
+{const _dm=drawMixer;drawMixer=function(){const r=_dm.apply(this,arguments);try{const w=document.getElementById('mixWin');if(w&&!w.hidden&&MXV&&!(FRN%2))s1MixTick(w)}catch(e){console.error('AudioLab pan balance',e)}return r}}
+/* in a thin strip the slider runs from edge to edge with a thinner handle */
+{const _pc=paintCtl;paintCtl=function(el){const r=_pc.apply(this,arguments);try{if(el.classList.contains('cs')&&el.closest('#mixWin.mxpc')){const C=CT.get(el.dataset.c);if(C){const n=C.spec.n(C.get());el.querySelector('.ck').style.left=`calc((100% - 6px) * ${n})`;const f=el.querySelector('.cf');f.style.left=`calc((100% - 6px) * ${Math.min(.5,n)} + 3px)`;f.style.width=`calc((100% - 6px) * ${Math.abs(n-.5)})`}}
+  else if(el.classList.contains('wsl2')){const C=CT.get(el.dataset.c);if(C){const n=C.spec.n(C.get()),o=el.querySelector('output');if(o)o.textContent=Math.round(C.get())+'%'}}}catch(e){}return r}}
+/* the width slider: a strip with the stereo field behind the setting */
+{const _ct=ctl;ctl=function(kind,id,label,spec,get,set,after){if(kind!=='ws')return _ct.apply(this,arguments);CT.set(id,{kind,spec,get,set,after,label});
+  return`<div class="wsl wsl2" data-c="${id}" title="${esc(label)}: drag sideways, double-click for 100%. The bright bracket is the width you set (100% is the sound as it is, 0% is mono, above 100% is wider). Behind it you see where the sound really is from left to right while it plays; anything in the red ends is out of phase and gets quieter in mono."><span>${esc(label)}</span><div class="wst"><canvas class="wsc" aria-hidden="true"></canvas><b></b><i></i></div><output></output></div>`}}
+const S1H=new Float32Array(40),S1HN=new Float32Array(40);
+/* stereo field: per sample pair, the angle of (mid, side) folded to the front half: 0 = centre, ±45° = only left or only right, ±90° = out of phase. Weighted by energy */
+function s1Field(aL,aR,H){aL.getFloatTimeDomainData(S1BL);aR.getFloatTimeDomainData(S1BR);S1HN.fill(0);let tot=0;const n=S1HN.length;
+  for(let i=0;i<512;i++){let m=S1BL[i]+S1BR[i],d=S1BR[i]-S1BL[i];const e=m*m+d*d;if(e<1e-9)continue;if(m<0){m=-m;d=-d}const a=Math.atan2(d,m)/Math.PI+.5,k=Math.min(n-1,Math.max(0,Math.floor(a*n)));S1HN[k]+=e;tot+=e}
+  if(tot<512*2e-7){for(let k=0;k<n;k++)H[k]*=.7;return false}for(let k=0;k<n;k++)H[k]=H[k]*.55+S1HN[k]/tot*.45;return true}
+function s1FieldDraw(cv,H,col){const r=cv.getBoundingClientRect();if(r.width<4)return;const dpr=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*dpr),Hh=Math.round(r.height*dpr);if(cv.width!==W||cv.height!==Hh){cv.width=W;cv.height=Hh}
+  const g=cv.getContext('2d');g.clearRect(0,0,W,Hh);let mx=0;for(let k=0;k<H.length;k++)if(H[k]>mx)mx=H[k];if(mx<1e-4)return;const n=H.length,bw=W/n;
+  for(let k=0;k<n;k++){const v=Math.sqrt(H[k]/mx);if(v<.04)continue;const h=v*(Hh-2),out=k<n/4||k>=n*3/4;g.globalAlpha=.25+v*.6;g.fillStyle=out?'#ff4d6d':col;g.fillRect(k*bw+.5,(Hh-h)/2,Math.max(1,bw-1),h)}g.globalAlpha=1}
+let S1T=0,S1EL=null;
+/* device strip: width field and the pan balance marker, about 30 times a second while visible */
+function s1Loop(now){requestAnimationFrame(s1Loop);if(now-S1T<32)return;S1T=now;
+  if(!S1EL||S1EL.some(e=>!e.isConnected)){const f=document.getElementById('fxin');S1EL=f?[...f.querySelectorAll('.wsl2[data-c="fx:width"],.hb.pan[data-c="fx:pan"]')]:[];
+    for(const e of S1EL)if(e.classList.contains('hb')&&!e.querySelector('.pbm'))e.insertAdjacentHTML('beforeend','<i class="pbm"></i>')}
+  if(!S1EL.length)return;const t=typeof curT==='function'?curT():null,N=t&&NODES.get(t.id),run=!!(N&&ctx&&ctx.state==='running');
+  for(const e of S1EL){if(!e.offsetParent)continue;
+    if(e.classList.contains('wsl2')){const cv=e.querySelector('canvas');if(!run){if(e._on){e._on=0;S1H.fill(0);s1FieldDraw(cv,S1H,'#fff')}continue}const on=s1Field(N.aL,N.aR,S1H);e._on=1;s1FieldDraw(cv,S1H,t.color||'#4cc9f0')}
+    else{const b=run?s1Bal(N.aL,N.aR):null;let v=null;if(b!==null){e._bp=e._bp==null||e._bs?b:e._bp*.6+b*.4;e._bs=0;v=e._bp}else e._bs=1;s1Mark(e,e,v)}}}
+requestAnimationFrame(s1Loop);
+/* settings: pan control style and the master pin, in the mixer menu and in Settings */
+{const _mh=mxsHtml;mxsHtml=function(adv){let h=_mh.apply(this,arguments);const add=`<label class="mxsr" title="How pan looks in the mixer. Automatic is a slider, and a half dial when the channels are thinner than 80 px. Every style shows a small marker where the sound really sits, green when it is in the centre."><span>Pan control</span><select data-mxpan="1"><option value="auto">Automatic</option><option value="slider">Slider</option><option value="half">Half dial</option><option value="full">Full dial</option></select></label><div class="mxsg"><label class="mxst" title="The master stays at the right edge while you scroll through the channels. It lets go by itself when the mixer gets narrow (under 600 px, or 360 px with compact channels), and comes back when it is wider again."><input type="checkbox" data-mxs="pin"><span>Keep the master in view</span></label></div>`;
+  const k='<h5>Each channel shows</h5>';if(h.includes(k))h=h.replace(k,add+k);return h}}
+{const _ms=mxsSync;mxsSync=function(){const r=_ms.apply(this,arguments);try{const o=mxsO();for(const el of document.querySelectorAll('[data-mxpan]'))el.value=o.panst||'auto'}catch(e){}return r}}
+document.addEventListener('change',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.mxpan)mxsSet('panst',el.value)});
+{const _ma=mxsApply;mxsApply=function(){const r=_ma.apply(this,arguments);try{const w=document.getElementById('mixWin');if(w&&!w.hidden){s1PanBuild(w);s1Pin(w)}}catch(e){console.error('AudioLab pan style',e)}return r}}
+/* master pin */
+const S1PIN='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>';
+function s1Pin(w){w=w||document.getElementById('mixWin');if(!w||w.hidden)return;const o=mxsO(),lim=UI.mxCompact?360:600,narrow=w.offsetWidth<lim;if(!narrow)w._pinForce=0;
+  const pinned=!!o.pin&&(!narrow||!!w._pinForce);w.classList.toggle('mxunpin',!pinned);const b=w.querySelector('.mx.master .mxpin');
+  if(b){b.classList.toggle('on',pinned);b.title=pinned?'The master stays in view while you scroll. Click to let it scroll with the channels.':o.pin&&narrow?'The mixer is narrow, so the master scrolls with the channels. Click to keep it in view anyway.':'The master scrolls with the channels. Click to keep it at the right edge.';b.setAttribute('aria-pressed',pinned?'true':'false')}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#mixWin .mxpin');if(!b)return;e.stopPropagation();e.preventDefault();const w=document.getElementById('mixWin'),o=mxsO(),on=b.classList.contains('on');
+  if(on)mxsSet('pin',0);else{w._pinForce=1;mxsSet('pin',1)}s1Pin(w)},true);
+{const _rm=renderMixer;renderMixer=function(){const r=_rm.apply(this,arguments);try{const w=document.getElementById('mixWin');if(w&&!w.hidden){const n=w.querySelector('.mx.master .mxn');if(n&&!n.querySelector('.mxpin'))n.insertAdjacentHTML('beforeend',`<button class="mxpin" type="button" aria-label="Keep the master in view">${S1PIN}</button>`);s1PanBuild(w);s1Pin(w);s1Watch(w)}}catch(e){console.error('AudioLab mixer S1',e)}return r}}
+function s1Watch(w){if(w._s1w)return;w._s1w=1;let t=0;new ResizeObserver(()=>{cancelAnimationFrame(t);t=requestAnimationFrame(()=>s1Pin(w))}).observe(w);
+  /* the transport button glows while the mixer is open */
+  const sync=()=>{const b=document.getElementById('mBtn');if(!b)return;const on=!w.hidden;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');const g=b.closest('.mgrp');if(g)g.classList.toggle('mxon',on)};
+  new MutationObserver(sync).observe(w,{attributes:true,attributeFilter:['hidden']});sync()}
+/* compact channels: the window gets shorter too (its top stays where it is), the cable lane a little lower, the master smaller */
+{const _ch=cabH;cabH=function(){const h=_ch.apply(this,arguments);return UI.mxCompact?Math.max(38,Math.round(h*.8)):h}}
+function s1CmpH(on){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const H=w.offsetHeight;
+  if(on){UI.mxFullH=H;const nh=Math.max(280,Math.round(H*.74));if(nh<H)w.style.height=nh+'px'}
+  else{const fh=UI.mxFullH;if(fh&&fh>H){const vh=innerHeight/ZOOM;w.style.height=Math.min(fh,Math.max(H,vh-w.offsetTop-6))+'px'}UI.mxFullH=0}
+  UI.win=UI.win||{};UI.win.mixWin={x:w.offsetLeft,y:w.offsetTop,w:w.offsetWidth,h:w.offsetHeight};saveUI();try{mxFit();mxAutoW()}catch(e){}}
+{let last=!!UI.mxCompact;const chk=()=>{const now=!!UI.mxCompact;if(now!==last){last=now;s1CmpH(now);const w=document.getElementById('mixWin');if(w){s1PanBuild(w);s1Pin(w)}}};
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#mxCmp'))setTimeout(chk,0)});document.addEventListener('change',e=>{if(e.target&&e.target.dataset&&e.target.dataset.mxs==='compact')setTimeout(chk,0)})}
+/* double-click a track header: its devices; double right-click a header or a mixer channel: the mixer, scrolled to that channel and lit up */
+function s1MixFocus(id){let w=document.getElementById('mixWin');if(!w||w.hidden){const b=document.getElementById('mBtn');if(b&&b.onclick)b.onclick({currentTarget:b});w=document.getElementById('mixWin')}if(!w)return;
+  if(id==='master'){if(typeof selMaster==='function'&&selT!=='__m')selMaster()}else if(selT!==id)selectTrack(id);
+  requestAnimationFrame(()=>{const mx=w.querySelector(`.mx[data-id="${id}"]`),ms=w.querySelector('.mxs');if(!mx||!ms)return;if(id!=='master'){const M=ms.querySelector('.mx.master'),mw=w.classList.contains('mxunpin')?0:(M?M.offsetWidth:0);ms.scrollLeft=Math.max(0,mx.offsetLeft-(ms.clientWidth-mw-mx.offsetWidth)/2)}
+    mx.classList.remove('mxflash');void mx.offsetWidth;mx.classList.add('mxflash');setTimeout(()=>mx.classList.remove('mxflash'),1600)})}
+{const SKIP='button,input,select,textarea,a,label,[data-c],[data-a],[contenteditable=true],.lnb,.aar';
+  hdrin.addEventListener('dblclick',e=>{const h=e.target.closest&&e.target.closest('.hdr,.mhdr');if(!h||e.target.closest(SKIP))return;if(e.altKey&&e.target.closest('.nm'))return;/* Alt and double-click on the name still renames */
+    e.stopImmediatePropagation();e.preventDefault();const id=h.dataset.id;if(h.classList.contains('mhdr')||id==='master'||id==='__m'){if(typeof selMaster==='function'&&selT!=='__m')selMaster();if(UI.devPop)devPop(true);else if(UI.fxHide)devHide(false);return}if(S.tracks.some(t=>t.id===id))goDevice(id,null)},true);
+  let rc=null;document.addEventListener('contextmenu',e=>{const now=performance.now();if(rc&&now-rc.t<450&&Math.hypot(e.clientX-rc.x,e.clientY-rc.y)<10){const id=rc.id;rc=null;e.preventDefault();e.stopImmediatePropagation();try{closeMenu()}catch(x){}s1MixFocus(id);return}
+    const h=e.target.closest&&(e.target.closest('#hdrin .hdr,#hdrin .mhdr')||e.target.closest('#mixWin .mx[data-id]'));rc=null;if(!h||e.target.closest('canvas.mxv'))return;let id=h.dataset.id;if(h.classList.contains('mhdr')||id==='__m')id='master';if(!id)return;rc={t:now,x:e.clientX,y:e.clientY,id}},true)}
+/* Flat bars 2: the default fader and meter design (from the flat bars the user likes, with zone colours shown dimly behind the bars, a 0 dB line, a firm peak line and a flat grip tab) */
+{const z=(dbN(0)*100).toFixed(1);FDS.push({n:'Flat bars 2',css:fdBar(30,22,10,'opacity:1!important;border-radius:0;position:relative;z-index:1')+`§ .fm{background:linear-gradient(#101217,#101217) left/10px 100% no-repeat,linear-gradient(#101217,#101217) right/10px 100% no-repeat}§ .fm::before{content:'';position:absolute;inset:0;background:GRAD left/10px 100% no-repeat,GRAD right/10px 100% no-repeat;opacity:.12}§ .fm::after{content:'';position:absolute;left:-3px;right:-3px;bottom:${z}%;height:1px;background:rgba(255,255,255,.38);z-index:2}§ .fm s{height:2px!important;z-index:3;background:#f4f6fa}§ .fv::before{display:none}§ .fv i::before{left:2px!important;width:28px!important;margin-left:0;top:-1px!important;height:2px!important;bottom:auto;background:#f2f4f8!important;opacity:1;border-radius:0;z-index:2!important;box-shadow:0 0 0 1px rgba(0,0,0,.45)}§ .fv i::after{left:28px!important;right:auto!important;width:9px;top:-8px!important;height:16px!important;border-radius:2px!important;background:linear-gradient(transparent 7px,#3a3e49 7px,#3a3e49 9px,transparent 9px),#e9ecf2!important;box-shadow:inset 2px 0 0 var(--c),0 1px 3px rgba(0,0,0,.7)!important}§ .fv:hover i::after,§ .fv.act i::after{filter:brightness(1.12)}§ .fsc span{color:#8e93a2}`});
+  HFD.push(HFD[6]+`¶ i{background:#101217!important}`)}
+/* once: the old default (Classic) and the old Flat bars move to Flat bars 2 */
+if(!UI.fd22){UI.fd22=1;if(UI.mxs&&(UI.mxs.fd===1||UI.mxs.fd===7)){UI.mxs.fd=22}try{saveUI()}catch(e){}}
+try{fdCssUp(true);mxsApply();hfdCss()}catch(e){}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
