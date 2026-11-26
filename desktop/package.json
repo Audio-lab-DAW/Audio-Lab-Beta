@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Pro",
-  "version": "0.202.0",
+  "version": "0.203.0",
   "description": "AudioLab Pro - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -34,6 +34,9 @@
       "main.js",
       "preload.js",
       "dock-icon.png",
+      "icon-assets/picker/*.png",
+      "icon-assets/picker/icons.json",
+      "icon-assets/picker/thumb/*.png",
       "app/**/*",
       "package.json"
     ],
@@ -43,15 +46,6 @@
         "owner": "Audio-lab-DAW",
         "repo": "Audio-Lab-Beta",
         "releaseType": "release"
-      }
-    ],
-    "fileAssociations": [
-      {
-        "ext": "audiolab",
-        "name": "AudioLab Pro project",
-        "description": "AudioLab Pro project",
-        "role": "Editor",
-        "icon": "build/doc"
       }
     ],
     "mac": {
@@ -67,12 +61,46 @@
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "AudioLab Pro needs audio input access to record and to list your audio output devices."
+        "NSMicrophoneUsageDescription": "AudioLab Pro needs audio input access to record and to list your audio output devices.",
+        "CFBundleDocumentTypes": [
+          {
+            "CFBundleTypeName": "AudioLab Pro project",
+            "CFBundleTypeRole": "Editor",
+            "LSHandlerRank": "Owner",
+            "LSItemContentTypes": [
+              "com.audiolab.project"
+            ],
+            "CFBundleTypeExtensions": [
+              "audiolab"
+            ],
+            "CFBundleTypeIconFile": "doc.icns"
+          }
+        ],
+        "UTExportedTypeDeclarations": [
+          {
+            "UTTypeIdentifier": "com.audiolab.project",
+            "UTTypeDescription": "AudioLab Pro project",
+            "UTTypeConformsTo": [
+              "public.data",
+              "public.content"
+            ],
+            "UTTypeIconFile": "doc.icns",
+            "UTTypeTagSpecification": {
+              "public.filename-extension": [
+                "audiolab"
+              ]
+            }
+          }
+        ]
       },
       "extraResources": [
         {
           "from": "bin/alvol",
           "to": "bin/alvol"
+        },
+        {
+          "from": "build/doc.icns",
+          "to": "doc.icns"
         }
       ]
     },
@@ -89,12 +117,23 @@
           ]
         }
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.ico",
+      "fileAssociations": [
+        {
+          "ext": "audiolab",
+          "name": "AudioLab Pro project",
+          "description": "AudioLab Pro project",
+          "role": "Editor",
+          "icon": "build/doc"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "perMachine": false
+      "perMachine": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     },
     "afterPack": "scripts/afterPack.js"
   }

@@ -33,3 +33,6 @@ npm run dist:win   # on Windows -> dist/*.exe
 
 ## Releasing a new version
 Update `index.html` (bump `VERSION`), push, then push a tag `desktop-vX.Y` (or run the workflow by hand). Installed apps pick it up on their next start.
+
+## App icon (v0.203)
+The default icon is Ocean Yellow (`build/icon.icns`, `build/icon.ico`, `dock-icon.png`). Settings ▸ Colours & clips ▸ App icon offers the 49 pictures in `icon-assets/picker/` (names and groups in `icons.json`, 128 px thumbnails in `picker/thumb/`). The choice is kept in `app-icon.json` in the user-data folder: the Dock icon on a Mac (Finder and Launchpad keep the bundle icon), the window, taskbar and Start menu/desktop shortcuts on Windows. `.audiolab` files use `build/doc.icns` (Mac, exported type `com.audiolab.project` in `mac.extendInfo`) and `build/doc.ico` (Windows, `win.fileAssociations`). Source drawings: `icon-assets/README.md`.
