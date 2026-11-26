@@ -8,8 +8,17 @@ from alab import AudioLab
 al = AudioLab(sys.argv[1] if len(sys.argv) > 1 else 'index.html'); al.start()
 rms = lambda x: float(np.sqrt(np.mean(x.astype(np.float64) ** 2))); db = lambda v: 20 * np.log10(max(v, 1e-12))
 al.tracks = json.loads(al.run("JSON.stringify(Object.fromEntries(S.tracks.map(t=>[t.name,t.id])))"))
+# From v0.220 (task AI) the Fractals song opens with its master at -10 dB, and the master fader sits before the master effects:
+# as it opens Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7); with the master at 0 dB the old reference
+# Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e). Both are printed.
+m0 = al.run("S.master")
 for nm in ('Kick', 'Bass'):
-    x, sr = al.render(b0=64, b1=96, only=nm); print('Fractals %s %.5f dB  %s' % (nm, db(rms(x)), hashlib.md5(x.tobytes()).hexdigest()[:12]))
+    x, sr = al.render(b0=64, b1=96, only=nm); print('Fractals %s %.5f dB  %s%s' % (nm, db(rms(x)), hashlib.md5(x.tobytes()).hexdigest()[:12], '' if m0 == 0 else '  (master %g dB)' % m0))
+if m0 != 0:
+    al.run("S.master=0;0")
+    for nm in ('Kick', 'Bass'):
+        x, sr = al.render(b0=64, b1=96, only=nm); print('Fractals %s %.5f dB  %s  (master put back to 0 dB)' % (nm, db(rms(x)), hashlib.md5(x.tobytes()).hexdigest()[:12]))
+    al.run("S.master=%g;0" % m0)
 notes = [{'p': p, 's': i * 2, 'l': 1.7, 'v': .8} for i in range(4) for p in (48, 55, 60)]
 for name, pre, ov in (('Saw', 'saw', {}), ('Pad', 'pad', {}), ('Plant', 'plant', {}), ('Acid', 'acid', {}), ('Wavetable', 'wtab', {}), ('Sampler grains', 'sampler', {'mode': 'grain'}), ('Sampler', 'sampler', {}), ('Venom', 'venom', {}), ('Drum kit', 'drums', {})):
     t = {'name': name, 'preset': pre, 'clips': [{'start': 0, 'len': 8, 'notes': notes}]}

@@ -1,1 +1,1 @@
-New shortcut icon; needs the new desktop app. If the old icon still shows on a Mac, log out and back in once.
+Starts with the Fractals song as the only open song, 10 dB quieter on the master.

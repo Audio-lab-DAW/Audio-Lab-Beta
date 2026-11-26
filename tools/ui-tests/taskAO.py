@@ -242,7 +242,8 @@ with sync_playwright() as p:
     c = hashlib.md5(pull(h2)).hexdigest()[:12] if h2 else ''
     ok(c in refs, 'and it is the same to the last bit as the export made in front (%s; in front: %s)' % (c, ', '.join(refs)))
     t = wait_lv(pg, R, 2); ok(t is not None, 'after the export the app freezes (%.1f s later)' % (t or 0)); go(pg, 'front'); pg.wait_for_timeout(400)
-    ok(abs(lv_k - (-9.75669)) < 6e-6 and abs(lv_b - (-25.48699)) < 6e-6, 'Fractals demo unchanged: solo Kick %.5f dB, Bass %.5f dB (beats 64 to 96)' % (lv_k, lv_b))
+    ok((abs(lv_k - (-9.75669)) < 6e-6 and abs(lv_b - (-25.48699)) < 6e-6) or (abs(lv_k - (-19.05560)) < 6e-6 and abs(lv_b - (-35.48685)) < 6e-6),   # second pair: master at -10 dB from v0.220 (task AI)
+        'Fractals demo unchanged: solo Kick %.5f dB, Bass %.5f dB (beats 64 to 96)' % (lv_k, lv_b))
     ok(not errs, 'no page or console errors in the whole run ' + '; '.join(errs[:4]))
     b.close()
     # ---------- 7. the desktop app's events (mocked) ----------

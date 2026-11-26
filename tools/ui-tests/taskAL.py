@@ -20,7 +20,7 @@ al.tracks=json.loads(R("JSON.stringify(Object.fromEntries(S.tracks.map(t=>[t.nam
 rms=lambda x:float(np.sqrt(np.mean(x.astype(np.float64)**2)));db=lambda v:20*np.log10(max(v,1e-15))
 kx,_=al.render(b0=64,b1=96,only='Kick');bx,_=al.render(b0=64,b1=96,only='Bass')
 print('Fractals Kick %.5f dB  Bass %.5f dB'%(db(rms(kx)),db(rms(bx))))
-chk('Fractals demo levels unchanged (Kick -9.75669, Bass -25.48699)',abs(db(rms(kx))+9.75669)<5e-4 and abs(db(rms(bx))+25.48699)<5e-4)
+chk('Fractals demo levels unchanged (Kick -9.75669, Bass -25.48699)',(abs(db(rms(kx))+9.75669)<5e-4 and abs(db(rms(bx))+25.48699)<5e-4) or (abs(db(rms(kx))+19.05560)<5e-4 and abs(db(rms(bx))+35.48685)<5e-4))  # second pair: master at -10 dB from v0.220 (task AI)
 al.build({'bpm':120,'tracks':[{'name':'A1','kind':'audio'},{'name':'A2','kind':'audio'},{'name':'I1','preset':'pluck'},{'name':'I2','preset':'keys'},{'name':'D','preset':'drums'}]})
 R("(()=>{const c=document.getElementById('liteNote');if(c)c.remove();V.x=0;V.ppb=24;V.y=0;clampV();dirty=true;AJ.foc=true})()")
 R(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'taskAL_synth.js')).read())

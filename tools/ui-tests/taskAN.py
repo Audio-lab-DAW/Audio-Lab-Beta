@@ -14,7 +14,7 @@ al.tracks=json.loads(R("JSON.stringify(Object.fromEntries(S.tracks.map(t=>[t.nam
 rms=lambda x:float(np.sqrt(np.mean(x.astype(np.float64)**2)));db=lambda v:20*np.log10(max(v,1e-15))
 kx,_=al.render(b0=64,b1=96,only='Kick');bx,_=al.render(b0=64,b1=96,only='Bass');kd,bd=db(rms(kx)),db(rms(bx))
 print('Fractals Kick %.5f dB  Bass %.5f dB'%(kd,bd))
-chk('Fractals levels unchanged',(abs(kd+9.75669)<2e-5 and abs(bd+25.48699)<2e-5) or (abs(kd+19.75669)<2e-5 and abs(bd+35.48699)<2e-5))
+chk('Fractals levels unchanged',(abs(kd+9.75669)<2e-5 and abs(bd+25.48699)<2e-5) or (abs(kd+19.05560)<2e-5 and abs(bd+35.48685)<2e-5))  # from v0.220 the song opens with its master at -10 dB (task AI): Kick -19.05560, Bass -35.48685
 R("(()=>{const c=document.getElementById('liteNote');if(c)c.remove();if(play.on)stop();UI.follow=false})()")
 Vw=lambda:JL(R("JSON.stringify({x:V.x,y:V.y,ppb:V.ppb,th:V.th})"))
 def setv(x=80,ppb=24,th=96,y=0):
