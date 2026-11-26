@@ -2315,3 +2315,4 @@ Ran after task E (v0.201) was finished. Icon files from the branch `assets/app-i
 
 ### Release
 - v0.204, built on v0.203 (task V, app icon) released by another session while this one worked; one merge of two new blocks in index.html, both kept.
+- Commit 24001d9; desktop build run 45773245351 succeeded. Artifact 1b07d888: version 227 (index.html only, lines 3 to 10 removed; it was at v0.203). Project doc claude/audiolab-fixes-run-AC.md.
