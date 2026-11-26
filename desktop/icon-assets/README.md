@@ -5,13 +5,14 @@ Ocean blue tile `#1450A8`, white rings `#FFFFFF`, yellow nucleus and electron `#
 
 ## Geometry
 - Optically centred: the mark's centre of weight sits at (512, 504) on a 1024 canvas, a few px above the true centre.
-- Three size tiers, each drawn separately (thin lines vanish at small sizes):
+- Four size tiers, each drawn separately (thin lines vanish at small sizes). Ring width runs from thin side w·(1−taper) to thick side w·(1+taper):
 
-| Tier | Used at | Rings | Taper | Nucleus / electron |
+| Tier | Used at | Ring w | Taper (thick:thin) | Nucleus / electron |
 |---|---|---|---|---|
-| L | 128 px and up | 44 | 46% | 80 / 46 |
-| M | 48 to 64 px | 56 | 25% | 88 / 52 |
-| S | 16 to 32 px | 80 | none | 118 / 68 |
+| L | 128 px and up | 44 | 0.46 (2.7:1) | 80 / 46 |
+| M | 48 to 64 px | 64 | 0.60 (4:1, exaggerated) | 92 / 54 |
+| S | 24 to 32 px | 80 | 0.60 (4:1, exaggerated) | 112 / 64 |
+| XS | 16 to 20 px | 80 | none (taper cannot show) | 118 / 68 |
 
 `icon.icns`, `icon.ico`, `doc.icns`, `doc.ico` and the `web-*` favicons already contain the right tier at each size.
 `source/` has the tier SVG/PNG files (full-bleed `icon-*`, Apple-grid `icon-grid-*`).

@@ -3,8 +3,9 @@ src=open('/home/claude/gen/geo.py').read(); exec(src[:src.index('V=[')])
 D="/home/claude/final/"; os.makedirs(D,exist_ok=True)
 TIERS={ # name: (kw, used for)
  "L":({"ring_w":44,"nr":80,"er":46,"gap":15},"128 px and up (Dock, Finder, Launchpad, About)"),
- "M":({"ring_w":56,"taper":.25,"nr":88,"er":52,"gap":18},"48 to 64 px (Finder lists, taskbar, Settings picker)"),
- "S":({"ring_w":80,"taper":0.0,"nr":118,"er":68,"gap":26},"16 to 32 px (favicon, menus, small Windows icons)"),
+ "M":({"ring_w":64,"taper":.60,"nr":92,"er":54,"gap":20},"48 to 64 px: taper exaggerated to 4:1"),
+ "S":({"ring_w":80,"taper":.60,"nr":112,"er":64,"gap":24},"24 to 32 px: taper 4:1, heavier"),
+ "XS":({"ring_w":80,"taper":0.0,"nr":118,"er":68,"gap":26},"16 to 20 px: even rings, the taper cannot show"),
 }
 def tier_svg(t,fg=W,bg=OC,acc=YE,tile=True):
     kw=TIERS[t][0]; tr=place(kw,1.0,(512,504)); els=mark(fg,bg,**kw)
