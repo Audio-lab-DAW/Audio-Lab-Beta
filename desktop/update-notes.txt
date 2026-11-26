@@ -1,1 +1,1 @@
-Changing a preset no longer moves the devices panel, and clicking on a device never plays a sound. Preset switches on the synths are cleaner, held keys keep sounding, and the panel has a proper header with the Devices button inside it.
+Shift-drag duplicates clips; arrow keys move clips, the step follows the zoom.

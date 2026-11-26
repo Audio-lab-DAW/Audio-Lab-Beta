@@ -1,7 +1,7 @@
 {
-  "version": "0.211",
-  "sha256": "6f6bb66d53eb7678267a0ed29cf11e89cd7888ea89095b1c475047aec4ddfe6c",
-  "size": 3401034,
+  "version": "0.212",
+  "sha256": "c6792ef59bd5d82a564da0d4c956ad501549ae4f8e03a348d8797d34e65c9581",
+  "size": 3407701,
   "minShell": "0.147.0",
-  "notes": "Turning a device on or off in the mixer no longer makes the stereo field, meters and loudness flicker. The sidechain window is laid out more clearly, with a picture of the duck, small icons, and Remove at the bottom with an Undo."
+  "notes": "Shift-drag duplicates clips; arrow keys move clips, the step follows the zoom."
 }
