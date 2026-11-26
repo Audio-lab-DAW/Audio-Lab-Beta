@@ -1989,3 +1989,6 @@ Total in this part: 229 presets before, 451 after. Sub, Psy Bass and Bounce were
 
 ### Left
 - Per-channel colour schemes; the header pan controls have no field or marker; pinned device windows have no drag reorder.
+
+### Release
+- v0.199: commit a096302 on main. Desktop build run 45761961643 succeeded. Artifact 1b07d888 updated to version 222 (it was at v0.198). Project doc `claude/audiolab-ui-run-W.md`.
