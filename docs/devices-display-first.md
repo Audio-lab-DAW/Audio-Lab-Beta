@@ -158,8 +158,50 @@ Notes for the implementation:
 - On the picture needs a position for every control on each device's display; where a control has no place in the picture it lines up along the bottom or goes to a More drawer (section 3). Devices without such positions yet (the Reverb, for one) fall back to hover reveal until they have them.
 - Hover reveal needs a touch and keyboard way in: tap the display, or focus a control with Tab.
 
-## 8. What happens next
+## 8. Lab prototype on the glass engine (26 November 2026, late)
+
+The user chose to try the behaviour in the lab before the app is touched. **No index.html or desktop/ changes; `glass-engine.js` was not changed either.**
+
+| File | What it is |
+|---|---|
+| `tools/glass-lab/devices-lab.html` | The six devices at real size in a scrolling devices panel, with the picked behaviour (section 7). The floating controls are glass faces drawn by `glass-engine.js`; each display canvas is fed to the engine as a flat picture. Needs `glass-engine.js` beside it. |
+| `tools/glass-lab/devices_lab.py` | 17 headless checks. `python3 tools/glass-lab/devices_lab.py [screenshot dir]` |
+
+One-file version as an artifact (engine inlined): https://claude.ai/artifact/MWV7AobnkFob1icGw5j6mA
+
+Switches on the page: glass (GL engine, browser blur, solid), engine quality (high, medium, low), displays (still, or live: every visible display repaints and is handed to the engine each frame), all devices (as picked, rail open, hover reveal, on the picture). A live readout shows frames per second, frame times, CPU time in the engine's calls, and per second: display uploads, blur rebuilds, face redraws. **Measure** runs all 24 combinations for two seconds each and gives a table to copy.
+
+### How it is wired (this is the wiring proposed for the app)
+
+- **One engine canvas over the whole devices panel**, above the display canvases and below the DOM controls (z-index only; no device creates a stacking context). Not one engine per device: browsers allow only a limited number of WebGL contexts.
+- Each device display: `setFlat('d:'+id, {source: displayCanvas, rect})`, and `markFlatDirty` when that display repainted.
+- Each floating control (rail, dock, tray, chip, pill, menu, drawer): `addPanel({over:'flats', kind:'pill' or 'window', rect, radius, opacity})`. The DOM element keeps only its content: no fill, no border, no `backdrop-filter`.
+- Panel rectangles and opacity are read from the DOM only for about 300 ms after something changed (a click, a state change, a hover, a scroll, a resize). When nothing changes, no DOM is read and `render()` returns at once.
+- Hover reveal follows the CSS fade: the dock's opacity is passed to its panel each frame during the fade.
+
+### What the checks show (headless, no GPU, so counters only)
+
+- All 17 checks pass, no console errors.
+- **Still displays: 0 uploads, 0 blur rebuilds, 0 face redraws per second in every state**, with 14 panels (rail open), 28 (hover reveal at rest, counted with hidden docks) or 56 (on the picture) on six devices. Glass over a display that does not change costs nothing, whatever the layout.
+- Live displays, quality high: every visible display is uploaded every frame and the blur is rebuilt once per frame. Quality low: capped at 30 rebuilds per second while the displays and controls keep the screen rate.
+- Hover reveal: the dock is hidden at rest, appears under the mouse as a glass face, goes away again, and the engine is idle afterwards.
+- The eye and its right-click menu: rail to hover reveal, switch to on the picture, rail open hides it, closing brings it back.
+- Scrolling the panel keeps every glass face on its control.
+- In software rendering the engine's calls took about 2.4 to 3.1 ms per frame with two live displays visible at high and 1.2 to 2.0 ms at low; the three layouts were within noise of each other. These numbers are from a machine without a graphics card and say nothing about a real one. The real numbers are the user's to take with the Measure button.
+
+### Findings for the engine (for whoever owns `glass-engine.js`)
+
+1. **Hover reveal is not free while a display is live.** At rest only the small preset and pin pills are glass, but the engine uploads the whole display canvas and rebuilds the blur for the whole layer whenever a fed display is dirty and any panel with `over:'flats'` is visible. Measured: the same uploads and rebuilds per second in hover reveal as with the rail open. Two ways out: (a) the engine uploads and blurs a fed canvas only where a visible panel covers it (the region cull that already exists for docked panels, extended to flats); (b) in the app, the two pills over a live display are drawn as plain tint instead of glass while the rail is closed. (a) is the better fix: it also makes on the picture cheaper than the rail, as section 5 assumed.
+2. **Flats need a backdrop.** `render()` only handles flats once a backdrop source was uploaded, so a layer that has only fed displays needs a dummy backdrop (the lab gives it a 2 x 2 canvas in the panel colour). A flat-only layer should work without one.
+3. **The flat blur is rebuilt for the whole layer** when one display changes. With a 1600 x 253 panel that is small, but a region limited to the dirty display would be cheaper still.
+4. Counting in the readout: `flatUploads`, `flatPyramids` and `draws` from `g.stats` were enough to see all of the above.
+
+Section 5's ranking by area under glass therefore holds only after finding 1 is fixed; until then every layout costs the same over a live display, and nothing over a still one.
+
+## 9. What happens next
 
 1. Done: the user picked and confirmed the rules (section 7).
-2. Implementation device by device in index.html (serial work, after or together with G3, since the floating glass uses the glass engine with the flat-picture feed for canvases).
-3. The page source is in the artifact; it can be read back from the link above.
+2. The user runs Measure in the lab page on the Mac and copies the table.
+3. Engine: findings 1 to 3 in section 8.
+4. Implementation device by device in index.html (serial work, after or together with G3, since the floating glass uses the glass engine with the flat-picture feed for canvases).
+5. The pick page's source is in its artifact; the lab page is in the repo.
