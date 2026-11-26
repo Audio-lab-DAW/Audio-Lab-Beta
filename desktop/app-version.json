@@ -1,7 +1,7 @@
 {
-  "version": "0.218",
-  "sha256": "f8e4eb14e90a16bb99cacdc2ab5938ce751a1b8549355f150365ff1e93e9e7a1",
+  "version": "0.219",
+  "sha256": "5a9b3c5e9776a33814694777e1dc7a1981e79b4566201f82159448fdbde28134",
   "size": 3581883,
   "minShell": "0.147.0",
-  "notes": "The AudioLab logo on the settings button and in Settings now keeps moving while AudioLab is in front. In the background, with nothing playing, AudioLab freezes after 2 seconds and uses almost no processor, and is back the moment you return (Settings, Performance). It works in the app you have; the new desktop app also notices hide and minimise and saves more power."
+  "notes": "New shortcut icon; needs the new desktop app. If the old icon still shows on a Mac, log out and back in once."
 }

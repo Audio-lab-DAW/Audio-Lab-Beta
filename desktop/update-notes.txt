@@ -1,1 +1,1 @@
-The AudioLab logo on the settings button and in Settings now keeps moving while AudioLab is in front. In the background, with nothing playing, AudioLab freezes after 2 seconds and uses almost no processor, and is back the moment you return (Settings, Performance). It works in the app you have; the new desktop app also notices hide and minimise and saves more power.
+New shortcut icon; needs the new desktop app. If the old icon still shows on a Mac, log out and back in once.
