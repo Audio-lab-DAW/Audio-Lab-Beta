@@ -18,7 +18,7 @@ body{background:var(--bg);color:var(--fg);font:13px/1.4 Inter,system-ui,-apple-s
 #hud{position:fixed;z-index:10;top:calc(12px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(350px,calc(100% - 32px));max-height:calc(100% - 24px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
 #hud h1{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #hud p{margin:0;color:var(--mut);font-size:12px}
-.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:#0c0d11;border-radius:8px;padding:3px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#0c0d11;border-radius:8px;padding:3px}
 .seg button{font:600 12px inherit;font-family:inherit;color:var(--mut);background:none;border:0;border-radius:6px;padding:6px 2px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--acc);color:var(--accink)}
 .rowx{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12px}
@@ -34,15 +34,13 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 <div id="stage" class="m-gl">
   <canvas id="scene"></canvas>
   <canvas id="gl"></canvas>
-  <svg id="fsvg" width="0" height="0" style="position:absolute" color-interpolation-filters="sRGB" aria-hidden="true"></svg>
-</div>
+  </div>
 <div id="hud">
   <h1>AudioLab Glass Bench <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
-  <p>The same glass panels drawn four ways over a moving arrangement. Press Run and send me the table.</p>
+  <p>The same glass panels drawn three ways over a moving arrangement. Set the lens width per panel, press Run and send me the table.</p>
   <div class="seg" role="group" aria-label="How the glass is drawn">
-    <button data-m="none" aria-pressed="false" title="No glass at all: the ceiling">Solid</button>
-    <button data-m="blur" aria-pressed="false" title="backdrop-filter blur only">Blur</button>
-    <button data-m="lens" aria-pressed="false" title="backdrop-filter with the SVG refraction lens: what AudioLab does today">Lens now</button>
+    <button data-m="none" aria-pressed="false" title="No glass at all: the Lightest setting">Solid</button>
+    <button data-m="blur" aria-pressed="false" title="Plain blur, no lens: the Light setting">Blur</button>
     <button data-m="gl" aria-pressed="true" title="One shared blurred backdrop, every panel a shader with a rim lens">GL engine</button>
   </div>
   <div class="rowx">
@@ -50,22 +48,22 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
     <select id="scn"><option value="scroll">scrolling (worst case)</option><option value="play">playhead only</option><option value="still">still</option></select>
     <label><input type="checkbox" id="drag" checked> move the mixer</label>
   </div>
-  <div class="rowx" id="pch"></div>
+  <div id="pch" style="display:grid;grid-template-columns:auto 1fr auto;gap:5px 8px;align-items:center;font-size:12px"></div>
+  <p>Slider = lens width in px (how far in from the edge the glass bends). Apple uses a quarter of the short side, 20 at most.</p>
   <div class="rowx"><label for="lv">GL blur</label><select id="lv"><option value="2">light</option><option value="3" selected>regular</option><option value="4">heavy</option></select>
     <label><input type="checkbox" id="dirty" checked> GL redraws only on change</label></div>
-  <div class="rowx"><label for="bw">Lens width</label><input type="range" id="bw" min="0" max="80" step="2" value="20" style="flex:1;min-width:90px"><output id="bwo" style="font-family:var(--data);min-width:9ch">20 px Apple</output></div>
   <div id="live">measuring…</div>
-  <div class="rowx"><button class="b go" id="run">Run (about 30 s)</button><button class="b" id="copy">Copy table</button></div>
+  <div class="rowx"><button class="b go" id="run">Run (about 20 s)</button><button class="b" id="copy">Copy table</button></div>
   <pre id="res">No run yet.</pre>
 </div>
 
 <script>
 const $=s=>document.querySelector(s),stage=$('#stage'),S=$('#scene'),G=$('#gl'),sx=S.getContext('2d',{alpha:false});
 let W=0,H=0,D=1,mode='gl',t0=performance.now(),sceneDirty=true,glDirty=true;
-const PD=[{k:'hdr',n:'Track headers',on:1},{k:'tr',n:'Transport',on:1},{k:'dev',n:'Device panel',on:1},{k:'mix',n:'Mixer window',on:1},{k:'pill',n:'Pill',on:1}];
+const PD=[{k:'hdr',n:'Track headers',bw:20},{k:'tr',n:'Transport',bw:12},{k:'dev',n:'Device panel',bw:20},{k:'mix',n:'Mixer window',bw:20},{k:'pill',n:'Pill',bw:8}];
 const P={};
-$('#pch').innerHTML=PD.map(p=>`<label><input type="checkbox" id="p_${p.k}" checked> ${p.n}</label>`).join('');
-PD.forEach(p=>{const e=document.createElement('div');e.className='gp';e.textContent=p.n;stage.appendChild(e);P[p.k]={el:e,on:true,x:0,y:0,w:0,h:0,r:14,dx:0};$('#p_'+p.k).onchange=ev=>{P[p.k].on=ev.target.checked;layout()}});
+$('#pch').innerHTML=PD.map(p=>`<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" id="p_${p.k}" checked> ${p.n}</label><input type="range" id="b_${p.k}" min="0" max="80" step="1" value="${p.bw}" aria-label="Lens width, ${p.n}"><output id="o_${p.k}" style="font-family:var(--data);min-width:5ch;text-align:right">${p.bw} px</output>`).join('');
+PD.forEach(p=>{const e=document.createElement('div');e.className='gp';e.textContent=p.n;stage.appendChild(e);P[p.k]={el:e,on:true,x:0,y:0,w:0,h:0,r:14,dx:0,bw:p.bw};$('#p_'+p.k).onchange=ev=>{P[p.k].on=ev.target.checked;layout()};$('#b_'+p.k).oninput=ev=>{P[p.k].bw=+ev.target.value;$('#o_'+p.k).textContent=ev.target.value+' px';glDirty=true}});
 
 function layout(){const trH=48,devH=Math.min(262,H*.3|0),top=40;
   Object.assign(P.hdr,{x:0,y:top,w:Math.min(216,W*.3|0),h:H-top-trH-devH,r:0});
@@ -74,7 +72,7 @@ function layout(){const trH=48,devH=Math.min(262,H*.3|0),top=40;
   const mw=Math.min(1100,W-60),mh=Math.min(430,H-trH-140);Object.assign(P.mix,{x:(W-mw)/2|0,y:70,w:mw,h:mh,r:16});
   Object.assign(P.pill,{x:W-170,y:H-trH-devH-44,w:150,h:32,r:16});
   for(const k in P){const p=P[k],e=p.el;e.hidden=!p.on;e.style.width=p.w+'px';e.style.height=p.h+'px';e.style.setProperty('--r',p.r+'px');e.style.translate=`${p.x+p.dx}px ${p.y}px`}
-  if(mode==='lens')lensAttach();glDirty=true}
+  glDirty=true}
 function size(){D=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;S.width=G.width=Math.round(W*D);S.height=G.height=Math.round(H*D);glSize();sceneDirty=true;layout()}
 
 /* ---------- the fake arrangement (2D canvas, redrawn in full like the app does while playing) ---------- */
@@ -89,19 +87,8 @@ function drawScene(t){const scn=$('#scn').value,off=scn==='scroll'?(t*.12)%960:0
   sx.fillStyle='#ffffff10';for(let x=-(off*D%bw);x<S.width;x+=bw)sx.fillRect(x,0,1,S.height);
   if(scn!=='still'){const px=scn==='scroll'?S.width*.5:((t*.15*D)%S.width);sx.fillStyle='#3ecf8e';sx.fillRect(px,0,Math.max(1,D),S.height)}}
 
-const BW=()=>+$('#bw').value,bandOf=p=>Math.max(.5,Math.min(BW(),Math.min(p.w,p.h)/2.2)),amtOf=p=>BW()?Math.min(Math.min(p.w,p.h)/2,Math.max(24,BW()*1.2)):0;
-/* ---------- today's way: SVG displacement lens in backdrop-filter ---------- */
-function lensMap(w,h,r,band){const q=4,cw=Math.max(8,w/q|0),ch=Math.max(8,h/q|0),c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d'),im=x.createImageData(cw,ch),d=im.data;r=Math.max(r,1);
-  for(let py=0;py<ch;py++)for(let px=0;px<cw;px++){const X=(px+.5)*w/cw-w/2,Y=(py+.5)*h/ch-h/2,qx=Math.abs(X)-(w/2-r),qy=Math.abs(Y)-(h/2-r);let dist,nx=0,ny=0;
-    if(qx>0&&qy>0){const L=Math.hypot(qx,qy)||1;dist=r-L;nx=qx/L*Math.sign(X);ny=qy/L*Math.sign(Y)}else if(qx>qy){dist=w/2-Math.abs(X);nx=Math.sign(X)}else{dist=h/2-Math.abs(Y);ny=Math.sign(Y)}
-    const t=Math.min(1,Math.max(0,dist/band)),k=1-Math.sqrt(Math.max(0,1-(1-t)*(1-t))),i=(py*cw+px)*4;d[i]=128+127*nx*k;d[i+1]=128+127*ny*k;d[i+2]=128;d[i+3]=255}
-  x.putImageData(im,0,0);return c.toDataURL()}
-function lensAttach(){const svg=$('#fsvg');let h='';for(const k in P){const p=P[k];if(!p.on)continue;const band=bandOf(p);
-    h+=`<filter id="lf_${k}" filterUnits="userSpaceOnUse" x="0" y="0" width="${p.w}" height="${p.h}"><feImage href="${lensMap(p.w,p.h,p.r,band)}" x="0" y="0" width="${p.w}" height="${p.h}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${-2*amtOf(p)}" xChannelSelector="R" yChannelSelector="G"/></filter>`}
-  svg.innerHTML=h;for(const k in P)P[k].el.style.backdropFilter=`url(#lf_${k}) blur(9px) saturate(1.72)`}
-function lensDetach(){for(const k in P)P[k].el.style.backdropFilter=''}
-
-/* ---------- the proposed way: one shared backdrop, dual-Kawase pyramid, SDF rim lens per panel ---------- */
+const bandOf=p=>Math.max(.5,Math.min(p.bw,Math.min(p.w,p.h)/2.2)),amtOf=p=>p.bw?Math.min(Math.min(p.w,p.h)/2,Math.max(24,p.bw*1.2)):0;
+/* ---------- the engine: one shared backdrop, dual-Kawase pyramid, SDF rim lens per panel ---------- */
 const gl=G.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,powerPreference:'high-performance'});
 let glOK=!!gl,prog={},src,lev=[],vao;
 const VS=`#version 300 es
@@ -116,8 +103,9 @@ const FGLASS=`#version 300 es
 precision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc;uniform float rad,band,amt,dpr;out vec4 o;
 float sd(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
 void main(){vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y),hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.);if(a<=0.)discard;
- vec2 e=vec2(1.,0.);vec2 n=normalize(vec2(sd(l+e.xy,hb,rad)-sd(l-e.xy,hb,rad),sd(l+e.yx,hb,rad)-sd(l-e.yx,hb,rad))+1e-5);
- float x=clamp(-d/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));
+ float R=min(max(rad,band),min(hb.x,hb.y));vec2 q=abs(l)-hb+R,sg=vec2(l.x<0.?-1.:1.,l.y<0.?-1.:1.),n;float dl;
+ if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}
+ float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));
  vec2 sp=p-n*k*amt;vec3 c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;
  float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,1.3);c=mix(c,vec3(.086,.11,.165),.5);
  float rim=smoothstep(1.6*dpr,0.,-d),lit=abs(dot(n,vec2(-.7071,-.7071)));c+=rim*(.06+.3*lit);
@@ -141,7 +129,7 @@ function glFrame(newScene){gl.bindVertexArray(vao);gl.disable(gl.BLEND);gl.disab
 
 /* ---------- loop and measuring ---------- */
 let last=0,ring=[],acc=null;
-function setMode(m){if(m==='gl'&&!glOK)m='blur';mode=m;stage.className='m-'+m;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));if(m==='lens')lensAttach();else lensDetach();glDirty=sceneDirty=true;ring=[]}
+function setMode(m){if(m==='gl'&&!glOK)m='blur';mode=m;stage.className='m-'+m;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));glDirty=sceneDirty=true;ring=[]}
 function stats(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),q=p=>s[Math.min(s.length-1,Math.floor(p*s.length))],sum=a.reduce((x,y)=>x+y,0);return{fps:1000*a.length/sum,med:q(.5),p95:q(.95),worst:s[s.length-1],n:a.length}}
 function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&dt<1000){ring.push(dt);if(ring.length>720)ring.shift();if(acc)acc.push(dt)}
   const scn=$('#scn').value;let moved=false;
@@ -150,19 +138,18 @@ function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&d
   if(mode==='gl'&&glOK){const need=redraw||moved||glDirty||!$('#dirty').checked;if(need){glFrame(redraw||glDirty||!$('#dirty').checked);glDirty=false}}}
 setInterval(()=>{const s=stats(ring);if(s)$('#live').textContent=`${s.fps.toFixed(0)} fps   median ${s.med.toFixed(2)} ms   95% ${s.p95.toFixed(2)} ms   worst ${s.worst.toFixed(1)} ms\n${W}x${H} @ ${D}x = ${(S.width*S.height/1e6).toFixed(1)} MP${glOK?'':'   (WebGL2 not available)'}`},500);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-async function run(){const b=$('#run');b.disabled=true;const keep=mode,rows=[],names={none:'Solid (ceiling)',blur:'Blur only',lens:'Lens now',gl:'GL engine'};
-  const lensWorks=CSS.supports('backdrop-filter','url(#a) blur(2px)');
-  for(const m of['none','blur','lens','gl']){if(m==='gl'&&!glOK){rows.push([names[m],'WebGL2 not available']);continue}if(m==='lens'&&!lensWorks){rows.push([names[m],'not supported in this browser']);continue}
+async function run(){const b=$('#run');b.disabled=true;const keep=mode,rows=[],names={none:'Solid (Lightest)',blur:'Blur (Light)',gl:'GL engine'};
+  for(const m of['none','blur','gl']){if(m==='gl'&&!glOK){rows.push([names[m],'WebGL2 not available']);continue}
     setMode(m);b.textContent='Measuring: '+names[m];await sleep(1500);acc=[];await sleep(5500);const s=stats(acc);acc=null;rows.push([names[m],s])}
-  setMode(keep);b.disabled=false;b.textContent='Run (about 30 s)';
+  setMode(keep);b.disabled=false;b.textContent='Run (about 20 s)';
   const gi=glOK&&gl.getExtension('WEBGL_debug_renderer_info'),ren=gi?gl.getParameter(gi.UNMASKED_RENDERER_WEBGL):'?';
-  $('#res').textContent=`AudioLab Glass Bench\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · GL blur ${$('#lv').value} · lens width ${$('#bw').value}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n\n`+
+  $('#res').textContent=`AudioLab Glass Bench\n${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · under: ${$('#scn').value} · mixer moving: ${$('#drag').checked}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · GL blur ${$('#lv').value}\nlens width px: ${PD.filter(p=>P[p.k].on).map(p=>p.k+' '+P[p.k].bw).join(', ')}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n\n`+
    'mode              fps   median   95%    worst\n'+rows.map(([n,s])=>typeof s==='string'?n.padEnd(17)+s:n.padEnd(17)+s.fps.toFixed(0).padStart(4)+s.med.toFixed(2).padStart(8)+s.p95.toFixed(2).padStart(8)+s.worst.toFixed(1).padStart(8)).join('\n')}
 $('#run').onclick=run;
 $('#copy').onclick=async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText($('#res').textContent);b.textContent='Copied'}catch(x){const r=document.createRange();r.selectNodeContents($('#res'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected'}setTimeout(()=>b.textContent='Copy table',1500)};
 $('#minb').onclick=e=>{const m=$('#hud').classList.toggle('min');e.currentTarget.textContent=m?'Open':'Fold'};
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
-$('#bw').oninput=()=>{const v=BW();$('#bwo').textContent=v+' px'+(v==20?' Apple':v==0?' off':'');glDirty=true;if(mode==='lens')lensAttach()};$('#scn').onchange=()=>{sceneDirty=true};$('#lv').onchange=()=>{glDirty=true};
+$('#scn').onchange=()=>{sceneDirty=true};$('#lv').onchange=()=>{glDirty=true};
 addEventListener('resize',size);glInit();size();setMode(glOK?'gl':'blur');requestAnimationFrame(frame);
 window.__bench={run,setMode,stats:()=>stats(ring)};
 </script>

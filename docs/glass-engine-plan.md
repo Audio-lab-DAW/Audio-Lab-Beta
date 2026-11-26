@@ -20,9 +20,15 @@ Related: `docs/design-language-research.md` (round 1 research and options), `cla
 
 **Answers given on 26 Nov:**
 - Platform: **stay on Electron, build our own glass engine.** Native audio and VST host later, as a separate helper.
-- Lens width on big panels: **wants to compare first** (slider added to the Glass Bench).
+- Lens width on big panels: wanted to compare first; now a per-surface setting (see below).
 - Source: **go private with our own updates, keep a browser version.**
 - Science look: **both** our own visuals drawn in code and real NASA / Webb images with credit.
+
+**Decided after trying the Glass Bench (26 Nov, late):**
+- **The GL engine is the glass from now on.** "Lens now" (the SVG lens in `backdrop-filter`) is dropped.
+- Three levels only: **GL engine** (normal), **Blur** (plain blur, no lens) as the light version, **Solid** as the absolute lightest. The Performance page and Light mode are rebuilt around these three.
+- **Lens width is a setting**, and it is **set per kind of surface** (the transport should not have the same width as the track headers). Starting values, from Apple's rule (a quarter of the short side, 20 px at most): transport and tab band 12, track headers 20, device panel 20, windows and sheets 20, pills and menus 8. The user tunes them on the Glass Bench (one slider per panel; the widths are printed in the results table). In Settings: one slider per group (thin bars, side panels, big panels and windows, small floating things).
+- **Corner artifact fixed in the bench shader** (a line from each corner toward the middle): the lens used the panel's own corner radius, so on square or tightly rounded panels the bending direction flipped along the corner diagonal. The lens now uses its own distance field with a corner radius of at least the lens width, and the direction is computed directly instead of from four extra samples, so it is cheaper than before, not dearer. The engine (task G2) must take this shader as its starting point.
 
 **Design philosophy (new, user's words):** scientific. The atom logo, Caltech, JPL, Jupiter, Hubble, the James Webb telescope, measurements, "mathematical beauty". The app should feel "smart and sciencey, clear, intuitive, snappy".
 
@@ -107,11 +113,11 @@ Rule for parallel work: **index.html is one file.** Tasks that edit it must run 
 
 | # | Task | Touches | Parallel? | Depends on |
 |---|---|---|---|---|
-| U1 | **User:** run the Glass Bench on the Mac (Chrome; scrolling, mixer moving, all panels), copy the table; try the Lens width slider and say which width. | nothing | yes | none |
+| U1 | **User:** run the Glass Bench on the Mac (Chrome; scrolling, mixer moving, all panels), copy the table (it includes the lens widths chosen per panel). | nothing | yes | none |
 | G1 | **Quick wins in today's glass**, each measured before and after with `tools/glass-lab/bench.py`: move the logo glow, meters, time text and CPU graph out of the transport's glass element (sibling layer, as `#fxglass` does); remove glass on glass in the mixer (`.fwh`, the 1.6 px `.ck` blur); playhead as its own layer; Follow centre without a full redraw and backdrop copy per frame; mixer window and sheets on the picture blur; pointer capture on window drags. | index.html | serial | none |
-| G2 | **Engine as a stand-alone module** in `tools/glass-lab/`: the design in 2.4 with Apple's numbers from 2.2, an API (register a panel with rectangle, radius, kind; set backdrop sources; mark dirty), context-loss recovery, fallbacks (plain tint), Reduce Transparency and Increase Contrast behaviour, quality steps, a test page with AudioLab-sized panels. No code copied from the reverse-engineering repos (no licence given); numbers only. | tools/ only | **parallel** | none (U1 result tunes it) |
+| G2 | **Engine as a stand-alone module** in `tools/glass-lab/`: the design in 2.4 with Apple's numbers from 2.2, starting from the shader in `tools/glass-lab/glass-bench.html` (corner fix included), lens width per panel, an API (register a panel with rectangle, radius, kind; set backdrop sources; mark dirty), context-loss recovery, fallbacks (plain tint), Reduce Transparency and Increase Contrast behaviour, quality steps, a test page with AudioLab-sized panels. No code copied from the reverse-engineering repos (no licence given); numbers only. | tools/ only | **parallel** | none (U1 result tunes it) |
 | G3 | **Integrate behind a switch** "Glass engine (preview)" in Settings: arrangement as backdrop; track headers, transport, tab band and device panel first; then floating windows; then menus and sheets (2.4 gap, option a). Old glass stays as the fallback. | index.html | serial | G2, U1 |
-| G4 | After the user confirms on the Mac: remove `backdrop-filter` and the SVG lens, rebuild the Performance page around the engine's quality steps, keep Light mode as the lowest step. | index.html | serial | G3 |
+| G4 | After the user confirms on the Mac: remove `backdrop-filter` and the SVG lens, rebuild the Performance page around three levels (GL engine, Blur, Solid) plus the lens-width sliders per surface group. | index.html | serial | G3 |
 | G5 | Electron: check real 240 Hz pacing in the shipped app; plan the move to Electron 46 (Chromium 160, HTML-in-Canvas) when it is stable. | desktop/ | parallel | none |
 | D1 | "Flat bars" (design 7) is the default again; undo the one-time migration for people it moved to "Flat bars 2", without overriding anyone who chose 2 themselves afterwards if that can be told apart (else ask). | index.html | serial | none |
 | D2 | Sidechain outline only when the sender or receiver is selected (`abxLights`, about line 17288); cables unchanged; "Selected only" unchanged. | index.html | serial | none |
@@ -126,8 +132,8 @@ Suggested order for index.html work: D2, D1 (small, asked for directly), G1, D3,
 
 ## 4. Open questions for the user
 
-1. Lens width on big panels (after trying the slider): Apple's 20 px, or wider?
-2. The Glass Bench table from the Mac.
+1. The lens widths per panel the user settles on (from the Glass Bench table).
+2. The Glass Bench frame-rate table from the Mac (not received yet; the user reported that the GL engine "looks very good").
 3. Where should updates and the browser version be hosted once the repo is private (own domain, which provider)? Are Apple and Windows signing certificates wanted now?
 4. Menus and windows over other glass: Apple never lets glass sample glass. Is "the top glass shows the arrangement and a flat picture of the panel under it" acceptable until HTML-in-Canvas arrives?
 
