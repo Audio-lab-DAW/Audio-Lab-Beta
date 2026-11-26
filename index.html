@@ -5841,7 +5841,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.201',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.202',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -16371,6 +16371,412 @@ function vxInit(){
  setTimeout(()=>{try{vxRestore()}catch(e){}},1500)}
 
 /*VX-END*/
+/*PSLIB2-START*/
+/* ===== Preset library, part 2: drums, percussion, samplers, particle instruments, FX, Grid, Sub, Psy Bass, Bounce and Bouncy Notes =====
+ Same rules as part 1 (PSLIB): Init first, groups, a one-line tooltip per preset, the mark "psy" on presets made for psytrance outside the
+ Psytrance group. PSMETA[inst][key] holds them; PSLV[inst][key] a level trim in dB (measured by tools/engine-tests/presets_all.py).
+ Only preset data changes here: no engine and no sound calculation. Every key that existed before keeps its exact values, because projects
+ and drum pads store some of them by key (a drum pad's kick is stored as a Kick designer preset key) and the demos use them
+ (Kick designer psyzap, drum pads house, Percussion tom, Sampler cloud and choir, every default). psLib2() runs once, after psLib(). */
+function psLib2(){try{
+ const meta=(inst,k,g,t,o)=>{(PSMETA[inst]=PSMETA[inst]||{})[k]=Object.assign({g,t},o||{})};
+ const db=(inst,k)=>Math.pow(10,(((PSLV[inst]||{})[k])||0)/20),r3=v=>Math.round(v*1000)/1000;
+ const reorder=(T,keys)=>{const o={};for(const k of keys)if(T[k])o[k]=T[k];for(const k of Object.keys(T))if(!o[k])o[k]=T[k];for(const k of Object.keys(T))delete T[k];Object.assign(T,o)};
+ const fl=f=>{const o={};if(!f)return o;if(f.split(' ').includes('p'))o.p=1;const m=f.match(/r=([a-z]+)/);if(m)o.r=m[1];return o};
+ PS2_LEVELS();
+ PS2_KICK(meta,reorder,fl);
+ PS2_DRUMS(meta,reorder,fl,db,r3);
+ PS2_SAMP(meta,reorder,fl,db,r3);
+ PS2_FX(meta,reorder,fl,db,r3);
+ PS2_BASS(meta,reorder,fl,db,r3);
+ psMenus.sig=null;
+ {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{psMenus2()}catch(e){console.error('AudioLab preset menus 2',e)}return r}}
+}catch(e){console.error('AudioLab preset library part 2',e)}}
+/* menus the part 1 code does not reach: the Kick designer's own menu and a drum pad's kick menu (grouped, with tooltips), and tooltips on
+   the Grid and Bouncy Notes menus (they are grouped already) */
+function psMenus2(){
+ for(const s of document.querySelectorAll('select[data-s=kpre]:not([data-ps2]),select[data-s=pkp]:not([data-ps2])')){s.dataset.ps2='1';const cur=s.value,G=new Map(),M=PSMETA.kick||{};
+  for(const k in KPRE){const m=M[k]||{g:'Other'};if(m.h&&k!==cur)continue;if(!G.has(m.g))G.set(m.g,[]);G.get(m.g).push(`<option value="${k}" title="${esc(psTip('kick',k))}"${k===cur?' selected':''}>${esc(String(KPRE[k].n)+(m.p&&!/^Psytrance/.test(m.g)?'  · psy':''))}</option>`)}
+  s.innerHTML=[...G].map(([g,a])=>`<optgroup label="${esc(g)}">${a.join('')}</optgroup>`).join('');s.value=cur;
+  const sh=()=>{s.title=psTip('kick',s.value)||'Kick presets'};sh();s.addEventListener('change',sh)}
+ const tipSel=(sel,inst)=>{for(const s of document.querySelectorAll(sel)){if(s.dataset.ps2)continue;const M=PSMETA[inst];if(!M)continue;const ks=[...s.options].map(o=>o.value);if(!ks.length||!ks.every(k=>M[k]))continue;s.dataset.ps2='1';
+  for(const o of s.options){o.title=psTip(inst,o.value);if(M[o.value].p&&!/psy/i.test(o.textContent))o.textContent+='  · psy'}const sh=()=>{s.title=psTip(inst,s.value)||'Presets'};sh();s.addEventListener('change',sh)}};
+ tipSel('select[data-s=ipre]','grid');tipSel('select[data-x=pre]','bnotes')}
+
+/* ---------- Kick designer ----------
+ [key, group, name, tooltip, flags, values]; values: pitch (note number, 31 = G, 46 Hz is F#), punch Hz (start of the pitch fall), sweep s,
+ curve %, length s, body %, click %, drive %, click type, key track. flags: p = psytrance; r=roll (the kick is 20 dB down when the first
+ bass note of a rolling bass comes, 103 ms at 145 BPM), r=offbeat (down before the bass at the 8th, 207 ms), r=long (runs into the bass). */
+function PS2_KICK(meta,reorder,fl){
+ const K=(k,tune,start,sweep,bend,len,tail,click,drive,ctype,kt,n)=>{KPRE[k]={n,tune,start,sweep,bend,len,tail,click,drive,ctype,kt}};
+ const N=[
+  ['init','Init','Plain sine kick','A plain sine with a medium pitch fall and no click: the start for your own kick. On A (55 Hz).','r=plain',[33,220,.045,50,.35,35,0,0,'off',false]],
+  ['psyfo','Psytrance','Full-on, tight on G','The rolling full-on kick for 145 BPM: a hard tick, a fast fall to G (49 Hz) and a body that is 20 dB down before the first bass note (103 ms). Use with a rolling bass on G.','p r=roll',[31,2400,.04,80,.135,2,50,28,'tick',false]],
+  ['psymel','Psytrance','Melodic full-on, round on A','Rounder and softer on top, tuned to A (55 Hz) like Electric Universe "Fractals". 20 dB down before the first bass note at 145 BPM.','p r=roll',[33,1600,.045,76,.135,0,35,18,'tick',false]],
+  ['psysnap','Psytrance','Full-on, snappy click on G#','A brighter, snappy click over a short G# body (52 Hz), for a kick that cuts through a busy mix. For 145 to 148 BPM.','p r=roll',[32,3200,.035,82,.13,0,65,40,'snap',false]],
+  ['psynite','Psytrance','Dark night, low and hard on F','A low F (44 Hz) with a hard tick and more drive, for dark and night psytrance at 148 to 150 BPM.','p r=roll',[29,1800,.035,78,.125,0,55,50,'tick',false]],
+  ['psyfor2','Psytrance','Forest, short and clicky on E','Very short with a loud click on a low E (41 Hz), for forest and darkpsy at 150 to 160 BPM where the bass notes come every 94 to 100 ms.','p r=roll',[28,2800,.03,84,.105,0,72,45,'tick',false]],
+  ['psyhit','Psytrance','Hi-tech, very short','Under 90 ms long, for hi-tech at 170 to 190 BPM, where a 16th is only 79 to 88 ms.','p r=roll',[31,3000,.025,86,.095,0,75,40,'tick',false]],
+  ['psygoa2','Psytrance','Goa, soft and analog on E','A softer knock and a slower fall on a low E (41 Hz), like the drum machines of 90s Goa trance. For 140 to 145 BPM.','p r=roll',[28,900,.05,60,.14,0,22,12,'knock',false]],
+  ['psyprog','Psytrance','Progressive, rounder on F','A rounder, longer kick on F (44 Hz) for progressive psytrance at 134 to 140 BPM with an offbeat or galloping bass: it is down before the bass on the second 8th (207 ms).','p r=offbeat',[29,1000,.05,64,.2,14,35,20,'knock',false]],
+  ['hhouse','House','Deep house, soft and round','A soft knock and a long round body on G (49 Hz) for deep house at 118 to 124 BPM.','r=house',[31,220,.05,40,.38,40,15,5,'knock',false]],
+  ['hdisco','House','Disco house, short knock','A short, higher kick with a snap, for disco and funky house where the bass needs room.','r=house',[35,500,.03,45,.22,12,50,18,'snap',false]],
+  ['tpeak','Techno','Peak time, punchy','A punchy 909-style techno kick with drive and a snap, for 128 to 135 BPM.','r=techno',[31,420,.04,45,.3,25,55,45,'snap',false]],
+  ['thard','Techno','Hard techno, distorted','Long and heavily driven on F (44 Hz), for hard and industrial techno at 140 to 150 BPM. Add reverb and a low-pass for a rumble.','r=techno',[29,520,.05,48,.42,50,60,82,'snap',false]],
+  ['trup','Trance','Uplifting trance, punchy','A tight, punchy trance kick on A (55 Hz) that leaves room for an offbeat bass at 136 to 140 BPM.','r=trance',[33,650,.045,55,.27,18,55,35,'tick',false]],
+  ['trtech','Trance','Tech trance, hard','Shorter, harder and more driven on G# (52 Hz), for tech trance at 138 to 142 BPM.','r=trance',[32,1200,.04,62,.22,16,60,70,'tick',false]],
+  ['edmfh','EDM','Future house, tight thump','A short, tight thump with a snap on a high C (65 Hz), for future house and bass house at 124 to 128 BPM.','r=edm',[36,450,.035,46,.25,20,60,30,'snap',false]],
+  ['hraw','Hard dance','Raw hardstyle, long pitch fall','The pitch falls slowly over 150 ms into a long, fully driven tail, for raw hardstyle at 150 to 160 BPM.','r=hard',[31,520,.15,40,.5,75,60,100,'tick',false]],
+  ['hcore','Hard dance','Uptempo hardcore','A hard, driven kick with a strong attack, for hardcore and uptempo at 160 to 200 BPM.','r=hard',[31,1400,.07,64,.38,48,70,100,'tick',false]],
+  ['dnbp','Drum and bass','Punchy and tight','A short, punchy kick on A (55 Hz) with a snap, for drum and bass at 172 to 176 BPM.','r=dnb',[33,700,.03,50,.2,10,60,30,'snap',false]],
+  ['dnbneu','Drum and bass','Neurofunk, hard','Harder and more driven on F (44 Hz), for neurofunk where the kick has to cut through a loud bass.','r=dnb',[29,900,.035,58,.22,18,60,62,'snap',false]],
+  ['t808k','Hip hop and trap','808, short knock','A shorter 808 kick with a knock, on F (44 Hz), for hip hop and drill where an 808 bass plays as well.','r=trap',[29,400,.03,40,.45,50,40,30,'knock',false]],
+  ['t808d','Hip hop and trap','808, distorted phonk','A long, distorted 808 that plays your key (Key track on: C3 plays F, 44 Hz), for phonk and trap.','r=trap',[29,200,.05,30,1.2,80,20,85,'knock',true]],
+  ['fxdrop','FX','Sub drop','A two second sine falling from 300 Hz to 27.5 Hz: the sub drop on the first beat of a drop.','r=fx',[21,300,.3,20,2,100,0,10,'off',false]],
+  ['fxzap','FX','Laser kick','A slow, high zap that falls into a short body: a kick and a laser at once, for intros and fills.','r=fx',[33,4000,.15,90,.3,30,0,20,'off',false]]];
+ for(const[k,,n,,,v] of N)K(k,...v,n);
+ /* the keys that existed before: values untouched, new names and groups */
+ const OLD=[
+  ['psyzap','Psytrance, long body','Zap, long body on F#','The shape of the demo song\'s kick: a fast zap and a body of about 250 ms on F# (46 Hz). The body runs into the first note of a rolling bass, so lower that note, duck the bass, or use it with an offbeat bass.','p r=long'],
+  ['psyroll','Psytrance, long body','Rolling, long body on G','A rolling psy kick on G (49 Hz) with a body of about 190 ms: it overlaps the first bass note at 145 BPM. Good with the Psy Bass gate or a ducked bass.','p r=long'],
+  ['psyhard','Psytrance, long body','Hard, long body on G','A hard tick and more drive on G, body about 215 ms. Overlaps the first bass note of a rolling bass.','p r=long'],
+  ['fullon','Psytrance, long body','Full-on punch, long body on G','A snappy full-on punch on G with a body of about 215 ms. Overlaps the first bass note of a rolling bass.','p r=long'],
+  ['psydark','Psytrance, long body','Dark, long body on F','Darker knock on F (44 Hz), body about 230 ms, for darker grooves with an offbeat bass.','p r=long'],
+  ['psysub','Psytrance, long body','Sub heavy on D#','A long, heavy body on a low D# (39 Hz) for progressive psy with an offbeat bass, or as a breakdown kick.','p r=long'],
+  ['goa','Psytrance, long body','Goa, soft and long on A','A soft knock on A with a long body, for slower Goa grooves at 135 to 140 BPM.','p r=long'],
+  ['forest','Psytrance, long body','Forest, tight on G#','A tight forest kick on G# (52 Hz), body about 150 ms: it still overlaps the first bass note at 150 BPM a little.','p r=long'],
+  ['techno','Techno','909 techno','The classic 909 techno kick: a snap and a medium body on G, for 125 to 135 BPM.','r=techno'],
+  ['melodic','Techno','Melodic techno, warm tail','A warm kick with a long tail on G, for melodic techno and progressive house at 120 to 126 BPM.','r=techno'],
+  ['minimal','Techno','Minimal click','A short, high click kick on C (65 Hz), for minimal and microhouse.','r=techno'],
+  ['industrial','Techno','Industrial, heavy drive','Heavy drive and a loud snap on A, for industrial techno.','r=techno'],
+  ['house','House','House punch','The default house kick: a tick and a medium body on A (55 Hz), for 120 to 126 BPM. It is also the kick of the default drum kit.','r=house'],
+  ['techhouse','House','Tech house','A short kick with a snap on A# (58 Hz), for tech house at 124 to 128 BPM.','r=house'],
+  ['afro','House','Afro house, warm','A warm, rounded kick on A# with a soft knock, for afro and organic house.','r=house'],
+  ['deep','House','Deep, long sub','A long, soft sub kick on E (41 Hz), for deep house, dub techno and breakdowns.','r=house'],
+  ['bigroom','EDM','Big room, long and driven','A long, driven big room kick on G with a loud tick, for festival EDM at 126 to 130 BPM.','r=edm'],
+  ['pop','EDM','Pop punch','A short punchy kick on B (62 Hz), for pop and dance pop.','r=edm'],
+  ['hardstyle','Hard dance','Hardstyle','A long, fully driven kick with a long pitch fall on F#, for hardstyle at 150 BPM.','r=hard'],
+  ['gabber','Hard dance','Gabber','Driven all the way, long and hard, for gabber and hardcore.','r=hard'],
+  ['dnbsub','Drum and bass','Deep, rolling sub','A deep, clean kick with a knock on F#, for liquid and rolling drum and bass.','r=dnb'],
+  ['trap','Hip hop and trap','808 long, plays your key','A long 808 boom. Key track is on: C3 plays F (44 Hz), so play your bass line with it.','r=trap'],
+  ['boombap','Hip hop and trap','Boom bap','A short, knocking kick on C#, for boom bap and old school hip hop.','r=trap'],
+  ['lofi','Hip hop and trap','Lo-fi thump','A short, dusty thump on B, for lo-fi hip hop.','r=trap']];
+ const nm={};for(const[k,g,n] of OLD){if(KPRE[k])KPRE[k].n=n}
+ const ORDER=['init','psyfo','psymel','psysnap','psynite','psyfor2','psyhit','psygoa2','psyprog','psyzap','psyroll','psyhard','fullon','psydark','psysub','goa','forest',
+  'trup','trtech','techno','tpeak','melodic','minimal','industrial','thard','house','hhouse','techhouse','hdisco','afro','deep','bigroom','pop','edmfh','hardstyle','hraw','gabber','hcore',
+  'dnbp','dnbsub','dnbneu','trap','t808k','t808d','boombap','lofi','fxdrop','fxzap'];
+ reorder(KPRE,ORDER);
+ for(const[k,g,,t,f] of N)meta('kick',k,g,t,fl(f));for(const[k,g,,t,f] of OLD)meta('kick',k,g,t,fl(f));
+ /* Full-on punch is nearly the same as Hard, long body (measured): it stays for drum pads and projects that use it, but leaves the menu */
+ PSMETA.kick.fullon.h=1;
+ for(const k in KPRE)if(!PSMETA.kick[k])meta('kick',k,'Other',KPRE[k].n,{r:'plain'})}
+/* ---------- Snare, Clap, Hat and Tom designers: [key, group, name, tooltip, flags, values (only what differs from the designer's own defaults)].
+ Every hit is made at the same peak (the designer scales each sound to it), so they keep the designer's level; the gain stays as it was. */
+function PS2_DRUMS(meta,reorder,fl,db,r3){
+ const Z=(ty,inst,L,OLD)=>{for(const[k,,n,,,o] of L)pzp(ty,k,n,Object.assign({gain:ty==='hat'?.7:.8},o));for(const[k,,n] of OLD)if(PZPRE[ty][k])PZPRE[ty][k].n=n;
+  const GO=['Init','Classic machines','House','Techno','Trance','Psytrance','Drum and bass','EDM','Hip hop and trap','Other'],all=L.concat(OLD).map((a,i)=>[a,i]).sort((p,q)=>(GO.indexOf(p[0][1])-GO.indexOf(q[0][1]))||(p[1]-q[1])).map(p=>p[0]);reorder(PZPRE[ty],all.map(a=>a[0]));for(const[k,g,,t,f] of all)meta(inst,k,g,t,fl(f));const def=PRESETS[inst].ipk;if(PSMETA[inst][def])PSMETA[inst][def].def=1};
+ /* order: the list below is the menu order; every row of OLD is a preset that existed before */
+ Z('snare','zsnare',[
+  ['init','Init','Plain snare','A plain tone at 200 Hz with a little noise and no drive: the start for your own snare.','',{tune:200,sweep:30,body:60,tone:30,snap:60,nhp:2000,nd:.15,rattle:20,click:20,dec:.18,drive:0}],
+  ['s808','Classic machines','808 snare, long noise','The 808 recipe: a tone near 160 Hz and a long noise tail (the 808 lets the noise ring 100 to 600 ms).','',{tune:160,sweep:15,body:80,tone:40,snap:75,nhp:2500,nd:.4,rattle:25,click:25,dec:.3,drive:5}],
+  ['techno2','Techno','Techno rumble snare','A low, driven snare with a dark noise, for techno and minimal.','',{tune:150,sweep:60,body:85,tone:40,snap:60,nhp:1300,nd:.22,rattle:55,click:30,dec:.26,drive:60}],
+  ['trance','Trance','Trance snare, bright tail','A bright snare with a longer noise tail, for trance claps and snares on 2 and 4.','',{tune:200,sweep:40,body:55,snap:90,nhp:4000,nd:.3,rattle:40,click:40,dec:.2,drive:25}],
+  ['tranroll','Trance','Snare for rolls, short','Very short, so 16th and 32nd rolls in a build up stay clear. Raise its level step by step over the roll.','',{tune:210,sweep:35,body:50,snap:85,nhp:3200,nd:.07,rattle:20,click:45,dec:.09,drive:20}],
+  ['psy909','Psytrance','Full-on 909 layer','The punch layer of a psytrance snare (a 909-style body). Layer it with a psy clap and a noise snare, all on the same hit.','',{tune:190,sweep:55,body:80,tone:60,snap:80,nhp:2600,nd:.12,rattle:35,click:50,dec:.14,drive:35}],
+  ['psynoise','Psytrance','Noise snare, no body','Only bright noise and rattle, no low end: the top layer of a psy snare, as psytrance snares keep no low end.','',{tune:200,sweep:0,body:5,tone:0,snap:100,nhp:5000,nd:.16,rattle:70,click:40,dec:.1,drive:30}],
+  ['psyroll','Psytrance','Snare for 32nd rolls','Very short and bright, for the 32nd note rolls before a psytrance drop (52 ms apart at 145 BPM).','',{tune:230,sweep:40,body:45,snap:95,nhp:3800,nd:.06,rattle:30,click:60,dec:.07,drive:40}],
+  ['jungle','Drum and bass','Jungle snare, ringing','A ringing, tuned snare with a long body, like the breakbeat snares of jungle.','',{tune:240,sweep:30,body:85,tone:85,snap:75,nhp:2600,nd:.18,rattle:40,click:55,dec:.32,drive:25}],
+  ['piccolo','Drum and bass','Piccolo, high and tight','A high, tight snare with a short noise, for ghost notes and fast breaks.','',{tune:330,sweep:25,body:70,tone:75,snap:80,nhp:4500,nd:.08,rattle:50,click:40,dec:.12,drive:10}],
+  ['edm','EDM','Big room snare, long noise','A driven snare with a long noise tail, for EDM drops and builds.','',{tune:190,sweep:50,body:70,tone:60,snap:100,nhp:2200,nd:.45,rattle:60,click:60,dec:.3,drive:50}],
+  ['rim','Other','Rim click','A short, high click like a stick on the rim, for house and techno ghost notes.','',{tune:420,sweep:20,body:60,tone:90,snap:20,nhp:5000,nd:.04,rattle:0,click:100,dec:.06,drive:20}],
+  ['clapsn','Other','Clappy snare','Almost no body and a wide noise band: halfway to a clap.','',{tune:250,sweep:20,body:25,tone:30,snap:100,nhp:1400,nd:.2,rattle:90,click:10,dec:.15,drive:20}]],
+ [['t909','Classic machines','909 snare, tight','The 909 recipe: a tuned body near 190 Hz with a falling pitch and a bright noise.'],['f808','Classic machines','808 snare, fat body','A fat 808-style tone at 170 Hz with a short noise.'],
+  ['techno','Techno','Techno snap','A short, bright snap for techno.'],['psy','Psytrance','Psy snare, hard','A hard, driven psy snare with a lot of snap and rattle.','p'],['dnb','Drum and bass','Tight crack','A high, tight crack for drum and bass at 170 to 176 BPM.'],
+  ['trap','Hip hop and trap','Trap snare','A bright trap snare with a rattle.'],['lofi','Hip hop and trap','Lo-fi dust','A dark, driven snare for lo-fi hip hop.'],['crack','Hip hop and trap','Rimshot crack','A cracking rimshot with a high click.'],
+  ['dub','EDM','Dubstep layered','A huge, layered snare with a long tail, for dubstep on the third beat.'],['brush','Other','Brush swish','A soft brush: noise and rattle only, no click.']]);
+ Z('clap','zclap',[
+  ['init','Init','Plain clap','Three hands close together, no room and no drive: the start for your own clap.','',{bursts:3,spread:10,bd:5,tail:.15,freq:1500,q:1.5,room:0,drive:0}],
+  ['c808','Classic machines','808 clap','The 808 recipe: a few quick hands, a band near 1 kHz and a longer, roomy tail.','',{bursts:3,spread:9,bd:5,tail:.35,freq:1000,q:1.2,room:40,drive:8}],
+  ['techno','Techno','Techno clap, dark','A darker, driven clap with a little room, for techno.','',{bursts:4,spread:13,bd:6,tail:.15,freq:900,q:1.3,room:25,drive:35}],
+  ['trance','Trance','Trance clap, long tail','A bright clap with a long, roomy tail, for trance on 2 and 4.','',{bursts:5,spread:11,bd:6,tail:.45,freq:1800,q:1.5,room:75,drive:15}],
+  ['psy','Psytrance','Psy clap, tight and bright','A short, bright clap with little room, the mid and high layer of a psytrance snare. Use about 10% reverb on it.','',{bursts:3,spread:8,bd:4,tail:.12,freq:2200,q:2,room:15,drive:30}],
+  ['psyw','Psytrance','Psy clap, wide room','The same bright psy clap with more room, for breakdowns and the second drop.','',{bursts:4,spread:10,bd:5,tail:.2,freq:1900,q:1.8,room:70,drive:25}],
+  ['lofi','Hip hop and trap','Lo-fi clap, crunchy','Low, driven and crunchy, for lo-fi and boom bap.','',{bursts:4,spread:12,bd:6,tail:.16,freq:1000,q:1,room:20,drive:70}],
+  ['long','EDM','Breakdown clap, huge room','Six hands and a very long tail, for one clap at the end of a breakdown.','',{bursts:6,spread:16,bd:8,tail:.7,freq:1400,q:1.4,room:100,drive:10}],
+  ['crowd','Other','Crowd of hands','Eight hands spread far apart: many people clapping at once.','',{bursts:8,spread:22,bd:10,tail:.3,freq:1600,q:1,room:45,drive:5}]],
+ [['c909','Classic machines','909 clap','The 909 clap: four hands about 11 ms apart and a short room.'],['wide','House','Wide hands','More hands spread wider, for house.'],['dry','Techno','Dry tight','Three hands, almost no room, for tight techno grooves.'],
+  ['room','EDM','Big room','A big, roomy clap for EDM.'],['edm','EDM','EDM stack','Seven hands with drive and room: a stacked EDM clap.'],['trap','Hip hop and trap','Trap clap','A high, driven trap clap.'],
+  ['gate','Other','Gated','A clap whose tail is cut short, like a gated reverb.'],['snap','Other','Finger snap','Two quick hands, high and narrow: a finger snap.']]);
+ Z('hat','zhat',[
+  ['init','Init','Plain hat','Metal and noise half and half, no drive: the start for your own hi-hat.','',{pitch:9,tone:8000,hp:6000,noise:50,dec:.06,drive:0}],
+  ['h808c','Classic machines','808 closed, metallic','The 808 hat: only the six square oscillators, through a band near 7.1 kHz, no noise.','',{pitch:9,tone:7100,hp:4500,noise:0,dec:.05,drive:0}],
+  ['h808o','Classic machines','808 open, metallic','The same 808 metal, left to ring for half a second.','',{pitch:9,tone:7100,hp:4500,noise:0,dec:.5,drive:0}],
+  ['houseo','House','House open, shaky','A softer, noisier open hat for the offbeat in house.','',{pitch:8,tone:8000,hp:6000,noise:55,dec:.3,drive:5}],
+  ['techc','Techno','Techno closed, dirty','Low, fully driven metal and very short: a dirty closed hat for techno 16ths.','',{pitch:5,tone:6000,hp:5500,noise:15,dec:.035,drive:100}],
+  ['tropen','Trance','Trance open, long and bright','A bright open hat for the offbeat in trance.','',{pitch:11,tone:12000,hp:8000,noise:35,dec:.3,drive:20}],
+  ['psyc','Psytrance','Psy closed, 16ths','Very short, high and glassy, for 16th note hats in psytrance (it dies within one 16th at 145 BPM). Soft on the beat, loudest on the offbeat.','',{pitch:18,tone:14000,hp:12000,noise:10,dec:.03,drive:10}],
+  ['psyo','Psytrance','Psy open, offbeat','A short open hat for the offbeat (steps 3, 7, 11 and 15) in psytrance.','',{pitch:10,tone:10000,hp:7500,noise:30,dec:.2,drive:15}],
+  ['dnbh','Drum and bass','Crisp and noisy','A crisp, noisy hat for fast drum and bass patterns.','',{pitch:10,tone:13000,hp:10000,noise:85,dec:.08,drive:15}],
+  ['ride','Other','Ride','Lower pitched metal that rings for most of a second: a ride cymbal.','',{pitch:14,tone:6500,hp:4000,noise:10,dec:.9,drive:5}],
+  ['crash','Other','Crash','A long, noisy crash for the first beat of a new section.','',{pitch:16,tone:9000,hp:4500,noise:55,dec:1.2,drive:20}]],
+ [['c909','Classic machines','909 closed','The 909 closed hat: metal and noise, short and bright.'],['o909','Classic machines','909 open','The 909 open hat, about half a second.'],['tick','Techno','Tight tick','A very short tick for fast patterns.'],
+  ['ped','Techno','Metal pedal','A metallic pedal hat.'],['bopen','Trance','Bright open','A bright, driven open hat with a long ring.'],['trap','Hip hop and trap','Trap hat','A bright trap hat for fast rolls.'],
+  ['lofi','Hip hop and trap','Lo-fi hat','A dark, dusty hat for lo-fi hip hop.'],['shk','Other','Noisy shaker','Mostly noise: a shaker.']]);
+ Z('tom','ztom',[
+  ['init','Init','Plain tom','A plain tuned body at 120 Hz with a small pitch fall: the start for your own tom.','',{tune:120,sweep:30,body:90,skin:0,click:10,noise:0,dec:.35,drive:0}],
+  ['909l','Classic machines','909 low tom','Two tones a fifth apart with a pitch fall, as on the 909. Key track is on: the key you play tunes it.','',{tune:100,sweep:55,body:90,skin:55,click:35,noise:15,dec:.45,drive:10}],
+  ['909h','Classic machines','909 high tom','The 909 recipe, higher and shorter.','',{tune:200,sweep:55,body:90,skin:55,click:35,noise:15,dec:.3,drive:10}],
+  ['tecr','Techno','Techno tom, short and dark','A short, driven low tom for techno fills and percussion loops.','',{tune:110,sweep:50,body:100,skin:20,click:40,noise:25,dec:.18,drive:45}],
+  ['psylow','Psytrance','Psy tom, low boom','A low, driven tom with a big pitch fall, for the two-hit fills at the end of an 8 bar phrase.','',{tune:80,sweep:70,body:100,skin:20,click:50,noise:5,dec:.3,drive:45}],
+  ['syn','Other','Syndrum, long pitch fall','The disco syndrum: a pure tone that falls a long way.','',{tune:220,sweep:100,body:100,skin:0,click:15,noise:5,dec:.75,drive:10}],
+  ['bongo','Other','Bongo','A high, short drum with a slap, for afro and latin percussion.','',{tune:400,sweep:10,body:85,skin:50,click:65,noise:10,dec:.15,drive:5}],
+  ['tribal','Other','Tribal floor drum','A low drum with skin and noise, for tribal percussion loops.','',{tune:75,sweep:20,body:100,skin:60,click:40,noise:30,dec:.6,drive:20}]],
+ [['t808','Classic machines','808 low tom','A low 808-style tom.'],['tmid','Classic machines','808 mid tom','A mid 808-style tom.'],['thi','Classic machines','808 high tom','A high 808-style tom.'],
+  ['elec','Techno','Electro tom','A tom with a fast, deep pitch fall.'],['psy','Psytrance','Psy tom','A driven psy tom with a big click.','p'],['floor','Other','Floor boom','A long, low boom.'],
+  ['conga','Other','Conga','A conga with a slap.'],['timb','Other','Timbale','A high, ringing timbale.']]);
+
+ /* ---------- Percussion (modal model): [key, group, name, tooltip, flags, values]; a level trim from PSLV is put on new presets ---------- */
+ const PC=[
+  ['init','Init','Plain bar','A plain struck bar with the model\'s middle settings: the start for your own sound. C3 to C5.','',{rt:'beam',tune:0,decay:1.2,mat:30,pos:.3,stiff:45,noise:10,inh:0,bright:9000}],
+  ['xylo','Mallets','Xylophone','A short, hard, bright wooden bar. C4 to C6.','',{rt:'marimba',tune:12,decay:.45,mat:40,pos:.25,stiff:78,noise:8,inh:0,bright:12000}],
+  ['musicbox','Bells','Music box','A tiny, bright tine an octave or two up. C4 to C6.','',{rt:'beam',tune:24,decay:1.2,mat:98,pos:.15,stiff:90,noise:3,inh:-5,bright:16000}],
+  ['gamelan','Bells','Gamelan','A metal plate with off-key overtones that rings long. C3 to C5.','',{rt:'plate',tune:0,decay:3,mat:90,pos:.33,stiff:60,noise:4,inh:25,bright:11000}],
+  ['bowl','Bells','Singing bowl','A long, soft ringing bowl for breakdowns and intros. C3 to C4.','',{rt:'tube',tune:0,decay:4.5,mat:100,pos:.4,stiff:25,noise:2,inh:10,bright:6000}],
+  ['handpan','Drums','Handpan','A soft metal drum with a round tone, for melodic percussion. C3 to C5.','',{rt:'plate',tune:0,decay:2.4,mat:75,pos:.3,stiff:40,noise:5,inh:8,bright:7000}],
+  ['logdrum','Drums','Log drum','A deep, woody drum with a hollow body, like the log drum of amapiano. C2 to C3.','',{rt:'pipe',tune:-12,decay:.4,mat:15,pos:.35,stiff:30,noise:12,inh:0,bright:4000}],
+  ['tabla','Drums','Tabla','A tuned hand drum with a bending ring. C3 to C4.','',{rt:'membrane',tune:0,decay:.35,mat:45,pos:.15,stiff:70,noise:18,inh:-10,bright:7000}],
+  ['clave','Drums','Clave','A short, very hard, ringing wooden click two octaves above the key you play.','',{rt:'pipe',tune:24,decay:.25,mat:70,pos:.5,stiff:95,noise:5,inh:0,bright:16000}],
+  ['pizz','Plucked','Pizzicato string','A short plucked string. C3 to C5.','',{rt:'string',tune:0,decay:.5,mat:30,pos:.18,stiff:70,noise:6,inh:0,bright:5000}],
+  ['psyblip','Psytrance','Wood blip','A tiny, very short high blip for psytrance percussion loops and fills. C4 to C6.','',{rt:'pipe',tune:24,decay:.12,mat:60,pos:.4,stiff:95,noise:5,inh:0,bright:12000}],
+  ['psyping','Psytrance','Metal ping','A bright, off-key metal ping for psytrance FX hits and echoes. C4 to C6.','',{rt:'beam',tune:24,decay:.6,mat:100,pos:.2,stiff:95,noise:2,inh:35,bright:16000}],
+  ['psyperc','Psytrance','Rubber perc','A short, bending membrane hit for the off-beat percussion of full-on. C3 to C5.','',{rt:'membrane',tune:12,decay:.18,mat:35,pos:.25,stiff:85,noise:10,inh:-30,bright:8000}]];
+ const PCOLD=[['marimba','Mallets','Marimba','A soft wooden marimba. C3 to C6.'],['vibes','Mallets','Vibraphone','A metal vibraphone with a long, soft ring. C3 to C6.'],['glock','Mallets','Glockenspiel','A high, bright glockenspiel two octaves up. C4 to C6.'],
+  ['tubular','Bells','Tubular bell','A long church-like bell. C3 to C5.'],['crystal','Bells','Crystal','A high, glassy bell with off-key overtones. C4 to C6.'],['steel','Drums','Steel drum','A Caribbean steel pan. C3 to C5.'],
+  ['tom','Drums','Tom','A tuned tom, an octave down. C3 to C4.'],['block','Drums','Wood block','A short, hard wood block. C4 to C5.'],['kalimba','Plucked','Kalimba','A plucked metal tine an octave up. C3 to C5.'],['harp','Plucked','Harp pluck','A plucked harp string. C3 to C5.']];
+ for(const[k,,n,,,o] of PC){PCPRE[k]=Object.assign({n},o,{gain:r3(Math.min(1,.6*db('perc',k)))})}for(const[k,,n] of PCOLD){PCPRE[k].n=n;if(k!=='tom'&&k!=='marimba'&&(PSLV.perc||{})[k])PCPRE[k].gain=r3(Math.min(1,.6*db('perc',k)))}
+ reorder(PCPRE,['init','marimba','xylo','vibes','glock','tubular','crystal','musicbox','gamelan','bowl','steel','handpan','tom','logdrum','tabla','block','clave','kalimba','harp','pizz','psyblip','psyping','psyperc']);
+ for(const[k,g,,t,f] of PC)meta('perc',k,g,t,fl(f));for(const[k,g,,t] of PCOLD)meta('perc',k,g,t,{});
+
+ /* ---------- Drum kit: kits per genre. Every kit keeps the same pad layout (kick on C3, rim, snare, clap, second snare, low tom, closed hat,
+  mid tom, pedal hat, high tom, open hat, conga, shaker, crash, cowbell, ride), so a beat written for one plays on all of them. A kit sets the
+  kick (a kick preset, or a Kick designer on the pad: kd) and each pad's tune, decay, tone and level. The six kits that existed keep
+  their exact result. ---------- */
+ const PAD={kick:0,rim:1,snare:2,clap:3,snare2:4,ltom:5,chat:6,mtom:7,phat:8,htom:9,ohat:10,conga:11,shaker:12,crash:13,cow:14,ride:15};
+ const KIT={
+  deephouse:['House','Deep house, soft','Soft and round: a deep kick, every pad longer and a little darker. 118 to 124 BPM.',{kp:'hhouse',all:{tone:-.15,dec:1.9,tune:1},p:{snare:{dec:.9},clap:{dec:1.3},chat:{dec:.8},ohat:{dec:.8},shaker:{lvl:.55},cow:{lvl:.5}}}],
+  techhouse:['House','Tech house','Short tech house kick, every pad shorter and brighter, percussion up front. 124 to 128 BPM.',{kp:'techhouse',all:{tone:.25,dec:.55,tune:2},p:{clap:{dec:.8,tone:.6},chat:{dec:.7,tone:.7},ohat:{dec:.7},conga:{lvl:.7,tune:2},rim:{lvl:.8}}}],
+  techno:['Techno','Peak time techno','A punchy techno kick, every pad a little brighter and lower, dry clap, tight hats and a ride. 128 to 135 BPM.',{kp:'tpeak',all:{tone:.1,tune:-1},p:{clap:{dec:.9},chat:{dec:.6,tone:.75},ohat:{dec:.8},ride:{lvl:.7,tone:.7},rim:{tone:.7},ltom:{tune:-8,dec:.7},mtom:{tune:-3,dec:.7},htom:{tune:2,dec:.7}}}],
+  hardtechno:['Techno','Hard techno','A distorted kick, every pad shorter, brighter and lower. 140 to 150 BPM.',{kp:'thard',all:{tone:.2,dec:.6,tune:-2},p:{clap:{dec:.7,tone:.6},snare:{tone:.7,dec:.7},chat:{dec:.5,tone:.85},ohat:{dec:.6,tone:.8},crash:{lvl:.5}}}],
+  trance:['Trance','Uplifting trance','A punchy trance kick, every pad brighter and higher, a long clap, a short snare for rolls. 136 to 140 BPM.',{kp:'trup',all:{tone:.15,tune:2},p:{clap:{dec:1.2,tone:.65},snare:{tone:.75,dec:.6},chat:{tone:.8,dec:.7},ohat:{dec:1,tone:.75},crash:{lvl:.65,dec:1.4},ride:{lvl:.65}}}],
+  psyfo:['Psytrance','Full-on 145','The full-on kit: a short Kick designer kick on G that is gone before the first rolling bass note, bright short hats, a 909-style snare and a bright clap to layer on 2 and 4, toms for fills. 145 BPM.',{kd:'psyfo',p:{snare:{tone:.8,dec:.6},clap:{tone:.7,dec:.7},chat:{tone:.9,dec:.45},ohat:{dec:.5,tone:.85},conga:{tune:5,dec:.5},shaker:{lvl:.45,tone:.8},crash:{lvl:.55},ltom:{dec:.6},mtom:{dec:.6,tune:2},htom:{dec:.6,tune:7},rim:{tone:.8,lvl:.65}}},'p'],
+  psydark:['Psytrance','Forest and dark 150','A very short, clicky kick on F#, very bright and short hats, a darker snare and low toms. 148 to 160 BPM.',{kd:'psyfor2',p:{chat:{dec:.4,tone:.95},phat:{dec:.4},ohat:{dec:.45,tone:.9},snare:{tone:.6,dec:.5,tune:-2},clap:{dec:.6},ltom:{tune:-9,dec:.5},mtom:{tune:-4,dec:.5},htom:{dec:.5},conga:{tune:-3}}},'p'],
+  psyprog:['Psytrance','Progressive psy 138','A rounder kick for an offbeat or galloping bass, the pads a little lower and longer, open hats and shaker. 134 to 140 BPM.',{kd:'psyprog',all:{tune:-2,dec:1.15},p:{clap:{dec:1.1,tone:.6},ohat:{dec:.8},chat:{tone:.75,dec:.7},shaker:{lvl:.55},conga:{lvl:.65}}},'p'],
+  goa:['Psytrance','Goa 140','A soft analog style kick on E, warm snare and clap, longer toms and a cowbell, like 90s Goa trance. 138 to 145 BPM.',{kd:'psygoa2',p:{snare:{tone:.6,dec:.8},clap:{dec:.9,tone:.5},chat:{tone:.7},ohat:{dec:.8},ltom:{dec:.9},mtom:{dec:.9},htom:{dec:.9},cow:{lvl:.55},crash:{lvl:.6}}},'p'],
+  dnb:['Drum and bass','Drum and bass','A short punchy kick, every pad tuned up and shorter, a high snare and a brighter second snare for ghost notes, a ride. 170 to 176 BPM.',{kp:'dnbp',all:{tune:4,dec:.8,tone:.1},p:{snare:{tone:.8,tune:3,dec:.7,lvl:.9},snare2:{tone:.9,tune:5,dec:.5},clap:{dec:.7},chat:{dec:.5,tone:.8},ride:{lvl:.7,dec:1.2,tone:.7}}}],
+  edm:['EDM','Big room','A long driven big room kick, every pad longer and a little lower, a big clap and a long crash. 126 to 130 BPM.',{kp:'bigroom',all:{tone:.05,dec:1.5,tune:-2},p:{clap:{tone:.7,dec:1.3,lvl:.85},snare:{tone:.75},crash:{lvl:.7,dec:1.5},ohat:{dec:.9}}}],
+  lofi:['Hip hop and trap','Lo-fi hip hop','A boom bap kick, every pad much darker, lower and longer, rim and shaker. 70 to 90 BPM.',{kp:'boombap',all:{tone:-.35,tune:-5,dec:1.4},p:{chat:{dec:.8},snare:{dec:1.2},rim:{lvl:.75},shaker:{lvl:.5}}}],
+  trap2:['Hip hop and trap','Modern trap','The 808 kick, every pad brighter, shorter and higher, hats for fast rolls. 130 to 150 BPM (written at half time).',{kp:'trap',all:{tone:.25,dec:.7,tune:2},p:{chat:{dec:.5,tone:.8},phat:{dec:.4,tone:.7},clap:{tone:.7,dec:1.1},snare:{tune:3,tone:.7}}}]};
+ const OLDK={def:['Init','Default kit (house)','The default 16 pads, a 909-style house kit: house kick, rim, two snares, clap, three toms, hats, conga, shaker, crash, cowbell and ride. Start here.'],
+  tight:['Techno','Tight and dry','The default sounds made shorter, with the 909 techno kick.'],deep:['House','Deep and long','The default sounds tuned down and longer, with a deep sub kick.'],
+  bright:['EDM','Bright and snappy','The default sounds brighter and shorter, with the big room kick.'],dark:['Hip hop and trap','Dark and low','The default sounds darker and lower, with the lo-fi kick.'],
+  trap:['Hip hop and trap','Trap kit','The default sounds a little longer and lower, with the 808 kick.']};
+ for(const k in KIT)DUKIT[k]={n:KIT[k][1]};for(const k in OLDK)if(DUKIT[k])DUKIT[k].n=OLDK[k][1];
+ reorder(DUKIT,['def','deephouse','techhouse','deep','techno','hardtechno','tight','trance','psyfo','psydark','psyprog','goa','dnb','edm','bright','lofi','dark','trap','trap2']);
+ const kitPads=k=>{const S=KIT[k];if(!S)return duKit(k);const o=S[3],pads=defaultPads();
+  for(const[i,p] of pads.entries()){if(o.all&&i!==0){p.tone=clamp(p.tone+(o.all.tone||0),0,1);p.tune=clamp(p.tune+(o.all.tune||0),-24,24);p.dec=clamp(p.dec*(o.all.dec||1),.2,4)}}
+  for(const[nm,v] of Object.entries(o.p||{}))Object.assign(pads[PAD[nm]],v);
+  if(o.kd){pads[0]=Object.assign(pads[0],{type:'kd',name:'Kick',k:kickParams(o.kd)})}else if(o.kp)pads[0].kp=o.kp;return pads};
+ IPRE.drums[1]=k=>({pads:kitPads(k),psel:0});
+ for(const k in KIT)meta('drums',k,KIT[k][0],KIT[k][2],fl(KIT[k][4]));for(const k in OLDK)meta('drums',k,OLDK[k][0],OLDK[k][2],{})}
+/* ---------- Sampler, Emit and Vector Grain ----------
+ The built-in sources are three: a choir "ahh", a glass tone and a rain texture. The group "Your sample" holds settings only: it keeps
+ the sample that is loaded (drop your own sample in first), as the playback modes of samplers do in other DAWs. */
+function PS2_SAMP(meta,reorder,fl,db,r3){
+ const SM=[
+  ['yplain','Init','Plain: play your sample','Keeps the sample that is loaded and plays it from start to end, looped while held, no filter. Start here with your own sample.','r=keys',{mode:'classic',start:0,end:1,a:.003,d:.3,s:1,r:.2,cut:18000,res:.7,fenv:0,lfoa:0}],
+  ['yone','Your sample','One-shot drum hit','Keeps your sample and plays it once to the end however short the note: for drum hits and vocal shots. Key C5 plays it at its own pitch.','r=hit',{mode:'oneshot',start:0,end:1,a:.001,d:.3,s:1,r:.05,cut:18000,res:.7,fenv:0,lfoa:0}],
+  ['yloop','Your sample','Looped pad','Keeps your sample, loops its middle part with a slow fade in and out, a little darker: a pad from any sound.','r=pad',{mode:'classic',start:.2,end:.8,a:.4,d:.3,s:1,r:1.5,cut:9000,res:.7,fenv:0,lfoa:0}],
+  ['yrev','Your sample','Reversed swell','Keeps your sample and plays it backwards with a slow fade in: the classic reverse swell before a drop.','r=pad',{mode:'classic',rev:true,start:0,end:1,a:.8,d:.3,s:1,r:.8,cut:16000,res:.7,fenv:0,lfoa:0}],
+  ['yfreeze','Your sample','Granular freeze','Keeps your sample and freezes one moment of it as a cloud of grains: a held note never ends and never moves.','r=pad',{mode:'grain',pos:.5,size:.15,dens:30,spray:10,scan:0,prand:3,a:.4,r:2,cut:14000,res:.7,fenv:0,lfoa:0}],
+  ['ystretch','Your sample','Granular slow stretch','Keeps your sample and moves slowly through it with grains: about four times slower, at the same pitch.','r=pad',{mode:'grain',pos:.05,size:.12,dens:24,spray:5,scan:15,prand:0,a:.3,r:.8,cut:16000,res:.7,fenv:0,lfoa:0}],
+  ['choirlead','Vocals','Choir lead, filtered','The choir as a lead: quick start, a resonant low-pass and a slow filter wobble. C4 to C5.','r=lead',{buf:'@choir',mode:'classic',start:.05,end:.95,a:.02,r:.3,cut:3500,res:3,lfoa:12,lfor:5}],
+  ['choirrev','Vocals','Reverse choir swell','The choir backwards with a slow fade in: a breath before a drop or a new phrase. C3 to C5.','r=pad',{buf:'@choir',mode:'classic',rev:true,start:0,end:1,a:.6,r:1.2,cut:8000}],
+  ['choirvox','Vocals','Vocal chop, one-shot','A short piece of the choir played once: chop rhythms and call-outs. C4 to C6.','r=pluck',{buf:'@choir',mode:'oneshot',start:.2,end:.35,a:.002,r:.08,cut:12000}],
+  ['choirlow','Pads','Dark choir drone, octave down','The choir an octave down, slow in, dark: a drone under a breakdown. C2 to C4.','r=pad',{buf:'@choir',mode:'classic',tune:-12,start:.05,end:.95,a:1,r:3,cut:1800}],
+  ['glasspad','Pads','Glass pad, long grains','Long, overlapping grains of the glass tone: a soft, bright pad. C3 to C5.','r=pad',{buf:'@glass',mode:'grain',pos:.4,size:.4,dens:20,spray:25,scan:2,prand:3,a:1.2,r:3,cut:9000}],
+  ['rainwash','Pads','Rain wash, filtered','The rain as a slowly breathing, filtered wash. Any key.','r=pad',{buf:'@rain',mode:'grain',pos:.5,size:.3,dens:18,spray:60,scan:10,prand:20,a:1.5,r:3,cut:2500,lfoa:30,lfor:.2}],
+  ['choirup','Granular','Choir shimmer, octave up','Grains of the choir an octave up with a little pitch spray: a shimmering top layer. C3 to C5.','r=pad',{buf:'@choir',mode:'grain',tune:12,pos:.5,size:.12,dens:40,spray:30,scan:3,prand:6,a:.8,r:2.5,cut:12000}],
+  ['choirtime','Granular','Choir, slow time stretch','Moves slowly through the choir with grains: the vowel changes slowly while the pitch stays. C3 to C5.','r=pad',{buf:'@choir',mode:'grain',pos:.1,size:.2,dens:25,spray:5,scan:20,prand:0,a:.3,r:1,cut:12000}],
+  ['glassglitch','Granular','Glass glitch, random pitch','Tiny grains with wild pitch and position spray: glitch and sparkle. Any key.','r=fx',{buf:'@glass',mode:'grain',pos:.3,size:.02,dens:30,spray:100,scan:0,prand:100,a:.005,r:.3,cut:16000}],
+  ['glasspluck','Keys','Glass pluck, short','The glass tone cut short with a filter that closes: a bright pluck for arps. C4 to C6.','r=pluck',{buf:'@glass',mode:'oneshot',start:0,end:.25,a:.001,d:.15,s:0,r:.15,cut:3000,res:2,fenv:60}],
+  ['glassrev','FX','Reversed glass bell','The glass tone backwards: a rising, ringing swell into the next beat. C4 to C5.','r=fx',{buf:'@glass',mode:'oneshot',rev:true,start:0,end:1,a:.002,r:.4,cut:14000}],
+  ['choirwob','FX','Choir wobble','The choir through a resonant low-pass moved four times a second. C3 to C4.','r=fx',{buf:'@choir',mode:'classic',start:.05,end:.95,a:.05,r:.4,cut:1200,res:6,lfoa:70,lfor:4}]];
+ const SMOLD=[['choir','Vocals','Choir pad, classic','The choir sample played and looped while you hold the key. The default. C3 to C5.'],['cloud','Granular','Choir cloud','The choir as a cloud of slow grains with spray: an airy pad. C3 to C5.'],
+  ['frozen','Granular','Glass, frozen','One moment of the glass tone held as grains. C3 to C5.'],['glasskeys','Keys','Glass keys','The glass tone played once per note: bell-like keys. C4 to C6.'],
+  ['rain','Textures','Rain texture','The rain as a moving texture of grains. Any key.'],['stutter','Granular','Stutter vox','Short grains of the choir in a row: a stuttering vocal. C4 to C5.']];
+ for(const[k,,n,,,o] of SM){SMPRE[k]=Object.assign({n},o);if(!/^y/.test(k))SMPRE[k].gain=r3(Math.min(1,.6*db('sampler',k)))}for(const[k,,n] of SMOLD){SMPRE[k].n=n;if(k!=='choir'&&k!=='cloud'&&(PSLV.sampler||{})[k])SMPRE[k].gain=r3(Math.min(1,.6*db('sampler',k)))}
+ reorder(SMPRE,['yplain','yone','yloop','yrev','yfreeze','ystretch','choir','choirlead','choirrev','choirvox','choirlow','glasspad','rainwash','cloud','choirup','choirtime','frozen','stutter','glassglitch','glasskeys','glasspluck','rain','glassrev','choirwob']);
+ for(const[k,g,,t,f] of SM)meta('sampler',k,g,t,fl(f));for(const[k,g,,t] of SMOLD)meta('sampler',k,g,t,{r:k==='glasskeys'?'keys':k==='rain'?'fx':k==='stutter'?'lead':'pad',slow:k==='choir'?0:1});
+ /* the "Your sample" presets name no sample, so the one loaded stays; sampParams always sets Reverse off, so a reversed preset sets it back on */
+ IPRE.sampler[1]=k=>{const o=sampParams(k);if(SMPRE[k]&&SMPRE[k].rev)o.rev=true;return o};
+
+ /* Emit: one or two emitters shoot particles over the picture of a sample; each plays the spot it is over */
+ const EM=[
+  ['init','Init','One still emitter','One emitter in the middle that shoots slowly upwards: a plain, steady sound to start from. C3 to C5.','r=fx',{buf:'@choir',rx1:.45,ry1:.4,rw1:.1,rh1:.2,ang1:90,wid1:30,frc1:10,fri1:10,rate1:8,grn1:16,life1:1.5,fw1:2,edx:0,edy:0}],
+  ['glasspad','Pads','Glass pad, slow drift','Slow particles drifting over the glass tone: a calm, bright pad. C3 to C5.','r=pad',{buf:'@glass',rx1:.2,ry1:.3,rw1:.6,rh1:.4,ang1:90,wid1:180,frc1:8,fri1:5,rate1:10,grn1:32,life1:4,blur1:40,fw1:4,gain:.7}],
+  ['drone','Pads','Low drone, octave down','A still cloud an octave down, very blurred: a drone for intros and breakdowns. C2 to C4.','r=pad',{buf:'@choir',rx1:.2,ry1:.25,rw1:.6,rh1:.5,ang1:90,wid1:360,frc1:5,fri1:0,rate1:6,grn1:30,life1:4,blur1:80,fw1:3.5,pit1:-12}],
+  ['shimmer','Textures','Shimmer, octave up','Fast, short particles an octave up over the glass tone: a shimmer on top of a pad. C3 to C5.','r=pad',{buf:'@glass',rx1:.3,ry1:.2,rw1:.4,rh1:.2,ang1:80,wid1:60,frc1:45,fri1:10,rate1:24,grn1:40,life1:2,fw1:2,pit1:12,gain:.5}],
+  ['sparks','FX','Falling sparks','Particles shot down whose pitch glides an octave down: falling sparks for transitions. C4 to C5.','r=fx',{buf:'@glass',rx1:.3,ry1:.85,rw1:.4,rh1:.1,ang1:270,wid1:40,frc1:60,fri1:10,rate1:20,grn1:30,life1:1.4,fw1:1.5,pit1:-12,gl1:.4}],
+  ['bursts','Rhythm','Rain bursts','Four bursts of eight particles a second over the rain: a rhythmic crackle. Any key.','r=fx',{buf:'@rain',rx1:.4,ry1:.4,rw1:.2,rh1:.2,ang1:90,wid1:360,frc1:60,fri1:50,rate1:4,bur1:8,spr1:0,grn1:20,life1:.4,fw1:1.5,gain:.9}],
+  ['psyspray','Psytrance','Psy spray, two ways','Two emitters shooting at each other with a fast spin, high in the choir: a moving psychedelic texture for breakdowns. C3 to C5.','p r=pad',{buf:'@choir',rx1:.2,ry1:.3,rw1:.05,rh1:.3,ang1:0,wid1:20,frc1:55,fri1:6,rate1:14,grn1:28,life1:1.6,fw1:2,on2:true,rx2:.75,ry2:.3,rw2:.05,rh2:.3,ang2:180,wid2:20,frc2:55,fri2:6,rate2:14,grn2:28,life2:1.6,fw2:2,pit2:7,ms1:'up',mr1:1.2,ma1:100,mt1:'ang',ms2:'down',mr2:1.5,ma2:100,mt2:'ang',me2:1,edx:1,edy:1,gain:.8}]];
+ const EMOLD=[['spin','Textures','Sprinkler in the centre','The default: a sprinkler in the middle of the choir, turning slowly. C3 to C5.'],['duo','Textures','Two sprinklers','Two sprinklers over the glass tone, the second a fifth up. C3 to C5.'],
+  ['scan','Pads','Slow scan','One emitter that scans slowly through the choir. C3 to C5.'],['cloud','Pads','Still cloud','A still, blurred cloud of the choir. C3 to C5.'],['rain','Textures','Falling rain','Particles falling over the glass tone like rain. C4 to C5.'],
+  ['pinball','Rhythm','Pinball','A few fast particles bouncing about over the glass tone. C4 to C5.'],['fire','FX','Fireworks','Bursts of particles flying out over the rain. Any key.'],['two','Rhythm','Two ways','Particles shot two ways in small bursts. C3 to C5.'],
+  ['pan','Textures','Side to side','Particles swinging from left to right. C3 to C5.'],['breath','FX','Breathing out','The rain breathing out as the force rises. Any key.']];
+ for(const[k,,n,,,o] of EM){EMPRE[k]=Object.assign({n},o);if(EMPRE[k].gain==null)EMPRE[k].gain=.6;EMPRE[k].gain=r3(Math.min(1,EMPRE[k].gain*db('emit',k)))}for(const[k,,n] of EMOLD){EMPRE[k].n=n;if(k!=='spin'&&(PSLV.emit||{})[k])EMPRE[k].gain=r3(Math.min(1,(EMPRE[k].gain??.6)*db('emit',k)))}
+ reorder(EMPRE,['init','spin','duo','rain','pan','shimmer','glasspad','scan','cloud','drone','pinball','two','bursts','sparks','fire','breath','psyspray']);
+ for(const[k,g,,t,f] of EM)meta('emit',k,g,t,fl(f));for(const[k,g,,t] of EMOLD)meta('emit',k,g,t,{r:g==='Pads'?'pad':'fx'});
+
+ /* Vector Grain: particles, each looping a piece of a sample; where it is and how it moves changes the loop */
+ const VG=[
+  ['init','Init','One still loop','One particle that stands still: a plain loop of the choir to start from. C3 to C5.','r=keys',{buf:'@choir',num:1,spd:0,gst:30,gsz:300,gfd:50,ax:0,ay:0,grav:0,kick:0}],
+  ['chop','Rhythm','Tempo chops 1/16','Four particles whose loops are locked to 1/16 notes: rhythmic chops in time with the song. C3 to C5.','r=pluck',{buf:'@choir',num:4,sync:true,div:'.25',gst:20,gsz:120,gfd:30,ax:100,tx:'pan',ay:50,ty:'start',cen:40,grav:20,kick:50}],
+  ['pad','Pads','Wide choir pad','Twelve slow particles with long, faded loops spread wide: a big, soft pad. C3 to C5.','r=pad',{buf:'@choir',num:12,spd:30,gst:40,gsz:800,gfd:90,ax:100,tx:'pan',ay:30,ty:'start',cen:40,grav:10,kick:40,att:1,rel:3,gain:.5}],
+  ['oct','Pads','Glass shimmer, octave up','Eight particles an octave up over the glass tone: a shimmer for the top of a breakdown. C3 to C5.','r=pad',{buf:'@glass',num:8,gpit:12,gst:20,gsz:400,gfd:60,ax:100,tx:'pan',ay:35,ty:'start',cen:50,grav:15,kick:45,att:.5,rel:2,gain:.6}],
+  ['low','Pads','Dark grains, octave down','Six particles an octave down with long loops: a dark bed. C2 to C4.','r=pad',{buf:'@choir',num:6,gpit:-12,gst:35,gsz:600,gfd:70,ax:100,tx:'pan',ay:30,ty:'start',cen:45,grav:10,kick:40,att:.6,rel:2}],
+  ['glitch','FX','Glitch swarm','Sixteen fast particles with tiny loops over the rain: a glitchy, crackling swarm. Any key.','r=fx',{buf:'@rain',num:16,spd:300,gst:50,gsz:30,gfd:20,ax:100,tx:'pan',ay:60,ty:'start',cen:30,grav:40,kick:100,drag:0,gain:.7}],
+  ['pluck','Keys','Grain pluck','Short loops with a fast decay and no sustain: a plucked sound for arps. C4 to C6.','r=pluck',{buf:'@glass',num:6,gst:15,gsz:150,gfd:40,ax:100,tx:'pan',ay:30,ty:'start',cen:45,grav:20,kick:50,att:.001,dec:.25,sus:0,rel:.2}]];
+ const VGOLD=[['orbit','Textures','Orbits','The default: six particles orbiting the centre over the choir. C3 to C5.'],['swarm','Textures','Swarm','Twelve particles swarming, their speed changing the size of their loops. C3 to C5.'],
+  ['magnet','Textures','Magnets','Particles pulled by magnets over the glass tone. C3 to C5.'],['river','Textures','River','Particles flowing like water over the rain. Any key.'],['keys','Keys','One particle per key','Every key you hold gets its own particle. C3 to C5.'],
+  ['stutter','Rhythm','Glass stutter','Loops locked to 1/16 notes over the glass tone. C3 to C5.'],['back','Pads','Backwards cloud','Long loops played backwards, flowing slowly. C3 to C5.'],['frozen','Pads','Frozen','Particles that stand still: a frozen choir. C3 to C5.'],
+  ['drift','FX','Drifting pitch','Particles whose height bends their pitch. C4 to C5.']];
+ for(const[k,,n,,,o] of VG){VGPRE[k]=Object.assign({n},o);if(VGPRE[k].gain==null)VGPRE[k].gain=.6;VGPRE[k].gain=r3(Math.min(1,VGPRE[k].gain*db('vgrain',k)))}for(const[k,,n] of VGOLD){VGPRE[k].n=n;if(k!=='orbit'&&(PSLV.vgrain||{})[k])VGPRE[k].gain=r3(Math.min(1,(VGPRE[k].gain??.6)*db('vgrain',k)))}
+ reorder(VGPRE,['init','orbit','swarm','magnet','river','pad','oct','low','back','frozen','keys','pluck','chop','stutter','glitch','drift']);
+ for(const[k,g,,t,f] of VG)meta('vgrain',k,g,t,fl(f));for(const[k,g,,t] of VGOLD)meta('vgrain',k,g,t,{r:k==='keys'?'keys':k==='stutter'?'pluck':g==='Pads'?'pad':'fx'})}
+/* ---------- FX (risers, downers, sweeps, lasers, impacts, percussion) and Grid ----------
+ An FX preset now sets the whole sound: the kind, Tone, Length, Wobble, Space, Level and the two curves (pitch or filter, and level), so a
+ curve dragged in the picture is put back by a preset. Old presets give the kind's own curves and the default knobs. */
+function PS2_FX(meta,reorder,fl,db,r3){
+ const D={tone:60,len:1,wob:0,space:40,gain:.5};
+ const FXN=[
+  ['multi','Sets','By note, a different effect on each key','Every key plays another effect: C riser, C# uplifter, D downlifter, D# dive, E impact, F zap, F# FM laser, G reverse crash, G# pew, A sweep, A# snap, B sub boom.','r=fx',{kind:'multi'}],
+  ['psyriser','Risers','Psy noise riser, even rise','White noise through a band-pass that rises evenly from low to about 8 kHz over the held note, getting louder all the way, after the psytrance riser recipe. Hold it 8 bars.','p r=fx',{kind:'riser',tone:30,space:30,pc:[0,[.5,.5],1],ac:[0,[.5,.5],1]}],
+  ['riserw','Risers','Bright riser, wobble, late rise','A bright noise riser with a strong wobble that stays low and rises only at the very end: more tension in the last bars of a build.','r=fx',{kind:'riser',wob:90,tone:85,pc:[0,[.9,.05],1]}],
+  ['vowelwob','Sweeps','Talking vowel, wobbling','A saw through a moving vowel filter with a wobble: talking FX for psytrance and dubstep.','p r=fx',{kind:'vowel',wob:50,tone:70}],
+  ['storm','Sweeps','Storm wind','A darker, longer, gusting wind.','r=fx',{kind:'wind',tone:30,len:2,wob:40,space:60}],
+  ['psyzap','Lasers','Psy zap, short and dry','A short, bright saw zap with little room: one now and then in a full-on groove.','p r=fx',{kind:'zap',len:.5,tone:75,space:15}],
+  ['zaplong','Lasers','Long laser fall','The zap slowed down three times with a big room: a falling laser between phrases.','r=fx',{kind:'zap',len:3,space:55}],
+  ['pewup','Lasers','Rising pew','A square pew that rises instead of falling.','r=fx',{kind:'pew',pc:[0,[.2,.1],1]}],
+  ['laserwob','Lasers','FM laser, wobbling','The FM laser, twice as long, with a fast wobble.','r=fx',{kind:'laser',wob:70,len:2}],
+  ['impbig','Impacts','Drop impact, big room','The impact with a big room: the first beat of a drop.','r=fx',{kind:'impact',len:1.5,space:70,tone:70}],
+  ['impdry','Impacts','Impact, short and dry','A short, dry impact for hits inside a phrase.','r=fx',{kind:'impact',len:.5,space:0}],
+  ['boomlong','Impacts','Sub boom, long, in a room','The sub boom three times as long with a room: a long sub drop for the start of a drop.','r=fx',{kind:'boom',len:3,tone:20,space:60}],
+  ['slamdk','Impacts','Dark slam, long room','A much darker, longer slam in a big room.','r=fx',{kind:'slam',tone:5,space:90,len:2}],
+  ['metalbell','Percussion','Metal bell, long ring','The metal hit ringing three times longer: a bell for breakdowns.','r=fx',{kind:'metal',len:3,space:50}]];
+ const FXOLD=[['riser','Init','Noise riser','The default: white noise through a band-pass that rises over the held note, with a saw layer. Hold the note as long as the rise should be.'],
+  ['uplift','Risers','Saw uplifter','A detuned saw rising two octaves over the held note, with a filter opening.'],['tension','Risers','Tension','A high-pass noise with a wobble that speeds up.'],['whoosh','Risers','Whoosh','A short noise swell that rises and falls in about a second.'],
+  ['downer','Downers','Downlifter','A noise band falling over the held note.'],['dive','Downers','Saw dive','A detuned saw falling two octaves over the held note: the psytrance downlifter recipe when held 1 bar and sent into a long reverb.','p'],['revcrash','Downers','Reverse crash','A crash played backwards, ending on the note\'s end.'],
+  ['sweep','Sweeps','Filter sweep','A resonant noise sweep from low to high.'],['vowel','Sweeps','Vowel sweep','A saw through a vowel filter that opens and closes.'],['wind','Sweeps','Wind','Gusting wind from filtered noise.'],
+  ['zap','Lasers','Laser zap','A saw falling fast from four octaves up.'],['pew','Lasers','Pew','A short square pew.'],['laser','Lasers','FM laser','A falling FM laser.'],['blaster','Lasers','Blaster','A short, noisy FM blast.'],['bubble','Lasers','Bubble','A short rising sine bubble.'],
+  ['impact','Impacts','Impact','A sine falling from 170 to 42 Hz with a noise burst.'],['boom','Impacts','Sub boom','A long sub falling from 90 to 30 Hz.'],['slam','Impacts','Slam','Low-passed noise with a sub.'],['thud','Impacts','Thud','A short, low thud with a click.'],
+  ['tom','Percussion','Tom drop','A tom whose pitch falls.'],['snap','Percussion','Snap','A short band-passed snap.'],['shaker','Percussion','Shaker','A short high shaker.'],['rim','Percussion','Rim','A short rim click.'],['metal','Percussion','Metal hit','An FM metal hit.'],['cowbell','Percussion','Cowbell','A two-tone cowbell.']];
+ for(const[k,,n,,,o] of FXN)SFPRE[k]=Object.assign({n},o);for(const[k,,n] of FXOLD)SFPRE[k].n=n;
+ reorder(SFPRE,['riser','psyriser','riserw','uplift','tension','whoosh','downer','dive','revcrash','sweep','vowel','vowelwob','wind','storm',
+  'zap','psyzap','zaplong','pew','pewup','laser','laserwob','blaster','bubble','impact','impbig','impdry','boom','boomlong','slam','slamdk','thud','tom','snap','shaker','rim','metal','metalbell','cowbell','multi']);
+ IPRE.sfx[1]=k=>{const P=SFPRE[k]||{kind:k},o=Object.assign({},D,P);delete o.n;o.pc=P.pc?JSON.parse(JSON.stringify(P.pc)):null;o.ac=P.ac?JSON.parse(JSON.stringify(P.ac)):null;o.gain=r3(Math.min(1,.5*db('sfx',k)));return o};
+ for(const[k,g,,t,f] of FXN)meta('sfx',k,g,t,fl(f));for(const[k,g,,t,f] of FXOLD)meta('sfx',k,g,t,Object.assign({r:'fx'},f?fl(f):{}));
+
+ /* Grid: the patches keep their sound; each gets a tooltip, and the one name with an artist in it is renamed */
+ if(GPX.eminent){GPX.eminent[0]='Wide string machine, phased';if(IPRE.grid[0].eminent)IPRE.grid[0].eminent.n=GPX.eminent[0]}
+ const GT={basic:'A saw through a low-pass with an envelope and an LFO: the plain patch to learn the Grid with. C3 to C5.',init:'One sine, an envelope and the output: the emptiest patch. Start here and add modules.',
+  supersaw:'A detuned supersaw through a ladder filter, chorus and reverb: a trance lead. C4 to C6.',hoover:'Detuned saws an octave down with drive and a moving pan: the 90s rave hoover. C3 to C5.',
+  squarelead:'A square through a ladder filter with a delay: a classic synth lead. C4 to C6.',flute:'A sine with vibrato and breath noise: a soft flute. C4 to C6.',brass:'Two oscillators in FM with a slow attack: a brass lead. C3 to C5.',
+  arcade:'A thin pulse through a bit crusher with a short delay: a video game lead. C4 to C6.',scream:'A driven supersaw through a resonant filter: a screaming lead. C4 to C6.',foldlead:'A sine through a wavefolder: a bright, hollow lead. C4 to C6.',
+  reese:'Detuned saws and a sub through a moving ladder filter and drive: a drum and bass reese. C1 to C3.',acid:'A saw through a resonant ladder filter with drive and delay: a 303 style acid line. C2 to C3.',
+  sub:'A sine and a triangle an octave down through a low-pass: a clean sub. C1 to C2.',growl:'A folded saw through a resonant filter moved by an LFO, with drive: a growl bass. C1 to C3.',
+  wobble:'A bass whose filter is opened and closed by an LFO: a wobble bass. C1 to C3.',dxbass:'Two sines in FM: the punchy FM bass of the DX7. C1 to C3.',pluckbass:'A saw whose filter snaps shut: a short plucked bass. C1 to C3.',
+  moog:'A saw and a pulse through a resonant ladder filter with drive: a fat analog bass. C1 to C3.',rolling:'One saw through a filter and a level that both close in about 100 ms: a psytrance rolling bass. Play 16ths on E2 to A2.',
+  talkbass:'A supersaw through a vowel filter moved by an LFO, with drive: a talking dubstep bass. C1 to C3.',karplus:'A noise burst through a tuned feedback delay and reverb: the Karplus-Strong plucked string. C3 to C5.',
+  steel:'A noise burst through a tuned feedback delay with chorus: a steel string. C3 to C5.',marimba:'Two sines with a short decay and reverb: a wooden marimba. C3 to C6.',buchla:'A folded tone through a filter that closes with the level, with a delay: a Buchla style bongo. C3 to C5.',
+  pluck:'A square and a saw an octave up with a short decay: a pluck for arps. C4 to C6.',kalimba:'A high sine in FM with a short decay: a kalimba. C3 to C5.',harp:'A plucked string in a big reverb: a harp. C3 to C5.',
+  bellpluck:'A triangle through a ring modulator with a delay: a bell pluck. C4 to C6.',koto:'A bright, short plucked string with chorus: a koto. C3 to C5.',fm:'Two sines in FM with a long decay: a bell. C4 to C6.',
+  tubular:'Two oscillators with a long decay and reverb: a tubular bell. C3 to C5.',glass:'A tone through a ring modulator with delay and reverb: a glass mallet. C4 to C6.',epiano:'Two oscillators in FM with chorus: an electric piano. C3 to C5.',organ:'Three oscillators mixed like drawbars, with chorus: an organ. Chords C3 to C5.',
+  clav:'A thin pulse through a band-pass that closes: a clavinet. C3 to C5.',wurli:'A sine and a triangle in FM with drive and a moving pan: a Wurlitzer style piano. C3 to C5.',musicbox:'A high sine with a ring modulator in a reverb: a music box. C4 to C6.',
+  vibes:'Two sines with a slow pan: a vibraphone. C3 to C6.',solina:'A pulse and detuned saws with chorus, a filter and reverb: the string machine of the 70s. Chords C3 to C5.',eminent:'Detuned saws through two choruses and a reverb, slow and wide: an old string machine. Chords C3 to C5.',
+  juno:'A pulse and a sub through a filter with chorus: a Juno style pad. Chords C3 to C5.',choir:'Vowel filters on detuned saws: a ghostly choir. Chords C3 to C5.',cz:'A wavetable through a filter with chorus: a bright, glassy tone like a Casio CZ. Chords C3 to C5.',
+  morph:'A wavetable through a ladder filter moved by an LFO, with reverb. Chords C3 to C5.',drone:'Detuned saws and noise through a ladder filter moved slowly by an LFO, with reverb: a drone. Hold one note, C2 to C4.',warmpad:'A supersaw pad with a slow attack, chorus and reverb. Chords C3 to C5.',
+  glasspad:'A wavetable through a ring modulator and a high-pass, in a long reverb: a glassy pad. Chords C3 to C5.',shimmer:'A supersaw an octave up into a delay and a huge reverb: a shimmering pad. Chords C3 to C5.',
+  darkpad:'Detuned saws two octaves down with noise and a slowly moving filter: a dark film pad. Chords C2 to C4.',dfam:'A drum voice with a pitch and level envelope, like the Moog DFAM. C2 to C4.',
+  kick:'A sine whose pitch falls fast: an 808 style kick. Play C3.',snare:'A tone and filtered noise with a little reverb: a synth snare. Play C3 to C4.',hat:'A pulse through a ring modulator with noise and a filter: a metallic hat. Any key.',tom:'A sine in FM with a falling pitch: a tom. C2 to C4.',
+  clap:'Noise through a band-pass with a short room: a clap. Any key.',cowbell:'Two square waves through a band-pass: a cowbell. Any key.',rim:'A short triangle and noise: a rimshot. Any key.',
+  bleeps:'A sample and hold sends random notes to a square: computer bleeps. Hold a note.',laser:'A tone with fast envelopes on the filter and level, and a delay: a laser zap. C3 to C5.',riser:'Noise through a band-pass that opens over a slow attack: a riser. Hold a long note.',
+  chip:'A pulse through a bit crusher: chiptune. C4 to C6.',computer:'Random notes from a sample and hold into a delay: a sci-fi computer. Hold a note.',vowel:'Detuned saws through a vowel filter and a filter moved by an LFO: talking vowels. C3 to C5.',
+  underwater:'A resonant filter moved by an LFO with chorus and reverb: underwater. C3 to C5.',wind:'Noise through a filter and a pan moved by two LFOs, with reverb: wind and ocean. Hold a note.',noise:'Noise through a resonant band-pass swept by a slow LFO, with a delay: a noise sweep. Hold a note.'};
+ /* a level trim per patch on its Output module (it can rise to 1 at most) */
+ {const _gp=IPRE.grid[1];IPRE.grid[1]=k=>{const r=_gp(k),o=r&&r.g&&r.g.mods.find(m=>m.type==='out');if(o&&(PSLV.grid||{})[k])o.p.lvl=r3(Math.min(1,(o.p.lvl??.6)*db('grid',k)));return r}}
+ for(const k in IPRE.grid[0]){const c=k==='basic'||k==='init'?'Init':(GPX[k]&&GPX[k][1])||'Basics';meta('grid',k,c,GT[k]||String(IPRE.grid[0][k].n),Object.assign(k==='rolling'?{p:1}:{},k==='talkbass'?{r:'lead'}:{},k==='cz'?{slow:0}:{}))}}
+/* ---------- Sub, Psy Bass, Bounce and Bouncy Notes: their presets were made from their own research a day ago; they keep them, get an Init
+ group, tooltips, the psy mark and a few presets for gaps found against that research ---------- */
+function PS2_BASS(meta,reorder,fl,db,r3){
+ /* Sub (keys as the app names them: C2 is 33 Hz, C3 is 65 Hz) */
+ sbsp('tranceoff','Trance, offbeat sub','Trance',{h2:8,att:.003,dec:.18,sus:.4,rel:.04});
+ sbsp('ukg','UK garage, sliding square','House',{shp:20,wv:'q',cut:500,gm:'l',gl:.08,att:.003,dec:.3,sus:.8,rel:.06});
+ SBSPRE.pure.n='Pure sine sub';SBSPRE.pure.g='Init';
+ reorder(SBSPRE,['pure','warm','even','house','organ','garage','ukg','rumble','hardt','tranceoff','dnb','jungle','dub','dubw','l808','s808','k808','g808','psy','psys','psyr','small','phone','wide']);
+ const ST={pure:'A pure sine with short fades: only the note, nothing else. The start for every sub. Keys C2 to C3 (33 to 65 Hz).',warm:'The sine with a little 2nd and 3rd overtone and tube-like drive: warmer and easier to hear. C2 to C3.',
+  even:'Low notes made louder so every note sounds equally loud at club level. C2 to C3.',house:'A rounder sub that falls a little while held, for house bass lines. C2 to C3.',organ:'Strong 2nd and 3rd overtones: the organ bass of deep house. C2 to C3.',
+  garage:'Half a square: a hollow, punchy garage sub. C2 to C3.',ukg:'A square-ish sub that slides between overlapping notes, for UK garage and bassline. C2 to C3.',rumble:'Slow attack, low-pass and drive on F: the rumbling sub of techno. Hold long notes, C2 to C3.',
+  hardt:'Heavy drive and a short body for hard techno. C2 to C3.',tranceoff:'A short sub with a little 2nd overtone, for the offbeat bass of trance (one 8th after each kick). C2 to C3.',
+  dnb:'A clean sine with a short glide under a reese, for drum and bass. C2 to C3.',jungle:'A triangle with drive: the bite of a jungle sub. C2 to C3.',dub:'Two sines an octave apart with a long glide, for dubstep. C2 to C3.',dubw:'Drive and asymmetry: a heavy dubstep sub. C2 to C3.',
+  l808:'A long 808 that falls 4 semitones into the note and slides between overlapping notes. C2 to C3.',s808:'A short 808 with a quick knock. C2 to C3.',k808:'An 808 with a hard knock that starts two octaves up. C2 to C3.',g808:'A long 808 that always slides, for trap slides. C2 to C3.',
+  psy:'A short sine under a filtered roller: the sub layer of a psytrance bass (sources disagree about using one). 16ths on E2 to A2.',psys:'A short, filtered saw: a whole psytrance bass from the Sub. 16ths on E2 to A2.',psyr:'A short rolling sub with a little 3rd overtone. 16ths on E2 to A2.',
+  small:'Adds overtones just above 100 Hz so the bass line is heard on small speakers; the sub itself is unchanged. C2 to C3.',phone:'More overtones and drive: heard on phones and laptops. C2 to C3.',wide:'A mono sub with its overtones spread wide above 150 Hz. C2 to C3.'};
+ for(const k in SBSPRE)meta('sbass',k,SBSPRE[k].g,ST[k]||SBSPRE[k].n,Object.assign({r:SBSPRE[k].g==='Psytrance'?'roll':'sub'},SBSPRE[k].g==='Psytrance'?{p:1}:{}));
+
+ /* Psy Bass */
+ psbp('init','Init: plain filtered saw','Init','One saw through the 24 dB filter at 420 Hz that opens one octave, no resonance, no tick, no saturation: the start for your own rolling bass. 16ths at 145 BPM on E2 to A2.',{fe:1,res:0,tk:0,sat:0,kt:0});
+ psbp('kickown','Full-on, bass above the kick','Full-on','The other way to share the low end: the kick keeps everything under about 85 Hz and the bass plays an octave higher with a low cut at 85 Hz. Use it with a kick tuned to the root. For 145 BPM, keys E2 to A2.',{oc:1,lc:85,cut:520,fe:1.8,fd:.045});
+ psbp('twilight','Twilight, hypnotic 142','Dark and forest','For 140 to 146 BPM, keys E2 to G2. Between full-on and night: a slightly resonant, saturated roller that closes a little slower.',{cut:330,res:35,fe:2.4,fd:.06,ad:.085,gt:60,sat:30,tk:25,drv:15});
+ reorder(PSBPRE,['init','fo145','fo150','fract','imper','fobr','fosq','fosub','kickown','prog','progoff','twilight','dark','forest','darkgal','hitech','hitsub','goa','goasq','trip','acid']);
+ for(const k in PSBPRE)meta('psyb',k,PSBPRE[k].g,PSBPRE[k].tip,{r:'roll'});
+
+ /* Bounce */
+ bbip('psy16','Psy ratchet, 1/16 halving','In time',{mat:'m',sync:'1/16',bmode:'half',hard:80,dec:.3,clk:20,dmp:60});
+ bbip('glass8','Glass on every 1/8','In time',{mat:'g',sync:'1/8',bmode:'steady',hold:'n',dec:1,hard:70,clk:5,dyn:10});
+ bbip('str316','Metal echo on 3/16','In time',{mat:'m',sync:'1/8 dotted',bmode:'steady',hold:'n',dec:1.5,dmp:40,hard:45,clk:0,dyn:30});
+ bbip('drumbar','Drum roll fills a bar','In time',{mat:'d',sync:'1 bar',bmode:'round',dec:.25,tune:-12,hard:60,clk:40});
+ bbip('metaltrip','Drum triplets','In time',{mat:'d',sync:'1/8 triplet',bmode:'steady',hold:'n',dec:.4,hard:60,clk:30,tune:-12});
+ bbip('softwood','Soft wood, slow fall','Free',{grav:.5,fric:10,hard:25,dec:1.6,clk:5,dmp:70});
+ bbip('glassbell','Glass bells, long ring','Free',{mat:'g',dec:6,hard:90,fric:8,dmp:20,clk:3});
+ BBIPRE.marimba.n='Wood ball';BBIPRE.marimba.g='Init';
+ reorder(BBIPRE,['marimba','pingp','marble','steel','softwood','glassbell','beat','pluck8','glass8','str316','metaltrip','ratchet','psy16','bar','drumbar','bells','rain','tabla','chimes']);
+ const BT={marimba:'One wooden ball per note, falling freely and coming to rest. The start. C3 to C6.',pingp:'A light, hard ball bouncing fast and short: ping pong. C4 to C6.',marble:'A marble on glass, ringing long. C4 to C6.',steel:'A steel bar that rings for seconds. C3 to C5.',
+  softwood:'A soft wooden ball in low gravity: slow, gentle bounces. C3 to C5.',glassbell:'Glass struck hard, ringing for six seconds: a bell for breakdowns. C4 to C6.',
+  beat:'A kalimba bouncing on every beat, for ever while the key is held. C3 to C5.',pluck8:'A string bounced on every 1/8. C3 to C5.',glass8:'Glass bounced on every 1/8, every bounce equally loud. C4 to C6.',
+  str316:'Soft metal bounced every dotted 8th (3/16): the echo rhythm of psytrance leads, played by the ball. C4 to C6.',metaltrip:'A drum bounced in steady 1/8 triplets. C2 to C4.',
+  ratchet:'A drum bounced 1/4, 1/8, 1/16 and faster: a ratchet. C2 to C4.',psy16:'Metal bounced from a 1/16 and halving: a fast psytrance ratchet into the next beat. C4 to C6.',
+  bar:'One whole round of bounces fills exactly one bar. C3 to C5.',drumbar:'A low drum whose bounces fill one bar, speeding up: a roll into the next bar. C2 to C4.',bells:'Metal bells, each gap two thirds of the one before. C4 to C6.',
+  rain:'Glass balls dropped by themselves every 1/4, drifting left and right: rain. Hold a chord.',tabla:'A bouncing drum. C2 to C4.',chimes:'Metal balls dropped by themselves every 1/2, spread wide: wind chimes. Hold a chord.'};
+ for(const k in BBIPRE)meta('bball',k,BBIPRE[k].g,BT[k]||BBIPRE[k].n,Object.assign({r:/rain|chimes/.test(k)?'fx':'pluck'},/str316|psy16/.test(k)?{p:1}:{}));
+
+ /* Bouncy Notes (a MIDI effect: its presets are in the effect's menu) */
+ const B=FXPRE.bnotes;if(B&&B.one){const base=JSON.parse(JSON.stringify(B.one[1])),bp=o=>Object.assign(JSON.parse(JSON.stringify(base)),o);
+  Object.assign(B,PRS('Psytrance and EDM',[['psyrat','Ratchet into the next beat, 1/16',bp({sync:'1/16',bmode:'half',vfade:50,len:60,life:4})],
+   ['dot316','Dotted 8th echo notes',bp({sync:'1/8 dotted',bmode:'steady',life:4,vfade:40,len:90})],['build','Build-up roll, faster and faster',bp({sync:'1/8',bmode:'third',vfade:30,len:70,life:8})],
+   ['arp16','1/16 arp up the minor scale',bp({sync:'1/16',bmode:'steady',walk:'up',scale:'minor',life:2,len:60,vfade:10})],['fifth8','Fifths on every 1/8',bp({sync:'1/8',bmode:'steady',harm:'5',life:3,len:120,vfade:20})]]));
+  const BNT={one:'One ball per note, falling freely: each bounce plays the note again, softer and sooner. The start.',rubber:'A bouncy rubber ball: many bounces, slowly fading.',dead:'A heavy ball that barely bounces: two or three short echoes.',
+   moon:'Low gravity: slow, floating bounces with long notes.',heavy:'A heavy ball falling fast: quick, short bounces.',scatter:'Every bounce jumps to another note of the minor pentatonic scale, spread over three octaves.',
+   harp:'Slow bounces that fall onto notes of the major scale like a harp.',grid16:'Free bounces moved onto the 1/16 grid, so they stay in time.',trip:'Each gap two thirds of the one before: a falling, triplet-like rhythm.',
+   rain:'Balls dropped by themselves every 1/4 on the minor pentatonic scale: rain. Hold a chord.',drip:'One ball dropped by itself every bar, slowly.',echo:'Plays your note as well as the bounces.',
+   beat:'Bounces on every beat for ever while the key is held.',ratchet:'Bounces 1/4, 1/8, 1/16 and faster: a ratchet.',bar:'One whole round of bounces fills exactly a bar.',eight:'Steady 1/8 bounces that walk up the minor pentatonic scale.',
+   melup:'A ratchet that walks up and down the dorian scale.',chords:'A major chord on every half note.',sevenths:'Four-note minor chords that walk down, each gap two thirds of the one before.',fifths:'Steady 1/8 bounces skipping up the scale in fifths.',
+   popc:'Chords I, V, VI and IV, one per bar.',minc:'Minor four-note chords stepping every half bar.',rain3:'Balls dropped by themselves in three rhythms at once.',
+   psyrat:'Bounces from a 1/16 that halve each time: a ratchet roll into the next beat, for psytrance and trance leads.',dot316:'Steady bounces every dotted 8th (3/16): the psytrance echo rhythm as notes, so each echo can be changed.',
+   build:'Bounces from a 1/8, each gap two thirds of the one before: a roll that speeds up, for builds.',arp16:'Steady 1/16 bounces that walk up the minor scale: an arpeggio from one held note.',fifth8:'Steady 1/8 bounces with a fifth on top of each: a driving line from one held note.'};
+  for(const k in B){const v=B[k][0],i=v.indexOf('|');meta('bnotes',k,i<0?'Basics':v.slice(0,i),BNT[k]||v.slice(i+1),/psyrat|dot316/.test(k)?{p:1}:{})}}}
+/* level trims in dB per preset, measured by tools/engine-tests/presets_all.py (loudest 100 ms of a phrase in the preset's own register, K-weighted) against the instrument's default preset; pads 3 dB, keys 1.5 dB, plucks and mallets 1 dB, FX 2 dB lower. The drum designers and the Kick designer make every hit at the same peak, so they have no trims; a gain stops at 1 (the top of its knob) */
+function PS2_LEVELS(){const L={"sfx":{"psyriser":-0.7,"riserw":3.8,"riserdk":0.8,"uplift":-0.4,"tension":-2.5,"whoosh":12.0,"downer":-0.4,"downlong":0.5,"dive":-1.7,"psydive":-2.9,"revcrash":-4.1,"revshort":-2.4,"sweep":11.5,"sweepdn":11.7,"vowel":12.0,"vowelwob":12.0,"wind":12.0,"storm":12.0,"zap":-2.2,"psyzap":0.3,"zaplong":-4.5,"pew":-7.2,"pewup":-5.7,"laser":-8.9,"laserwob":-6.5,"blaster":-5.2,"bubble":-3.2,"blip":-1.5,"impact":-4.1,"impbig":-5.1,"impdry":-2.7,"boom":-3.0,"boomlong":-5.9,"slam":-4.3,"slamdk":-5.5,"tom":-3.3,"snap":11.9,"snaproom":8.3,"shaker":-0.4,"rim":9.1,"metal":-5.7,"metalbell":-7.5,"cowbell":1.2,"multi":-6.3},"perc":{"init":-2.2,"xylo":2.2,"vibes":-7.5,"glock":-7.2,"tubular":-6.0,"crystal":-5.7,"musicbox":-4.0,"gamelan":-5.9,"bowl":-9.4,"steel":-4.0,"handpan":-5.6,"logdrum":0.7,"tabla":6.3,"block":3.9,"kalimba":-0.6,"harp":-1.7,"pizz":4.4,"psyblip":7.1,"psyping":-2.5,"psyperc":7.3},"sampler":{"yplain":6.6,"yone":12.0,"yloop":12.0,"yrev":12.0,"yfreeze":12.0,"ystretch":12.0,"choirlead":5.0,"choirrev":-0.3,"choirvox":0.9,"glasspad":12.0,"rainwash":12.0,"choirup":2.0,"choirtime":3.1,"frozen":12.0,"stutter":12.0,"glassglitch":12.0,"glasskeys":0.6,"glasspluck":12.0,"rain":12.0,"glassrev":9.9,"choirwob":2.2},"emit":{"init":-3.5,"duo":4.5,"rain":-0.8,"pan":1.2,"shimmer":11.6,"glasspad":9.3,"scan":-4.6,"cloud":-6.7,"drone":-5.7,"pinball":2.1,"two":-2.3,"bursts":12.0,"sparks":12.0,"fire":12.0,"breath":12.0,"psyspray":-12.1},"vgrain":{"init":-3.0,"swarm":3.9,"magnet":5.5,"river":12.0,"pad":-1.2,"oct":2.1,"low":-2.5,"back":-1.0,"frozen":-2.2,"keys":-2.7,"pluck":12.0,"chop":1.0,"stutter":12.0,"glitch":12.0,"drift":9.2},"grid":{"supersaw":-3.9,"hoover":-5.0,"squarelead":-8.0,"flute":-2.8,"brass":-2.0,"arcade":-1.5,"scream":-11.3,"foldlead":-6.3,"reese":-1.7,"acid":-2.5,"growl":-2.8,"wobble":1.7,"dxbass":-1.8,"pluckbass":3.3,"moog":-1.9,"rolling":11.2,"talkbass":-2.0,"karplus":6.6,"steel":12.0,"marimba":-6.4,"pluck":-0.5,"kalimba":-6.4,"harp":9.0,"bellpluck":-0.5,"koto":-6.1,"fm":-7.1,"tubular":-11.4,"glass":-11.7,"epiano":-8.0,"organ":-10.1,"clav":-3.0,"wurli":-12.7,"musicbox":-10.4,"vibes":-9.9,"solina":-14.0,"eminent":-13.6,"juno":-11.8,"choir":-10.4,"cz":-5.8,"morph":-10.4,"drone":-9.4,"warmpad":-11.3,"glasspad":-9.5,"shimmer":-14.0,"darkpad":-6.7,"dfam":-5.3,"kick":-3.5,"snare":4.3,"hat":12.0,"clap":12.0,"cowbell":3.4,"rim":12.0,"bleeps":-6.5,"laser":-2.4,"chip":5.2,"noise":3.3,"wind":7.0,"vowel":12.0,"riser":7.9,"computer":-6.6,"underwater":-7.8}};for(const i in L)PSLV[i]=Object.assign(PSLV[i]||{},L[i])}
+/*PSLIB2-END*/
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -17887,6 +18293,7 @@ function vnWinDraw(){const w=document.getElementById('vnWin');if(!w||w.hidden)re
 
 /*VN-END*/
 psLib();/* preset library, part 1 (defined before askChoice) */
+psLib2();/* preset library, part 2 (defined before askChoice) */
 function wtNow(I,age,act){let pos=I.pos??.2;if(act&&age>=0){pos+=(I.lamt||0)/100*.5*Math.sin(2*Math.PI*(I.lfoRate||.4)*age)+(I.penv||0)/100*Math.exp(-age/(Math.max(.02,I.pd||.5)/3))}else pos+=(I.lamt||0)/100*.5*Math.sin(performance.now()/1000*(I.lfoRate||.4)*2*Math.PI)*.0;return clamp(pos,0,1)}
 function wtDev(t,I,kn){const K=k=>kn('wt:'+k,WTL[k],k==='uni'?specSnap(WTP[k],1):specD(WTP[k]),()=>I[k]??WTP[k][2],v=>{I[k]=v;changed(false)});
  const sel=(k,opts)=>`<label class="wtl">${k==='wt'?'Table':'Filter'}<select data-wt="${k}">${opts.map(([v,n])=>`<option value="${v}"${(I[k]||opts[0][0])===v?' selected':''}>${n}</option>`).join('')}</select></label>`;
