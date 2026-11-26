@@ -13,7 +13,8 @@ Marks used below: **[checked]** = read in this repo or on an official page opene
 - Two things the short order in plan 2.7 does not say, and that decide the rollout:
   1. **Mac users must install one new app by hand** before the repo goes private. The address is inside the app (`desktop/main.js`), not inside the program file, and the unsigned Mac app cannot replace itself.
   2. **Moving the browser version to a new address leaves saved projects behind.** Browsers keep projects per address. The old page has to stay up as a "move your projects" page, or the address has to stay the same (setup C).
-- Five decisions are needed from the user (section 10).
+- **Found while pushing this plan: the repo has been renamed to `Audio-Lab-Pro-Alpha`.** The update addresses in the apps still work through GitHub's redirects, but the browser address in the README (`…github.io/Audio-Lab-Beta/`) now answers 404; the page is at `…github.io/Audio-Lab-Pro-Alpha/`. See 2.1. The rename also opens a simpler route for old apps (setup B, "old name").
+- Six decisions are needed from the user (section 10).
 
 ## 2. How updates work today [checked]
 
@@ -76,6 +77,25 @@ Details that matter for the move:
 | Browser version | Offline. On the free plan Pages is unpublished when a repo goes private. Projects saved in the browser at that address can no longer be reached through the app |
 | CI builds | Still work, but Actions minutes on private repos are metered (macOS runners count ten times) [not confirmed for the current allowance; check the billing page before step 4] |
 
+### 2.1 The repo was renamed (measured 26 Nov 2026, after this plan was written) [checked]
+
+`git push` answered "This repository moved" to `Audio-lab-DAW/Audio-Lab-Pro-Alpha`. Every address in the apps and in `index.html` still uses the old name `Audio-Lab-Beta`. Measured from the cloud session:
+
+| Old address | Answer |
+|---|---|
+| `raw.githubusercontent.com/Audio-lab-DAW/Audio-Lab-Beta/main/desktop/app-version.json` | 200, still works |
+| `api.github.com/repos/Audio-lab-DAW/Audio-Lab-Beta/contents/…` | 301 to the same repo by number; the app follows it |
+| `github.com/Audio-lab-DAW/Audio-Lab-Beta/releases/latest` | 301 to the new name |
+| `github.com/…/Audio-Lab-Beta/releases.atom` (Windows app updater) | 403 from here; may be this session's network, **test on a Windows machine** |
+| `audio-lab-daw.github.io/Audio-Lab-Beta/` (browser version, the link in the README) | **404** |
+| `audio-lab-daw.github.io/Audio-Lab-Pro-Alpha/` | 200, the browser version is here now |
+
+What follows:
+
+- Program updates keep working for now. They depend on GitHub's redirect, which stops the moment any repo named `Audio-Lab-Beta` is created in the organisation.
+- Browser users with the old link get a 404 today. Their projects are not lost: the site name `audio-lab-daw.github.io` is the same, so the storage is the same; they need the new link. The README still shows the old one (not edited here; this task changes docs only).
+- That redirect rule can be used on purpose: **a public repo that takes the old name `Audio-Lab-Beta`** would receive every request of every old app and the old browser link. With the published files at the same paths (`index.html`, `desktop/app-version.json` on `main`, releases with `latest.yml`), old apps would go on updating after the source repo is private, with no manual step for Mac users. This must be tried with a throw-away pair of repos first [not confirmed].
+
 ## 3. Recommended setups
 
 All three keep the files readable by anyone who has the address. That is unavoidable: an app that updates without a login needs a public file. What becomes private is the source history, the tools, the tests and the docs. See 5.5 for the minified build.
@@ -90,6 +110,7 @@ Traffic used for the estimates: each user downloads 2 installers of 200 MB and 1
 | Per month, 100 / 1,000 / 10,000 users | 0 / 0 / 0, plus the domain | 0 / 0 / 0 | 4 per member of the organisation (GitHub Team) |
 | Per year | **about 10.5** (.com) or about 14 (.app) | **0** | **48** per member |
 | Browser projects | new address: needs the "move your projects" page (5.6) | new path but same site name `audio-lab-daw.github.io`, so saved projects stay reachable [not confirmed; test in step 5] | nothing moves |
+| Old apps (0.219 and older) | need app N by hand on the Mac (step 2) | **if the public repo takes the old name `Audio-Lab-Beta` (2.1), they keep updating as they are** [not confirmed] | as A |
 | Weak points | one more account; domain renewal | GitHub's terms forbid Pages as free hosting for a business; no own headers; the address still says GitHub | Pages has a 100 GB a month soft limit and the same terms; the published site is public anyway; the org needs a paid plan for as long as it runs |
 
 Facts behind the table [checked unless marked]:
@@ -111,7 +132,7 @@ Looked at and not recommended:
 | Vercel | Free plan cannot hold the installers (100 MB upload limit); Pro about 20 / 67 / 669 a month |
 | Private GitHub provider of electron-updater | needs a GitHub token inside every installed app; the makers call it unsuitable for all users |
 
-**Proposal: A as the first address and B as the second.** The app then has two live addresses on two companies, the cost is the domain, and if one of them fails the other still delivers updates. If no domain and no new account are wanted now, B alone works and A can be added later without a new app (the list of addresses can be extended by a program update only if it lives in the version file; see 7.1).
+**Proposal: A as the first address and B as the second, with B's public repo taking the old name `Audio-Lab-Beta` if the throw-away test in 2.1 works.** Then old apps keep updating, new apps have two addresses, and step 3 (the wait) loses most of its risk. The app then has two live addresses on two companies, the cost is the domain, and if one of them fails the other still delivers updates. If no domain and no new account are wanted now, B alone works and A can be added later without a new app (the list of addresses can be extended by a program update only if it lives in the version file; see 7.1).
 
 ## 4. Rollout, in the order of plan 2.7
 
@@ -359,7 +380,8 @@ One serial task, under the usual rules for this file (pull first, version bump, 
 
 - The user's country and whether there is a company; it decides the Windows option.
 - The current free Actions minutes for private repos, and how many a release build uses.
-- Items marked [not confirmed] above: the `s3` upload to R2 from electron-builder 25, header rules on R2 domains, Pages behaviour after a repo rename, storage at a new path on the same Pages site, the exact macOS message when an ad-hoc app is offered a signed update, the price of an individual certificate at SSL.com, and whether GitHub throttles its release download addresses.
+- Who renamed the repo and whether more renames are planned; every rename moves the browser address. Whether the Windows app updater still finds releases under the old name (403 seen from the cloud session).
+- Items marked [not confirmed] above: a public repo taking over the old name, the `s3` upload to R2 from electron-builder 25, header rules on R2 domains, Pages behaviour after a repo rename, storage at a new path on the same Pages site, the exact macOS message when an ad-hoc app is offered a signed update, the price of an individual certificate at SSL.com, and whether GitHub throttles its release download addresses.
 - Real minified size and whether minifying changes any sound: to be measured in step 5.
 
 ## 10. Decisions for the user
@@ -368,7 +390,8 @@ One serial task, under the usual rules for this file (pull first, version bump, 
 2. **Domain:** which name and ending (.com about 10.5 a year, .app about 14, .audio about 100)?
 3. **Apple certificate now** (99 a year)? If yes, app N is the first signed Mac app and Mac users install by hand one last time.
 4. **Windows:** which country, and is there a company? Then: Azure (about 120 a year, if eligible), SSL.com (about 309 a year), or unsigned for now.
-5. **Minified file for the desktop apps too**, or only for the browser version? And is "save your projects to files at the old address, open them at the new one" acceptable for browser users, or should the browser address stay (setup C)?
+5. **Repo name:** is `Audio-Lab-Pro-Alpha` the final name of the source repo, and may a public releases repo take the old name `Audio-Lab-Beta`?
+6. **Minified file for the desktop apps too**, or only for the browser version? And is "save your projects to files at the old address, open them at the new one" acceptable for browser users, or should the browser address stay (setup C)?
 
 ## 11. Sources (opened on 26 Nov 2026 by research helpers)
 
