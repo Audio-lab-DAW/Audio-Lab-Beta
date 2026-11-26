@@ -1594,3 +1594,8 @@ Sources read this run: psynews.org (topic 72935), kvraudio.com forum (p=3272796,
 - A swing control for the roll; the first note after the kick softer by its own amount; a fundamental swap (sine 3 semitones up, IDM Mag) as an option.
 - Ducking that listens to the kick track's notes (today the app's Sidechain effect pumps on the beat).
 - Task E (CPU and background freeze).
+
+### Release
+- v0.190: commit 1a98265, project doc `claude/audiolab-psy-bass-research-and-device.md`, artifact version 213.
+- Built on top of v0.189 (Bounce, task F), which another session released while this one was testing: the Psy Bass block was put onto v0.189 (its engine joins the clean preset switch through `CHSENG.push`, as Bounce does) and the tests were run again there.
+- **Desktop build**: run 45742963619 for this commit succeeded (2 min 22 s, started 02:31 UTC).
