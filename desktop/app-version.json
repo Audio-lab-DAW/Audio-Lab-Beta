@@ -1,7 +1,7 @@
 {
-  "version": "0.201",
-  "sha256": "119d96cd58bd54443f82ee0d78a23933e3a4eff0e6f01208cfa0f4a2a68a8793",
-  "size": 3139733,
+  "version": "0.202",
+  "sha256": "1c6c762e6a7469dd71b667429f25a7fbc76c1469af49cc435616355b7a97edfd",
+  "size": 3214030,
   "minShell": "0.147.0",
   "notes": "Tracks now rest while the song is stopped and their sound has died away, so an idle song uses far less processor, and sleeping tracks really stop working. Heavy instrument tracks you are not changing are recorded in the background and played from the recording, with no change in sound; any change plays them live again at once (Settings, Performance, Background freeze)."
 }
