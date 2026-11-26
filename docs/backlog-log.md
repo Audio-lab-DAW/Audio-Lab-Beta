@@ -3114,3 +3114,11 @@ The shortcut icon of the desktop app is now the "W7" design: the Ocean Yellow lo
 ### Not verified
 - Nobody has looked at the icon on a real Mac or a real Windows computer. macOS caches app icons: if the old one still shows, log out and back in once (this is in the update note).
 - Windows reading `resources/icon.ico` at run time (going back to Ocean Yellow without a restart) was not run on Windows; the test computer is Linux and used the stand-in picture. If the file could not be read, the window would show the picker picture until the next start, as before.
+
+### Release
+- v0.219: commit 7144f77 on main. App copy synced, update note written ("New shortcut icon; needs the new desktop app. If the old icon still shows on a Mac, log out and back in once."). MIN_SHELL not raised.
+- Desktop build run 45902988517 (success), release v0.219.0. Both installers downloaded and unpacked with 7z:
+  - Mac (`AudioLab-Pro-0.219.0-arm64.dmg`): `Contents/Resources/icon.icns` is the new file byte for byte (sha256 23beac77...), `Info.plist` names it as the app icon; `doc.icns` unchanged.
+  - Windows (`AudioLab-Pro-Setup-0.219.0.exe`): all ten pictures of the new `icon.ico` (16 to 256 px) sit byte for byte in `AudioLab Pro.exe`; `resources/icon.ico` and the uninstaller icon are the new file (sha256 62cbbba8...); the packed app holds the new `dock-icon.png` and the new `main.js`.
+- The repository answers as Audio-Lab-Pro-Alpha; the `gh api` dispatch with the old name is refused by the proxy, so the build was started with the GitHub tools (first try).
+- Branches `assets/shortcut-icon` and `assets/app-icons` could **not** be deleted from here (the push and the API call were both refused; this session may not delete branches). Everything on them is on main in `desktop/icon-assets/`, so they can be deleted on GitHub by hand.
