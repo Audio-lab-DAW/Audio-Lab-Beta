@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Display-first devices lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* AudioLab display-first devices lab (task D4, lab prototype). Six devices at real size in a devices panel; their floating controls are glass faces drawn by tools/glass-lab/glass-engine.js, with each device display fed to the engine as a flat picture. Needs glass-engine.js beside it. No app code. */
+:root{--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;color-scheme:dark;
+  --disp:'Space Grotesk',Inter,system-ui,sans-serif;--text:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--data:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--pg);color:var(--pfg);font:14px/1.5 var(--text);padding:20px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:1640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font:700 24px/1.1 var(--disp);margin:0}.sub{color:var(--pmut);margin:4px 0 0;max-width:86ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:12px;color:var(--pmut);align-items:flex-end}
+.ctl>div{display:flex;flex-direction:column;gap:4px}
+.segm{display:inline-flex;background:var(--card);border:1px solid var(--pline);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.segm button,.act{font:600 12px var(--text);color:var(--pmut);background:none;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+.segm button[aria-pressed=true]{background:var(--brand);color:var(--brandink)}
+.act{background:var(--card);border:1px solid var(--pline);color:var(--pfg);padding:8px 12px;border-radius:8px}.act.go{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+#read{font:500 12.5px/1.6 var(--data);background:var(--card);border:1px solid var(--pline);border-radius:10px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:2px 22px}
+#read b{color:var(--brand);font-weight:500}
+.panel{position:relative;background:#121216;border:1px solid var(--pline);border-radius:10px;overflow:hidden}
+.scr{display:flex;gap:6px;padding:4px 6px;overflow-x:auto;scrollbar-color:#3a4152 transparent}
+#eng{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.dp canvas{z-index:0}.g{z-index:2}.flat{z-index:2}
+[data-glass=gl] .g{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border-color:transparent}
+[data-glass=css] #eng,[data-glass=solid] #eng{display:none}
+[data-glass=solid] .m{--glass:#22242d;--gbl:none;--gb:#34363f;--rim:none;--field:#15161b}
+.out{overflow-x:auto}table{border-collapse:collapse;font:500 12px var(--data);white-space:nowrap}th,td{padding:4px 10px;border-bottom:1px solid var(--pline);text-align:right}th{color:var(--pmut);font-weight:500}td:nth-child(-n+3),th:nth-child(-n+3){text-align:left}
+.notes{color:var(--pmut);font-size:13px;max-width:96ch;display:flex;flex-direction:column;gap:6px}.notes p{margin:0}.notes b{color:var(--pfg)}
+/* ============ the mock world (AudioLab's own colours: B0, buttons E0, Inter 11/12/13 C1, full glass D3) ============ */
+.m{--dev:#18181d;--strip:#1b1c22;--ln:#2a2b33;--ink:#ececf1;--mut:#a3a7b4;--well:#06070a;--sel:#2f6fe0;--ka:#4c8dff;--kr:#3a3c47;
+  --btn:linear-gradient(#363741,#2a2b33);--btnb:#0e0f13;--btnsh:inset 0 1px 0 rgba(255,255,255,.07);
+  --glass:rgba(34,36,46,.44);--gbl:blur(12px) saturate(1.7);--gb:rgba(255,255,255,.15);--rim:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.35);--gsh:0 8px 20px rgba(0,0,0,.45);--field:rgba(0,0,0,.32);--hov:rgba(255,255,255,.1);
+  --dh:253px;font:500 11px/1.2 Inter,system-ui,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;user-select:none;-webkit-user-select:none}
+[data-mode=lite] .m{--glass:#22242d;--gbl:none;--gb:#34363f;--rim:none;--field:#15161b}
+[data-mode=bright] .m{--dev:#f3f3f6;--strip:#e8e9ee;--ln:#cfd0d8;--ink:#15161a;--mut:#555866;--kr:#b9bcc8;--ka:#1f6fe0;--sel:#1f6fe0;
+  --btn:linear-gradient(#ffffff,#ececf1);--btnb:#c3c4cd;--btnsh:none;--glass:rgba(244,246,251,.66);--gb:rgba(255,255,255,.75);--rim:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,20,60,.12);--gsh:0 8px 20px rgba(0,0,0,.4);--field:rgba(10,20,50,.1);--hov:rgba(10,20,50,.1)}
+[data-mode=bright] .stage{--stagebg:#dfe1e8}
+[data-h=short] .m{--dh:215px}
+.dv{width:var(--w);height:var(--dh);background:var(--dev);border-radius:6px;border-top:2px solid var(--tc,#4c8dff);display:flex;position:relative;flex:none}
+.sl{width:28px;flex:none;background:var(--strip);border-right:1px solid var(--ln);border-radius:0 0 0 6px;display:flex;flex-direction:column;align-items:center;padding:6px 0 4px;gap:6px}
+.sl b{writing-mode:vertical-rl;transform:rotate(180deg);font:600 12px/22px Inter,system-ui,sans-serif;flex:1 1 auto;min-height:0;text-align:end;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+.ib{width:22px;height:22px;display:grid;place-items:center;border-radius:3px;background:var(--btn);border:1px solid var(--btnb);box-shadow:var(--btnsh);color:var(--mut);flex:none;padding:0;cursor:pointer}
+.ib svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ib.on{color:#3ecf8e}.sl .lg{width:20px;height:20px;border-radius:5px;flex:none;background:var(--lg)}
+.dp{flex:1;min-width:0;position:relative;background:var(--well);border-radius:0 0 6px 0;overflow:hidden;margin:0}
+.dp canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* glass */
+.g{position:absolute;background:var(--glass);backdrop-filter:var(--gbl);-webkit-backdrop-filter:var(--gbl);border:1px solid var(--gb);box-shadow:var(--rim),var(--gsh);border-radius:12px;color:var(--ink)}
+.dv.hidec .g:not(.tr),.dv.hidec .flat{opacity:0;pointer-events:none}
+.g,.flat{transition:opacity .15s ease-out,transform .15s ease-out}
+.row{display:flex;align-items:center;gap:6px;flex:none}
+.pre{left:8px;top:8px;height:28px;padding:0 4px;display:flex;align-items:center;gap:3px;border-radius:9px;max-width:calc(100% - 80px)}
+.pre .nm{font-weight:600;font-size:12px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pre .ch{color:var(--mut);padding:0 2px;font-size:13px}
+.b{display:inline-flex;align-items:center;justify-content:center;height:20px;padding:0 8px;border-radius:3px;background:var(--btn);border:1px solid var(--btnb);box-shadow:var(--btnsh);color:var(--ink);font:500 11px Inter,system-ui,sans-serif;white-space:nowrap;flex:none;cursor:pointer}
+.b.on{background:var(--sel);color:#fff;border-color:transparent;box-shadow:none}.b.acc{background:var(--acc);color:#fff;border-color:transparent;box-shadow:none}
+.b.sq{width:22px;padding:0}
+.sg{display:inline-flex;flex:none}.sg .b{border-radius:0;margin-left:-1px}.sg .b:first-child{border-radius:3px 0 0 3px;margin-left:0}.sg .b:last-child{border-radius:0 3px 3px 0}
+.se{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;border-radius:3px;background:var(--field);border:1px solid var(--gb);white-space:nowrap;flex:none}.se::after{content:"";width:5px;height:5px;border:solid var(--mut);border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.se small{font-size:11px;color:var(--mut)}
+.tg{display:inline-flex;align-items:center;gap:5px;color:var(--mut);white-space:nowrap;flex:none}.tg i{width:22px;height:12px;border-radius:9px;background:var(--kr);position:relative}.tg i::after{content:"";position:absolute;left:1.5px;top:1.5px;width:9px;height:9px;border-radius:50%;background:#fff}
+.tg.on i{background:var(--sel)}.tg.on i::after{left:11.5px}
+.tr{right:8px;top:8px;height:28px;padding:0 3px;display:flex;align-items:center;gap:3px;border-radius:9px}
+.tr .ib{background:none;border-color:transparent;box-shadow:none;color:var(--ink)}.tr .ib:hover{background:var(--hov)}
+/* knob cell: knob, label over value (11 px both, the C1 scale) */
+.kc{display:flex;align-items:center;gap:6px;flex:none;min-width:0}
+.kc span{display:flex;flex-direction:column;min-width:0}
+.kc label{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kc output{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kn{--v:.5;width:var(--ks,24px);height:var(--ks,24px);border-radius:50%;position:relative;flex:none;background:conic-gradient(from 225deg,var(--ka) calc(var(--v)*270deg),var(--kr) 0 270deg,transparent 0)}
+.kn::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--kb,#15161b)}
+[data-mode=bright] .kn::before{background:#fdfdfe}
+.kn::after{content:"";position:absolute;left:50%;top:50%;width:1.5px;height:38%;margin-left:-.75px;background:var(--ink);border-radius:2px;transform-origin:50% 0;transform:rotate(calc(45deg + var(--v)*270deg))}
+.gf{width:8px;border-radius:4px;background:var(--field);position:relative;flex:none;align-self:stretch;min-height:40px}.gf::after{content:"";position:absolute;left:-3px;right:-3px;top:42%;height:5px;border-radius:2px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.6)}
+/* DD1 dock */
+.dock{left:8px;right:8px;bottom:8px;padding:6px 10px;display:flex;align-items:center;gap:6px 12px;justify-content:space-between;border-radius:14px;overflow:hidden}
+.dock.fit{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 16px)}
+.dock .sep{width:1px;align-self:stretch;background:var(--gb);flex:none}
+.tray{left:8px;right:8px;padding:6px 10px;display:flex;align-items:center;gap:6px 12px;border-radius:12px;overflow:hidden}
+.steps{display:grid;grid-template-columns:repeat(16,14px);gap:2px;flex:none}.steps i{height:16px;border-radius:2px;background:color-mix(in srgb,var(--acc) 55%,#1a1a20);border-top:2px solid var(--acc)}.steps i.k{background:var(--field);border-top-color:#e5534b}
+/* DD2 rail */
+.rail{right:8px;top:8px;bottom:8px;padding:7px 8px;display:flex;gap:8px;border-radius:14px}
+.rail .col{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;overflow:hidden auto;scrollbar-width:none}
+.rail .grid{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));gap:5px 8px;align-content:start}
+.rail .pr{display:flex;align-items:center;gap:3px;min-width:0}.rail .pr .nm{font-weight:600;font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--field);border-radius:3px;height:20px;line-height:20px;padding:0 6px}
+.rail .gc{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;color:var(--mut)}.rail .gc output{color:var(--ink);font-weight:600;white-space:nowrap}
+.wrapr{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+/* DD3 chips on the picture */
+.chip{height:26px;padding:0 8px 0 4px;display:flex;align-items:center;gap:5px;border-radius:13px;white-space:nowrap;transform:translate(var(--tx,0),var(--ty,0))}
+.chip .kn{--ks:18px}.chip label{color:var(--mut)}.chip output{font-weight:600}
+.chip::before{content:"";position:absolute;width:1px;background:var(--gb);left:var(--lx,12px);top:var(--lt,auto);bottom:var(--lb,auto);height:var(--lh,0)}
+.pop{padding:6px 8px;display:flex;align-items:center;gap:8px;border-radius:14px;white-space:nowrap}
+.more{right:8px;bottom:8px;height:26px;padding:0 10px;border-radius:13px;display:flex;align-items:center;gap:5px;font-weight:600;cursor:pointer}
+.drawer{right:8px;top:44px;bottom:42px;width:236px;padding:8px 10px;border-radius:14px;display:none;flex-direction:column;gap:5px;overflow:auto;scrollbar-width:thin}
+.dv.open .drawer{display:flex}
+.drawer h5{margin:2px 0 0;font:600 11px Inter,system-ui,sans-serif;color:var(--mut)}
+.drawer .r{display:flex;justify-content:space-between;gap:8px;align-items:center}.drawer .r i{flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--ka) var(--p,40%),var(--kr) 0)}.drawer .r label{color:var(--mut);width:74px;flex:none}.drawer .r output{font-weight:600;width:52px;text-align:right;flex:none}
+.gfl{right:9px;top:46px;bottom:44px;width:20px;padding:6px 5px;border-radius:10px;display:flex}
+.ly{position:absolute;inset:0;pointer-events:none}.ly>*{pointer-events:auto}
+.menu{z-index:6;padding:5px;border-radius:10px;display:flex;flex-direction:column;gap:1px;min-width:196px;top:40px}
+.menu h6{margin:2px 8px 3px;font:500 11px Inter,system-ui,sans-serif;color:var(--mut)}
+.menu .mi{padding:5px 8px;border-radius:6px;display:flex;gap:7px;align-items:center;cursor:pointer;font-size:12px;border:0;background:none;color:inherit;font-family:inherit;text-align:left}
+.menu .mi:hover{background:var(--hov)}.menu .mi i{width:12px;font-style:normal;color:var(--ka)}
+.menu hr{border:0;border-top:1px solid var(--gb);margin:3px 0;width:100%}
+.decided{border-color:var(--brand)}
+/* DD4 hover reveal */
+.flat{position:absolute;left:10px;bottom:8px;right:150px;color:rgba(236,236,241,.78);font-size:11px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flat b{font-weight:600;color:#fff}
+.hint{right:8px;bottom:8px;height:24px;padding:0 10px;border-radius:12px;display:flex;align-items:center;gap:5px;color:var(--mut)}
+.dv.hv .dock,.dv.hv .tray{opacity:0;transform:translateY(8px);pointer-events:none}.dv.hv .dock.fit{transform:translate(-50%,8px)}
+.dv.hv:hover .dock,.dv.hv.show .dock,.dv.hv:hover .tray,.dv.hv.show .tray{opacity:1;transform:none;pointer-events:auto}.dv.hv:hover .dock.fit,.dv.hv.show .dock.fit{transform:translateX(-50%)}
+.dv.hv:hover .flat,.dv.hv.show .flat,.dv.hv:hover .hint,.dv.hv.show .hint{opacity:0}
+</style></head><body>
+<div class="wrap" id="page" data-glass="gl" data-mode="dark">
+  <div><h1>Display-first devices lab</h1><p class="sub">Six AudioLab devices at real size with the picked behaviour: the eye opens and closes the glass rail; closed, a device shows hover reveal, or on the picture (right-click the eye). Here the glass is drawn by the AudioLab glass engine, with each display canvas fed to it as a flat picture. Use it to see what floating glass over a display costs before it goes into the app.</p></div>
+  <div class="ctl">
+    <div><span>Glass</span><div class="segm" data-k="glass"><button data-v="gl" aria-pressed="true">GL engine</button><button data-v="css" aria-pressed="false">Browser blur</button><button data-v="solid" aria-pressed="false">Solid</button></div></div>
+    <div><span>Engine quality</span><div class="segm" data-k="q"><button data-v="3" aria-pressed="true">High</button><button data-v="2" aria-pressed="false">Medium</button><button data-v="1" aria-pressed="false">Low</button></div></div>
+    <div><span>Displays</span><div class="segm" data-k="live"><button data-v="0" aria-pressed="true">Still</button><button data-v="1" aria-pressed="false">Live (redraw every frame)</button></div></div>
+    <div><span>All devices</span><div class="segm" data-k="all"><button data-v="mine" aria-pressed="true">As picked</button><button data-v="DD2" aria-pressed="false">Rail open</button><button data-v="DD4" aria-pressed="false">Hover reveal</button><button data-v="DD3" aria-pressed="false">On the picture</button></div></div>
+    <button class="act go" id="measure">Measure (about 50 s)</button><button class="act" id="copy" hidden>Copy table</button>
+  </div>
+  <div id="read"></div>
+  <div class="panel" id="panel"><div class="scr m" id="scr"></div><canvas id="eng"></canvas></div>
+  <div class="out" id="out"></div>
+  <div class="notes">
+    <p><b>What to look at.</b> With "Still" displays the readout should show 0 uploads and 0 blur rebuilds per second in every state: glass over a display that does not change costs nothing. With "Live" every visible display is repainted and handed to the engine each frame; that is the worst case (ten devices all animating).</p>
+    <p><b>Measure</b> runs every combination of glass, displays and state for two seconds each and makes a table to copy. Keep the window in front and the mouse still while it runs.</p>
+    <p><b>Limits.</b> The displays are redrawn stand-ins, not the app's drawing code, so the "display paint" column is not the app's cost. The engine's CPU time is only the time spent in its calls; the graphics card's share shows up as frames per second.</p>
+  </div>
+</div>
+<script src="glass-engine.js"></script>
+<script>
+const SV=p=>`<svg viewBox="0 0 16 16" aria-hidden="true">${p}</svg>`;
+const I={pw:SV('<path d="M8 2.8v4.4M5 4.6a4.4 4.4 0 1 0 6 0"/>'),rm:SV('<path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M4.6 4.5l.6 8h5.6l.6-8M6.8 7v3.5M9.2 7v3.5"/>'),pin:SV('<path d="M6 2.5h4l-.6 4 2 2H4.6l2-2zM8 8.5v5"/>'),eye:SV('<path d="M1.8 8s2.3-4 6.2-4 6.2 4 6.2 4-2.3 4-6.2 4-6.2-4-6.2-4z"/><circle cx="8" cy="8" r="1.8"/>'),dots:SV('<circle cx="3.5" cy="8" r=".9"/><circle cx="8" cy="8" r=".9"/><circle cx="12.5" cy="8" r=".9"/>')};
+const K=(l,v,x)=>`<div class="kc"><i class="kn" style="--v:${x}"></i><span><label>${l}</label><output>${v}</output></span></div>`;
+const B=(t,c='')=>`<span class="b ${c}">${t}</span>`,SG=(a,on=0)=>`<span class="sg">${a.map((t,i)=>B(t,i==on?'on':'')).join('')}</span>`,SE=(v,l)=>`<span class="se">${l?`<small>${l}</small>`:''}${v}</span>`,TG=(l,on)=>`<span class="tg${on?' on':''}"><i></i>${l}</span>`;
+const STEPS=`<span class="steps">${Array.from({length:16},(_,i)=>`<i class="${i%4==0?'k':''}"></i>`).join('')}</span>`;
+const PRE=(d,rail)=>rail?`<div class="pr">${B('‹','sq')}<span class="nm">${d.preset}</span>${B('›','sq')}${B('Change')}${d.play?B('▶','sq'):''}</div>`:`<div class="g pre">${B('‹','sq')}<span class="nm">${d.preset}</span><span class="ch">⌄</span>${B('›','sq')}${B('Change')}${d.play?B('▶','sq'):''}${d.top||''}</div>`;
+const TR=`<div class="g tr"><button class="ib" data-eye title="Show or hide the floating controls">${I.eye}</button><span class="ib" title="Pin">${I.pin}</span></div>`;
+const GAIN=K('Gain','0.0 dB',.5);
+
+/* ---------- display painters: (g, W, H, R) with R = the part of the display kept clear of glass ---------- */
+const rnd=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+function txt(g,t,x,y,c='rgba(236,236,241,.6)',f='500 11px Inter,system-ui,sans-serif',al='left'){g.fillStyle=c;g.font=f;g.textAlign=al;g.fillText(t,x,y)}
+function grid(g,W,H,nx,ny,c='rgba(255,255,255,.055)'){g.strokeStyle=c;g.lineWidth=1;g.beginPath();for(let i=1;i<nx;i++){const x=Math.round(W*i/nx)+.5;g.moveTo(x,0);g.lineTo(x,H)}for(let i=1;i<ny;i++){const y=Math.round(H*i/ny)+.5;g.moveTo(0,y);g.lineTo(W,y)}g.stroke()}
+const P={
+psy(g,W,H,R){const x0=R.x+6,w=R.w-12,top=R.y+40,hh=R.h-40,uh=hh*.66,mid=top+uh/2,ac='#f84fb4';
+  const gr=g.createLinearGradient(x0,0,x0+w*.2,0);gr.addColorStop(0,'rgba(229,83,75,.42)');gr.addColorStop(1,'rgba(229,83,75,0)');g.fillStyle=gr;g.fillRect(x0+w*.03,top,w*.19,uh);
+  g.fillStyle='rgba(229,83,75,.3)';g.fillRect(x0+w*.955,top,w*.045,uh);g.strokeStyle='#e5534b';g.lineWidth=1.5;g.beginPath();g.moveTo(x0+w*.03,top);g.lineTo(x0+w*.03,top+uh);g.moveTo(x0+w*.955,top);g.lineTo(x0+w*.955,top+uh);g.stroke();
+  g.strokeStyle='rgba(255,255,255,.14)';g.lineWidth=1;g.beginPath();g.moveTo(x0,mid+.5);g.lineTo(x0+w,mid+.5);g.stroke();
+  for(let n=0;n<3;n++){const nx=x0+w*(.255+n*.233),nw=w*.2;g.fillStyle=ac;for(let i=0;i<nw;i+=2){const t=i/nw,a=Math.exp(-t*7)*Math.sin(t*46)*uh*.44;g.fillRect(nx+i,mid,1.6,-a)}
+    g.strokeStyle='rgba(236,236,241,.85)';g.lineWidth=1.3;g.setLineDash([]);g.beginPath();g.moveTo(nx,top+uh);g.lineTo(nx,top+6);for(let i=0;i<=nw;i+=3)g.lineTo(nx+i,top+6+(uh-8)*(1-Math.exp(-i/nw*5.2)));g.stroke();
+    g.strokeStyle='#f5c84c';g.setLineDash([3,3]);g.beginPath();for(let i=0;i<=nw;i+=3){const y=top+10+(uh-12)*(1-Math.exp(-i/nw*8));i?g.lineTo(nx+i,y):g.moveTo(nx,y)}g.stroke();g.setLineDash([])}
+  txt(g,'Kick',x0+w*.04,top+14,'#ff6b6b','600 11px Inter,system-ui,sans-serif');txt(g,'Next kick',x0+w*.95,top+14,'#ff6b6b','600 11px Inter,system-ui,sans-serif','right');txt(g,'140 BPM · 16th 107 ms · sounds 86 ms',x0+w*.58,top-6,undefined,undefined,'center');
+  txt(g,'silent 21 ms',x0+w*.95,top+uh-8,'#7ee0a8','600 11px Inter,system-ui,sans-serif','right');
+  const sy=top+uh+14,sh=hh-uh-30;if(sh>14){g.strokeStyle='rgba(255,255,255,.14)';g.beginPath();g.moveTo(x0,sy+sh+.5);g.lineTo(x0+w,sy+sh+.5);g.stroke();
+    for(let k=1;k<=18;k++){const x=x0+w*(.16+.74*Math.log2(k)/Math.log2(18)),a=k==1?1:Math.max(.05,.75-k*.045);g.fillStyle=k==1?ac:'rgba(248,79,180,.6)';g.fillRect(x,sy+sh*(1-a),k==1?7:2.5,sh*a)}
+    txt(g,'A2  55.0 Hz',x0+w*.185,sy+12,ac,'600 12px Inter,system-ui,sans-serif');txt(g,'spectrum of one note',x0+w,sy+10,undefined,undefined,'right')}},
+kick(g,W,H,R){const x0=R.x+8,w=R.w-46,top=R.y+42,hh=R.h-64,ms=['0 ms','50 ms','100 ms','150 ms','200 ms','250 ms'];
+  g.strokeStyle='rgba(255,255,255,.06)';g.beginPath();ms.forEach((m,i)=>{const x=Math.round(x0+w*i/6)+.5;g.moveTo(x,R.y);g.lineTo(x,R.y+R.h);txt(g,m,x+4,R.y+R.h-7)});g.stroke();
+  g.strokeStyle='#5b8ff5';g.lineWidth=1.3;g.beginPath();let ph=0;for(let i=0;i<=w;i++){const t=i/w,f=.9*Math.exp(-t*30)+.075,a=Math.exp(-t*3.4)*(t<.93?1:0);ph+=f;const y=top+hh/2-Math.sin(ph)*hh*.47*a;i?g.lineTo(x0+i,y):g.moveTo(x0,y)}g.stroke();
+  g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();for(let i=0;i<=w*.86;i+=2){const t=i/w,y=top+4+(hh*.86)*(1-Math.exp(-t*34));i?g.lineTo(x0+i,y):g.moveTo(x0,y)}g.stroke();
+  for(const [t,f] of [[0,1],[.045,0],[.16,1]]){const y=top+4+(hh*.86)*(1-Math.exp(-t*34));g.beginPath();g.arc(x0+w*t+(t?0:4),y,5,0,7);g.fillStyle=f?'#fff':'#06070a';g.fill();g.strokeStyle='#fff';g.lineWidth=1.5;g.stroke()}
+  ['5k','2k','1k','500','200','100','50'].forEach((s,i)=>txt(g,s,R.x+R.w-8,top+6+i*(hh*.86)/6.4,undefined,undefined,'right'))},
+eq(g,W,H,R,T=0){const x0=R.x,w=R.w,y0=R.y+34,h=R.h-34-16,mid=y0+h/2,fx=f=>x0+w*Math.log(f/20)/Math.log(1000),bands=[[30,0,'#ff5a5a',0],[100,3,'#ff9a3c',1],[500,-4.5,'#f5c84c',1],[1500,1.5,'#b4d84a',1],[4000,2.5,'#3ecf8e',1],[8000,-2,'#2dd4d4',1],[16000,0,'#4cc9f0',0]],dy=d=>mid-d/24*(h/2-8);
+  g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;g.beginPath();for(const f of [50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fx(f))+.5;g.moveTo(x,R.y);g.lineTo(x,R.y+R.h);txt(g,f>=1000?f/1000+'k':f,x+4,R.y+R.h-6)}
+  for(const d of [-18,-12,-6,6,12,18]){const y=Math.round(dy(d))+.5;g.moveTo(R.x,y);g.lineTo(R.x+R.w,y);txt(g,(d>0?'+':'')+d,R.x+R.w-8,y-3,undefined,undefined,'right')}g.stroke();
+  const r=rnd(7);let v=.5;g.beginPath();g.moveTo(x0,y0+h);for(let i=0;i<=w;i+=3){v+=(r()-.5)*.16;v=Math.max(.15,Math.min(.9,v));const t=i/w,a=(.2+.8*Math.sin(Math.PI*Math.min(1,t*1.25)))*(1-t*.5)*v*(1+.22*Math.sin(i*.045+T*6)+.12*Math.sin(i*.11-T*9));g.lineTo(x0+i,y0+h-a*h*.62)}g.lineTo(x0+w,y0+h);g.fillStyle='rgba(120,160,255,.13)';g.fill();
+  const cur=x=>bands.reduce((s,b)=>s+b[1]*Math.exp(-Math.pow((x-fx(b[0]))/(w*.07),2)),0);g.shadowColor='#f5b942';g.shadowBlur=6;g.strokeStyle='#f8c555';g.lineWidth=2;g.beginPath();for(let i=0;i<=w;i+=2){const y=dy(cur(x0+i));i?g.lineTo(x0+i,y):g.moveTo(x0,y)}g.stroke();g.shadowBlur=0;
+  bands.forEach((b,i)=>{const x=fx(b[0]),y=dy(cur(x));g.beginPath();g.arc(x,y,i==2?9:7.5,0,7);if(b[3]){g.fillStyle=b[2];g.fill();if(i==2){g.strokeStyle='#fff';g.lineWidth=2;g.stroke()}}else{g.setLineDash([2,2]);g.strokeStyle=b[2];g.lineWidth=1.5;g.stroke();g.setLineDash([])}txt(g,i+1,x,y+3.5,b[3]?'#111':b[2],'700 10px Inter,system-ui,sans-serif','center')})},
+comp(g,W,H,R,T=0){const s=Math.min(R.h-50,R.w*.52),x0=R.x+10,y0=R.y+R.h-8-s;g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;g.beginPath();for(let i=0;i<=5;i++){const p=Math.round(s*i/5)+.5;g.moveTo(x0+p,y0);g.lineTo(x0+p,y0+s);g.moveTo(x0,y0+p);g.lineTo(x0+s,y0+p)}g.stroke();
+  const tx=x0+s*.7,ty=y0+s*.3,ex=x0+s,ey=ty-s*.3/4;g.strokeStyle='rgba(255,255,255,.2)';g.lineWidth=1.5;g.beginPath();g.moveTo(tx,ty);g.lineTo(ex,y0);g.stroke();g.strokeStyle='rgba(229,83,75,.8)';g.setLineDash([3,3]);g.lineWidth=1;g.beginPath();g.moveTo(tx+.5,y0);g.lineTo(tx+.5,y0+s);g.stroke();g.setLineDash([]);
+  g.strokeStyle='#f8c555';g.lineWidth=2;g.beginPath();g.moveTo(x0,y0+s);g.lineTo(tx,ty);g.lineTo(ex,ey);g.stroke();
+  for(const [x,y,c] of [[tx,ty,'#ff5a5a'],[ex-4,ey,'#f8c555']]){g.beginPath();g.arc(x,y,7,0,7);g.fillStyle='#06070a';g.fill();g.strokeStyle=c;g.lineWidth=2.5;g.stroke();g.beginPath();g.arc(x,y,2.5,0,7);g.fillStyle=c;g.fill()}
+  txt(g,'-18.0 dB · 4.0:1',x0+6,y0+s-8,'#fff','600 12px Inter,system-ui,sans-serif');
+  const hx=x0+s+16,hw=R.x+R.w-10-hx;if(hw>40){const r=rnd(11);g.fillStyle='rgba(255,255,255,.04)';g.fillRect(hx,y0,hw,s);g.fillStyle='rgba(120,160,255,.35)';for(let i=0;i<hw;i+=3){const a=(.3+.6*Math.abs(Math.sin(i*.09+T*4)))*(.6+r()*.4);g.fillRect(hx+i,y0+s-a*s*.8,2,a*s*.8)}
+    g.fillStyle='rgba(229,83,75,.6)';for(let i=0;i<hw;i+=3){const a=Math.max(0,Math.abs(Math.sin(i*.09+T*4))-.55)*.5;g.fillRect(hx+i,y0,2,a*s)}g.strokeStyle='rgba(229,83,75,.8)';g.setLineDash([3,3]);g.beginPath();g.moveTo(hx,ty+.5);g.lineTo(hx+hw,ty+.5);g.stroke();g.setLineDash([]);
+    txt(g,'level & gain reduction',hx+hw-4,y0+s*.5,undefined,undefined,'right');for(const [p,c] of [[.12,'#4cc9f0'],[.3,'#b583ff']]){g.beginPath();g.arc(hx+hw*p,y0+s-9,6,0,7);g.fillStyle='#06070a';g.fill();g.strokeStyle=c;g.lineWidth=2.5;g.stroke()}}},
+delay(g,W,H,R){const x0=R.x+12,w=R.w-24,top=R.y+58,hh=R.h-58-26,mid=top+hh*.55;g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;g.beginPath();for(let i=0;i<=16;i++){const x=Math.round(x0+w*i/16)+.5;g.moveTo(x,top);g.lineTo(x,top+hh)}g.stroke();
+  g.fillStyle='rgba(255,255,255,.4)';g.fillRect(x0-4,top,4,hh);g.strokeStyle='rgba(255,255,255,.18)';g.beginPath();g.moveTo(x0,mid+.5);g.lineTo(x0+w,mid+.5);g.stroke();
+  g.strokeStyle='rgba(245,200,120,.7)';g.setLineDash([4,4]);g.beginPath();g.moveTo(x0,mid-hh*.3);for(let i=0;i<=w;i+=4){const t=i/w;g.lineTo(x0+i,mid-hh*.3*Math.exp(-Math.max(0,t-.12)*7))}g.stroke();g.setLineDash([]);
+  for(let k=1;k<=5;k++){const x=x0+w*.118*k,a=Math.pow(.4,k-1),bh=Math.max(3,hh*.52*a),gr=g.createLinearGradient(0,mid-bh/2,0,mid+bh/2);gr.addColorStop(0,'#e0b070');gr.addColorStop(1,'#8a5a2a');g.fillStyle=gr;g.beginPath();g.roundRect(x-8,mid-bh*.55,16,bh,7);g.fill()}
+  g.beginPath();g.arc(x0+w*.118,mid-hh*.3,7,0,7);g.fillStyle='#06070a';g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke();
+  txt(g,'1/8 · 214 ms',x0,top-8,'#fff','600 12px Inter,system-ui,sans-serif');txt(g,'feedback 40% · mix 25%',x0+w,top-8,undefined,undefined,'right');
+  const by=R.y+R.h-16;g.fillStyle='rgba(255,255,255,.07)';g.beginPath();g.roundRect(x0,by,w,8,4);g.fill();const gr=g.createLinearGradient(x0+w*.3,0,x0+w*.85,0);gr.addColorStop(0,'#5a4526');gr.addColorStop(.5,'#b08a50');gr.addColorStop(1,'#5a4526');g.fillStyle=gr;g.fillRect(x0+w*.3,by,w*.55,8);g.fillStyle='#fff';g.fillRect(x0+w*.3-2,by-3,4,14);g.fillRect(x0+w*.85-2,by-3,4,14);txt(g,'150 Hz',x0+w*.3-8,by+8,undefined,undefined,'right');txt(g,'7.0 kHz',x0+w*.85+8,by+8)},
+voice(g,W,H,R){const x0=R.x,kw=52,top=R.y+40,hh=R.h-40-20,n=14,rh=hh/n,bl=[1,3,6,8,10,13];for(let i=0;i<n;i++){const y=top+i*rh,blk=bl.includes(i);g.fillStyle=blk?'#101116':'#d9dce4';g.fillRect(x0+4,y+1,kw-6,rh-2);g.fillStyle=blk?'rgba(255,255,255,.015)':'rgba(255,255,255,.045)';g.fillRect(x0+kw,y,R.w-kw,rh-1)}
+  txt(g,'C4',x0+kw-6,top+7*rh+rh*.72,'#222','600 10px Inter,system-ui,sans-serif','right');const w=R.w-kw-10,xs=x0+kw+6;
+  const notes=[[.02,.16,7],[.2,.12,5],[.34,.2,4],[.56,.1,5],[.68,.24,7]];g.fillStyle='rgba(248,79,180,.32)';g.strokeStyle='#f84fb4';g.lineWidth=1;for(const [a,l,r] of notes){g.beginPath();g.roundRect(xs+w*a,top+r*rh+2,w*l,rh-4,3);g.fill();g.stroke()}
+  g.strokeStyle='#8fd0ff';g.lineWidth=1.6;g.beginPath();let f=1;for(const [a,l,r] of notes){for(let i=0;i<=w*l;i+=3){const t=i/(w*l),y=top+(r+.5)*rh+Math.sin(i*.22)*rh*.28*(.4+t)+(1-Math.min(1,t*6))*rh*1.2;f?g.moveTo(xs+w*a+i,y):g.lineTo(xs+w*a+i,y);f=0}}g.stroke();
+  const by=R.y+R.h-6;txt(g,'LIVE VIEW · you: A3, 12 ct flat · voice: Natural',x0+kw+6,by);txt(g,'you',R.x+R.w-190,by,'#8fd0ff');txt(g,'out',R.x+R.w-162,by,'#f84fb4')}};
+
+/* ---------- the six devices: real names, sizes, labels and values from v0.219 ---------- */
+const D=[
+{k:'P',id:'psy',name:'Psy Bass',w:970,tc:'#4c8dff',acc:'#f84fb4',lg:'linear-gradient(135deg,#f84fb4,#7a5cff)',preset:'Full-on roller 145',play:1,today:[410,250],shot:'psyb',star:'DD2',
+ blurb:'A synth with many parameters: eight that always show, three pages, a step row. Today its picture already runs behind the parameters.',
+ main:[['Cutoff','420 Hz',.42],['Resonance','10%',.1],['Opening','2.0 oct',.5],['Close time','45 ms',.3],['Decay','75 ms',.35],['Release','20 ms',.2],['Tick','25%',.25],['Gate','62%',.62]],
+ tabs:['Roll and gate','Sound','Envelopes'],
+ pages:{'Roll and gate':{x:[B('Gate to the kick','acc'),B('Roll off'),SE('K-B-B-B'),SG(['16ths','Triplets'])],steps:1,k:[['Accent','4.0 dB',.4]]},
+  'Sound':{x:[SG(['24 dB','12 dB']),B('Restart'),SE('Sub on the note'),SE('Octave 0')],k:[['Square','0%',0],['Sub','0%',0],['Drive','0%',0],['Saturate','20%',.2],['Key track','30%',.3],['Low cut','30 Hz',.1],['Start phase','0°',0]]},
+  'Envelopes':{x:[],k:[['Open time','0.1 ms',.02],['Stays open','0%',0],['Close curve','60%',.6],['Attack','0.5 ms',.05],['Sustain','0%',0],['Curve','60%',.6],['Vel bright','0.5 oct',.25],['Velocity','40%',.4]]}},
+ railW:420,cols:4,
+ chips:[['Cutoff','420 Hz',.42,30,30],['Resonance','10%',.1,30,43],['Opening','2.0 oct',.5,54,30],['Close time','45 ms',.3,55,43],['Decay','75 ms',.35,77,30],['Release','20 ms',.2,78,43],['Tick','25%',.25,24.5,17],['Gate','62%',.62,85,17]],
+ note:{DD1:'The eight main knobs sit in one dock; a page opens as a second tray above it and closes again when you click its tab, so the step row is there only when you want it.',DD2:'Closest to today, so the least to relearn: everything Psy Bass has fits on the rail in four columns and no parameter is ever hidden behind a second click.',DD3:'The eight main knobs sit at the thing they shape (filter curve, level curve, the tick, the gap before the next kick). The step row is drawn flat on the picture; the Sound and Envelopes pages move to the More drawer.',DD4:'The display is completely clean; values are written as plain text. The dock from DD1 rises when the mouse is over the device.'}},
+{k:'K',id:'kick',name:'Kick designer',w:872,tc:'#4c8dff',acc:'#4c8dff',lg:'linear-gradient(135deg,#ff6b6b,#c92a4a)',preset:'Zap, long body on F#',play:1,today:[380,238],shot:'kick',star:'DD2',
+ blurb:'A drum designer (Clap, Snare, Hat and Tom share this frame): one picture with handles, nine parameters, two views of the picture.',
+ top:SG(['Pitch','Amp']),main:[['Pitch','F#2 46 Hz',.3],['Punch','3.0 kHz',.7],['Sweep','50 ms',.45],['Curve','78%',.78],['Body','22%',.22],['Click','45%',.45],['Drive','28%',.28],['Level','90%',.9],['Length','300 ms',.5]],
+ x:[SE('Tick','Click'),TG('Key track',0)],railW:252,cols:2,
+ chips:[['Punch','3.0 kHz',.7,5,22],['Sweep','50 ms',.45,10,62],['Curve','78%',.78,12,49],['Pitch','F#2 46 Hz',.3,22,84],['Length','300 ms',.5,72,62],['Level','90%',.9,30,22],['Body','22%',.22,62,84],['Click','45%',.45,74,84],['Drive','28%',.28,86,84]],
+ note:{DD1:'Nine knobs and Gain in one dock, the same on Clap, Snare, Hat and Tom. The Pitch and Amp switch and the click type move up beside the preset.',DD2:'Two columns on a narrow rail. Works the same for every drum designer whatever its parameters are, and the picture is still much wider than today.',DD3:'Pitch, Punch, Sweep, Curve, Level and Length sit at their handle or edge of the picture. Body, Click and Drive have no place in the picture, so they line up along the bottom.',DD4:'Clean picture, values as text, the dock on hover. A drum designer is mostly dragged in the picture, so the knobs are needed less often.'}},
+{k:'E',id:'eq',name:'Pro EQ',w:982,tc:'#4c8dff',acc:'#f5c84c',pw:1,preset:'Presets…',today:[560,238],shot:'eq',star:'DD3',
+ blurb:'A device that is its picture: the bands are the dots. Today the band editor takes 282 px beside the graph.',
+ top:SG(['Off','Post','Pre+Post'],1)+TG('Auto',0),
+ band:[SE('Bell'),['Freq','500 Hz',.47],['Gain','-4.5 dB',.42],['Q','1.4',.3],SG(['Stereo','Mid','Side']),TG('Dynamic',0),B('Solo')],
+ x:[['Scale','100%',.75],['Out','0.0 dB',.5]],railW:290,cols:3,
+ note:{DD1:'The selected band is edited in the dock (type, Freq, Gain, Q, Stereo/Mid/Side, Dynamic, Solo), Analyser and Auto move up beside the preset, Scale and Out to the top right.',DD2:'Today\'s band editor, on glass, with the graph running under it. The top octaves of the graph end up behind the rail unless the frequency axis is squeezed to the clear part, as drawn here.',DD3:'The band editor is a small capsule under the selected dot and follows it, so eyes and mouse stay in one place. Nothing else covers the graph. Scale and Out sit in the "…" drawer.',DD4:'Clean graph, the band in words at the bottom; the dock on hover. Good for looking, slower for editing several bands.'}},
+{k:'C',id:'comp',name:'Compressor',w:602,tc:'#4c8dff',acc:'#f8c555',pw:1,preset:'Default settings',today:[300,238],shot:'comp',star:'DD3',
+ blurb:'A narrow effect with five parameters, most of which already have a handle in the picture. The Sidechain has the same frame.',
+ main:[['Threshold','-18.0 dB',.7],['Ratio','4.0:1',.3],['Attack','10 ms',.25],['Release','200 ms',.5],['Makeup','3.0 dB',.3]],railW:152,cols:1,narrow:1,
+ chips:[['Threshold','-18.0 dB',.7,4,46],['Ratio','4.0:1',.3,33,17],['Attack','10 ms',.25,43,74],['Release','200 ms',.5,61,86],['Makeup','3.0 dB',.3,68,20]],
+ note:{DD1:'Five knobs and Gain in a centred dock. The curve and the level history both keep the full width.',DD2:'One column of knobs on a slim rail; the preset floats at the top left. The level history loses part of its width to the rail.',DD3:'Each value sits at its handle: Threshold and Ratio on the curve, Attack and Release on their dots in the level history, Makeup at the output side. No panel at all.',DD4:'Clean picture with the values as text; the dock on hover.'}},
+{k:'D',id:'delay',name:'Echo delay',w:602,tc:'#4c8dff',acc:'#e0b070',pw:1,preset:'Default settings',today:[300,238],shot:'delay',star:'DD1',
+ blurb:'A narrow effect with five knobs. The Reverb has the same frame (Damp, Decay, Low cut, Mix, Pre-delay).',
+ main:[['Time','250 ms',.25],['Feedback','40%',.4],['Mix','25%',.25],['Low cut','150 Hz',.3],['High cut','7.0 kHz',.7]],railW:152,cols:1,narrow:1,
+ chips:[['Time','250 ms',.25,13,22],['Feedback','40%',.4,40,36],['Mix','25%',.25,70,22],['Low cut','150 Hz',.3,10,74],['High cut','7.0 kHz',.7,70,74]],
+ note:{DD1:'Five knobs and Gain in a centred dock: the echoes spread across the full width, which is what this picture needs, and the same dock fits the Reverb unchanged.',DD2:'One column of knobs on a slim rail; the preset floats at the top left. A delay picture reads left to right, so width is what it can least afford.',DD3:'Time at the first echo, Feedback on the decay line, the two cuts at the ends of the filter band, Mix at the top. Works for the delay; the Reverb has no such handles yet.',DD4:'Clean picture with the values as text; the dock on hover.'}},
+{k:'V',id:'voice',name:'Voice',w:1116,tc:'#4c8dff',acc:'#f84fb4',pw:1,preset:'Natural',today:[600,238],shot:'voice',star:'DD2',
+ blurb:'The device with the most kinds of controls: five menus, a tick box, six mode buttons, eight knobs and four number fields, around a piano-roll picture.',
+ top:B('Live')+B('Input')+B('Record')+B('Notes')+B('Editor')+B('AI voice'),
+ main:[['Correct','0%',0],['Speed','40 ms',.2],['Pitch','0 st',.5],['Formant','0 st',.5],['Width','80%',.8],['Doubler','0%',0],['Tuning','0 ct',.5],['Mix','100%',1]],
+ sels:[SE('Natural','Voice'),SE('C','Key'),SE('Chromatic','Scale'),SE('Unison','Choir'),SE('Find out','You'),TG('Keep formant',1)],
+ nums:[['Voices','1',5],['Time spread','0 ms',0],['Pitch spread','0 ct',0],['Formant spread','0 st',0]],railW:400,cols:4,
+ chips:[['Correct','0%',0,30,38],['Speed','40 ms',.2,30,52],['Pitch','0 st',.5,52,22],['Formant','0 st',.5,52,36],['Mix','100%',1,70,80]],
+ note:{DD1:'The mode buttons sit beside the preset, the Voice, Key and Scale menus at the top right and the eight knobs in the dock. Choir, You, Keep formant and the four spread fields go into the More drawer.',DD2:'Everything Voice has stays visible on one rail: menus on top, knobs in four columns, the spread fields below. The piano roll keeps its full height, which is what shows the pitch range.',DD3:'Only the controls that belong to the picture float on it (Correct and Speed at the pitch line, Pitch and Formant, Mix). Key and Scale sit on the piano keys; the rest is in the More drawer.',DD4:'Clean piano roll with the state in words; the dock on hover. Voice is often watched while singing, hands off the mouse, which suits this.'}}];
+
+const L={DD1:{n:'Glass dock',cpu:'One or two panels, all in one low strip. When the display redraws, only that strip is blurred again. Cheap, and the same on every device.',small:'At 215 px the dock keeps its height and the picture gives up the difference; on narrow devices the dock scrolls sideways.'},
+ DD2:{n:'Glass rail',cpu:'One panel, the largest area under glass of the four. Still a single rectangle, and it sits at the edge where little moves. On a display that redraws while playing this is the dearest layout, by area.',small:'At 215 px the rail loses a row: the last row of the page scrolls inside the rail.'},
+ DD3:{n:'On the picture',cpu:'The most panels but the smallest area. Every chip is one more rectangle in the same draw, which costs next to nothing; what counts is the area, and it is the lowest here. The drawer adds one panel only while it is open.',small:'At 215 px the chips keep their place; labels can drop to value only, the label showing on hover.'},
+ DD4:{n:'Hover reveal',cpu:'No glass at all until the mouse is over the device, then the same as DD1. The cheapest at rest; with ten devices in the panel only one ever pays for glass.',small:'Best fit for small screens: at rest nothing covers the picture at any height. Needs a tap or a key on touch screens.'}};
+
+function clearOf(d,l,H){const W=d.w-29;let s={l:0,t:0,r:0,b:0};
+  if(l==='DD1')s.b=(d.tabs?108:56);if(l==='DD2')s.r=d.railW+12;return {W,H,s,cw:W-s.l-s.r,ch:H-s.t-s.b}}
+function body(d,l){const main=(d.main||[]).map(k=>K(...k)).join('');let h='';
+  if(l==='DD2'){let col='';
+    if(d.id=='eq')col=`${PRE(d,1)}<div class="wrapr">${d.top}</div><div class="wrapr">${[1,2,3,4,5,6,7].map(i=>`<span class="b sq${i==3?' on':''}">${i}</span>`).join('')}${B('+','sq')}</div><div class="wrapr">${d.band[0]}${d.band[4]}</div><div class="grid">${d.band.slice(1,4).map(k=>K(...k)).join('')}${d.x.map(k=>K(...k)).join('')}</div><div class="wrapr">${d.band[5]}${d.band[6]}</div>`;
+    else if(d.id=='voice')col=`${PRE(d,1)}<div class="wrapr">${d.sels.join('')}</div><div class="wrapr">${d.top}</div><div class="grid">${main}</div><div class="wrapr">${d.nums.map(n=>SE(n[1],n[0])).join('')}</div>`;
+    else col=`${d.narrow?'':PRE(d,1)}${d.tabs?`<span class="sg" data-tabs>${d.tabs.map((t,i)=>`<span class="b${i?'':' on'}" data-tab="${t}" style="flex:1;padding:0 4px">${t}</span>`).join('')}</span>`:''}${d.top||d.x?`<div class="wrapr">${d.top||''}${(d.x||[]).join('')}</div>`:''}<div class="grid">${main}</div>${d.tabs?'<div data-page style="display:flex;flex-direction:column;gap:6px"></div>':''}`;
+    h=`<div class="g rail" style="width:${d.railW}px;--cols:${d.cols}"><div class="col">${col}</div><div class="gc"><span>Gain</span><i class="gf"></i><output>0.0</output></div></div>`+TR.replace('class="g tr"',`class="g tr" style="right:${d.railW+16}px"`)+(d.narrow?PRE(d):'')}
+  if(l==='DD1'||l==='DD4'){let dock=main;
+    if(d.id=='eq')dock=`<span class="row">${[1,2,3,4,5,6,7].map(i=>`<span class="b sq${i==3?' on':''}">${i}</span>`).join('')}</span><i class="sep"></i>${d.band.map(k=>Array.isArray(k)?K(...k):k).join('')}`;
+    if(d.id=='voice')dock=main+`<span class="b" data-more>More</span>`;
+    if(d.tabs)dock=`<span class="sg" data-tabs>${d.tabs.map((t,i)=>`<span class="b${i?'':' on'}" data-tab="${t}">${t.replace('Roll and gate','Roll').replace('Envelopes','Env')}</span>`).join('')}</span>`+main;
+    h=PRE(d)+TR+(d.tabs?`<div class="g tray" data-page style="bottom:60px"></div>`:'')+`<div class="g dock${d.w<700||d.id=='voice'?' fit':''}">${dock}${d.id=='kick'?'':'<i class="sep"></i>'}${GAIN}</div>`+(d.id=='kick'?`<div class="g pre" style="left:auto;right:72px">${d.x.join('')}</div>`:'')+(d.id=='voice'?`<div class="g pre" style="left:auto;right:72px;gap:5px">${d.sels.slice(0,3).join('')}</div>`:'')+(d.id=='eq'?`<div class="g pre" style="left:auto;right:72px;gap:5px">${d.x.map(k=>SE(k[1],k[0])).join('')}</div>`:'');
+    if(d.id=='voice')h+=drawer(d);
+    if(l==='DD4')h+=`<div class="flat">${flat(d)}</div><div class="g hint">Hover for controls</div>`}
+  if(l==='DD3'){h=PRE(d)+TR;
+    if(d.id=='eq')h+=`<div class="g pop" style="left:46.6%;top:63%;transform:translateX(-50%)">${d.band.map(k=>Array.isArray(k)?K(...k):k).join('')}${B('✕','sq')}</div><button class="g more" data-more><span class="ib" style="background:none;border:0;box-shadow:none;color:inherit;width:14px">${I.dots}</span>More</button>`+drawer(d);
+    else{h+=d.chips.map(c=>`<div class="g chip" style="left:${c[3]}%;top:${c[4]}%"><i class="kn" style="--v:${c[2]}"></i><label>${c[0]}</label><output>${c[1]}</output></div>`).join('');
+      if(d.id=='psy')h+=`<div class="flat" style="left:50%;right:auto;transform:translateX(-50%);bottom:10px;display:flex;gap:8px;align-items:center;overflow:visible">${B('Gate to the kick','acc')}${SE('K-B-B-B')}${STEPS}${SG(['16ths','Triplets'])}</div>`;
+      if(d.id=='kick')h+=`<div class="g pre" style="left:auto;right:72px">${d.x.join('')}</div>`;
+      if(d.id=='voice')h+=`<div class="g chip" style="left:8px;top:46px;padding-left:8px"><label>Key</label><output>C</output><label>Scale</label><output>Chromatic</output></div>`;
+      if(d.tabs||d.id=='voice')h+=`<button class="g more" data-more style="right:${d.id=='psy'?40:8}px"><span class="ib" style="background:none;border:0;box-shadow:none;color:inherit;width:14px">${I.dots}</span>More</button>`+drawer(d)}
+    h+=`<div class="g gfl" title="Gain 0.0 dB"><i class="gf" style="min-height:0"></i></div>`}
+  return h}
+function drawer(d){let s='';const r=(l,v,p)=>`<div class="r"><label>${l}</label><i style="--p:${p*100}%"></i><output>${v}</output></div>`;
+  if(d.id=='psy')for(const t of ['Sound','Envelopes']){s+=`<h5>${t}</h5>`+(d.pages[t].x.length?`<div class="wrapr">${d.pages[t].x.join('')}</div>`:'')+d.pages[t].k.map(k=>r(...k)).join('')}
+  if(d.id=='eq')s=`<h5>Whole EQ</h5>${d.x.map(k=>r(...k)).join('')}<h5>Analyser</h5><div class="wrapr">${d.top}</div>`;
+  if(d.id=='voice')s=`<h5>Singer</h5><div class="wrapr">${d.sels.slice(3).join('')}</div><h5>Choir</h5>${d.nums.map(n=>r(n[0],n[1],n[2]/8)).join('')}`;
+  return `<div class="g drawer">${s}</div>`}
+function flat(d){if(d.id=='eq')return `<b>Band 3</b> Bell · <b>500 Hz</b> · <b>-4.5 dB</b> · Q <b>1.4</b> · Stereo`;
+  return (d.main||[]).map(k=>`${k[0]} <b>${k[1]}</b>`).join(' · ')}
+function page(el,d,name){const p=d.pages[name];if(!el)return;const rail=el.closest('.rail');
+  const x=p.x.join(''),k=p.k.map(q=>K(...q)).join('');
+  el.innerHTML=rail?(p.steps?`<div class="wrapr">${x}</div><div class="row" style="gap:10px">${STEPS}${k}</div>`:`${x?`<div class="wrapr">${x}</div>`:''}<div class="grid">${k}</div>`):`${x}${p.steps?STEPS:''}${k}`}
+const act=dv=>dv.querySelector('.ly:not([hidden])')||dv;
+const MINE={P:['DD2','DD4'],K:['DD2','DD4'],E:['DD3','DD3'],C:['DD4','DD4'],D:['DD4','DD4'],V:['DD2','DD4']};
+const SN={DD2:'Glass rail (open)',DD4:'Rail closed: hover reveal',DD3:'Rail closed: on the picture'};
+function combo(d){const [st,pf]=MINE[d.k];return `<div class="dv${st==='DD4'?' hv':''}" data-combo data-id="${d.id}" data-l="${st}" data-pref="${pf}" style="--w:${d.w}px;--tc:${d.tc};--acc:${d.acc};--lg:${d.lg||'none'}"><div class="sl">${d.pw?`<span class="ib on">${I.pw}</span>`:'<i class="lg"></i>'}<b>${d.name}</b><span class="ib">${I.rm}</span></div><div class="dp"><canvas></canvas>${['DD2','DD4','DD3'].map(l=>`<div class="ly" data-ly="${l}"${l===st?'':' hidden'}>${body(d,l)}</div>`).join('')}</div></div>`}
+function setState(dv,l){dv.dataset.l=l;dv.classList.toggle('hv',l==='DD4');dv.classList.remove('open','show');for(const y of dv.querySelectorAll('.ly'))y.hidden=y.dataset.ly!==l;closeMenu();refresh()}
+function closeMenu(){for(const m of document.querySelectorAll('.menu'))m.remove()}
+function openMenu(dv,eye){closeMenu();const dp=dv.querySelector('.dp'),r=eye.getBoundingClientRect(),q=dp.getBoundingClientRect(),open=dv.dataset.l==='DD2',pf=dv.dataset.pref;const m=document.createElement('div');m.className='g menu';
+  m.innerHTML=`<h6>When the rail is closed, show</h6><button class="mi" data-pref="DD4"><i>${pf==='DD4'?'✓':''}</i>Hover reveal</button><button class="mi" data-pref="DD3"><i>${pf==='DD3'?'✓':''}</i>On the picture</button><hr><button class="mi" data-rail><i></i>${open?'Close the glass rail':'Open the glass rail'}</button>`;
+  dp.append(m);m.style.left=Math.max(8,Math.min(q.width-m.offsetWidth-8,r.right-q.left-m.offsetWidth))+'px'}
+function paint(dv){const d=D.find(q=>q.id===dv.dataset.id),l=dv.dataset.l,cv=dv.querySelector('canvas'),r=cv.getBoundingClientRect(),W=Math.round(r.width),H=Math.round(r.height),dpr=Math.min(2,window.devicePixelRatio||1);if(!W)return;
+  cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  let b=l==='DD4'?24:(l==='DD3'&&d.id==='psy')?32:0;if(l==='DD1'){b=56;const t=act(dv).querySelector('.tray');if(t&&!dv.classList.contains('hidec')&&t.style.display!=='none')b=108}
+  const c=clearOf(d,l,H);P[d.id](g,W,H,{x:0,y:0,w:W-c.s.r,h:H-b})}
+function facts(dv){const d=D.find(q=>q.id===dv.dataset.id),l=dv.dataset.l,dp=dv.querySelector('.dp').getBoundingClientRect(),c=clearOf(d,l,Math.round(dp.height));
+  let n=0,a=0;for(const e of dv.querySelectorAll('.g')){if(e.classList.contains('drawer')||e.classList.contains('hint'))continue;if(l==='DD4'&&!e.classList.contains('pre')&&!e.classList.contains('tr'))continue;const q=e.getBoundingClientRect();if(!q.width)continue;n++;a+=q.width*q.height}
+  const pct=Math.round(a/(dp.width*dp.height)*100),cw=l==='DD3'||l==='DD4'?c.W:c.cw,ch=l==='DD3'||l==='DD4'?c.H:c.ch,gain=Math.round((cw*ch/(d.today[0]*d.today[1])-1)*100);
+  return {pic:`${cw} × ${ch} px clear of the main panel (today ${d.today[0]} × ${d.today[1]}): ${gain>=0?'+':''}${gain}%`,glass:`${n} panel${n==1?'':'s'}, ${pct}% of the display under glass${l==='DD4'?' at rest':''}`}}
+
+
+/* ================= lab ================= */
+const pg=document.getElementById('page'),scr=document.getElementById('scr'),panel=document.getElementById('panel'),engCv=document.getElementById('eng');
+const C={glass:'gl',q:'3',live:'0',all:'mine'};
+scr.innerHTML=D.map(d=>combo(d)).join('');
+const DVS=[...scr.querySelectorAll('.dv')];
+for(const el of scr.querySelectorAll('[data-page]')){const d=D.find(q=>q.id===el.closest('.dv').dataset.id);page(el,d,d.tabs[0])}
+const tiny=document.createElement('canvas');tiny.width=tiny.height=2;{const g=tiny.getContext('2d');g.fillStyle='#121216';g.fillRect(0,0,2,2)}
+let eng=null,needSync=0,T=0,gid=0;const flatRect=new Map(),live=new Set();
+function mkEngine(){if(!window.AudioLabGlass)return;eng=AudioLabGlass.create(engCv,{allowSoftware:true,quality:+C.q,backdropColor:[.07,.07,.086],requestRender:()=>{needSync=performance.now()+300}});
+  eng.setBackdrop(tiny);for(const dv of DVS)eng.setFlat('d:'+dv.dataset.id,{source:dv.querySelector('canvas'),rect:[0,0,1,1]})}
+function touch(ms=320){needSync=performance.now()+ms}
+/* the display: sized once, repainted on change or every frame when live */
+function draw(dv,t){const d=D.find(q=>q.id===dv.dataset.id),l=dv.dataset.l,cv=dv.querySelector('canvas'),W=cv.clientWidth,H=cv.clientHeight,dpr=Math.min(2,devicePixelRatio||1);if(!W)return;
+  if(cv.width!==W*dpr||cv.height!==H*dpr){cv.width=W*dpr;cv.height=H*dpr}const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  const c=clearOf(d,l,H),b=l==='DD4'?24:(l==='DD3'&&d.id==='psy')?32:0;P[d.id](g,W,H,{x:0,y:0,w:W-c.s.r,h:H-b},t);
+  if(t&&d.id!=='eq'&&d.id!=='comp'){const x=(t*90)%(W-c.s.r);g.fillStyle='rgba(62,207,142,.9)';g.fillRect(x,0,1.5,H)}
+  if(eng)eng.markFlatDirty('d:'+d.id)}
+function refresh(){for(const dv of DVS)draw(dv,C.live==='1'?T:0);touch()}
+function sync(){const R=panel.getBoundingClientRect(),seen=new Set();
+  for(const dv of DVS){const r=dv.querySelector('.dp').getBoundingClientRect(),k=[r.left-R.left,r.top-R.top,r.width,r.height].map(v=>Math.round(v*2)/2),ks=k.join(),id='d:'+dv.dataset.id;
+    if(flatRect.get(id)!==ks){flatRect.set(id,ks);eng.setFlat(id,{rect:k})}
+    if(r.right>R.left&&r.left<R.right)live.add(dv);else live.delete(dv);
+    for(const el of dv.querySelectorAll('.g')){const q=el.getBoundingClientRect();if(!q.width)continue;const cs=getComputedStyle(el),id2=el._gid||(el._gid='g'+(gid++));seen.add(id2);
+      eng.addPanel({id:id2,rect:[q.left-R.left,q.top-R.top,q.width,q.height],radius:parseFloat(cs.borderTopLeftRadius)||0,kind:q.height<34||q.width<34?'pill':'window',opacity:+cs.opacity,over:'flats',shadow:0,z:el.classList.contains('menu')?2:1})}}
+  for(const id of sync.ids||[])if(!seen.has(id))eng.removePanel(id);sync.ids=seen}
+/* frame loop + readout */
+const S={fr:[],eng:0,paint:0,n:0,last:0,st:null,t0:0};
+function frame(now){requestAnimationFrame(frame);if(S.last)S.fr.push(now-S.last);S.last=now;T=now/1000;
+  let a=performance.now();if(C.live==='1')for(const dv of live)draw(dv,T);let b=performance.now();S.paint+=b-a;
+  if(eng&&C.glass==='gl'){if(now<needSync)sync();eng.render(now)}S.eng+=performance.now()-b;S.n++;
+  if(now-S.t0>=1000){show(now);}}
+function stat(){return eng?Object.assign({},eng.stats):{flatUploads:0,flatPyramids:0,draws:0}}
+function sample(now){const f=S.fr.slice().sort((x,y)=>x-y),st=stat(),p=S.st||st,dt=(now-S.t0)/1000,r={fps:f.length/dt,med:f[f.length>>1]||0,p95:f[Math.floor(f.length*.95)]||0,eng:S.eng/Math.max(1,S.n),paint:S.paint/Math.max(1,S.n),up:(st.flatUploads-p.flatUploads)/dt,pyr:(st.flatPyramids-p.flatPyramids)/dt,dr:(st.draws-p.draws)/dt,panels:sync.ids?sync.ids.size:0};
+  S.fr=[];S.eng=S.paint=S.n=0;S.st=st;S.t0=now;return r}
+function show(now){const r=sample(now);if(measuring)return;document.getElementById('read').innerHTML=`<span>frames <b>${r.fps.toFixed(0)}</b>/s</span><span>frame median <b>${r.med.toFixed(2)}</b> ms, 95% <b>${r.p95.toFixed(2)}</b> ms</span><span>engine calls <b>${r.eng.toFixed(3)}</b> ms/frame</span><span>display paint <b>${r.paint.toFixed(3)}</b> ms/frame</span><span>per second: display uploads <b>${r.up.toFixed(0)}</b>, blur rebuilds <b>${r.pyr.toFixed(0)}</b>, face redraws <b>${r.dr.toFixed(0)}</b></span><span>glass panels <b>${C.glass==='gl'?r.panels:0}</b></span><span>engine <b>${eng?eng.mode+(eng.reason?' ('+eng.reason+')':''):'missing'}</b></span>`}
+/* settings */
+function set(k,v){C[k]=v;for(const b of document.querySelectorAll(`.segm[data-k=${k}] button`))b.setAttribute('aria-pressed',b.dataset.v===v);
+  if(k==='glass'){pg.dataset.glass=v;if(v==='gl')touch()}
+  if(k==='q'&&eng){eng.setQuality(+v)}
+  if(k==='all'){for(const dv of DVS){const d=D.find(q=>q.id===dv.dataset.id),l=v==='mine'?MINE[d.k][0]:v;if(v==='mine')dv.dataset.pref=MINE[d.k][1];else if(v!=='DD2')dv.dataset.pref=v;setState(dv,l)}}
+  refresh()}
+document.addEventListener('click',e=>{const t=e.target,sb=t.closest('.segm button');if(sb){set(sb.parentElement.dataset.k,sb.dataset.v);return}
+  if(t.id==='measure'){measure();return}
+  if(t.id==='copy'){const s=document.getElementById('out').innerText;try{navigator.clipboard.writeText(s).then(()=>{t.textContent='Copied';setTimeout(()=>t.textContent='Copy table',1400)})}catch(x){}return}
+  const dv=t.closest('.dv');if(!dv){closeMenu();touch();return}const d=D.find(q=>q.id===dv.dataset.id);
+  const mi=t.closest('.menu .mi');if(mi){if(mi.dataset.pref){dv.dataset.pref=mi.dataset.pref;if(dv.dataset.l!=='DD2')setState(dv,mi.dataset.pref);else{closeMenu();touch()}}else setState(dv,dv.dataset.l==='DD2'?dv.dataset.pref:'DD2');return}
+  closeMenu();touch();
+  if(t.closest('[data-eye]')){setState(dv,dv.dataset.l==='DD2'?dv.dataset.pref:'DD2');return}
+  if(t.closest('[data-more]')){dv.classList.toggle('open');return}
+  const tb=t.closest('[data-tab]');if(tb){const root=tb.closest('.ly'),tray=root.querySelector('.tray'),was=tb.classList.contains('on');for(const b of root.querySelectorAll('[data-tab]'))b.classList.remove('on');
+    if(tray&&was&&tray.style.display!=='none'){tray.style.display='none'}else{tb.classList.add('on');if(tray)tray.style.display='';page(root.querySelector('[data-page]'),d,tb.dataset.tab)}refresh();return}
+  if(dv.classList.contains('hv'))dv.classList.toggle('show')});
+document.addEventListener('contextmenu',e=>{const eye=e.target.closest('[data-eye]'),dv=eye&&eye.closest('.dv');if(!dv)return;e.preventDefault();openMenu(dv,eye);touch()});
+scr.addEventListener('scroll',()=>touch(),{passive:true});scr.addEventListener('pointerover',()=>touch(),{passive:true});scr.addEventListener('pointerout',()=>touch(),{passive:true});addEventListener('resize',()=>{refresh()});
+/* measure: every combination, two seconds each */
+let measuring=false;const wait=ms=>new Promise(r=>setTimeout(r,ms)),raf=()=>new Promise(r=>requestAnimationFrame(r));
+async function measure(){if(measuring)return;measuring=true;const keep=Object.assign({},C),rows=[],out=document.getElementById('out'),btn=document.getElementById('measure');
+  const G=[['gl','3','GL engine, high'],['gl','1','GL engine, low'],['css','3','Browser blur'],['solid','3','Solid']],ST=[['DD2','Rail open'],['DD4','Hover reveal'],['DD3','On the picture']];let i=0;
+  for(const [gl,q,gn] of G)for(const lv of ['0','1'])for(const [st,sn] of ST){btn.textContent=`Measuring ${++i} of 24`;set('glass',gl);set('q',q);set('live',lv);set('all',st);await wait(500);const now=await raf();sample(now);await wait(1500);const r=sample(await raf());rows.push([gn,lv==='1'?'live':'still',sn,r])}
+  for(const k in keep)set(k,keep[k]);measuring=false;btn.textContent='Measure again';document.getElementById('copy').hidden=false;
+  out.innerHTML=`<table><tr><th>Glass</th><th>Displays</th><th>State</th><th>frames/s</th><th>frame median ms</th><th>95% ms</th><th>engine ms/frame</th><th>display paint ms/frame</th><th>uploads/s</th><th>blur rebuilds/s</th><th>face redraws/s</th><th>panels</th></tr>${rows.map(([a,b,c,r])=>`<tr><td>${a}</td><td>${b}</td><td>${c}</td><td>${r.fps.toFixed(0)}</td><td>${r.med.toFixed(2)}</td><td>${r.p95.toFixed(2)}</td><td>${r.eng.toFixed(3)}</td><td>${r.paint.toFixed(3)}</td><td>${r.up.toFixed(0)}</td><td>${r.pyr.toFixed(0)}</td><td>${r.dr.toFixed(0)}</td><td>${a.startsWith('GL')?r.panels:0}</td></tr>`).join('')}</table><p style="color:var(--pmut);font-size:12px">${navigator.userAgent} · ${innerWidth}×${innerHeight} at ${devicePixelRatio}x · engine ${eng?eng.mode:'missing'}</p>`;window.LAB_ROWS=rows}
+mkEngine();window.LAB={C,set,get eng(){return eng},DVS,sample,stat};
+const start=()=>{refresh();requestAnimationFrame(frame)};if(document.fonts&&document.fonts.ready)document.fonts.ready.then(start);else start();
+</script></body></html>
