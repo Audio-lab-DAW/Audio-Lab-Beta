@@ -1661,3 +1661,45 @@ Sources: kilohearts.com/products/trance_gate · image-line.com/support/FLHelp/ht
 - v0.191 (v0.190 was taken by Psy Bass, released by another run during this one; this was rebuilt and tested again on top of it).
 - v0.191: commit 46bafa9, artifact version 214, project doc `claude/audiolab-crackle-pulse-synth.md`.
 - **Desktop build**: run 45747286773 for this commit succeeded (1 min 59 s, started 03:11 UTC).
+
+## 26 November 2026, v0.192: arrangement edges, playhead look and Follow (task R, from the user's message)
+
+### What the user asked
+No blurred boxes at the top left (under the project tabs, above Controls and the track headers, left of Intro) or the bottom left (below Master, above Settings and Assistant, and the thin blur above Master): the arrangement should carry on behind them. No line behind the Instruments, Audio and return-arrow buttons. The time over the playhead as 04:12 (two digits each side, colon on the line), hidden where it passes behind the project tabs and the plus button. A Playhead section in Settings with shapes, colours and thicknesses from research. A clearer Follow button with a right-click menu of follow modes.
+
+### What the boxes were
+- Since the glass rebuild the arrangement canvas (`#arr`) is clipped away under the whole header column whenever the header glass is taller than half the arrangement (`gbLayout`), and a half-size copy of it (`#arrBack`, made for the blur under the glass) shows there. Above the first track and below the last one that half-size copy was seen directly: the "blurred boxes".
+- The canvas also darkened everything left of the song start (0.42 black) plus everything left of beat 0 again (0.3 black), from x = 0, so with the song start at the header edge the whole column under the headers was a dark block, and the grid lines started at beat 0.
+- The header glass (`#hglass`) reached from the caption row to the middle of the add buttons, so its right edge and bottom edge ran through "Instrument" and the plus signs; the add buttons were 72% see-through with their own 8 px blur.
+
+### What was built
+- **Header glass** from the top of the first track to the bottom of the last track (`HGR` keeps its place for the canvas code). The caption row (Tracks, Controls), the automation buttons, the add buttons and Master float over the arrangement with only their own small backgrounds.
+- **No darkening under the header column**, and no darker block left of the song start any more: the song start is a thin line like the song end; the grid carries on into negative beats (as 4/4). The darker area after the song end stays, only over the arrangement itself.
+- **`gbClip` / `gbCol` and a new canvas `#arrCol`**: the arrangement is still clipped under the whole header column with a plain rectangle (`inset`), and a canvas as wide as the column shows the two strips above the first track and below the last one, copied from `#arr` after every drawing (also playhead-only frames). Nothing under the header glass changes, so the glass is not recalculated. A first try clipped `#arr` with a polygon around the glass; it cost about 8 ms more per frame while playing in the test browser (polygon clips are masks), so it was replaced. `#arrCol` leaves the page in Lightest with the other glass layers (`pmLayers`), and is mirrored for headers on the right.
+- **Add buttons**: solid background, no blur, the plus signs dropped (the tooltips say "Add ... track"), so "Instrument" fits.
+- **Time over the playhead** (`tmTime`, `tmFlag`, `#phFlag`): `00:00`, `04:12`, `12:05`, `1:02:03`; three grid cells (minutes, colon, seconds) in a fixed 112 px box so the colon sits on the middle of the playhead line (measured 0.04 px off), tabular figures. `tmClip` hides it where it passes behind any project tab, the plus button or the buttons on the right of the tab bar (a partial overlap cuts it with `inset`; the rectangles are cached and refreshed by a ResizeObserver and a MutationObserver on the tabs). The read-out now also moves on playhead-only frames.
+- **Playhead look** (Settings, Zoom and playhead, new "Playhead look"; `UI.ph = {s, c, w, t}`, saved with the app settings): shapes Line, Triangle head, Handle, Glow, Beam, Double line, Comet tail, Scanning bar, Dashed (`PHSH`, `phDraw`, a few rectangles or one gradient each, no shadows or filters); colour Accent (the theme's playhead colour) or eight swatches or any colour; thickness 1 to 6 px; time above the playhead on or off; a live preview (`phPrevDraw`, runs only while the page is open) and small pictures of each shape; "Back to the standard playhead".
+- **Follow button** (`fbDraw`, `FBW`): a pill with a small playhead icon and the word Follow, in the playhead colour when on, dark when off; left-click toggles as before. **Right-click menu** (`followMenu`): Follow on or off; Keep the playhead in the middle; Stay in place (new mode `stay`: the playhead keeps the spot where it was when Play was pressed and the song scrolls past, `FSTAYF`); Look ahead; Page by page; Push at the edge, smoothly; Off; Follow again 3 s after I stop scrolling; Jump back to the playhead; Playhead look in Settings. Settings has a "Stay in place" tile next to Keep centred, Page by page and Don't follow. The old menu label with a dash is gone.
+
+### Research (sources)
+- Cubase and Nuendo: Auto-Scroll button with two settings, Page Scroll (the cursor runs to the right edge, then the view jumps) and Stationary Cursor (the cursor stays in the middle and the ruler scrolls), plus Suspend Auto-Scroll when Editing. archive.steinberg.help/nuendo/v12/en/cubase_nuendo/topics/playback/playback_autoscroll_r.html, forums.steinberg.net (stationary cursor threads).
+- Logic Pro: Catch button per window; with View > Scroll in Play the playhead stays in the middle and the content scrolls; Catch preferences "when Logic starts" and "when moving playhead". help.apple.com/logicpro/mac/10.2.1/en.lproj/lgcp5cbf1727.html. Logic's playhead has a handle in the ruler.
+- Pro Tools: Edit window scrolling options (No Scrolling, After Playback, Page, Continuous); a Playback Cursor locator in the ruler when the cursor is off screen (red when a track is armed, blue otherwise). apps.avid.com/proToolsFirstHelp/version12.3/enu/Pro Tools First Help/rec1.playback.19.11.html, production-expert.com Pro Tools scrolling options.
+- Ableton Live: Follow (paging); forum threads on follow behaviour and its frame rate. forum.ableton.com. REAPER: play cursor colour and look come from the theme; cockos wiki Preferences Appearance (the page did not load), reaper.fm theme docs.
+- Shapes from memory of the DAWs (not looked up page by page): thin line with a point (Ableton, Bitwig, Cubase, REAPER), large triangle head (Studio One, FL Studio), handle (Logic); the creative ones (glow, beam, comet tail, scanning bar, double, dashed) are our own.
+
+### Tests
+- `tools/ui-tests/playhead.py` (new): time read-outs `00:00 04:00 12:05 1:02:03`; colon 0.04 px from the line; read-out hidden at every place behind the tabs (230 to 480 px); the arrangement clip is a rectangle and the strips canvas is on; Follow 58 px wide, a click toggles, a right-click opens the menu with the modes; frame time while playing for every shape (19 to 25 ms in the software-rendered test browser, all within noise of each other); no page errors.
+- Corners looked at (2x screenshots) at the top left and bottom left with the arrangement scrolled to 0, right, left of the song start and down, in Full effects, Optimised, Lighter and Lightest; headers on the right; every shape on the arrangement; Settings page; the menu.
+- Frame time against v0.191 while playing (same test, twice each): centred 23 to 26 ms against 22 to 27 ms, page 20 to 21 ms against 21 to 22 ms.
+- Unchanged: Fractals demo solo Kick -9.75669 dB and Bass -25.48699 dB (beats 64 to 96).
+
+### Not verified
+- A real Mac GPU (the test browser draws in software); the look in other DAW themes than the standard one; touch.
+- Right after a vertical scroll the strips are copied in the same frame; while resizing the window they may lag one frame.
+
+### Left
+- An option to follow while stopped (when the playhead jumps); a playhead locator arrow in the ruler when the playhead is off screen (Pro Tools style; today there is the small jump button).
+
+### Release
+- v0.192, built on v0.191 (Fractal, task P), which another session released while this one was testing; one merge of two additions in index.html.
