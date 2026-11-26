@@ -2361,7 +2361,7 @@ Ran after task E (v0.201) was finished. Icon files from the branch `assets/app-i
 - A ducker for groups that contain the trigger (refused as a loop); a modulation choice when dragging a cable; the per-band ducking of Trackspacer.
 
 ### Release
-- v0.205 on top of v0.204 (task AC) and v0.203 (task V), released by other sessions while this one worked.
+- v0.205: commit e35372f on main, on top of v0.204 (task AC) and v0.203 (task V), released by other sessions while this one worked. Desktop build run 45773787322 succeeded. Artifact 1b07d888 updated to version 228 (it was at v0.204). Project doc `claude/audiolab-fixes-run-AB.md`.
 ## 26 November 2026, v0.206: AI voices for Voice (task Z2, from a later message)
 
 > "We need AI voices to be a follow-up task because that's the most important thing of this device: that you can change your voice into any other voice for singing or talking. And you should be able to use an example clip, then use that as a voice, and then you can sing, and it will use the example clip to morph your voice into that. With AI, do research on the best AI voices and neural networks that are open source, and let's implement the best one or make our own better one. You can choose which is the best."
