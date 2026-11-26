@@ -1,7 +1,7 @@
 {
-  "version": "0.191",
-  "sha256": "c5b12fa704a4387d8755bb3cd69d268812990cea0f5a984c5c651e018e610bef",
-  "size": 2825137,
+  "version": "0.192",
+  "sha256": "3cada23a4a0c9fd652daaaffcf8d1f8f8a5147f1f65fc421a691f1017f37fbad",
+  "size": 2837041,
   "minShell": "0.147.0",
-  "notes": "New instrument Psy Bass, made for the psytrance rolling bass: every note of the roll is exactly the same, each note ends cleanly before the next kick, and a roll pattern can play the 16ths in time with the song from one long note. It comes with 18 presets for full-on, progressive, dark and forest, hi-tech and Goa."
+  "notes": "New device Fractal, as an instrument and as an effect: a row of short pulses with one level dial per step chops a sound, from a sidechain pump or trance gate in time with the song up to a rattle, growl, buzz or crackle at audio speed, in tune with the key if you want. It has its own phaser and 3D spread, one click adds Phaser or Vector Delay after it, and it comes with 20 presets."
 }
