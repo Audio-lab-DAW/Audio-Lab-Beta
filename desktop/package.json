@@ -151,8 +151,7 @@
     },
     "afterPack": "scripts/afterPack.js",
     "asarUnpack": [
-      "node_modules/onnxruntime-node/bin/**",
-      "voice-ai-worker.js"
+      "node_modules/onnxruntime-node/bin/**"
     ]
   }
 }
