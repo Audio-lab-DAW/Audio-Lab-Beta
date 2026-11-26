@@ -2711,4 +2711,4 @@ Research: Ableton Live duplicates with Ctrl/Cmd+D and Ctrl/Option+drag, Logic wi
 - With the strip gone, the empty part of the tab row (after the last tab when there are few tracks) still catches clicks as before; it is 25 px high.
 
 ### Release
-- v0.213 (v0.212 was taken by task AJ while this ran; merged, both sides kept). Commit, desktop build and artifact: see the release note below.
+- v0.213: commit c4085e4 on main (v0.212 was taken by task AJ while this ran; merged, both sides kept). Desktop build run 45792913920 dispatched through the GitHub connector (the gh dispatch was refused by the proxy). Artifact 1b07d888 updated to version 236 (it was at v0.212). Project doc `claude/audiolab-fixes-run-AF.md`. Note: GitHub reports the repository moved to Audio-lab-DAW/Audio-Lab-Pro-Alpha (pushes to the old address still work).
