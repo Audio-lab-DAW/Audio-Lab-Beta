@@ -1,7 +1,7 @@
 {
-  "version": "0.194",
-  "sha256": "ca507a138fdb1214a25ccaac85aea7eca90c04f588dfcb86ef6d5db3d0b4417f",
-  "size": 2878499,
+  "version": "0.195",
+  "sha256": "2724a72b12e976166a254751a7c34438082434f066ea824054961e1c3aa28aa7",
+  "size": 2903099,
   "minShell": "0.147.0",
-  "notes": "The piano roll now sits above the devices panel at the same height, nothing is cut off, and it grows down when you hide the devices; drag the bar between them to change the sizes. Its window has a head like the mixer's, no border, smaller buttons when it is small, and the track tabs above the devices are now glass."
+  "notes": "AudioLab now opens faster: the loading screen shows at once, follows the real loading and is gone as soon as everything is ready (no more Click to skip). The visualizer can dock at the top and is sharp on high resolution screens, right-click the map or the visualizer to turn either on or off, the Glass and light preview plays a ready-made loop for each setting, and zooming in and out of the song overview keeps the clips where they are, now with their names."
 }
