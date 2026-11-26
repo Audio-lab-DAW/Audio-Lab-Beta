@@ -1779,3 +1779,4 @@ No blurred boxes at the top left (under the project tabs, above Controls and the
 
 ### Left
 - Header pan controls could get the same marker. The cable lane (task S2) was not touched.
+- Artifact version 217 (1b07d888). Desktop build run 45753812908 dispatched for commit e649c00. Project doc `claude/audiolab-ui-run-S1.md`.
