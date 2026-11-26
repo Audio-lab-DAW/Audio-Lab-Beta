@@ -2597,3 +2597,75 @@ Desktop app
 - Clicking and holding Hear it to listen only while held (Pro-C does this); a preview curve in the devices panel's Ducker.
 ### Release
 - v0.210: commit 7abff48 on main. Desktop build run 45781476825 dispatched through the GitHub connector (the gh dispatch was refused by the proxy: numeric-ID repository path); it was running when this was written. Artifact 1b07d888 updated to version 233 (it was at v0.209). Project doc `claude/audiolab-fixes-run-AG.md`.
+
+## 26 November 2026, v0.211: devices panel fixes (task AA, from a later message)
+> "Every time you change a preset in the devices, it resets the scrolling [...] it scrolls all the way to the left. [...] when you change presets, especially with instruments, it's not that instant and there are some bugs [...] you still have to fix the weirdness when you change from one preset to the other. [...] whenever you change a parameter on the big black box, it plays like a sample sound or a demo sound, even when the song is playing. We don't want that at all. [...] the devices button on the top right to collapse it and make it bigger is a little bit too low. It should look like it's part of it, not intruding into it [...] more professional by design rules. You can do some research online".
+
+### What changed for the user
+- **The panel stays where you left it when a preset changes.** The row of track tabs no longer jumps back (it was drawn again on every change and centred on the shown track, which looked like "scrolled to the left" when you had scrolled the tabs elsewhere). It now only moves when you pick another track whose tab is out of view, and then just far enough to show it. In the Devices window, where devices wrap into rows, a preset change no longer moves the view up and to the left.
+- **No sounds from clicking devices.** Clicking, dragging, double-clicking or choosing a menu entry on any device (picture, knobs, sliders, wave and mode buttons, drum pads, preset menus and arrows, the big Venom and Grid windows, pinned windows) no longer plays a note, playing or stopped. The actions still happen (a pad is selected, a wave is chosen). The explicit play buttons stay: Play the kick, Play this pad, and the ▶ of the instruments that have one. A preset change no longer plays a test note either. The Change browser keeps its short test sound while stopped (it is a browser for hearing instruments, not a control on the device).
+- **Cleaner preset switches.** On the synths with the voice engine (Saw, Square, Pad, Strings, Keys, Bass, Sub bass, Reese, Acid, Plant, Wavetable, Sampler in grain mode) a note that carries on after a switch no longer starts with all its unison oscillators in phase, which gave a loud zap (+10 to +13 dB for 50 to 100 ms on supersaw sounds); the oscillators continue where they would be. A key held on the keyboard while stopped now carries on at its age (it used to start its attack again: Pad and Strings dipped by 18 to 27 dB). On Emit, Vector Grain, Vector FM, Orbit, Sub, Bounce, Psy Bass and Fractal a held key was lost for good at a preset switch (silent afterwards); it now carries on with the new preset.
+- **The devices panel has a real header.** The track tabs, Master and the Devices button now sit in one header strip that belongs to the panel: the same surface as the panel, a hairline on top, a line under it that the shown track's tab breaks. The Devices button is an ordinary header button centred in the strip with a divider before it, so it no longer hangs down into the devices. Folded away, the strip stays as a thin header bar on the edge with the tabs (a click on a tab opens the panel) and the button pointing up, tinted blue.
+
+### Research (sources read)
+- Apple Human Interface Guidelines, Disclosure controls: a disclosure button points down when the content is hidden and up when it is shown; "Place a disclosure button near the content that it shows and hides"; "Use no more than one disclosure button in a single view". https://developer.apple.com/design/human-interface-guidelines/disclosure-controls
+- Apple Human Interface Guidelines, Panels: panels are less prominent than the main window, have a title bar with a short noun as the title; nothing about docked bottom panels. https://developer.apple.com/design/human-interface-guidelines/panels
+- Bitwig Studio user guide, The Window Footer and Anatomy of the window: panel toggles are icon buttons in a strip that belongs to the window (lit when the panel is shown), grouped on the side where the panel opens; header, body and footer are separate slices. https://www.bitwig.com/userguide/latest/the_window_footer , https://www.bitwig.com/userguide/latest/anatomy_of_the_bitwig_studio_window
+- Ableton help, Navigation and View Options in Live 12: the Mixer view control sits at the bottom right corner of the window and folds the mixer in or out; the same from the View menu and a key. https://help.ableton.com/hc/en-us/articles/12243771208092
+- Figma, Our approach to designing UI3: floating panels were tried and reversed, "panels are fixed, but still resizable", because floating panels cramped the canvas and slowed people down. https://www.figma.com/blog/our-approach-to-designing-ui3/
+- Decisions taken from these: the toggle is a button inside the panel's own header (Apple: near the content it hides; Bitwig: in a strip that is part of the frame), not a tab glued to the edge; one toggle per panel; the chevron points down while shown (the panel folds down) and up while folded away; the header is a fixed part of the panel, not floating pieces over the arrangement (Figma's lesson); when folded away the header stays as a thin bar so the control never jumps. Studio One and Logic pages were not read; nothing here rests on them.
+
+### Part 1: scrolling, measured (`tools/ui-tests/preset_scroll.py`, new; Fractals demo, 1280 x 900)
+Before (v0.202): the device row in the panel already kept its place for every way of changing a preset (menu, arrow key on the menu, arrows of an effect and of the Kick designer, an effect's menu, Change with clicks, keys, Escape and Enter, stopped and playing). What moved:
+    track tabs scrolled to the start, preset menu changed:   tabs 0 > 544 (jump to the shown track's tab)
+    track tabs scrolled to the end, preset menu changed:     tabs 1200 > 544
+    Devices window scrolled down, any preset changed:         down 619 > 242 (and 46 > 0 sideways)
+After: every case keeps both positions (16 checks stopped and playing, 0 failures).
+How: `renderFx` keeps the tab row's position (`tabsKeep`), `fxswWire` no longer centres the shown tab on every redraw; an outermost `renderFx` wrapper, installed after all the others, puts the device row back in both directions at once and once more in the next frame before it is painted.
+
+### Part 2: preset switch on every instrument, measured (`tools/engine-tests/preset_switch2.py`, new)
+Method: two tracks play the same notes; A starts on preset k0 and is switched through its preset menu, B plays the new preset all along; both recorded on the audio thread with a marker at the click. "new sound": ms from the click until A's band levels stay within what A and B differ by 0.6 to 1 s later (+2 dB) for 100 ms. "over/dip": the loudest and quietest 10 ms of A against B 30 to 300 ms after the click. Cases: one long note playing, sixteenth notes playing, a key held while stopped. Full tables before and after for all 32 instruments are in `docs/preset-switch-AA.md`; the instruments that changed:
+
+    case / instrument            new sound before > after   over / dip before          > after
+    long note, Plant (supersaw)  207 > 37 ms                +13.1 / -7.2  > +1.3 / -0.9
+    long note, Wavetable         307 > 47 ms                +10.8 / -11.0 > +3.5 / -5.7
+    long note, Pad               182 > 37 ms                +5.4 / -89.7  > +1.2 / -1.1
+    long note, Reese             247 > 12 ms                +5.1 / -96.6  > +3.7 / -4.2
+    long note, Saw lead           27 > 32 ms                +4.6 / -5.9   > +0.9 / -1.0
+    key held, Saw lead           297 > 22 ms                +12.5 / -1.7  > 0.0 / 0.0
+    key held, Pad                227 > 27 ms                -0.6 / -19.6  > 0.0 / 0.0
+    key held, Strings            577 > 27 ms                +3.2 / -17.8  > 0.0 / 0.0
+    key held, Sub bass           717 > 27 ms                +4.3 / -0.2   > 0.0 / 0.0
+    key held, Emit / Vector FM / Orbit / Sub (sbass) / Fractal: the held key silent after the switch (-92 to -108 dB, measured with the test note removed) > it carries on with the new preset
+- "key held" before: the extra "over" was the test note of the preset change playing on top of the held key; it is gone.
+- Unchanged and fine: drums, Kick designer, Snare, Clap, Hat, Tom, Perc, Growl, Grid, Sampler, SFX switch in 12 to 37 ms with no over or dip worth hearing.
+- Still a restart (not fixed): Venom, Vector FM, Emit, Vector Grain, Orbit and Fractal start a picked-up note with their own attack (Vector FM's bell is +8 to +12 dB louder than the held note for about 0.6 s; Venom dips 5 to 6 dB for 50 ms); Bounce is a physics simulation and never matches a reference. Sixteenth notes with long-release sounds (Pad, Strings, Plant) lose the release tails of the notes before the switch, by design of the clean switch.
+- Time in the change event (picture drawn after it): 11 to 40 ms for all instruments, stopped and playing; the 367 ms seen once for Venom in the before run (the first use of a wavetable) did not come back.
+
+### Part 3: no preview sounds (`tools/ui-tests/quiet_devices.py`, new)
+- Before: on v0.202 a click or drag on the picture of Plant, Wavetable, Venom (and its big window), drum pads, the Kick designer picture, knobs of the Drum kit, wave menus and every preset menu or arrow played a note (-1 to -22 dBFS on the output tap).
+- How: `DQ`, a capture listener on the window for pointer, click, double-click, menu and wheel events inside a device (panel, pinned windows, Devices window, Venom and Grid windows); it is on from the event until the end of the task it runs in (a heavy rebuild can take longer than a time window) and 150 ms after; `preview`, `padHear` and the held preview `prevSet` do nothing while it is on. Events on an explicit play button turn it off. `instApply` and `kickApply` no longer play a test note. The drum pad tooltip says "click to select and edit it (the play button hears it)".
+- Test: every instrument (32) and every effect (41), stopped and while the transport runs past the end of the song: the picture clicked at five points, dragged and double-clicked, every knob and slider dragged, every own button clicked (not remove, Change, pin, show parameters, on/off, play), every menu set to its next entry; the whole output tapped on the audio thread, anything above -90 dBFS counts. Result: all 32 instruments and all 41 effects silent, stopped and playing (146 device runs). The first runs were split in chunks because one long browser session ran out of breath; the test now unpins windows and closes the Change browser between devices.
+- Found by this test and fixed: a click on the small buttons of Spectrum, Loudness, Shaper, Arp, Pitch correct, Space reverb, Tape stop and Meter threw "NACT[f.type] is not a function" (their actions are a list by name, the click handler only knew single functions), so those buttons never worked. They do now.
+- Explicit play buttons still sound (Plant -11 dB, Venom -7 dB, Orbit -5 dB and the others).
+
+### Part 4: the panel header (`tools/ui-tests/devices_header.py`, new)
+- CSS block "v0.211: the devices panel's header (task AA)" before `.dacv`: `#fx.dsh>#fxTitle` spans the panel (left 0, right 0) with the panel's surface (glass where the panel is glass, solid in Light mode, Lighter and Lightest), hairline on top, a line under it; `.fxbtns` is centred in the strip with a divider; `#fxHide.dshb` is a 19 px header button with rounded corners (the old tab shape hung 1 px into the devices and drew a 3 px patch over the panel's edge); folded away, the strip stays with the tabs.
+- Test: normal and Light mode, open and folded away: the button inside the strip (strip 566 to 591, button 569 to 588; folded 827 to 852 and 830 to 849), the strip spans the panel, tooltips on every control in it, the button folds and opens the panel, a click on a tab of the folded panel opens it, no page errors. Screenshots looked at (2x): open and folded, left and right ends, normal and Light mode; also with the piano roll docked above and with the devices in their own window.
+- `tools/ui-tests/sideheaders.py`: the check of the Devices button's height now allows the new 19 px button (it asked for 24 px, the old tab).
+
+### Other tests
+- `sideheaders.py` (all devices, three panel heights, pin windows, Change, remove): 0 failures. `preset_scroll.py`: 0 failures. `devices_header.py`: 0 failures.
+- Demo unchanged: Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96, solo). No page errors on load.
+
+### Not verified
+- The user's Mac with a real mouse and trackpad; a native preset menu on macOS (the change event is the same).
+- The quiet test clicks every visible control once; controls inside sub-tabs that are not open were not all reached; on Orbit, Vector FM, Bounce and Psy Bass a click changed the device's layout and the test went on with the next device.
+
+### Code (for the next person)
+- New JS blocks before `askChoice`: "the track tabs keep their place", "the device row keeps its place too", "held keys on every engine carry on after a preset switch" (`chsVo`, an outermost `voiceOn` wrapper so the engines that answer a key themselves are listed in `CHSK`), "quiet devices" (`DQ`, `dqOn`, `dqHit`, `DQOK`).
+- Direct edits: `renderFx` (keeps the tab row's position), `fxswWire` (no centring), `instApply` and `kickApply` (no test note), the al-poly worklet's picked-up note (oscillator, sub and FM phases at their age), `chsKeys` (age for al-poly and al-grain, plays through `chsVo`), the drum pad tooltip.
+
+### Release
+- v0.211, built on v0.203 to v0.210 (tasks V, AC, AB, Z2, Y, AE, AD, AG), which other sessions released while this one worked; merged at the insertion points (both sides kept).
+

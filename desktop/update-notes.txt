@@ -1,1 +1,1 @@
-Turning a device on or off in the mixer no longer makes the stereo field, meters and loudness flicker. The sidechain window is laid out more clearly, with a picture of the duck, small icons, and Remove at the bottom with an Undo.
+Changing a preset no longer moves the devices panel, and clicking on a device never plays a sound. Preset switches on the synths are cleaner, held keys keep sounding, and the panel has a proper header with the Devices button inside it.

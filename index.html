@@ -1828,6 +1828,32 @@ body.lite .ahfT:hover{background:#1a1d25}
 .agft .agrm{background:transparent!important;border-color:transparent!important;color:#e58c8c;margin-right:auto}.agft .agrm:hover{background:rgba(255,90,90,.14)!important;border-color:rgba(255,107,107,.4)!important;color:#ffb3b3}
 #agUndo{position:fixed;z-index:9790;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;border-radius:10px;background:rgba(22,23,30,.97);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5);color:#dfe2ea;font:12px Inter,system-ui,sans-serif;max-width:420px}
 #agUndo>svg{width:14px;height:14px;fill:none;stroke:#e58c8c;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}#agUndo button{min-height:24px;padding:0 9px;display:inline-flex;align-items:center;gap:4px;border-radius:7px;font-size:11px}#agUndo button svg{width:13px;height:13px}#agUndo .agux{width:24px;padding:0;justify-content:center;background:transparent;border-color:transparent;color:#9aa0ad}
+/* ===== v0.211: the devices panel's header (task AA) =====
+ The tabs, Master and the Devices button now sit in one header strip that belongs to the panel: the same surface as the panel (glass where the
+ panel is glass, solid in Light mode), a hairline on top, a line under it that the chosen tab breaks. The Devices button is an ordinary header
+ button, centred in the strip with a divider before it, so it no longer hangs into the devices below. Folded away, the strip stays as a thin
+ header bar with the tabs (a click on a tab opens the panel again) and the button pointing up. */
+#fx.dsh>#fxTitle{left:0!important;right:0!important;top:-25px;height:25px;padding:0 calc(var(--dshw,96px) + 22px) 0 8px!important;background:rgba(var(--gtr2),.9)!important;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.4),0 -8px 18px rgba(0,0,0,.16)!important;border-radius:10px 10px 0 0}
+body.fx-top #fx.dsh>#fxTitle{top:auto;bottom:-25px;border-radius:0 0 10px 10px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.06),inset 0 1px 0 rgba(0,0,0,.4),0 8px 18px rgba(0,0,0,.16)!important}
+body.lite #fx.dsh>#fxTitle,body.fxmin #fx.dsh>#fxTitle,body.fxzero #fx.dsh>#fxTitle{background:rgb(var(--gtr2))!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.4)!important}
+#fx.dsh .fxbtns{top:-25px!important;right:0!important;height:25px;padding:0 6px 0 9px;display:flex;align-items:center!important;gap:0;z-index:9}
+body.fx-top #fx.dsh .fxbtns{top:auto!important;bottom:-25px}
+#fx.dsh .fxbtns::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;background:rgba(255,255,255,.1)}
+#fx .fxbtns #fxHide.dshb{height:19px!important;min-height:19px!important;margin:0!important;padding:0 7px 0 8px!important;gap:5px;border-radius:6px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035)!important;box-shadow:none;color:#cfd4de;font:600 11px Inter,system-ui,sans-serif}
+#fx .fxbtns #fxHide.dshb::after{display:none}
+#fx .fxbtns #fxHide.dshb svg{width:13px;height:13px}#fx .fxbtns #fxHide.dshb .dshp{width:14px;height:14px;opacity:.7}
+#fx .fxbtns #fxHide.dshb:hover{color:#fff;background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.16)}
+#fx .fxbtns #fxHide.dshb:focus-visible{outline:2px solid rgba(var(--bl3,76,141,255),.8);outline-offset:1px}
+#fx .fxbtns #fxHide.dshb.dsoff{color:#d6e4ff;border-color:rgba(var(--bl3,76,141,255),.45);background:rgba(var(--bl3,76,141,255),.16)!important}
+#fx .fxbtns #fxHide.dshb.dsoff:hover{background:rgba(var(--bl3,76,141,255),.26)!important}
+body.fx-top #fx .fxbtns #fxHide.dshb{border:1px solid rgba(255,255,255,.09);border-radius:6px;margin:0!important;box-shadow:none}
+/* the tabs sit on the strip's bottom line; the chosen one is the panel's own surface and breaks the line */
+#fx.dsh>#fxTitle .fxsw.fxall button{height:20px}#fx.dsh>#fxTitle .fxsw.fxall button.on{height:22px}
+#fx.dsh>#fxTitle .fxmst{height:20px!important;margin-right:0!important}#fx.dsh>#fxTitle .fxmst.on{height:22px!important}
+/* folded away: the strip stays, as a header bar on the edge */
+#fx.dsh.collapsed>#fxTitle{display:flex!important;border-radius:10px 10px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 -8px 18px rgba(0,0,0,.16)!important}
+#fx.dsh.collapsed>#fxTitle .fxsw.fxall button.on{height:20px;border-bottom:0!important}
+body.fx-top #fx.dsh.collapsed>#fxTitle{border-radius:0 0 10px 10px}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5326,7 +5352,7 @@ function renderFx(){if(IBCTX){ibLiveRender();return}
   for(const k of[...CT.keys()])if(k.startsWith('fx:'))CT.delete(k);
   const t=curT();
   if(!t){fxin.innerHTML='<p class="cap2">Add a track to start.</p>';$('#fxTitle').innerHTML='Devices';VIZ=[];return}
-  const _isM=t.kind==='master',_tt=_isM?(S.tracks.find(x=>x.id===selMaster.prev)||S.tracks[0]):t;$('#fxTitle').innerHTML=`<span class="fxtn">Devices</span><span class="fxsw fxall" role="tablist" aria-label="Which devices are shown"><span class="fxsc">${S.tracks.filter(x=>!HIDT.has(x)).map(x=>`<button role="tab" class="${!_isM&&x===_tt?'on':''}" data-seltrk="${x.id}" style="--c:${x.color}" title="${esc(x.name)}: show its devices"><i></i>${esc(x.name)}</button>`).join('')}</span></span><button role="tab" class="fxmst${_isM?' on':''}"${_isM?'':' data-mst'} title="${_isM?'You are looking at the master chain':'Show the master chain: limiter, meters and other devices on the final mix'}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>Master</button><span class="fxhint" title="Drag this bar upward to turn the devices into a floating window"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="1.3"/><circle cx="15" cy="7" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="17" r="1.3"/><circle cx="15" cy="17" r="1.3"/></svg><svg class="up" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M7 11l5-5 5 5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 9h18M6 7h0M8.5 7h0"/></svg></span>`;
+  const _isM=t.kind==='master',_tt=_isM?(S.tracks.find(x=>x.id===selMaster.prev)||S.tracks[0]):t;const _tsc=document.querySelector('#fxTitle .fxsc'),_tsl=_tsc?_tsc.scrollLeft:0;$('#fxTitle').innerHTML=`<span class="fxtn">Devices</span><span class="fxsw fxall" role="tablist" aria-label="Which devices are shown"><span class="fxsc">${S.tracks.filter(x=>!HIDT.has(x)).map(x=>`<button role="tab" class="${!_isM&&x===_tt?'on':''}" data-seltrk="${x.id}" style="--c:${x.color}" title="${esc(x.name)}: show its devices"><i></i>${esc(x.name)}</button>`).join('')}</span></span><button role="tab" class="fxmst${_isM?' on':''}"${_isM?'':' data-mst'} title="${_isM?'You are looking at the master chain':'Show the master chain: limiter, meters and other devices on the final mix'}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>Master</button><span class="fxhint" title="Drag this bar upward to turn the devices into a floating window"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="1.3"/><circle cx="15" cy="7" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="17" r="1.3"/><circle cx="15" cy="17" r="1.3"/></svg><svg class="up" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M7 11l5-5 5 5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 9h18M6 7h0M8.5 7h0"/></svg></span>`;tabsKeep(_tsl);
   const kn=(id,label,spec,get,set)=>ctl('kn','fx:'+id,label,spec,get,set);
   const tb=(k,lab,tip,on)=>`<button class="tdbtn${on?' on':''}" data-tda="${k}" title="${tip}">${lab}</button>`;
   let h=`<div class="dev tdev tdev2" data-d="track" data-id="${t.id}" style="--c:${t.color}"><div class="devh"><span class="tdn"><i class="tdot"></i>${esc(t.name)}</span><div class="dgain tdgn" title="Gain: trims the level going into the channel (−24 to +24 dB). Double-click for 0 dB.">${ctl('hb','fx:trim','Gain',specD([-24,24,0,'dB']),()=>t.trim||0,v=>{t.trim=v;changed(false)})}</div></div><div class="tdb2 tdb3">
@@ -5552,7 +5578,7 @@ document.addEventListener('drop',e=>{if(!dg)return;const z=e.target.closest&&e.t
 document.addEventListener('dragend',()=>{dg=null;for(const x of document.querySelectorAll('.slot.cpsrc'))x.classList.remove('cpsrc');for(const x of document.querySelectorAll('.mxi.dropto'))x.classList.remove('dropto')})}
 /* ---------- visual instrument devices ---------- */
 const IPRE={acid:[ACPRE,acidParams],sfx:[SFPRE,k=>({kind:SFPRE[k].kind})],plant:[PLPRE,plantParams],perc:[PCPRE,percParams],sampler:[SMPRE,sampParams],grid:[Object.fromEntries(Object.entries(GRPRE).map(([k,n])=>[k,{n}])),k=>({g:gridPatch(k)})]};
-function instApply(I,k){const P=IPRE[I.preset];pushUndo();Object.assign(I,JSON.parse(JSON.stringify(P[1](k))),{ipk:k});changed(false);renderFx();const t=curT();if(t)preview(t,60,.85)}
+function instApply(I,k){const P=IPRE[I.preset];pushUndo();Object.assign(I,JSON.parse(JSON.stringify(P[1](k))),{ipk:k});changed(false);renderFx()/* v0.211: no test note on a preset change (task AA) */}
 const IHIDE=new Set(['kick','sfx','drums']);
 function instShell(t,I,name,body,cls){const P=IPRE[I.preset][0],hk=IHIDE.has(I.preset);return`<div class="dev idev ${cls||''}${hk?' hidek':''}${(I.kOpen!==false)?' kopen':''}" data-d="inst" style="--c:${t.color}"><div class="devh">${logoSvg(I.preset,20)}<span>${name}</span>${hk?`<button class="kbtn${(I.kOpen!==false)?' on':''}" data-ikt title="${(I.kOpen!==false)?'Hide':'Show'} all parameters as sliders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>`:''}<div class="kpre"><button data-ip="prev" aria-label="Previous preset">‹</button><select data-s="ipre" aria-label="Preset">${I.preset==='grid'?GCATS.map(c=>`<optgroup label="${c}">${Object.entries(P).filter(([k])=>(GPX[k]&&GPX[k][1])===c).map(([k,p])=>`<option value="${k}"${k===I.ipk?' selected':''}>${p.n}</option>`).join('')}</optgroup>`).join(''):Object.entries(P).map(([k,p])=>`<option value="${k}"${k===I.ipk?' selected':''}>${p.n}</option>`).join('')}</select><button data-ip="next" aria-label="Next preset">›</button></div><button data-ip="play" aria-label="Play">▶</button><button data-s="browse">Change…</button></div><div class="devb">${body}</div></div>`}
 const okn=(kn,id,lab,d,I,k,col)=>`<div class="okn" style="--kc:${col||'#ff9a3c'}">${kn(id,lab,k==='uni'?specSnap(d,1):k==='tune'?specSnap(d,1):specD(d),()=>I[k]??d[2],v=>{I[k]=v;changed(false)})}</div>`;
@@ -5997,7 +6023,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.210',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.211',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6153,7 +6179,7 @@ function kickDev(t,I,kn,sub){
 <div class="pars">${kns}</div></div></div>`}
 function kitDev(t,I,kn){ensurePads(I);const sel=I.psel,pd=I.pads[sel],col=DTYPE[pd.type][1];let pads='';
   for(let r=3;r>=0;r--)for(let c=0;c<4;c++){const i=r*4+c,p=I.pads[i];
-    pads+=`<button class="pad${i===sel?' on':''}${p.mute?' mu':''}${p.type==='off'?' emp':''}" data-pad="${i}" style="--pc:${DTYPE[p.type][1]}" title="${esc(p.name)} · ${nname(36+i)} · click to play and edit"><i class="pm" data-pm="${i}" title="Mute this pad">M</i><b>${esc(p.name)}</b><small>${nname(36+i)}</small></button>`}
+    pads+=`<button class="pad${i===sel?' on':''}${p.mute?' mu':''}${p.type==='off'?' emp':''}" data-pad="${i}" style="--pc:${DTYPE[p.type][1]}" title="${esc(p.name)} · ${nname(36+i)} · click to select and edit it (the play button hears it)"><i class="pm" data-pm="${i}" title="Mute this pad">M</i><b>${esc(p.name)}</b><small>${nname(36+i)}</small></button>`}
   const kns=Object.keys(DPAR).map(k=>kn('d:'+sel+':'+k,DPL[k],k==='tune'?specSnap(DPAR[k],1):specD(DPAR[k]),()=>pd[k],v=>{pd[k]=v;changed(false)})).join('');
   return`<div class="dev kit" data-d="inst" style="--c:${t.color}"><div class="devh"><span>Drum kit</span>${I.pads.some(p=>p.type==='kd')?'':'<button data-dk="stack" title="Put a Kick designer on the C3 kick pad">＋ Kick designer</button>'}<button data-dk="reset" title="Put the default sounds back on all 16 pads">Default kit</button><button data-s="browse">Change…</button></div>
 <div class="devb"><div class="pads">${pads}</div><div class="padp" style="--pc:${col}"><div class="padh"><b class="pnm" title="Double-click to rename">${esc(pd.name)}</b><small>${nname(36+sel)}</small><button data-dk="play" title="Play this pad">▶</button></div>
@@ -6161,7 +6187,7 @@ function kitDev(t,I,kn){ensurePads(I);const sel=I.psel,pd=I.pads[sel],col=DTYPE[
 <div class="pars">${kns}</div></div></div></div>`}
 function curKick(){const t=curT();if(!t||!t.inst)return null;const I=t.inst;if(I.preset==='kick')return I;if(I.preset==='drums'&&I.pads){const pd=I.pads[I.psel];if(pd&&pd.type==='kd'){if(!pd.k)pd.k=kickParams('psyzap');return pd.k}}return null}
 function kHear(){const t=curT();if(!t||!t.inst)return;if(t.inst.preset==='drums')padHear(t,t.inst.psel);else preview(t,36,.9)}
-function kickApply(I,k){pushUndo();Object.assign(I,kickParams(k));changed(false);renderFx();kHear()}
+function kickApply(I,k){pushUndo();Object.assign(I,kickParams(k));changed(false);renderFx()}
 function padHear(t,i){ensureCtx();if(ctx.state!=='running')ctx.resume();if(!NODES.get(t.id))syncGraph();const N=NODES.get(t.id);if(N)padPlay(ctx,t.inst,N.in,i,ctx.currentTime,.9*t.inst.gain)}
 fxin.addEventListener('change',e=>{const el=e.target,t=curT();if(!t||!t.inst)return;const s=el.dataset.s,I=/^k/.test(s||'')?curKick():t.inst;if(!I)return;
   if(s==='kpre')kickApply(I,el.value);
@@ -8892,7 +8918,7 @@ const MXVI={wave:{l:'Waveform',d:'the sound itself, scrolling by',ic:MXVS('<path
 {const _rmx=renderMixer;renderMixer=function(){const r=_rmx.apply(this,arguments);try{mabMount()}catch(e){}return r}}
 /* the device bar lists every channel in its colour; it scrolls sideways (trackpad, wheel, or grab and slide), with a soft fade on the side where more channels are hidden */
 function fxswWire(){const sc=document.querySelector('#fxTitle .fxsc');if(!sc||sc._w)return;sc._w=1;const box=sc.parentElement,upd=()=>{box.classList.toggle('fl',sc.scrollLeft>2);box.classList.toggle('fr',sc.scrollLeft<sc.scrollWidth-sc.clientWidth-2)};
-  const on=sc.querySelector('.on');if(on){const r=on.offsetLeft-sc.clientWidth/2+on.offsetWidth/2;sc.scrollLeft=Math.max(0,r)}upd();sc.addEventListener('scroll',upd,{passive:true});sc.addEventListener('click',e=>e.stopPropagation());
+  /* v0.211: no centring of the shown track's tab on every redraw; tabsKeep keeps the place and shows the tab only when another track is chosen */upd();sc.addEventListener('scroll',upd,{passive:true});sc.addEventListener('click',e=>e.stopPropagation());
   sc.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){sc.scrollLeft+=e.deltaY;e.preventDefault()}e.stopPropagation()},{passive:false});
   let d=null;sc.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.stopPropagation();d={x:e.clientX,l:sc.scrollLeft,mv:false,id:e.pointerId}});
   sc.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x;if(!d.mv&&Math.abs(dx)>4){d.mv=true;try{sc.setPointerCapture(d.id)}catch(err){}sc.classList.add('drag')}if(d.mv)sc.scrollLeft=d.l-dx});
@@ -9207,6 +9233,9 @@ class Poly extends AudioWorkletProcessor{
   if(q[8]>0){const ag=q[8],a=Math.max(.004,P.a);v.fOff=s0+Math.round(Math.max(q[1],.005)*sr);v.fEnd=v.fOff+Math.round(P.rend*sr);
    if(ag<a)v.ai=v.pk/Math.max(1,Math.max(.004,a-ag)*sr);else{const lv=v.sus+(v.pk-v.sus)*Math.exp(-(ag-a)/P.dtc);v.pk=lv;v.ai=lv/(.004*sr)}
    v.c=v.fc+(v.c-v.fc)*Math.exp(-ag/P.ftc);if(v.fm)v.fd=v.fdT+(v.fd-v.fdT)*Math.exp(-ag/.3);v.lph=(P.lfo*ag)%1;
+   /* v0.211 (task AA): the oscillators carry on where they would be by now too. Started fresh, all unison saws begin in phase and sum to one loud
+      burst (+10 dB for 50 to 100 ms on a supersaw, measured) before they drift apart; at their phases by now they are as spread as the held note was */
+   {const k=ag*sr;for(let i=0;i<v.n;i++)v.ph[i]=(v.ph[i]+v.df[i]*k)%1;v.sph=(v.sinc*k)%1;v.fph=(v.finc*k)%1}
    if(v.wt){v.wlph=(P.lfoRate*ag)%1;if(v.wea!==0){v.wes=1;v.we=Math.exp(-ag/(Math.max(.02,P.pd)/3))}}}}
  process(ins,outs){if(this.dead)return false;const out=outs[0],L=out[0],R=out[1]||out[0],N=L.length,sr=sampleRate,f0=currentFrame;
   if(this.pend.length){const pd=this.pend;let due=null;for(let k=pd.length-1;k>=0;k--){const s0=Math.round(pd[k][0]*sr);if(s0<f0+N){(due||(due=[])).push([s0,pd[k]]);pd.splice(k,1)}}
@@ -12900,8 +12929,8 @@ function chsResched(t){const now=Math.max(CHS.T||0,ctx.currentTime+.003),k0=play
     else{const fb=Math.min(play.sched,Math.max(play.b0,beatOf(secOf(play.b0)+(now-play.t0))));schedule(fb,play.sched,false)}}
   catch(e){console.error('AudioLab: picking up notes failed on',t.name,e)}finally{play.only=k0;play.chs=k1;CHS.c=0}}
 /* keys that are held down on the keyboard carry on with the new sound */
-function chsKeys(t){try{if(LIVEK.size)liveKeysRevoice()}catch(e){}for(const e of CHSK)if(e.t===t||e.t.id===t.id){e.t=t;try{const h=CHS.vo(t,e.p,e.v);if(h)e.h=h}catch(er){}}}
-{const _vo=voiceOn;CHS.vo=_vo;voiceOn=function(t,p,v){const n0=LIVEK.size,h=_vo.apply(this,arguments);if(!h||LIVEK.size!==n0)return h;const e={t,p,v,h};CHSK.add(e);return{off(f){CHSK.delete(e);e.h.off(f)}}}}
+function chsKeys(t){try{if(LIVEK.size)liveKeysRevoice()}catch(e){}for(const e of CHSK)if(e.t===t||e.t.id===t.id){e.t=t;/* v0.211: the held key carries on at its age, like a picked-up note (its envelope does not start again; only the two engines that know the age of a note) */PVN.age=(pvOK(t.inst)||gvOK(t.inst))?Math.max(0,ctx.currentTime-(e.w0||ctx.currentTime)):0;try{const h=chsVo(t,e.p,e.v);if(h)e.h=h}catch(er){}finally{PVN.age=0}}}
+{const _vo=voiceOn;CHS.vo=_vo;voiceOn=function(t,p,v){const n0=LIVEK.size,h=_vo.apply(this,arguments);if(!h||LIVEK.size!==n0)return h;const e={t,p,v,h,w0:ctx.currentTime};CHSK.add(e);return{off(f){CHSK.delete(e);e.h.off(f)}}}}
 /* tables and samples the new sound needs are made before the cut, so the gap between the old sound and the new one stays short (a new wavetable takes up to 90 ms the first time) */
 function chsWarm(I){try{if(I.preset==='venom'){const P=vnParams(I);vnTab(P.aw|0);vnTab(P.bw|0)}else if(I.preset==='wtab'){if(pvOK(I))wtMips(I.wt||'basic')}else if(I.buf){const B=sampleBuf(I.buf);if(B&&I.rev)sampRev(B)}}catch(e){}}
 function chsTrack(t,fxToo){if(!ctx||!t||t===MSTO||!t.inst)return 0;if(!NODES.get(t.id)){syncGraph();return 0}chsWarm(t.inst);const q=performance.now();
@@ -17752,6 +17781,40 @@ function agPaint(g,w,h,f,X){const cv=g.canvas,live=X&&X.m&&performance.now()-X.m
  const dd=amt>=.999?'silent':'−'+(-20*Math.log10(1-amt)).toFixed(1)+' dB';g.textBaseline='top';g.font='600 9.5px Inter,system-ui,sans-serif';g.textAlign='left';g.fillStyle=sc;g.fillText(s.name+' hits',x0+4,2);
  g.textAlign='right';g.fillStyle=dc;g.fillText(t.name+' '+dd,w-4,2);g.textAlign='left';
  g.fillStyle='rgba(255,255,255,.35)';g.textAlign='right';g.textBaseline='alphabetic';g.fillText('preview · play to see it live',w-4,B-3);g.textAlign='left'}
+/* ---------- v0.211: the track tabs keep their place (task AA) ----------
+ renderFx draws the tab row again on every change (a preset, a knob that changes the layout, a new track), which put it back at the start.
+ The row now keeps its scroll position; only when another track is chosen and its tab is out of view is it scrolled just far enough to show it. */
+function tabsKeep(sl){const sc=document.querySelector('#fxTitle .fxsc');if(!sc)return;if(sl)sc.scrollLeft=sl;const on=sc.querySelector('button.on'),id=on?on.dataset.seltrk||'':'';if(id===tabsKeep.id)return;tabsKeep.id=id;if(!on)return;
+  const R=sc.getBoundingClientRect(),q=on.getBoundingClientRect(),z=R.width/(sc.offsetWidth||1)||1,pad=30,l=sc.scrollLeft,a=(q.left-R.left)/z+l,b=a+q.width/z,r=l+sc.clientWidth;
+  if(a<l+pad)sc.scrollLeft=Math.max(0,a-pad);else if(b>r-pad)sc.scrollLeft=b-sc.clientWidth+pad}
+/* The device row keeps its place too. In the panel it already kept its left position; in the Devices window, where the devices wrap into rows,
+ a preset change moved it up (600 > 266 px measured) and to the left. The outermost renderFx wrapper (installed after every other one) puts both
+ back at once, and once more in the next frame before it is painted, for parts that are laid out a frame later. */
+setTimeout(()=>{const _rf=renderFx;renderFx=function(){const fx=document.getElementById('fxin'),l=fx?fx.scrollLeft:0,tp=fx?fx.scrollTop:0,r=_rf.apply(this,arguments);
+  if(fx&&!IBCTX){const put=()=>{if(l&&fx.scrollLeft!==l)fx.scrollLeft=l;if(tp&&fx.scrollTop!==tp)fx.scrollTop=tp};put();requestAnimationFrame(put)}return r}},0);
+/* ---------- v0.211: held keys on every engine carry on after a preset switch (task AA) ----------
+ The list of held keys (CHSK) was filled by a voiceOn wrapper that sits inside the ones Emit, Vector Grain, Vector FM, Orbit, Sub, Bounce, Psy Bass
+ and Fractal add when they start; those answer a key themselves, so their keys were never listed and a preset switch cut them for good (measured:
+ the held key silent after the switch, -92 to -108 dB). This wrapper goes on the outside once everything has started, and chsKeys plays the key
+ again through the whole chain (chsVo) so each engine gets its own note. */
+function chsVo(t,p,v){const before=new Set(CHSK);let h;CHS.rv=1;try{h=voiceOn(t,p,v)}finally{CHS.rv=0}for(const x of CHSK)if(!before.has(x))CHSK.delete(x);return h}
+setTimeout(()=>{const _vo=voiceOn;voiceOn=function(t,p,v){if(CHS.rv)return _vo.apply(this,arguments);const n0=CHSK.size,k0=LIVEK.size,h=_vo.apply(this,arguments);
+  if(!h||CHSK.size!==n0||LIVEK.size!==k0)return h;const e={t,p,v,h,w0:ctx?ctx.currentTime:0};CHSK.add(e);return{off(f){CHSK.delete(e);e.h.off(f)}}};if(_vo.__e)voiceOn.__e=1},0);
+/* ---------- v0.211: quiet devices (task AA): clicking, dragging or choosing anything on a device never plays a note ----------
+ A short window after a pointer or menu event inside a device (panel, pinned windows, Devices window, the big Venom and Grid windows) silences the test notes (preview, the
+ held preview of a drag, a drum pad's hit). The actions themselves still happen (a pad is selected, a wave is chosen). Explicit play buttons
+ (Play the kick, Play this pad, the play button of the basic instruments) are kept; the Change browser's own test note is not a device control. */
+const DQ={t:-1e9,on:0,q:0};
+const DQOK='[data-ip=play],[data-dk=play],[data-kk=play],[data-dqok]';
+function dqHit(e){const el=e.target;if(!el||!el.closest)return;if(el.closest(DQOK)){DQ.t=-1e9;DQ.on=0;return}
+  if(e.type==='pointermove'&&!e.buttons)return;if(!el.closest('#fxin,.pinb,#devWin,#vnWin,#gridWin'))return;
+  /* on from the start of the event until the end of the task it runs in (a heavy rebuild can take longer than the window), then 150 ms more */
+  DQ.on=1;DQ.t=performance.now();if(!DQ.q)DQ.q=setTimeout(()=>{DQ.q=0;DQ.on=0;DQ.t=performance.now()},0)}
+for(const ev of['pointerdown','pointerup','pointermove','click','dblclick','change','input','wheel'])window.addEventListener(ev,dqHit,{capture:true,passive:true});
+function dqOn(){return DQ.on||performance.now()-DQ.t<150}
+{const _pv=preview;preview=function(){if(dqOn())return;return _pv.apply(this,arguments)}}
+{const _ph=padHear;padHear=function(){if(dqOn())return;return _ph.apply(this,arguments)}}
+{const _ps=prevSet;prevSet=function(t,ps){if(ps&&ps.length&&dqOn())return _ps.call(this,t,[]);return _ps.apply(this,arguments)}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -18275,7 +18338,7 @@ function rolling(X,key,len){const a=X[key]||(X[key]=[]);return{push(v){a.push(v)
 function ndXs(f,pre){return`<div class="xs">${pre}</div>`}
 function ndTb(f){if(!NDN[f.type])return'';const sel=(FXSEL[f.type]||[]).map(([k,l,opts,kind])=>kind==='chk'?`<label><input type="checkbox" data-x="${k}"${f.p[k]?' checked':''}> ${l}</label>`:`<label>${l} <select data-x="${k}">${opts.map(o=>{const v=Array.isArray(o)?o[0]:o,n=Array.isArray(o)?o[1]:o;return`<option value="${v}"${String(f.p[k])===String(v)?' selected':''}>${n}</option>`}).join('')}</select></label>`).join(''),
   btn=(FXBTN[f.type]||[]).map(([a,l,tip])=>`<button class="nbtn${f.p['_'+a]?' on':''}" data-nact="${a}" title="${tip||l}">${l}</button>`).join('');return sel||btn?`<div class="ndtb">${sel}${btn}</div>`:''}
-fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-nact]');if(!b)return;e.stopPropagation();const t=curT(),dv=b.closest('.dev'),f=t&&t.fx.find(q=>q.id===dv.dataset.id);if(!f||!NACT[f.type])return;NACT[f.type](f,b.dataset.nact,t)},true);
+fxin.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-nact]');if(!b)return;e.stopPropagation();const t=curT(),dv=b.closest('.dev'),f=t&&t.fx.find(q=>q.id===dv.dataset.id);if(!f||!NACT[f.type])return;const A=NACT[f.type];/* task AA: most effects give their actions as a list by name (a click threw 'not a function' before) */if(typeof A==='function')A(f,b.dataset.nact,t);else if(A&&typeof A[b.dataset.nact]==='function')A[b.dataset.nact](f,t)},true);
 
 /* ---------------- Spectrum analyzer ---------------- */
 ND('spec',{name:'Spectrum',vw:540,grp:['Analysis','#4cc9f0'],desc:'Real-time spectrum with peak hold, reference trace and slope',hint:'Drag the dots on the right edge to rescale · the left dot tilts the slope · the bottom dot sets smoothing',
