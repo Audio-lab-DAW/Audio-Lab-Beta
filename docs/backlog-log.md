@@ -2542,3 +2542,6 @@ Desktop app
 
 ### Not verified
 - On the user's Mac with a real GPU; how the fade looks at 120 Hz.
+
+### Release
+- v0.208: commit e97ce44 on main, on top of v0.207 (task Y, released by another session while this one worked; the version moved from 0.207 to 0.208 and both sides of the conflict were kept). Desktop build run 45776476015 succeeded. Artifact 1b07d888 updated to version 231 (it was at v0.207). Project doc `claude/audiolab-run-AE.md`.
