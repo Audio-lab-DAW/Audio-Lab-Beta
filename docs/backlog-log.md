@@ -1949,3 +1949,6 @@ Total in this part: 229 presets before, 451 after. Sub, Psy Bass and Bounce were
 
 ### Left
 - A drag from a socket could offer "Modulate" as a choice. The pop-up of a modulation cable shows a straight line sample instead of a wave.
+
+### Release
+- v0.198: commit 5405596 on main. Desktop build run 45757449230 succeeded. Artifact 1b07d888 updated to version 221 (it was at v0.197). Project doc `claude/audiolab-ui-run-S2.md`.
