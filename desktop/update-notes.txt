@@ -1,1 +1,1 @@
-You can now select several channels or tracks (Shift-click or Cmd/Ctrl-click, in the mixer or the track list) and move a fader, pan, send or button on one of them to change all of them: volumes keep their differences in dB. The cable legend at the bottom of the mixer no longer sits under the resize tab.
+The About window (click the logo, or Settings, General, "What's inside AudioLab") now shows what runs under the hood: six highlights and a "Show all" list of 34 features in six groups, each with a plain line and the number we measured. Nothing else changed.
