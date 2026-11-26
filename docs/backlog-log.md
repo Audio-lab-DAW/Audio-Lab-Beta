@@ -1517,4 +1517,6 @@ Not verified: the GPU side. In software drawing Lighter and Lightest reach the s
 - Task E (CPU and background freeze).
 
 ### Release
-- v0.189: see the release note below.
+- v0.189: commit 4428510, project doc `claude/audiolab-device-backlog-run-F.md`. The artifact is published last (it may wait for an approval); its version is not known when this note is written.
+- **Desktop build**: run 45740327722 for this commit succeeded (2 min 41 s, started 02:07 UTC).
+- Task H (Psy Bass) ran at the same time in another session; nothing of Psy Bass or Sub was touched here.
