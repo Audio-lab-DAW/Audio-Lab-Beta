@@ -1,4 +1,5 @@
-"""The devices panel's header (task AA): python3 tools/ui-tests/devices_header.py [index.html] [out dir]
+"""The devices panel's header (task AA; changed in task AF, v0.212: no strip behind the tabs, the button is a pill above the panel's edge, folded away only the
+pill shows; see taskAF.py for the full check): python3 tools/ui-tests/devices_header.py [index.html] [out dir]
 Fractals demo at 1600 x 1000, normal and Light mode, panel open and folded away: the Devices button must sit inside the header strip (not
 hanging into the devices below), the strip spans the panel's width, the button folds and opens the panel, a click on a track tab opens a folded
 panel, and every control in the strip has a tooltip. Screenshots (2x) of each state."""
@@ -29,8 +30,8 @@ with sync_playwright() as p:
         for hid in (False, True):
             R("(()=>{devHide(%s);return 1})()" % ('true' if hid else 'false')); pg.wait_for_timeout(600)
             g = json.loads(R(GEO)); tag = '%s, %s' % ('Light mode' if lite else 'normal', 'folded away' if hid else 'open')
-            ok(g['vis'] != 'none' and g['bt'] >= g['st'] + 1 and g['bb'] <= g['sb'] - 1, '%s: Devices button inside the header strip (strip %d..%d, button %d..%d)' % (tag, g['st'], g['sb'], g['bt'], g['bb']))
-            ok(abs(g['sl'] - g['fl']) <= 1 and abs(g['sr'] - g['fr']) <= 1, '%s: the strip spans the panel (%d..%d, panel %d..%d)' % (tag, g['sl'], g['sr'], g['fl'], g['fr']))
+            ok(g['bb'] <= g['fxt'] - 1, '%s: Devices button above the panel edge, never in the devices (button %d..%d, panel top %d)' % (tag, g['bt'], g['bb'], g['fxt']))
+            ok((g['vis'] == 'none') == hid, '%s: tabs shown when open, hidden when folded away (%s)' % (tag, g['vis']))
             ok(g['tips'] == 0, '%s: every control in the strip has a tooltip' % tag)
             y = max(0, g['st'] - 40)
             for side, x in (('left', 0), ('right', 1000)):
@@ -38,10 +39,6 @@ with sync_playwright() as p:
     R("(()=>{UI.lite=false;applyLite();devHide(false);return 1})()"); pg.wait_for_timeout(400)
     pg.click('#fxHide'); pg.wait_for_timeout(400); h1 = R("UI.fxHide"); pg.click('#fxHide'); pg.wait_for_timeout(400); h2 = R("UI.fxHide")
     ok(h1 is True and h2 is False, 'the Devices button folds the panel away and brings it back')
-    R("(()=>{devHide(true);return 1})()"); pg.wait_for_timeout(400)
-    x, y = json.loads(R("(()=>{const b=[...document.querySelectorAll('#fxTitle .fxsc button')].find(b=>{const r=b.getBoundingClientRect();return r.width>20&&r.left>40&&r.right<900});const r=b.getBoundingClientRect();return JSON.stringify([r.left+r.width/2,r.top+r.height/2])})()"))
-    pg.mouse.click(x, y); pg.wait_for_timeout(500)
-    ok(R("UI.fxHide") is False, 'a click on a track tab of the folded panel opens it')
     ok(not errs, 'no page errors ' + '; '.join(errs[:3]))
     b.close()
 print('\n%d failures' % len(FAIL)); sys.exit(1 if FAIL else 0)
