@@ -3465,3 +3465,13 @@ JSON lines and a local socket instead of shared memory; "exact with rare correct
 
 ### Next
 N2 (the engine under the app) needs `index.html` and `desktop/`; left for task NB in its turn, after the design chain, as the user ordered. For the user: try 0.2's second row with the Gryphon and paste the report.
+
+## 27 November 2026: task NB-N2a (the road from the desktop shell to the native engine, proven outside the app)
+
+No app changes: `index.html` and `desktop/` were not touched. Details and the table: `docs/native-mac-build.md`.
+
+- **Built:** `tools/native-lab/electron-tap/` (a test program on the real shell, Electron 45.4.1): an AudioWorklet hands each 128-frame block through a message port from the audio thread straight to the shell's main process, which feeds `alengine` through `native/bridge/engine-bridge.js`. `tools/native-lab/stream_compare.py` compares what was sent with what the loop-back device recorded, bit for bit, and finds its place again after gaps.
+- **Tested (build machine, run 45942655178, 20 s):** all 7,500 blocks arrived in both runs, nothing lost. Page clock from no device (`sinkId: none`): the page ran at 0.59 of real time, the ring ran empty 79 times, and every one of 1,920,000 samples that reached the device was identical. Page clock from a real device playing silence: 0.998 of real time, 1,917,384 of 1,920,000 identical, 5 gaps with 4 overloads reported by the machine.
+- **Decided from it (changeable):** in N2 the page keeps a real device as its clock and plays silence into it; with exclusive use on the DAC that clock device must be another one. Blocks are sent as copies (transferred buffers arrive empty in the main process). N2 needs the smooth drift correction.
+- **Not verified:** nothing inside AudioLab, no real DAC, nothing longer than 20 seconds, nothing on the M4.
+- **Stopped here on purpose:** the next step needs a hook in `index.html` and changes in `desktop/`. Only one task may edit `index.html` at a time, the design chain is working there, and the user's order is design first, then the native engine. Task NB continues from N2 when it is fired in its turn.
