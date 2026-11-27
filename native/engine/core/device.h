@@ -27,6 +27,9 @@ struct RenderContext {
     double sampleRate = 48000;
     WorkletRandom random;  // Math.random of the worklet scope: one per audio context
     double currentFrame = 0;  // first frame of the block being rendered; currentTime = currentFrame / sampleRate
+    // The web engine's render quantum, the grid its worklet bundle keeps its rules on: 128 while playing,
+    // 512 in the app's export (renderSizeHint in renderMix). Up to 4096.
+    int quantum = 128;
     double currentTime() const { return currentFrame / sampleRate; }
 };
 
@@ -54,7 +57,8 @@ struct Processor {
 };
 
 // WorkletShell runs a ported processor the way the web engine runs the worklet, on the web engine's grid of
-// 128-frame windows, whatever the size of the calls it is given (task NB-N3c): a call may be 32 or 64 frames
+// render quanta (128 frames while playing, 512 in the app's export; RenderContext::quantum), whatever the size
+// of the calls it is given (task NB-N3c): a call may be 32 or 64 frames
 // (the audio device's own buffer) or longer (offline render); the bundle's rules still apply per window:
 //   - the silence rule looks at a whole window: when the window can be skipped (more than 3 s of silence before
 //     it) and its first frames are silent, they are output as zeros; if sound arrives later in the same window,
@@ -74,8 +78,9 @@ public:
         int done = 0;
         while (done < n) {
             const double frame = ctx_.currentFrame + done;
-            const int off = (int)std::fmod(frame, (double)kWin);
-            const int m = std::min(n - done, kWin - off);
+            const int W = win();
+            const int off = (int)std::fmod(frame, (double)W);
+            const int m = std::min(n - done, W - off);
             piece(L + done, R + done, oL + done, oR + done, m, frame - off, off);
             done += m;
         }
@@ -83,11 +88,13 @@ public:
     bool skipping() const { return q_ > sr_ * 3; }
     long catchUpFrames() const { return catchUp_; }
     long catchUpNonZero() const { return catchUpNZ_; }
-    static constexpr int kWin = 128;
+    static constexpr int kMaxWin = 4096;
+    int win() const { return std::max(1, std::min(kMaxWin, ctx_.quantum)); }
 
 private:
     void piece(const float* L, const float* R, float* oL, float* oR, int m, double winStart, int off) {
-        if (off == 0) { winSilent_ = true; winRan_ = false; pend_ = 0; mayskip_ = !p_->runsOnSilence() && (q_ + kWin > sr_ * 3); }
+        const int W = win();
+        if (off == 0) { winSilent_ = true; winRan_ = false; pend_ = 0; mayskip_ = !p_->runsOnSilence() && (q_ + W > sr_ * 3); }
         bool sil = true;
         for (int i = 0; i < m && sil; i++) if (L[i] != 0 || R[i] != 0) sil = false;
         if (!sil) winSilent_ = false;
@@ -96,9 +103,10 @@ private:
             pend_ += m;
         } else {
             if (pend_ > 0) {  // sound arrived inside a window that started silent: run the silent frames first
-                float tL[kWin], tR[kWin];
+                std::vector<float>& tL = tmpL_; std::vector<float>& tR = tmpR_;
+                tL.resize(kMaxWin); tR.resize(kMaxWin);
                 p_->winStart = winStart; p_->winOff = off - pend_;
-                p_->process(pL_, pR_, tL, tR, pend_);
+                p_->process(pL_.data(), pR_.data(), tL.data(), tR.data(), pend_);
                 catchUp_ += pend_;
                 for (int i = 0; i < pend_; i++) if (tL[i] != 0 || tR[i] != 0) catchUpNZ_++;
                 pend_ = 0;
@@ -107,8 +115,8 @@ private:
             p_->process(L, R, oL, oR, m);
             winRan_ = true;
         }
-        if (off + m == kWin) {  // end of the window
-            if (!p_->runsOnSilence()) { if (winSilent_) q_ += kWin; else q_ = 0; }
+        if (off + m == W) {  // end of the window
+            if (!p_->runsOnSilence()) { if (winSilent_) q_ += W; else q_ = 0; }
             if (winRan_ && ++c_ >= 16) { c_ = 0; p_->flushTiny(); }
         }
     }
@@ -119,7 +127,8 @@ private:
     int c_ = 0;
     bool winSilent_ = true, winRan_ = false, mayskip_ = false;
     int pend_ = 0;
-    float pL_[kWin] = {0}, pR_[kWin] = {0};  // the silent frames held back in this window (they may be -0)
+    std::vector<float> pL_ = std::vector<float>(kMaxWin), pR_ = std::vector<float>(kMaxWin);  // silent frames held back (may be -0)
+    std::vector<float> tmpL_, tmpR_;
     long catchUp_ = 0, catchUpNZ_ = 0;
 };
 

@@ -8,6 +8,9 @@ if(NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "")
 endif()
 project(audiolab_native_lab LANGUAGES C CXX)
+# Everything here must round like JavaScript: no fused multiply-add, no fast-math (review RN5, A6). Targets that
+# want the opposite as a control set it themselves (alnative_fused, alrender_fused).
+add_compile_options(-ffp-contract=off -fno-fast-math)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE)

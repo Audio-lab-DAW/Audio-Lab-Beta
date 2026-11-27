@@ -6,7 +6,8 @@ the app's own code: mkFx (a new device as the app makes it), the preset merged i
 OfflineAudioContext, the app's worklet bundle. For each case it records the settings exactly as the page posts
 them to the worklet (the device's `sp` mapping), which is what the native engine is given.
 
-    python3 tools/native-lab/make_ref_core.py [outdir] [types]   # default outdir tools/native-lab/out/core
+    python3 tools/native-lab/make_ref_core.py [outdir] [types] [quantum]   # default outdir tools/native-lab/out/core
+quantum: the render quantum of the offline context (128, as while playing; 512, as the app's export uses)
 writes  in.wav, cases.json, web/<case>.wav, web.json (sha-256 of each web output, the app version, the browser)
 """
 import base64, hashlib, json, os, struct, sys
@@ -93,9 +94,11 @@ def make_input():
     return x.astype(np.float32)
 
 
-JS = """async ({b64, N, SR, chain}) => {
+JS = """async ({b64, N, SR, chain, Q}) => {
   const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0)), f = new Float32Array(raw.buffer);
-  const c = new OfflineAudioContext(2, N, SR), buf = c.createBuffer(2, N, SR);
+  const c = Q === 128 ? new OfflineAudioContext(2, N, SR) : new OfflineAudioContext({numberOfChannels: 2, length: N, sampleRate: SR, renderSizeHint: Q});
+  if (Q !== 128 && c.renderQuantumSize !== Q) throw new Error('render quantum ' + c.renderQuantumSize + ', asked for ' + Q);
+  const buf = c.createBuffer(2, N, SR);
   buf.copyToChannel(f.subarray(0, N), 0); buf.copyToChannel(f.subarray(N, 2 * N), 1);
   const src = c.createBufferSource(); src.buffer = buf;
   const A = window.__alref, posted = [];
@@ -120,7 +123,8 @@ JS = """async ({b64, N, SR, chain}) => {
 def main():
     from alab import AudioLab
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "out", "core")
-    types = sys.argv[2].split(",") if len(sys.argv) > 2 else TYPES
+    types = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else TYPES
+    Q = int(sys.argv[3]) if len(sys.argv) > 3 else 128
     os.makedirs(os.path.join(out, "web"), exist_ok=True)
     x = make_input()
     wav_write(os.path.join(out, "in.wav"), x)
@@ -138,10 +142,10 @@ def main():
         if all(d in types for d, _ in ch):
             jobs.append((name, [({"type": d, "pre": k} if k else {"type": d}) for d, k in ch]))
     b64 = base64.b64encode(np.ascontiguousarray(x).tobytes()).decode()
-    cases, info = [], {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
+    cases, info = [], {"quantum": Q, "app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
                        "input_sha256": hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest(), "cases": {}}
     for name, ch in jobs:
-        r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch})
+        r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch, "Q": Q})
         y = np.frombuffer(base64.b64decode(r["out"]), dtype="<f4").reshape(2, N)
         wav_write(os.path.join(out, "web", name + ".wav"), y)
         cases.append({"name": name, "chain": r["posted"]})
@@ -149,7 +153,7 @@ def main():
                                "changed": bool(np.any(y != x))}
         print(name, "peak %.4f" % info["cases"][name]["peak"], "changed" if info["cases"][name]["changed"] else "UNCHANGED", flush=True)
     al.stop()
-    json.dump({"sr": SR, "cases": cases}, open(os.path.join(out, "cases.json"), "w"), indent=1)
+    json.dump({"sr": SR, "quantum": Q, "cases": cases}, open(os.path.join(out, "cases.json"), "w"), indent=1)
     json.dump(info, open(os.path.join(out, "web.json"), "w"), indent=1)
     print(len(cases), "cases written to", out)
 

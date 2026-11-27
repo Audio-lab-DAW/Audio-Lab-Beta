@@ -7,10 +7,32 @@
 #include <string>
 #include <vector>
 #include "device.h"
+#if defined(__x86_64__) || defined(_M_X64)
+#include <xmmintrin.h>
+#endif
 
 namespace al {
 
 void registerCoreDevices();
+
+// The floating-point state the web engine's devices are computed with: round to nearest, denormal numbers kept
+// (Chromium's worklet thread does not flush them; measured in N3c: flushing breaks every device). A plug-in may
+// leave flush-to-zero on (review RN5, A7), so every chain sets the state at its start and puts the caller's back.
+struct WebFloatState {
+#if defined(__x86_64__) || defined(_M_X64)
+    unsigned int saved;
+    WebFloatState() { saved = _mm_getcsr(); _mm_setcsr((saved & ~0x8040u & ~0x6000u)); }  // FTZ, DAZ off; nearest
+    ~WebFloatState() { _mm_setcsr(saved); }
+#elif defined(__aarch64__)
+    uint64_t saved;
+    WebFloatState() { __asm__ volatile("mrs %0, fpcr" : "=r"(saved)); uint64_t v = saved & ~((1ull << 24) | (1ull << 19) | (3ull << 22)); __asm__ volatile("msr fpcr, %0" : : "r"(v)); }  // FZ, FZ16 off; nearest
+    ~WebFloatState() { __asm__ volatile("msr fpcr, %0" : : "r"(saved)); }
+#else
+    WebFloatState() {}
+#endif
+    WebFloatState(const WebFloatState&) = delete;
+    WebFloatState& operator=(const WebFloatState&) = delete;
+};
 
 
 constexpr int kQuantum = 128;  // the web engine's render quantum
@@ -42,6 +64,7 @@ public:
     ChainSlot& slot(size_t i) { return slots_[i]; }
     // One block in place (n <= kMaxBlock).
     void process(float* L, float* R, int n) {
+        WebFloatState fp;
         float tL[kMaxBlock], tR[kMaxBlock];
         for (auto& s : slots_) {
             if (!s.on) continue;

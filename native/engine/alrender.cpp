@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
         int bad = 0;
         for (auto& c : cj["cases"].a) {
             RenderContext ctx; ctx.sampleRate = in.sr;
+            ctx.quantum = (int)cj["quantum"].num(128);
             Chain ch(ctx);
             bool ok = true;
             for (auto& d : c["chain"].a) if (!ch.add(d["type"].str(), d["p"], err)) { ok = false; break; }
