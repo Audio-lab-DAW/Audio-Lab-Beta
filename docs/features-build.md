@@ -70,13 +70,13 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 | FT-F2 | Arranger moves: drag a section with its clips, automation, tempo and signature changes; Alt copies; insert empty bars; delete and close the gap; one undo step; bit-identical to the same edit by hand. | **done v0.268** |
 | FT-F9a | Step sequencer clips, part 1: clip type with 16, 32 or 64 steps over drum pads or notes of the key; level, accent, slide, chance and ratchet per step; editor. | **done v0.277** |
 | FT-F9b | Step sequencer clips, part 2: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide plays legato into Acid and Psy Bass; same render as the equal notes. Push's step lane (C2b) gets these clips. | **done v0.288** (Psy Bass's own slide: lane L, SND-6) |
-| FT-F16a | Volume shaper, part 1: the effect with a drawable curve per 1/4, 1/2 or 1 bar, tempo triggered, drawn live behind the waveform, presets. | open |
+| FT-F16a | Volume shaper, part 1: the effect with a drawable curve per 1/4, 1/2 or 1 bar, tempo triggered, drawn live behind the waveform, presets. | in progress (claimed 27 Nov, after v0.288) |
 | FT-F16b | Volume shaper, part 2: triggered by notes of another track or by audio, up to three bands. | open |
 | FT-F18a | Kick and bass lab, part 1: the view on a pair of tracks: kick fundamental as a note, bass key, overlap in time, low-band correlation. | open |
-| FT-F18b | Kick and bass lab, part 2: the bass phase-rotation knob and the one-click suggestions (tune kick, shorten tail, rotate). | open |
+| FT-F18b | Kick and bass lab, part 2: the bass phase-rotation knob and the one-click suggestions (tune kick, shorten tail, rotate). Folded in from AE3: X15 kick and bass lock (the bass ducks or shapes to the kick from the lab). | open |
 | FT-F20 | Build designer: range of 8, 16 or 32 bars, one Build control writes normal automation (high-pass, reverb send, noise riser, snare roll density, pitch rise, bass filter), four shapes. | open |
 | FT-F25a | Reference A/B, part 1: panel with up to eight references, loudness matched within 0.2 LU, one key flips at the same position or the reference's cue, no click. | open |
-| FT-F25b | Reference A/B, part 2: spectra overlaid; listening modes mono, side, sub only, small speaker (the "club check" row). | open |
+| FT-F25b | Reference A/B, part 2: spectra overlaid; listening modes mono, side, sub only, small speaker (the "club check" row). Folded in from AE3: X21 the difference line between the mix and the reference, X22 your own target curve. | open |
 | FT-F31a | Sample browser, part 1: folders (desktop reads them, the browser uses the folder picker), index without blocking the page, search, tags, favourites, colours, drag to a track or pad. | open |
 | FT-F31b | Sample browser, part 2: one-time analysis (tempo, key, length, kind), preview in the song's tempo and key under 50 ms. | open |
 | FT-F36 | Plug-ins in AudioLab: the AudioLab side only (a Plug-in device that keeps its state in the project and talks to the native host through the bridge when it is there; "needs the desktop app on a Mac" otherwise). The hosting itself is the native track (`docs/native-mac-plan.md`). | gated on native N2c and the host step |
@@ -84,8 +84,11 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 ### Group A: automation and arrangement editing
 | Step | What | Status |
 |---|---|---|
+| FT-S1 | From UX1: time verbs: duplicate, insert and delete time across all tracks (on F2's arranger moves); plain **L** loops the selection (Mod+L stays MIDI learn). | open |
 | FT-F3 | Automation curve shapes per segment in the track lanes (the clip envelope editor's shapes). | open |
+| FT-S4 | From UX1: automation drawn over a time range across clips with shapes (F3's shapes), one undo step. | open |
 | FT-F4 | Automation clips you can loop, cut and stretch. | open |
+| FT-S2 | From UX1: looping clips by dragging the corner notch (works with F1 linked clips and F4 automation clips). | open |
 | FT-F21 | FX throws: a momentary send that writes automation (works from Push's buttons too). | open |
 | FT-F5 | Arrangement snap and grid menu (setting row for lane B's Navigation page, hook). | open |
 | FT-F6 | Crossfades between audio clips and glue clips into one. | open |
@@ -112,10 +115,14 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 ### Group M: mix and master
 | Step | What | Status |
 |---|---|---|
+| FT-X20 | From AE3: fair compare: bypass with matched gain so a device is judged by its sound, not its level. | open |
+| FT-X8 | From AE3: bounce with a tap point in the bounce pop-up and the automatic bounce's settings (before effects, after effects, after fader, after group, after a device; tail; replace or new; original kept), with X9 freeze up to here as a right-click on the freeze button only; and UX1 S18's part: bounce and freeze run in slices so the screen answers within 100 ms. Lane K owns the graph: hooks only. | open |
+| FT-X11 | From AE3: the routing map (after lane K's MX-1; reads the graph through hooks). | after MX-1 |
 | FT-F26 | Export normalised to LUFS and true peak, export presets (hook for lane B's Export page). | open |
-| FT-F29 | Mix snapshots to flip between. | open |
+| FT-X10 | From AE3: group stems with their share of the returns, an option in the Advanced part of Export (hook for lane B's Export page; kept out of the way). | open |
+| FT-F29 | Mix snapshots to flip between. Folded in from AE3: X26 scenes with partial recall (choose what a snapshot recalls). | open |
 | FT-F30 | Phrase markers (8/16/32 bars) and the DJ check of intro and outro. | open |
-| FT-F27 | VCA faders. | open |
+| FT-F27 | VCA faders. Folded in from AE3: X14 (VCA with the AE3 details). | open |
 | FT-F28a/b | Mastering page: a, the album sequence with gaps and fades; b, the export (DDP if feasible in the browser, otherwise a cue sheet with the WAV). | open |
 
 ### Group W: workflow
@@ -163,12 +170,12 @@ Controllers first, as asked (the user has a Push 1 waiting). Then the nine starr
 | `FT_HOOKS.clipLinks` = `{group(linkId), linkedCopy(clipId), unique(clipId), sync()}`; commands `clip.linkedDup` (Duplicate as linked copy) and `clip.unique` (Make unique) in `SCA`. No settings rows. `clip.link` is the project field (optional). Steps that copy clips (F2 arranger moves, F4, F8 clip slots) keep `link` on a copy that should stay linked and delete it on a plain copy | Lane C (F2, F4, F8), DL2 | FT-F1, v0.255 |
 | `FT_HOOKS.arrangerMoves` = `{edit(op, start, length, dst), move(sectionId, dst), copy(sectionId, dst), insert(beat, beats), del(sectionId)}`: the arranger moves (clips, automation, tempo, signatures, sections, loop in one undo step) for a section launcher, Push buttons or an AI tool. Commands `arr.secDup`, `arr.insertBars`, `arr.secDelete` in `SCA`. No settings rows | DL2, lane C | FT-F2, v0.268 |
 
-## Added from the mixing research picks (AE3, 27 Nov 2026, 21:07 Brussels): fold into your order
+## Added from the mixing research picks (AE3, 27 Nov 2026, 21:07 Brussels): folded into the order above (FT-X8, FT-X10, FT-X11, FT-X20; F18b, F25b, F27, F29) after v0.288
 
 Read `docs/research-mixing.md` (options X and the user's picks and notes at its end). Lane C builds: **FT-X8** X8 bounce with a tap point inside the existing bounce pop-up and the automatic bounce's settings (before effects, after effects, after fader, after group, after a device; tail; replace or new; original kept), with **X9 freeze up to here as a right-click on the freeze button only**; **FT-X10** group stems with their share of the returns as an option in the Advanced part of Export (hook for lane B's Export page; the user is unsure how useful it is, keep it out of the way); **FT-X11** the routing map (after MX-1); **FT-X20** fair compare (gain-matched bypass); and these into planned cards: X14 into F27 (VCA), X15 into F18 (kick and bass lock), X21 and X22 into F25 (reference difference line, own target), X26 into F29 (scenes with partial recall). X4 moved to lane K (MX). Mixing-engine code (`busRoute`, `syncGraph`, `fxLat`, `renderMix`, `pdcMap`) belongs to lane K now: hooks only.
 | `FT_HOOKS.stepClip(clip)` gives `{n, res, mode, edited}` or null (lane A: a step badge on step clips in the arrangement); `FT_HOOKS.stepEditor` = `{open(clipId), close(), paint(), add(trackId, beat), gen(clipId)}` (F9b, Push 1's step lane, DL2). Commands `clip.newSteps`, `clip.editSteps`. No settings rows | Lane A, lane C, DL2 | FT-F9a, v0.277 |
 | `FT_HOOKS.stepConvert` = `{toSteps(clipId), toNotes(clipId), preset(clipId, id), presets(mode)}`: step clip to normal MIDI clip and back, the ready-made patterns (`roll`, `gallop`, `off`, `clear` on note rows; `four`, `psy`, `clear` on drum pads). Commands `clip.toSteps`, `clip.toNotes`. Clip fields (optional): `clip.nch` (a normal clip whose notes keep their chance), `clip.stepsOld` (the steps kept aside for an exact turn back). No settings rows. **Lane L, SND-6 (Psy Bass v2):** a note that overlaps the next one should slide into it (pitch glide over a Slide time, wave, filter and envelopes not restarted), the same rule Acid uses (`w <= last.end + 0.012`); step clips write a slide as a note 5 % longer than its step, flagged `sl:1` | Lane L (SND-6), DL2, lane C (F10 note chance) | FT-F9b, v0.288 |
 
-## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels): fold into your order
+## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels): folded into the order above (FT-S1, FT-S2, FT-S4; S18 with FT-X8) after v0.288
 
 Read `docs/research-ux-speed.md` (picks at its end). Lane C builds: **FT-S1** time verbs (duplicate, insert and delete time across all tracks; plain **L** loops the selection, because Mod+L is MIDI learn) with F2 arranger moves; **FT-S2** looping clips by dragging the corner notch (with F1 linked clips and F4); **FT-S4** automation drawn over a time range across clips with shapes (with F3 and F4); and S18's part for you: bounce and freeze run in slices or a worker so the screen answers within 100 ms. Lane O (UV) owns zoom, scroll and the tile cache: hooks only.
