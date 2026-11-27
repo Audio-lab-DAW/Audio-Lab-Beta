@@ -436,6 +436,8 @@ Each task:
 
    **Done in v0.264** (task IN-E, E3): the Pro EQ with the fill between the summed curve and 0 dB, an amber caliper under each bell (band-pass, notch) measured on the band's own response, corner marks on shelves and cuts, the gain scale on the left and the analyzer's dBFS scale and tilt on the right, note and octaves in the band read-out; the Filter and Auto Filter displays the same. The ±24 dB range stays (E1's zoom not built: the hit test, drag and box select share the range). See the backlog log.
 6. **IN-G, dynamics (G).** `vizComp()`, the limiter, gate, ducker, OTT and multiband displays, from the GR values the devices already post.
+
+   **Done in v0.276** (task IN-G, G1 G3 G4): `INS.grh` (the one gain reduction history drawer) in the Compressor, Limiter, Gate and Ducker; the Compressor's curve as Chromium computes it (`ingCK`) with the live point, a 30-point trail and the amber caliper; `ingBar` (G4 bars on the studio scale) in OTT, Multiband and the De-Esser. See the backlog log.
 7. **IN-O, stereo and scope (O).** Marks and afterglow on the kept stereo displays: mixer strips (strips off screen keep only history, as today) and the master. The correlation, balance and width scales. The scope in the Visualizer. The polar view as a menu choice.
 8. **IN-V, Visualizer (V).** The layout, plus the right-click menu entries (colour map, range, tilt, hold, speed).
 9. **IN-C and IN-D, CPU graph and device previews (C, D).** The smallest; they can go with IN-M or IN-G.
