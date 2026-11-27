@@ -69,7 +69,7 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 | FT-F1 | Linked clips: chain mark, edits change every copy, Make unique, Alt-Shift-drag makes a linked copy, MIDI clips then audio clip settings, the demo's repeated clips linked; one undo step; small file. | | **done v0.255** |
 | FT-F2 | Arranger moves: drag a section with its clips, automation, tempo and signature changes; Alt copies; insert empty bars; delete and close the gap; one undo step; bit-identical to the same edit by hand. | **done v0.268** |
 | FT-F9a | Step sequencer clips, part 1: clip type with 16, 32 or 64 steps over drum pads or notes of the key; level, accent, slide, chance and ratchet per step; editor. | **done v0.277** |
-| FT-F9b | Step sequencer clips, part 2: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide plays legato into Acid and Psy Bass; same render as the equal notes. Push's step lane (C2b) gets these clips. | open |
+| FT-F9b | Step sequencer clips, part 2: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide plays legato into Acid and Psy Bass; same render as the equal notes. Push's step lane (C2b) gets these clips. | in progress (claimed 27 Nov 20:37 UTC) |
 | FT-F16a | Volume shaper, part 1: the effect with a drawable curve per 1/4, 1/2 or 1 bar, tempo triggered, drawn live behind the waveform, presets. | open |
 | FT-F16b | Volume shaper, part 2: triggered by notes of another track or by audio, up to three bands. | open |
 | FT-F18a | Kick and bass lab, part 1: the view on a pair of tracks: kick fundamental as a note, bass key, overlap in time, low-band correlation. | open |
