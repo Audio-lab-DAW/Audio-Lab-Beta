@@ -14,8 +14,8 @@ Lane K owns the audio graph: `syncGraph`, `busRoute`, `fxLat`, `trkLat`, `pdcMap
 |---|---|---|---|
 | MX-0 | | this plan | **done** (27 Nov) |
 | MX-1 | X12, X13 | pre or post per send (blue and yellow rings); output to any group, return or track; one loop check for every link | **done** (v0.294) |
-| MX-2 | X5, X6 | delay compensation for returns, sends and sidechain triggers, live and in export; latency changes re-aligned without a click; latency you can see, subtly, in few places; first the `S.pauto` export check (end of this file) | claimed (27 Nov, in progress) |
-| MX-3 | X1, X4 | sidechain from anything (`mxScPick`, tap points) on Compressor, Gate, Multiband, OTT and the EQ's dynamic bands; "Duck under the kick" on each return and in the cable menu | |
+| MX-2 | X5, X6 | delay compensation for returns, sends and sidechain triggers, live and in export; latency changes re-aligned without a click; latency you can see, subtly, in few places; first the `S.pauto` export check (end of this file) | **done** (v0.295) |
+| MX-3 | X1, X4 | sidechain from anything (`mxScPick`, tap points) on Compressor, Gate, Multiband, OTT and the EQ's dynamic bands; "Duck under the kick" on each return and in the cable menu | next |
 | MX-4 | X3, X19 | the Ducker's Spectral focus (32 bands); Bass mono switch; `MX_HOOKS.bandFilter` for lane E's band listen (X17) | |
 | MX-5 | (X7 replaced) | the user's play-through idea, **only if this repository records the user's yes**; otherwise the run says "MX waits for the user's answer on the play-through idea" and stops | waits for the user |
 
@@ -148,3 +148,9 @@ X8 bounce with a tap point (lane C, through `MX_HOOKS.tap`), X9, X10, X11 routin
 ## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels)
 
 S18: export renders in slices (renderMixChunked) so the screen answers within 100 ms; lane F shows the progress line.
+
+### MX-2 as built (v0.295)
+- `pdcMap(sr, live)` is one solve: earliest times forward (the longest path is the target), then latest times backward from the master, so buses are not delayed and a project with groups only gets exactly its old delays. `M` per track (the track's delay), `M.edge` the extra on one link (`o:<track>`, `s:<track>:<return>`, `k:<device>`), `M.pre` tracks a Ducker trigger enters (their delay sits before their devices, so the keyed device sees it), `M.crit` the longest path's track and device. `LT_HOOKS.pdcLive()` (lane J), when it exists, returns the tracks played live: they get no delay live.
+- Known limit: a track with its own clips that also receives another track's output: the incoming sound is lined up, its own clips are not delayed to meet it. The "FX off" switch (`fxByp`) is not applied in export (as before).
+- `fxLat`: Compressor, OTT and Multiband report the browser compressor's measured delay `floor(6 ms)` (264 samples at 44.1 kHz instead of 265; the Multiband said 6.2 ms).
+- Automation in export: `mxPaPlan` (volumes, pans, master as AudioParam curves with a point every 256 samples; device parameters set every 256 samples where they move; instrument parameters at each note's start; macros through their targets). Parameters the Vector Map drives are left to its own export plan.
