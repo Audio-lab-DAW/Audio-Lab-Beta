@@ -16,7 +16,7 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | R3 | Review fix NB-R3: the sound path out of the shell's main process | **done, proven with the real Electron shell on Linux** (task NB-R3): the page's sound goes to a small helper process (the feeder) that only writes it into the engine, with a bounded queue and back-pressure; a watchdog replaces a feeder or an engine that stops answering (3 s); with the main process blocked 50 or 250 ms every second every frame arrived bit for bit with no gap, where the old path made gaps; `alengine` 0.4 no longer stalls a source switch on a frozen sender. The Mac waits for D9 |
 | R2 | Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac | **done on Linux** (task NB-R2): the page must say its rate and the engine refuses any other; a device that changes rate goes silent, tells the page and resumes when the rate comes back; source switching without the 30 ms sleep (review C1, C2, C5); the engine now runs everywhere on a null device and is tested end to end on every push (24 checks, also under ASan, UBSan and TSan). The Mac build of this code waits for a Mac runner (D9) |
 | R1 | Review fix NB-R1: native CI on every push | **done on Linux** (task NB-R1): workflow `native-ci.yml` builds every native target normally and with AddressSanitizer + UndefinedBehaviorSanitizer, runs the engine's selftest, the ring under two real threads (also under ThreadSanitizer), the mixer's 10 scenes and all 240 device cases against the web engine (green: 240 of 240, sanitizers 240 of 240 at 128 frames, 239 of 240 at 7 as known), and 27 bridge checks against a stand-in engine. The Apple Silicon part waits for a Mac runner (D9) |
-| N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.5 (task NL5: the host now gives the controller the processor's state and delivers messages between the two from any thread, the gap most likely behind the silent Phase Plant and Pigments; a silence probe and [diag] lines measure it on your Mac); not in the app |
+| N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.5; **Pigments sounds on the user's Mac** (report 6), Phase Plant not played yet, Pigments' knob moves not reaching the host (task NL6 next) (task NL5: the host now gives the controller the processor's state and delivers messages between the two from any thread, the gap most likely behind the silent Phase Plant and Pigments; a silence probe and [diag] lines measure it on your Mac); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
@@ -131,6 +131,20 @@ Whether Phase Plant and Pigments now sound, and if they still do not, which of t
 **AudioLab VST3 test 0.5**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-5 (a pre-release; open it once with Open Anyway as before).
 
 What to try: choose the Gryphon at 44.1 kHz, load Phase Plant, open its window, play the pattern ten seconds, stop it; the same with Pigments; if either stays silent, wait for the [probe] lines (10 to 40 s), then choose a preset in its own window and play again. Paste the report.
+
+## The user's sixth report, on test app 0.5 (27 November 2026, 20:12 Brussels): "works well"
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-6.txt`.
+
+What it shows:
+- **Pigments sounds now.** Loaded in 3.5 s (4,365 parameters, 128 programs through VST3, latency 44 samples), `setComponentState` = ok, 155 notes from the pattern, sound in 2,854 of 3,468 blocks, peak -13.4 dB, on the Bose and then on the iFi Gryphon at 44.1 kHz. Average 0.69 ms per 11.6 ms block (5.9 %), worst 1.69 ms (14.6 %), 0 failed blocks, 1 overload reported by the device (at the switch to the Gryphon). In reports 4 and 5 it was silent with the 0.4 host: the 0.5 host's set-up (state given to the controller, messages from any thread) is what fixed it. The "Why silent?" probe never had to run.
+- **Phase Plant was not played this time** (0 notes sent, its window open, `setComponentState` = not implemented, which is allowed). Whether it sounds is still open.
+- **Pigments' knob moves did not reach the host**: 222 drag steps and 2 clicks in its window, 0 parameter moves, 0 gestures begun. In report 5 Phase Plant's moves did arrive (1,428). Not known yet whether the drags were on knobs or in its preset browser, or whether Pigments reports moves in a way the host does not catch.
+- **The iFi Gryphon runs at 16-bit integer on the wire** ("format on the wire: 16-bit integer, 2 ch, 44100 Hz", 60 formats offered). macOS turns the float mix into 16 bits before the DAC. Set in Audio MIDI Setup; the native engine should choose the deepest integer format when it opens a device.
+- **Devices**: the Bluetooth speaker came back at 44.1 kHz and the app followed ("switched to 44100 Hz from outside this app; following it"); when the eqMac device went away it moved to the default output by itself; the Gryphon was switched on during the run and got a `[device] appeared` line. One blank device appeared for a moment during the Bluetooth reconnect ("(, unknown) ... now 0 Hz").
+- Scan: 253 bundles, 221 readable, 222 plug-ins, every bundle in a separate process; 31 Intel-only (Midnight Mirage, Output's Arcade, Black, Boost, Brass, Clone, Duck, Hatz, Infiltrator, Minipol, PitchMonster, Shaper2, Tantrum, Tapex2, Texture, Transient Master, Vybz, 14 RX 9), 1 broken (helisert_6.0). `[au]` 104 Audio Units (96 Apple Silicon, 8 Intel-only), `[clap]` none. The report is ASCII; two empty lines between summaries.
+
+Next: task NL6 (below).
 
 ## Stage N1: what was built (27 November 2026)
 
