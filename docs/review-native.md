@@ -20,6 +20,14 @@ Review only, written 27 November 2026. No code was changed: `index.html`, `deskt
 
 **What I could not run:** anything that needs Core Audio, the VST3 SDK host on macOS, or RealtimeSanitizer (clang 18 here has no runtime for it, and LLVM 20 or newer is needed). These need the macOS runner (section 6).
 
+**NB moved on while this review was written.** My clone was at `b79ab32`. By the time I pushed, NB-N3a (the engine core: devices, chains, `alrender`, the dynamics family, 119 of 119 cases bit for bit on Linux) and NB-N3b (the mixer in `native/engine/mix/`, 10 of 10 scenes bit for bit on Linux) had landed. The findings above were reviewed against `b79ab32`. A short check of the new code shows:
+- **It confirms A5.** N3b found on its own that "the web engine's own order of tracks into a bus changes between renders", so the web export is not repeatable with three or more tracks into one bus.
+- **It answers part of A2, not all of it.** `mix_graph.h:52` keeps **one** generator "shared by the devices in creation order, as in the page", and draws for whole quanta, as Chromium does. That matches the serial page, which is good work. But it ties the engine to one serial order, so NR3's parallel graph cannot use it for any device that draws random numbers, and the generator would be a data race the day two threads share it. D2 stands.
+- **It sharpens A4.** `mix_graph.h:10` notes that the web engine uses 128-frame quanta while playing and **512 in an export** (`renderSizeHint`). So `dnGuard`'s "every 16 calls" flush and its silence gate fall at different sample positions in playback and in export. The reference itself differs between the two, which is one more reason for the grid rule in sample time (D4).
+- **A6 is still open.** `-ffp-contract=off` is still set target by target (`alnative`, `alrender`, `almix`), not for the whole engine.
+
+The new code was not read line by line. It is worth its own short review once NB-N3 settles.
+
 ---
 
 ## 1. Summary: the top ten
