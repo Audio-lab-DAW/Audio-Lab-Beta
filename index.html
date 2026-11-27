@@ -2375,6 +2375,7 @@ body.lite .sciv{display:none}
 #niMono .nmline{position:absolute;width:6px;border:1.5px solid #ffb547;border-right:0;border-radius:3px 0 0 3px;pointer-events:auto;box-sizing:border-box}#niMono .nmline.bad{border-color:#ff6b6b}
 #niMono .nmp{display:flex;flex-direction:column;gap:2px;font-size:var(--fs1)}#niMono .nmpn{color:var(--mut)}#niMono .nmpr{color:#ffb547;cursor:pointer}#niMono .nmpr:hover{text-decoration:underline}
 #niMono .nmempty{grid-column:1/-1;color:var(--mut)}#niMono .nmnote{font-size:var(--fs1);color:var(--mut);line-height:1.35}
+.mxsr{display:flex;align-items:center;gap:4px}.mxsr>.hb{flex:1;min-width:0}.mxpp{flex:none;box-sizing:border-box;width:11px;height:11px;min-width:0;min-height:0;padding:0;margin:0;border-radius:50%;border:2px solid #f5c84c;background:transparent;cursor:pointer}.mxpp.pre{border-color:#4cc9f0;background:rgba(76,201,240,.18)}.mxpp:hover{box-shadow:0 0 0 2px rgba(255,255,255,.16)}.mxpp:focus-visible{outline:2px solid #fff;outline-offset:1px}.hb.mxlp{opacity:.45}.mxout{display:flex;align-items:center;gap:4px;box-sizing:border-box;width:100%;min-height:0;margin:3px 0 0;padding:2px 5px;border-radius:5px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font:var(--fw6) var(--fs1)/12px var(--ffu);color:#9aa0ad;cursor:pointer;text-align:left}.mxout i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--oc,#cfd3db)}.mxout span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mxout b{flex:none;font-weight:400;opacity:.6}.mxout:hover{color:#eef1f6;border-color:rgba(255,255,255,.2)}.mxout.set{color:#eef1f6;border-color:rgba(255,255,255,.18)}.mxout.bad{border-color:#ff6b6b}#mixWin.mxcmp .mx .mxout{display:none}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6651,7 +6652,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.293',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.294',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8119,9 +8120,9 @@ async function renderMix(sr,b0,b1,tail,lim,only,fast,prog){SIDE_B0=b0;RQOFF=RQOK
   const ABK=only||fast?new Set():abxKeys(),ABD=[];/* v0.205: a track that triggers a Ducker is built even when it is not heard (its fader at 0) */
   for(const t of S.tracks){const _aud=!!only||trkAudible(t,solo);if(only?t.id!==only:!_aud&&!ABK.has(t.id))continue;
     const tin=oc.createGain(),vol=oc.createGain(),pn=oc.createStereoPanner();vol.gain.value=_aud?t.vol:0;pn.pan.value=t.pan;let prev=tin;
-    for(const f of fast?[]:t.fx){if(!f.on)continue;const x=mkFxNode(oc,f.type);x.set(f.p);prev.connect(x.in);prev=x.out;if(f.type==='duck'&&x.key)ABD.push([x,f.p&&f.p.src,t.id])}{const d=PDC.get(t.id)||0;if(d>0){const dl=oc.createDelay(1);dl.delayTime.value=d/sr;prev.connect(dl);prev=dl}}prev.connect(vol);vol.connect(pn);NN.set(t.id,{tin,pn,pre:prev});if(typeof vmOffTrk==='function')vmOffTrk(oc,t,vol,pn)}
-  for(const t of S.tracks){const n=NN.get(t.id);if(!n)continue;const gp=only?null:grpOf(t),G=gp&&NN.get(gp.id);n.pn.connect(G?G.tin:mst);
-    if(!only&&t.kind!=='return')for(const rid in t.sends||{}){const R=NN.get(rid),lv=t.sends[rid];if(!R||!(lv>0)||rid===t.id)continue;const sg=oc.createGain();sg.gain.value=lv;n.pn.connect(sg);sg.connect(R.tin)}
+    for(const f of fast?[]:t.fx){if(!f.on)continue;const x=mkFxNode(oc,f.type);x.set(f.p);prev.connect(x.in);prev=x.out;if(f.type==='duck'&&x.key)ABD.push([x,f.p&&f.p.src,t.id])}{const d=PDC.get(t.id)||0;if(d>0){const dl=oc.createDelay(1);dl.delayTime.value=d/sr;prev.connect(dl);prev=dl}}prev=mxUtilOff(oc,t,prev);prev.connect(vol);vol.connect(pn);NN.set(t.id,{tin,pn,pre:prev,aud:_aud});if(typeof vmOffTrk==='function')vmOffTrk(oc,t,vol,pn)}
+  for(const t of S.tracks){const n=NN.get(t.id);if(!n)continue;const gp=only?null:mxDestT(t),G=gp&&NN.get(gp.id);if(!(gp&&!G&&mxOutT(t)))n.pn.connect(G?G.tin:mst);
+    if(!only&&t.kind!=='return')for(const rid in t.sends||{}){const R=NN.get(rid),lv=t.sends[rid];if(!R||!(lv>0)||rid===t.id)continue;if(!mxSendOk(t,rid))continue;const pr=!!(t.sendPre&&t.sendPre[rid]),sg=oc.createGain();sg.gain.value=pr?(n.aud?lv:0):lv;(pr?n.pre:n.pn).connect(sg);sg.connect(R.tin)}
     const tin=n.tin;
     for(const c of t.clips){if(c.mute)continue;const cs=c.start,ce=cs+c.len;if(ce<=b0||cs>=b1)continue;
       const bFrom=Math.max(0,b0-cs),t0=secSpan(b0,cs+bFrom),ch=clipChain(oc,c,bFrom,t0,tin,60/bpmAt(cs+bFrom),t.read!==false);
@@ -9238,11 +9239,14 @@ function grpOf(t){const g=t&&t.grp&&trkById(t.grp);return g&&g.kind==='group'&&g
 function grpAnc(t){const out=[];let g=grpOf(t),n=0;while(g&&n++<12){out.push(g);g=grpOf(g)}return out}
 function grpMembers(g,deep){const out=[];for(const t of S.tracks)if(deep?grpAnc(t).includes(g):grpOf(t)===g)out.push(t);return out}
 function trkAudible(t,solo){if(t.mute||grpAnc(t).some(g=>g.mute))return false;if(!solo)return true;if(t.kind==='return')return true;if(t.solo||grpAnc(t).some(g=>g.solo))return true;if(t.kind==='group'&&grpMembers(t,true).some(m=>m.solo&&!m.mute))return true;return false}
-function busRoute(){if(!ctx)return;for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;const g=grpOf(t),G=g&&NODES.get(g.id),dest=G?G.in:master;
+function busRoute(){if(!ctx)return;const solo=S.tracks.some(t=>t.solo);for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;const d=mxDestT(t),D=d&&NODES.get(d.id),dest=D?D.in:master;
     if(N.dest!==dest){try{N.pan.disconnect(N.dest||master)}catch(e){}N.pan.connect(dest);N.dest=dest}
-    N.snd=N.snd||new Map();const want=t.kind==='return'?{}:(t.sends||{});
-    for(const[rid,sg] of N.snd)if(!(want[rid]>0)||!NODES.get(rid)||sg._to!==NODES.get(rid).in){try{N.pan.disconnect(sg)}catch(e){}try{sg.disconnect()}catch(e){}N.snd.delete(rid)}
-    for(const rid in want){const R=NODES.get(rid),lv=want[rid];if(!R||rid===t.id||!(lv>0))continue;let sg=N.snd.get(rid);if(!sg){sg=ctx.createGain();sg.gain.value=0;N.pan.connect(sg);sg.connect(R.in);sg._to=R.in;N.snd.set(rid,sg)}sg.gain.setTargetAtTime(lv,ctx.currentTime,.01)}}}
+    N.snd=N.snd||new Map();const want=t.kind==='return'?{}:(t.sends||{}),pre=t.sendPre||{};/* MX-1: a send in t.sendPre is taken before the fader (N.mxPre, after effects, compensation and the utility) */
+    for(const[rid,sg] of N.snd){const R=NODES.get(rid);if(!(want[rid]>0)||!R||sg._to!==R.in||!!sg._pre!==!!pre[rid]||!mxSendOk(t,rid)){try{(sg._from||N.pan).disconnect(sg)}catch(e){}try{sg.disconnect()}catch(e){}N.snd.delete(rid)}}
+    let np=false;for(const rid in want)if(pre[rid]&&want[rid]>0){np=true;break}
+    if(np&&!N.mxPre){N.mxPre=ctx.createGain();N.mxPre.gain.value=0;N.mxPreC=false}
+    if(N.mxPre){const on=!N.slp;if(!!N.mxPreC!==on){try{on?N.ut.out.connect(N.mxPre):N.ut.out.disconnect(N.mxPre)}catch(e){}N.mxPreC=on}N.mxPre.gain.setTargetAtTime(np&&trkAudible(t,solo)?1:0,ctx.currentTime,.01)}
+    for(const rid in want){const R=NODES.get(rid),lv=want[rid];if(!R||rid===t.id||!(lv>0)||!mxSendOk(t,rid))continue;let sg=N.snd.get(rid);if(!sg){const pr=!!pre[rid],fr=pr?N.mxPre:N.pan;sg=ctx.createGain();sg.gain.value=0;fr.connect(sg);sg.connect(R.in);sg._to=R.in;sg._pre=pr;sg._from=fr;N.snd.set(rid,sg)}sg.gain.setTargetAtTime(lv,ctx.currentTime,.01)}}}
 const RETN=()=>S.tracks.filter(t=>t.kind==='return');
 function retNew(fxType,from){pushUndo();const n=RETN().length,r={id:rid(),kind:'return',name:'Return '+String.fromCharCode(65+n%26),color:['#7fd0ff','#c39bff','#ffb36b','#9be38a'][n%4],vol:.8,pan:0,mute:false,solo:false,fx:[],clips:[]};
   if(fxType&&FXDEF[fxType])r.fx.push(mkFx(fxType));S.tracks.push(r);if(from){from.sends=from.sends||{};from.sends[r.id]=.5}changed(true);toast(r.name+' added'+(fxType?' with '+FXDEF[fxType].name:'')+'. Turn up a track’s Send knob in the mixer to feed it.');return r}
@@ -9277,9 +9281,9 @@ function drawGroupLanes(g,w,h){S.tracks.forEach((t,i)=>{if(t.kind!=='group'||HID
 /* sends in the mixer: one small bar per return under the inserts */
 const SPEC_SEND={...SPEC_VOL,d:0};
 function mxSends(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const R=RETN();for(const mx of w.querySelectorAll('.mx[data-id]')){const t=trkById(mx.dataset.id);mx.querySelector('.mxsnd')?.remove();if(!t)continue;
-    mx.classList.toggle('kret',t.kind==='return');mx.classList.toggle('kgrp',t.kind==='group');if(grpOf(t))mx.style.setProperty('--gc',grpOf(t).color);mx.classList.toggle('gm',!!grpOf(t));
+    mx.classList.toggle('kret',t.kind==='return');mx.classList.toggle('kgrp',t.kind==='group');if(grpOf(t))mx.style.setProperty('--gc',grpOf(t).color);mx.classList.toggle('gm',!!grpOf(t));try{mxOutBtn(mx,t)}catch(e){console.error(e)}
     if(t.kind==='return'||!R.length)continue;const box=document.createElement('div');box.className='mxsnd';box.innerHTML='<span class="mxsh">Sends</span>'+R.map(r=>ctl('hb','mx:'+t.id+':s:'+r.id,r.name,SPEC_SEND,()=>(t.sends||{})[r.id]||0,v=>{t.sends=t.sends||{};if(v>0)t.sends[r.id]=v;else delete t.sends[r.id];sgSoon();changed(false)})).join('');
-    const after=mx.querySelector('.mxi')||mx.querySelector('.mxn');after.after(box);paintAll(box)}}
+    const after=mx.querySelector('.mxi')||mx.querySelector('.mxn');after.after(box);paintAll(box);try{mxRings(box,t)}catch(e){console.error(e)}}}
 {const _rm3=renderMixer;renderMixer=function(){const x=_rm3.apply(this,arguments);try{mxSends()}catch(e){console.error(e)}return x}}
 /* crossfades: where two audio clips on one track overlap, the first fades out while the second fades in (equal power). Drag either fade handle to make it your own. */
 function xfadeSync(){for(const t of S.tracks){if(t.kind!=='audio')continue;const cs=t.clips.filter(c=>!c.notes&&!c.mute).sort((a,b)=>a.start-b.start),sI=new Set(),sO=new Set();
@@ -17535,7 +17539,7 @@ function abxFind(fid){for(const t of S.tracks)for(const f of t.fx||[])if(f.id===
 const abxX=(t,f)=>{if(!ctx||!t||!f)return null;const N=NODES.get(t.id);return N&&N.fxm.get(f.id)||null};
 const abxSrc=f=>f&&f.p&&typeof f.p.src==='string'?trkById(f.p.src):null;
 /* does the sound of b reach a (through groups, sends or the triggers of other ducks)? then a cannot make b duck: that would be a loop */
-function abxReach(b,a){const seen=new Set(),st=[b];while(st.length){const x=st.pop();if(!x||seen.has(x.id))continue;seen.add(x.id);if(x===a)return true;const g=grpOf(x);if(g)st.push(g);
+function abxReach(b,a){const seen=new Set(),st=[b];while(st.length){const x=st.pop();if(!x||seen.has(x.id))continue;seen.add(x.id);if(x===a)return true;const g=mxRawDest(x);if(g)st.push(g);
   if(x.kind!=='return')for(const rid in x.sends||{})if(x.sends[rid]>0)st.push(trkById(rid));for(const t of S.tracks)for(const f of t.fx||[])if(f.type==='duck'&&f.on&&f.p&&f.p.src===x.id)st.push(t)}return false}
 /* ---- wiring the trigger: the source track after its effects, before its fader ---- */
 function abxWire(){if(!ctx)return;for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;for(const f of t.fx||[]){if(f.type!=='duck')continue;const X=N.fxm.get(f.id);if(!X||!X.key)continue;
@@ -17598,12 +17602,13 @@ document.addEventListener('pointerdown',e=>{const m=document.getElementById('abx
 addEventListener('keydown',e=>{if(e.key==='Escape'){abxMClose()}});
 /* what a cable from a to b can be, in plain words */
 function abxOpts(a,b){const it=[];if(!a||!b||a===b)return it;
- if(b==='master'){const g=grpOf(a);if(g)it.push({ic:'mst',col:'#cfd3db',t:'Play straight into the Master',d:a.name+' leaves the group '+g.name+' and plays straight into the Master.',act:()=>{pushUndo();delete a.grp;changed(true);toast(a.name+' now plays straight into the Master.')}});return it}
+ if(b==='master'){if(mxOutT(a)){it.push({ic:'mst',col:'#cfd3db',main:true,t:'Play straight into the Master',d:a.name+' stops playing into '+mxOutT(a).name+' and plays straight into the Master.',act:()=>mxSetOut(a,'master')});return it}const g=grpOf(a);if(g)it.push({ic:'mst',col:'#cfd3db',t:'Play straight into the Master',d:a.name+' leaves the group '+g.name+' and plays straight into the Master.',act:()=>{pushUndo();delete a.grp;changed(true);toast(a.name+' now plays straight into the Master.')}});return it}
  const sc=[],dk=(b.fx||[]).filter(f=>f.type==='duck'&&f.p&&f.p.src===a.id),loop=abxReach(b,a);
  {if(dk.length)sc.push({ic:'win',col:'#ff7a7a',main:true,t:'Open the sidechain window',d:b.name+' already ducks when '+a.name+' plays. Change how much and how fast.',act:()=>abxOpen(dk[0].id)});
   else sc.push({ic:'duck',col:'#ff7a7a',main:true,t:b.name+' ducks when '+a.name+' plays',d:'Sidechain: every time '+a.name+' hits, '+b.name+' gets quieter and then comes back. Opens the sidechain window.',dis:loop,why:loop?b.name+' already plays into '+a.name+', so this would make a loop.':'',act:()=>abxMake(a,b)})}
  if(b.kind==='return'&&a.kind!=='return'){const on=(a.sends||{})[b.id]>0;
   it.push(on?{ic:'amt',col:b.color,t:'Change the send amount',d:a.name+' already sends to '+b.name+'.',act:()=>{const c=cabList().find(x=>x.k==='send'&&x.a===a&&x.b===b);if(c)cabPop(c,CAB.lx||200,CAB.ly||200)}}:{ic:'send',col:b.color,main:true,t:'Send to '+b.name,d:'A copy of '+a.name+' goes into the return '+b.name+' (half level). '+a.name+' keeps playing as before.',act:()=>{pushUndo();a.sends=a.sends||{};a.sends[b.id]=.5;changed(true);toast(a.name+' now sends to '+b.name+'.')}})}
+ mxOptsOut(a,b,it);
  if(b.kind==='group'&&a.kind!=='return'){if(grpOf(a)===b)it.push({ic:'grp',col:b.color,t:'Already plays through '+b.name,d:'Its sound already goes through the effects and fader of '+b.name+'.',dis:true});else if(!grpAnc(b).includes(a))it.push({ic:'grp',col:b.color,main:true,t:'Play through '+b.name,d:a.name+' goes into the group '+b.name+': its effects and fader.',act:()=>{addToGroup(a,b);toast(a.name+' now plays through '+b.name+'.')}})}
  (b.mods||[]).forEach((m,j)=>{if(m.type!=='side')return;const cur=m.p&&m.p.src===a.id;sc.push({ic:'fol',col:MODT.side.c,t:'Follower '+(j+1)+(cur?': already follows '+a.name:': follow '+a.name),d:cur?'':'It follows '+spoName(m.p.src)+' now.',dis:cur,act:()=>{pushUndo();m.p.src=a.id;changed(false);renderFx();cabSoon()}})});
  (b.fx||[]).forEach((f,j)=>{if(f.type!=='side')return;const cur=f.p&&f.p.src===a.id;sc.push({ic:'pump',col:'#4cc9f0',t:'Pump effect in slot '+(j+1)+(cur?': already marked':''),d:cur?'':'Mark '+a.name+' as its source. It pumps in time with the song.',dis:cur,act:()=>{pushUndo();f.p.src=a.id;changed(true)}})});
@@ -25231,6 +25236,95 @@ function xtSandboxRun(code,opts){opts=opts||{};const id=++XT_SBX.n,t0=performanc
   })}
 /* stop one run (id) or all of them */
 function xtSandboxStop(id){for(const [k,r] of [...XT_SBX.runs])if(id==null||k===id)r.stop()}
+/* ===== task MX-1 (lane K, mixing engine): pre or post per send (X12), output to any group, return or track (X13) =====
+   Project data (both optional; absent means what AudioLab did before):
+   - t.sendPre = {returnId: true}: that send is taken before the fader (after the track's effects, delay compensation, width, phase and trim),
+     so fading the track keeps its send. It still follows Mute and Solo. Absent: after the fader and the pan, as before.
+   - t.out = id of a group, a return or another track, or 'master'. Absent: the group the track sits in (t.grp), else the master, as before.
+     t.grp stays the arrangement's folder: choosing an output does not regroup anything.
+   One loop check for every link (abxReach, used by outputs, sends and Ducker triggers). Hooks for other lanes in window.MX_HOOKS. */
+window.MX_HOOKS=window.MX_HOOKS||{};
+const mxRawOut=x=>x&&x.out&&x.out!=='master'?trkById(x.out)||null:null;
+/* where x's sound goes, as stored (used inside the loop check, so it does not check loops itself) */
+let MXRV=false;/* true while checking a send: outputs that are refused themselves do not count, so in a loop the output gives way and the send stays */
+function mxRawDest(x){if(!x)return null;if(MXRV)return mxDestT(x);if(x.out){if(x.out==='master')return null;const o=trkById(x.out);if(o)return o}return grpOf(x)}
+/* the chosen output when it exists and makes no loop, else null */
+function mxOutT(t){const o=mxRawOut(t);if(!o||o===t)return null;const k=MXRV;MXRV=false;try{return abxReach(o,t)?null:o}finally{MXRV=k}}
+/* where t's sound really goes: its output, its group, or null for the master */
+function mxDestT(t){const o=mxOutT(t);if(o)return o;return t&&t.out==='master'?null:grpOf(t)}
+function mxSendOk(t,rid){const r=trkById(rid);if(!r||r===t)return false;const k=MXRV;MXRV=true;try{return!abxReach(r,t)}finally{MXRV=k}}
+/* can a play into b? k: 'out' (output), 'send', 'sc' (a trigger). {ok, why} in plain words */
+function mxCan(a,b,k){if(!a||!b)return{ok:false,why:'There is nothing to connect.'};if(b==='master')return{ok:true,why:''};if(a===b)return{ok:false,why:'A track cannot play into itself.'};
+  if(k==='send'&&b.kind!=='return')return{ok:false,why:'Sends go to return tracks only.'};if(k==='send'&&a.kind==='return')return{ok:false,why:'Return tracks have no sends. Choose their output instead.'};
+  if(abxReach(b,a))return{ok:false,why:b.name+' already plays into '+a.name+', so this would make a loop.'};return{ok:true,why:''}}
+const mxOutName=t=>{const d=mxDestT(t);return d?d.name:'Master'};
+function mxSetOut(t,id){if(!t)return false;const g=grpOf(t),v=id==='master'||id==null?(g?'master':null):(g&&id===g.id?null:id);
+  if(v&&v!=='master'){const b=trkById(v),c=mxCan(t,b,'out');if(!c.ok){toast(c.why);return false}}
+  if((t.out||null)===v)return true;pushUndo();if(v)t.out=v;else delete t.out;changed(true);try{cabSoon()}catch(e){}try{mxSends()}catch(e){}
+  toast(t.name+' now plays into '+mxOutName(t)+'.');return true}
+function mxOutMenu(t,x,y){if(!t)return;const cur=mxDestT(t),g=grpOf(t),it=[{head:'Output of '+t.name}];
+  it.push({label:'Master',sub:'plays straight into the master',check:!cur,dot:'#cfd3db',act:()=>mxSetOut(t,'master')});
+  const add=(b,sub)=>{const c=mxCan(t,b,'out');it.push({label:b.name,sub:c.ok?sub:c.why,check:cur===b,dot:b.color||'#cfd3db',dis:!c.ok,act:()=>mxSetOut(t,b.id)})};
+  const gs=S.tracks.filter(x=>x.kind==='group'&&x!==t),rs=S.tracks.filter(x=>x.kind==='return'&&x!==t),ts=S.tracks.filter(x=>x.kind!=='group'&&x.kind!=='return'&&x!==t);
+  if(gs.length){it.push({head:'Groups'});for(const b of gs)add(b,b===g?'its group in the arrangement':'group: its effects and fader')}
+  if(rs.length){it.push({head:'Returns'});for(const b of rs)add(b,'return: its effects and fader')}
+  if(ts.length){it.push({head:'Tracks'});for(const b of ts)add(b,'plays through its devices, to resample')}
+  openMenu(x,y,it)}
+/* the output button under a strip's inserts (one per strip, not on the master) */
+function mxOutBtn(mx,t){if(!mx||!t)return;mx.querySelector('.mxout')?.remove();const d=mxDestT(t),bad=!!(t.out&&t.out!=='master'&&!mxOutT(t)),b=document.createElement('button');
+  b.type='button';b.className='mxout'+(t.out?' set':'')+(bad?' bad':'');b.dataset.mxout=t.id;b.style.setProperty('--oc',d?d.color||'#cfd3db':'#cfd3db');
+  b.innerHTML='<i></i><span>'+esc(d?d.name:'Master')+'</span><b aria-hidden="true">▾</b>';
+  b.title='Output: where '+t.name+' plays into. Now: '+(d?d.name:'the Master')+'.'+(bad?' The chosen output would make a loop, so it plays here for now.':'')+' Click to choose the Master, a group, a return or another track.';
+  b.setAttribute('aria-label','Output of '+t.name+': '+(d?d.name:'Master'));b.setAttribute('aria-haspopup','menu');
+  (mx.querySelector('.mxi')||mx.querySelector('.mxn')).after(b)}
+/* the ring on each send: blue before the fader, yellow after it */
+function mxRings(box,t){if(!box||!t)return;for(const el of box.querySelectorAll('.hb[data-c]')){const m=/^mx:[^:]+:s:(.+)$/.exec(el.dataset.c||'');if(!m||el.parentNode.classList.contains('mxsr'))continue;const rid=m[1],r=trkById(rid);if(!r)continue;
+  const pre=!!(t.sendPre&&t.sendPre[rid]),w=document.createElement('div'),b=document.createElement('button');w.className='mxsr';el.before(w);
+  b.type='button';b.className='mxpp'+(pre?' pre':'');b.dataset.mxpp=rid;b.dataset.tid=t.id;b.setAttribute('aria-pressed',pre?'true':'false');b.setAttribute('aria-label','Send to '+r.name+': '+(pre?'before':'after')+' the fader');
+  b.title=(pre?'Before the fader (blue)':'After the fader (yellow)')+'. Blue: taken before the fader, so fading the track keeps its send. Yellow: after the fader. Click to switch.';w.append(b,el);
+  if((t.sends||{})[rid]>0&&!mxSendOk(t,rid)){el.classList.add('mxlp');el.title=r.name+' already plays into '+t.name+', so this send would make a loop. It stays silent.'}}}
+function mxTogPre(t,rid){if(!t||!trkById(rid))return;pushUndo();t.sendPre=t.sendPre||{};if(t.sendPre[rid])delete t.sendPre[rid];else t.sendPre[rid]=true;if(!Object.keys(t.sendPre).length)delete t.sendPre;
+  sgSoon();changed(false);try{mxSends()}catch(e){}toast('The send from '+t.name+' to '+trkById(rid).name+' is now taken '+(t.sendPre&&t.sendPre[rid]?'before':'after')+' the fader.')}
+document.addEventListener('click',e=>{const o=e.target.closest&&e.target.closest('.mxout[data-mxout]');if(o){e.stopPropagation();e.preventDefault();const t=trkById(o.dataset.mxout),r=o.getBoundingClientRect();if(t)mxOutMenu(t,r.left,r.bottom+2);return}
+  const p=e.target.closest&&e.target.closest('.mxpp[data-mxpp]');if(p){e.stopPropagation();e.preventDefault();mxTogPre(trkById(p.dataset.tid),p.dataset.mxpp)}},true);
+/* the cable menu: a cable to a return or a track can be an output */
+function mxOptsOut(a,b,it){if(!a||!b||b==='master'||a===b||b.kind==='group')return;const c=mxCan(a,b,'out'),cur=mxOutT(a)===b;
+  if(cur){it.push({ic:'grp',col:b.color,t:'Already plays into '+b.name,d:'Its sound goes through the effects and fader of '+b.name+'.',dis:true});return}
+  it.push({ic:'grp',col:b.color,main:b.kind!=='return'&&a.kind==='return',t:'Play into '+b.name,d:b.kind==='return'?'The whole sound of '+a.name+' goes into the return '+b.name+' instead of the '+(grpOf(a)?'group '+grpOf(a).name:'Master')+'.':'The sound of '+a.name+' goes into '+b.name+' and plays through its devices and fader, together with its own clips. Good for resampling.',dis:!c.ok,why:c.ok?'':c.why,act:()=>mxSetOut(a,b.id)})}
+/* offline: the track's width, phase and trim, only when they are not neutral (so older projects render exactly as before) */
+function mxUtilOff(oc,t,prev){const w=(t.width??100)/100,ph=t.phase?-1:1,tr=Math.pow(10,(t.trim||0)/20);if(w===1&&ph===1&&tr===1)return prev;
+  const i=oc.createGain(),sp=oc.createChannelSplitter(2),m=oc.createChannelMerger(2),o=oc.createGain(),a=(.5+.5*w)*ph,b=(.5-.5*w)*ph,G=v=>{const g=oc.createGain();g.gain.value=v;return g},LL=G(a),RR=G(a),LR=G(b),RL=G(b);
+  i.channelCountMode='explicit';i.channelCount=2;i.connect(sp);sp.connect(LL,0);sp.connect(RL,0);sp.connect(LR,1);sp.connect(RR,1);LL.connect(m,0,0);LR.connect(m,0,0);RL.connect(m,0,1);RR.connect(m,0,1);m.connect(o);o.gain.value=tr;prev.connect(i);return o}
+/* Solo: a soloed track keeps the bus it plays into audible (as a soloed member keeps its group) */
+let MXTAD=0;
+{const _ta=trkAudible;trkAudible=function(t,solo){const r=_ta.call(this,t,solo);if(r||!solo||!t||MXTAD>24||!S.tracks.some(x=>x.out))return r;if(t.mute||grpAnc(t).some(g=>g.mute))return r;
+  MXTAD++;try{return S.tracks.some(x=>x!==t&&mxDestT(x)===t&&trkAudible(x,solo))}finally{MXTAD--}}}
+/* sleeping tracks (lane J): a track, group or return that an awake track plays into stays awake; pre sends sleep with their track */
+const MXWK=new Set();
+function mxWake(){if(!ctx)return;const any=S.tracks.some(t=>t.out&&t.out!=='master'),now=new Set();
+  if(any){const wake=x=>{if(!x)return false;const O=NODES.get(x.id);if(!O||!O.slp)return false;try{O.ut.out.connect(O.vol)}catch(e){}O.slp=false;try{slzSinks(O,true)}catch(e){}
+      if(!MXWK.has(x.id))for(const f of O.fxm.values()){try{if(f.resync)f.resync();else if(f.sync)f.sync(play.on?play.t0-play.b0*60/S.bpm:ctx.currentTime)}catch(e){}}return true};
+    let ch=true,k=0;while(ch&&k++<16){ch=false;for(const t of S.tracks){const o=mxOutT(t),N=NODES.get(t.id);if(!o||!N||N.slp)continue;now.add(o.id);if(wake(o))ch=true;
+      for(const g of grpAnc(o)){now.add(g.id);if(wake(g))ch=true}if(o.kind!=='return')for(const rid in o.sends||{})if(o.sends[rid]>0){now.add(rid);if(wake(trkById(rid)))ch=true}}}}
+  MXWK.clear();for(const id of now)MXWK.add(id);
+  for(const[,N] of NODES)if(N.mxPre){const on=!N.slp;if(!!N.mxPreC!==on){try{on?N.ut.out.connect(N.mxPre):N.ut.out.disconnect(N.mxPre)}catch(e){}N.mxPreC=on}}}
+{const _sl=slpTick;slpTick=function(){const r=_sl.apply(this,arguments);try{mxWake()}catch(e){}return r}}
+/* mixer cables: a channel whose output goes elsewhere no longer draws its group cable */
+{const _cl=cabList;cabList=function(){const L=_cl.apply(this,arguments);try{if(!S.tracks.some(t=>t.out))return L;return L.filter(c=>!(c.k==='out'&&c.a&&c.a.out&&mxDestT(c.a)!==c.b))}catch(e){return L}}}
+Object.assign(MX_HOOKS,{
+  /* every link of the project: {k:'out'|'send'|'sc', a, b ('master' for the master), pre, lv, tap, lat (MX-2)} */
+  links(){const L=[];for(const t of S.tracks){L.push({k:'out',a:t,b:mxDestT(t)||'master',pre:false,tap:null,lat:null});
+      if(t.kind!=='return')for(const rid in t.sends||{}){const r=trkById(rid);if(r&&t.sends[rid]>0&&mxSendOk(t,rid))L.push({k:'send',a:t,b:r,lv:t.sends[rid],pre:!!(t.sendPre&&t.sendPre[rid]),tap:null,lat:null})}
+      for(const f of t.fx||[])if(f&&f.type==='duck'&&f.p&&typeof f.p.src==='string'){const s=trkById(f.p.src);if(s&&s!==t)L.push({k:'sc',a:s,b:t,fx:f,pre:true,tap:'fx',lat:null})}}return L},
+  canLink:(a,b,k)=>mxCan(a,b,k||'out'),
+  outOf:t=>mxDestT(t)||'master',
+  setOut:(t,id)=>mxSetOut(t,id),
+  outMenu:(t,x,y)=>mxOutMenu(t,x,y),
+  isPre:(t,rid)=>!!(t&&t.sendPre&&t.sendPre[rid]),
+  setPre(t,rid,on){if(!t||!!(t.sendPre&&t.sendPre[rid])===!!on)return;mxTogPre(t,rid)},
+  /* the live node at a tap point: 'in' (before effects), 'fx' (after effects), 'fader' (after fader and pan), 'group' (after the bus it plays into) */
+  tap(t,pt){if(!ctx||!t)return null;const N=NODES.get(t.id);if(!N)return null;if(pt==='in')return N.in;if(pt==='fx')return N.ut.out;if(pt==='fader')return N.pan;
+    if(pt==='group'){const d=mxDestT(t),D=d&&NODES.get(d.id);return D?D.pan:master}return null}});
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
