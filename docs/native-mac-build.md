@@ -365,9 +365,11 @@ The review (A10) said the engine cannot grow further without a defined owner of 
 
 **Found and fixed by the sanitizer run:** the history limit could cut an undo step in half (now whole steps only, checked); moving one track resent all tracks (now only the moved one).
 
-**The first Mac machine (D9):** the Mac job of native-ci got a `macos-latest` machine at last (run 46052838752: macOS 26.7.2, Apple clang 21, arm64). `alengine` built and its selftest passed on Apple Silicon, the ring too. The devices and the mixer did not build: the vendored LLVM maths lacked its ARM files. Added (13 files, same LLVM commit) and dispatched again; the devices bit for bit on Apple Silicon is what the next run reads.
+**The first Mac machine (D9):** the Mac job of native-ci got a `macos-latest` machine at last (run 46052838752: macOS 26.7.2, Apple clang 21, arm64). `alengine` built and its selftest passed on Apple Silicon, the ring too. The devices and the mixer did not build: the vendored LLVM maths lacked its ARM files. Added (13 files, same LLVM commit) and dispatched again: **run 46054867320, the Mac job green on everything**: every native target builds for arm64 (`alengine`, `alrender`, `almix`, `aldoc`, the maths probe), `alengine selftest` passes (follower flat to 20 kHz, every clock offset steered within 2 ppm, 14.8 us per block), the ring under two threads also with ThreadSanitizer, **the mixer's 10 scenes bit for bit against the web engine on Apple Silicon (ALL IDENTICAL)**, `aldoc selftest` and the protocol test (300 steps per song, PASS), the bridge's 55 checks.
 
-**Not proven yet:** the page side inside the real app and its cost in Chromium (N2c); `aldoc` and the protocol test on the Mac (in the dispatched run).
+**Not proven yet:** the page side inside the real app and its cost in Chromium (N2c); the 240 device cases on Apple Silicon (the Mac job does not make the web references yet: next NB run adds them).
+
+Mac runs: the D9 row of the review table no longer holds as written; `macos-latest` machines come within a minute now (`macos-15` and `macos-14` still got none earlier today).
 
 ## Review fix NB-R5: the clock follower (27 November 2026)
 
