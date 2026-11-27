@@ -4,6 +4,7 @@
 #ifdef __APPLE__
 #include "coreaudio.h"
 #include "json.h"
+#include "../engine/sample_convert.h"
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <mach/mach_time.h>
@@ -217,7 +218,7 @@ static OSStatus ioProc(AudioObjectID, const AudioTimeStamp*, const AudioBufferLi
     // frames in this cycle, from the first buffer
     const AudioBuffer& b0 = out->mBuffers[0];
     UInt32 nch0 = b0.mNumberChannels ? b0.mNumberChannels : 1;
-    UInt32 frames = b0.mDataByteSize / (sizeof(Float32) * nch0);
+    UInt32 frames = b0.mDataByteSize / ((s->vFloat ? (UInt32)sizeof(Float32) : (UInt32)s->vBytes) * nch0);
     if (frames > s->scratch[0].size()) frames = (UInt32)s->scratch[0].size();
     float* ch[2] = {s->scratch[0].data(), s->scratch[1].data()};
     uint64_t t0 = mach_absolute_time();
@@ -237,6 +238,19 @@ static OSStatus ioProc(AudioObjectID, const AudioTimeStamp*, const AudioBufferLi
         Float32* d = (Float32*)b.mData;
         UInt32 fr = b.mDataByteSize / (sizeof(Float32) * nch);
         if (!d) { chanIndex += nch; continue; }
+        if (!s->vFloat) {
+            // the device's own integer format: this program writes the bytes
+            SampleFormat sf; sf.isFloat = false; sf.bits = s->vBits; sf.bytes = s->vBytes; sf.alignedHigh = s->vAlignedHigh; sf.bigEndian = s->vBigEndian;
+            Dither dth; dth.s = s->ditherState;
+            int stride = (int)(sf.bytes * nch);
+            UInt32 fri = b.mDataByteSize / (UInt32)stride;
+            memset(b.mData, 0, b.mDataByteSize);
+            for (UInt32 c = 0; c < nch; c++, chanIndex++) {
+                if (chanIndex < 2) writeChannel(ch[chanIndex], (int)(fri < frames ? fri : frames), (uint8_t*)b.mData + c * sf.bytes, stride, sf, (sf.bits <= 16 && s->dither16) ? &dth : nullptr);
+            }
+            s->ditherState = dth.s;
+            continue;
+        }
         for (UInt32 c = 0; c < nch; c++, chanIndex++) {
             if (chanIndex < 2) { const float* src = ch[chanIndex]; for (UInt32 k = 0; k < fr; k++) d[k * nch + c] = k < frames ? src[k] : 0.f; }
             else for (UInt32 k = 0; k < fr; k++) d[k * nch + c] = 0.f;
@@ -256,6 +270,24 @@ static OSStatus overloadListener(AudioObjectID, UInt32, const AudioObjectPropert
 bool OutputStream::start(uint32_t device, RenderFn f, void* u, std::string& err) {
     dev = device; fn = f; user = u;
     scratch[0].assign(16384, 0.f); scratch[1].assign(16384, 0.f);
+    {   // which format does the system hand us for this device?
+        vFloat = true; vBits = 32; vBytes = 4; vAlignedHigh = true; vBigEndian = false; formatText = "32-bit float";
+        auto sb = getBytes(dev, addr(kAudioDevicePropertyStreams, kAudioObjectPropertyScopeOutput));
+        if (sb.size() >= sizeof(AudioStreamID)) {
+            AudioStreamID st = *(const AudioStreamID*)sb.data();
+            AudioStreamBasicDescription f = {};
+            if (get(st, addr(kAudioStreamPropertyVirtualFormat), f) && f.mFormatID == kAudioFormatLinearPCM && f.mChannelsPerFrame > 0) {
+                vFloat = (f.mFormatFlags & kAudioFormatFlagIsFloat) != 0;
+                vBits = (int)f.mBitsPerChannel;
+                vBytes = (int)(f.mBytesPerFrame / f.mChannelsPerFrame);
+                vAlignedHigh = (f.mFormatFlags & kAudioFormatFlagIsAlignedHigh) != 0 || (f.mFormatFlags & kAudioFormatFlagIsPacked) != 0;
+                vBigEndian = (f.mFormatFlags & kAudioFormatFlagIsBigEndian) != 0;
+                formatText = fmtName(f);
+                if (!vFloat && (vBytes < 2 || vBytes > 4 || vBits < 8 || vBits > 32)) { err = "the device's format is not one this program can write: " + formatText; return false; }
+                if (vFloat && vBytes != 4) { err = "the device's float format is not 32-bit: " + formatText; return false; }
+            }
+        }
+    }
     AudioDeviceIOProcID pid = nullptr;
     OSStatus e = AudioDeviceCreateIOProcID(dev, ioProc, this, &pid);
     if (e != noErr || !pid) { err = "AudioDeviceCreateIOProcID: error " + osErr(e); return false; }
@@ -275,6 +307,183 @@ void OutputStream::stop() {
     AudioObjectRemovePropertyListener(dev, &a, overloadListener, this);
     AudioDeviceDestroyIOProcID(dev, pid);
     procId = nullptr; running = false;
+}
+
+// ---------------------------------------------------------------------------------------------------
+// added for the engine (task NB-N1)
+
+static AudioStreamID firstOutStream(uint32_t dev) {
+    auto sb = getBytes(dev, addr(kAudioDevicePropertyStreams, kAudioObjectPropertyScopeOutput));
+    return sb.size() >= sizeof(AudioStreamID) ? *(const AudioStreamID*)sb.data() : 0;
+}
+std::vector<PhysFormat> listPhysicalFormats(uint32_t dev) {
+    std::vector<PhysFormat> v;
+    AudioStreamID st = firstOutStream(dev);
+    if (!st) return v;
+    auto fb = getBytes(st, addr(kAudioStreamPropertyAvailablePhysicalFormats));
+    const AudioStreamRangedDescription* r = (const AudioStreamRangedDescription*)fb.data();
+    for (size_t i = 0; i < fb.size() / sizeof(AudioStreamRangedDescription); i++) {
+        const AudioStreamBasicDescription& f = r[i].mFormat;
+        if (f.mFormatID != kAudioFormatLinearPCM) continue;
+        PhysFormat p; p.rate = f.mSampleRate ? f.mSampleRate : r[i].mSampleRateRange.mMinimum; p.bits = (int)f.mBitsPerChannel; p.channels = (int)f.mChannelsPerFrame;
+        p.isFloat = (f.mFormatFlags & kAudioFormatFlagIsFloat) != 0; p.mixable = (f.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0;
+        v.push_back(p);
+    }
+    return v;
+}
+bool setPhysicalFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err) {
+    AudioStreamID st = firstOutStream(dev);
+    if (!st) { err = "the device has no output stream"; return false; }
+    auto fb = getBytes(st, addr(kAudioStreamPropertyAvailablePhysicalFormats));
+    const AudioStreamRangedDescription* r = (const AudioStreamRangedDescription*)fb.data();
+    const AudioStreamBasicDescription* pick = nullptr;
+    for (size_t i = 0; i < fb.size() / sizeof(AudioStreamRangedDescription); i++) {
+        const AudioStreamBasicDescription& f = r[i].mFormat;
+        if (f.mFormatID != kAudioFormatLinearPCM) continue;
+        bool mix = (f.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0;
+        bool rateOk = f.mSampleRate == rate || (f.mSampleRate == 0 && rate >= r[i].mSampleRateRange.mMinimum && rate <= r[i].mSampleRateRange.mMaximum);
+        if (rateOk && (int)f.mBitsPerChannel == bits && mix == mixable) { pick = &f; break; }
+    }
+    if (!pick) { err = "the device does not offer this format"; AudioStreamBasicDescription c = {}; if (get(st, addr(kAudioStreamPropertyPhysicalFormat), c)) now = fmtName(c); return false; }
+    AudioStreamBasicDescription want = *pick; want.mSampleRate = rate;
+    AudioObjectPropertyAddress a = addr(kAudioStreamPropertyPhysicalFormat);
+    OSStatus e = AudioObjectSetPropertyData(st, &a, 0, nullptr, sizeof want, &want);
+    if (e != noErr) err = "error " + osErr(e);
+    AudioStreamBasicDescription c = {};
+    for (int i = 0; i < 40; i++) {
+        get(st, a, c);
+        if (c.mSampleRate == rate && (int)c.mBitsPerChannel == bits && ((c.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0) == mixable) break;
+        usleep(50000);
+    }
+    now = fmtName(c);
+    return e == noErr && c.mSampleRate == rate && (int)c.mBitsPerChannel == bits && ((c.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0) == mixable;
+}
+static UInt32 volumeElement(uint32_t dev, bool& found) {
+    const AudioObjectPropertyScope O = kAudioObjectPropertyScopeOutput;
+    found = true;
+    if (has(dev, addr(kAudioDevicePropertyVolumeScalar, O, kAudioObjectPropertyElementMain))) return kAudioObjectPropertyElementMain;
+    if (has(dev, addr(kAudioDevicePropertyVolumeScalar, O, 1))) return 1;
+    found = false; return 0;
+}
+bool getVolume(uint32_t dev, double& v) {
+    bool f; UInt32 el = volumeElement(dev, f); if (!f) return false;
+    Float32 x = 0; if (!get(dev, addr(kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, el), x)) return false;
+    v = x; return true;
+}
+bool setVolume(uint32_t dev, double v, std::string& err) {
+    bool f; UInt32 el = volumeElement(dev, f); if (!f) { err = "this device has no volume the computer can set"; return false; }
+    Float32 x = (Float32)(v < 0 ? 0 : v > 1 ? 1 : v);
+    bool ok = true;
+    for (UInt32 e = el; e <= (el == 1 ? 2u : el); e++) {      // per channel: both channels
+        AudioObjectPropertyAddress a = addr(kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, e);
+        if (!AudioObjectHasProperty(dev, &a)) continue;
+        OSStatus st = AudioObjectSetPropertyData(dev, &a, 0, nullptr, sizeof x, &x);
+        if (st != noErr) { ok = false; err = "error " + osErr(st); }
+    }
+    return ok;
+}
+bool getMute(uint32_t dev, bool& m) {
+    UInt32 x = 0; const AudioObjectPropertyScope O = kAudioObjectPropertyScopeOutput;
+    if (get(dev, addr(kAudioDevicePropertyMute, O, kAudioObjectPropertyElementMain), x) || get(dev, addr(kAudioDevicePropertyMute, O, 1), x)) { m = x != 0; return true; }
+    return false;
+}
+bool setMute(uint32_t dev, bool m) {
+    UInt32 x = m ? 1 : 0; bool any = false; const AudioObjectPropertyScope O = kAudioObjectPropertyScopeOutput;
+    for (UInt32 e = 0; e <= 2; e++) {
+        AudioObjectPropertyAddress a = addr(kAudioDevicePropertyMute, O, e);
+        if (!AudioObjectHasProperty(dev, &a)) continue;
+        if (AudioObjectSetPropertyData(dev, &a, 0, nullptr, sizeof x, &x) == noErr) any = true;
+    }
+    return any;
+}
+uint32_t deviceByUid(const std::string& uid) { for (auto& d : listDevices()) if (d.uid == uid) return d.id; return 0; }
+DeviceInfo deviceInfo(uint32_t dev) { for (auto& d : listDevices()) if (d.id == dev) return d; return DeviceInfo(); }
+std::string virtualFormatText(uint32_t dev) {
+    AudioStreamID st = firstOutStream(dev); AudioStreamBasicDescription f = {};
+    if (st && get(st, addr(kAudioStreamPropertyVirtualFormat), f)) return fmtName(f);
+    return "";
+}
+
+static OSStatus watchProc(AudioObjectID obj, UInt32 n, const AudioObjectPropertyAddress* a, void* ctx) {
+    Watcher* w = (Watcher*)ctx;
+    for (UInt32 i = 0; i < n; i++) {
+        const char* what = nullptr;
+        switch (a[i].mSelector) {
+            case kAudioHardwarePropertyDevices: what = "devices"; break;
+            case kAudioHardwarePropertyDefaultOutputDevice: what = "default-output"; break;
+            case kAudioDevicePropertyVolumeScalar: what = "volume"; break;
+            case kAudioDevicePropertyMute: what = "mute"; break;
+            case kAudioDevicePropertyNominalSampleRate: what = "rate"; break;
+            case kAudioDevicePropertyDeviceIsAlive: what = "alive"; break;
+            case kAudioDevicePropertyHogMode: what = "exclusive"; break;
+            case kAudioDevicePropertyBufferFrameSize: what = "buffer"; break;
+            default: break;
+        }
+        if (what && w->fn) w->fn(w->user, what, obj == kAudioObjectSystemObject ? 0 : (uint32_t)obj);
+    }
+    return noErr;
+}
+static void deviceWatchAddrs(std::vector<AudioObjectPropertyAddress>& v) {
+    const AudioObjectPropertyScope O = kAudioObjectPropertyScopeOutput;
+    for (UInt32 e = 0; e <= 2; e++) { v.push_back(addr(kAudioDevicePropertyVolumeScalar, O, e)); v.push_back(addr(kAudioDevicePropertyMute, O, e)); }
+    v.push_back(addr(kAudioDevicePropertyNominalSampleRate)); v.push_back(addr(kAudioDevicePropertyDeviceIsAlive));
+    v.push_back(addr(kAudioDevicePropertyHogMode)); v.push_back(addr(kAudioDevicePropertyBufferFrameSize));
+}
+void Watcher::start(WatchFn f, void* u) {
+    fn = f; user = u;
+    // no run loop in a command line program: let the system call us on its own thread
+    CFRunLoopRef none = nullptr; AudioObjectPropertyAddress rl = addr(kAudioHardwarePropertyRunLoop);
+    AudioObjectSetPropertyData(kAudioObjectSystemObject, &rl, 0, nullptr, sizeof none, &none);
+    AudioObjectPropertyAddress a1 = addr(kAudioHardwarePropertyDevices), a2 = addr(kAudioHardwarePropertyDefaultOutputDevice);
+    AudioObjectAddPropertyListener(kAudioObjectSystemObject, &a1, watchProc, this);
+    AudioObjectAddPropertyListener(kAudioObjectSystemObject, &a2, watchProc, this);
+    system = true;
+}
+void Watcher::watchDevice(uint32_t d) {
+    std::vector<AudioObjectPropertyAddress> v; deviceWatchAddrs(v);
+    if (dev) for (auto& a : v) if (AudioObjectHasProperty(dev, &a)) AudioObjectRemovePropertyListener(dev, &a, watchProc, this);
+    dev = d;
+    if (dev) for (auto& a : v) if (AudioObjectHasProperty(dev, &a)) AudioObjectAddPropertyListener(dev, &a, watchProc, this);
+}
+void Watcher::stop() {
+    watchDevice(0);
+    if (system) {
+        AudioObjectPropertyAddress a1 = addr(kAudioHardwarePropertyDevices), a2 = addr(kAudioHardwarePropertyDefaultOutputDevice);
+        AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &a1, watchProc, this);
+        AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &a2, watchProc, this);
+        system = false;
+    }
+}
+
+struct RecCtx { std::vector<float>* out; size_t want; std::atomic<bool> done{false}; };
+static OSStatus recProc(AudioObjectID, const AudioTimeStamp*, const AudioBufferList* in, const AudioTimeStamp*, AudioBufferList*, const AudioTimeStamp*, void* ctx) {
+    RecCtx* c = (RecCtx*)ctx;
+    if (!in || !in->mNumberBuffers || c->done.load()) return noErr;
+    const AudioBuffer& b0 = in->mBuffers[0];
+    UInt32 nch = b0.mNumberChannels ? b0.mNumberChannels : 1;
+    UInt32 frames = b0.mDataByteSize / (sizeof(Float32) * nch);
+    const Float32* d0 = (const Float32*)b0.mData;
+    const Float32* d1 = (nch < 2 && in->mNumberBuffers > 1) ? (const Float32*)in->mBuffers[1].mData : nullptr;
+    if (!d0) return noErr;
+    for (UInt32 k = 0; k < frames; k++) {
+        if (c->out->size() >= c->want) { c->done = true; break; }
+        c->out->push_back(d0[k * nch]);
+        c->out->push_back(nch > 1 ? d0[k * nch + 1] : d1 ? d1[k] : d0[k * nch]);
+    }
+    return noErr;
+}
+bool recordInput(uint32_t dev, double seconds, std::vector<float>& interleaved, double& rate, std::string& err) {
+    Float64 r = 0; get(dev, addr(kAudioDevicePropertyNominalSampleRate), r); rate = r;
+    if (r <= 0) { err = "the device reports no sample rate"; return false; }
+    RecCtx c; c.out = &interleaved; c.want = (size_t)(seconds * r) * 2; interleaved.clear(); interleaved.reserve(c.want + 8192);
+    AudioDeviceIOProcID pid = nullptr;
+    OSStatus e = AudioDeviceCreateIOProcID(dev, recProc, &c, &pid);
+    if (e != noErr || !pid) { err = "AudioDeviceCreateIOProcID: error " + osErr(e); return false; }
+    e = AudioDeviceStart(dev, pid);
+    if (e != noErr) { err = "AudioDeviceStart: error " + osErr(e); AudioDeviceDestroyIOProcID(dev, pid); return false; }
+    for (int i = 0; i < (int)(seconds * 100) + 300 && !c.done.load(); i++) usleep(10000);
+    AudioDeviceStop(dev, pid); AudioDeviceDestroyIOProcID(dev, pid);
+    return true;
 }
 
 }  // namespace al

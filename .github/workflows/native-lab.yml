@@ -12,7 +12,7 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-1'
+        default: 'native-lab-2'
 
 permissions:
   contents: write
@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: |
           cmake -S native -B build -DVST3_SDK_ROOT="$RUNNER_TEMP/vst3sdk" -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake-configure.txt 2>&1 || { tail -40 out/cmake-configure.txt; exit 1; }
-          cmake --build build --target alnative alnative_fused -j 4
+          cmake --build build --target alnative alnative_fused alengine -j 4
           cmake --build build --target alvst3 -j 4
           file build/alnative build/alvst3
 
@@ -68,6 +68,17 @@ jobs:
           BH=$(python3 -c "import json;d=json.load(open('out/devices_with_blackhole.json'));print(next((str(x['id']) for x in d['devices'] if 'BlackHole' in x['name']),''))")
           echo "BlackHole device id: $BH"
           if [ -n "$BH" ]; then build/alnative play --device "$BH" --in tools/native-lab/ref/crush_in.wav --buffer 64 --try-rate 96000 --try-hog | tee out/play_blackhole.json; fi
+
+      # ---------------- the engine, first part (task NB-N1) ----------------
+      - name: 'Engine: checks that need no sound card'
+        run: build/alengine selftest | tee out/engine-selftest.json
+
+      - name: 'Engine: hand-over through a loop-back device, device control, exclusive use, switching'
+        continue-on-error: true
+        run: |
+          python3 tools/native-lab/run_engine.py build/alengine build/alnative out/engine | tee out/engine.txt
+          rm -f out/engine/loopback.wav
+          cat out/engine/engine.json
 
       # ---------------- test B ----------------
       - name: Build the SDK's own example plug-ins (fallback and extra subjects)

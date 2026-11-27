@@ -28,6 +28,14 @@ if(APPLE)
   target_link_libraries(alnative_fused PRIVATE "-framework CoreAudio" "-framework CoreFoundation")
 endif()
 
+# ---- the engine, first part (task NB-N1): owns the audio output, driven by JSON lines -------------------
+add_executable(alengine engine/engine_main.cpp common/coreaudio.cpp)
+if(APPLE)
+  target_link_libraries(alengine PRIVATE "-framework CoreAudio" "-framework CoreFoundation")
+else()
+  target_link_libraries(alengine PRIVATE pthread)
+endif()
+
 # ---- tests B and C: need the VST 3 SDK ---------------------------------------------------------------
 if(VST3_SDK_ROOT)
   if(APPLE)

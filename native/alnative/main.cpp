@@ -149,6 +149,16 @@ static int cmdPlay(int argc, char** argv) {
     printf("%s}\n", s.c_str());
     return 0;
 }
+static int cmdRecord(int argc, char** argv) {
+    auto o = opts(argc, argv, 2);
+    uint32_t dev = (uint32_t)atoi(o["device"].c_str());
+    std::vector<float> d; double rate = 0; std::string err;
+    bool ok = recordInput(dev, o.count("seconds") ? atof(o["seconds"].c_str()) : 3.0, d, rate, err);
+    Wav w; w.sr = (int)rate; w.ch = 2; w.data = d;
+    if (ok) ok = wavWrite(o["to"], w);
+    printf("{\"recorded\":%s,\"frames\":%zu,\"rate\":%s,\"error\":%s}\n", ok ? "true" : "false", d.size() / 2, jnum(rate).c_str(), jstr(err).c_str());
+    return ok ? 0 : 1;
+}
 #endif
 
 int main(int argc, char** argv) {
@@ -158,6 +168,7 @@ int main(int argc, char** argv) {
 #ifdef __APPLE__
     if (c == "devices") return cmdDevices();
     if (c == "play") return cmdPlay(argc, argv);
+    if (c == "record") return cmdRecord(argc, argv);
 #else
     if (c == "devices" || c == "play") { printf("{\"opened\":false,\"why\":\"Core Audio exists only on macOS\"}\n"); return 0; }
 #endif
