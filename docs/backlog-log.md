@@ -4147,3 +4147,40 @@ No visible change yet: this step is the analysis; the ruler view with the two fi
 
 ### Left
 NI-2b: the view (note ruler C0 to C3 with the key lit, the kick's falling curve with its end note, bass notes as bars, the clash glow with the beat rate, the rolling-bass gap strip), the fixes "tune kick to root" and "bass down an octave" (one undo step each), the command `ni.kickBass`, `NI_HOOKS.kickBassView` for FT-F18's rows. Then NI-3.
+
+
+## 27 November 2026, v0.238: Ableton Push 1, part 1: connect, display, pads (task FT-C2a, lane C)
+Step FT-C2a of `docs/features-build.md` (the user's pick: MIDI controller support, their Push 1 first). Edit script `tools/feature-lab/ft/ftC2a.py` with `ftC2a_block.js` (one asserted anchor, after FT-C1b's block), test `tools/ui-tests/taskFT_C2a.py` (46 checks, a fake Push 1).
+
+### Built
+- **A Push 1 profile** (`push1`, "Ableton Push 1") for the Push's Live port: names with "Ableton Push", not "User", not "MIDIIN2 (...)" (the Windows name of the User port), not Push 2 or 3. The User port stays Generic MIDI, so User mode is left to the user.
+- **Hello** (when it is plugged in, AudioLab starts or the device is switched on again): Live mode `F0 47 7F 15 62 00 01 00 F7`, pressure mode `F0 47 7F 15 5C 00 01 <0 per pad, 1 whole grid> F7`, touch strip mode `F0 47 7F 15 63 00 01 <6 pitch bend, 10 mod wheel> F7`, then the display, the pads and the buttons it uses. **Goodbye** (page hidden or AudioLab quits, device switched off on the Controllers page, unplugged): the 4 lines cleared (`F0 47 7F 15 1C..1F 00 00 F7`), every pad and lit button dark, held notes stopped.
+- **The display**: 4 lines of 68 characters, `F0 47 7F 15 <18..1B> 00 45 00 <68 ASCII> F7`; only lines that changed are sent. Note mode shows AudioLab and the track's name, the key, layout, octave and velocity curve, and a hint; the Scales page shows the 8 settings over the 8 encoders.
+- **Pads as a note grid** in the project key (`PR.root`, `PR.scale`, the same key as the piano roll; "none" plays chromatic): In key (every pad a note of the scale) or Chromatic (every note; notes outside the key dark), rows in fourths (3 scale steps or 5 semitones), thirds (2 or 4) or in a row (8), **octave up and down** (CC 54, 55; lit while there is room). Pads play the armed instrument tracks, or the selected instrument track when none is armed (as Live does with Push), recorded like a keyboard.
+- **Pad colours** (note on to the pad, velocity = Push palette index): root pads in the nearest palette colour to the track's colour (the 14 full colours 5, 9 ... 57; white 3 for grey colours), other notes of the key white (3), outside the key off (0), held pads green (21), also every other pad with the same note. Only changed pads are sent. They follow the selected track, its colour and the key (selectTrack, changed).
+- **Velocity curves** Linear, Soft, Hard, Fixed (100). **Pressure** Off, Per pad, Whole grid: values go to `FT_HOOKS.pressure(note or null, 0..1)` for FT-F14 (AudioLab's instruments do not take pressure yet). **Touch strip** as pitch bend or the mod wheel lane (ccLive 'pb' or '1', as keyboards do). Encoder and strip touches (notes 0 to 12) never play.
+- **Scales** (CC 58): the 8 encoders (CC 71 to 78, two's complement, 3 ticks a step) change root, scale, layout, rows, velocity, pressure, strip, octave. Outside Scales the encoders and buttons go to MIDI learn and mappings (an encoder is found as an endless knob), and are not recorded into controller lanes. FT-C2b puts them on the selected device.
+- **Controllers page**: while a Push 1 is connected, an "Ableton Push 1" block with Layout, Rows, Velocity, Pressure, Touch strip and Octave (tooltips on each; kept in `UI.p1`, for every project) and the project key. Hooks: `FT_HOOKS.pressure`, `FT_HOOKS.push1Paint`; settings rows in the S4 shape in `docs/features-build.md` section 6.
+- Nothing runs while the Push is still (event driven; a 60 ms repaint after a change only while a device is connected). Audio path untouched; no project fields added.
+
+### Sources
+- pushmod, "The Ableton Push" (reverse-engineered SysEx on Live 9.1.2: display write and clear, Live and User mode, key or channel pressure, touch strip modes, pad notes y*8+36+x, pad colour by note velocity, button LED values): https://pushmod.blogspot.com/
+- Ableton, Using Push 1 (Live 12 manual): https://www.ableton.com/en/manual/using-push-1/ ; Push User Mode for custom MIDI mappings: https://help.ableton.com/hc/en-us/articles/209071249
+- hardpush (Push 1 hardware notes): https://github.com/cbmainz/hardpush
+- Button and encoder numbers (Octave 54 and 55, Scales 58, Note 50, encoders 71 to 78, encoder touches notes 0 to 10, strip touch note 12) come from the open-source Push 1 scripts (DrivenByMoss, Live's remote scripts), as listed in the plan; the pushmod note and CC table and its palette table could not be read in this run. The palette colours past 0 (off) and 3 (white) follow Live's pad palette and are **not yet confirmed on a real Push 1**.
+
+### Tested (`tools/ui-tests/taskFT_C2a.py`, headless Chromium, fake Push 1, 46 checks, all pass)
+- Profile matching (Live port, User port, "Live Port", MIDIIN2, Push 2); hello bytes; display lines 77 bytes each with 00 45 00; display text; all 64 pads coloured, root red for a red track, white in key, octave above red again; buttons lit; nothing sent to the User port or the Push 2.
+- Pads in A minor, octave 2: pad 36 plays A (MIDI 45), 37 B, 44 D (fourths), on the selected unarmed track; linear velocity; held pads and same notes green; note off and note on 0 stop them; only changed pads sent. Encoder and strip touches do not play; the strip bends; Push buttons not recorded.
+- Octave up: octave 3, only the changed display line sent, pad 36 plays A2. Scales: display shows the settings (68 characters); root up a semitone; chromatic (A# dark, B white); one row up 5 semitones; velocity curves Hard and Fixed (plays 100); strip mode 10 and pressure 1 sent; pressure reaches the hook; strip moves the mod wheel lane. An encoder learned as an endless knob outside Scales. Track colour blue: root pads 45.
+- Controllers page block with tooltips, no em dash; a change there reaches the Push. Nothing runs while still. Switched off: lines cleared and 64 pads dark; on again: hello again; page hidden: goodbye. SysEx refused: pads play and are coloured, no SysEx sent. No console errors.
+- Screenshots looked at: the Controllers page with the Push 1 block (normal and Light level).
+- `taskFT_C1a.py` 55 of 55, `taskFT_C1b.py` 29 of 29. **Fractals levels unchanged**: Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB.
+
+### Only the user can test (the real Push 1)
+- Plug in the Push 1 and open AudioLab (desktop app; in a browser press MIDI learn once and allow MIDI with SysEx). Expected: the display shows "AudioLab", the selected track, "Key A minor" (or your project key), "Octave 2"; the pads light with the track's colour on the root notes and white on the others.
+- Select an instrument track and play the pads: notes in the key, a row up is a fourth. Press Octave up and down. Press Scales and turn the 8 encoders: root, scale, layout (try Chromatic), rows, velocity, pressure, touch strip, octave; press Scales again to go back.
+- Please report: does the display show text (if it stays blank, the Live mode or display bytes differ); are the pad colours right (red track: red roots; held pads green); do the Octave, Scales and Note buttons light; does the touch strip bend notes (and act as mod wheel when set). Quitting AudioLab should clear the display and darken the pads.
+
+### Left
+- FT-C2b: encoders on the selected device's parameters with names and values on the display, banks, track select and arm/mute/solo rows, transport, tempo, swing, master, metronome, undo, drum-rack 4x4 mode. Pressure reaches no instrument yet (FT-F14). Next: FT-C2b.
