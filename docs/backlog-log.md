@@ -4668,3 +4668,26 @@ Sixth step of the settings rebuild (`docs/settings-round-1.md`, S6, depends on D
 
 ### What is left
 S7 (changed mark, reset per setting and per page, "Reset all" that lists what it resets and saves a backup first) next, then S8 to S19. A clock format option (C30) does not exist yet; S17 adds it and its search entry. Performance and the Glass block stay with the glass chain (G4).
+## 27 November 2026: task NB-R4a (engine hardening, alengine 0.5; review RN5 C6, C7, C8, C10, C11, A10)
+
+Fired by the scheduler with a note from the scheduling chat (15:35 UTC, read as data): do the next stage, review blockers first. No other NB run was working (the only NB commits in the last 20 minutes were NB-R3's own, finished). NB-R4 split: R4a here, R4b (C9's second half) left. `index.html` untouched.
+
+### Built
+- `native/engine/engine_main.cpp` (`tools/native-lab/edits/nb_r4_engine.py`): protect (NaN and infinity to 0, a clip at +-1.0, counted, legal samples untouched); the device volume in a ramp thread (0.02 per 5 ms, one event at the end) with a per-device ceiling (level at first open, confirmed levels, levels set outside), `needsConfirm` above it; a `format` event restarts the stream on its own thread under a device lock; dither from `open`'s `dither` (off by default); `deviceLatencyFrames`, `ringLatencyFrames`, `latencyNote`; `numArg` checks every number from the page; `protocol: 1` in ready; `req` echoed in every answer, also on a parse error. `alengine 0.5`.
+- `native/common/` (`nb_r4_common.py`): the Core Audio watcher also listens to the output stream's virtual and physical format; dither16 off by default; the null device offers 16 and 24-bit integer formats the system does not mix, writes them through `sample_convert.h` and records what the bytes decode to; `null change=format`; `minijson.h` reads `\u` escapes and surrogate pairs as UTF-8; `wav.h` bounds checks.
+- `native/bridge/engine-bridge.js`: request numbers, matching by number, the protocol check at start, `volume(value, confirm)`, SIGKILL 3 s after an ignored stop. The fake engine echoes request numbers and can speak another protocol or answer late.
+
+### Proven
+- Here: `engine_null_test.py` 43 of 43 in Release, ASan + UBSan and TSan (new: protocol and request numbers, a parse error answered with its number, 7 kinds of bad number refused by name, bad ring sizes and volumes refused, the ceiling refuses 0.9 until confirmed, the ramp takes 56 ms and is at 0.77 half way, one event, 0.95 needs a confirmation again, quieter needs none, NaN, +-infinity counted (3) and 2.0, -3.0, 1e30 held (3), peak at most 1.0; a format change restarts the stream in 24-bit integer; 24-bit samples through the integer path bit for bit, 96,000 of 96,000; dither only when asked; a broken WAV refused). The older checks unchanged, the hand-over still 192,000 of 192,000. Selftest: `\u` escapes and a surrogate pair. Bridge unit tests 50 of 50. Feeder test 13 of 13. Ring stress ok.
+- GitHub (commit 67a1158): push run 46033808827 green on every job; run 46033821125 (Apple Silicon box ticked) green on Linux, its Mac job still waiting for a machine after 7 minutes (D9), left queued.
+
+### Left
+- NB-R4b: C9's second half (the socket thread's messages through a queue so they can never wait on the output pipe).
+- The Mac: the Core Audio format listener has not been compiled by any machine (D9).
+- Then NB-R5 (follower quality), N2c when the design chain allows, N3d.
+
+### Assumptions
+- The volume ceiling is "the loudest level the device has had" (first open, confirmed, set outside), not the last level: lowering the volume and raising it back to where it was needs no confirmation; only louder than ever does.
+- A volume change from outside during the engine's own ramp is overwritten by the ramp's next step; the event at the end says where it ended.
+- Protect is always on (no switch): it changes no legal sample.
+- Dither stays a choice made at `open` (the engine does not know the source's bit depth yet); the settings page decides it in N2c.
