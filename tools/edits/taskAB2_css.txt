@@ -1,0 +1,8 @@
+/* v0.229 (task AB2): the About card in the Settings menu. One canvas (.nab) behind the fine atom with a small splash drawing; the card's ground, the name and the version take the drawing's colours (--sp..., set by AB2), as on the splash. The blurred coloured balls are gone. */
+#setNav .navAtom.ab2c{background:radial-gradient(circle at 50% 38%,var(--spg,#0f1830) 0%,var(--spbg,#070910) 66%,var(--spe,#040508) 100%);border-color:rgba(255,255,255,.08)}
+#setNav .navAtom.ab2c:hover{border-color:color-mix(in srgb,var(--spa,#4cc9f0) 45%,transparent)}
+#setNav .navAtom>canvas.nab{position:absolute;inset:0;width:100%!important;height:100%!important;pointer-events:none;z-index:0;display:block;background:none}
+#setNav .navAtom.ab2c .wmA{color:var(--spink,#eaf1ff)!important;-webkit-text-fill-color:var(--spink,#eaf1ff)}
+#setNav .navAtom.ab2c .wmL{background:linear-gradient(100deg,var(--spa,#4cc9f0),var(--spb,#6096ff));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#setNav .navAtom.ab2c .wmP{border-color:var(--spa,#4cc9f0);color:var(--spp,#a8d8ff);-webkit-text-fill-color:var(--spp,#a8d8ff)}
+#setNav .navAtom.ab2c small{color:var(--spn,#77839f)}
