@@ -43,7 +43,9 @@ def run(name, seconds, hold, stop_at=0, in_main=False, kind="wait"):
     except Exception: R = {"error": "no result; stderr: " + p.stderr[-800:]}
     C = {}
     if os.path.exists(rec) and os.path.exists(os.path.join(d, "sent.raw")):
-        C = json.loads(subprocess.run([sys.executable, CHECK, rec, os.path.join(d, "sent.raw")], stdout=subprocess.PIPE, text=True).stdout)
+        q = subprocess.run([sys.executable, CHECK, rec, os.path.join(d, "sent.raw")], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try: C = json.loads(q.stdout)
+        except Exception: C = {"error": "feeder_check.py failed: " + q.stderr[-600:]}
     last = (R.get("statuses") or [{}])[-1]
     print("  " + name + ": " + json.dumps({k: C.get(k) for k in ("identical", "sentFrames", "gaps", "gapMsList", "lostFrames", "wrongFrames")}) +
           " ranEmpty " + str(last.get("ranEmpty")) + ", tap " + str(last.get("tapPath")) + ", worst gap between blocks " + str(last.get("worstGapMs")) + " ms" +

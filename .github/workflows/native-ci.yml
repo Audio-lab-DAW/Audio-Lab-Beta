@@ -217,6 +217,7 @@ jobs:
           test -x node_modules/electron/dist/electron || node node_modules/electron/install.js
           test -x node_modules/electron/dist/electron
           sudo apt-get install -y -qq xvfb > /dev/null 2>&1 || true
+          python3 -m pip install --quiet --break-system-packages numpy || python3 -m pip install --quiet numpy
       - name: 'The sound path out of the main process (task NB-R3): main blocked or busy, frozen feeder, the old path for comparison'
         shell: bash   # -eo pipefail: the test's exit code survives the tee
         run: |

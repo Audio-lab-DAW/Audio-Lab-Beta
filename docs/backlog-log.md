@@ -4558,3 +4558,27 @@ Step FT-C3b of `docs/features-build.md` (the user's pick: "support for other MID
 
 ### Left
 - Level meters on the surface (channel pressure on Mackie, A0 on HUI), Flip, Name/Value, sends (AudioLab has no send knobs on a strip yet), the Mackie handshake for old original units. Next in lane C: FT-C3c (Launchpad and APC).
+## 27 November 2026: task NB-R3 (the sound path out of the shell's main process; review RN5 A8)
+
+Fired by the scheduler; the next NB item after NB-R2 was NB-R3 (review section 6: "sound path out of the main process: a utilityProcess feeder, a bounded queue, a back-pressure count, a hang watchdog; test: case A again with the main process blocked for 50 ms every second, no gap"). `index.html` untouched; the desktop app behaves as before (the shell stays idle until the page asks for the native engine, which comes with N2c).
+
+### Built
+- **`desktop/native-feeder.js`**: an Electron utilityProcess. Takes the page's worklet port (handed on by the shell as a transfer) and the engine's socket address; writes each 128-frame block into the socket. Back-pressure honoured: while the socket says wait, blocks queue up to `queueMs` (250 ms default, 20 to 2,000); beyond that new blocks are dropped whole and counted. Answers pings with its counts.
+- **`desktop/native-engine.js`**: the port and the sound go to the feeder (no block in the main process); `openSound` opens the engine's socket without connecting (`engine-bridge.js` `startSound(o, { connect: false })`) and connects the feeder; a **watchdog** once a second while the engine is wanted: feeder ping and engine `status`, 3 misses replace the feeder (`feeder-restarted`, `needPort`) or kill the engine (`engine-hung`, then the crash recovery's `restarted`); 3 feeder restarts in a minute give `gave-up`. `status.tap` names the path and carries the feeder's counts. A replacement page port keeps the socket. `AL_FEED_IN_MAIN=1` keeps the old path (comparison only); without utilityProcess (plain Node) the old path is used. `AL_ENGINE_TEST=1` lets the shell and `preload.js` start the engine off the Mac (null device), for tests. `native-feeder.js` added to the desktop build's files.
+- **`native/bridge/page-tap.js`**: `tap.reconnect()` (a new channel to the worklet and the shell) and `alNativeWatchFeeder(nativeEngine, tap)`.
+- **`alengine` 0.4** (`tools/native-lab/edits/nb_r3_engine.py`, anchors asserted once): a source switch shuts the old sender's connection down instead of waiting for it to close (a frozen feeder held the command thread; found by this task's test).
+- **Tests**: `tools/native-lab/feeder_test.py` with `electron-feeder/` and `feeder_check.py` (real Electron, real shell, feeder, preload, page tap, engine on the null device; the null device's recording compared with what the page sent); `bridge_unit.js` 45 checks (16 new, with a stand-in utilityProcess running the real feeder); `fake-alengine.js` gets `FAKE_HANG_AFTER_MS` and `FAKE_PAUSE_READ`; `engine_null_test.py` 26 checks (2 new). New CI job `electron` in `native-ci.yml`.
+
+### Proven
+- Here (2 cores, Electron 45.4.1 as in `desktop/package-lock.json`, production settings 30 ms prefill, exact clock): main process blocked 50 ms every second for 20 s: 960,000 of 960,000 frames bit for bit, no gap, ring never empty (0 gaps in 9 blocked runs); 250 ms every second: 576,000 of 576,000; spinning 50 ms: bit for bit in the strict run (2 of 8 spin runs had one short gap, from blocks reaching the feeder up to 74 ms apart, upstream of the feeder: the spin took half this machine). The old path under the same spin: 2 to 5 gaps per run, up to 152 ms. Feeder frozen (SIGSTOP) at second 4: found after 3 s, killed, replaced, the page gave a new port, the sound came back by itself and stayed bit for bit to the end, never a wrong sample.
+- GitHub: see the CI line in `docs/native-mac-build.md` (run for commit ddc5d31 and after).
+
+### Left
+- The Mac (D9): the same test on Core Audio and in the app's own main process comes with N2c. Upstream jitter (the page's audio thread itself) is not the feeder's to fix; whether 30 ms prefill is enough is NB-R5's production-targets question.
+- Next: NB-R4 (engine hardening: NaN/Inf scrub and protect clip, volume ramp, request ids and protocol version, client shutdown, checked conversions), NB-R5 (follower), then N2c when the design chain allows; N3d in parallel.
+
+### Assumptions
+- The commit identity and the no-attribution rule come from the repository's CLAUDE.md, as the task says.
+- The feeder queue default is 250 ms: long enough for a slow socket moment, short enough that dropped sound stays bounded; the engine's own ring still decides latency.
+- Linux CI with the null device stands in for the Mac for this part, because the change is in the shell's processes, not in Core Audio.
+- The hold test uses a waiting block for the strict cases (the main process unavailable, which is what A8 is about) and counts the spinning case as strict only on 4 or more cores.
