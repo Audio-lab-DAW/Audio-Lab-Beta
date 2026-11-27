@@ -1,0 +1,9 @@
+arch: arm64
+ProductName:		macOS
+ProductVersion:		26.7.2
+BuildVersion:		25G332
+Apple M1 (Virtual)
+VirtualMac2,1
+Apple clang version 21.0.0 (clang-2100.1.1.101)
+Target: arm64-apple-darwin25.6.0
+cmake version 4.5.0

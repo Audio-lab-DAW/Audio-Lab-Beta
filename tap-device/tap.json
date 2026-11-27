@@ -1,0 +1,70 @@
+{
+ "seconds": 20,
+ "mode": "device",
+ "electron": "45.4.1",
+ "chrome": "156.0.8078.100",
+ "fills": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "open": {
+  "ok": true,
+  "rate": 48000,
+  "buffer": 256
+ },
+ "page": {
+  "asked": 48000,
+  "silentOutput": "plays silence into the default device, which gives the clock",
+  "rate": 48000,
+  "path": "worklet thread straight to the main process",
+  "state": "running",
+  "baseLatency": 0.005333333333333333,
+  "contextSeconds": 33.626666666666665,
+  "wallSeconds": 44.10239999999997
+ },
+ "dataKind": "[object Float32Array]",
+ "lastStatus": {
+  "ring": {
+   "fill": 0,
+   "received": 0,
+   "ranEmpty": 0,
+   "fillMinMs": null,
+   "targetMs": 50,
+   "worstGapMs": 0,
+   "droppedTimes": 0,
+   "droppedFrames": 0,
+   "silentFrames": 0,
+   "connected": false,
+   "clock": "exact",
+   "ppm": 0,
+   "ppmMin": 0,
+   "ppmMax": 0
+  },
+  "overloads": 0
+ },
+ "blocks": 7500,
+ "framesFromPage": 960000,
+ "worstGapBetweenBlocksMs": 54,
+ "pageSecondsByWallClock": 20,
+ "pageSpeedAgainstWallClock": 1,
+ "driftFramesPerSecond": 0,
+ "driftPartsPerMillion": 0
+}

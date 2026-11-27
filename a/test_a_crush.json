@@ -1,0 +1,189 @@
+{
+ "machine": "arm64",
+ "system": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+ "web": {
+  "app": "0.223",
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36"
+ },
+ "cases": {
+  "plain": {
+   "settings": {
+    "bits": 6,
+    "rate": 3,
+    "jit": 0,
+    "dith": 0,
+    "drive": 0,
+    "mix": 100,
+    "out": 0,
+    "aa": 0,
+    "post": 0,
+    "shape": "round"
+   },
+   "webNumbers": {
+    "q": "4040000000000000",
+    "dr": "3ff0000000000000",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "nativeNumbers": {
+    "q": "4040000000000000",
+    "dr": "3ff0000000000000",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "numbersSame": {
+    "q": true,
+    "dr": true,
+    "go": true,
+    "pc": true,
+    "oc": true
+   },
+   "ownMaths": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 0.84375
+   },
+   "webNumbersRender": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 0.84375
+   },
+   "timesRealTime": 3513.708629
+  },
+  "filter": {
+   "settings": {
+    "bits": 8,
+    "rate": 2.5,
+    "jit": 0,
+    "dith": 0,
+    "drive": 6,
+    "mix": 70,
+    "out": -3,
+    "aa": 6000,
+    "post": 9000,
+    "shape": "round"
+   },
+   "webNumbers": {
+    "q": "4060000000000000",
+    "dr": "3fffec982d5bb8af",
+    "go": "3fe6a77deae8ab8a",
+    "pc": "3fe168f47187dbc4",
+    "oc": "3fe625fa74f0e096"
+   },
+   "nativeNumbers": {
+    "q": "4060000000000000",
+    "dr": "3fffec982d5bb8af",
+    "go": "3fe6a77deae8ab8a",
+    "pc": "3fe168f47187dbc4",
+    "oc": "3fe625fa74f0e096"
+   },
+   "numbersSame": {
+    "q": true,
+    "dr": true,
+    "go": true,
+    "pc": true,
+    "oc": true
+   },
+   "ownMaths": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 0.6978623867
+   },
+   "webNumbersRender": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 0.6978623867
+   },
+   "timesRealTime": 1846.672346
+  },
+  "dither": {
+   "settings": {
+    "bits": 5,
+    "rate": 4,
+    "jit": 30,
+    "dith": 50,
+    "drive": 9,
+    "mix": 100,
+    "out": 0,
+    "aa": 0,
+    "post": 0,
+    "shape": "fold"
+   },
+   "webNumbers": {
+    "q": "4030000000000000",
+    "dr": "40068c0c59ab1564",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "nativeNumbers": {
+    "q": "4030000000000000",
+    "dr": "40068c0c59ab1564",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "numbersSame": {
+    "q": true,
+    "dr": true,
+    "go": true,
+    "pc": true,
+    "oc": true
+   },
+   "ownMaths": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 1
+   },
+   "webNumbersRender": {
+    "identical": true,
+    "samples": 48000,
+    "sameLength": true,
+    "differing": 0,
+    "firstDifference": -1,
+    "maxDifference": 0,
+    "maxDifferenceDb": null,
+    "rmsDifferenceDb": null,
+    "peak": 1
+   },
+   "timesRealTime": 2796.03941
+  }
+ },
+ "text": [
+  "plain   own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 3514 x real time",
+  "filter  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 1847 x real time",
+  "dither  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 2796 x real time"
+ ]
+}

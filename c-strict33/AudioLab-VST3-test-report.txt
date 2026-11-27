@@ -1,0 +1,118 @@
+﻿AudioLab VST3 test 0.8 (tasks NM1, NB-N1, NL4, NL5, NL7 and NL8). Report file: paste all of it back.
+[machine] VirtualMac2,1, Apple M1 (Virtual), macOS Version 26.7.2 (Build 25G332), this app runs as arm64
+[device] Apple Virtual Sound Device (Apple Inc., built-in): out 2 ch, in 0 ch, now 48000 Hz, rates offered: 48000 96000, rate can be set: yes, buffer 512 (range 15 to 4096), volume the computer can set: yes (main), format on the wire: 32-bit float, 2 ch, 48000 Hz, mixable (2 formats offered), exclusive use can be taken: yes, DEFAULT OUTPUT
+[device] Apple Virtual Sound Device (Apple Inc., built-in): out 0 ch, in 2 ch, now 48000 Hz, rates offered: 48000 96000, rate can be set: yes, buffer 512 (range 15 to 4096), volume the computer can set: no, format on the wire:  (0 formats offered), exclusive use can be taken: yes
+[device] BlackHole 2ch (Existential Audio Inc., virtual): out 2 ch, in 2 ch, now 48000 Hz, rates offered: 8000 16000 24000 44100 48000 88200 96000 176400 192000 352800 384000 705600 768000, rate can be set: yes, buffer 512 (range 15 to 4096), volume the computer can set: yes (main), format on the wire: 32-bit float, 2 ch, 48000 Hz, mixable (13 formats offered), exclusive use can be taken: yes
+[device] Null Audio Device (Apple Inc., virtual): out 2 ch, in 2 ch, now 44100 Hz, rates offered: 44100 48000, rate can be set: yes, buffer 512 (range 14 to 4096), volume the computer can set: yes (main), format on the wire: 32-bit float, 2 ch, 44100 Hz, mixable (2 formats offered), exclusive use can be taken: yes
+[output] Apple Virtual Sound Device: opened, 48000 Hz, buffer 512 frames (10.67 ms), device latency 0 + safety 100 + stream 0 frames; why: the system's default output, at the start; nothing chosen yet, so the app follows the default until you choose an output in the Output menu
+[format] Apple Virtual Sound Device: on the wire 32-bit float, 2 ch, 48000 Hz, mixable (2 formats offered); the deepest integer format at 48000 Hz: none (float only, or not offered)
+[scan] found Surge XT Effects by Surge Synth Team, effect, version 1.3.4 [x86_64 arm64] in Surge XT Effects.vst3 (0.04 s)
+[scan] found Surge XT by Surge Synth Team, instrument, version 1.3.4 [x86_64 arm64] in Surge XT.vst3 (0.05 s)
+[scan] found AL Strict Synth by AudioLab test, instrument, version 0.8.0 [arm64] in al-strict-synth.vst3 (0.02 s)
+[scan] found AL Strict Synth 33 outs by AudioLab test, instrument, version 0.8.0 [arm64] in al-strict-synth.vst3 (0.02 s)
+[scan] found mda Ambience by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Bandisto by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda BeatBox by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Combo by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda DeEsser by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Degrade by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Delay by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Detune by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Dither by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda DubDelay by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda DX10 by mda, instrument, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Dynamics by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda EPiano by mda, instrument, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Image by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda JX10 by mda, instrument, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Leslie by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Limiter by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Loudness by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda MultiBand by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Overdrive by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Piano by mda, instrument, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda RePsycho! by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda RezFilter by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda RingMod by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Round Panner by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Shepard by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Splitter by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Stereo Simulator by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Sub-Bass Synthesizer by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda TalkBox by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda TestTone by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Thru-Zero Flanger by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda Tracker by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] found mda SpecMeter by mda, effect, version 3.8.1.0 [arm64] in mda-vst3.vst3 (0.02 s)
+[scan] done: 4 bundle(s) in /Users/runner/Library/Audio/Plug-Ins/VST3, /Library/Audio/Plug-Ins/VST3, /Network/Library/Audio/Plug-Ins/VST3; 4 could be read, 0 could not; 38 plug-in(s). The app itself was never at risk: every bundle was opened in a separate process.
+[clap] 2 CLAP bundle(s) in /Users/runner/Library/Audio/Plug-Ins/CLAP, /Library/Audio/Plug-Ins/CLAP (listed, not loaded): 2 for Apple Silicon, 0 Intel-only
+[clap] names: Surge XT Effects; Surge XT
+[au] 2 Audio Unit bundle(s) in /Users/runner/Library/Audio/Plug-Ins/Components, /Library/Audio/Plug-Ins/Components (listed, not loaded): 2 for Apple Silicon, 0 Intel-only; kinds: 1 effect, 1 instrument
+[au] names: Surge Synth Team: Surge XT Effects (effect); Surge Synth Team: Surge XT (instrument)
+[selftest] search "AL STRICT SYNTH 33 OÜTS": 1 of 38, first: AL Strict Synth 33 outs
+[selftest] search "instrument": 7 of 38, first: AL Strict Synth 33 outs
+[selftest] search "effect": 31 of 38, first: mda Ambience
+[selftest] search "zzzz-nothing": 0 of 38, first: (none)
+[selftest] grouped by maker: 4 group heading(s), 42 rows
+[load] AL Strict Synth 33 outs loaded in 4 ms: instrument, audio in 0 ch, out 2 ch, note inputs 1, 7 parameters (first: Level, Loud (+20 dBFS), Sneaky drift, Dérive, Spread, Symbols, Factory), state saved (16 bytes), latency 0 samples (0.00 ms at 48000 Hz)
+[diag] AL Strict Synth 33 outs: plug-in: AL Strict Synth 33 outs by AudioLab test, version 0.8.0, built with VST 3.8.1, categories Instrument|Synth
+[diag] AL Strict Synth 33 outs: component initialize = ok
+[diag] AL Strict Synth 33 outs: controller: a separate object, initialize = ok
+[diag] AL Strict Synth 33 outs: processor and controller connected (IConnectionPoint): processor = ok, controller = ok; messages from other threads: delivered (as JUCE's host)
+[diag] AL Strict Synth 33 outs: controller->setComponentState(the processor's state, 4 bytes) = ok
+[diag] AL Strict Synth 33 outs: parameters: 7; messages so far: 0 to the processor, 0 to the controller, 0 from other threads, 0 dropped
+[diag] AL Strict Synth 33 outs: buses the plug-in offers: [audio out 0 "Master": main, 2 ch, default inactive] [audio out 1 "Out 2": main, 2 ch, default inactive] [audio out 2 "Out 3": main, 2 ch, default inactive] [audio out 3 "Out 4": main, 2 ch, default inactive] [audio out 4 "Out 5": main, 2 ch, default inactive] [audio out 5 "Out 6": main, 2 ch, default inactive] [audio out 6 "Out 7": main, 2 ch, default inactive] [audio out 7 "Out 8": main, 2 ch, default inactive] [audio out 8 "Out 9": main, 2 ch, default inactive] [audio out 9 "Out 10": main, 2 ch, default inactive] [audio out 10 "Out 11": main, 2 ch, default inactive] [audio out 11 "Out 12": main, 2 ch, default inactive] [audio out 12 "Out 13": main, 2 ch, default inactive] [audio out 13 "Out 14": main, 2 ch, default inactive] [audio out 14 "Out 15": main, 2 ch, default inactive] [audio out 15 "Out 16": main, 2 ch, default inactive] [audio out 16 "Out 17": main, 2 ch, default inactive] [audio out 17 "Out 18": main, 2 ch, default inactive] [audio out 18 "Out 19": main, 2 ch, default inactive] [audio out 19 "Out 20": main, 2 ch, default inactive] [audio out 20 "Out 21": main, 2 ch, default inactive] [audio out 21 "Out 22": main, 2 ch, default inactive] [audio out 22 "Out 23": main, 2 ch, default inactive] [audio out 23 "Out 24": main, 2 ch, default inactive] [audio out 24 "Out 25": main, 2 ch, default inactive] [audio out 25 "Out 26": main, 2 ch, default inactive] [audio out 26 "Out 27": main, 2 ch, default inactive] [audio out 27 "Out 28": main, 2 ch, default inactive] [audio out 28 "Out 29": main, 2 ch, default inactive] [audio out 29 "Out 30": main, 2 ch, default inactive] [audio out 30 "Out 31": main, 2 ch, default inactive] [audio out 31 "Out 32": main, 2 ch, default inactive] [audio out 32 "Out 33": main, 2 ch, default inactive] [event in 0 "Notes": main, 16 ch, default active]
+[diag] AL Strict Synth 33 outs: setupProcessing(realtime, 32-bit float, 48000 Hz, largest block 4096) = ok
+[diag] AL Strict Synth 33 outs: arrangements the plug-in prefers: out 0: stereo out 1: stereo out 2: stereo out 3: stereo out 4: stereo out 5: stereo out 6: stereo out 7: stereo out 8: stereo out 9: stereo out 10: stereo out 11: stereo out 12: stereo out 13: stereo out 14: stereo out 15: stereo out 16: stereo out 17: stereo out 18: stereo out 19: stereo out 20: stereo out 21: stereo out 22: stereo out 23: stereo out 24: stereo out 25: stereo out 26: stereo out 27: stereo out 28: stereo out 29: stereo out 30: stereo out 31: stereo out 32: stereo
+[diag] AL Strict Synth 33 outs: setBusArrangements( out 0: stereo out 1: stereo out 2: stereo out 3: stereo out 4: stereo out 5: stereo out 6: stereo out 7: stereo out 8: stereo out 9: stereo out 10: stereo out 11: stereo out 12: stereo out 13: stereo out 14: stereo out 15: stereo out 16: stereo out 17: stereo out 18: stereo out 19: stereo out 20: stereo out 21: stereo out 22: stereo out 23: stereo out 24: stereo out 25: stereo out 26: stereo out 27: stereo out 28: stereo out 29: stereo out 30: stereo out 31: stereo out 32: stereo ) = ok; the plug-in now has out 0: stereo out 1: stereo out 2: stereo out 3: stereo out 4: stereo out 5: stereo out 6: stereo out 7: stereo out 8: stereo out 9: stereo out 10: stereo out 11: stereo out 12: stereo out 13: stereo out 14: stereo out 15: stereo out 16: stereo out 17: stereo out 18: stereo out 19: stereo out 20: stereo out 21: stereo out 22: stereo out 23: stereo out 24: stereo out 25: stereo out 26: stereo out 27: stereo out 28: stereo out 29: stereo out 30: stereo out 31: stereo out 32: stereo
+[diag] AL Strict Synth 33 outs: activateBus: audio out 0 on = ok; audio out 1 off = ok; audio out 2 off = ok; audio out 3 off = ok; audio out 4 off = ok; audio out 5 off = ok; audio out 6 off = ok; audio out 7 off = ok; audio out 8 off = ok; audio out 9 off = ok; audio out 10 off = ok; audio out 11 off = ok; audio out 12 off = ok; audio out 13 off = ok; audio out 14 off = ok; audio out 15 off = ok; audio out 16 off = ok; audio out 17 off = ok; audio out 18 off = ok; audio out 19 off = ok; audio out 20 off = ok; audio out 21 off = ok; audio out 22 off = ok; audio out 23 off = ok; audio out 24 off = ok; audio out 25 off = ok; audio out 26 off = ok; audio out 27 off = ok; audio out 28 off = ok; audio out 29 off = ok; audio out 30 off = ok; audio out 31 off = ok; audio out 32 off = ok; event in 0 on = ok;
+[diag] AL Strict Synth 33 outs: setActive(true) = ok
+[diag] AL Strict Synth 33 outs: setProcessing(true) = not implemented (allowed)
+[diag] AL Strict Synth 33 outs: process data: out bus 0 2 ch; out bus 1 2 ch; out bus 2 2 ch; out bus 3 2 ch; out bus 4 2 ch; out bus 5 2 ch; out bus 6 2 ch; out bus 7 2 ch; out bus 8 2 ch; out bus 9 2 ch; out bus 10 2 ch; out bus 11 2 ch; out bus 12 2 ch; out bus 13 2 ch; out bus 14 2 ch; out bus 15 2 ch; out bus 16 2 ch; out bus 17 2 ch; out bus 18 2 ch; out bus 19 2 ch; out bus 20 2 ch; out bus 21 2 ch; out bus 22 2 ch; out bus 23 2 ch; out bus 24 2 ch; out bus 25 2 ch; out bus 26 2 ch; out bus 27 2 ch; out bus 28 2 ch; out bus 29 2 ch; out bus 30 2 ch; out bus 31 2 ch; out bus 32 2 ch; event list, parameter changes in and out, process context (tempo 120, 4/4, playing, system time, bar position), note ids -1
+[presets] AL Strict Synth 33 outs: 2 reachable through VST3 (first: "Café Init"); choose one in the Factory preset menu
+[selftest] load ok
+[selftest] Symbols at 0.058 reads "us +/-3 x2 inf m2 m3 21 deg"
+[selftest] Symbols at 1.000 reads "us +/-3 x2 inf m2 m3 21 deg"
+[selftest] Spread at 0.058 reads "21 deg"
+[selftest] Spread at 1.000 reads "360 deg"
+[window] AL Strict Synth 33 outs: its own window is open, 420 x 160
+[pattern] test pattern on
+[selftest] five seconds of the pattern played
+[selftest] 24 drags in the plug-in's window: 0 parameter move(s) reached the host
+[pattern] test pattern off. [audio] plug-in AL Strict Synth 33 outs: 1186 blocks, average 141.9 microseconds per block (1.33 % of the block), worst 1077.5 (10.1 %), block lasts 10667 microseconds, failed blocks 0, overloads reported by the device 0, device callbacks 1462, frames per callback 512 to 512, peak level 0.200
+[audio] the slowest blocks (at least 100 ms apart) and what happened in the 100 ms before each, and during it:
+[audio]   1) 1077.5 microseconds (10.1 % of the block) at 22:14:57.737: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[audio]   2) 863.0 microseconds (8.1 % of the block) at 22:14:54.576: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[audio]   3) 826.8 microseconds (7.8 % of the block) at 22:14:50.416: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[param] AL Strict Synth 33 outs: NO parameter moves reached the host from its window, although the mouse was used in it 120 time(s) (24 click(s) or scroll(s), 96 drag step(s)); gestures begun 0. If you turned knobs, this plug-in does not tell the host about them (or not through VST3's component handler)
+[param] AL Strict Synth 33 outs: no value changed without telling the host (polled its 7 values every 200 ms while its window was open: 58 polls, 0.01 ms on average, worst 0.12 ms)
+[notes] AL Strict Synth 33 outs: 47 notes sent (47 from the test pattern, 0 from the keys), output peak 0.200: it sounded
+[level] AL Strict Synth 33 outs: its own output stayed at or below 0 dBFS (peak -8.0 dBFS); the app's safety limiter engaged 0 time(s); the app's output peak 0.200 (-14.0 dBFS), never past full scale
+[diag] AL Strict Synth 33 outs: 1186 blocks processed; the plug-in's own main output held sound in 1087 of them (peak -8.0 dB, measured before this app copies or halves it); other output buses held sound in 0 (peak silent (0)); blocks with a silence flag set by the plug-in: 1186 of 1186 (on any of its 33 output buses; on the main bus: 120, 21 of them although the main bus held sound; flags summed over all buses: 38072); process() not ok: 0 (last result: ok); notes handed over: 47 on, 46 off, 0 refused by the event list; parameter changes handed over: 0; messages between its two parts: 1 to the processor, 0 to the controller, 1 of them from a thread other than the main thread, 0 dropped
+[param] AL Strict Synth 33 outs: NO parameter moves reached the host from its window, although the mouse was used in it 120 time(s) (24 click(s) or scroll(s), 96 drag step(s)); gestures begun 0. If you turned knobs, this plug-in does not tell the host about them (or not through VST3's component handler)
+[param] AL Strict Synth 33 outs: no value changed without telling the host (polled its 7 values every 200 ms while its window was open: 58 polls, 0.01 ms on average, worst 0.12 ms)
+[notes] AL Strict Synth 33 outs: 47 notes sent (47 from the test pattern, 0 from the keys), output peak 0.200: it sounded
+[level] AL Strict Synth 33 outs: its own output stayed at or below 0 dBFS (peak -8.0 dBFS); the app's safety limiter engaged 0 time(s); the app's output peak 0.200 (-14.0 dBFS), never past full scale
+[diag] AL Strict Synth 33 outs: 1188 blocks processed; the plug-in's own main output held sound in 1089 of them (peak -8.0 dB, measured before this app copies or halves it); other output buses held sound in 0 (peak silent (0)); blocks with a silence flag set by the plug-in: 1188 of 1188 (on any of its 33 output buses; on the main bus: 120, 21 of them although the main bus held sound; flags summed over all buses: 38136); process() not ok: 0 (last result: ok); notes handed over: 47 on, 47 off, 0 refused by the event list; parameter changes handed over: 0; messages between its two parts: 1 to the processor, 0 to the controller, 1 of them from a thread other than the main thread, 0 dropped
+[probe] AL Strict Synth 33 outs: loading it again in a separate process and playing it under several host set-ups at 48000 Hz (your sound keeps playing meanwhile)
+[probe] AL Strict Synth 33 outs, the 0.5 host (as JUCE and the SDK's validator): SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, the 0.4 host (as on your Mac in reports 4 and 5): SILENT; its main output held sound in 0 of 188 blocks, other buses in 0; messages 0 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] AL Strict Synth 33 outs, 0.5 without giving the controller the processor's state: SILENT; its main output held sound in 0 of 188 blocks, other buses in 0; messages 0 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] AL Strict Synth 33 outs, 0.5 but messages from other threads dropped (the SDK's proxy): SILENT; its main output held sound in 0 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 1 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, 0.5 but buses set up as in 0.4 (stereo forced, before setupProcessing): SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, 0.5 with a unique id on every note: SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, 0.5 with every audio bus active: SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, 0.5 with the transport stopped: SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, 0.5 after loading its first factory preset ("Café Init"): SOUND, peak -8.0 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 1 from other threads, 0 dropped; controller given the state: ok
+[probe] AL Strict Synth 33 outs, conclusion: the 0.4 host's set-up was the cause: it sounds with 0.5, not with 0.4. Silent again with: 0.5 without giving the controller the processor's state; 0.5 but messages from other threads dropped (the SDK's proxy).
+[selftest] end
+[audio] plug-in AL Strict Synth 33 outs: 2243 blocks, average 141.6 microseconds per block (1.33 % of the block), worst 1077.5 (10.1 %), block lasts 10667 microseconds, failed blocks 0, overloads reported by the device 0, device callbacks 2519, frames per callback 512 to 512, peak level 0.200
+[audio] the slowest blocks (at least 100 ms apart) and what happened in the 100 ms before each, and during it:
+[audio]   1) 1077.5 microseconds (10.1 % of the block) at 22:14:57.737: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[audio]   2) 863.0 microseconds (8.1 % of the block) at 22:14:54.576: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[audio]   3) 826.8 microseconds (7.8 % of the block) at 22:14:50.416: nothing happened in the window, the plug-in's controls or the devices (the plug-in's own work, or the system)
+[param] AL Strict Synth 33 outs: NO parameter moves reached the host from its window, although the mouse was used in it 120 time(s) (24 click(s) or scroll(s), 96 drag step(s)); gestures begun 0. If you turned knobs, this plug-in does not tell the host about them (or not through VST3's component handler)
+[param] AL Strict Synth 33 outs: no value changed without telling the host (polled its 7 values every 200 ms while its window was open: 114 polls, 0.01 ms on average, worst 0.18 ms)
+[notes] AL Strict Synth 33 outs: 47 notes sent (47 from the test pattern, 0 from the keys), output peak 0.200: it sounded
+[level] AL Strict Synth 33 outs: its own output stayed at or below 0 dBFS (peak -8.0 dBFS); the app's safety limiter engaged 0 time(s); the app's output peak 0.200 (-14.0 dBFS), never past full scale
+[diag] AL Strict Synth 33 outs: 2243 blocks processed; the plug-in's own main output held sound in 1377 of them (peak -8.0 dB, measured before this app copies or halves it); other output buses held sound in 0 (peak silent (0)); blocks with a silence flag set by the plug-in: 2243 of 2243 (on any of its 33 output buses; on the main bus: 893, 27 of them although the main bus held sound; flags summed over all buses: 72669); process() not ok: 0 (last result: ok); notes handed over: 47 on, 47 off, 0 refused by the event list; parameter changes handed over: 0; messages between its two parts: 1 to the processor, 0 to the controller, 1 of them from a thread other than the main thread, 0 dropped

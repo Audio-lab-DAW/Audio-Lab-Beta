@@ -1,0 +1,12 @@
+[32m==>[0m [1mFetching downloads for: [32mblackhole-2ch[39m[0m
+✔︎ Cask blackhole-2ch (0.7.1)
+[32m==>[0m [1mInstalling Cask [32mblackhole-2ch[39m[0m
+[34m==>[0m [1mRunning installer for blackhole-2ch with `sudo` (which may request your password)...[0m
+installer: Package name is BlackHole: Audio Loopback Driver (2ch) 0.7.1
+installer: Installing at base path /
+installer: The install was successful.
+installer: The install requires restarting now.
+🍺  blackhole-2ch was successfully installed!
+[32m==>[0m [1mCaveats[0m
+[34m==>[0m [1mblackhole-2ch[0m
+You must reboot for the installation of blackhole-2ch to take effect.

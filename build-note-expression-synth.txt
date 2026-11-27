@@ -1,0 +1,33 @@
+[  2%] Built target pluginterfaces
+[  6%] Built target base
+[ 11%] Built target sdk_common
+[ 15%] Built target sdk_hosting
+[ 22%] Built target sdk
+[ 25%] Built target moduleinfotool
+[ 63%] Built target vstgui
+[ 95%] Built target vstgui_uidescription
+[ 97%] Built target vstgui_support
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/note_expression_synth_controller.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/factory.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/note_expression_synth_processor.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/note_expression_synth_ui.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/note_expression_synth_voice.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/source/note_touch_controller.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/Users/runner/work/_temp/vst3sdk/vstgui4/vstgui/contrib/keyboardview.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/note_expression_synth/CMakeFiles/note-expression-synth.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/macmain.cpp.o
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/Snapshots/41466D9BB0654576B641098F686371B3_snapshot.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/Snapshots/41466D9BB0654576B641098F686371B3_snapshot_2.0x.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/about.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/background.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/groupframe.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/knob big.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/knob.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/knob2.png
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/note_expression_synth.uidesc
+Copying OS X content VST3/Release/note-expression-synth.vst3/Contents/Resources/vst3_logo_small.png
+[100%] Linking CXX CFBundle shared module ../../../../../VST3/Release/note-expression-synth.vst3/Contents/MacOS/note-expression-synth
+[SMTG] Adhoc codesign workaround for Xcode 15
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/note-expression-synth.vst3: replacing existing signature
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/note-expression-synth.vst3: signed app bundle with Mach-O thin (arm64) [note-expression-synth-5555494484821df61d32382885ea03ef360ddd5b]
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/note-expression-synth.vst3/Contents/Resources/moduleinfo.json: signed generic [moduleinfo-01aa5a395dcf23defa23ffe5d82c52555c76bae4]
+[100%] Built target note-expression-synth

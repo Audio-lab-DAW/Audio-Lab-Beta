@@ -1,0 +1,9 @@
+Executable=/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test
+Identifier=com.audiolab.vst3test
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=1774 flags=0x2(adhoc) hashes=49+3 location=embedded
+Signature=adhoc
+Info.plist entries=14
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=0
+Internal requirements count=0 size=12

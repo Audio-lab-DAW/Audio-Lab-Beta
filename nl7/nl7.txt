@@ -1,0 +1,5 @@
+[nl7] PASS text: "17.1<U+202F>ms <U+2212>3.26<U+00A0>dB caf<e acute>" -> "17.1 ms -3.26 dB café" (the accented letter stays: a report holding it starts with a byte order mark: yes)
+[nl7] PASS plug-in strings (titles, units, value texts, program names) carry none of U+202F, U+2212, U+00A0: Level [dB] = "-8.0 dB"; Loud (+20 dBFS) = "Off"; Sneaky drift = "Off"; Dérive [ms] = "12.5 ms"; Spread [deg] = "21 deg"; Symbols = "us +/-3 x2 inf m2 m3 21 deg"; Factory = "Café Init"; program "Café Init"; program "Loud - test"
+[nl7] PASS loud mode: the plug-in's own output peaked at +20.0 dBFS (140 of 140 blocks past 0 dBFS); after the app's half level and safety limiter the output peaked at 0.980 (-0.18 dBFS), limiter engaged 1 time(s), most -14.1 dB
+[nl7] PASS sneaky mode: 6 change(s) without telling the host, in: Dérive (the host's own changes to Sneaky drift and Level not counted)
+[nl7] PASS events recorded: 2 (state set 1, preset loaded 1)

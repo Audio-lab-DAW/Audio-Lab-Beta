@@ -1,0 +1,7 @@
+plain   own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 3514 x real time
+filter  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 1847 x real time
+dither  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 2796 x real time
+--- control: the same program built with fused multiply-add allowed ---
+plain   own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 2491 x real time
+filter  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 3564 x real time
+dither  own maths: identical, all 48000 samples | web numbers: identical, all 48000 samples | pow/exp results same as the browser: yes | speed 2368 x real time

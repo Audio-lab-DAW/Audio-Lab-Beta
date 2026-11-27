@@ -1,0 +1,26 @@
+[diag] Surge XT: plug-in: Surge XT by Surge Synth Team, version 1.3.4, built with VST 3.7.8, categories Instrument|Synth
+[diag] Surge XT: component initialize = ok
+[diag] Surge XT: controller: a separate object, initialize = ok
+[diag] Surge XT: processor and controller connected (IConnectionPoint): processor = ok, controller = ok; messages from other threads: delivered (as JUCE's host)
+[diag] Surge XT: controller->setComponentState(the processor's state, 50239 bytes) = not implemented
+[diag] Surge XT: parameters: 2855; messages so far: 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped
+[diag] Surge XT: buses the plug-in offers: [audio in 0 "Sidechain": aux, 2 ch, default active] [audio out 0 "Output": main, 2 ch, default active] [audio out 1 "Scene A": main, 2 ch, default inactive] [audio out 2 "Scene B": main, 2 ch, default inactive] [event in 0 "MIDI Input": main, 16 ch, default active]
+[diag] Surge XT: setupProcessing(realtime, 32-bit float, 44100 Hz, largest block 512) = ok
+[diag] Surge XT: arrangements the plug-in prefers: in 0: stereo out 0: stereo out 1: stereo out 2: stereo
+[diag] Surge XT: setBusArrangements( in 0: stereo out 0: stereo out 1: stereo out 2: stereo ) = ok; the plug-in now has in 0: stereo out 0: stereo out 1: stereo out 2: stereo
+[diag] Surge XT: activateBus: audio in 0 off = ok; audio out 0 on = ok; audio out 1 off = ok; audio out 2 off = ok; event in 0 on = ok;
+[diag] Surge XT: setActive(true) = ok
+[diag] Surge XT: setProcessing(true) = ok
+[diag] Surge XT: process data: in bus 0 2 ch; out bus 0 2 ch; out bus 1 2 ch; out bus 2 2 ch; event list, parameter changes in and out, process context (tempo 120, 4/4, playing, system time, bar position), note ids -1
+[diag] Surge XT: 0 blocks processed; the plug-in's own main output held sound in 0 of them (peak silent (0), measured before this app copies or halves it); other output buses held sound in 0 (peak silent (0)); blocks with a silence flag set by the plug-in: 0 of 0 (on any of its 3 output buses; on the main bus: 0, 0 of them although the main bus held sound; flags summed over all buses: 0); process() not ok: 0 (last result: ok); notes handed over: 0 on, 0 off, 0 refused by the event list; parameter changes handed over: 0; messages between its two parts: 1 to the processor, 0 to the controller, 0 of them from a thread other than the main thread, 0 dropped
+[presets] Surge XT: 0 reachable through VST3
+[probe] Surge XT, the 0.5 host (as JUCE and the SDK's validator): SOUND, peak -4.6 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, the 0.4 host (as on your Mac in reports 4 and 5): SOUND, peak -7.6 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] Surge XT, 0.5 without giving the controller the processor's state: SOUND, peak -7.3 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] Surge XT, 0.5 but messages from other threads dropped (the SDK's proxy): SOUND, peak -6.5 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, 0.5 but buses set up as in 0.4 (stereo forced, before setupProcessing): SOUND, peak -6.8 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, 0.5 with a unique id on every note: SOUND, peak -6.7 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, 0.5 with every audio bus active: SOUND, peak -7.3 dB; its main output held sound in 173 of 173 blocks, other buses in 173; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, 0.5 with the transport stopped: SOUND, peak -7.2 dB; its main output held sound in 173 of 173 blocks, other buses in 0; messages 1 to the processor, 0 to the controller, 0 from other threads, 0 dropped; controller given the state: not implemented
+[probe] Surge XT, 0.5 after loading its first factory preset: no factory preset reachable through VST3 (no program list, no .vstpreset file)
+[probe] Surge XT, conclusion: it sounds with both hosts here. If it was silent while you played, the difference is elsewhere (its patch, or what it was doing at that moment).

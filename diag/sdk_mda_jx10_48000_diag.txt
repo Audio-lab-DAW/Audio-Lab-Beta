@@ -1,0 +1,26 @@
+[diag] mda JX10: plug-in: mda JX10 by mda, version 3.8.1.0, built with VST 3.8.1, categories Instrument|Synth
+[diag] mda JX10: component initialize = ok
+[diag] mda JX10: controller: a separate object, initialize = ok
+[diag] mda JX10: processor and controller connected (IConnectionPoint): processor = ok, controller = ok; messages from other threads: delivered (as JUCE's host)
+[diag] mda JX10: controller->setComponentState(the processor's state, 8076 bytes) = ok
+[diag] mda JX10: parameters: 31; messages so far: 0 to the processor, 0 to the controller, 0 from other threads, 0 dropped
+[diag] mda JX10: buses the plug-in offers: [audio out 0 "Stereo Out": main, 2 ch, default active] [event in 0 "MIDI in": main, 1 ch, default active]
+[diag] mda JX10: setupProcessing(realtime, 32-bit float, 48000 Hz, largest block 512) = ok
+[diag] mda JX10: arrangements the plug-in prefers: out 0: stereo
+[diag] mda JX10: setBusArrangements( out 0: stereo ) = ok; the plug-in now has out 0: stereo
+[diag] mda JX10: activateBus: audio out 0 on = ok; event in 0 on = ok;
+[diag] mda JX10: setActive(true) = ok
+[diag] mda JX10: setProcessing(true) = ok
+[diag] mda JX10: process data: out bus 0 2 ch; event list, parameter changes in and out, process context (tempo 120, 4/4, playing, system time, bar position), note ids -1
+[diag] mda JX10: 0 blocks processed; the plug-in's own main output held sound in 0 of them (peak silent (0), measured before this app copies or halves it); other output buses held sound in 0 (peak silent (0)); blocks with a silence flag set by the plug-in: 0 of 0 (main bus; 0 of them although it held sound); process() not ok: 0 (last result: ok); notes handed over: 0 on, 0 off, 0 refused by the event list; parameter changes handed over: 0; messages between its two parts: 0 to the processor, 1 to the controller, 0 of them from a thread other than the main thread, 0 dropped
+[presets] mda JX10: 52 reachable through VST3 (first: "5th Sweep Pad", program list)
+[probe] mda JX10, the 0.5 host (as JUCE and the SDK's validator): SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, the 0.4 host (as on your Mac in reports 4 and 5): SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] mda JX10, 0.5 without giving the controller the processor's state: SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: not called
+[probe] mda JX10, 0.5 but messages from other threads dropped (the SDK's proxy): SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, 0.5 but buses set up as in 0.4 (stereo forced, before setupProcessing): SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, 0.5 with a unique id on every note: SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, 0.5 with every audio bus active: SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, 0.5 with the transport stopped: SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, 0.5 after loading its first factory preset ("5th Sweep Pad"): SOUND, peak -5.4 dB; its main output held sound in 188 of 188 blocks, other buses in 0; messages 0 to the processor, 1 to the controller, 0 from other threads, 0 dropped; controller given the state: ok
+[probe] mda JX10, conclusion: it sounds with both hosts here. If it was silent while you played, the difference is elsewhere (its patch, or what it was doing at that moment).

@@ -1,0 +1,80 @@
+[  8%] Built target pluginterfaces
+[ 25%] Built target base
+[ 41%] Built target sdk_common
+[ 41%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/main/pluginfactory.cpp.o
+[ 41%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/common/pluginview.cpp.o
+[ 41%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/main/moduleinit.cpp.o
+[ 58%] Built target sdk_hosting
+[ 58%] Building CXX object vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/source/main.cpp.o
+[ 58%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/dataexchange.cpp.o
+[ 58%] Building CXX object vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/moduleinfo/moduleinfocreator.cpp.o
+[ 58%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/stringconvert.cpp.o
+[ 66%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/systemtime.cpp.o
+In file included from /Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/utility/stringconvert.cpp:29:
+In file included from /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/istream:1411:
+In file included from /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/ostream:201:
+In file included from /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/format:248:
+In file included from /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/locale:203:
+/Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__locale_dir/wstring_convert.h:179:1: warning: 'wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>' is deprecated [-Wdeprecated-declarations]
+  179 | wstring_convert<_Codecvt, _Elem, _WideAlloc, _ByteAlloc>::to_bytes(const _Elem* __frm, const _Elem* __frm_end) {
+      | ^
+/Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__locale_dir/wstring_convert.h:80:12: note: in instantiation of member function 'std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>::to_bytes' requested here
+   80 |     return to_bytes(__wptr, __wptr + char_traits<_Elem>::length(__wptr));
+      |            ^
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/utility/stringconvert.cpp:100:22: note: in instantiation of member function 'std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>::to_bytes' requested here
+  100 |         return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str));
+      |                             ^
+/Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__locale_dir/wstring_convert.h:34:7: note: 'wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>' has been explicitly marked deprecated here
+   34 | class _LIBCPP_DEPRECATED_IN_CXX17 wstring_convert {
+      |       ^
+/Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__config:581:41: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX17'
+  581 | #    define _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_DEPRECATED
+      |                                         ^
+/Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__config:554:49: note: expanded from macro '_LIBCPP_DEPRECATED'
+  554 | #      define _LIBCPP_DEPRECATED __attribute__((__deprecated__))
+      |                                                 ^
+1 warning generated.
+[ 66%] Building CXX object vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp.o
+[ 66%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/testing.cpp.o
+[ 66%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/utility/vst2persistence.cpp.o
+[ 66%] Building OBJCXX object vst3sdk/public.sdk/samples/vst-utilities/moduleinfotool/CMakeFiles/moduleinfotool.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/hosting/module_mac.mm.o
+[ 66%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstaudioeffect.cpp.o
+[ 66%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstbus.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstcomponent.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstcomponentbase.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vsteditcontroller.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstinitiids.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstnoteexpressiontypes.cpp.o
+[ 75%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstparameters.cpp.o
+[ 83%] Linking CXX executable ../../../../../bin/Release/moduleinfotool
+[ 83%] Built target moduleinfotool
+[ 91%] Building CXX object vst3sdk/CMakeFiles/sdk.dir/public.sdk/source/vst/vstrepresentation.cpp.o
+[ 91%] Linking CXX static library ../lib/Release/libsdk.a
+[ 91%] Built target sdk
+[ 91%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/source/adelayprocessor.cpp.o
+[ 91%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/source/exampletest.cpp.o
+[ 91%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/source/adelaycontroller.cpp.o
+[ 91%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/source/factory.cpp.o
+[ 91%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/utility/test/ringbuffertest.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/utility/test/versionparsertest.cpp.o
+In file included from /Users/runner/work/_temp/vst3sdk/public.sdk/samples/vst/adelay/source/factory.cpp:21:
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:66:10: warning: address of array 'ci.category' will always evaluate to 'true' [-Wpointer-bool-conversion]
+   66 |                 if (ci.category)
+      |                 ~~  ~~~^~~~~~~~
+/Users/runner/work/_temp/vst3sdk/public.sdk/samples/vst/adelay/source/factory.cpp:60:1: note: in instantiation of member function 'Steinberg::PluginFactory<FactoryData>::getClassInfo' requested here
+   60 | END_FACTORY
+      | ^
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:196:48: note: expanded from macro 'END_FACTORY'
+  196 |                 static Steinberg::PluginFactory<FactoryData> factory;                    \
+      |                                                              ^
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:68:10: warning: address of array 'ci.name' will always evaluate to 'true' [-Wpointer-bool-conversion]
+   68 |                 if (ci.name)
+      |                 ~~  ~~~^~~~
+2 warnings generated.
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/adelay/CMakeFiles/adelay.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/macmain.cpp.o
+[100%] Linking CXX CFBundle shared module ../../../../../VST3/Release/adelay.vst3/Contents/MacOS/adelay
+[SMTG] Adhoc codesign workaround for Xcode 15
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/adelay.vst3: replacing existing signature
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/adelay.vst3: signed app bundle with Mach-O thin (arm64) [adelay-55554944f6acd99f46fa365b837ab34cc62d435e]
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/adelay.vst3/Contents/Resources/moduleinfo.json: signed generic [moduleinfo-fc764d63fbb4c3fded4b47513b0a261cc6e6c5bb]
+[100%] Built target adelay

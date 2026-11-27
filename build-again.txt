@@ -1,0 +1,204 @@
+[  0%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cmake_pch.objcxx.hxx.pch
+[  0%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cmake_pch.hxx.pch
+[  2%] Built target pluginterfaces
+[  6%] Built target base
+[ 11%] Built target sdk_common
+[ 15%] Built target sdk_hosting
+[ 22%] Built target sdk
+[ 25%] Built target moduleinfotool
+[ 27%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/caviewlayer.mm.o
+[ 27%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/autoreleasepool.mm.o
+[ 27%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/cocoahelpers.mm.o
+[ 27%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cfontmac.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/cocoaopenglview.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/cocoatextedit.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/nsviewdraggingsession.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/nsviewframe.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cocoa/nsviewoptionmenu.mm.o
+[ 29%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/coregraphicsdevicecontext.mm.o
+[ 31%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/macclipboard.mm.o
+[ 31%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/macfactory.mm.o
+[ 31%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/macfileselector.mm.o
+[ 31%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/macglobals.cpp.o
+[ 31%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/macstring.mm.o
+[ 34%] Building OBJCXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/mactaskexecutor.mm.o
+[ 34%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/mactimer.cpp.o
+[ 34%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/quartzgraphicspath.cpp.o
+[ 36%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/animation/animations.cpp.o
+[ 36%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/animation/animator.cpp.o
+[ 36%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/animation/timingfunctions.cpp.o
+[ 36%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cbitmap.cpp.o
+[ 36%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cbitmapfilter.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cclipboard.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/ccolor.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cdatabrowser.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cdrawcontext.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cdrawmethods.cpp.o
+[ 38%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cdropsource.cpp.o
+[ 40%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cexternalview.cpp.o
+[ 40%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cfileselector.cpp.o
+[ 40%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cfont.cpp.o
+[ 40%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cframe.cpp.o
+[ 40%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cgradient.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cgradientview.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cgraphicspath.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/clayeredviewcontainer.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/clinestyle.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/ctexteditor.cpp.o
+[ 43%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/coffscreencontext.cpp.o
+[ 45%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cautoanimation.cpp.o
+[ 45%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cbuttons.cpp.o
+[ 45%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/ccolorchooser.cpp.o
+[ 45%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/ccontrol.cpp.o
+[ 45%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cfontchooser.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cknob.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/clistcontrol.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cmoviebitmap.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cmoviebutton.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/coptionmenu.cpp.o
+[ 47%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cparamdisplay.cpp.o
+[ 50%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cscrollbar.cpp.o
+[ 50%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/csearchtextedit.cpp.o
+[ 50%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/csegmentbutton.cpp.o
+[ 50%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cslider.cpp.o
+[ 50%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cspecialdigit.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/csplashscreen.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cstringlist.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cswitch.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/ctextedit.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/ctextlabel.cpp.o
+[ 52%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cvumeter.cpp.o
+[ 54%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/controls/cxypad.cpp.o
+[ 54%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/copenglview.cpp.o
+[ 54%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cpoint.cpp.o
+[ 54%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/crect.cpp.o
+[ 54%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/crowcolumnview.cpp.o
+[ 56%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cscrollview.cpp.o
+[ 56%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cshadowviewcontainer.cpp.o
+[ 56%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/csplitview.cpp.o
+[ 56%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cstring.cpp.o
+[ 56%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/ctabview.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/ctooltipsupport.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cview.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cviewcontainer.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/cvstguitimer.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/events.cpp.o
+[ 59%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/genericstringlistdatabrowsersource.cpp.o
+[ 61%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/pixelbuffer.cpp.o
+[ 61%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/platformfactory.cpp.o
+[ 61%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/common/fileresourceinputstream.cpp.o
+[ 61%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/common/genericoptionmenu.cpp.o
+[ 61%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/common/generictextedit.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/stringconvert.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/viewlayouter/autosizeviewlayouter.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/viewlayouter/gridlayouter.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/tasks.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/vstguidebug.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/vstguiinit.cpp.o
+[ 63%] Building CXX object vst3sdk/VSTGUI.build/vstgui/lib/CMakeFiles/vstgui.dir/platform/mac/cgbitmap.cpp.o
+[ 63%] Linking CXX static library ../../../../lib/Release/libvstgui.a
+[ 63%] Built target vstgui
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/cmake_pch.hxx.pch
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/cstream.cpp.o
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/compresseduidescription.cpp.o
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/cstream_zlib.cpp.o
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uiattributes.cpp.o
+[ 65%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uicontentprovider.cpp.o
+[ 68%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uidescription.cpp.o
+[ 68%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uidescriptionaddonregistry.cpp.o
+[ 68%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uiviewcreator.cpp.o
+[ 68%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uiviewfactory.cpp.o
+[ 68%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/uiviewswitchcontainer.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/xmlparser.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/detail/uidesclist.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/detail/uijsonpersistence.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/detail/uinode.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/detail/uixmlpersistence.cpp.o
+[ 70%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uiactions.cpp.o
+[ 72%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uiattributescontroller.cpp.o
+[ 72%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uibitmapscontroller.cpp.o
+[ 72%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uicolor.cpp.o
+[ 72%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uicolorchoosercontroller.cpp.o
+[ 72%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uicolorscontroller.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uicolorslider.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uicrosslines.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uidialogcontroller.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uieditcontroller.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uieditmenucontroller.cpp.o
+[ 75%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uieditview.cpp.o
+[ 77%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uifocussettingscontroller.cpp.o
+[ 77%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uifontscontroller.cpp.o
+[ 77%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uigradientscontroller.cpp.o
+[ 77%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uigridcontroller.cpp.o
+[ 77%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uioverlayview.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uiselection.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uitagscontroller.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uitemplatecontroller.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uitemplatesettingscontroller.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uiundomanager.cpp.o
+[ 79%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/editing/uiviewcreatecontroller.cpp.o
+[ 81%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/animationsplashscreencreator.cpp.o
+[ 81%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/animknobcreator.cpp.o
+[ 81%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/autoanimationcreator.cpp.o
+[ 81%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/checkboxcreator.cpp.o
+[ 81%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/controlcreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/gradientviewcreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/kickbuttoncreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/knobcreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/layeredviewcontainercreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/moviebitmapcreator.cpp.o
+[ 84%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/moviebuttoncreator.cpp.o
+[ 86%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/multibitmapcontrolcreator.cpp.o
+[ 86%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/multilinetextlabelcreator.cpp.o
+[ 86%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/onoffbuttoncreator.cpp.o
+[ 86%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/optionmenucreator.cpp.o
+[ 86%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/paramdisplaycreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/rockerswitchcreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/rowcolumnviewcreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/scrollviewcreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/searchtexteditcreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/segmentbuttoncreator.cpp.o
+[ 88%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/shadowviewcontainercreator.cpp.o
+[ 90%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/sliderviewcreator.cpp.o
+[ 90%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/splitviewcreator.cpp.o
+[ 90%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/stringlistcontrolcreator.cpp.o
+[ 90%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/switchcreators.cpp.o
+[ 90%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/textbuttoncreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/texteditcreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/textlabelcreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/uiviewswitchcontainercreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/viewcontainercreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/viewcreator.cpp.o
+[ 93%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/vumetercreator.cpp.o
+[ 95%] Building CXX object vst3sdk/VSTGUI.build/vstgui/uidescription/CMakeFiles/vstgui_uidescription.dir/viewcreator/xypadcreator.cpp.o
+[ 95%] Linking CXX static library ../../../../lib/Release/libvstgui_uidescription.a
+[ 95%] Built target vstgui_uidescription
+[ 95%] Building CXX object vst3sdk/CMakeFiles/vstgui_support.dir/vstgui4/vstgui/plugin-bindings/vst3padcontroller.cpp.o
+[ 97%] Building CXX object vst3sdk/CMakeFiles/vstgui_support.dir/vstgui4/vstgui/plugin-bindings/vst3groupcontroller.cpp.o
+[ 97%] Building CXX object vst3sdk/CMakeFiles/vstgui_support.dir/vstgui4/vstgui/plugin-bindings/vst3editor.cpp.o
+[ 97%] Building CXX object vst3sdk/CMakeFiles/vstgui_support.dir/public.sdk/source/vst/vstguieditor.cpp.o
+[ 97%] Linking CXX static library ../lib/Release/libvstgui_support.a
+[ 97%] Built target vstgui_support
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/vst/utility/test/midiconverttest.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/source/againentry.cpp.o
+[ 97%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/source/again.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/source/againcontroller.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/source/againsidechain.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/again/CMakeFiles/again.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/macmain.cpp.o
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/Snapshots/41347FD6FED64094AFBB12B7DBA1D441_snapshot.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/Snapshots/41347FD6FED64094AFBB12B7DBA1D441_snapshot_2.0x.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/Snapshots/84E8DE5F92554F5396FAE4133C935A18_snapshot.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/Snapshots/84E8DE5F92554F5396FAE4133C935A18_snapshot_2.0x.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/again.uidesc
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/background.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/slider_background.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/slider_handle.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/slider_handle_2.0x.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/vu_on.png
+Copying OS X content VST3/Release/again.vst3/Contents/Resources/vu_off.png
+[100%] Linking CXX CFBundle shared module ../../../../../VST3/Release/again.vst3/Contents/MacOS/again
+[SMTG] Adhoc codesign workaround for Xcode 15
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/again.vst3: replacing existing signature
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/again.vst3: signed app bundle with Mach-O thin (arm64) [again-555549449fac68ff15de38abb62a3c491f36b105]
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/again.vst3/Contents/Resources/moduleinfo.json: signed generic [moduleinfo-898ff1fee45a90c730d2af67388359b6b51b103a]
+[100%] Built target again

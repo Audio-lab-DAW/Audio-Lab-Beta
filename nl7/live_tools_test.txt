@@ -1,0 +1,22 @@
+PASS U+202F narrow no-break space -> space (Phase Plant's '17.1 ms')
+PASS U+2212 minus and U+00A0 no-break space
+PASS an accented letter stays (the report then gets a byte order mark)
+PASS bytes that are not UTF-8 become '?'
+PASS an overlong sequence is refused
+PASS em dash and ellipsis
+PASS NL8: U+00B0 degree sign -> ' deg' ('21 deg')
+PASS NL8: micro, plus-minus, times, infinity, squared, cubed
+PASS NL8: '21' + Mac Roman mojibake of the degree sign (what report 8 showed before the 0.5 clean-up) -> '21 deg'
+PASS NL8: the same symbols as Mac Roman mojibake are repaired
+PASS NL8: a lone 'not' sign stays
+PASS NL8: after the clean-up the symbols are plain ASCII (no byte order mark needed)
+PASS limiter on +28 dBFS: output peak 0.9800 <= 0.98 (one rounding step allowed; full scale is 1.0), engaged 1 time(s) (once, it never rested), 2 bad samples silenced, most -22.1 dB
+PASS limiter leaves sound below the ceiling bit for bit
+PASS three loud bursts with rests between: engaged 3 times
+PASS event ring: 20000 events from 4 threads, the last 1024 kept in time order; reaches back to time 0: no
+PASS event ring: a time window picks the right event
+PASS slowest blocks: the 3 slowest, at least 100 ms apart, slowest first
+PASS parameter poll: unreported change counted, reported, read-only and preset changes not
+all passed: 0 failed
+all passed: 0 failed
+all passed: 0 failed

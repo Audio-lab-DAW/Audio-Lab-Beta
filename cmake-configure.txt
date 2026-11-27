@@ -1,0 +1,55 @@
+-- The C compiler identification is AppleClang 21.0.0.21000101
+-- The CXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The OBJC compiler identification is AppleClang 21.0.0.21000101
+-- The OBJCXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting OBJC compiler ABI info
+-- Detecting OBJC compiler ABI info - done
+-- Check for working OBJC compiler: /usr/bin/clang - skipped
+-- Detecting OBJCXX compiler ABI info
+-- Detecting OBJCXX compiler ABI info - done
+-- Check for working OBJCXX compiler: /usr/bin/clang++ - skipped
+-- [SMTG] Check C++ compiler
+-- [SMTG] Building with Xcode version: 26.6
+-- [SMTG] SMTG_VSTGUI_SOURCE_DIR is set to: /Users/runner/work/_temp/vst3sdk/vstgui4
+-- Found EXPAT: /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libexpat.tbd (found version "2.7.4")
+-- VSTGUI will use the Expat library at /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libexpat.tbd
+-- VSTGUI will use the Expat header found in /Applications/Xcode_26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+-- [SMTG] SMTG_AAX_SDK_PATH is not set. If you need it, please download the AAX SDK!
+-- Could NOT find LIBJACK (missing: LIBJACK_LIBRARIES LIBJACK_INCLUDE_DIR) 
+-- Performing Test SMTG_USE_STDATOMIC_H
+-- Performing Test SMTG_USE_STDATOMIC_H - Success
+-- [SMTG] Setup running moduleinfotool for adelay
+-- [SMTG] Setup running moduleinfotool for again
+-- [SMTG] Setup running moduleinfotool for again-simple
+-- [SMTG] Setup running moduleinfotool for again-sample-accurate
+-- [SMTG] Setup running moduleinfotool for channel-context
+-- [SMTG] Setup running moduleinfotool for data-exchange
+-- [SMTG] Setup running moduleinfotool for host-checker
+-- [SMTG] Setup running moduleinfotool for legacy-midicc-out
+-- [SMTG] Setup running moduleinfotool for mda-vst3
+-- [SMTG] Setup running moduleinfotool for multiple-program-changes
+-- [SMTG] Setup running moduleinfotool for note-expression-synth
+-- [SMTG] Setup running moduleinfotool for note-expression-text
+-- [SMTG] Setup running moduleinfotool for panner
+-- [SMTG] Setup running moduleinfotool for pitch-names
+-- [SMTG] Setup running moduleinfotool for prefetchable
+-- [SMTG] Setup running moduleinfotool for program-change
+-- [SMTG] Setup running moduleinfotool for remap-paramid
+-- [SMTG] Setup running moduleinfotool for sync-delay
+-- [SMTG] Setup running moduleinfotool for transport-control
+-- [SMTG] Setup running moduleinfotool for utf16-name
+* To enable building the AUv3 Wrapper example for iOS you need to set the SMTG_IOS_DEVELOPMENT_TEAM and use the Xcode generator
+-- [SMTG] Setup running moduleinfotool for al-strict-synth
+-- Configuring done (10.2s)
+-- Generating done (0.5s)
+-- Build files have been written to: /Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build

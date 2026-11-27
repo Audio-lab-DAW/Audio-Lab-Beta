@@ -1,0 +1,99 @@
+[  4%] Built target pluginterfaces
+[ 12%] Built target base
+[ 20%] Built target sdk_common
+[ 28%] Built target sdk_hosting
+[ 40%] Built target sdk
+[ 44%] Built target moduleinfotool
+[ 44%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaAmbienceController.cpp.o
+[ 44%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBandistoController.cpp.o
+[ 48%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaAmbienceProcessor.cpp.o
+[ 48%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBandistoProcessor.cpp.o
+[ 48%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBaseController.cpp.o
+[ 48%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBaseProcessor.cpp.o
+[ 48%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBeatBoxController.cpp.o
+[ 52%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaBeatBoxProcessor.cpp.o
+[ 52%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaComboController.cpp.o
+[ 52%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaComboProcessor.cpp.o
+[ 52%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDeEsserController.cpp.o
+[ 52%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDeEsserProcessor.cpp.o
+[ 56%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDegradeController.cpp.o
+[ 56%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDegradeProcessor.cpp.o
+[ 56%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDelayController.cpp.o
+[ 56%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDelayProcessor.cpp.o
+[ 56%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDetuneController.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDetuneProcessor.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDitherController.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDitherProcessor.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDubDelayController.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDubDelayProcessor.cpp.o
+[ 60%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDX10Controller.cpp.o
+[ 64%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDX10Processor.cpp.o
+[ 64%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDynamicsController.cpp.o
+[ 64%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaDynamicsProcessor.cpp.o
+[ 64%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaEPianoController.cpp.o
+[ 64%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaEPianoProcessor.cpp.o
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdafactory.cpp.o
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaImageController.cpp.o
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaImageProcessor.cpp.o
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaJX10Controller.cpp.o
+In file included from /Users/runner/work/_temp/vst3sdk/public.sdk/samples/vst/mda-vst3/source/mdafactory.cpp:62:
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:66:10: warning: address of array 'ci.category' will always evaluate to 'true' [-Wpointer-bool-conversion]
+   66 |                 if (ci.category)
+      |                 ~~  ~~~^~~~~~~~
+/Users/runner/work/_temp/vst3sdk/public.sdk/samples/vst/mda-vst3/source/mdafactory.cpp:853:1: note: in instantiation of member function 'Steinberg::PluginFactory<FactoryData>::getClassInfo' requested here
+  853 | END_FACTORY
+      | ^
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:196:48: note: expanded from macro 'END_FACTORY'
+  196 |                 static Steinberg::PluginFactory<FactoryData> factory;                    \
+      |                                                              ^
+/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/pluginfactory_constexpr.h:68:10: warning: address of array 'ci.name' will always evaluate to 'true' [-Wpointer-bool-conversion]
+   68 |                 if (ci.name)
+      |                 ~~  ~~~^~~~
+2 warnings generated.
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaJX10Processor.cpp.o
+[ 68%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLeslieController.cpp.o
+[ 72%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLeslieProcessor.cpp.o
+[ 72%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLimiterController.cpp.o
+[ 72%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLimiterProcessor.cpp.o
+[ 72%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLoudnessController.cpp.o
+[ 72%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaLoudnessProcessor.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaMultiBandController.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaMultiBandProcessor.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaOverdriveController.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaOverdriveProcessor.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaParameter.cpp.o
+[ 76%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaPianoController.cpp.o
+[ 80%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaPianoProcessor.cpp.o
+[ 80%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRePsychoController.cpp.o
+[ 80%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRePsychoProcessor.cpp.o
+[ 80%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRezFilterController.cpp.o
+[ 80%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRezFilterProcessor.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRingModController.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRingModProcessor.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRoundPanController.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaRoundPanProcessor.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaShepardController.cpp.o
+[ 84%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaShepardProcessor.cpp.o
+[ 88%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSpecMeterController.cpp.o
+[ 88%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSpecMeterProcessor.cpp.o
+[ 88%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSplitterController.cpp.o
+[ 88%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSplitterProcessor.cpp.o
+[ 88%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaStereoController.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaStereoProcessor.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSubSynthController.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaSubSynthProcessor.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTalkBoxController.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTalkBoxProcessor.cpp.o
+[ 92%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTestToneController.cpp.o
+[ 96%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTestToneProcessor.cpp.o
+[ 96%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaThruZeroController.cpp.o
+[ 96%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaThruZeroProcessor.cpp.o
+[ 96%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTrackerController.cpp.o
+[ 96%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/source/mdaTrackerProcessor.cpp.o
+[100%] Building CXX object vst3sdk/public.sdk/samples/vst/mda-vst3/CMakeFiles/mda-vst3.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/macmain.cpp.o
+[100%] Linking CXX CFBundle shared module ../../../../../VST3/Release/mda-vst3.vst3/Contents/MacOS/mda-vst3
+[SMTG] Adhoc codesign workaround for Xcode 15
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/mda-vst3.vst3: replacing existing signature
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/mda-vst3.vst3: signed app bundle with Mach-O thin (arm64) [mda-vst3-55554944bdcfadd75b363625b6aef94c7d1023bd]
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/mda-vst3.vst3/Contents/Resources/moduleinfo.json: signed generic [moduleinfo-4dc25242f1232ae03f23ede70a5de5378ab9ee9b]
+[100%] Built target mda-vst3

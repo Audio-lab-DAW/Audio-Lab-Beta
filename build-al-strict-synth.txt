@@ -1,0 +1,11 @@
+[  8%] Built target pluginterfaces
+[ 25%] Built target base
+[ 41%] Built target sdk_common
+[ 58%] Built target sdk_hosting
+[ 83%] Built target sdk
+[ 91%] Built target moduleinfotool
+[ 91%] Building CXX object testapp/strictsynth/CMakeFiles/al-strict-synth.dir/Users/runner/work/_temp/vst3sdk/public.sdk/source/main/macmain.cpp.o
+[100%] Building CXX object testapp/strictsynth/CMakeFiles/al-strict-synth.dir/strictsynth.cpp.o
+[100%] Linking CXX CFBundle shared module ../../VST3/Release/al-strict-synth.vst3/Contents/MacOS/al-strict-synth
+/Users/runner/work/Audio-Lab-Pro-Alpha/Audio-Lab-Pro-Alpha/build/VST3/Release/al-strict-synth.vst3/Contents/Resources/moduleinfo.json: signed generic [moduleinfo-8a19158eda363249862ad7ee9504d1e19488841f]
+[100%] Built target al-strict-synth

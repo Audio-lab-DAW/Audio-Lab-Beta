@@ -1,0 +1,11 @@
+{
+ "sentSamples": 288000,
+ "recordedSamples": 480000,
+ "lineUpFound": true,
+ "comparedSamples": 287998,
+ "identical": 287998,
+ "different": 0,
+ "gapsInTheRecording": 0,
+ "gaveUp": false,
+ "sentButNeverArrived": 0
+}
