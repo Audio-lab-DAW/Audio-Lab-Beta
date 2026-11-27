@@ -431,7 +431,7 @@ Each task:
    **Done in v0.259** (task IN-L, L2): `INS.lhist` (the one loudness history drawer), `INL` (the master's momentary and short-term, 10 a second). The devices keep their own measurement, span and scale; LRA settling for 60 s. See the backlog log.
 4. **IN-S, spectrum (S).** `ND('spec')`, the overlay (SPO), the Visualizer spectrum and the mixer spec view share one drawer. Analyser fftSize and smoothing move to the IN-A cache.
 
-   **Claimed 27 November 2026** by a lane E run (task IN-S, S2); a second lane E run does not repeat it.
+   **Done in v0.263** (task IN-S, S2): `INS.spec` (the one analyzer front-panel drawer: 10 by 10 graticule, REF on the top line, START, STOP, RBW, AVG, DET, trace 1 live, trace 2 max hold, marker 1 and the delta marker), `INS.an` (analyser size and smoothing in one place). Levels calibrated to dBFS (a sine reads its peak level). The Spectrum device, the overlay's spectrum module and the Visualizer's spectrum draw through it; the mixer's spec view keeps its bars and gets decade marks. See the backlog log.
 5. **IN-E, EQ (E).** `vizEQ2()`, `vizFilter()`, Auto Filter. The curve is cached per change; pre and post come from the existing analysers.
 6. **IN-G, dynamics (G).** `vizComp()`, the limiter, gate, ducker, OTT and multiband displays, from the GR values the devices already post.
 7. **IN-O, stereo and scope (O).** Marks and afterglow on the kept stereo displays: mixer strips (strips off screen keep only history, as today) and the master. The correlation, balance and width scales. The scope in the Visualizer. The polar view as a menu choice.

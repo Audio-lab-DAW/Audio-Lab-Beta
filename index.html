@@ -5980,7 +5980,7 @@ function drawMixer(){const w=$('#mixWin');if(!w||w.hidden||!MXV)return;if(FRN%2)
         else{for(const[p2,c2] of MXPAL[cm])gr.addColorStop(clamp(1-sy(-60+p2*60)/H,0,1),c2)}
         g.fillStyle='#14161c';g.fillRect(x,0,bw,H);INS.mbar(g,x,0,bw,H,dbN(v),INM.rfr(k?aR:aL,dbN),gr);if(hd>-59){g.fillStyle=hd>=-.1?'#ff3b3b':'#fff';g.fillRect(x,sy(hd),bw,1.5)}if(hd>=-.1){g.fillStyle='#ff1d6e';g.fillRect(x,0,bw,3)}}
       if(mxOpt('meter','ticks'))INS.scaleTaper(g,5,0,H,{lab:false})}
-    else if(view==='spec'){if(live){const an=aL;INS.fftB(an,mxF.subarray(0,an.frequencyBinCount));const n=an.frequencyBinCount,bars=Math.max(6,Math.floor(H/5));for(let b=0;b<bars;b++){const f0=Math.floor(Math.pow(n,b/bars)),f1=Math.max(f0+1,Math.floor(Math.pow(n,(b+1)/bars)));let m=0;for(let q=f0;q<f1&&q<n;q++)m=Math.max(m,mxF[q]);const v=m/255,y=H-(b+1)*H/bars;g.fillStyle=cm==='rainbow'?`hsl(${(1-b/bars)*270},85%,${45+v*20}%)`:cm==='track'?col:cm==='heat'?heatCol(v):(()=>{const c3=mxPosRGB(cm,b/bars,cm==='tri'?.5+v*.5:v,col);return`rgb(${c3[0]},${c3[1]},${c3[2]})`})();g.globalAlpha=cm==='track'||cm==='rainbow'?.25+v*.75:.35+v*.65;const mir=mxOpt('spec','mirror');if(mir)g.fillRect(W/2-v*(W/2-3),y+1,v*(W-6),H/bars-1.5);else g.fillRect(3,y+1,v*(W-6),H/bars-1.5);H0.sc=H0.sc||[];H0.sc[b]=Math.max(v,(H0.sc[b]||0)-.012);if(mxOpt('spec','caps')){g.globalAlpha=.9;g.fillStyle='#fff';const cw=H0.sc[b]*(mir?(W/2-3):(W-6));if(mir){g.fillRect(W/2-cw-1,y+1,1.5,H/bars-1.5);g.fillRect(W/2+cw-.5,y+1,1.5,H/bars-1.5)}else g.fillRect(3+cw,y+1,1.5,H/bars-1.5)}}g.globalAlpha=1}}
+    else if(view==='spec'){if(live){const an=aL;INS.fftB(an,mxF.subarray(0,an.frequencyBinCount));const n=an.frequencyBinCount,bars=Math.max(6,Math.floor(H/5));for(let b=0;b<bars;b++){const f0=Math.floor(Math.pow(n,b/bars)),f1=Math.max(f0+1,Math.floor(Math.pow(n,(b+1)/bars)));let m=0;for(let q=f0;q<f1&&q<n;q++)m=Math.max(m,mxF[q]);const v=m/255,y=H-(b+1)*H/bars;g.fillStyle=cm==='rainbow'?`hsl(${(1-b/bars)*270},85%,${45+v*20}%)`:cm==='track'?col:cm==='heat'?heatCol(v):(()=>{const c3=mxPosRGB(cm,b/bars,cm==='tri'?.5+v*.5:v,col);return`rgb(${c3[0]},${c3[1]},${c3[2]})`})();g.globalAlpha=cm==='track'||cm==='rainbow'?.25+v*.75:.35+v*.65;const mir=mxOpt('spec','mirror');if(mir)g.fillRect(W/2-v*(W/2-3),y+1,v*(W-6),H/bars-1.5);else g.fillRect(3,y+1,v*(W-6),H/bars-1.5);H0.sc=H0.sc||[];H0.sc[b]=Math.max(v,(H0.sc[b]||0)-.012);if(mxOpt('spec','caps')){g.globalAlpha=.9;g.fillStyle='#fff';const cw=H0.sc[b]*(mir?(W/2-3):(W-6));if(mir){g.fillRect(W/2-cw-1,y+1,1.5,H/bars-1.5);g.fillRect(W/2+cw-.5,y+1,1.5,H/bars-1.5)}else g.fillRect(3+cw,y+1,1.5,H/bars-1.5)}}g.globalAlpha=1;insMxSpecTicks(g,W,H,an)/* IN-S */}}
     else if(view==='sgram')mxSgram(g,W,H,H0,aL,live,cm,col);
     else if(view==='fun')mxFun(g,W,H,H0,aL,aR,live,cm,col,pl,pr);
     else{const S0=Math.min(W-6,H-6)*({s:.5,m:.75}[mxOpt('stereo','size')]||1),sx=(W-S0)/2,sy0=3;
@@ -6463,7 +6463,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.262',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.263',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8510,7 +8510,7 @@ setInterval(lmPaint,250);$('#lufsB')&&($('#lufsB').onclick=lmOpen);
 /* spectrum overlays: floating, see-through spectrum windows for the master or any tracks. Several sources can share one overlay to compare them; pinned overlays stay on top and come back next time */
 const SPO={list:[],an:new Map(),raf:0};
 function spoSrcNode(k){if(!ctx)return null;if(k==='master')return outBus||master;const N=NODES.get(k);return N?N.pan:null}
-function spoAn(k){let A=SPO.an.get(k);const src=spoSrcNode(k);if(!src)return null;if(A&&A.src===src)return A.an;if(A){try{A.src.disconnect(A.an)}catch(e){}}const an=ctx.createAnalyser();an.fftSize=8192;an.smoothingTimeConstant=.82;an.minDecibels=-100;an.maxDecibels=0;src.connect(an);SPO.an.set(k,{an,src,buf:new Float32Array(an.frequencyBinCount)});return an}
+function spoAn(k){let A=SPO.an.get(k);const src=spoSrcNode(k);if(!src)return null;if(A&&A.src===src)return A.an;if(A){try{A.src.disconnect(A.an)}catch(e){}}const an=INS.an(ctx.createAnalyser(),8192,.82);an.minDecibels=-100;an.maxDecibels=0;src.connect(an);SPO.an.set(k,{an,src,buf:new Float32Array(an.frequencyBinCount)});return an}
 const spoName=k=>k==='master'?'Master':(S.tracks.find(t=>t.id===k)||{}).name||'Track';const spoCol=k=>k==='master'?'#e8ecf4':(S.tracks.find(t=>t.id===k)||{}).color||'#4cc9f0';
 function spoOpen(k,o){ensureCtx();const id=o&&o.id||'sp'+rid();if(SPO.list.some(x=>x.id===id))return;const ov=Object.assign({id,x:Math.max(20,innerWidth/ZOOM-520),y:90,w:460,h:210,src:[k],pin:false,hold:true},o||{});const el=document.createElement('div');el.className='spov';el.innerHTML=`<div class="sph"><span class="spn"></span><button data-sp="add" title="Compare: add another source">＋</button><button data-sp="hold" title="Peak hold line">Peak</button><button data-sp="pin" title="Pin: stays on top, goes full size and opens again next time"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 2.3 13.7 5.8 11.6 6.6 9.3 8.9 9.6 11.9 8.6 12.9 3.1 7.4 4.1 6.4 7.1 6.7 9.4 4.4z"/><path d="M5.6 10.4 2.4 13.6"/></svg></button><button data-sp="x" aria-label="Close">✕</button></div><canvas></canvas><div class="spfl"><button data-sp="pin" class="spfp" title="Unpin"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 2.3 13.7 5.8 11.6 6.6 9.3 8.9 9.6 11.9 8.6 12.9 3.1 7.4 4.1 6.4 7.1 6.7 9.4 4.4z"/><path d="M5.6 10.4 2.4 13.6"/></svg></button><button data-sp="x" aria-label="Close" title="Close">✕</button></div><i class="sprz"></i>`;document.body.appendChild(el);ov.el=el;SPO.list.push(ov);spoPlace(ov);spoWire(ov);spoHead(ov);spoSave();if(!SPO.raf)SPO.raf=requestAnimationFrame(spoDraw)}
 function spoPlace(ov){Object.assign(ov.el.style,{left:ov.x+'px',top:ov.y+'px',width:ov.w+'px',height:ov.h+'px'});ov.el.classList.toggle('pinned',!!ov.pin);spoFit(ov)}
@@ -8993,7 +8993,7 @@ if(window.audiolabDesktop)setTimeout(()=>{const g=document.getElementById('fsgrp
 /* ---------- Visualizer: spectrogram, spectrum, waveform with beats and clipping, levels. Dock it or float it. ---------- */
 const VZ={an:null,f:null,t:null,cols:[],lb:-1,raf:0,last:0,el:null,cv:null,mode:null,hold:[],spk:new Float32Array(0)};
 const VZM=[['all','All','M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z'],['spec','Spectrogram','M3 16V4M7 16V7M11 16V5M15 16V9M3 16h14'],['fft','Spectrum','M2 15c3 0 3-10 6-10s3 7 6 7 2-3 4-3'],['wave','Waveform','M2 10h2l2-5 3 10 3-8 2 6 2-3h2'],['lev','Levels','M5 17V7M9 17V3M13 17V9M17 17V12']];
-function vizEnsure(){if(!ctx||!outBus)return false;if(!VZ.an||VZ.an.context!==ctx){VZ.an=ctx.createAnalyser();VZ.an.fftSize=4096;VZ.an.smoothingTimeConstant=.55;outBus.connect(VZ.an);VZ.f=new Float32Array(VZ.an.frequencyBinCount);VZ.t=new Float32Array(VZ.an.fftSize)}return true}
+function vizEnsure(){if(!ctx||!outBus)return false;if(!VZ.an||VZ.an.context!==ctx){VZ.an=INS.an(ctx.createAnalyser(),4096,.55);outBus.connect(VZ.an);VZ.f=new Float32Array(VZ.an.frequencyBinCount);VZ.t=new Float32Array(VZ.an.fftSize)}return true}
 function vizBuild(){if(VZ.el)return VZ.el;const el=document.createElement('div');el.id='vizp';el.innerHTML=`<div class="vzh"><b>Visualizer</b><span class="seg vzm">${VZM.map(([k,l,ic])=>`<button data-vz="${k}" title="${l}"><svg viewBox="0 0 20 20"><path d="${ic}"/></svg><span>${l}</span></button>`).join('')}</span><span class="vzsp"></span><select class="vzdock" aria-label="Where the visualizer sits"><option value="top">Top</option><option value="bottom">Bottom</option><option value="left">Left</option><option value="right">Right</option><option value="float">Window</option></select><button class="vzx" title="Hide the visualizer" aria-label="Hide the visualizer">✕</button></div><div class="vzb"><canvas></canvas></div><i class="vzrz" title="Drag to resize"></i>`;
   VZ.el=el;VZ.cv=el.querySelector('canvas');el.querySelector('.vzm').onclick=e=>{const b=e.target.closest('[data-vz]');if(!b)return;UI.vizMode=b.dataset.vz;saveUI();vizPaintBtns();VZ.cols=[]};el.querySelector('.vzdock').onchange=e=>{UI.vizDock=e.target.value;saveUI();vizApply()};el.querySelector('.vzx').onclick=()=>{UI.viz=false;saveUI();vizApply()};
   let d=null;el.querySelector('.vzrz').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();d={x:e.clientX,y:e.clientY,w:el.offsetWidth,h:el.offsetHeight,dock:UI.vizDock||'bottom'};e.target.setPointerCapture(e.pointerId)});
@@ -9007,7 +9007,7 @@ function vizApply(){const on=!!UI.viz,dock=UI.vizDock||'bottom';const el=vizBuil
   else{if(fw)fw.hidden=true;if(dock==='bottom'){const bo=document.getElementById('botOut');bo.insertBefore(el,bo.firstChild);el.style.height=(UI.vizH||190)+'px'}else if(dock==='top'){document.getElementById('topOut').appendChild(el);el.style.height=(UI.vizH||190)+'px'}else{document.body.appendChild(el);el.style.width=(UI.vizW||300)+'px';vizDockSide()}}
   vizPaintBtns();VZ.cols=[];if(!VZ.raf)VZ.raf=requestAnimationFrame(vizFrame);setTimeout(()=>dispatchEvent(new Event('resize')),30)}
 const VZHEAT=(()=>{const c=[];for(let i=0;i<256;i++){const t=i/255;const r=Math.round(255*Math.min(1,Math.max(0,1.6*t-.35))),g=Math.round(255*Math.min(1,Math.max(0,1.8*t-.8))),b=Math.round(255*Math.min(1,Math.max(0,t<.5?.25+t*1.2:1.6-t*1.4)));c.push(`rgb(${r},${g},${b})`)}return c})();
-function vizFrame(now){VZ.raf=requestAnimationFrame(vizFrame);if(!UI.viz||!VZ.el||!VZ.el.isConnected||document.hidden)return;if(now-VZ.last<(UI.lite?33:20))return;VZ.last=now;const cv=VZ.cv,box=cv.parentElement,dp=(VZ.dp=vzDp()),W=Math.max(10,Math.floor(box.clientWidth)),H=Math.max(10,Math.floor(box.clientHeight));
+function vizFrame(now){VZ.raf=requestAnimationFrame(vizFrame);if(!UI.viz||!VZ.el||!VZ.el.isConnected||document.hidden)return;if(now-VZ.last<(UI.lite?40:20))return;/* IN-S: the Light level at half rate */VZ.last=now;const cv=VZ.cv,box=cv.parentElement,dp=(VZ.dp=vzDp()),W=Math.max(10,Math.floor(box.clientWidth)),H=Math.max(10,Math.floor(box.clientHeight));
   if(cv.width!==Math.floor(W*dp)||cv.height!==Math.floor(H*dp)){cv.width=Math.floor(W*dp);cv.height=Math.floor(H*dp);cv.style.width=W+'px';cv.style.height=H+'px';VZ.cols=[];VZ.sg=null}
   const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);const live=vizEnsure();if(live){INS.fft(VZ.an,VZ.f);VZ.an.getFloatTimeDomainData(VZ.t)}
   const mode=UI.vizMode||'all';g.fillStyle='#07080b';g.fillRect(0,0,W,H);
@@ -22767,6 +22767,115 @@ prc.addEventListener('pointermove',e=>{if(!PR.open||pd)return;const o=prClip();i
   const{x,y,h}=prPt(e);const n=(x>KEYW&&y>PRUL&&y<h-VELH)?hitN(o.c,bAt(x),pAt(y)):null;if(n===DSP1.hov)return;const was=DSP1.hov;DSP1.hov=n;
   if((n&&!dsP1In(sc,n.p))||(was&&!dsP1In(sc,was.p)))dirty=true},{passive:true});
 prc.addEventListener('pointerleave',()=>{if(DSP1.hov){const sc=SCALES[PR.scale],was=DSP1.hov;DSP1.hov=null;if(sc&&!dsP1In(sc,was.p))dirty=true}});
+/* ===== lane E (task IN-S): the spectrum, the user's pick S2 (the analyzer front panel) =====
+   One drawer, INS.spec, laid out like a bench spectrum analyzer (Keysight, Rohde & Schwarz): a 10 by 10 graticule with the reference level on
+   the top line, the dB per division beside it, start and stop frequency, resolution bandwidth, averaging and detector in the corners;
+   trace 1 is the live trace (yellow, "clear/write"), trace 2 the max hold (cyan); marker 1 sits on the strongest peak, the delta marker on the
+   next one, with the difference in frequency and level. Used by the Spectrum device (ND('spec')), the analyser overlay's spectrum module, and
+   the Visualizer's spectrum; the mixer's spec view keeps its bars (a strip is too narrow for a panel) and gets decade marks on its edge.
+   - Reads: INS.fft (one analyser read per analyser per frame, IN-A). The detector is positive peak: each pixel column takes the highest bin in
+     its frequency span (bins closer than a pixel), or the level between the two nearest bins (bins wider than a pixel).
+   - Averaging is by time, not by frame (the same at 60 or 120 frames a second, and at the Light level's half rate): AVG is the time
+     constant in seconds, including the analyser's own smoothing where the caller keeps one (INS.avgOf).
+   - RBW is the noise bandwidth of the analyser's window: Web Audio applies a Blackman window (1.73 bins), so RBW = 1.73 x rate / FFT size.
+   - INS.an sets an analyser's FFT size and smoothing in one place, only when they change (a change clears the analyser's history).
+   - Nothing new in the audio path. Drawn only when the callers draw (on screen, not hidden, not in the background freeze). */
+INS.an=function(an,n,sm){if(!an)return an;if(n&&an.fftSize!==n)an.fftSize=n;if(sm!=null&&Math.abs(an.smoothingTimeConstant-sm)>1e-6)an.smoothingTimeConstant=sm;return an};
+INS.ENBW=1.73;/* Blackman window (what AnalyserNode uses), noise bandwidth in bins */
+INS.SPCAL=20*Math.log10(2/.42);/* 13.56 dB: the analyser reads a sine 20 log(0.42 / 2) under its peak (the Blackman window's coherent gain, one side); added so a sine reads its peak level in dBFS, as on the pick page */
+INS.rbw=(an,sr)=>INS.ENBW*(sr||(typeof ctx==='object'&&ctx?ctx.sampleRate:48000))/(an&&an.fftSize||8192);
+INS.avgOf=function(an,dt){/* the time constant (s) of the analyser's own smoothing at this read interval: X = s X' + (1 - s) |X| per read */const s=an&&an.smoothingTimeConstant||0;return s>0&&s<1&&dt>0?-dt/Math.log(s):0};
+INS.smooth=s=>{/* the Spectrum device's Smoothing (%, the share of the last frame kept at 60 frames a second) as a time constant in s */const f=Math.min(.999,Math.max(0,(+s||0)/100));return f>0?-1/(60*Math.log(f)):0};
+INS.SPC={c1:'#f5c84c',c2:'rgba(76,201,240,.7)',ref:'rgba(255,154,60,.8)',frame:'rgba(255,255,255,.22)',mk:'#ffffff'};/* today's colours: yellow live, cyan hold, orange reference */
+INS._segs=function(g,parts,x,y,al){/* text in pieces of its own colour (numbers ink, units amber: L2), aligned as one string */let w=0;for(const p of parts)w+=g.measureText(p[0]).width;let xx=al==='right'?x-w:al==='center'?x-w/2:x;g.textAlign='left';for(const p of parts){g.fillStyle=p[1];g.fillText(p[0],xx,y);xx+=g.measureText(p[0]).width}return w};
+INS._spU=function(v,u,L,o){/* a value and its unit as coloured pieces: ' 1.00', ' kHz' */const[a,b]=INS.parts(v,u,o||{});return[[a,L.ink],[b?' '+b:'',L.unit]]};
+INS._spCol=function(D,m,c){/* the positive-peak detector of one column, in the analyser's dB */const n=D.length,i0=m.b0[c],i1=m.b1[c];if(i1>i0){let v=-1e9;for(let i=i0;i<=i1;i++)if(D[i]>v)v=D[i];return v}const f=m.fr[c],x0=D[i0],x1=D[Math.min(n-1,i0+1)];return x0>-1e9&&x1>-1e9?x0+(x1-x0)*f:Math.max(x0,x1)};
+INS._spTr=function(t,an,map,tilt,o,now){/* one trace: read, detect, average, hold; t.sm (averaged dB, tilt included) and t.mh (held) per column */
+  const D=INS.fft(an),n=D.length,gw=map.n,first=!t.sm||t.sm.length!==gw;let dt=t.tt?(now-t.tt)/1000:0;t.tt=now;
+  if(first||dt>1){t.sm=new Float32Array(gw).fill(-240);t.mh=new Float32Array(gw).fill(-240);dt=0}dt=Math.min(.25,dt);t.dt=t.dt?t.dt*.9+dt*.1:dt;
+  const avg=(o.avg||0)+(o.anAvg?INS.avgOf(an,t.dt||1/60):0),a=avg>0&&dt>0?Math.exp(-dt/avg):0,fall=o.fall||0,sil=o.sil==null?-150:o.sil,sm=t.sm,mh=t.mh;t.avgT=avg;
+  if(map.bn!==n)INS._spMap(map,n);const B0=map.b0,B1=map.b1,FR=map.fr,TL=map.tl;
+  void B0;void B1;void FR;for(let c=0;c<gw;c++){let v=INS._spCol(D,map,c);
+    v=v>sil&&isFinite(v)?v+INS.SPCAL+tilt*TL[c]:-240;sm[c]=sm[c]<-200||!a?v:sm[c]*a+v*(1-a);if(sm[c]<-240)sm[c]=-240;mh[c]=Math.max(sm[c],fall>0?mh[c]-fall*dt:mh[c])}
+  return t};
+INS._spMap=function(m,n){/* pixel columns to bins, once per size, range, rate and FFT size */const gw=m.n,lo=m.lo,K=Math.log(m.hi/lo),bh=m.sr/2/n;m.bn=n;m.b0=new Int32Array(gw);m.b1=new Int32Array(gw);m.fr=new Float32Array(gw);m.tl=new Float32Array(gw);
+  for(let c=0;c<gw;c++){const fa=lo*Math.exp(K*c/gw),fb=lo*Math.exp(K*(c+1)/gw),fc=Math.sqrt(fa*fb),ba=fa/bh,bb=fb/bh;m.tl[c]=Math.log2(fc/1000);
+    if(bb-ba>=1){m.b0[c]=Math.max(1,Math.min(n-1,Math.round(ba)));m.b1[c]=Math.max(m.b0[c],Math.min(n-1,Math.round(bb)-1))}else{const bc=Math.max(1,Math.min(n-1.001,fc/bh));m.b0[c]=m.b1[c]=Math.floor(bc);m.fr[c]=bc-Math.floor(bc)}}};
+INS._spPk=function(D,m,c,tilt){/* a marker's frequency and level from the bins (a parabola through the highest bin and its neighbours, in dB): free of the window's scalloping */
+  const n=D.length,bh=m.sr/2/n;let k=m.b0[c];for(let i=m.b0[c];i<=Math.max(m.b1[c],m.b0[c]+(m.b1[c]>m.b0[c]?0:1));i++)if(i<n&&D[i]>D[k])k=i;for(let s=0;s<3;s++){if(k>1&&D[k-1]>D[k])k--;else if(k<n-2&&D[k+1]>D[k])k++;else break}
+  const a=D[Math.max(0,k-1)],b=D[k],e=D[Math.min(n-1,k+1)],dn=a-2*b+e;let p=0;if(isFinite(a)&&isFinite(e)&&dn<0)p=Math.max(-.5,Math.min(.5,.5*(a-e)/dn));const f=Math.max(1e-3,(k+p)*bh);return{f,v:b-.25*(a-e)*p+INS.SPCAL+tilt*Math.log2(f/1000)}};
+INS.spec=function(g,x,y,w,h,o){/* the analyzer front panel in the box (x, y, w, h). o: tr [{an, col, hold, fall (dB/s, 0 = max hold), avg (s), anAvg, st, dash}] (the first is
+   trace 1 and carries the markers), lo, hi (Hz), top (the reference level, dBFS), bot, tilt (dB/oct around 1 kHz), live (false: graticule only),
+   ref (a held trace per column), padL, padR, size ('full', 'mid', 'mini'), st (the panel's own state). Returns {Y, map, mx (the highest point of trace 1), gx, gy, gw, gh}. */
+  o=o||{};const L=INS.look(),C=INS.SPC,st=o.st||(o.st={}),lo=o.lo||20,hi=o.hi||20000,top=o.top==null?0:o.top,bot=o.bot==null?top-100:o.bot,rng=Math.max(1e-3,top-bot),tilt=o.tilt||0,now=performance.now();
+  const sz=o.size||(h>=150&&w>=320?'full':h>=96&&w>=200?'mid':'mini'),fs=sz==='full'?7.5:7,hd=sz==='mini'?0:13,ft=sz==='full'?25:sz==='mid'?13:0;
+  const gx=Math.round(x+(o.padL||0)),gy=Math.round(y+hd+(sz==='mini'?1:0)),gw=Math.max(8,Math.floor(w-(o.padL||0)-(o.padR||0))),gh=Math.max(8,Math.floor(h-hd-ft-(sz==='mini'?2:0))),Y=v=>gy+gh*(top-v)/rng;
+  const sr=typeof ctx==='object'&&ctx?ctx.sampleRate:48000;let map=st.map;if(!map||map.n!==gw||map.lo!==lo||map.hi!==hi||map.sr!==sr)map=st.map={n:gw,lo,hi,sr,bn:-1};
+  /* graticule: 10 by 10, the centre axes with five minor marks per division (IN-A's drawer, drafting levels, hairlines) */
+  INS.graticule(g,gx,gy,gw,gh,{nx:10,ny:10});
+  /* frequency marks inside the bottom line: decades long, 2 and 5 short, numbers at the decades */
+  {const K=Math.log(hi/lo),fx=f=>gx+gw*Math.log(f/lo)/K,lw=INS.hair(g,L.lwLine);g.lineWidth=lw;g.strokeStyle=L.tick;g.beginPath();const labs=[];
+    for(let d=1;d<=hi;d*=10)for(const m of[1,2,5]){const f=d*m;if(f<lo*1.001||f>hi*.999)continue;const xx=INS.px(g,fx(f)),k=m===1?4:2;g.moveTo(xx,gy+gh);g.lineTo(xx,gy+gh-k);if(m===1||(sz==='full'&&gw>520))labs.push([f,xx])}g.stroke();
+    g.font=(fs-.5)+'px '+L.mono;g.textBaseline='bottom';g.textAlign='left';let last=-1e9;for(const[f,xx] of labs){const s=f>=1000?f/1000+'k':String(f),tw=g.measureText(s).width;if(xx+2<last+4||xx+2+tw>gx+gw-2)continue;g.fillStyle=f===100||f===1000||f===10000?L.lab:L.mut;g.fillText(s,xx+2,gy+gh-2);last=xx+2+tw}}
+  /* traces */
+  const T=o.tr||[],live=o.live!==false;let mx=-240;
+  g.save();g.beginPath();g.rect(gx,gy,gw,gh);g.clip();
+  if(o.ref&&o.ref.length===gw){g.beginPath();for(let c=0;c<gw;c++){const yy=Y(o.ref[c]);c?g.lineTo(gx+c+.5,yy):g.moveTo(gx+.5,yy)}g.strokeStyle=C.ref;g.setLineDash([4,3]);g.lineWidth=1.2;g.stroke();g.setLineDash([])}
+  for(let k=T.length-1;k>=0;k--){const r=T[k];if(!r||!r.an)continue;const t=r.st||(r.st={});if(!live){t.tt=0;continue}INS._spTr(t,r.an,map,tilt,r,now);
+    if(!k)for(let c=0;c<gw;c++)if(t.sm[c]>mx)mx=t.sm[c];
+    if(r.hold){g.beginPath();let on=false;for(let c=0;c<gw;c++){const v=t.mh[c];if(v<-200){on=false;continue}const yy=Y(v);on?g.lineTo(gx+c+.5,yy):g.moveTo(gx+c+.5,yy);on=true}
+      g.strokeStyle=r.col2||(k?r.col:C.c2);g.globalAlpha=k?.45:1;if(r.dash||k)g.setLineDash([2,3]);g.lineWidth=INS.hair(g,L.lwCurve);g.stroke();g.setLineDash([]);g.globalAlpha=1}
+    g.beginPath();let on=false;for(let c=0;c<gw;c++){const v=t.sm[c];if(v<-200){on=false;continue}const yy=Y(v);on?g.lineTo(gx+c+.5,yy):g.moveTo(gx+c+.5,yy);on=true}
+    g.strokeStyle=r.col||C.c1;g.lineWidth=k?1:Math.max(1,L.lwCurve);g.globalAlpha=k?.85:1;g.stroke();g.globalAlpha=1}
+  g.restore();
+  /* the frame */
+  g.lineWidth=INS.hair(g,L.lwLine);g.strokeStyle=C.frame;g.strokeRect(INS.px(g,gx),INS.px(g,gy),Math.round(gw),Math.round(gh));
+  /* markers: 1 on the strongest peak of trace 1, delta 2 on the next local maximum at least 3 % of the width away */
+  const t0=T[0]&&T[0].st,mk=st.mk||(st.mk={});mk.a=mk.b=-1;
+  if(live&&t0&&t0.sm&&t0.sm.length===gw){const sm=t0.sm,K=Math.log(hi/lo),fc=c=>lo*Math.exp(K*(c+.5)/gw),c0=Math.max(0,Math.ceil(gw*Math.log(Math.max(lo,25)/lo)/K)),thr=bot+3;let a=-1,av=-1e9;
+    for(let c=c0;c<gw;c++)if(sm[c]>av&&sm[c]>thr){av=sm[c];a=c}
+    if(a>=0){let b=-1,bv=-1e9;const md=Math.max(6,Math.round(gw*.03));for(let c=Math.max(c0,1);c<gw-1;c++){if(Math.abs(c-a)<md)continue;const v=sm[c];if(v>bv&&v>thr&&v>=sm[c-1]&&v>=sm[c+1]){bv=v;b=c}}
+      mk.a=a;mk.av=av;mk.af=fc(a);mk.b=b;mk.bv=bv;mk.bf=b>=0?fc(b):0;
+      {/* the read-outs from the bins; the averaging keeps its share: the trace's level plus the refinement of this frame's peak */const D=INS.fft(T[0].an),raw=c=>INS._spCol(D,map,c)+INS.SPCAL+tilt*map.tl[c];
+        const pa=INS._spPk(D,map,a,tilt);if(pa.v>-200&&Math.abs(Math.log2(pa.f/mk.af))<.25){mk.af=pa.f;mk.av=av+Math.max(0,pa.v-raw(a))}
+        if(b>=0){const pb=INS._spPk(D,map,b,tilt);if(pb.v>-200&&Math.abs(Math.log2(pb.f/mk.bf))<.25){mk.bf=pb.f;mk.bv=bv+Math.max(0,pb.v-raw(b))}}}
+      g.font=(fs-.5)+'px '+L.mono;g.textBaseline='bottom';g.textAlign='center';const tri=(c,v,s)=>{const xx=gx+c+.5,yy=Math.max(gy+10,Y(v));g.fillStyle=C.mk;g.beginPath();g.moveTo(xx,yy-2);g.lineTo(xx+3,yy-6);g.lineTo(xx-3,yy-6);g.closePath();g.fill();g.fillText(s,xx,yy-7)};
+      tri(a,av,'1');if(b>=0)tri(b,bv,sz==='mini'?'2':'Δ2')}}
+  /* the settings around the graticule (front-panel style; units amber, L2) */
+  g.font=fs+'px '+L.mono;g.textBaseline='alphabetic';const u=tilt?'dB':'dBFS',div=rng/10,dv=INS.parts(div,'dB',{d:Math.abs(div-Math.round(div))<.05?0:1})[0];
+  const refP=[['REF ',L.mut],...INS._spU(top,'dBFS',L,{d:1}),['  '+dv+' ',L.ink],['dB/div',L.unit]];
+  const mk1=mk.a>=0?[['MKR1 ',L.mut],...INS._spU(mk.af,'Hz',L),...(sz==='full'&&gw>=420?[['  '+INS.note(mk.af).name,L.lab]]:[]),['  ',L.ink],...INS._spU(mk.av,u,L,{d:1})]:[['MKR1 ',L.mut],['–',L.mut]];
+  const tr1=(T[0]&&typeof T[0].col==='string'?T[0].col:C.c1),hold0=T[0]&&T[0].hold,fl0=T[0]&&T[0].fall||0;
+  const tl=[['1 CLRW',tr1],...(hold0?[['  2 '+(fl0>0?'PK HOLD':'MAXH'),T[0].col2||C.c2]]:[])];
+  if(sz==='mini'){g.font='6.5px '+L.mono;const ty=gy+8;INS._segs(g,[['REF ',L.mut],...INS._spU(top,'dBFS',L,{d:0}),[' '+dv+' dB/div',L.mut]],gx+3,ty,'left');if(mk.a>=0)INS._segs(g,[...INS._spU(mk.af,'Hz',L),[' ',L.ink],...INS._spU(mk.av,u,L,{d:1})],gx+gw-3,ty,'right')}
+  else{const ty=y+9;const lw0=INS._segs(g,refP,gx,ty,'left');const rw=INS._segs(g,mk1,gx+gw,ty,'right');void lw0;void rw;
+    g.font=(fs-1.5)+'px '+L.mono;INS._segs(g,tl,gx+4,gy+8,'left');g.font=fs+'px '+L.mono;
+    const r1=gy+gh+11,an0=T[0]&&T[0].an,av=t0&&t0.avgT||0;
+    const sP=[['START ',L.mut],...INS._spU(lo,'Hz',L)],eP=[['STOP ',L.mut],...INS._spU(hi,'Hz',L)];
+    const ws=INS._segs(g,sP,gx,r1,'left'),we=INS._segs(g,eP,gx+gw,r1,'right');
+    const rbwP=[['RBW ',L.mut],...INS._spU(INS.rbw(an0,sr),'Hz',L),['  AVG ',L.mut],...(av>=.0005?INS._spU(av,'s',L):[['OFF',L.ink]]),['  DET ',L.mut],['PEAK',L.ink],...(tilt?[['  TILT ',L.mut],[INS.num(tilt,1),L.ink],[' dB/oct',L.unit]]:[])];
+    if(sz==='full'){g.textAlign='center';g.fillStyle=L.mut;const lg='LOG';if(gw/2-g.measureText(lg).width/2>ws+8&&gw/2+g.measureText(lg).width/2<gw-we-8)g.fillText(lg,gx+gw/2,r1);
+      const r2=r1+11,wl=INS._segs(g,rbwP,gx,r2,'left');if(mk.b>=0){const dP=[['ΔMKR2 ',L.mut],...(()=>{const q=INS._spU(mk.bf-mk.af,'Hz',L,{n:3});if(mk.bf>mk.af)q[0][0]='+'+q[0][0];return q})(),['  ',L.ink],...INS._spU(mk.bv-mk.av,'dB',L,{d:1,plus:true})];let wd=0;for(const p of dP)wd+=g.measureText(p[0]).width;if(gx+wl+12<gx+gw-wd)INS._segs(g,dP,gx+gw,r2,'right')}}
+    else{let wr=0;for(const p of rbwP)wr+=g.measureText(p[0]).width;if(gw/2-wr/2>ws+8&&gw/2+wr/2<gw-we-8)INS._segs(g,rbwP,gx+gw/2,r1,'center')}}
+  return{Y,map,mx,gx,gy,gw,gh,mk}};
+/* the overlay's spectrum module through the drawer (its colours, sources, range menu, slow automatic range and Peak button stay) */
+function insSpoSpec(ov,M,g,w,h,st){g.clearRect(0,0,w,h);const auto=ov.rng==='auto',rng=auto?72:(+ov.rng||72),T0=Math.round(ANZTOP+INS.SPCAL),top=auto?(ov.insT?(ov.top??T0):T0):T0;if(auto&&!ov.insT){ov.insT=1;ov.top=undefined}M.ss=M.ss||{};/* the steady top keeps the picture where it was (the levels are now dBFS: 13.6 dB up) */
+  const tr=[];ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;let col=spoCol(k);
+    if(!si&&st.cm!=='track'){if(M.gk!==st.cm+col+w+'x'+h){M.gk=st.cm+col+w+'x'+h;const pos=st.cm==='tri'||st.cm==='bass'||st.cm==='rainbow',G=pos?g.createLinearGradient(0,0,w,0):g.createLinearGradient(0,0,0,h);
+      if(pos)for(let q=0;q<=12;q++){const c=st.cm==='rainbow'?anzHue(q/12,.95):mxPosRGB(st.cm,q/12,.95,col);G.addColorStop(q/12,`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`)}else{const Lc=anzLut(st.cm,col).css;for(let q=0;q<=6;q++)G.addColorStop(q/6,Lc[Math.round(255-q/6*190)])}M.gr=G}col=M.gr}
+    tr.push({an,col,col2:si?null:(typeof col==='string'?col:INS.SPC.c2),dash:true,hold:!!ov.hold,fall:21,anAvg:true,sil:-104,st:M.ss[k]||(M.ss[k]={})})});
+  const r=INS.spec(g,0,0,w,h,{tr,lo:20,hi:20000,top,bot:top-rng,tilt:4.5,live:!!st.active,st:M.sp||(M.sp={})});
+  if(auto&&st.active&&r.mx>-150){const mxv=r.mx,want=Math.ceil((mxv+6)/6)*6,cur=ov.top??want;if(want>cur){ov.top=cur+(want-cur)*Math.min(1,st.dt*1.5);M.lo=0}else if(want<cur-6){M.lo=(M.lo||0)+st.dt;ov.top=M.lo>6?cur-st.dt*1.5:cur}else{M.lo=0;ov.top=cur}}}
+if(typeof ANZD==='object'&&ANZD)ANZD.spec=insSpoSpec;
+/* the Visualizer's spectrum through the drawer: REF 0 dBFS, 10 dB/div, no tilt (as on the pick page); max hold falls 3 dB/s, none at the Light level */
+function insVzSpec(g,w,h,live){const st=VZ.ins||(VZ.ins={tr:{}});
+  INS.spec(g,0,0,w,h,{tr:[{an:VZ.an,col:INS.SPC.c1,hold:!INS.lite(),fall:3,anAvg:true,st:st.tr}],lo:20,hi:20000,top:0,bot:-100,live:!!(live&&VZ.an),st})}
+if(typeof VZD==='object'&&VZD)VZD.fft=insVzSpec;
+/* the mixer's spec view keeps its bars (a strip is too narrow for a panel); the frequency scale is marked on its edge: 100 Hz, 1 kHz, 10 kHz */
+function insMxSpecTicks(g,W,H,an){if(!an||!ctx)return;const n=an.frequencyBinCount,bh=ctx.sampleRate/2/n,L=INS.look();g.lineWidth=INS.hair(g,L.lwLine);g.strokeStyle=L.tickHi;g.beginPath();const lb=[];
+  for(const f of[100,1000,10000]){const k=f/bh;if(k<1||k>=n)continue;const yy=INS.px(g,H*(1-Math.log(k)/Math.log(n)));g.moveTo(W-4,yy);g.lineTo(W,yy);lb.push([f,yy])}g.stroke();
+  if(W>=44){g.font='6.5px '+L.mono;g.textAlign='right';g.textBaseline='middle';g.fillStyle=L.mut;for(const[f,yy] of lb)if(yy>6&&yy<H-4)g.fillText(f>=1000?f/1000+'k':String(f),W-6,yy)}}
+/* ===== end of lane E IN-S ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -24295,13 +24404,10 @@ ND('spec',{name:'Spectrum',vw:540,grp:['Analysis','#4cc9f0'],desc:'Real-time spe
  sel:[['fft','FFT',[[2048,'2048 fast'],[4096,'4096'],[8192,'8192'],[16384,'16384'],[32768,'32768 fine']]],['peak','Peak hold',null,'chk']],btn:[['ref','Hold ref','Freeze the current curve as an orange reference'],['clr','Clear ref','Remove the reference curve']],
  act:{ref:(f)=>{const X=vizInst(f);if(X&&X.st.sm)X.ref=Float32Array.from(X.st.sm)},clr:(f)=>{const X=vizInst(f);if(X)X.ref=null}},
  pre:mergePre(PRS('Mix',[['full','Full range',{fft:'8192',smooth:55,top:-6,floor:-96,slope:3,decay:.35,lo:20,hi:20000,peak:true}],['pink','Pink-noise balance (4.5 dB/oct)',{fft:'8192',smooth:70,top:-6,floor:-90,slope:4.5,decay:.25,lo:20,hi:20000,peak:true}],['flat','Flat (no tilt)',{fft:'8192',smooth:50,top:0,floor:-100,slope:0,decay:.3,lo:20,hi:20000,peak:false}],['fast','Fast response',{fft:'2048',smooth:25,top:-6,floor:-90,slope:3,decay:.9,lo:20,hi:20000,peak:true}],['slow','Slow and smooth',{fft:'16384',smooth:88,top:-12,floor:-90,slope:4.5,decay:.1,lo:20,hi:20000,peak:true}],['master','Mastering fine detail',{fft:'32768',smooth:80,top:-12,floor:-84,slope:4.5,decay:.12,lo:20,hi:22000,peak:true}],['peak','Peak hold monitor',{fft:'8192',smooth:60,top:-3,floor:-96,slope:3,decay:.04,lo:20,hi:20000,peak:true}]]),PRS('Focus',[['sub','Sub and kick (20–300 Hz)',{fft:'32768',smooth:75,top:-6,floor:-96,slope:0,decay:.2,lo:20,hi:300,peak:true}],['bass','Bass range (30–800 Hz)',{fft:'16384',smooth:70,top:-6,floor:-96,slope:1.5,decay:.2,lo:30,hi:800,peak:true}],['vox','Vocal range (80 Hz–8 kHz)',{fft:'8192',smooth:55,top:-6,floor:-90,slope:3,decay:.3,lo:80,hi:8000,peak:true}],['hi','Highs and air (2–22 kHz)',{fft:'8192',smooth:60,top:-18,floor:-100,slope:4.5,decay:.3,lo:2000,hi:22000,peak:true}],['psy','Psytrance low end',{fft:'32768',smooth:78,top:-6,floor:-90,slope:0,decay:.18,lo:25,hi:500,peak:true}]])),
- node:c=>{const i=c.createGain(),an=c.createAnalyser();an.fftSize=8192;an.smoothingTimeConstant=0;i.connect(an);return{in:i,out:i,an,st:{},ref:null,set(p){const n=+p.fft||8192;if(an.fftSize!==n)an.fftSize=n}}},
+ node:c=>{const i=c.createGain(),an=c.createAnalyser();an.fftSize=8192;an.smoothingTimeConstant=0;i.connect(an);return{in:i,out:i,an,st:{},ref:null,set(p){INS.an(an,+p.fft||8192)}}},/* IN-S: sized in one place */
  draw:(g,w,h,f,X)=>{const p=f.p;vbg(g,w,h);if(!X||!X.an){return}const lo=p.lo,hi=p.hi,a0=6,ah=h-22,Yd=db=>a0+ah-clamp((db-p.floor)/(p.top-p.floor),0,1)*ah;
-  for(let db=Math.ceil(p.floor/12)*12;db<=p.top;db+=12){const y=Yd(db);lineH(g,y,w,'rgba(255,255,255,.05)');txt(g,db+'',3,y-2,'rgba(255,255,255,.28)',8)}
-  for(const fr of[20,30,50,100,200,300,500,1000,2000,3000,5000,10000,20000]){if(fr<lo||fr>hi)continue;const x=Math.round(Math.log(fr/lo)/Math.log(hi/lo)*w)+.5;lineV(g,x,h-16,'rgba(255,255,255,.06)');txt(g,fr>=1000?fr/1000+'k':fr,x+2,h-4,'rgba(255,255,255,.35)',8)}
-  const r=drawSpec(g,w,h,X.an,{lo,hi,top:p.top,floor:p.floor,slope:p.slope,smooth:p.smooth/100,peak:p.peak,decay:p.decay,y0:a0,h:ah,st:X.st,ref:X.ref});
-  if(r){let bi=0,bv=-300;for(let x=2;x<w-2;x++)if(r.sm[x]>bv){bv=r.sm[x];bi=x}if(bv>p.floor+8){const fr=r.X(bi),m=hz2n(fr);glow(g,'#fff',8);g.fillStyle='#fff';g.beginPath();g.arc(bi,Yd(bv),3,0,7);g.fill();g.shadowBlur=0;const t=(fr>=1000?(fr/1000).toFixed(2)+' kHz':fr.toFixed(fr<100?1:0)+' Hz')+' · '+noteName(m)+' · '+bv.toFixed(1)+' dB';txt(g,t,clamp(bi,70,w-80),Math.max(14,Yd(bv)-8),'#fff',10,'center')}}
-  txt(g,p.slope.toFixed(1)+' dB/oct',w-6,h-4,'rgba(255,255,255,.35)',8,'right')},
+  void a0;void ah;void Yd;/* IN-S: S2, the analyzer front panel (Top is the reference level on the top line, Floor the bottom, Slope the tilt, Smoothing the averaging time, Peak fall the hold's fall) */
+  INS.spec(g,0,0,w,h,{tr:[{an:X.an,col:INS.SPC.c1,hold:!!p.peak,fall:(+p.decay||0)*60,avg:INS.smooth(p.smooth),st:X.st}],lo,hi,top:p.top,bot:p.floor,tilt:p.slope,ref:X.ref,padL:4,padR:26,st:X.sp||(X.sp={})})},
  hnd:(p,w,h)=>[{x:w-12,y:14,c:'#4cc9f0',l:'Top',v:p.top.toFixed(0)+' dB',sm:1,drag:(x,y,W,H,dy,p0)=>{p.top=clamp(p0.top-dy*.25,-60,6)}},{x:w-12,y:h-34,c:'#b583ff',l:'Floor',v:p.floor.toFixed(0)+' dB',sm:1,drag:(x,y,W,H,dy,p0)=>{p.floor=clamp(p0.floor-dy*.3,-120,-40)}},
   {x:12,y:h/2,c:'#ff9a3c',l:'Slope',v:p.slope.toFixed(1)+' dB/oct',sm:1,drag:(x,y,W,H,dy,p0)=>{p.slope=clamp(p0.slope-dy*.04,0,9)}},{x:30+p.smooth/100*(w-80),y:h-12,c:'#3ecf8e',l:'Smoothing',v:Math.round(p.smooth)+'%',sm:1,drag:(x)=>{p.smooth=clamp((x-30)/(w-80)*100,0,95)}}]});
 /* ---------------- Loudness meter ---------------- */
