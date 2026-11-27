@@ -42,16 +42,17 @@ VARIANTS = {
  'ko_mixwin':   ('#mixWin,#mixWin .fwh' + NONE, 'full'),
  'ko_ck':       ('#mixWin .ck' + NONE, 'full'),
  'ko_mix_all':  ('#mixWin,#mixWin *' + NONE, 'full'),
+ 'glf_face':    ('', 'face'),            # v0.227 (task GS2): floating glass as one engine per window on a canvas as large as the window (the default is one layer)
 }
 SCEN_VARS = {
  'a': ['full', 'no_backdrop', 'refr_off', 'app_light', 'app_zero', 'ko_hglass', 'ko_tr', 'ko_arrBlur', 'ko_anim'],
  'b': ['full', 'no_backdrop', 'refr_off', 'app_light', 'app_zero', 'ko_hglass', 'ko_tr', 'ko_arrBlur'],
  'e': ['full', 'no_backdrop', 'refr_off', 'app_light', 'ko_hglass', 'ko_tr'],
- 'c': ['full', 'no_backdrop', 'refr_off', 'app_light', 'ko_hglass', 'ko_tr', 'ko_mixwin', 'ko_ck', 'ko_mix_all'],
- 'd': ['full', 'no_backdrop', 'refr_off', 'ko_hglass', 'ko_tr', 'ko_mixwin', 'ko_ck', 'ko_mix_all'],
+ 'c': ['full', 'no_backdrop', 'refr_off', 'app_light', 'ko_hglass', 'ko_tr', 'ko_mixwin', 'ko_ck', 'ko_mix_all', 'glf_face'],
+ 'd': ['full', 'no_backdrop', 'refr_off', 'ko_hglass', 'ko_tr', 'ko_mixwin', 'ko_ck', 'ko_mix_all', 'glf_face'],
 }
 SCEN_NAME = {'a': 'idle, stopped', 'b': 'playing', 'c': 'playing + mixer open', 'd': 'dragging the mixer window (stopped)', 'e': 'scroll + zoom arrangement (stopped)'}
-STATE = {'full': "pmSetOn(false)", 'norefr': "pmSetOn(false);pmToggle({refr:false})", 'light': "UI.fxOpt=null;pmSetStop(2)", 'zero': "pmSetStop(1)"}
+STATE = {'full': "pmSetOn(false);if(typeof GLF==='object'&&GLF.mode!=='layer'){GLF.mode='layer';glfReset()}", 'face': "pmSetOn(false);GLF.mode='face';glfReset()", 'norefr': "pmSetOn(false);pmToggle({refr:false})", 'light': "UI.fxOpt=null;pmSetStop(2)", 'zero': "pmSetStop(1)"}
 
 RAF_START = """(ms)=>{window.__raf=new Promise(res=>{const iv=[];let last=performance.now(),t0=last;const f=()=>{const n=performance.now();iv.push(n-last);last=n;if(n-t0<ms)requestAnimationFrame(f);else res(iv)};requestAnimationFrame(f)})}"""
 
@@ -133,7 +134,8 @@ def main():
             return o
 
         def drag(t0):
-            box = pg.evaluate("()=>{const r=document.querySelector('#mixWin .fwt').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]}")
+            # v0.227: the mixer's title text (.fwt) is hidden, so its box was 0 x 0 and this "drag" moved nothing; grab a free spot of the tab instead
+            box = pg.evaluate("()=>{const t=document.querySelector('#mixWin>.fwh'),r=t.getBoundingClientRect();for(let x=r.left+3;x<r.right;x+=4){const e=document.elementFromPoint(x,r.top+r.height/2);if(e&&t.contains(e)&&!e.closest('button,select,input,.seg'))return [x,r.top+r.height/2]}return [r.left+5,r.top+r.height/2]}")
             x0, y0 = box; pg.mouse.move(x0, y0); pg.mouse.down()
             import math
             while True:
