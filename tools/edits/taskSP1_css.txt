@@ -1,0 +1,19 @@
+/* v0.224 (task SP1): the splash pictures. The loading splash (class sp1) is a card with one canvas behind the name; its colours (--sp...) are set by the picture that runs (SPLBG, right after the splash in the body). No logo, no text at the edges; the name, the two lines and the bar sit low so the figure has the upper two thirds. */
+#splash.ld.sp1{--spz:1;--spW:min(calc(94vw / var(--spz)),calc(120vh / var(--spz)),clamp(560px,calc(46vw / var(--spz)),1280px));width:var(--spW);height:calc(var(--spW)*.74);z-index:2147481500;padding:0;display:block;overflow:hidden;border-radius:calc(var(--spW)*.026);cursor:default;contain:layout paint;
+  background:radial-gradient(circle at 50% 35%,var(--spg,#0f1830) 0%,var(--spbg,#070910) 62%,var(--spe,#040508) 100%);backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#splash.ld.sp1>canvas{position:absolute;inset:0;width:100%!important;height:100%!important;aspect-ratio:auto!important;object-fit:fill;margin:0!important;background:none;display:block}
+#splash.ld.sp1[data-sp="spec"]>canvas{height:64%!important}
+#splash.ld.sp1[data-sp="spec"]::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(5,7,13,.1) 0%,rgba(5,7,13,.14) 46%,rgba(5,7,13,1) 64%),radial-gradient(ellipse at 50% 34%,rgba(5,7,13,0) 35%,rgba(5,7,13,.5) 100%)}
+#splash.ld.sp1 .spw{position:absolute;z-index:2;left:0;right:0;bottom:calc(var(--spW)*.062);margin:0!important;display:flex;flex-direction:column;align-items:center;gap:0}
+#splash.ld.sp1 .spw>b{font-size:calc(var(--spW)*.072)!important;line-height:1.15;background:none;color:var(--spink,#eaf1ff);text-shadow:none}
+#splash.ld.sp1 .wmA{color:var(--spink,#eaf1ff)!important;-webkit-text-fill-color:var(--spink,#eaf1ff)}
+#splash.ld.sp1 .wmL{background:linear-gradient(100deg,var(--spa,#4cc9f0),var(--spb,#6096ff));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#splash.ld.sp1 .wmP{font-size:.26em;border-color:var(--spa,#4cc9f0);color:var(--spp,#a8d8ff);-webkit-text-fill-color:var(--spp,#a8d8ff)}
+#splash.ld.sp1 .spw small{color:var(--spm,#8492b4);font-size:max(10px,calc(var(--spW)*.0165));letter-spacing:.28em;line-height:1.25}
+#splash.ld.sp1 .spw .sdaw{margin-top:calc(var(--spW)*.017)}
+#splash.ld.sp1 .spw .sver{margin-top:calc(var(--spW)*.005);color:var(--spn,#77839f);font-size:max(9.5px,calc(var(--spW)*.0145));letter-spacing:.22em}
+#splash.ld.sp1 i{width:calc(var(--spW)*.42);height:max(2px,calc(var(--spW)*.004));margin-top:calc(var(--spW)*.024);background:rgba(255,255,255,.09)}
+#splash.ld.sp1 em{background:linear-gradient(90deg,var(--spa,#4cc9f0),var(--spb,#6096ff) 78%,var(--spd,#ffc43c))}
+#splash.ld.sp1 .ldst{position:absolute;width:1px;height:1px;min-height:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#splash.ld.sp1>p{position:absolute;z-index:2;left:50%;right:auto;transform:translateX(-50%);width:max-content;bottom:calc(var(--spW)*.021);margin:0;text-align:center;font-size:max(9.5px,calc(var(--spW)*.0135));line-height:1.2;letter-spacing:.06em;color:var(--spm,#8492b4);opacity:0;transition:opacity .3s ease}
+#splash.ld.sp1.rdy>p{opacity:.9}

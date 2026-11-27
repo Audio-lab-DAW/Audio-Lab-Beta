@@ -1,7 +1,7 @@
 {
-  "version": "0.223",
-  "sha256": "d27b642eb86351159ad84e9672c727ae0ff2bfd0e44066eccd93d7563d1bad4e",
-  "size": 5903124,
+  "version": "0.224",
+  "sha256": "959197a43b585d5b2d19ee9315e02a09fd25933b841dc3055e805d38059ec5ba",
+  "size": 5921358,
   "minShell": "0.147.0",
-  "notes": "The docked panels (track headers, transport bar, devices) are now drawn by the new glass engine: Glass, Light or Solid in Settings, Performance. Please tell us the frame rate you see on your Mac."
+  "notes": "New splash screen: five science drawings that change from start to start (moons in resonance, harmonograph, magnetic field, orbit chart, spectrogram), with the name and the loading bar in the drawing's colours. It stays about 1.5 seconds after loading; a click or a key closes it sooner."
 }
