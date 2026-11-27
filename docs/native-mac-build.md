@@ -148,6 +148,16 @@ What it shows:
 
 Next: task NL6 (below).
 
+### The user's ninth report (22:30 Brussels): test app 0.7 works
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.7-report-9.txt`.
+- **The Gryphon now runs at 32-bit integer** on the wire (the user changed it in Audio MIDI Setup); `[format]` confirms the deepest integer format at 44.1 kHz is in use. Exclusive use taken and held.
+- **Every plug-in tried sounded, all at or below 0 dBFS, the safety limiter never engaged**: Phase Plant (-0.2 dBFS), Pigments, kHs Phaser, Dawesome Abyss and BABY Audio Atoms (separate controllers, IConnectionPoint, messages delivered), Sinevibes Albedo, iZotope Aurora (latency 1,152 samples = 26.1 ms, to be compensated), Steinberg HALion 7 (33 output buses, only the main one on; program "MIDI Channel 1" loaded).
+- **Knob moves** reached the host from all except HALion 7 (37 mouse uses, 0 moves, and the 200 ms poll found no value changed either: the clicks were probably in its browser, not on parameters). No plug-in changed a value without telling the host.
+- **Plug-in strings are clean** ("17.1 ms", "90 %"). Aurora writes decimals with a comma ("35,25"): that is the plug-in's own locale, fine.
+- **Slowest blocks are explained**: HALion's worst 5.6 ms of 11.6 ms with nothing happening (its own work) and one 1 ms after a click in its window.
+- Small things for the next test app: (1) HALion's "blocks with a silence flag" (66,460 to 126,176) exceeds the blocks processed: the count is per bus, not per block; (2) after HALion's window opened, the output moved from the Gryphon back to "Bose Mini II SoundLink (eqMac)" (line 481): find out whether the user chose it or the app moved by itself (it must never leave a device the user picked, unless the device goes away); (3) the degree sign from report 8 ("21¬inf") was not exercised here: test it with kHs Phase Distortion's Spread.
+
 ### The user's eighth report (22:25 Brussels, still test app 0.5)
 
 The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-8.txt`. Still 0.5 (the user had not opened 0.7 yet).
