@@ -2,7 +2,7 @@
 # Task MX-2 release (lane K): run in a fresh clone of main, after `git pull --rebase`, when desktop/release-freeze.json is NOT on main.
 # Re-runs the edit script on main's index.html, VERSION = main + 0.001, fills the version into the texts, adds them to the backlog,
 # the update notes, Where it stands and the plan's status, syncs the app (never desktop/app-version.json), lints.
-# Then: run tools/ui-tests/taskMX_2.py and the smoke test, fill @TESTS@ and @SMOKE@ in docs/backlog-log.md, commit, push.
+# Then: run tools/ui-tests/taskMX_2.py and the smoke test, if main moved on a lot, re-run them and correct the backlog entry's test line, commit, push.
 set -e
 D=tools/engine-lab/mx/mx2_release
 [ -f desktop/release-freeze.json ] && { echo "release freeze on main: wait"; exit 2; }
