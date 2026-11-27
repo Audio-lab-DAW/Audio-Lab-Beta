@@ -4781,3 +4781,27 @@ Step 2 of the lane order for design round 2 (picks `A5 P4 B3 T3 | AC3 AW3 ...`):
 ### What is left
 - Next run: **DS-P1** piano roll rows and keys (PS3 with chord names as part b if needed, PK3). Then DS-P2, DS-T2, DS-B1, DS-B2, DS-A1, then MD1, then DS-A2 and DS-T1.
 - The arrangement-lines picks (DR6: L5 R3 P1 S0 T2 Z2) are now in `docs/design-grid-lines.md`, so DS-A1 will be built together with GL1 following them.
+
+## 27 November 2026, v0.255: linked clips (task FT-F1, lane C)
+Step FT-F1 of `docs/features-build.md` (starred card F1 of `docs/research-features-gap.md`, section 4 "RF-F1 Linked clips"). Edit script `tools/feature-lab/ft/ftF1.py` with `ftF1_block.js` (two asserted anchors: the end of FT-C3c's block, and the `dup` entry of `SCA` for the two commands; re-run on the fresh file after the rebase over DS-A4), test `tools/ui-tests/taskFT_F1.py` (29 checks).
+
+### Built
+- **The model**: `clip.link`, an optional id shared by linked copies (older songs have none and load as before). Shared: for MIDI clips the notes, controller lanes (`cc`), bend range (`pbr`) and envelopes; for audio clips the gain, warp markers and envelopes. Each copy keeps its own place, length, start offset, fades, name and mute.
+- **How an edit spreads**: every linked clip has a baseline of what it holds. After an edit (`changed()`), a linked clip that differs from its baseline is the one edited, and its content is copied into the other copies **in the same undo step** (the snapshot was taken before the edit). The selected clips and the piano roll's clip are checked at once; every linked clip is checked a quarter second after an edit (catches edits made elsewhere, such as a whole-track transpose) and a link left with one clip is dropped. Nothing runs while idle. Note selection in the piano roll is not shared.
+- **Envelopes in content time**: a copy that starts later in the content has its points shifted, so an envelope stays in step with the notes. A move, a resize or a split changes a clip's placement and is never shared (a left resize of one copy changes no other); a split keeps both halves linked (same notes).
+- **Making and breaking**: **Alt+Shift-drag** makes linked copies (one or a selection; Shift-drag stays a plain copy, and a plain copy of a linked clip is unique); clip menu **Duplicate as linked copy** (also the command `clip.linkedDup`), and on a linked clip **Make unique** (`clip.unique`, also for a selection) and **Select linked copies**. Plain Duplicate (Mod+D) and copy and paste of a linked clip keep it linked. Toasts say what happened.
+- **Chain mark**: a small chain on a dark pill right after the clip name (or in the middle on thin tracks), part of the clip's cached picture.
+- **Fractals**: its repeated Kick and Bass clips are linked when the song is built (2 groups of 12 on each track: same notes and envelopes); the start-up check that tells a stored Fractals tab from an edited one ignores links, so an old stored tab is not kept as "(edited)".
+- **File**: every copy keeps its full content, so an older AudioLab opens the song as plain clips; the links add under 1 % (531,221 against 530,252 characters for Fractals) and the file is gzipped.
+- Hook `FT_HOOKS.clipLinks`; no settings rows. Audio path untouched.
+
+### Tested (`tools/ui-tests/taskFT_F1.py`, headless Chromium, 29 checks, all pass)
+- Fractals: Kick and Bass 24 linked clips each in 2 groups, no other track linked; the chain mark in the clip picture's key. An edit to one Kick clip changes all 12 at once in one undo step; undo and redo every copy. Clip menu has the three new entries, no em dash; Transpose +1 octave from the menu reaches every copy; Select linked copies selects 12. A left resize of one copy changes no other; an envelope point at beat 2 of that copy shows at beat 6 of the others; a note edit on it reaches the others. Make unique (command) and its edits stay its own. Duplicate as linked copy (command) on a Lead clip, a note added to the copy shows in the original. Real mouse: Shift-drag of a linked clip gives a plain copy, Alt+Shift-drag a linked copy, the original stays. Audio: gain shared, fade not. The other copy deleted: the last is a plain clip. File under 1 % bigger. A reloaded song keeps working links; a song without links opens with none. Nothing runs while still. No console errors.
+- Screenshots looked at: the clip menu, and Kick clips with the chain mark beside the name (the plain Shift-drag copy has none).
+- Also: `taskAJ.py` all OK, `taskDS_A3.py` 19 of 19, `taskDS_A4.py` 17 of 17, `taskAI.py` all pass (the Fractals boot and kept tabs), `taskFT_C2c.py` 36, `taskFT_C3b.py` 51, `taskFT_C3c.py` 57. **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable, Venom the same. Plant, Sampler, Sampler grains and Drum kit give other numbers on every run, on the untouched v0.253 too (they are seeded at random in that check), so they say nothing about this step.
+
+### Only the user can test
+- Open Fractals: the Kick and Bass clips show a small chain. Open one Kick clip in the piano roll, move a note: every linked Kick clip changes; Mod+Z puts them all back. Alt+Shift-drag a Lead clip to make a linked copy, right-click › Make unique to break it.
+
+### Left
+- Linking clips that already exist (select several and link them) is not built; neither is a per-copy transpose. Next in lane C: **FT-F2** (arranger moves).
