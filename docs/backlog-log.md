@@ -3225,3 +3225,7 @@ Started after task D2 (v0.221) was in the log. Only the default and one start-up
 
 ### Not verified
 - On the user's Mac, and in the real desktop app (the page is the same there). The user's own saved profile was not seen; it is expected to be the "migrated" case.
+
+### Release
+- v0.222: commit 527b6d5 on main (rebased once on other sessions' doc and glass-lab commits; `index.html` was not touched by them).
+- v0.222. App copy synced, update note written ("The mixer fader design 'Flat bars' is the standard again; if you were on 'Flat bars 2' you are back on 'Flat bars' and can pick 'Flat bars 2' again in the mixer settings."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-task-D1.md`. Next in the chain: G1.
