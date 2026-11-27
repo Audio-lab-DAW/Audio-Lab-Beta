@@ -1,0 +1,98 @@
+{
+ "app": "0.223",
+ "sr": 48000,
+ "frames": 24000,
+ "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+ "cases": {
+  "plain": {
+   "p": {
+    "bits": 6,
+    "rate": 3,
+    "jit": 0,
+    "dith": 0,
+    "drive": 0,
+    "mix": 100,
+    "out": 0,
+    "aa": 0,
+    "post": 0,
+    "shape": "round"
+   },
+   "coef": {
+    "q": "4040000000000000",
+    "dr": "3ff0000000000000",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "coefDec": {
+    "q": 32,
+    "dr": 1,
+    "go": 1,
+    "pc": 1,
+    "oc": 1
+   },
+   "peak": 0.84375,
+   "differsFromInput": true
+  },
+  "filter": {
+   "p": {
+    "bits": 8,
+    "rate": 2.5,
+    "jit": 0,
+    "dith": 0,
+    "drive": 6,
+    "mix": 70,
+    "out": -3,
+    "aa": 6000,
+    "post": 9000,
+    "shape": "round"
+   },
+   "coef": {
+    "q": "4060000000000000",
+    "dr": "3fffec982d5bb8af",
+    "go": "3fe6a77deae8ab8a",
+    "pc": "3fe168f47187dbc4",
+    "oc": "3fe625fa74f0e096"
+   },
+   "coefDec": {
+    "q": 128,
+    "dr": 1.9952623149688795,
+    "go": 0.7079457843841379,
+    "pc": 0.5440618722340038,
+    "oc": 0.692136028671501
+   },
+   "peak": 0.6978623867034912,
+   "differsFromInput": true
+  },
+  "dither": {
+   "p": {
+    "bits": 5,
+    "rate": 4,
+    "jit": 30,
+    "dith": 50,
+    "drive": 9,
+    "mix": 100,
+    "out": 0,
+    "aa": 0,
+    "post": 0,
+    "shape": "fold"
+   },
+   "coef": {
+    "q": "4030000000000000",
+    "dr": "40068c0c59ab1564",
+    "go": "3ff0000000000000",
+    "pc": "3ff0000000000000",
+    "oc": "3ff0000000000000"
+   },
+   "coefDec": {
+    "q": 16,
+    "dr": 2.8183829312644537,
+    "go": 1,
+    "pc": 1,
+    "oc": 1
+   },
+   "peak": 1.0,
+   "differsFromInput": true
+  }
+ }
+}

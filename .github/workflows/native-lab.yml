@@ -1,0 +1,176 @@
+name: Native lab (task NM1 tests)
+
+# The first native tests for the Mac: Core Audio + one effect bit for bit (A), a command line VST3 host (B),
+# and the small "AudioLab VST3 test" app (C). Runs only when started by hand. Does not touch the desktop build.
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Publish the test app as a pre-release (tag native-lab-N)'
+        type: boolean
+        default: false
+      release_tag:
+        description: 'Tag for the pre-release'
+        type: string
+        default: 'native-lab-1'
+
+permissions:
+  contents: write
+
+env:
+  VST3_SDK_TAG: v3.8.1_build_84
+  SURGE_VERSION: 1.3.4
+
+jobs:
+  mac:
+    runs-on: macos-15          # Apple Silicon runner
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Machine
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; sw_vers; sysctl -n machdep.cpu.brand_string; sysctl -n hw.model; clang --version | head -2; cmake --version | head -1; } | tee out/machine.txt
+
+      - name: Get Steinberg's VST 3 SDK (MIT licence)
+        run: |
+          git clone --quiet --depth 1 --branch "$VST3_SDK_TAG" --recursive --shallow-submodules https://github.com/steinbergmedia/vst3sdk.git "$RUNNER_TEMP/vst3sdk"
+          head -5 "$RUNNER_TEMP/vst3sdk/LICENSE.txt"
+
+      - name: Build
+        run: |
+          cmake -S native -B build -DVST3_SDK_ROOT="$RUNNER_TEMP/vst3sdk" -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake-configure.txt 2>&1 || { tail -40 out/cmake-configure.txt; exit 1; }
+          cmake --build build --target alnative alnative_fused -j 4
+          cmake --build build --target alvst3 -j 4
+          file build/alnative build/alvst3
+
+      # ---------------- test A ----------------
+      - name: 'Test A: the Bitcrusher, native against the web engine, bit for bit'
+        run: |
+          python3 tools/native-lab/run_a.py build/alnative out/a | tee out/a.txt
+          echo "--- control: the same program built with fused multiply-add allowed ---" | tee -a out/a.txt
+          python3 tools/native-lab/run_a.py build/alnative_fused out/a_fused | tee -a out/a.txt
+          cat out/a/test_a_crush.json
+
+      - name: 'Test A: Core Audio devices of this machine'
+        run: |
+          build/alnative devices | tee out/devices.json
+          build/alnative play --in tools/native-lab/ref/crush_in.wav --buffer 64 --try-rate 96000 --try-hog | tee out/play.json
+
+      - name: 'Test A: add a virtual device (BlackHole) and repeat, in case the machine had none'
+        continue-on-error: true
+        run: |
+          brew install --cask blackhole-2ch > out/blackhole-install.txt 2>&1 || tail -5 out/blackhole-install.txt
+          sudo killall coreaudiod || true
+          sleep 5
+          build/alnative devices | tee out/devices_with_blackhole.json
+          BH=$(python3 -c "import json;d=json.load(open('out/devices_with_blackhole.json'));print(next((str(x['id']) for x in d['devices'] if 'BlackHole' in x['name']),''))")
+          echo "BlackHole device id: $BH"
+          if [ -n "$BH" ]; then build/alnative play --device "$BH" --in tools/native-lab/ref/crush_in.wav --buffer 64 --try-rate 96000 --try-hog | tee out/play_blackhole.json; fi
+
+      # ---------------- test B ----------------
+      - name: Build the SDK's own example plug-ins (fallback and extra subjects)
+        continue-on-error: true
+        run: |
+          for t in adelay mda-vst3 again note-expression-synth; do cmake --build build --target $t -j 4 > "out/build-$t.txt" 2>&1 && echo "built $t" || { echo "could not build $t"; tail -5 "out/build-$t.txt"; }; done
+          mkdir -p "$RUNNER_TEMP/sdk-vst3"
+          find build -name '*.vst3' -maxdepth 6 -type d -print -exec cp -R {} "$RUNNER_TEMP/sdk-vst3/" \;
+          ls "$RUNNER_TEMP/sdk-vst3" || true
+
+      - name: Download Surge XT (GPL 3, from its official GitHub releases)
+        continue-on-error: true
+        run: |
+          mkdir -p "$RUNNER_TEMP/surge" "$HOME/Library/Audio/Plug-Ins/VST3"
+          curl -sSL --fail -o "$RUNNER_TEMP/surge.zip" "https://github.com/surge-synthesizer/releases-xt/releases/download/${SURGE_VERSION}/surge-xt-macos-${SURGE_VERSION}-pluginsonly.zip"
+          ls -la "$RUNNER_TEMP/surge.zip"; shasum -a 256 "$RUNNER_TEMP/surge.zip" | tee out/surge-sha256.txt
+          unzip -q "$RUNNER_TEMP/surge.zip" -d "$RUNNER_TEMP/surge"
+          find "$RUNNER_TEMP/surge" -name '*.vst3' -maxdepth 4 -type d -print -exec cp -R {} "$HOME/Library/Audio/Plug-Ins/VST3/" \;
+          ls -la "$HOME/Library/Audio/Plug-Ins/VST3"
+
+      - name: 'Test B: scan (each bundle in its own process), with one pretended crash'
+        run: |
+          AL_TEST_CRASH_ON=adelay build/alvst3 scan --folder "$HOME/Library/Audio/Plug-Ins/VST3" --folder "$RUNNER_TEMP/sdk-vst3" --json out/scan.json
+          cat out/scan.json
+
+      - name: 'Test B: load, parameters, notes, audio, state, export, time per block'
+        run: |
+          V="$HOME/Library/Audio/Plug-Ins/VST3"
+          IN=tools/native-lab/ref/crush_in.wav
+          mkdir -p out/b
+          run() { echo "=== $1"; shift; build/alvst3 run "$@" --outdir out/b --in "$IN" > /dev/null || echo "(a check failed or the plug-in was not found)"; }
+          run "Surge XT (instrument)" --plugin "$V/Surge XT.vst3" --tag surge_xt
+          run "Surge XT Effects (effect)" --plugin "$V/Surge XT Effects.vst3" --tag surge_xt_effects
+          run "SDK example: mda JX10 (instrument)" --plugin "$RUNNER_TEMP/sdk-vst3/mda-vst3.vst3" --name "mda JX10" --tag sdk_mda_jx10
+          run "SDK example: ADelay (effect)" --plugin "$RUNNER_TEMP/sdk-vst3/adelay.vst3" --tag sdk_adelay
+          run "SDK example: Note Expression Synth (instrument)" --plugin "$RUNNER_TEMP/sdk-vst3/note-expression-synth.vst3" --tag sdk_note_expression_synth
+          run "SDK example: AGain (effect)" --plugin "$RUNNER_TEMP/sdk-vst3/again.vst3" --tag sdk_again
+          for f in out/b/*.json; do echo "--- $f"; cat "$f"; done
+          rm -f out/b/*_export.wav
+
+      # ---------------- test C ----------------
+      - name: 'Test C: build the test app'
+        id: app
+        continue-on-error: true
+        run: |
+          cmake --build build --target alvst3app -j 4
+          APP="build/AudioLab VST3 test.app"
+          ls -la "$APP/Contents/MacOS"
+          codesign --force --deep --sign - "$APP"        # ad-hoc: no Apple Developer account
+          codesign -dv "$APP" 2>&1 | tee out/app-signature.txt
+          file "$APP/Contents/MacOS/AudioLab VST3 test"
+          cp tools/native-lab/READ-ME-FIRST.txt build/ || true
+          ( cd build && ditto -c -k --keepParent "AudioLab VST3 test.app" "../AudioLab-VST3-test-mac-arm64.zip" )
+          ls -la AudioLab-VST3-test-mac-arm64.zip
+
+      - name: 'Test C: start the app on the build machine (loads Surge XT, opens its window, plays the pattern)'
+        if: steps.app.outcome == 'success'
+        continue-on-error: true
+        run: |
+          mkdir -p out/c
+          "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/out/c" --plugin-name "Surge XT" > out/c/stdout.txt 2>&1 &
+          PID=$!
+          for i in $(seq 1 120); do [ -f out/c/ready-for-screenshot ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
+          screencapture -x out/c/screen.png || echo "no screenshot"
+          for i in $(seq 1 40); do [ -f out/c/done ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
+          kill $PID 2>/dev/null || true
+          echo "--- report"; cat out/c/AudioLab-VST3-test-report.txt || true
+          echo "--- output"; tail -30 out/c/stdout.txt || true
+          ls -la out/c
+
+      - name: Summary
+        if: always()
+        run: |
+          python3 tools/native-lab/summary.py out > out/RESULTS.md || true
+          cat out/RESULTS.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-lab-results
+          path: |
+            out
+            AudioLab-VST3-test-mac-arm64.zip
+
+      - name: Keep the results on the branch native-lab-results
+        if: always()
+        continue-on-error: true
+        run: |
+          rm -rf "$RUNNER_TEMP/res" && mkdir -p "$RUNNER_TEMP/res" && cp -R out/. "$RUNNER_TEMP/res/"
+          find "$RUNNER_TEMP/res" -name '*.wav' -delete
+          cd "$RUNNER_TEMP/res"
+          echo "run ${GITHUB_RUN_ID} on ${GITHUB_SHA}" > RUN.txt
+          git init -q -b native-lab-results .
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "native lab results, run ${GITHUB_RUN_ID} (${GITHUB_SHA})"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" native-lab-results
+
+      - name: Publish the test app as a pre-release
+        if: inputs.release && steps.app.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          # a pre-release, never "latest": the desktop app's download page and updater follow the latest full release
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" --prerelease --latest=false --target "$GITHUB_SHA" --title "AudioLab VST3 test (native lab, not the app)" --notes-file tools/native-lab/READ-ME-FIRST.txt "AudioLab-VST3-test-mac-arm64.zip" tools/native-lab/READ-ME-FIRST.txt
