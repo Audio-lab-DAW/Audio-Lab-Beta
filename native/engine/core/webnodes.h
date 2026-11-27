@@ -192,8 +192,11 @@ public:
     // AudioParam.value = v at context time `at`: Chromium records it as a setValueAtTime event, and the param counts
     // as sample-accurate in the quantum that holds the event (and any before it). The node then takes its a-rate
     // path there (different arithmetic, the same value), the k-rate path after.
-    void setFrequency(double v, double at = 0) { freq_ = (float)v; freqEv_ = true; freqEvFrame_ = at * sr_; }
-    void setDetune(double v, double at = 0) { detune_ = (float)v; detEv_ = true; detEvFrame_ = at * sr_; }
+    // Measured against Chromium: with one such event the param is sample-accurate only in the quantum that holds it;
+    // with two (the app sets the frequency twice before the render) in the first two quanta the node computes, however
+    // late it starts (taken as one quantum per event; three or more events are not measured).
+    void setFrequency(double v, double at = 0) { freq_ = (float)v; freqEv_++; freqEvFrame_ = at * sr_; }
+    void setDetune(double v, double at = 0) { detune_ = (float)v; detEv_++; detEvFrame_ = at * sr_; }
     Schedule sched;
     // one render quantum; returns whether the output is flagged non-silent
     bool process(size_t qstart, size_t Q, float* out) {
@@ -202,7 +205,8 @@ public:
         if (!n) { std::fill(out, out + Q, 0.f); return false; }
         double virtual_read_index = vri_;
         const float rate_scale = wave_->rateScale();
-        const bool aFreq = freqEv_ && freqEvFrame_ >= (double)qstart, aDet = detEv_ && detEvFrame_ >= (double)qstart;
+        const bool aFreq = sampleAccurate(freqEv_, freqLeft_, freqEvFrame_, qstart);
+        const bool aDet = sampleAccurate(detEv_, detLeft_, detEvFrame_, qstart);
         const bool has_sample_accurate_values = aFreq || aDet;
         float frequency = 0;
         if (has_sample_accurate_values) {
@@ -516,7 +520,14 @@ private:
     float sr_;
     std::unique_ptr<PeriodicWave> wave_;
     float freq_ = 440, detune_ = 0;
-    bool freqEv_ = false, detEv_ = false;
+    int freqEv_ = 0, detEv_ = 0;   // setValueAtTime events not yet dropped
+    int freqLeft_ = -1, detLeft_ = -1;   // sample-accurate quanta left once the node computes (-1: not started)
+    static bool sampleAccurate(int& ev, int& left, double evFrame, size_t qstart) {
+        if (ev >= 2) { left = ev; ev = 1; }
+        if (left > 0) { left--; if (left == 0) ev = 0; return true; }
+        if (ev == 1 && evFrame >= (double)qstart) return true;
+        return false;
+    }
     double freqEvFrame_ = 0, detEvFrame_ = 0;
     double vri_ = 0;
     std::vector<float> inc_, det_;

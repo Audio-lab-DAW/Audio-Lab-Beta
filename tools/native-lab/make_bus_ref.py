@@ -106,6 +106,16 @@ SCENES["compbus"] = (512, 0.8, [("comp", None, CP_MASTER), ("limit", "trans")],
                       T("b", "st_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_BELLS)]),
                       T("r", kind="return", vol=0.7, fx=[("comp", None, CP_HARD)])])
 SCENES["compbus128"] = (128,) + SCENES["compbus"][1:]
+# task NB-N3g: the Sidechain pump as Fractals has it (Bass with its EQ and pump; Music and FX groups pumped), the
+# compressor and limiter on the master; a mono source through the pump (it comes out stereo)
+SD_BASS = {"depth": 100, "shape": 24, "punch": 0, "sustain": 0, "sync": "1/4"}
+SD_MUSIC = {"depth": 35, "shape": 40, "punch": 0, "sustain": 0, "sync": "1/4"}
+SD_FX = {"depth": 25, "shape": 40, "punch": 0, "sustain": 0, "sync": "1/4"}
+SCENES["sidebus"] = (512, 0.8, [("comp", None, CP_MASTER), ("limit", "trans")],
+                     [T("k", "mono_a", vol=0.9, fx=[("eq", None, EQ_PASS)]), T("bs", "st_b", vol=0.7, pan=0.1, fx=[("eq", None, EQ_BELLS), ("side", None, SD_BASS)]),
+                      T("mu", kind="group", vol=0.8, fx=[("side", None, SD_MUSIC)]), T("a", "st_a", vol=0.6, pan=-0.3, grp="mu"),
+                      T("fx", kind="group", vol=0.7, fx=[("side", None, SD_FX)]), T("m", "mono_b", vol=0.5, pan=0.4, grp="fx", fx=[("side", None, {"depth": 60, "shape": 30, "sync": "1/8"})])])
+SCENES["sidebus128"] = (128,) + SCENES["sidebus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),
@@ -116,6 +126,7 @@ SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
 
 JS = r"""async ({sc, b64, N, SR}) => {
   const A = window.__alref;
+  A.setB0(0);
   const oc = sc.Q > 128 ? new OfflineAudioContext({numberOfChannels: 2, length: N, sampleRate: SR, renderSizeHint: sc.Q}) : new OfflineAudioContext(2, N, SR);
   await A.wlLoad(oc);
   const posted = {}, mk = (d, owner) => { const q = A.mkFx(d.type).p;
@@ -173,8 +184,9 @@ def main():
     for k, x in INPUTS.items(): wav_write(os.path.join(out, "in_%s.wav" % k), x)
     b64 = {k: base64.b64encode(np.ascontiguousarray(x).tobytes()).decode() for k, x in INPUTS.items()}
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat};1")
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat,setB0:v=>{SIDE_B0=v}};1")
     only = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else None   # some scenes only; the others' entries are kept
+    bpm = al.run("S.bpm")
     info = {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N, "scenes": {}}
     old = os.path.join(out, "bus_ref.json")
     if only and os.path.exists(old): info["scenes"] = json.load(open(old)).get("scenes", {})
@@ -187,7 +199,7 @@ def main():
         y2 = np.frombuffer(base64.b64decode(r2["out"]), dtype="<f4").reshape(2, N)
         rep = int(np.count_nonzero(y.view("<u4") != y2.view("<u4")))
         wav_write(os.path.join(out, "web_%s.wav" % name), y)
-        scene = {"sr": SR, "frames": N, "quantum": Q, "master": master, "masterFx": r["posted"].get("@master", []), "nodes": []}
+        scene = {"sr": SR, "frames": N, "quantum": Q, "bpm": bpm, "beat0": 0, "master": master, "masterFx": r["posted"].get("@master", []), "nodes": []}
         for t in tracks:
             if t["id"] not in r["built"]: continue
             scene["nodes"].append({"id": t["id"], "kind": t["kind"], "in": ("in_%s.wav" % t["src"]) if t["src"] else None,

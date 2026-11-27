@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -83,6 +83,19 @@ EXTRA["comp"] = {
     "x-none": {"threshold": 0, "ratio": 1, "attack": 10, "release": 200, "makeup": 0},
     "x-odd": {"threshold": -17.3, "ratio": 3.7, "attack": 7.7, "release": 333.3, "makeup": 3.3},
 }
+# task NB-N3g: the Sidechain device (an oscillator through a wave shaper on a GainNode's gain): Fractals' three
+# (Bass, Music, FX), every sync, the shape and depth ends, punch and sustain with their compressors, both at once
+EXTRA["side"] = {
+    "frx-bass": {"depth": 100, "shape": 24, "punch": 0, "sustain": 0, "sync": "1/4"},
+    "frx-music": {"depth": 35, "shape": 40, "punch": 0, "sustain": 0, "sync": "1/4"},
+    "frx-fx": {"depth": 25, "shape": 40, "punch": 0, "sustain": 0, "sync": "1/4"},
+    "x-16th": {"depth": 80, "shape": 10, "sync": "1/16"}, "x-8th": {"depth": 60, "shape": 30, "sync": "1/8"},
+    "x-half": {"depth": 90, "shape": 70, "sync": "1/2"}, "x-dotted": {"depth": 50, "shape": 50, "sync": "1/4 dotted"},
+    "x-triplet": {"depth": 70, "shape": 20, "sync": "1/8 triplet"}, "x-free": {"depth": 40, "shape": 60, "sync": "free"},
+    "x-zero": {"depth": 0, "shape": 0}, "x-full-short": {"depth": 100, "shape": 1},
+    "x-punch": {"depth": 50, "shape": 30, "punch": 60}, "x-sustain": {"depth": 50, "shape": 30, "sustain": 70},
+    "x-neg": {"depth": 60, "shape": 30, "punch": -50, "sustain": -40},
+}
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
@@ -94,6 +107,9 @@ CHAINS = {
     # task NB-N3f: the compressor between worklet devices and EQs, two compressors in a row
     "chain-comp-bus": [("eq", "x-bells"), ("comp", "drums-drum-bus-glue"), ("limit", "loud")],
     "chain-comp-crush": [("crush", "8bit"), ("comp", "x-hard"), ("chorus", None), ("comp", "frx-master")],
+    # task NB-N3g: Fractals' Bass chain (EQ, sidechain pump) and the pump between worklet devices
+    "chain-side-bass": [("eq", "frx01"), ("side", "frx-bass")],
+    "chain-side-mix": [("chorus", None), ("side", "x-8th"), ("limit", "trans")],
 }
 
 
@@ -146,6 +162,7 @@ JS = """async ({b64, N, SR, chain, Q}) => {
   buf.copyToChannel(f.subarray(0, N), 0); buf.copyToChannel(f.subarray(N, 2 * N), 1);
   const src = c.createBufferSource(); src.buffer = buf;
   const A = window.__alref, posted = [];
+  A.setB0(0);   // the beat the render starts at, read by the Sidechain device when it is made
   let prev = src;
   for (const d of chain) {
     const q = A.mkFx(d.type).p;
@@ -173,7 +190,7 @@ def main():
     x = make_input()
     wav_write(os.path.join(out, "in.wav"), x)
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad};1")
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v}};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
     presets = al.run("(()=>{const o={};for(const t of %s)o[t]=Object.keys(FXPRE[t]||{});return o})()" % json.dumps(types))
     jobs = []
     for t in types:
@@ -186,7 +203,8 @@ def main():
         if all(d in types for d, _ in ch):
             jobs.append((name, [({"type": d, "extra": EXTRA[d][k]} if k and k in EXTRA.get(d, {}) else {"type": d, "pre": k} if k else {"type": d}) for d, k in ch]))
     b64 = base64.b64encode(np.ascontiguousarray(x).tobytes()).decode()
-    cases, info = [], {"quantum": Q, "app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
+    bpm = al.run("S.bpm"); beat0 = al.run("SIDE_B0||0")
+    cases, info = [], {"bpm": bpm, "beat0": beat0, "quantum": Q, "app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
                        "input_sha256": hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest(), "cases": {}}
     for name, ch in jobs:
         r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch, "Q": Q})
@@ -197,7 +215,7 @@ def main():
                                "changed": bool(np.any(y != x))}
         print(name, "peak %.4f" % info["cases"][name]["peak"], "changed" if info["cases"][name]["changed"] else "UNCHANGED", flush=True)
     al.stop()
-    json.dump({"sr": SR, "quantum": Q, "cases": cases}, open(os.path.join(out, "cases.json"), "w"), indent=1)
+    json.dump({"sr": SR, "quantum": Q, "bpm": bpm, "beat0": beat0, "cases": cases}, open(os.path.join(out, "cases.json"), "w"), indent=1)
     json.dump(info, open(os.path.join(out, "web.json"), "w"), indent=1)
     print(len(cases), "cases written to", out)
 

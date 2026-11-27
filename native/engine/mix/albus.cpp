@@ -25,6 +25,7 @@ static bool load(const std::string& path, BusGraph& g, size_t& frames, std::vect
     std::string dir = path.find('/') == std::string::npos ? "." : path.substr(0, path.rfind('/'));
     g.sr = s["sr"].num(48000); g.quantum = (int)s["quantum"].num(512); g.master = (float)s["master"].num(1); frames = (size_t)s["frames"].num(0);
     g.ctx.sampleRate = g.sr; g.ctx.quantum = g.quantum;
+    g.ctx.bpm = s["bpm"].num(120); g.ctx.beat0 = s["beat0"].num(0);   // the song's tempo (task NB-N3g)
     auto chainOf = [&](const JValue& fx, std::unique_ptr<Chain>& ch) -> bool {
         ch.reset(new Chain(g.ctx));
         if (fx.t != JValue::Array) return true;

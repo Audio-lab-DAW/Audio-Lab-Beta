@@ -54,6 +54,9 @@ struct RenderContext {
     // The web engine's render quantum, the grid its worklet bundle keeps its rules on: 128 while playing,
     // 512 in the app's export (renderSizeHint in renderMix). Up to 4096.
     int quantum = 128;
+    // The song's tempo and the beat the render starts at (S.bpm and SIDE_B0 in the app): the devices that run in time
+    // with the song read them (the Sidechain device's pump, task NB-N3g).
+    double bpm = 120, beat0 = 0;
     double currentTime() const { return currentFrame / sampleRate; }
 };
 

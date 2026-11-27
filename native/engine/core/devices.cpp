@@ -4,6 +4,7 @@
 #include "dev_dynamics.h"
 #include "dev_eq.h"
 #include "dev_modulation.h"
+#include "dev_side.h"
 
 namespace al {
 template <class T> static ProcessorFactory mk() { return [](RenderContext& c) { return std::unique_ptr<Processor>(new T(c)); }; }
@@ -26,5 +27,7 @@ void registerCoreDevices() {
     deviceRegistry()["eq"] = mk<eq::ProEQ>();
     // task NB-N3f: Chromium's DynamicsCompressorNode
     deviceRegistry()["comp"] = mk<comp::Comp>();
+    // task NB-N3g: the Sidechain device (an oscillator, a wave shaper and a constant source on a GainNode's gain)
+    deviceRegistry()["side"] = mk<side::Side>();
 }
 }  // namespace al
