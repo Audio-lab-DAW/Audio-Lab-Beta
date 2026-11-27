@@ -4035,3 +4035,33 @@ Play a loud part of a song with the safety limiter on: if the limiter hits its c
 ### Left
 Task I3 done. Next: NI-2a, the kick and bass analysis (shared with lane C's FT-F18).
 
+
+## 27 November 2026, v0.235: the mappings page (task FT-C1b, lane C)
+Step FT-C1b of `docs/features-build.md`. (This run's trigger still named FT-C1a, which was released as v0.233 in the run before; the plan's rule is the next step not yet logged, so this run did C1b.) Lane D (task NI) is now running too; nothing in this step is shared with its ideas.
+
+### Built
+- **The Controllers window is the full mappings page** (menu "Controllers…", command `ctl.mappings`; a bigger first window, 780 x 520): `ctlPagePaint` is replaced, its styles are scoped to `.ctlpg`, so `FT_HOOKS.controllersPage(host)` gives lane B the same page in a Settings page body.
+- **Top**: MIDI learn, and the **defaults for new mappings**: takeover (Pick up, Scale, Jump; `UI.ctlTake`) and where they are kept (every project or this project; `UI.ctlScope`). These are the S4 rows `ctl.take` and `ctl.scope` named in C1a.
+- **Last message** line: the last message of any controller ("Pad Box, Note 40 (channel 2), value 99"), updated at most 20 times a second and only while the page is open, so you can see which knob sends what.
+- **Devices** with their profile and a switch each (as C1a).
+- **Mappings**: a filter by device ("1 of 2"), sorted by device and message; per row device, message, what it moves (device and control name, and the range when it is not the whole), takeover (or Switch, Endless knob), where it is kept, edit, delete. The **edit row**: range from and to in percent with the control's own value beside each ("20 % 1.0:1 to 60 % 20.0:1"; a start above the end turns the knob around); knob kind (knob or fader, or one of three endless kinds, for CC); speed of an endless knob (very fine to very fast, 0.25 to 4 times); Send back (feedback on or off); **Learn again**: the next message from any controller becomes this mapping's message, keeping its control, range and place (a key makes it a switch); Esc stops.
+- **Feedback follows automation while playing**: a control moved without being drawn (automation, a device not on screen) is still sent back; a check every 66 ms runs only while playing and only when some mapping sends feedback, and stops with Stop.
+- Code: block "v0.235 (task FT-C1b)" after the C1a block (`ctlPagePaint` replaced; `ctlIn`, `ctlMsg`, `start` wrapped once each), edit script `tools/feature-lab/ft/ftC1b.py` with `ftC1b_block.js`, anchors asserted unique. `taskFT_C1a.py` now accepts the new page's markup.
+
+### Tested (`tools/ui-tests/taskFT_C1b.py`, the fake MIDI system of C1a, 29 checks, all pass)
+- Page with two fake devices; last message "nothing yet", then the note from the second device; two mappings learned and listed; filter by device.
+- Edit row: range 20 to 60 % stored, shown in the row and with the control's values; the knob then covers 20 to 60 %; endless kind with speed Fast moves twice as far per step inside the range; Send back on sends a mouse move back, off sends nothing.
+- Learn again: waits ("Move a knob now…"), takes Pad Box CC 50 on channel 3 for the same control, range kept; Esc stops it; a key makes it a switch.
+- Defaults Scale and "this project": the next learned mapping is in `S.ctl` with Scale. Move from this project to every project; delete.
+- Tooltips on every control (the app's own tooltip moves a title to `data-tip` after hover; both count), no em dashes. The hook draws the same page into a plain element.
+- While playing, a control set without drawing is sent back (CC 24 = 95); after Stop the check stops (no more runs while idle). No console errors.
+- Screenshots looked at: the page with an open edit row, and at the Light level.
+- After the rebase onto lane D's v0.234: `taskFT_C1b.py` 29 of 29, `taskFT_C1a.py` 55 of 55, `taskNI_1b.py` 36 of 36; `play.py` passes.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB, Bass -35.48685 dB with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums as before (Plant, Sampler, Sampler grains and Drum kit differ between runs of the same file, as logged). No audio code was touched.
+
+### Only the user can test
+- With the Push 1 (still Generic MIDI until C2a) or a keyboard: open Controllers…, turn a knob and watch the last-message line name it. Open a mapping's edit row, set the range to 25 to 75 % and turn the knob; press Learn again and turn another knob, which should take over. A controller with motor faders or LED rings: play a song with automation on a mapped control, the fader or ring should follow.
+
+### Left
+- Mappings to controls of a device never opened since AudioLab started still wait until it is drawn (as C1a). Learn again takes the very next message, also from a key played by accident (Esc or press it again to cancel).
+- Next: FT-C2a, Push 1 part 1 (connect, display, pads).

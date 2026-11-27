@@ -1,1 +1,1 @@
-New: "Why is this clipping?". When the mix goes over while it plays, a Clip button appears next to the mixer button: it shows where, which tracks made the peak, and one-click fixes (lower the loudest part, a limiter on the master, play the moment).
+MIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings.

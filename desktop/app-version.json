@@ -1,7 +1,7 @@
 {
-  "version": "0.234",
-  "sha256": "1e0160895b30ebf1da0ed1dbe12d3f5bd1c5709cc4f3089bc2e08d1823e9ab2f",
-  "size": 6013535,
+  "version": "0.235",
+  "sha256": "76ed7ad43ebae35476d33cb64433a08bd9e1eb7916374c1e75b18631483bb3d3",
+  "size": 6026624,
   "minShell": "0.147.0",
-  "notes": "New: \"Why is this clipping?\". When the mix goes over while it plays, a Clip button appears next to the mixer button: it shows where, which tracks made the peak, and one-click fixes (lower the loudest part, a limiter on the master, play the moment)."
+  "notes": "MIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings."
 }
