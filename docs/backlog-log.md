@@ -4571,7 +4571,7 @@ Fired by the scheduler; the next NB item after NB-R2 was NB-R3 (review section 6
 
 ### Proven
 - Here (2 cores, Electron 45.4.1 as in `desktop/package-lock.json`, production settings 30 ms prefill, exact clock): main process blocked 50 ms every second for 20 s: 960,000 of 960,000 frames bit for bit, no gap, ring never empty (0 gaps in 9 blocked runs); 250 ms every second: 576,000 of 576,000; spinning 50 ms: bit for bit in the strict run (2 of 8 spin runs had one short gap, from blocks reaching the feeder up to 74 ms apart, upstream of the feeder: the spin took half this machine). The old path under the same spin: 2 to 5 gaps per run, up to 152 ms. Feeder frozen (SIGSTOP) at second 4: found after 3 s, killed, replaced, the page gave a new port, the sound came back by itself and stayed bit for bit to the end, never a wrong sample.
-- GitHub: see the CI line in `docs/native-mac-build.md` (run for commit ddc5d31 and after).
+- GitHub (run 46030650243, commit 4fdbfcb, 4 cores): `electron` job 14 of 14 (the spinning case strict there, bit for bit, blocks at most 11 ms apart at the feeder; the old path 2 gaps); `node` 45 of 45; `tsan` green. The first two runs failed on the job's own setup (Electron's binary not fetched, numpy missing), fixed in ddc5d31 and 4fdbfcb.
 
 ### Left
 - The Mac (D9): the same test on Core Audio and in the app's own main process comes with N2c. Upstream jitter (the page's audio thread itself) is not the feeder's to fix; whether 30 ms prefill is enough is NB-R5's production-targets question.

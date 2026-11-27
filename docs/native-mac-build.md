@@ -296,6 +296,8 @@ Spread over more runs here: with the main process blocked (waiting) 0 gaps in 9 
 
 Unit tests (`bridge_unit.js`, 45 checks, 16 new): the port goes on to the feeder and the main process does not listen to it; every frame arrives; a new page port keeps the socket; a frozen feeder is replaced within about 3 s; an engine that does not read: the queue stops at its bound and every frame is written, queued or counted as dropped; an engine that stops answering while it runs is killed and started again with its device and sound. `engine_null_test.py` 26 checks (2 new: a sender that stops sending and never closes does not hold a source switch, 3 ms instead of waiting forever).
 
+**On GitHub** (run 46030650243, commit 4fdbfcb, 4 cores): the new whole run green (all four Linux jobs, including the 240 device cases); the new `electron` job 14 of 14: A, B and the spinning case E (strict on 4 cores) bit for bit with no gap and the blocks at most 11 ms apart at the feeder; the old path 2 gaps (18.7 and 2.7 ms); the frozen feeder replaced, 3.7 s silent, then bit for bit to the end. `node` (bridge unit tests 45 of 45) and `tsan` (the engine on the null device under ThreadSanitizer, with the new frozen-sender check) green.
+
 **Not proven:** the Mac (D9). What only the Mac can show: the same with Core Audio's clock and the app's real main process; that comes with N2c.
 
 ## Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac (27 November 2026)
