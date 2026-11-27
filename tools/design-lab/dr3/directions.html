@@ -1,0 +1,842 @@
+<title>AudioLab design directions: scientific and beyond</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a long pick sheet. One live AudioLab screen per direction (all the same screen at 1200 app px, scaled to fit),
+   then the mixable details with a live mix preview, then the research in short. A fixed picks bar gives one line to paste. */
+:root{
+  --bg:#0b0c10; --fg:#e7e9ef; --mut:#959baa; --line:#242733; --card:#12141b; --chip:#1a1d27; --chip2:#232736;
+  --acc:#f5c84c; --amb:#ffb547; --ok:#3ecf8e;
+  --ui:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f4f7; --fg:#15171d; --mut:#5b6170; --line:#d8dbe3; --card:#ffffff; --chip:#eceef3; --chip2:#e1e4ec;
+  --acc:#9c7300; --amb:#a35700; --ok:#16875a; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f4f7; --fg:#15171d; --mut:#5b6170; --line:#d8dbe3; --card:#ffffff; --chip:#eceef3; --chip2:#e1e4ec;
+  --acc:#9c7300; --amb:#a35700; --ok:#16875a; color-scheme:light}
+:root[data-theme="dark"]{
+  --bg:#0b0c10; --fg:#e7e9ef; --mut:#959baa; --line:#242733; --card:#12141b; --chip:#1a1d27; --chip2:#232736;
+  --acc:#f5c84c; --amb:#ffb547; --ok:#3ecf8e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 14px/1.55 var(--ui);margin:0}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 140px}
+a{color:inherit;text-decoration-color:color-mix(in srgb,var(--fg) 35%,transparent);text-underline-offset:2px}
+h1{font:600 clamp(26px,3.4vw,40px)/1.1 var(--ui);letter-spacing:-.02em;margin:6px 0 12px;text-wrap:balance}
+h2{font:600 22px/1.2 var(--ui);letter-spacing:-.01em;margin:48px 0 6px;text-wrap:balance}
+h3{font:600 16px/1.3 var(--ui);margin:0}
+p{margin:0 0 10px;max-width:72ch}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--amb)}
+.lede{font-size:15.5px;color:var(--fg);max-width:78ch}
+.mut{color:var(--mut)}
+.top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.top{grid-template-columns:1fr}}
+figure{margin:0}
+figure img{width:100%;border-radius:8px;border:1px solid var(--line);display:block}
+figcaption{font-size:12px;color:var(--mut);margin-top:6px}
+.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;font-size:13.5px}
+.how code,.code{font:500 12.5px var(--mono);background:var(--chip);padding:1px 6px;border-radius:4px}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:18px 0 0;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 11px;font:500 12.5px var(--ui);color:var(--mut)}
+.seg button[aria-pressed="true"]{background:var(--chip2);color:var(--fg)}
+.seg button:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ctrls .lab{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump a{font:500 12px var(--mono);text-decoration:none;padding:4px 7px;border-radius:5px;background:var(--chip);color:var(--mut)}
+.jump a:hover{color:var(--fg)}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:7px;background:var(--chip);border:1px solid var(--line);font:500 13px var(--ui);color:var(--fg)}
+.btn[aria-pressed="true"]{background:var(--acc);color:#15120a;border-color:var(--acc)}
+.btn.pri{background:var(--acc);color:#15120a;border-color:var(--acc)}
+
+.dir{margin-top:40px;border-top:1px solid var(--line);padding-top:18px}
+.dhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:12px}
+.dcode{font:600 13px var(--mono);padding:3px 8px;border-radius:5px;background:var(--chip);color:var(--fg)}
+.dname{font:600 21px/1.2 var(--ui);letter-spacing:-.01em}
+.star{color:var(--acc);font-weight:700}
+.tag{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);padding:2px 7px;border-radius:20px}
+.dhead .sp{flex:1}
+.stage{position:relative;width:100%;max-width:1920px;overflow:hidden;border-radius:10px;background:#000;box-shadow:0 0 0 1px var(--line)}
+.stage.big{overflow-x:auto}
+.stage .scr{transform-origin:0 0;position:absolute;left:0;top:0}
+.info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 26px;margin-top:14px}
+@media (max-width:900px){.info{grid-template-columns:1fr}}
+.info div{min-width:0}
+.info h4{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 0 4px}
+.info p{font-size:13.5px;margin:0}
+.info .wide{grid-column:span 3}
+@media (max-width:900px){.info .wide{grid-column:auto}}
+.ms{font:500 12px var(--mono);color:var(--amb)}
+.src{font-size:12.5px;color:var(--mut)}
+
+.dets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:1000px){.dets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.dets{grid-template-columns:1fr}}
+.dg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 12px 8px;min-width:0}
+.dg h3{font-size:14px;margin-bottom:8px}
+.chip{all:unset;cursor:pointer;display:grid;grid-template-columns:34px 1fr;gap:2px 8px;padding:7px 8px;border-radius:7px;margin-bottom:4px;border:1px solid transparent}
+.chip:hover{background:var(--chip)}
+.chip[aria-pressed="true"]{background:var(--chip2);border-color:var(--acc)}
+.chip b{font:600 12px var(--mono);grid-row:span 2;align-self:start;padding-top:1px}
+.chip span{font:500 13px var(--ui)}
+.chip small{font-size:12px;color:var(--mut);line-height:1.4}
+.mixbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:18px 0 10px}
+.mixbar select{font:500 13px var(--ui);background:var(--chip);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+.res{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 28px}
+@media (max-width:900px){.res{grid-template-columns:1fr}}
+.res div{min-width:0}
+.res h4{font:600 14px var(--ui);margin:10px 0 4px}
+.res p,.res li{font-size:13.5px}
+.res ul{margin:0;padding-left:18px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:640px;width:100%}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+td.n{font-variant-numeric:tabular-nums}
+
+.picks{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.picks .in{max-width:1360px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.picks output{font:500 13px var(--mono);background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:7px 10px;flex:1 1 340px;min-width:0;overflow-wrap:anywhere}
+.picks input{font:400 13px var(--ui);background:var(--chip);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 10px;flex:1 1 220px;min-width:0}
+.toast{font-size:12px;color:var(--ok)}
+
+/* ======================= the AudioLab screen (1200 app px wide) ======================= */
+.scr{width:1200px;background:var(--s-bg);color:var(--s-ink);font-family:var(--s-ui);overflow:hidden;border-radius:8px;contain:layout paint}
+.scr *{box-sizing:border-box}
+.scr .a{position:absolute}
+.s-top{left:0;top:0;width:1200px;height:28px;background:var(--s-pn);border-bottom:1px solid var(--s-ln);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12px}
+.s-top .tab{background:var(--s-pn2);border:1px solid var(--s-ln);border-bottom:none;border-radius:var(--s-br) var(--s-br) 0 0;padding:3px 10px;margin-top:6px;font-weight:500}
+.s-top .meta{margin-left:auto;color:var(--s-mut);font:500 10.5px var(--s-mono)}
+.s-arr{left:0;top:28px;width:1200px}
+.s-arr canvas{position:absolute;left:0;top:0}
+.s-ph{position:absolute;top:0;left:0;width:var(--s-phw);background:var(--s-phc);will-change:transform;pointer-events:none}
+.s-ph::before{content:"";position:absolute;top:0;left:50%;margin-left:-5px;border:5px solid transparent;border-top:7px solid var(--s-phc)}
+.trail .s-ph::after{content:"";position:absolute;top:42px;bottom:0;right:100%;width:28px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--s-phc) 22%,transparent))}
+.s-hdrs{position:absolute;left:0;top:0;background:var(--s-pn);border-right:1px solid var(--s-ln)}
+.s-hdrs .hh{height:42px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--s-ln)}
+.hdr{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:0 8px 0 12px;border-bottom:1px solid var(--s-ln);position:relative}
+.hdr .tabc{position:absolute;left:0;top:0;bottom:0;width:4px}
+.hdr .r1,.hdr .r2{display:flex;align-items:center;gap:6px}
+.hdr .num{font:500 10px var(--s-mono);color:var(--s-mut);width:12px}
+.hdr .r2{padding-left:18px}
+.hdr .r2 .sp{flex:1}
+.hdr.sel{background:color-mix(in srgb,var(--s-sel) 10%,transparent)}
+.hdr.sel .nm{color:var(--s-ink)}
+.nm{font:600 12.5px var(--s-ui);white-space:nowrap}
+.n3 .hdr{flex-direction:row;align-items:center;justify-content:flex-start}
+.n3 .hdr .r2{padding-left:0;margin-left:auto}
+.n3 .hdr .r2 .vv{display:none}
+.b{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:17px;padding:0 4px;border-radius:var(--s-br);background:var(--s-bb);border:1px solid var(--s-bbd);font:600 9.5px var(--s-ui);color:var(--s-mut)}
+.b.on{color:#fff;border-color:transparent}
+.b.rec.on{background:var(--s-rec)}
+.b.mut.on{background:var(--s-mute)}
+.m2 .b{transition:background-color .12s ease-out,color .12s ease-out}
+.s-bot{left:0;width:1200px;height:200px;background:var(--s-pn);border-top:1px solid var(--s-ln);border-bottom:1px solid var(--s-ln)}
+.s-dev{position:absolute;left:6px;top:6px;width:700px;height:188px;display:flex;border:1px solid var(--s-ln);border-radius:calc(var(--s-br) + 2px);overflow:hidden;background:var(--s-pn2)}
+.vt{width:26px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 0;border-right:1px solid var(--s-ln);background:var(--s-pn2)}
+.vt .nmv{writing-mode:vertical-rl;transform:rotate(180deg);font:600 12px var(--s-ui);letter-spacing:.02em}
+.vt .pw{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--s-play);position:relative}
+.vt .pw::after{content:"";position:absolute;left:4px;top:-3px;width:1.5px;height:6px;background:var(--s-play)}
+.vt .x{font:500 12px var(--s-ui);color:var(--s-mut)}
+.disp{position:relative;flex:1;background:var(--s-disp)}
+.disp canvas{position:absolute;left:0;top:0}
+.dock{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:14px;padding:6px 12px;border-radius:calc(var(--s-br) + 4px);background:var(--s-dockbg);border:1px solid var(--s-dockbd);white-space:nowrap}
+.kn{display:flex;align-items:center;gap:6px}
+.kn .t{display:flex;flex-direction:column;line-height:1.15}
+.pill{position:absolute;top:8px;display:flex;align-items:center;gap:8px;padding:3px 9px;border-radius:calc(var(--s-br) + 4px);background:var(--s-dockbg);border:1px solid var(--s-dockbd);font:500 11.5px var(--s-ui)}
+.pill.l{left:8px}.pill.r{right:8px}
+.mbar{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:14px;font:500 10.5px var(--s-mono);color:var(--s-mut);padding:3px 9px;border:1px solid var(--s-dockbd);background:var(--s-dockbg);border-radius:var(--s-br)}
+.mbar b{color:var(--s-ink);font-weight:500}
+.s-mix{position:absolute;left:714px;top:6px;width:480px;height:188px;display:flex;gap:5px}
+.st{flex:0 0 84px;height:188px;background:var(--s-pn2);border:1px solid var(--s-ln);border-radius:calc(var(--s-br) + 2px);display:flex;flex-direction:column;align-items:stretch;padding:5px 6px;gap:3px;position:relative}
+.st.mst{flex:1 1 auto}
+.st.sel{border-color:var(--s-sel)}
+.stn{display:flex;align-items:center;gap:5px;height:16px}
+.stn i{width:3px;height:12px;border-radius:2px;flex:none}
+.stn .nm{font-size:11.5px}
+.pan{height:30px;display:flex;justify-content:center}
+.fz{position:relative;height:96px;margin-top:2px}
+.fz .sc{position:absolute;left:0;top:0;width:26px;height:96px}
+.fz .sc span{position:absolute;right:0;transform:translateY(-50%);font:500 8.5px var(--s-mono);color:var(--s-mut)}
+.fz .sc span::after{content:"";display:inline-block;width:3px;height:1px;background:var(--s-mut);vertical-align:middle;margin-left:2px;opacity:.7}
+.fz .fd{position:absolute;left:32px;top:0;width:12px;height:96px;background:color-mix(in srgb,var(--s-ink) 7%,transparent);border-radius:2px}
+.fz .ff{position:absolute;left:0;right:0;bottom:0;border-radius:2px}
+.fz .fh{position:absolute;left:-4px;right:-4px;height:2px;background:var(--s-ink)}
+.fz .ix{position:absolute;left:24px;width:0;height:0;border:4px solid transparent;border-left:6px solid var(--s-meas);transform:translateY(-50%)}
+.fz canvas{position:absolute;left:52px;top:0}
+.sv{text-align:center;height:16px}
+.sb{display:flex;gap:3px;justify-content:center}
+.s-tp{left:0;width:1200px;height:42px;display:flex;align-items:center;gap:16px;padding:0 10px;background:var(--s-pn);border-top:1px solid var(--s-ln)}
+.s-tp .tg{display:flex;flex-direction:column;line-height:1.15;white-space:nowrap}
+.s-tp .tb{display:flex;gap:4px}
+.s-tp .tb .b{height:24px;min-width:26px}
+.s-tp .tb .b.play{background:var(--s-play);border-color:transparent}
+.s-tp .sp{flex:1}
+.s-tp .xb{font:500 10px var(--s-mono);color:var(--s-mut);border:1px solid var(--s-ln);padding:2px 6px;border-radius:var(--s-br);line-height:1.3}
+.s-tp .xb b{color:var(--s-ink);font-weight:500}
+.s-tp canvas{display:block}
+.badge{position:absolute;right:8px;bottom:50px;font:500 10px var(--s-mono);color:var(--s-mut);background:var(--s-pn);border:1px solid var(--s-ln);padding:2px 6px;border-radius:4px;z-index:5}
+
+/* label styles */
+.lb{color:var(--s-mut)}
+.v{font-variant-numeric:tabular-nums;color:var(--s-ink)}
+.u{margin-left:3px}
+.l1 .lb{font:500 10.5px var(--s-ui)} .l1 .v{font:500 12px var(--s-ui)} .l1 .u{font:400 10.5px var(--s-ui);color:var(--s-mut)}
+.l2 .lb{font:500 10.5px var(--s-ui)} .l2 .v{font:500 12px var(--s-mono)} .l2 .u{font:600 8.5px var(--s-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--s-meas)}
+.l3 .lb{font:600 8.5px var(--s-ui);letter-spacing:.13em;text-transform:uppercase} .l3 .v{font:500 12px var(--s-ui)} .l3 .u{font:600 8.5px var(--s-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--s-mut)}
+.l4 .lb{font:500 9px var(--s-mono);letter-spacing:.07em;text-transform:uppercase} .l4 .v{font:500 12px var(--s-mono)} .l4 .u{font:500 9px var(--s-mono);text-transform:uppercase;color:var(--s-mut)}
+.l3 .nm,.l4 .nm{text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.l4 .nm,.l4 .tab,.l4 .vt .nmv{font-family:var(--s-mono)}
+.big .tm .v{font:600 20px var(--s-ui);letter-spacing:-.01em}
+
+/* glass (CSS stand-in for the app's GL engine) */
+.glass .s-hdrs,.glass .s-tp{background:var(--s-gl);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+.glass .dock,.glass .pill{-webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.glass .s-tp{position:absolute}
+
+/* per-direction touches */
+.d-mc .hdr .lamp{width:6px;height:6px;border-radius:50%;background:var(--s-play);box-shadow:0 0 0 2px color-mix(in srgb,var(--s-play) 25%,transparent)}
+.d-mc .hdr .lamp.c{background:#ffb66c;box-shadow:0 0 0 2px rgba(255,182,108,.25)}
+.d-li .hdr .num{width:auto;padding:1px 4px;border-radius:2px;color:#000;font-weight:600}
+.d-li .b{box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.d-li .vt{background:var(--s-pn)}
+.d-ob .s-top{background-image:radial-gradient(1px 1px at 18% 40%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 47% 70%,rgba(255,255,255,.35),transparent),radial-gradient(1px 1px at 71% 30%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 88% 62%,rgba(255,255,255,.3),transparent)}
+.d-ob .s-bot,.d-ob .s-hdrs{background:linear-gradient(180deg,var(--s-pn2),var(--s-pn))}
+.d-bp .st,.d-bp .s-dev{border-style:solid}
+.d-bp .s-tp .xb{border-width:1.5px}
+.d-ph .scr-in,.d-ph{text-shadow:0 0 4px color-mix(in srgb,var(--s-ink) 45%,transparent)}
+.d-ph.scan::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 2px,rgba(0,0,0,.22) 2px 3px);z-index:9}
+.d-sw .s-hdrs,.d-sw .s-top,.d-sw .s-tp,.d-sw .s-bot{border-color:var(--s-ln)}
+.d-sw .st,.d-sw .s-dev{border:none;border-left:1px solid var(--s-ln);border-radius:0;background:transparent}
+.d-sw .b{border:none;background:transparent;text-decoration:underline;text-decoration-color:var(--s-ln)}
+.d-sw .dock,.d-sw .pill{border:none;border-top:1px solid var(--s-ln);border-radius:0}
+.d-ic .b{border-radius:20px}
+.d-ic .st{border:none}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">Task DR3 · 27 November 2026 · reference v0.228</div>
+    <h1>AudioLab design directions: scientific and beyond</h1>
+    <p class="lede">Eight whole looks for AudioLab, each applied to the same real screen: the arrangement with five tracks and clips, the transport, Pro EQ as a display-first device and part of the mixer. Six come from science and engineering (mission control, lab instruments, observatories, technical drawing, Swiss data design, today's glass carried further); two are contrasts (CRT phosphor, and Braun / Teenage Engineering calm). Everything is live: the playhead runs at 145 BPM, meters and the spectrum move, and each card shows how long its drawing takes on your computer.</p>
+    <div class="how">
+      <b>How to answer.</b> Pick one direction with its <b>Pick</b> button, or set details below to mix (a detail overrides the direction's own choice). The bar at the bottom builds one line, for example <span class="code">DR3 picks: DS7 | G2 W3 L2 A2 M1 N2</span>. Press <b>Copy</b> and paste it back. <b>Take all ★</b> fills in the recommendation. ★ = recommended.
+      <p class="mut" style="margin:8px 0 0">Nothing in the app was changed. The screens are redrawn in HTML, CSS and canvas at AudioLab's sizes (track headers, device and mixer strip widths from v0.228); they are close, not the app's own code. The glass here is CSS blur, a stand-in for the GL engine.</p>
+    </div>
+  </div>
+  <figure>
+    <img src="today-v0228.jpg" alt="AudioLab v0.228 in a headless browser at 1920 by 1080: tab bar, ruler with bar numbers, track headers on the left with Kick and Bass, Kick, Bass, Drums, Clap and Snare, coloured clips, the devices panel with a compressor display, and the transport at the bottom." width="1200" height="675">
+    <figcaption>Today, for comparison: v0.228, headless screenshot at 1920 × 1080 (software renderer, so the app chose its solid glass level).</figcaption>
+  </figure>
+</header>
+
+<nav class="ctrls" aria-label="Screen options">
+  <span class="lab">Screens</span>
+  <div class="seg" role="group" aria-label="Mode">
+    <button id="m-dark" aria-pressed="true" data-mode="dark">Dark</button>
+    <button id="m-lite" aria-pressed="false" data-mode="lite">Light mode (no glass)</button>
+    <button id="m-bright" aria-pressed="false" data-mode="bright">Bright</button>
+  </div>
+  <div class="seg" role="group" aria-label="Motion">
+    <button id="mo-on" aria-pressed="true" data-mo="1">Moving</button>
+    <button id="mo-off" aria-pressed="false" data-mo="0">Still</button>
+  </div>
+  <div class="jump" id="jump"></div>
+</nav>
+
+<main id="dirs"></main>
+
+<section id="details">
+  <h2>Mixable details</h2>
+  <p class="mut">Each row changes one thing across the whole screen. Click a detail to use it instead of the direction's own; click again to go back. The preview under the rows shows the direction you picked (DS7 until you pick one) with your details, live.</p>
+  <div class="dets" id="dets"></div>
+  <div class="mixbar">
+    <h3 style="margin:0">Mix preview</h3>
+    <label class="mut" for="mixbase" style="font-size:13px">Base direction</label>
+    <select id="mixbase"></select>
+    <span class="ms" id="mixms"></span>
+  </div>
+  <div class="stage" id="mixstage"></div>
+</section>
+
+<section id="research">
+  <h2>What the research says, in short</h2>
+  <p class="mut">The full write-up with every source is <span class="code">docs/design-languages-research.md</span> in the repository. Claims below come from pages that were opened, except where marked.</p>
+  <div class="res">
+    <div>
+      <h4>Real science screens are plain, not glowing</h4>
+      <p>Mission software is dense text with units: NASA's own browser framework <a href="https://nasa.github.io/openmct/about-open-mct" target="_blank" rel="noopener">Open MCT</a> uses a charcoal theme, stacked plots on one time axis and colour only for yellow and red limits (<a href="https://cdn.jsdelivr.net/npm/openmct@4.3.0-rc1/src/styles/_constants-espresso.scss" target="_blank" rel="noopener">its theme file</a>). Film designers say their screens are "an illustration and a storytelling device" made to look complex (<a href="https://www.pushing-pixels.org/?p=18414" target="_blank" rel="noopener">Mark Coleran</a>); the Martian's real NASA screen was "a spreadsheet of events" (<a href="https://www.pushing-pixels.org/?p=11034" target="_blank" rel="noopener">Territory</a>).</p>
+      <h4>Colour keeps one meaning</h4>
+      <p>The FAA's cockpit guidance gives each colour a fixed job (red warning, amber caution, cyan selected, green engaged, magenta target, white scales), says six colours or fewer, and always a second cue besides colour (<a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_25-11B.pdf" target="_blank" rel="noopener">AC 25-11B</a>). Oscilloscopes repeat one channel colour on trace, knob and readout (<a href="https://tek.com.cn/support/faqs/what-are-the-default-channel-colors" target="_blank" rel="noopener">Tektronix: CH1 yellow, CH2 cyan, CH3 red, CH4 green</a>).</p>
+      <h4>Colour by wavelength, maps that do not lie</h4>
+      <p>Webb's images use chromatic ordering: shortest wavelength blue, longest red (<a href="https://science.nasa.gov/mission/webb/science-overview/science-explainers/how-are-webbs-full-color-images-made" target="_blank" rel="noopener">NASA</a>). Rainbow maps distort data; perceptual maps such as viridis and magma do not (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7595127" target="_blank" rel="noopener">Crameri et al. 2020</a>, <a href="https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html" target="_blank" rel="noopener">viridis</a>).</p>
+    </div>
+    <div>
+      <h4>Long sessions</h4>
+      <ul>
+        <li>Dark text on light reads small text better (Piepenbrock et al., <a href="https://docserv.uni-duesseldorf.de/servlets/DerivateServlet/Derivate-31413" target="_blank" rel="noopener">2013 to 2014</a>), but in a dim studio a bright screen glares. Dark stays right for AudioLab with larger, not-quite-white text.</li>
+        <li>About half of people have some astigmatism; pure white on pure black blurs ("halation") (<a href="https://www.levelaccess.com/blog/accessibility-for-people-with-astigmatism/" target="_blank" rel="noopener">Level Access</a>). Glow makes it worse.</li>
+        <li>Motion in the corner of the eye is detected almost every time and pulls attention; slow linear motion distracts least (<a href="https://www.interruptions.net/literature/Bartram-IJHCS03.pdf" target="_blank" rel="noopener">Bartram, Ware and Calvert 2003</a>). Ambient animation stays optional.</li>
+        <li>Saturated red next to blue on dark seems to float at different depths (<a href="https://en.wikipedia.org/wiki/Chromostereopsis" target="_blank" rel="noopener">chromostereopsis</a>).</li>
+      </ul>
+      <h4>Cost in Chromium</h4>
+      <p><span class="code">backdrop-filter</span> is the dearest compositor effect and re-blurs whenever what is behind it moves (<a href="https://grida.co/docs/wg/research/chromium/effect-optimizations" target="_blank" rel="noopener">Grida notes</a>, <a href="https://web.dev/articles/backdrop-filter" target="_blank" rel="noopener">web.dev</a>); MDN says to avoid canvas <span class="code">shadowBlur</span> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas" target="_blank" rel="noopener">MDN</a>). Every glow on this page is a line drawn twice, not a blur.</p>
+    </div>
+  </div>
+  <h2>Directions side by side</h2>
+  <div class="tbl"><table id="cmp"><thead><tr><th>Direction</th><th>Colours</th><th>Long sessions</th><th>Cost (estimate)</th><th>Drawing on this page</th></tr></thead><tbody></tbody></table></div>
+</section>
+</div>
+
+<div class="picks" role="region" aria-label="Your picks">
+  <div class="in">
+    <output id="line" aria-live="polite">DR3 picks: (pick a direction)</output>
+    <input id="note" type="text" placeholder="Optional note, e.g. DS2 displays inside DS7" aria-label="Optional note">
+    <button class="btn pri" id="copy">Copy</button>
+    <button class="btn" id="takeall">Take all ★</button>
+    <button class="btn" id="clear">Clear</button>
+    <span class="toast" id="toast" role="status"></span>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+/* ---------- song model (same for every screen) ---------- */
+const BPM=145, BAR=240/BPM, VB0=5, NB=24;
+const TRK=[{n:'Kick',k:'kick',vol:-1.9,pan:0},{n:'Bass',k:'bass',vol:-3.4,pan:0},{n:'Hat',k:'hat',vol:-8.0,pan:.25},{n:'Lead',k:'lead',vol:-5.2,pan:-.3},{n:'Pad',k:'pad',vol:-6.5,pan:0}];
+const CL={kick:[[5,4],[9,4],[13,4],[21,4],[25,4]],bass:[[9,4],[13,4],[21,4],[25,4]],hat:[[5,4],[9,8],[21,8]],lead:[[13,4],[17,4],[25,4]],pad:[[1,8],[17,4],[21,8]]};
+const SEC=[['Intro',1,8],['Drop',9,8],['Break',17,4],['Drop 2',21,8]];
+const SELT=1, SELB=9;
+const act=(k,bar)=>CL[k].some(([b,l])=>bar>=b&&bar<b+l);
+
+/* ---------- details ---------- */
+const DET=[
+ {id:'grid',t:'Grid style',o:[
+  ['G1','Today','Bar and beat lines in the lanes; frequency and dB lines in displays.'],
+  ['G2','Graticule','Bar lines, and in each lane a centre axis with beat and sixteenth ticks, like a scope. Displays get 10 × 8 divisions.',1],
+  ['G3','Drafting','Graph paper: fine, medium and heavy lines for sixteenth, beat and bar.'],
+  ['G4','Dots','Only dots where beats and lane quarters cross; a line every 4 bars.'],
+  ['G5','Swiss','A hairline every 4 bars and nothing else. The data carries the rhythm.']]},
+ {id:'lines',t:'Line weights',o:[
+  ['W1','Hairline','Everything one device pixel.'],
+  ['W2','Standard','One css pixel everywhere, as today.'],
+  ['W3','Drafting weights','Three weights by role, √2 apart as in ISO 128: grid thin, outlines medium, curves and playhead thick.',1]]},
+ {id:'labels',t:'Label style',o:[
+  ['L1','Sentence case','Inter labels and values, as today.'],
+  ['L2','Amber units','Values in equal-width mono, units as tiny amber capitals (M1, already picked).',1],
+  ['L3','Tracked capitals','Small spaced capitals for labels, control-room style.'],
+  ['L4','Technical mono','Everything in mono capitals, like lettering on a drawing.']]},
+ {id:'accent',t:'Accent colour use',o:[
+  ['A1','Yellow selection','Yellow only for selection and the main action; measurements in grey.'],
+  ['A2','Yellow and amber','Yellow selects, amber measures (units, calipers, note names).',1],
+  ['A3','Channel colours','The selected track\'s own colour marks the selection, as on a scope.'],
+  ['A4','Mono and one red','Neutral everything, one red for selection (Swiss red, redline).']]},
+ {id:'motion',t:'Motion',o:[
+  ['M1','Signal only','Only the playhead, meters, displays and read-outs move.',1],
+  ['M2','Signal and transitions','Adds 120 ms state changes and a short trail behind the playhead.'],
+  ['M3','Ambient','Adds a slow orbit in empty display space. Pulls the eye; never on by default.']]},
+ {id:'density',t:'Density',o:[
+  ['N1','Roomy','76 px tracks, wider headers.'],
+  ['N2','Today','62 px tracks, as the app at this window size.',1],
+  ['N3','Dense','48 px tracks, one-row headers.']]}
+];
+const STARMIX={grid:'G2',lines:'W3',labels:'L2',accent:'A2',motion:'M1',density:'N2'};
+
+/* ---------- palettes ---------- */
+const BD={bg:'#0a0a0c',pn:'#121216',pn2:'#18181d',ln:'#25252c',ink:'#ececf1',mut:'#8b8b97',lane:'#0e0e11',lane2:'#0c0c0f',gA:'rgba(255,255,255,.10)',gB:'rgba(255,255,255,.045)',disp:'#050507',dA:'rgba(255,255,255,.13)',dB:'rgba(255,255,255,.05)',spec:'#6fa8ff',curve:'#ffd36b',ph:'#ffffff',acc:'#f5c84c',amber:'#ffb547',red:'#ff4d3d',play:'#3ecf8e',rec:'#ff5a4f',mute:'#ff9a3c',tracks:['#ff6b6b','#4c8dff','#3ecf8e','#b583ff','#ff9a3c'],bb:'#2a2b33',bbd:'#000000',gl:'rgba(26,26,34,.55)',dockbg:'rgba(20,20,26,.72)',dockbd:'rgba(255,255,255,.10)'};
+const BB={acc:'#c99700',amber:'#b0650a',red:'#d92d20',play:'#1f9e62',rec:'#d92d20',mute:'#d9761f',bbd:'#c7cad2',bb:'#ffffff',dockbg:'rgba(255,255,255,.8)',dockbd:'rgba(0,0,0,.12)'};
+const P=(...o)=>Object.assign({},...o);
+
+const DIRS=[
+{key:'mc',code:'DS1',name:'Mission control',tag:'scientific',
+ def:{grid:'G4',lines:'W1',labels:'L3',accent:'own',motion:'M1',density:'N3'},
+ st:{clip:'outline',meter:'seg',knob:'tick',spec:'fill',br:2,mbar:1,lamps:1,extra:'mc',mono:1},
+ dark:P(BD,{bg:'#17191c',pn:'#1d2024',pn2:'#23272c',ln:'#323840',ink:'#d8dde3',mut:'#8a939e',lane:'#1a1c20',lane2:'#1c1f23',gA:'rgba(170,190,210,.22)',gB:'rgba(170,190,210,.08)',disp:'#101215',dA:'rgba(170,190,210,.20)',dB:'rgba(170,190,210,.08)',spec:'#03ace4',curve:'#e6ebf0',ph:'#e6ebf0',own:'#03ace4',ownM:'#a9bccf',tracks:['#d0675f','#5d8fd6','#56b88a','#9d86d6','#d39a55'],bb:'#262a30',bbd:'#3a4048',dockbg:'rgba(29,32,36,.92)',dockbd:'#3a4048'}),
+ bright:P(BD,BB,{bg:'#eef0f2',pn:'#f9fafb',pn2:'#ffffff',ln:'#d3d6da',ink:'#262a2f',mut:'#5f656d',lane:'#f6f7f8',lane2:'#eff1f3',gA:'rgba(40,50,60,.20)',gB:'rgba(40,50,60,.08)',disp:'#fbfbfc',dA:'rgba(40,50,60,.20)',dB:'rgba(40,50,60,.07)',spec:'#0a8fc0',curve:'#262a2f',ph:'#262a2f',own:'#0a87b6',ownM:'#5f656d',tracks:['#c0453c','#2f6fc6','#2a9a66','#7a5cc6','#c27a28'],bb:'#eceef0',bbd:'#c7cbd0'}),
+ desc:'The arrangement read as telemetry: stacked plots on one time axis, a value and its unit everywhere, colour only when something needs attention. Charcoal instead of black. Cyan marks what is selected, the way cockpits use it; amber and red are kept for limits such as clipping.',
+ chg:'Ground lifts from near-black to charcoal (Open MCT\'s Espresso idea). Selection turns cyan, so yellow leaves the selection. Clips become outlined plots, tracks go dense (48 px), meters become segments. A mission clock (T+ and UTC) in the transport, a measurement bar on the display, status lamps in the headers.',
+ keep:'Atom logo, layout, track colours (a little muted), flat-bar fader, half pan dial, display-first device with sideways title.',
+ fat:'Good. Mid-dark ground and grey-white text avoid halation, and colour stays rare. Small capitals are slower to read in long lists; dense rows need 12 px type to stay.',
+ cpu:'Low: flat panels, hairlines, segment meters are plain rectangles. No blur.',
+ src:[['NASA Open MCT','https://nasa.github.io/openmct/about-open-mct'],['Open MCT Espresso theme','https://cdn.jsdelivr.net/npm/openmct@4.3.0-rc1/src/styles/_constants-espresso.scss'],['FAA AC 25-11B colours','https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_25-11B.pdf'],['Bloomberg: concealing complexity','https://www.bloomberg.com/company/stories/how-bloomberg-terminal-ux-designers-conceal-complexity']],
+ colours:'Charcoal, grey text, cyan selection, amber and red limits only'},
+{key:'li',code:'DS2',name:'Lab instrument',tag:'scientific',
+ def:{grid:'G2',lines:'W3',labels:'L4',accent:'A3',motion:'M1',density:'N2'},
+ st:{clip:'trace',meter:'trace',knob:'tick',spec:'trace',br:3,mbar:1,glow:1,extra:'li',chan:1},
+ dark:P(BD,{bg:'#1a1b1e',pn:'#222327',pn2:'#2b2d32',ln:'#3a3c42',ink:'#e4e4e6',mut:'#9a9ca3',lane:'#050505',lane2:'#080808',gA:'rgba(255,255,255,.17)',gB:'rgba(255,255,255,.07)',disp:'#000000',dA:'rgba(255,255,255,.22)',dB:'rgba(255,255,255,.08)',spec:'#2fd3e8',curve:'#f5d90a',ph:'#ffffff',tracks:['#f5d90a','#2fd3e8','#ff5252','#3ee07a','#ff9a3c'],bb:'#34363c',bbd:'#4a4d55',dockbg:'rgba(34,35,39,.95)',dockbd:'#4a4d55'}),
+ bright:P(BD,BB,{bg:'#d6d7da',pn:'#e3e4e7',pn2:'#eeeff1',ln:'#b9bbc0',ink:'#1b1c1f',mut:'#55585f',lane:'#fbfbf8',lane2:'#f5f5f1',gA:'rgba(0,0,0,.18)',gB:'rgba(0,0,0,.07)',disp:'#fbfbf8',dA:'rgba(0,0,0,.20)',dB:'rgba(0,0,0,.07)',spec:'#0a8fa6',curve:'#8f7500',ph:'#1b1c1f',tracks:['#a88f00','#0a8fa6','#cc2b2b','#13924a','#c25a10'],bb:'#f3f3f4',bbd:'#a9acb2'}),
+ desc:'Every lane is a scope screen. Clips are traces in their channel colour on black, the device display gets a 10 by 8 graticule and a read-out bar, buttons are soft keys on a grey bezel. One track keeps one colour on its tag, trace, meter, knob ring and selection.',
+ chg:'Track colours become channel colours (yellow, cyan, red, green, orange, Tektronix order). Clip blocks become traces on black lanes; panels go mid-grey; values and names in mono; the selection takes the track\'s own colour. A read-out bar (peak, crest, correlation) on the display.',
+ keep:'Atom logo, layout, flat-bar fader, half pan dial, display-first device and sideways title, Inter for long text.',
+ fat:'Black lanes with bright traces are calm in a dark room and fast to read up close. Without filled clips the song\'s structure is harder to see from far out. Saturated yellow on black is the brightest thing on screen; keep its area small.',
+ cpu:'Low to medium: traces are stroked twice for the glow (no blur). Real persistence (an accumulating canvas) would cost more and is not used.',
+ src:[['Tektronix default channel colours','https://tek.com.cn/support/faqs/what-are-the-default-channel-colors'],['R&S MXO 4 brochure','https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_brochures_and_datasheets/product_brochure/3609_8473_12/MXO-4_bro_en_3609-8473-12_v0900.pdf'],['Keysight InfiniiVision guide','https://tjr-lab.mit.edu/wp-content/uploads/2023/09/Keysight-InfiniiVision-4000-X-Series-Oscilloscopes-Users-Guide.pdf'],['Bitwig Grid signal colours','https://www.bitwig.com/userguide/latest/on_grid_signals']],
+ colours:'Grey bezel, black screens, channel colours'},
+{key:'ob',code:'DS3',name:'Observatory',tag:'scientific',
+ def:{grid:'G5',lines:'W1',labels:'L1',accent:'A1',motion:'M3',density:'N1'},
+ st:{clip:'glow',meter:'map',knob:'arc',spec:'map',br:4,stars:1,glow:1,extra:'ob'},
+ dark:P(BD,{bg:'#04060c',pn:'#080c17',pn2:'#0d1322',ln:'#1a2340',ink:'#e2e7f3',mut:'#8490ad',lane:'#05080f',lane2:'#060a13',gA:'rgba(160,180,255,.12)',gB:'rgba(160,180,255,.05)',disp:'#020308',dA:'rgba(160,180,255,.15)',dB:'rgba(160,180,255,.05)',curve:'#e2e7f3',ph:'#cfe0ff',tracks:['#ff5a3c','#ff9f43','#8c7dff','#45c8ff','#6fdc96'],bb:'#111830',bbd:'#1f2a4a',dockbg:'rgba(10,14,28,.7)',dockbd:'rgba(160,180,255,.16)',gl:'rgba(10,14,28,.55)'}),
+ bright:P(BD,BB,{bg:'#f2f3f8',pn:'#ffffff',pn2:'#f8f9fc',ln:'#d8dce8',ink:'#121624',mut:'#5b6480',lane:'#f8f9fc',lane2:'#f2f4f9',gA:'rgba(30,40,90,.13)',gB:'rgba(30,40,90,.05)',disp:'#05070d',dA:'rgba(160,180,255,.16)',dB:'rgba(160,180,255,.06)',curve:'#e2e7f3',ph:'#121624',tracks:['#e0402a','#e07f1a','#6a59e0','#1a93cf','#2ea866'],bb:'#ffffff',bbd:'#d0d5e2',dockbg:'rgba(8,10,20,.7)',dockbd:'rgba(160,180,255,.2)'}),
+ desc:'Deep-space ground, and tracks coloured by register the way Webb colours its filters by wavelength: the lowest sound red, the highest violet (kick red, bass orange, pad green, lead cyan, hats violet). The spectrum uses a perceptual colour map. Clips glow softly. Faint stars only where nothing is.',
+ chg:'Track colours follow pitch, a rule instead of a choice. The spectrum and meters use the magma map. Clips become soft gradients without edges. Roomy 76 px tracks. A slow orbit in empty display space (M3, optional).',
+ keep:'Atom logo, yellow selection, layout, all controls; glass would fit too.',
+ fat:'Calm and the most beautiful in a dark room, but the lowest contrast: soft clip edges are harder to aim at, and drift in the corner of the eye pulls attention (Bartram 2003), so M3 must stay a choice. Avoid red text next to blue.',
+ cpu:'Low: stars drawn once, the colour map is a lookup table, the glow is a gradient fill.',
+ src:[['How Webb\'s colour images are made','https://science.nasa.gov/mission/webb/science-overview/science-explainers/how-are-webbs-full-color-images-made'],['DePasquale on representative colour','https://www.nasa.gov/mediacast/gravity-assist-how-we-make-webb-and-hubble-images'],['viridis and magma','https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html'],['Crameri et al. 2020','https://pmc.ncbi.nlm.nih.gov/articles/PMC7595127']],
+ colours:'Deep blue-black, tracks by register (red low to violet high), magma map'},
+{key:'bp',code:'DS4',name:'Blueprint',tag:'scientific',
+ def:{grid:'G3',lines:'W3',labels:'L4',accent:'A4',motion:'M1',density:'N2'},
+ st:{clip:'hatch',meter:'thin',knob:'cross',spec:'thin',br:0,extra:'bp',mono:1},
+ dark:P(BD,{bg:'#0b2545',pn:'#0d2a4f',pn2:'#103058',ln:'rgba(210,230,255,.32)',ink:'#e6f0ff',mut:'#a3bfe3',lane:'#0c2748',lane2:'#0d294c',gA:'rgba(210,230,255,.24)',gB:'rgba(210,230,255,.09)',disp:'#0a2241',dA:'rgba(210,230,255,.26)',dB:'rgba(210,230,255,.09)',spec:'#9fd0ff',curve:'#ffffff',ph:'#ffffff',red:'#ff6b5e',bb:'transparent',bbd:'rgba(210,230,255,.45)',dockbg:'rgba(11,37,69,.92)',dockbd:'rgba(210,230,255,.45)'}),
+ bright:P(BD,BB,{bg:'#f6f8fb',pn:'#ffffff',pn2:'#ffffff',ln:'rgba(13,58,120,.35)',ink:'#0d3a78',mut:'#4f6f9c',lane:'#fbfcfe',lane2:'#f6f8fc',gA:'rgba(13,58,120,.22)',gB:'rgba(13,58,120,.08)',disp:'#ffffff',dA:'rgba(13,58,120,.24)',dB:'rgba(13,58,120,.08)',spec:'#4f8fd6',curve:'#0d3a78',ph:'#0d3a78',red:'#d42a1f',bb:'transparent',bbd:'rgba(13,58,120,.5)',dockbg:'rgba(255,255,255,.94)',dockbd:'rgba(13,58,120,.5)'}),
+ desc:'A drawing of the song. Prussian-blue paper and white ink in three line weights, hatched clips, dimension lines with real lengths, technical lettering and a title block in the transport. Red is the redline: it marks only the selection.',
+ chg:'The whole palette: blue ground (white paper and blue ink in Bright); a track\'s colour shrinks to a small tag; all text in mono capitals; square corners; one red for selection.',
+ keep:'Atom logo, layout, all controls and their sizes.',
+ fat:'Striking for a screenshot, tiring for hours: a mid-blue ground lowers contrast, and capitals everywhere read slower. Better as a theme, or borrowed only for measurement overlays (calipers, dimension lines).',
+ cpu:'Very low: lines and hatching are drawn once with the grid.',
+ src:[['ISO 128-20 line widths (sample)','https://cdn.standards.iteh.ai/samples/1408/f62555427b87436eafe1e6abc5271860/ISO-128-20-1996.pdf'],['ISO 3098 lettering','https://www.roymech.co.uk/Useful_Tables/Drawing/Lettering.html'],['ISO 7200 title blocks','https://en.wikipedia.org/wiki/ISO_7200'],['Blueprint history','https://en.wikipedia.org/wiki/Blueprint']],
+ colours:'Prussian blue and white ink (Bright: paper and blue ink), one red'},
+{key:'ph',code:'DS5',name:'Phosphor',tag:'contrast · retro-futurist',
+ def:{grid:'G2',lines:'W2',labels:'L4',accent:'A4',motion:'M2',density:'N2'},
+ st:{clip:'mono',meter:'trace',knob:'tick',spec:'mono',br:0,glow:1,scan:1,extra:'ph',phos:1},
+ dark:P(BD,{bg:'#020502',pn:'#030803',pn2:'#051006',ln:'rgba(90,255,150,.24)',ink:'#8affb5',mut:'rgba(138,255,181,.58)',lane:'#020602',lane2:'#030803',gA:'rgba(90,255,150,.17)',gB:'rgba(90,255,150,.06)',disp:'#000000',dA:'rgba(90,255,150,.22)',dB:'rgba(90,255,150,.07)',spec:'#8affb5',curve:'#c9ffdc',ph:'#c9ffdc',tracks:['#8affb5','#8affb5','#8affb5','#8affb5','#8affb5'],red:'#ff5a4f',acc:'#f5c84c',bb:'transparent',bbd:'rgba(90,255,150,.42)',dockbg:'rgba(2,8,3,.94)',dockbd:'rgba(90,255,150,.42)',play:'#8affb5'}),
+ bright:P(BD,BB,{bg:'#efeee4',pn:'#f6f5ec',pn2:'#faf9f2',ln:'rgba(15,74,38,.3)',ink:'#0f4a26',mut:'rgba(15,74,38,.66)',lane:'#f3f2e8',lane2:'#efeee3',gA:'rgba(15,74,38,.18)',gB:'rgba(15,74,38,.07)',disp:'#f7f6ee',dA:'rgba(15,74,38,.2)',dB:'rgba(15,74,38,.07)',spec:'#0f6a34',curve:'#0f4a26',ph:'#0f4a26',tracks:['#0f6a34','#0f6a34','#0f6a34','#0f6a34','#0f6a34'],bb:'transparent',bbd:'rgba(15,74,38,.45)',dockbg:'rgba(246,245,236,.95)',dockbd:'rgba(15,74,38,.45)',play:'#0f6a34'}),
+ desc:'One phosphor colour on black, every line glowing a little, tracks told apart by brightness and dash pattern, faint scanlines. The CRT and vector-display look of 1970s and 80s science fiction, included as a contrast.',
+ chg:'All colour goes, so tracks lose their hue; mono type everywhere; glow on lines and text; a static scanline layer over the screen. Bright becomes a printout on paper.',
+ keep:'Atom logo (the only colour left), layout, controls.',
+ fat:'Poor for hours: one hue loses track identity, glow and scanlines soften every edge (halation), saturated green tires. Good as a hidden theme or for a scope view only.',
+ cpu:'Medium on this page: double strokes everywhere and a full-screen scanline layer. A real CRT shader (bloom, persistence) would be high.',
+ src:[['Phosphor types (P1, P3, P31)','https://en.wikipedia.org/wiki/Phosphor'],['Vector monitors','https://en.wikipedia.org/wiki/Vector_monitor'],['Alien (1979) screens','https://typesetinthefuture.com/2014/12/01/alien/'],['CRT-Royale shader cost','https://docs.libretro.com/shader/crt_royale/']],
+ colours:'P1 green on black (Bright: green ink on paper)'},
+{key:'sw',code:'DS6',name:'Swiss data',tag:'scientific · editorial',
+ def:{grid:'G5',lines:'W1',labels:'L1',accent:'A4',motion:'M1',density:'N1'},
+ st:{clip:'swiss',meter:'thin',knob:'bar',spec:'thin',br:0,extra:'sw',bigtime:1},
+ dark:P(BD,{bg:'#121314',pn:'#121314',pn2:'#121314',ln:'#2c2e31',ink:'#ebebe9',mut:'#8f9195',lane:'#121314',lane2:'#121314',gA:'rgba(255,255,255,.10)',gB:'rgba(255,255,255,.045)',disp:'#121314',dA:'rgba(255,255,255,.13)',dB:'rgba(255,255,255,.05)',spec:'#ebebe9',curve:'#ebebe9',ph:'#ebebe9',red:'#ff453a',bb:'transparent',bbd:'transparent',dockbg:'#121314',dockbd:'#2c2e31'}),
+ bright:P(BD,BB,{bg:'#fafaf8',pn:'#fafaf8',pn2:'#fafaf8',ln:'#d6d6d1',ink:'#111111',mut:'#68686a',lane:'#fafaf8',lane2:'#fafaf8',gA:'rgba(0,0,0,.11)',gB:'rgba(0,0,0,.045)',disp:'#fafaf8',dA:'rgba(0,0,0,.14)',dB:'rgba(0,0,0,.05)',spec:'#111111',curve:'#111111',ph:'#111111',red:'#e3251b',tracks:['#e0453f','#2f6fe0','#1f9e62','#7b4fd6','#d9761f'],bb:'transparent',bbd:'transparent',dockbg:'#fafaf8',dockbd:'#d6d6d1'}),
+ desc:'No boxes and no fills: hairline rules on a strict column grid, and type does the work. Large numerals for time, names set flush left, colour only in the data. Swiss red marks the selection. Tufte\'s data-ink rule applied to a DAW.',
+ chg:'Panels lose their backgrounds and outlines; clips become light tints with a colour edge; one large time read-out; buttons become text; red selection instead of yellow. Bright is its natural home.',
+ keep:'Atom logo, track colours, layout, controls.',
+ fat:'Very good for reading values; quiet and flat. Without surfaces the hierarchy depends on spacing alone, and controls look less clickable.',
+ cpu:'The lowest of all directions.',
+ src:[['Müller-Brockmann','https://en.wikipedia.org/wiki/Josef_M%C3%BCller-Brockmann'],['Musica Viva posters','https://socks-studio.com/2016/11/30/joseph-muller-brockmann-musica-viva-posters-for-the-zurich-tonhalle/'],['Data-ink and chartjunk','https://data.europa.eu/apps/data-visualisation-guide/chart-junk-and-data-ink-origins'],['Observable Plot scales','https://observablehq.github.io/plot/features/scales']],
+ colours:'Graphite or white, track colours in the data, one red'},
+{key:'lg',code:'DS7',name:'Liquid glass science',tag:'scientific · today, carried further',star:1,
+ def:{grid:'G2',lines:'W3',labels:'L2',accent:'A2',motion:'M1',density:'N2'},
+ st:{clip:'glass',meter:'bar',knob:'arc',spec:'fill',br:5,glass:1,extra:'lg'},
+ dark:P(BD,{}),
+ bright:P(BD,BB,{bg:'#e8eaef',pn:'#f4f5f8',pn2:'#f9fafb',ln:'#d2d5dd',ink:'#15161a',mut:'#5d606b',lane:'#f1f2f5',lane2:'#eceef2',gA:'rgba(0,0,0,.11)',gB:'rgba(0,0,0,.045)',disp:'#0c0d10',dA:'rgba(255,255,255,.13)',dB:'rgba(255,255,255,.05)',ph:'#15161a',gl:'rgba(255,255,255,.55)',tracks:['#e8505a','#3b78e0','#22a874','#9466e8','#e8862a'],dockbg:'rgba(22,22,28,.72)',dockbd:'rgba(255,255,255,.12)'}),
+ desc:'Today\'s AudioLab, finished. Glass headers and transport over the lanes, black display-first devices, and the science language placed only where it measures something: amber unit labels, a graticule in lanes and displays, three line weights, the note name on every frequency, a caliper on the selected clip.',
+ chg:'Lane grid becomes a graticule (bar lines, and a centre axis with beat and sixteenth ticks); three line weights by role; amber mono units (M1); tick scales and an index mark on faders (X1); note and cents on frequencies (X8); the ruler shows sixteenths (X4).',
+ keep:'Everything already chosen: the glass engine (D3), Inter on the strict scale (C1), today\'s colours (B0), buttons (E0), flat-bar fader, half pan dial, stereo field, sideways device titles, atom logo.',
+ fat:'Good: today\'s measured contrast stays, and the new detail is still and appears only next to values. Text on glass keeps a solid backing, as already ruled.',
+ cpu:'As today: in the app the glass is the GL engine (one shared backdrop on the GPU); the new lines are drawn once with the grid. On this page the glass is CSS blur, which is dearer than the app\'s engine.',
+ src:[['Apple: Meet Liquid Glass','https://developer.apple.com/videos/play/wwdc2025/219/'],['Apple HIG materials','https://developer.apple.com/design/human-interface-guidelines/materials'],['FabFilter Pro-Q analyzer','https://www.fabfilter.com/help/pro-q/using/analyzer'],['iZotope Insight','https://izotope.com/products/insight']],
+ colours:'Today\'s: near-black, track colours, yellow selection, amber measurements'},
+{key:'ic',code:'DS8',name:'Industrial calm',tag:'contrast · Braun and Teenage Engineering',
+ def:{grid:'G1',lines:'W2',labels:'L1',accent:'A1',motion:'M2',density:'N1'},
+ st:{clip:'soft',meter:'seg',knob:'dot',spec:'soft',br:8,extra:'ic'},
+ dark:P(BD,{bg:'#1b1a18',pn:'#232220',pn2:'#2b2a27',ln:'#3a3834',ink:'#ece8e0',mut:'#9d988e',lane:'#1f1e1c',lane2:'#21201d',gA:'rgba(255,245,230,.08)',gB:'rgba(255,245,230,.035)',disp:'#141312',dA:'rgba(255,245,230,.11)',dB:'rgba(255,245,230,.04)',spec:'#e8e3d8',curve:'#f5c84c',ph:'#ece8e0',tracks:['#ff6a2b','#4a6fd6','#a3a19a','#d9a63a','#6f9e7a'],bb:'#34322e',bbd:'#3f3d38',dockbg:'rgba(43,42,39,.95)',dockbd:'#3f3d38'}),
+ bright:P(BD,BB,{bg:'#e8e5df',pn:'#f2f0eb',pn2:'#faf9f6',ln:'#d3cfc7',ink:'#1e1d1b',mut:'#6c675d',lane:'#efede8',lane2:'#ebe8e2',gA:'rgba(30,25,15,.10)',gB:'rgba(30,25,15,.04)',disp:'#dcd8cf',dA:'rgba(30,25,15,.16)',dB:'rgba(30,25,15,.06)',spec:'#3a3833',curve:'#1e1d1b',ph:'#1e1d1b',tracks:['#e0551a','#3657b8','#7d7b74','#b8861c','#4f8a5c'],bb:'#faf9f6',bbd:'#cfcac0',dockbg:'rgba(250,249,246,.95)',dockbd:'#cfcac0'}),
+ desc:'The non-scientific contrast: warm graphite, round tactile knobs, generous spacing, colour only for function. Like the yellow equals key on Braun\'s ET66 calculator, yellow stays for the one action used most.',
+ chg:'Warm neutrals instead of cool; tracks take an OP-1 field-like set (orange, blue, grey, ochre, green); knobs become round with a dot; rounded clips and pill buttons; roomy tracks.',
+ keep:'Yellow main accent, atom logo, layout.',
+ fat:'Very calm and friendly. Warm greys can look muddy over hours, and fewer tracks fit on screen.',
+ cpu:'Very low.',
+ src:[['Rams: ten principles (Vitsoe)','https://www.vitsoe.com/gb/about/good-design'],['Braun ET66 (V&A)','https://collections.vam.ac.uk/item/O1360553'],['OP-1 layout guide','https://teenage.engineering/guides/op-1/original/layout'],['OP-1 field review','https://perfectcircuit.com/signal/teenage-engineering-op-1-field-review']],
+ colours:'Warm graphite, OP-1-like function colours, yellow main key'}
+];
+const BYK=Object.fromEntries(DIRS.map(d=>[d.key,d]));
+const BYC=Object.fromEntries(DIRS.map(d=>[d.code,d]));
+
+/* ---------- state ---------- */
+const S={mode:'dark',moving:!matchMedia('(prefers-reduced-motion: reduce)').matches,pick:null,ov:{},note:''};
+try{const s=JSON.parse(localStorage.getItem('dr3')||'null');if(s){S.pick=s.pick||null;S.ov=s.ov||{};S.note=s.note||'';if(s.mode)S.mode=s.mode}}catch(e){}
+const save=()=>{try{localStorage.setItem('dr3',JSON.stringify({pick:S.pick,ov:S.ov,note:S.note,mode:S.mode}))}catch(e){}};
+
+/* ---------- helpers ---------- */
+const hexA=(h,a)=>{if(!h||h[0]!=='#')return h;const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
+const V=(n,u)=>`<span class="v">${n}</span>${u?`<span class="u">${u}</span>`:''}`;
+const L=t=>`<span class="lb">${t}</span>`;
+const MAG=[[0,0,0,4],[.13,28,16,68],[.25,79,18,123],[.38,129,37,129],[.5,181,54,122],[.63,229,80,100],[.75,251,135,97],[.88,254,194,135],[1,252,253,191]];
+function magma(t){t=Math.max(0,Math.min(1,t));for(let i=1;i<MAG.length;i++){if(t<=MAG[i][0]){const a=MAG[i-1],b=MAG[i],f=(t-a[0])/(b[0]-a[0]);return `rgb(${a[1]+(b[1]-a[1])*f|0},${a[2]+(b[2]-a[2])*f|0},${a[3]+(b[3]-a[3])*f|0})`}}return 'rgb(252,253,191)'}
+const NOTES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+function noteOf(f){const n=69+12*Math.log2(f/440),r=Math.round(n),c=Math.round((n-r)*100);return `${NOTES[r%12]}${Math.floor(r/12)-1} ${c>=0?'+':'−'}${Math.abs(c)} ct`}
+const dbPos=db=>db===-Infinity||db<-60?1:db>=-12?(6-db)/18*.55:db>=-40?.55+(-12-db)/28*.35:.9+(-40-db)/20*.1;
+const fmtDb=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
+
+/* ---------- resolve a config ---------- */
+function resolve(dkey,ov,mode){
+  const d=BYK[dkey],m=Object.assign({},d.def,ov||{});
+  const pal=Object.assign({},mode==='bright'?d.bright:d.dark);
+  const c=Object.assign({},pal,{st:d.st,dir:d,m,mode,bright:mode==='bright'});
+  c.glass=!!d.st.glass&&mode!=='lite';
+  c.glow=!!d.st.glow&&mode!=='lite';
+  c.scan=!!d.st.scan&&mode!=='lite';
+  c.stars=!!d.st.stars;
+  if(mode==='lite'&&m.motion==='M3')m.motion='M1';
+  c.lw={W1:{g:.5,o:.5,c:1},W2:{g:1,o:1,c:1.5},W3:{g:.5,o:1,c:2}}[m.lines];
+  c.th={N1:76,N2:62,N3:48}[m.density]; c.hw={N1:212,N2:196,N3:180}[m.density];
+  c.mono=m.labels==='L2'||m.labels==='L4'; c.upper=m.labels==='L3'||m.labels==='L4';
+  const A=m.accent;
+  if(A==='A1'){c.sel=pal.acc;c.meas=pal.mut}
+  else if(A==='A2'){c.sel=pal.acc;c.meas=pal.amber}
+  else if(A==='A3'){c.sel=pal.tracks[SELT];c.meas=pal.tracks[SELT]}
+  else if(A==='A4'){c.sel=pal.red;c.meas=pal.ink}
+  else {c.sel=pal.own||pal.acc;c.meas=pal.ownM||pal.mut}
+  if(d.st.phos&&A==='A3'){c.sel=pal.ink}
+  return c;
+}
+
+/* ---------- canvas helpers ---------- */
+function mkCanvas(w,h,k){const cv=document.createElement('canvas');cv.width=Math.round(w*k);cv.height=Math.round(h*k);cv.style.width=w+'px';cv.style.height=h+'px';const x=cv.getContext('2d');x.setTransform(k,0,0,k,0,0);return [cv,x]}
+const font=(c,sz,w,mono)=>`${w||500} ${sz}px ${mono?'"JetBrains Mono",ui-monospace,monospace':'Inter,system-ui,sans-serif'}`;
+const cap=(c,s)=>c.upper?s.toUpperCase():s;
+function line(x,a,b,cc,d,lw,col,dash){x.beginPath();x.moveTo(a,b);x.lineTo(cc,d);x.lineWidth=lw;x.strokeStyle=col;x.setLineDash(dash||[]);x.stroke();x.setLineDash([])}
+function rr(x,a,b,w,h,r){x.beginPath();if(x.roundRect)x.roundRect(a,b,w,h,r);else x.rect(a,b,w,h)}
+
+/* envelopes for clip content, position in beats from bar 1 */
+function env(k,bt){
+  const ph=bt%1, s=(bt*4)%1, i16=Math.floor(bt*4);
+  if(k==='kick')return Math.exp(-ph*5)*.95;
+  if(k==='hat')return Math.exp(-s*9)*(i16%2?.42:.7);
+  return .5+.22*Math.sin(bt*.9)+.1*Math.sin(bt*3.3);
+}
+const BASSP=[0,0,3,0,5,0,3,7], LEADP=[[0,2,7],[2,2,9],[4,4,12],[8,2,10],[10,2,7],[12,4,5]];
+
+/* ---------- lanes (static) ---------- */
+function drawLanes(x,c,W,H){
+  const hw=c.hw,ppb=(W-hw)/NB,X=b=>hw+(b-VB0)*ppb,th=c.th,top=42,lw=c.lw;
+  x.fillStyle=c.lane;x.fillRect(0,0,W,H);
+  for(let i=0;i<5;i++){x.fillStyle=i%2?c.lane2:c.lane;x.fillRect(0,top+i*th,W,th)}
+  if(c.stars){let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<260;i++){x.fillStyle=`rgba(220,230,255,${.08+r()*.3})`;const sz=r()<.9?.8:1.4;x.fillRect(r()*W,top+r()*(H-top),sz,sz)}}
+  // grid
+  const G=c.m.grid;
+  for(let b=1;b<=VB0+NB;b++)for(let j=0;j<4;j++)for(let q=0;q<4;q++){
+    const xx=Math.round(X(b+j/4+q/16))+.5;if(xx<0||xx>W)continue;
+    const bar=j===0&&q===0,four=bar&&(b-1)%4===0,beat=q===0;
+    if(G==='G1'){if(beat)line(x,xx,top,xx,H,lw.g,bar?c.gA:c.gB)}
+    else if(G==='G2'){if(bar)line(x,xx,top,xx,H,four?lw.o:lw.g,four?c.gA:c.gB);
+      for(let i=0;i<5;i++){const cy=top+i*th+th/2,l=bar?0:beat?4:2;if(l)line(x,xx,cy-l/2,xx,cy+l/2,lw.g,c.gA)}}
+    else if(G==='G3'){line(x,xx,top,xx,H,four?lw.o:lw.g,four||bar?c.gA:beat?c.gB:hexA('#808080',.05))}
+    else if(G==='G4'){if(four)line(x,xx,top,xx,H,lw.g,c.gB);if(beat)for(let i=0;i<5;i++)for(let r=1;r<4;r++){x.fillStyle=c.gA;x.fillRect(xx-.6,top+i*th+r*th/4-.6,1.2,1.2)}}
+    else if(G==='G5'){if(four)line(x,xx,top,xx,H,lw.g,c.gB)}
+  }
+  if(G==='G2')for(let i=0;i<5;i++)line(x,0,top+i*th+th/2+.5,W,top+i*th+th/2+.5,lw.g,c.gB);
+  if(G==='G3')for(let i=0;i<5;i++)for(let r=1;r<4;r++)line(x,0,top+i*th+r*th/4+.5,W,top+i*th+r*th/4+.5,lw.g,hexA('#808080',.06));
+  for(let i=1;i<=5;i++)line(x,0,top+i*th-.5,W,top+i*th-.5,lw.g,c.ln);
+  // clips
+  TRK.forEach((t,i)=>CL[t.k].forEach(([b,l])=>{const x0=X(b),w=l*ppb;if(x0+w<0)return;drawClip(x,c,t,i,b,l,x0+1,top+i*th+3,w-2,th-6,i===SELT&&b===SELB)}));
+  // ruler + sections
+  x.fillStyle=c.pn;x.fillRect(0,0,W,top);
+  line(x,0,23.5,W,23.5,lw.g,c.ln);line(x,0,top-.5,W,top-.5,lw.g,c.ln);
+  const xr=(G==='G2'||G==='G3');
+  for(let b=VB0;b<=VB0+NB;b++){const xx=Math.round(X(b))+.5;line(x,xx,13,xx,23,lw.o,c.mut);
+    for(let j=1;j<4;j++){const xb=Math.round(X(b+j/4))+.5;line(x,xb,18,xb,23,lw.g,c.mut)}
+    if(xr)for(let q=1;q<16;q++)if(q%4){const xq=Math.round(X(b+q/16))+.5;line(x,xq,21,xq,23,lw.g,hexA('#888888',.6))}
+    if(b<VB0+NB){x.fillStyle=(b-1)%4===0?c.ink:c.mut;x.font=font(c,c.mono?9.5:10.5,(b-1)%4===0?600:500,c.mono);x.fillText(String(b),xx+3,11)}}
+  SEC.forEach(([n,b,l],k)=>{const x0=X(b),x1=X(b+l);const col=c.tracks[[0,1,3,4][k]];
+    x.fillStyle=c.st.phos?hexA(c.ink,.08):hexA(col.startsWith('#')?col:'#888888',.14);x.fillRect(Math.max(x0,hw)+1,25,x1-Math.max(x0,hw)-2,15);
+    x.fillStyle=c.st.phos?c.ink:col;x.fillRect(Math.max(x0,hw)+1,25,2,15);
+    x.fillStyle=c.ink;x.font=font(c,c.upper?9:10.5,600,c.mono);x.fillText(cap(c,n),Math.max(x0,hw)+7,36)});
+}
+function drawClip(x,c,t,i,b,l,cx,cy,w,h,sel){
+  const S=c.st.clip,col=c.tracks[i],br=c.bright,lw=c.lw,name=cap(c,`${t.n} ${b}`);
+  const ph=[1,.82,.62,.9,.5][i],dash=[[],[6,3],[2,3],[],[10,4]][i];
+  x.save();
+  let hd=13,ncol='#fff',cc='rgba(255,255,255,.62)',fillW=false;
+  if(S==='fill'||S==='glass'){rr(x,cx,cy,w,h,3);x.fillStyle=hexA(col,br?.75:.55);x.fill();x.save();x.clip();x.fillStyle=hexA(col,.95);x.fillRect(cx,cy,w,hd);
+    if(S==='glass'){const g=x.createLinearGradient(0,cy,0,cy+h*.5);g.addColorStop(0,'rgba(255,255,255,.20)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(cx,cy,w,h*.5);line(x,cx,cy+.5,cx+w,cy+.5,1,'rgba(255,255,255,.35)')}
+    x.restore();ncol=br?'#fff':'rgba(255,255,255,.95)';fillW=true}
+  else if(S==='outline'){x.fillStyle=hexA(col,br?.12:.13);x.fillRect(cx,cy,w,h);x.strokeStyle=hexA(col,.9);x.lineWidth=lw.o;x.strokeRect(cx+.5,cy+.5,w-1,h-1);x.fillStyle=col;x.fillRect(cx,cy,w,2);ncol=col;cc=hexA(col,.9)}
+  else if(S==='hatch'){x.strokeStyle=c.ink;x.lineWidth=lw.o;x.strokeRect(cx+.5,cy+.5,w-1,h-1);x.save();x.beginPath();x.rect(cx,cy,w,h);x.clip();for(let k=-h;k<w;k+=7)line(x,cx+k,cy+h,cx+k+h,cy,lw.g,hexA(c.ink[0]==='#'?c.ink:'#ffffff',.13));x.restore();
+    x.fillStyle=c.lane;x.fillRect(cx+1,cy+1,Math.min(w-2,x.measureText(name).width+26),hd);x.fillStyle=col;x.fillRect(cx+4,cy+4,6,6);ncol=c.ink;cc=hexA(c.ink,.85)}
+  else if(S==='trace'){line(x,cx+.5,cy,cx+.5,cy+h,lw.g,hexA(col,.6));line(x,cx+w-.5,cy,cx+w-.5,cy+h,lw.g,hexA(col,.6));line(x,cx,cy+.5,cx+6,cy+.5,lw.o,col);line(x,cx+w-6,cy+h-.5,cx+w,cy+h-.5,lw.o,col);ncol=col;cc=col}
+  else if(S==='glow'){const g=x.createLinearGradient(0,cy,0,cy+h);g.addColorStop(0,hexA(col,br?.38:.32));g.addColorStop(1,hexA(col,.03));rr(x,cx,cy,w,h,4);x.fillStyle=g;x.fill();line(x,cx+3,cy+.5,cx+w-3,cy+.5,1,hexA(col,.7));ncol=c.ink;cc=col}
+  else if(S==='mono'){x.globalAlpha=ph;x.strokeStyle=col;x.lineWidth=lw.o;x.setLineDash(dash);x.strokeRect(cx+.5,cy+.5,w-1,h-1);x.setLineDash([]);ncol=col;cc=col}
+  else if(S==='swiss'){x.fillStyle=hexA(col,br?.13:.11);x.fillRect(cx,cy,w,h);x.fillStyle=col;x.fillRect(cx,cy,3,h);ncol=c.ink;cc=col}
+  else if(S==='soft'){rr(x,cx,cy,w,h,6);x.fillStyle=hexA(col,.9);x.fill();ncol='rgba(0,0,0,.78)';cc='rgba(0,0,0,.38)';fillW=true}
+  // name
+  x.save();x.beginPath();x.rect(cx,cy,w,h);x.clip();
+  x.fillStyle=ncol;x.font=font(c,c.upper?8.5:10,600,c.mono);x.fillText(name,cx+(S==='hatch'?14:S==='swiss'?7:5),cy+10);
+  // content
+  const y0=cy+hd+2,ch=h-hd-5,mid=y0+ch/2,bt0=(b-1)*4,ppbt=w/(l*4);
+  const glow=c.glow&&(S==='trace'||S==='glow'||S==='mono');
+  const strokeTwice=(fn,lwid,colr)=>{if(glow){x.globalAlpha=(S==='mono'?ph:1)*.25;x.lineWidth=lwid*3.2;x.strokeStyle=colr;fn();x.stroke();x.globalAlpha=S==='mono'?ph:1}x.lineWidth=lwid;x.strokeStyle=colr;fn();x.stroke()};
+  if(t.k==='bass'||t.k==='lead'){
+    const notes=[];for(let bb=0;bb<l;bb++){if(t.k==='bass')BASSP.forEach((p,s)=>{if(s%2)notes.push([bb*16+s*2,2,p])});else LEADP.forEach(n=>notes.push([bb*16+n[0],n[1],n[2]]))}
+    const rng=t.k==='bass'?8:13,nh=Math.max(2,Math.min(4,ch/rng));
+    x.fillStyle=cc;notes.forEach(([s,ln,p])=>{const nx=cx+s*ppbt/4,ny=y0+ch-(p/rng)*(ch-nh)-nh;
+      if(S==='trace'||S==='mono'||S==='hatch'){strokeTwice(()=>{x.beginPath();x.moveTo(nx+1,ny+nh/2);x.lineTo(nx+ln*ppbt/4-1,ny+nh/2)},Math.max(1.2,lw.c*.8),cc)}
+      else x.fillRect(nx+.5,ny,ln*ppbt/4-1,nh)});
+  } else {
+    const pts=[];for(let px=0;px<=w;px+=1.5){pts.push([cx+px,env(t.k,bt0+px/ppbt)*ch/2])}
+    if(fillW||S==='outline'||S==='swiss'){x.beginPath();pts.forEach(([px,a],j)=>j?x.lineTo(px,mid-a):x.moveTo(px,mid-a));for(let j=pts.length-1;j>=0;j--)x.lineTo(pts[j][0],mid+pts[j][1]);x.closePath();x.fillStyle=fillW?cc:hexA(col,.55);x.fill()}
+    else{const path=sg=>()=>{x.beginPath();pts.forEach(([px,a],j)=>j?x.lineTo(px,mid-sg*a):x.moveTo(px,mid-sg*a))};strokeTwice(path(1),lw.o,cc);strokeTwice(path(-1),lw.o,cc)}
+  }
+  x.restore();
+  if(sel){x.globalAlpha=1;x.strokeStyle=c.sel;x.lineWidth=lw.c;x.strokeRect(cx+lw.c/2,cy+lw.c/2,w-lw.c,h-lw.c);
+    // caliper (M3): length of the selected clip
+    const yy=cy+h-6,a=cx+6,bq=cx+w-6;x.strokeStyle=c.meas;x.lineWidth=1;line(x,a,yy,bq,yy,1,c.meas);line(x,a,yy-4,a,yy+4,1,c.meas);line(x,bq,yy-4,bq,yy+4,1,c.meas);
+    const s=`${c.upper?'4 BARS':'4 bars'} · ${(4*BAR).toFixed(3)} s`;x.font=font(c,9,600,true);const tw=x.measureText(s).width;x.fillStyle=c.lane;x.fillRect((a+bq)/2-tw/2-4,yy-6,tw+8,12);x.fillStyle=c.meas;x.fillText(s,(a+bq)/2-tw/2,yy+3)}
+  x.restore();
+}
+
+/* ---------- EQ display ---------- */
+const BANDS=[{t:'ls',f:80,g:2},{t:'bell',f:250,g:-3,q:1},{t:'bell',f:2400,g:3,q:.71,sel:1},{t:'hc',f:16000,g:0}];
+const sig=v=>1/(1+Math.exp(-v));
+function eq(f){let s=0;for(const b of BANDS){const o=Math.log2(f/b.f);if(b.t==='ls')s+=b.g*(1-sig(o*2.5));else if(b.t==='bell')s+=b.g*Math.exp(-(o*o)/(2*Math.pow(.6/b.q,2)));else if(b.t==='hc')s+=-24*sig(o*3)}return s}
+function dispGeom(W,H){const x0=10,x1=W-34,y0=12,y1=H-16;return {x0,x1,y0,y1,xf:f=>x0+Math.log10(f/20)/3*(x1-x0),yc:db=>(y0+y1)/2-db/18*((y1-y0)*.44),ys:db=>y1-(db+66)/66*((y1-y0)*.9)}}
+function drawDispStatic(x,c,W,H){
+  const g=dispGeom(W,H),G=c.m.grid,lw=c.lw;
+  x.fillStyle=c.disp;x.fillRect(0,0,W,H);
+  if(c.stars){let s=3;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<90;i++){x.fillStyle=`rgba(220,230,255,${.08+r()*.3})`;x.fillRect(r()*W,r()*H,.9,.9)}}
+  const FR=[50,100,200,500,1000,2000,5000,10000],DB=[12,6,0,-6,-12];
+  if(G==='G1'){FR.forEach(f=>{const xx=Math.round(g.xf(f))+.5;line(x,xx,g.y0,xx,g.y1,lw.g,[100,1000,10000].includes(f)?c.dA:c.dB)});[-18,-12,-6,0,6,12,18].forEach(d=>{const y=Math.round(g.yc(d))+.5;line(x,g.x0,y,g.x1,y,lw.g,d?c.dB:c.dA)})}
+  else if(G==='G2'||G==='G3'){const cw=(g.x1-g.x0)/10,chh=(g.y1-g.y0)/8;
+    if(G==='G3')for(let i=0;i<=50;i++){const xx=Math.round(g.x0+i*cw/5)+.5;line(x,xx,g.y0,xx,g.y1,lw.g,i%5?hexA('#888888',.07):i%10?c.dB:c.dA)}
+    if(G==='G3')for(let j=0;j<=40;j++){const y=Math.round(g.y0+j*chh/5)+.5;line(x,g.x0,y,g.x1,y,lw.g,j%5?hexA('#888888',.07):j%10?c.dB:c.dA)}
+    if(G==='G2'){for(let i=0;i<=10;i++){const xx=Math.round(g.x0+i*cw)+.5;line(x,xx,g.y0,xx,g.y1,lw.g,c.dA,i%10?[1,3]:[])}for(let j=0;j<=8;j++){const y=Math.round(g.y0+j*chh)+.5;line(x,g.x0,y,g.x1,y,lw.g,c.dA,j%8?[1,3]:[])}
+      const cx=Math.round(g.x0+5*cw)+.5,cy=Math.round(g.y0+4*chh)+.5;line(x,cx,g.y0,cx,g.y1,lw.g,c.dA);line(x,g.x0,cy,g.x1,cy,lw.g,c.dA);
+      for(let i=0;i<=50;i++){const xx=Math.round(g.x0+i*cw/5)+.5;line(x,xx,cy-2,xx,cy+2,lw.g,c.dA)}for(let j=0;j<=40;j++){const y=Math.round(g.y0+j*chh/5)+.5;line(x,cx-2,y,cx+2,y,lw.g,c.dA)}}}
+  else if(G==='G4'){FR.forEach(f=>[-12,-6,0,6,12].forEach(d=>{x.fillStyle=c.dA;x.fillRect(g.xf(f)-.7,g.yc(d)-.7,1.4,1.4)}));[100,1000,10000].forEach(f=>{const xx=g.xf(f),y=g.yc(0);line(x,xx-4,y,xx+4,y,lw.g,c.dA);line(x,xx,y-4,xx,y+4,lw.g,c.dA)})}
+  else if(G==='G5'){const y=Math.round(g.yc(0))+.5;line(x,g.x0,y,g.x1,y,lw.g,c.dA)}
+  // axis labels
+  x.font=font(c,9,500,c.mono);x.fillStyle=c.st.phos?c.mut:hexA(c.bright&&c.dir.key!=='ob'&&c.dir.key!=='lg'?'#000000':'#ffffff',.45);
+  (G==='G5'?[100,1000,10000]:FR).forEach(f=>{x.fillText(f>=1000?(f/1000)+(c.upper?'K':'k'):String(f),g.xf(f)+2,g.y1+11)});
+  DB.forEach(d=>x.fillText((d>0?'+':d<0?'−':'')+Math.abs(d),g.x1+6,g.yc(d)+3));
+}
+function drawDispCurve(x,c,W,H){
+  const g=dispGeom(W,H),lw=c.lw,pts=[];
+  for(let px=g.x0;px<=g.x1;px+=2){const f=20*Math.pow(1000,(px-g.x0)/(g.x1-g.x0));pts.push([px,g.yc(eq(f))])}
+  const path=()=>{x.beginPath();pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b))};
+  if(!['hatch','swiss'].includes(c.st.clip)){path();x.lineTo(g.x1,g.yc(0));x.lineTo(g.x0,g.yc(0));x.closePath();x.fillStyle=hexA(c.curve,.09);x.fill()}
+  if(c.glow){x.globalAlpha=.25;path();x.lineWidth=lw.c*3.2;x.strokeStyle=c.curve;x.stroke();x.globalAlpha=1}
+  path();x.lineWidth=lw.c;x.strokeStyle=c.curve;x.stroke();
+  BANDS.forEach((b,i)=>{const bx=g.xf(b.f),by=g.yc(eq(b.f));x.beginPath();x.arc(bx,by,6,0,7);
+    if(b.sel){x.fillStyle=c.sel;x.fill()}else{x.fillStyle=c.disp;x.fill();x.lineWidth=1.2;x.strokeStyle=c.curve;x.stroke()}
+    x.fillStyle=b.sel?'#000':c.curve;x.font=font(c,8,700,true);x.fillText(String(i+1),bx-2.4,by+3);
+    if(b.sel){const s=`${(b.f/1000).toFixed(2)} ${c.upper?'KHZ':'kHz'} · ${noteOf(b.f)} · +${b.g.toFixed(1)} ${c.upper?'DB':'dB'}`;x.font=font(c,9.5,600,true);const tw=x.measureText(s).width;const lx=bx-tw/2,ly=by-14;
+      x.fillStyle=hexA(c.disp[0]==='#'?c.disp:'#000000',.85);x.fillRect(lx-5,ly-10,tw+10,14);x.fillStyle=c.meas;x.fillText(s,lx,ly)}});
+}
+function spectrum(bins,t,lv){
+  const N=bins.length,o=[];
+  for(let i=0;i<N;i++){const f=20*Math.pow(1000,i/(N-1)),l2=Math.log2(f),gs=(c,w)=>Math.exp(-Math.pow(l2-Math.log2(c),2)/(2*w*w));
+    let d=-60+lv.kick*30*gs(55,.8)+lv.bass*26*gs(110,.9)+lv.lead*(18*gs(880,.45)+12*gs(1760,.4)+8*gs(2640,.35))+lv.pad*16*gs(400,1.5)+lv.hat*24*gs(9000,1)+Math.sin(i*1.7+t*9)*1.2+Math.sin(i*.37-t*5)*1.5;
+    d-=Math.max(0,(l2-Math.log2(15000)))*24;
+    o.push(Math.max(d,bins[i]-1.3))}
+  return o;
+}
+
+/* ---------- small svgs ---------- */
+function knob(c,v,col,sz){
+  const s=sz||24,r=s/2,a=(-135+270*v)*Math.PI/180,px=(rad)=>[r+rad*Math.sin(a),r-rad*Math.cos(a)],K=c.st.knob;
+  const arc=(rad,a0,a1)=>{const p0=[r+rad*Math.sin(a0),r-rad*Math.cos(a0)],p1=[r+rad*Math.sin(a1),r-rad*Math.cos(a1)];return `M${p0[0].toFixed(2)} ${p0[1].toFixed(2)}A${rad} ${rad} 0 ${a1-a0>Math.PI?1:0} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`};
+  const A0=-135*Math.PI/180,A1=135*Math.PI/180;let g='';
+  if(K==='arc'){g=`<path d="${arc(r-3,A0,A1)}" stroke="${c.ln}" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="${arc(r-3,A0,a)}" stroke="${col}" stroke-width="2.5" fill="none" stroke-linecap="round"/><line x1="${r}" y1="${r}" x2="${px(r-6)[0]}" y2="${px(r-6)[1]}" stroke="${c.ink}" stroke-width="1.5" stroke-linecap="round"/>`}
+  else if(K==='tick'){for(let i=0;i<=10;i++){const aa=(-135+27*i)*Math.PI/180;g+=`<line x1="${r+(r-1)*Math.sin(aa)}" y1="${r-(r-1)*Math.cos(aa)}" x2="${r+(r-(i%5?3:4.5))*Math.sin(aa)}" y2="${r-(r-(i%5?3:4.5))*Math.cos(aa)}" stroke="${c.mut}" stroke-width="1"/>`}
+    g+=`<circle cx="${r}" cy="${r}" r="${r-6}" fill="${c.pn2}" stroke="${c.ln}"/><line x1="${r}" y1="${r}" x2="${px(r-6)[0]}" y2="${px(r-6)[1]}" stroke="${col}" stroke-width="1.8" stroke-linecap="round"/>`}
+  else if(K==='dot'){g=`<circle cx="${r}" cy="${r}" r="${r-1.5}" fill="${c.pn2}" stroke="${c.ln}"/><circle cx="${px(r-6)[0]}" cy="${px(r-6)[1]}" r="2.3" fill="${col}"/>`}
+  else if(K==='cross'){g=`<circle cx="${r}" cy="${r}" r="${r-3}" fill="none" stroke="${c.ink}" stroke-width="1"/><line x1="1" y1="${r}" x2="${s-1}" y2="${r}" stroke="${c.ink}" stroke-width=".5" stroke-dasharray="3 1.5 1 1.5"/><line x1="${r}" y1="1" x2="${r}" y2="${s-1}" stroke="${c.ink}" stroke-width=".5" stroke-dasharray="3 1.5 1 1.5"/><line x1="${r}" y1="${r}" x2="${px(r-3)[0]}" y2="${px(r-3)[1]}" stroke="${col}" stroke-width="2"/>`}
+  else if(K==='bar'){return `<svg width="28" height="8" aria-hidden="true"><rect x="0" y="3" width="28" height="1" fill="${c.ln}"/><rect x="0" y="2" width="${(28*v).toFixed(1)}" height="3" fill="${col}"/></svg>`}
+  return `<svg width="${s}" height="${s}" aria-hidden="true">${g}</svg>`;
+}
+function pan(c,p,col){
+  const cx=32,cy=27,r=21,th=(1-p)/2*Math.PI,nx=cx+r*Math.cos(th),ny=cy-r*Math.sin(th);
+  const w1=Math.PI*.62,w0=Math.PI*.38;const P1=[cx+r*Math.cos(w1),cy-r*Math.sin(w1)],P0=[cx+r*Math.cos(w0),cy-r*Math.sin(w0)];
+  return `<svg width="64" height="30" aria-hidden="true"><path d="M${cx} ${cy}L${P1[0].toFixed(1)} ${P1[1].toFixed(1)}A${r} ${r} 0 0 1 ${P0[0].toFixed(1)} ${P0[1].toFixed(1)}Z" fill="${hexA(col,.12)}"/><path d="M${cx-r} ${cy}A${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="${c.ln}" stroke-width="2"/><line x1="${cx}" y1="${cy-r-2}" x2="${cx}" y2="${cy-r+3}" stroke="${c.mut}" stroke-width="1"/><line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="${c.ink}" stroke-width="1.6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="2.2" fill="${c.ink}"/></svg>`;
+}
+const LOGO=`<svg width="28" height="28" viewBox="0 0 48 48" aria-label="AudioLab"><defs><linearGradient id="lg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a5f9e"/><stop offset="1" stop-color="#0a2c4f"/></linearGradient></defs><rect x="1" y="1" width="46" height="46" rx="11" fill="url(#lg0)"/><rect x="1.5" y="1.5" width="45" height="45" rx="10.5" fill="none" stroke="rgba(255,255,255,.3)"/><g fill="none" stroke="#f5c84c" stroke-width="2.2"><ellipse cx="24" cy="24" rx="16" ry="6.2"/><ellipse cx="24" cy="24" rx="16" ry="6.2" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="16" ry="6.2" transform="rotate(-60 24 24)"/></g><circle cx="24" cy="24" r="3.2" fill="#f5c84c"/></svg>`;
+const IC={rew:'<path d="M9 3v10M15 3L9 8l6 5z"/>',loop:'<path d="M4 6h8l-2-2M12 10H4l2 2"/>',stop:'<rect x="4" y="4" width="8" height="8"/>',play:'<path d="M5 3l8 5-8 5z"/>',rec:'<circle cx="8" cy="8" r="4.5"/>'};
+const icon=(k,col,fill)=>`<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="${fill?col:'none'}" stroke="${col}" stroke-width="1.5" stroke-linejoin="round">${IC[k]}</svg>`;
+
+/* ---------- build one screen ---------- */
+const live=new Set();
+function build(stage,dkey,ov,label){
+  if(stage._s)live.delete(stage._s);
+  const c=resolve(dkey,ov,S.mode),d=c.dir,st=d.st;
+  const W=1200,th=c.th,arrH=42+5*th,botY=28+arrH,tpY=botY+200,H=tpY+42;
+  const big=stage.classList.contains('big'),scale=big?1:Math.min(1.6,stage.clientWidth/W||1);
+  const k=Math.max(1,Math.min(2,Math.round((devicePixelRatio||1)*scale*2)/2));
+  const el=document.createElement('div');
+  el.className=`scr d-${d.key} l${c.m.labels.slice(1)} n${c.m.density.slice(1)}${c.glass?' glass':''}${c.scan?' scan':''}${c.m.motion==='M2'?' m2 trail':''}${st.bigtime?' big':''}`;
+  el.style.height=H+'px';
+  const vars={bg:c.bg,pn:c.pn,pn2:c.pn2,ln:c.ln,ink:c.ink,mut:c.mut,sel:c.sel,meas:c.meas,play:c.play,rec:c.rec,mute:c.mute,bb:c.bb,bbd:c.bbd,gl:c.gl,disp:c.disp,dockbg:c.glass?c.dockbg:(c.dockbg),dockbd:c.dockbd,phc:c.ph,phw:c.lw.c+'px',br:st.br+'px',ui:'Inter,system-ui,sans-serif',mono:'"JetBrains Mono",ui-monospace,monospace'};
+  for(const[kk,v]of Object.entries(vars))el.style.setProperty('--s-'+kk,v);
+  const tc=c.tracks,ext=st.extra;
+  // headers
+  const hdrs=TRK.map((t,i)=>`<div class="hdr${i===SELT?' sel':''}" style="height:${th}px"><i class="tabc" style="background:${tc[i]}"></i><div class="r1"><span class="num"${st.chan?` style="background:${tc[i]}"`:''}>${st.chan?'CH'+(i+1):i+1}</span>${st.lamps?`<i class="lamp${i===2?' c':''}"></i>`:''}<span class="nm">${t.n}</span></div><div class="r2"><span class="vv">${V(fmtDb(t.vol),'dB')}</span><span class="sp"></span><span class="b mut${i===3?' on':''}">M</span><span class="b">S</span><span class="b rec${i===SELT?' on':''}">R</span></div></div>`).join('');
+  // dock knobs
+  const kn=[['Band','3 · Bell',null,.5],['Freq','2.40','kHz',.62],['Gain','+3.0','dB',.58],['Q','0.71','',.3],['Output','0.0','dB',.5]].map(([lb,v,u,p],i)=>`<div class="kn">${knob(c,p,i===1?c.sel:(st.chan?tc[SELT]:c.curve))}<div class="t">${L(lb)}${u===null?`<span class="v">${v}</span>`:V(v,u)}</div></div>`).join('');
+  // mixer
+  const strip=(t,i)=>{const col=tc[i],fp=dbPos(t.vol)*96;
+    return `<div class="st${i===SELT?' sel':''}"><div class="stn"><i style="background:${col}"></i><span class="nm">${t.n}</span></div><div class="pan">${pan(c,t.pan,col)}</div>
+    <div class="fz"><div class="sc">${[6,0,-6,-12,-24,-40].map(db=>`<span style="top:${(dbPos(db)*96).toFixed(1)}px">${db>0?'+':db<0?'−':''}${Math.abs(db)}</span>`).join('')}</div>
+    <div class="fd"><div class="ff" style="height:${(96-fp).toFixed(1)}px;background:${hexA(col,.5)}"></div><div class="fh" style="top:${(fp-1).toFixed(1)}px"></div></div><i class="ix" style="top:${fp.toFixed(1)}px"></i></div>
+    <div class="sv">${V(fmtDb(t.vol),'dB')}</div><div class="sb"><span class="b mut${i===3?' on':''}">M</span><span class="b">S</span><span class="b rec${i===SELT?' on':''}">●</span></div></div>`};
+  const mfp=dbPos(-1)*96;
+  const master=`<div class="st mst"><div class="stn"><i style="background:${c.ink}"></i><span class="nm">Master</span><span style="margin-left:auto" class="lf">${V('−14.2','LUFS')}</span></div><div class="pan gon"></div>
+    <div class="fz"><div class="sc">${[6,0,-6,-12,-24,-40].map(db=>`<span style="top:${(dbPos(db)*96).toFixed(1)}px">${db>0?'+':db<0?'−':''}${Math.abs(db)}</span>`).join('')}</div>
+    <div class="fd"><div class="ff" style="height:${(96-mfp).toFixed(1)}px;background:${hexA(c.ink[0]==='#'?c.ink:'#aaaaaa',.35)}"></div><div class="fh" style="top:${(mfp-1).toFixed(1)}px"></div></div><i class="ix" style="top:${mfp.toFixed(1)}px"></i></div>
+    <div class="sv">${V('−1.0','dB')}</div><div class="sb"><span class="b">Mono</span><span class="b">Dim</span></div></div>`;
+  // transport extras
+  const xtra={mc:`<span class="xb">MET <b class="met">T+00:00:00.0</b></span><span class="xb">UTC <b class="utc">00:00:00</b></span>`,
+    li:`<span class="xb"><b>48.0</b> kS/s · <b>24</b> bit</span><span class="xb" style="color:${c.play};border-color:${c.play}">RUN</span>`,
+    bp:`<span class="xb">DWG <b>FRACTALS_REMAKE</b> · SHEET <b>1/1</b> · SCALE <b>1 BAR = ${((W-c.hw)/NB).toFixed(1)} PX</b> · REV <b>0.228</b></span>`,
+    ob:`<span class="xb">48 kHz · 24 bit</span>`, ph:`<span class="xb">READY</span>`,
+    lg:`<span class="xb">Kick &amp; Bass → Master → <b>48 kHz · 24 bit · 5.3 ms</b></span>`, sw:'', ic:''}[ext]||'';
+  const meterW=12;
+  el.innerHTML=`
+  <div class="a s-top"><span class="tab">Fractals_remake</span><span class="mut" style="color:var(--s-mut)">+</span><span class="meta">${d.code} ${d.name}${label?' · '+label:''}</span></div>
+  <div class="a s-arr" style="height:${arrH}px"><div class="s-ph" style="height:${arrH}px"></div><div class="s-hdrs" style="width:${c.hw}px;height:${arrH}px"><div class="hh">${L('Tracks')}<span class="v" style="margin-left:auto">5</span></div>${hdrs}</div></div>
+  <div class="a s-bot" style="top:${botY}px"><div class="s-dev"><div class="vt"><i class="pw"></i><span class="nmv">Pro EQ</span><span class="x">×</span></div><div class="disp">
+    <div class="pill l">‹ <span>Air lift</span> ›</div><div class="pill r">${L('Pin')}</div>${st.mbar?`<div class="mbar">Peak <b class="pk">61.4 Hz</b> Crest <b class="cr">9.4 dB</b> Corr <b class="co">+0.82</b></div>`:''}
+    <div class="dock">${kn}</div></div></div>
+    <div class="s-mix">${TRK.slice(0,4).map(strip).join('')}${master}</div></div>
+  <div class="a s-tp" style="top:${tpY}px"><div>${LOGO}</div>
+    <div class="tg">${L('Position')}<span class="v pos">5. 1. 1. 000</span></div>
+    <div class="tb"><span class="b">${icon('rew',c.mut)}</span><span class="b">${icon('loop',c.mut)}</span><span class="b">${icon('stop',c.mut,1)}</span><span class="b play">${icon('play',c.bright||st.phos?'#fff':'#06140c',1)}</span><span class="b">${icon('rec',c.rec,1)}</span></div>
+    <div class="tg">${L('Tempo')}<span>${V('145.00','BPM')}</span></div>
+    <div class="tg">${L('Signature')}<span class="v">4/4</span></div>
+    <div class="tg tm">${L('Time')}<span class="tmv">${V('0:00:00.000','')}</span></div>
+    ${xtra}<span class="sp"></span>
+    <div class="tg">${L('Loudness')}<span class="tlu">${V('−14.2','LUFS')}</span></div>
+    <div class="tg">${L('CPU')}<span>${V('12','%')}</span></div></div>
+  ${S.mode==='lite'?'<div class="badge">Light mode: no glass, no glow</div>':''}`;
+  // canvases
+  const arr=el.querySelector('.s-arr'),[lc,lx]=mkCanvas(W,arrH,k);arr.insertBefore(lc,arr.firstChild);drawLanes(lx,c,W,arrH);
+  const disp=el.querySelector('.disp'),DW=672,DH=186;const [dc,dx]=mkCanvas(DW,DH,k);disp.insertBefore(dc,disp.firstChild);
+  const [sa,sx]=mkCanvas(DW,DH,k);drawDispStatic(sx,c,DW,DH);const [sb,sbx]=mkCanvas(DW,DH,k);drawDispCurve(sbx,c,DW,DH);
+  const meters=[...el.querySelectorAll('.fz')].map((fz,i)=>{const[m,mx]=mkCanvas(meterW,96,k);fz.appendChild(m);return {mx,pk:[-60,-60],col:i<4?tc[i]:c.ink}});
+  const gonEl=el.querySelector('.gon');const[gc,gx]=mkCanvas(100,30,k);gonEl.appendChild(gc);
+  stage.innerHTML='';stage.appendChild(el);
+  const fit=()=>{const sc=big?1:Math.min(1.6,stage.clientWidth/W);el.style.transform=`scale(${sc})`;stage.style.height=(H*sc)+'px';if(big){stage.style.height=H+'px';el.style.position='relative'}};fit();
+  const ph=el.querySelector('.s-ph'),pos=el.querySelector('.pos'),tmv=el.querySelector('.tmv .v'),met=el.querySelector('.met'),utc=el.querySelector('.utc'),tlu=el.querySelector('.tlu .v'),lf=el.querySelector('.lf .v'),pk=el.querySelector('.pk'),cr=el.querySelector('.cr'),co=el.querySelector('.co');
+  const ppb=(W-c.hw)/NB,g=dispGeom(DW,DH);let bins=new Array(96).fill(-70),lastTxt='',lastSlow=-1,lu=-14.2;
+  const ms={sum:0,n:0,out:null};
+  const sObj={stage,visible:false,ms,fit,update(t){
+    const t0=performance.now();
+    const p=VB0+((t/BAR)%NB),bar=Math.floor(p),bt=(p-1)*4,phs=bt%1,s16=(bt*4)%1;
+    ph.style.transform=`translateX(${(c.hw+(p-VB0)*ppb-c.lw.c/2).toFixed(1)}px)`;
+    const lv={kick:act('kick',bar)?Math.exp(-phs*7)*.9:0,bass:act('bass',bar)?(phs>=.5?Math.exp(-(phs-.5)*5)*.75:.18):0,hat:act('hat',bar)?Math.exp(-s16*12)*.45+.05:0,lead:act('lead',bar)?.45+.15*Math.sin(bt*3.1):0,pad:act('pad',bar)?.35+.05*Math.sin(bt*.7):0};
+    const txt=`${bar}. ${Math.floor(phs*4%4)+1|0}`;
+    const b4=Math.floor((p%1)*4)+1,s4=Math.floor(((p%1)*16)%4)+1,tick=Math.floor(((p%1)*64%1)*240);
+    pos.textContent=`${bar}. ${b4}. ${s4}. ${String(tick).padStart(3,'0')}`;
+    const secs=(p-1)*BAR,mm=Math.floor(secs/60),ss=secs%60;tmv.textContent=`0:${String(mm).padStart(2,'0')}:${ss.toFixed(3).padStart(6,'0')}`;
+    if(met){met.textContent=`T+${String(mm).padStart(2,'0')}:${ss.toFixed(1).padStart(4,'0')}`;utc.textContent=new Date().toISOString().slice(11,19)}
+    // meters
+    const levs=[lv.kick,lv.bass,lv.hat,lv.lead];const mst=Math.min(1,Math.sqrt(levs.reduce((a,b)=>a+b*b,0)+lv.pad*lv.pad)*.75);levs.push(mst);
+    meters.forEach((m,i)=>{const x=m.mx,a=levs[i];x.clearRect(0,0,meterW,96);
+      for(let ch=0;ch<2;ch++){const db=a>0?20*Math.log10(a*(ch?.94:1))+(i<4?TRK[i].vol:-1):-90;const yy=dbPos(db)*96;
+        m.pk[ch]=Math.max(db,m.pk[ch]-.6);const py=dbPos(m.pk[ch])*96;const xx=ch*6,w=4;
+        x.fillStyle=hexA(c.ink[0]==='#'?c.ink:'#88ff99',.07);x.fillRect(xx,0,w,96);
+        const M=st.meter;
+        if(M==='bar'){const gg=x.createLinearGradient(0,96,0,0);gg.addColorStop(0,c.play);gg.addColorStop(.45,c.play);gg.addColorStop(.75,c.acc);gg.addColorStop(.85,c.red);x.fillStyle=gg;x.fillRect(xx,yy,w,96-yy)}
+        else if(M==='seg'){for(let s=0;s<24;s++){const sy=96-(s+1)*4;const lit=sy+4>yy;const sdb=s>=21?'r':s>=15?'a':'g';x.fillStyle=lit?(sdb==='r'?c.red:sdb==='a'?(c.dir.key==='ic'?c.acc:'#ffb66c'):(c.dir.key==='ic'?c.ink:c.play)):hexA('#808080',.12);x.fillRect(xx,sy+.5,w,3)}}
+        else if(M==='trace'){const cl=st.chan?m.col:c.ink;if(c.glow){x.globalAlpha=.3;x.fillStyle=cl;x.fillRect(xx-1,yy-1,w+2,97-yy);x.globalAlpha=1}x.fillStyle=cl;x.fillRect(xx+.5,yy,w-1,96-yy)}
+        else if(M==='map'){for(let y=Math.floor(yy);y<96;y+=2){x.fillStyle=magma(1-y/96*.85);x.fillRect(xx,y,w,2)}}
+        else {x.fillStyle=c.ink;x.fillRect(xx+1.25,yy,1.5,96-yy)}
+        x.fillStyle=c.meas;x.fillRect(xx,py,w,1.2)}});
+    // stereo field
+    gx.clearRect(0,0,100,30);gx.strokeStyle=c.ln;gx.lineWidth=1;gx.beginPath();gx.arc(50,29,26,Math.PI,0);gx.stroke();gx.fillStyle=st.phos?c.ink:hexA(c.spec[0]==='#'?c.spec:'#6fa8ff',.75);
+    for(let j=0;j<46;j++){const a=Math.PI/2+(Math.sin(j*12.9898+t*7)*.5)*(.35+lv.pad*.6),r=(.2+Math.abs(Math.sin(j*78.233+t*3)))*22*(.3+mst);gx.fillRect(50+r*Math.cos(a),29-r*Math.sin(a),1.3,1.3)}
+    // display
+    bins=spectrum(bins,t,lv);dx.drawImage(sa,0,0,DW,DH);
+    const SP=st.spec,sc=c.spec;
+    if(SP==='map'){const bw=(g.x1-g.x0)/96;bins.forEach((v,i)=>{const y=g.ys(v);if(y<g.y1){dx.fillStyle=magma((v+66)/66);dx.fillRect(g.x0+i*bw,y,bw+.6,g.y1-y)}})}
+    else{const pth=()=>{dx.beginPath();bins.forEach((v,i)=>{const xx=g.x0+i/95*(g.x1-g.x0),y=Math.min(g.y1,g.ys(v));i?dx.lineTo(xx,y):dx.moveTo(xx,y)})};
+      if(SP==='fill'||SP==='soft'){pth();dx.lineTo(g.x1,g.y1);dx.lineTo(g.x0,g.y1);dx.closePath();if(SP==='fill'){const gg=dx.createLinearGradient(0,g.y0,0,g.y1);gg.addColorStop(0,hexA(sc,.38));gg.addColorStop(1,hexA(sc,.03));dx.fillStyle=gg}else dx.fillStyle=hexA(sc,.22);dx.fill()}
+      if(c.glow&&(SP==='trace'||SP==='mono')){pth();dx.globalAlpha=.25;dx.lineWidth=3.5;dx.strokeStyle=sc;dx.stroke();dx.globalAlpha=1}
+      pth();dx.lineWidth=1;dx.strokeStyle=SP==='fill'?hexA(sc,.75):SP==='thin'?hexA(sc[0]==='#'?sc:'#ffffff',.55):sc;dx.stroke()}
+    dx.drawImage(sb,0,0,DW,DH);
+    if(c.m.motion==='M3'&&S.moving){const ox=DW-92,oy=52,a=t*.6;dx.save();dx.globalAlpha=.35;dx.strokeStyle=c.meas;dx.lineWidth=1;for(let r=0;r<3;r++){dx.beginPath();dx.ellipse(ox,oy,26,8,r*Math.PI/3,0,7);dx.stroke()}
+      dx.fillStyle=c.meas;dx.globalAlpha=.8;const ex=ox+26*Math.cos(a),ey=oy+8*Math.sin(a);dx.beginPath();dx.arc(ex,ey,2,0,7);dx.fill();dx.restore()}
+    // slow read-outs (4 a second)
+    const slow=Math.floor(t*4);if(slow!==lastSlow){lastSlow=slow;lu=lu*.8+(-14.2+(mst-.5)*3)*.2;const ls=(lu<0?'−':'')+Math.abs(lu).toFixed(1);tlu.textContent=ls;lf.textContent=ls;
+      if(pk){let mi=0;bins.forEach((v,i)=>{if(v>bins[mi])mi=i});const f=20*Math.pow(1000,mi/95);pk.textContent=(f>=1000?(f/1000).toFixed(2)+' kHz':f.toFixed(1)+' Hz');cr.textContent=(8+mst*3).toFixed(1)+' dB';co.textContent='+'+(.7+lv.pad*.3).toFixed(2)}}
+    const dt=performance.now()-t0;ms.sum+=dt;ms.n++;
+  }};
+  stage._s=sObj;live.add(sObj);
+  sObj.update(S.moving?performance.now()/1000:13.4*BAR-VB0*BAR);
+  io.observe(stage);
+  return sObj;
+}
+
+/* ---------- loop ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.target._s)e.target._s.visible=e.isIntersecting}),{rootMargin:'100px'});
+let last=0,stillT=(13.4-VB0)*BAR;
+function loop(now){requestAnimationFrame(loop);if(document.hidden||!S.moving)return;if(now-last<32)return;last=now;const t=now/1000;live.forEach(s=>{if(s.visible)s.update(t)})}
+requestAnimationFrame(loop);
+setInterval(()=>{live.forEach(s=>{if(s.ms.out&&s.ms.n){s.ms.out.textContent=`drawing ${(s.ms.sum/s.ms.n).toFixed(2)} ms a frame here`;s.ms.sum=0;s.ms.n=0}})},1500);
+
+/* ---------- page ---------- */
+const dirsEl=document.getElementById('dirs'),jump=document.getElementById('jump');
+DIRS.forEach(d=>{
+  const a=document.createElement('article');a.className='dir';a.id=d.code.toLowerCase();
+  a.innerHTML=`<div class="dhead"><span class="dcode">${d.code}</span><span class="dname">${d.name}${d.star?' <span class="star" aria-label="recommended">★</span>':''}</span><span class="tag">${d.tag}</span><span class="sp"></span>
+   <button class="btn" data-big="${d.key}">Actual size</button><button class="btn" data-pick="${d.code}" aria-pressed="false">Pick ${d.code}</button></div>
+   <div class="stage" data-dir="${d.key}"></div>
+   <div class="info">
+    <div class="wide"><h4>What it is</h4><p>${d.desc}</p></div>
+    <div><h4>What changes from today</h4><p>${d.chg}</p></div>
+    <div><h4>What it keeps</h4><p>${d.keep}</p></div>
+    <div><h4>Its own details</h4><p class="defs"></p></div>
+    <div><h4>Hours of use</h4><p>${d.fat}</p></div>
+    <div><h4>CPU</h4><p>${d.cpu}</p><p class="ms" style="margin-top:4px"></p></div>
+    <div><h4>Drawn from</h4><p class="src">${d.src.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join(' · ')}</p></div>
+   </div>`;
+  a.querySelector('.defs').textContent=DET.map(g=>{const v=d.def[g.id];const o=g.o.find(x=>x[0]===v);return o?`${v} ${o[1]}`:(g.id==='accent'?'own accent (cyan selection)':v)}).join(', ');
+  dirsEl.appendChild(a);
+  const j=document.createElement('a');j.href='#'+a.id;j.textContent=d.code+(d.star?' ★':'');jump.appendChild(j);
+});
+// comparison table
+document.querySelector('#cmp tbody').innerHTML=DIRS.map(d=>`<tr><td><b>${d.code}</b> ${d.name}${d.star?' ★':''}</td><td>${d.colours}</td><td>${d.fat.split('.')[0]}.</td><td>${d.cpu.split(':')[0].split('.')[0]}</td><td class="n" data-ms="${d.key}">…</td></tr>`).join('');
+
+// details
+const detEl=document.getElementById('dets');
+DET.forEach(g=>{const box=document.createElement('div');box.className='dg';box.innerHTML=`<h3>${g.t}</h3>`+g.o.map(([id,t,desc,star])=>`<button class="chip" data-g="${g.id}" data-v="${id}" aria-pressed="false"><b>${id}</b><span>${t}${star?' <span class="star">★</span>':''}</span><small>${desc}</small></button>`).join('');detEl.appendChild(box)});
+const mixSel=document.getElementById('mixbase');mixSel.innerHTML=DIRS.map(d=>`<option value="${d.code}">${d.code} ${d.name}</option>`).join('');
+
+function buildAll(){
+  document.querySelectorAll('.stage[data-dir]').forEach(st=>{const s=build(st,st.dataset.dir,null);s.ms.out=st.parentElement.querySelector('.info .ms');
+    const td=document.querySelector(`td[data-ms="${st.dataset.dir}"]`);const o=s.ms.out;const mo=new MutationObserver(()=>{td.textContent=o.textContent.replace('drawing ','').replace(' here','')});mo.observe(o,{childList:true})});
+  buildMix();
+}
+function buildMix(){const base=(S.pick||'DS7');mixSel.value=base;const s=build(document.getElementById('mixstage'),BYC[base].key,S.ov,'mix preview');s.ms.out=document.getElementById('mixms')}
+function refreshUI(){
+  document.querySelectorAll('[data-pick]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pick===S.pick)));
+  document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',String(S.ov[b.dataset.g]===b.dataset.v)));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===S.mode)));
+  document.querySelectorAll('[data-mo]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.mo==='1')===S.moving)));
+  const det=DET.map(g=>S.ov[g.id]).filter(Boolean);
+  document.getElementById('line').textContent=`DR3 picks: ${S.pick||'(no direction)'}${det.length?' | '+det.join(' '):''}${S.note.trim()?' | note: '+S.note.trim():''}`;
+  document.getElementById('note').value=S.note;
+  save();
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.pick){S.pick=S.pick===b.dataset.pick?null:b.dataset.pick;refreshUI();buildMix()}
+  else if(b.dataset.g){const g=b.dataset.g,v=b.dataset.v;if(S.ov[g]===v)delete S.ov[g];else S.ov[g]=v;refreshUI();buildMix()}
+  else if(b.dataset.mode){S.mode=b.dataset.mode;refreshUI();buildAll()}
+  else if(b.dataset.mo){S.moving=b.dataset.mo==='1';refreshUI();if(!S.moving)live.forEach(s=>s.update(stillT))}
+  else if(b.dataset.big){const st=b.closest('.dir').querySelector('.stage');st.classList.toggle('big');b.textContent=st.classList.contains('big')?'Fit to width':'Actual size';const s=build(st,b.dataset.big,null);s.ms.out=st.parentElement.querySelector('.info .ms')}
+  else if(b.id==='takeall'){S.pick='DS7';S.ov=Object.assign({},STARMIX);refreshUI();buildMix()}
+  else if(b.id==='clear'){S.pick=null;S.ov={};S.note='';refreshUI();buildMix()}
+  else if(b.id==='copy'){const t=document.getElementById('line').textContent,toast=document.getElementById('toast');
+    const ok=()=>{toast.textContent='Copied';setTimeout(()=>toast.textContent='',1800)};
+    const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('line'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast.textContent='Selected: press Cmd+C or Ctrl+C'};
+    try{navigator.clipboard.writeText(t).then(ok,fb)}catch(err){fb()}}
+});
+mixSel.addEventListener('change',()=>{S.pick=mixSel.value;refreshUI();buildMix()});
+document.getElementById('note').addEventListener('input',e=>{S.note=e.target.value;refreshUI()});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>live.forEach(s=>s.fit()),120)});
+const start=()=>{refreshUI();buildAll()};
+(document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve()).then(start);
+})();
+</script>
