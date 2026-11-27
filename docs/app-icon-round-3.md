@@ -107,3 +107,14 @@ In the user's words: "For the big icon round 3, let's go with J3 actually. I lik
 - **New small master** for 64 px and below (`tools/icon-lab/ic4/small.js`): the zoomed, tilted W7 crop redrawn with thin rings (1.0 px at 16, 1.3 at 32, 2.3 at 64) at 90 %, nucleus and electron on the pixel grid, ring edges on pixel centres; zoom 1.3 at 16 to 20 so the crop still reads. Used in `icon.icns` (16 and 32 pt, 1x and 2x), `icon.ico` (16 to 64) and the favicons.
 - Picker group "Dipole field" first: Dipole Field (J3, default), Field Orbits (J4), Porthole Field (J6), Measured Field (J8), Measured Field, Chart Paper (J8 P8), Field Dial (J10), Field Dial, Chart Paper (J10 P8), each with its own small versions at 16, 32, 48. P8's Dark question does not arise: P8 icons are picker choices (a Dock picture), not the bundle icon.
 - Desktop app v0.270 (Mac DMG, Windows installer) on the GitHub release v0.270. Details and renders: `docs/backlog-log.md` "task IC4", `tools/icon-lab/ic4/renders/`.
+
+## The user's picks after IC4 (27 November 2026, 22:37 Brussels)
+
+In the user's words (shortened): "We are picking J3 as our main logo. And we will keep J4 in the background. Let's actually work on J3 and J4 together. I actually can decide which one's better. I do like J4. We'll keep J6 as an extra in the options. Same for J8. And let's use W7 field, that is J9. We'll use that for the 32 pixels, maybe the small one. And let's keep J10 in the options, where you can change it in the settings. We'll keep the animated particles for later. Give me the next round."
+
+- **Main logo: J3** (shipped in v0.270 as the default); **J4 stays close behind**: round 4 refines J3 and J4 side by side so the user can choose between them (the user likes J4).
+- **Small sizes (32 px and below): J9**, the W7 field (W7's crop and tilt with the field centred on its nucleus and cut by the tile edge), replacing IC4's small master; drawn again for 32 and 16 px with clean, thin lines (the round noted J9 leans on the W7 small master at 16 px and is busy at 64 px).
+- **In the icon picker in Settings:** J6, J8 and J10 stay as options (as shipped in IC4), plus J4.
+- **Animated particles:** later.
+- Next: task IC5, round 4 pick page.
+
