@@ -1,1 +1,1 @@
-The About card in the Settings menu now has the new fine atom and, behind it, a small version of one of the five splash drawings, a different one each time Settings opens; the name and the version take the drawing's colours, as on the splash.
+Settings tidied: no more copies inside Settings. The level meter options appear once (Interface, Level meters), Export audio points to Project file for Save, Save as and Open, and the Interface and DAC page's button now takes you to Audio system, where the output device and the Audio devices window are.

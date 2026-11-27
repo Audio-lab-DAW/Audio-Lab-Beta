@@ -3858,3 +3858,26 @@ No app changes: `index.html` and `desktop/` untouched, no version. The plan is `
 - Rules: anchored edit scripts in `tools/feature-lab/ni/`, `NI_`/`ni` prefixes, commands `ni.*` in `SCA`, settings rows in the S4 shape, hooks `NI_HOOKS.<name>`, optional versioned project keys, every measurement on offline renders in a worker or idle slices (never the audio thread), Fractals levels checked every run (reference today: Kick -19.05560 dB, Bass -35.48685 dB at master -10 dB, from AB2 v0.229).
 
 Left: everything in the plan. Next: NI-1a, the "Why is this clipping?" engine.
+
+## 27 November 2026, v0.230: settings step S1, no copies inside Settings (task ST-S1)
+First step of the settings rebuild (`docs/settings-round-1.md`, "Proposed implementation order", S1, no dependencies). The user's picks and answers of 27 November are in the task; S1 needs none of them except C48 (Save, Save as, Open "both, linked": they stay in place and keep one home in Settings, Project file). No other task had work in progress on `index.html` (last release v0.229 at 12:56; the open wip commits of RN4 and NB-N2b touch only `tools/native-lab/`, `native/` and `desktop/native-engine.js`).
+
+### Built
+- **Level meters once in Settings**: the Mixer block on Interface (`#mxsSet`, drawn by `mxsHtml(true)`) no longer has its four Level meters selects; the Level meters block right below it (cards with the live meter, `#mtrSet`) is the one home. The mixer's gear popover keeps its short list for now (`mxsHtml(false)`, in sync as before); S14 turns it into a link.
+- **The hidden old DAC Profile select is gone** (`#dacSel` and `#dacCard` in a `<div hidden>` on Interface and DAC), with the code that only served it: the `DACS` table, `dacCard()`, the `dacSel` handler and the two lines in `cpSync`. The stored value `UI.dac` is kept and still used by "Device profile" (`#ifdProfSel`), which has the same Gryphon and AMS-24 advice (`DEVP`). Nothing visible changed here.
+- **One Audio devices button**: the second one, in the header of Interface and DAC (`#ifdDevs`), is now a link "Change output" (`data-pmgo="audio"`, tooltip) that opens Audio system, the home of the output device and of the one "Audio devices" button (`#findDev`), which still opens the Audio devices window.
+- **Save, Save as, Open once in Settings**: the second row on Export audio is gone, with its click handler (`[data-pf]`, used nowhere else). In its place a link line "Save the project as a .audiolab file: Project file" (tooltips on the line and the link). Project file keeps the three buttons; the logo menu, the tab menu, the shortcuts and the desktop menu are unchanged.
+- **Search**: page words added so the old names still lead somewhere: Interface and DAC "audio devices change output", Project file "save as open audiolab project". Level meters options are found through the block's own headings (Speed, Reading, Peak hold, Colours).
+- **Not touched, on purpose**: the hidden Refraction slider (`setRefr`) and switch (`fxRefr`) sit in Glass & light and Performance, which belong to the glass chain; task G4 removes them with the old glass keys. The doubled "Performance" link also stays with the glass chain.
+- No stored key moved or changed; no migration needed. The audio path is untouched.
+- Code: edit script `tools/edits/taskST_S1.py`, every replacement asserted unique (no new JS block or CSS was needed).
+
+### Tested
+- `tools/ui-tests/taskST_S1.py` (headless Chromium, 54 checks, all pass), normal and Light level, with an older profile (`UI.dac` gryphon, meter speed smooth, RMS, hold 3 s, heat colours, strip width 120, fader design 3, buffer auto, offset 7 ms, keep awake, autosave every 5 minutes): all values come through; the Settings Mixer block has no Level meters list, the Level meters block exists once with its four columns, shows the stored choices and still changes them; the gear popover keeps its four selects in sync; no hidden Profile select or card, Device profile still shows the Gryphon; "Change output" opens Audio system, one Audio devices button in Settings and it opens the window; Export audio has no file buttons and its link opens Project file with Save, Save as and Open, which appear once in Settings; search finds "peak hold", "speed", "level meters", "audio devices", "change output", "profile", "save as", "open", "gryphon"; no console errors.
+- Screenshots looked at, dark and Light: the Mixer block ending at Fader and meter design with Level meters right below, the Interface and DAC header with "Change output" and its tooltip, Export audio with the link line.
+- Existing tests: `setfind.py`, `ifd.py`, `taskD1.py` pass (their only console line is the service worker file the test server does not serve).
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, v0.229 and v0.230 from the repo): Kick -19.05560 dB, Bass -35.48685 dB with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums. Plant, Sampler, Sampler grains and Drum kit differ from run to run on both versions alike (two runs of v0.229 differ by up to 1.8 dB), as before.
+
+### What is left
+S2 (remember the export options and the piano roll options) next, then S3 to S19 in the order of `docs/settings-round-1.md`. Performance and the Glass block stay with the glass chain (G4).
+

@@ -1,7 +1,7 @@
 {
-  "version": "0.229",
-  "sha256": "e3afb68dccec594b84a82f03e484676ef90b241549c4cc23aa12468af0a95a02",
-  "size": 5968094,
+  "version": "0.230",
+  "sha256": "29c9f3fff4839af5792a55f9994afcdf10b079bdd0d89e6b98516e02717fe27b",
+  "size": 5965452,
   "minShell": "0.147.0",
-  "notes": "The About card in the Settings menu now has the new fine atom and, behind it, a small version of one of the five splash drawings, a different one each time Settings opens; the name and the version take the drawing's colours, as on the splash."
+  "notes": "Settings tidied: no more copies inside Settings. The level meter options appear once (Interface, Level meters), Export audio points to Project file for Save, Save as and Open, and the Interface and DAC page's button now takes you to Audio system, where the output device and the Audio devices window are."
 }
