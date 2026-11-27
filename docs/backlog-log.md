@@ -4079,6 +4079,7 @@ No app changes: `index.html` and `desktop/` untouched, no version. Running list:
 
 ### Proven (Linux; headless Chromium 158; app v0.230)
 - **240 of 240 cases bit for bit** at quantum 128 (every preset of the ten devices, extra settings for every mode, four chains). With the system's maths library instead: 231.
+- The same on GitHub's Linux machine, run 46014683118 (Chromium 159): 240 of 240; maths probe 0; 239 of 240 at 32 and 64 frames; system maths 231.
 - The browser's maths: over 400,000 arguments, the engine's functions 0 differences for sin, cos, exp, log10, pow; glibc differs for sin 596, cos 579, exp 262, log10 84,586; pow 0 (it is glibc's own in the browser on Linux).
 - Call sizes 1, 7, 32, 64, 100, 512, 4096 on the 128 grid: 239 of 240 each; the exception is two random-drawing devices in one chain (one shared stream in the web engine, review A2).
 - Quantum 512 (the export's): 156 of 240 web renders differ from 128; native at 512 in 512s 240 of 240; in pieces of 128 or 32, 209 of 240, all differences (but the random chain) in the frames between a quantum's start and the return of sound after more than 3 s of silence, at most 1.5e-12.

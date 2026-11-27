@@ -1,5 +1,5 @@
 {
- "app": "0.229",
+ "app": "0.230",
  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
  "sr": 48000,
  "frames": 312064,
@@ -590,6 +590,601 @@
    "peak": 1.8172165155410767,
    "changed": true
   },
+  "chorus-new": {
+   "sha256": "98f7e9967fe63f88362d2848b1e71a10150939083475fb49a541c5b53adee5c1",
+   "peak": 1.787348747253418,
+   "changed": true
+  },
+  "chorus-classic": {
+   "sha256": "98f7e9967fe63f88362d2848b1e71a10150939083475fb49a541c5b53adee5c1",
+   "peak": 1.787348747253418,
+   "changed": true
+  },
+  "chorus-juno": {
+   "sha256": "99d4ddc44768fe71a360018f3542e5bce9ebe7f1f1bf6694ae66699589677920",
+   "peak": 1.7273138761520386,
+   "changed": true
+  },
+  "chorus-slow": {
+   "sha256": "d7fb3d8506cb5dd66497e1d8e056b28dc2a7dc2b20627393e1c232be493b4ba6",
+   "peak": 1.7887076139450073,
+   "changed": true
+  },
+  "chorus-subtle": {
+   "sha256": "b5ad3793f4ca5592e7c9ac0bf61ae230f46e6f2370bfbb5043407921d5bfe337",
+   "peak": 1.9656274318695068,
+   "changed": true
+  },
+  "chorus-vibe": {
+   "sha256": "f5a8b014059961f3ccd37dc1186aaa3f5d0a7a3a71c85316456e5af5b62fff68",
+   "peak": 1.9809529781341553,
+   "changed": true
+  },
+  "chorus-thick": {
+   "sha256": "45f6403c750f38bd8d95edeea3856c633e15ed20a4294160beb64fcd4910198d",
+   "peak": 1.9086709022521973,
+   "changed": true
+  },
+  "chorus-dub": {
+   "sha256": "3ff58c9ed54ee354d348f0e56c17057e25501a0c45023b37f7762bc96cf206ea",
+   "peak": 1.7252507209777832,
+   "changed": true
+  },
+  "chorus-string": {
+   "sha256": "1394a52d0cf9d6bf1a9120be45052b134396d9bca24fd9bab33cb2b92659e66d",
+   "peak": 1.6702525615692139,
+   "changed": true
+  },
+  "chorus-pad": {
+   "sha256": "bc3c1e12d0574752862baa891b9576addec53926483487a425eb0a42439af81b",
+   "peak": 2.2372562885284424,
+   "changed": true
+  },
+  "chorus-choir": {
+   "sha256": "c8c026dbf53d4371bfb52d9414fcd33ded2e1c99b9b200837e9e3518ca5bbc11",
+   "peak": 1.8007177114486694,
+   "changed": true
+  },
+  "chorus-tape": {
+   "sha256": "e1ad26bf045230713499bfb877e9f3b49d5e42c110c734af13efb49654d0446c",
+   "peak": 1.8447884321212769,
+   "changed": true
+  },
+  "chorus-jet": {
+   "sha256": "986b2e1974093e5c0d13b92ecc6c934220ede7b26b340473d2bb41ef05c87e44",
+   "peak": 1.7370260953903198,
+   "changed": true
+  },
+  "chorus-slowf": {
+   "sha256": "8b7778d3225d15ed2f877981f575503868b2f04b657d4687bc9af1ba22cc0e2e",
+   "peak": 1.787200689315796,
+   "changed": true
+  },
+  "chorus-tzf": {
+   "sha256": "020d21fd5473e1178e032d68c71f9b4a8676390e77a9876742b0156588c816ac",
+   "peak": 1.9789167642593384,
+   "changed": true
+  },
+  "chorus-metal": {
+   "sha256": "5234b8bbc4d8e33dd594728a162ae5380c648bc6747a34a6b3770aea1dd45d9b",
+   "peak": 2.1458513736724854,
+   "changed": true
+  },
+  "chorus-tight": {
+   "sha256": "caabaf1a4f234cf4eb6420a7951ee6af49df3c6fb498b5f014187476d6795122",
+   "peak": 2.4112017154693604,
+   "changed": true
+  },
+  "chorus-rhythm": {
+   "sha256": "a5b08d4b2a19654ddc3cf4331ebbdd3cfa7f0ee5f954a2d11b637fac5e2943b4",
+   "peak": 2.28692364692688,
+   "changed": true
+  },
+  "chorus-dim1": {
+   "sha256": "8c7dab3abfb0c2dbeca7840c7dc6fc5c79d866d58022964fa3b2ea19b382142a",
+   "peak": 1.8463345766067505,
+   "changed": true
+  },
+  "chorus-dim2": {
+   "sha256": "efa56654b3dd9467bacb6cca00221527467ab8580a85d1ba99186ac1dd3846bc",
+   "peak": 2.3951992988586426,
+   "changed": true
+  },
+  "chorus-dim3": {
+   "sha256": "cdb31f435701d602d42ef29e3b1de63f264051150613bb802602eb24e8c1c39f",
+   "peak": 2.0242297649383545,
+   "changed": true
+  },
+  "chorus-space": {
+   "sha256": "79b0cb79c695db29f180d7dcbe4d5e88296092ae79f233f61f6f66d5374125e7",
+   "peak": 1.9455024003982544,
+   "changed": true
+  },
+  "chorus-psy": {
+   "sha256": "1b4c622d9a1b94c3e4ad5d2d23b6ba26a65cf06e41beaedc17cb0444818747fb",
+   "peak": 1.982977271080017,
+   "changed": true
+  },
+  "chorus-psyhat": {
+   "sha256": "101b13ff5a71a61fc445300811d6ea618bc9ab505256595225c294a23f50441c",
+   "peak": 1.9043209552764893,
+   "changed": true
+  },
+  "chorus-psywide": {
+   "sha256": "e92c1c3dfedb3f6c7f1f0e8a51b2d097a27c364abf5b7f450a17db97b6724fea",
+   "peak": 1.9638164043426514,
+   "changed": true
+  },
+  "chorus-x-flanger-tri": {
+   "sha256": "6b3ff1c1824f7bced65439c20c42297ac7b65b35bb5cb1eb76b2578bcf493d47",
+   "peak": 1.7733691930770874,
+   "changed": true
+  },
+  "chorus-x-dimension": {
+   "sha256": "972c9e260d102915f2c9b5d3a6c52cac332b09d2b41d9e0651b843bec1faaf8b",
+   "peak": 2.1801342964172363,
+   "changed": true
+  },
+  "chorus-x-ensemble-fb": {
+   "sha256": "ff8de9f34faea72e19e7daf1772c65307479539a2a5acec52489c3ba20ba6447",
+   "peak": 1.785704255104065,
+   "changed": true
+  },
+  "imager-new": {
+   "sha256": "698cf81e52eed60e46263c616dc01a6b6bbcbaee8f9535f143fbbe75f4033df8",
+   "peak": 2.099090099334717,
+   "changed": true
+  },
+  "imager-nat": {
+   "sha256": "698cf81e52eed60e46263c616dc01a6b6bbcbaee8f9535f143fbbe75f4033df8",
+   "peak": 2.099090099334717,
+   "changed": true
+  },
+  "imager-big": {
+   "sha256": "bbb8fe4ea76fbb40d7b0d0c4d805c156c2f26167aad2651bb1de411e8c111be8",
+   "peak": 1.928188443183899,
+   "changed": true
+  },
+  "imager-air": {
+   "sha256": "132f365b338cd23559bdf8e40cf30341320c0ff0a02d207d68a0d21c2ec518d0",
+   "peak": 2.336045503616333,
+   "changed": true
+  },
+  "imager-vwide": {
+   "sha256": "8e42b6506907026d1f5827a4d4f2317ba3e8f08ceaf4235e7a7af4aa527f26cb",
+   "peak": 1.939206600189209,
+   "changed": true
+  },
+  "imager-pad": {
+   "sha256": "0620849dee4826438124a59d02d9e78e15a94a39d626fe7149d95f3b43e93a60",
+   "peak": 1.9318746328353882,
+   "changed": true
+  },
+  "imager-hp": {
+   "sha256": "ba6f9872a1e76429bc13835c8d8dcd4131ae0836e0785a5227a329c855341614",
+   "peak": 2.044555187225342,
+   "changed": true
+  },
+  "imager-monob": {
+   "sha256": "032f0827ddf4bcf08868794f314ae540567671353033218693d4110f47ae376a",
+   "peak": 2.010180950164795,
+   "changed": true
+  },
+  "imager-monob2": {
+   "sha256": "70816755044d3953befeb4ef886d8388666331890f937a5d2d4766cdbf8f0cbc",
+   "peak": 2.061722755432129,
+   "changed": true
+  },
+  "imager-tight": {
+   "sha256": "90f52222443b48b8915fc3fcc91d20f786b2445f220be7ac57971dc8930b32ce",
+   "peak": 2.0439369678497314,
+   "changed": true
+  },
+  "imager-voc": {
+   "sha256": "f092de2dd9037db1a6878167dfb65e427daf0bb77779e7ee825d4750cd768f87",
+   "peak": 2.0579030513763428,
+   "changed": true
+  },
+  "imager-narrow": {
+   "sha256": "f18dbdda5c210d05e8e113b8f910a8ddddeb572e0c8fdee1a89b5d839b8ca570",
+   "peak": 1.9153242111206055,
+   "changed": true
+  },
+  "imager-mono": {
+   "sha256": "1c035ac6afd1834dbd2539eb431b2b58e45662d0cbb3bc34870ccc0b2b2396a6",
+   "peak": 1.8085726499557495,
+   "changed": true
+  },
+  "imager-kickc": {
+   "sha256": "81b5ff31c11ffe3eab402e33d59d335755f721979391e625aeffed1b96b80ff6",
+   "peak": 1.979514241218567,
+   "changed": true
+  },
+  "imager-mast": {
+   "sha256": "23218aa0ec0b1da7c008b9cac4b440fe18c44ebe7b9653f6aa61dd9985cc1ce7",
+   "peak": 2.0744807720184326,
+   "changed": true
+  },
+  "imager-mastm": {
+   "sha256": "20074aa387daad64a8b6c1eadc871eb33b76e1c918a03762709144992fab1e8c",
+   "peak": 2.017948627471924,
+   "changed": true
+  },
+  "imager-masts": {
+   "sha256": "921e0e7d1348fb03f53a6977435af505a86b269c3bec4a4f48221dbe9feefbbd",
+   "peak": 2.1539719104766846,
+   "changed": true
+  },
+  "imager-fix": {
+   "sha256": "2e46ba194779fd83c2a6a83e2ddff96a882082e30e11b82f813a47fab23a99f7",
+   "peak": 2.145561933517456,
+   "changed": true
+  },
+  "imager-club": {
+   "sha256": "3a924a6b46fe9e35e3befa60ad81c2f097a84840ba9efef3e40be81f81196c55",
+   "peak": 2.3992602825164795,
+   "changed": true
+  },
+  "imager-psymaster": {
+   "sha256": "73d37ef9a9207ce816e0219b1ed991425dbdccb3c09901df44a805e0eaef7f62",
+   "peak": 2.3372411727905273,
+   "changed": true
+  },
+  "imager-psylead": {
+   "sha256": "b05b8e8137c9a394cbb10a779a54b55bf99e34bd055f0b94e29d4b06f54f0b32",
+   "peak": 2.2864785194396973,
+   "changed": true
+  },
+  "imager-x-solo2": {
+   "sha256": "8610fccf10da892f7f8ea8fb439e7dc98d81ba2a3562617f0f1a643495d7a4ec",
+   "peak": 0.6051666736602783,
+   "changed": true
+  },
+  "imager-x-bmono": {
+   "sha256": "ab8f1a3b993d85089243154892d781e1744c57d7dc3c04bec0865df9ef44ad9d",
+   "peak": 2.6238038539886475,
+   "changed": true
+  },
+  "fshift-new": {
+   "sha256": "8fcf207eb3e4f12da49e526bee2879f72a7cb99e5268489e91d1168b67455fe0",
+   "peak": 2.0695972442626953,
+   "changed": true
+  },
+  "fshift-barber": {
+   "sha256": "8fcf207eb3e4f12da49e526bee2879f72a7cb99e5268489e91d1168b67455fe0",
+   "peak": 2.0695972442626953,
+   "changed": true
+  },
+  "fshift-small": {
+   "sha256": "4f81b7bfb2f616012cff5f630f0a71f3d91b12b5d219ae7a0a1a443788171798",
+   "peak": 3.2693898677825928,
+   "changed": true
+  },
+  "fshift-detune": {
+   "sha256": "fd78b86b060e51f7efdd71aea6d15e389af2a416b8fd6495e5b6d8c2dd77b628",
+   "peak": 2.8816113471984863,
+   "changed": true
+  },
+  "fshift-wob": {
+   "sha256": "0af8f3c0e0000bbee142d82457b70a13bf98c0028b94080df678005211c6d307",
+   "peak": 2.9278056621551514,
+   "changed": true
+  },
+  "fshift-up50": {
+   "sha256": "6f5cd11b0630ad0a4c68f3ae48e634a6c085e7ee7fe4f3e8d78e22f53892e415",
+   "peak": 2.898430109024048,
+   "changed": true
+  },
+  "fshift-dn80": {
+   "sha256": "a48cea0123fc15b4227cd2788457373e7faba7fb6c6f72ac98c2d521fc108018",
+   "peak": 2.785714864730835,
+   "changed": true
+  },
+  "fshift-harm": {
+   "sha256": "6ad45382561b5379182067230bb69c06495ad2765dd538cffb9b7991c2e96c3d",
+   "peak": 2.6599369049072266,
+   "changed": true
+  },
+  "fshift-dalek": {
+   "sha256": "63cfd319f4e08f700cafb3388b8b50266d874d388c81191b9fbd614dbcb7871d",
+   "peak": 3.298553466796875,
+   "changed": true
+  },
+  "fshift-bell": {
+   "sha256": "24bbce58d5105039bfc8bde848473ee2f7a0539d03c37579e3dbf94fa54ce96d",
+   "peak": 3.9476101398468018,
+   "changed": true
+  },
+  "fshift-tremolo": {
+   "sha256": "d74ca0d79bbffe00478acab119d6889478f10b4a0ed8e9480609458a33f88a0a",
+   "peak": 2.4601688385009766,
+   "changed": true
+  },
+  "fshift-rmsub": {
+   "sha256": "d0536c8e4c39a5394bea90ca05dfc34b82b6d66e5b5a1d36ba23f6e6c321c582",
+   "peak": 4.026541709899902,
+   "changed": true
+  },
+  "fshift-cyber": {
+   "sha256": "b9720449e6938669324f8cc07f4ddd7d2142a449b8c4c7318c256b5d69f1f3b0",
+   "peak": 2.7617902755737305,
+   "changed": true
+  },
+  "fshift-sweep": {
+   "sha256": "4df5041f7565fd0c0f712635e3b59a10cce96f623b857136832b0657c41c4ffc",
+   "peak": 3.8185572624206543,
+   "changed": true
+  },
+  "fshift-spiral": {
+   "sha256": "89a8d0e8dce8fdbd7d3ca0878992901cb2801f9058ebf4fcbe8cf0f7c5752e41",
+   "peak": 4.472887992858887,
+   "changed": true
+  },
+  "fshift-riser": {
+   "sha256": "fae4451cd6a8d413bff7f1be2db28b1debb14d5f5cbe51c45dd05e282b9264be",
+   "peak": 2.481144428253174,
+   "changed": true
+  },
+  "fshift-both": {
+   "sha256": "dd9093453ad0748575acdf08d78ee4131e8cae7f11833bfb5ae56be7657ef38b",
+   "peak": 3.8215463161468506,
+   "changed": true
+  },
+  "fshift-drone": {
+   "sha256": "740f55c786544a861384680e45de6f7feaee7a22ae7dfdfc10e1671a50a5b874",
+   "peak": 3.5653910636901855,
+   "changed": true
+  },
+  "fshift-phase": {
+   "sha256": "dfd9f07754b1fd9e32fa952eb4a04181880280c25575cb944488c488556fb8c8",
+   "peak": 4.053364276885986,
+   "changed": true
+  },
+  "fshift-psyfx": {
+   "sha256": "0233c8edbb3a55d0f90469aca2c3f09e7e07cfd6eb37cb721c4d4285c9c4a2c7",
+   "peak": 2.4480228424072266,
+   "changed": true
+  },
+  "fshift-psyhat": {
+   "sha256": "5786438314742848f1fd3f9f451d325f5276752e01c2791de8b19678ca0678fe",
+   "peak": 2.9198906421661377,
+   "changed": true
+  },
+  "fshift-x-ring": {
+   "sha256": "d9ab201f50a3eecb9b967bfd41fc9bdeb5b0dd7b70a09f9557e937a144ea63b8",
+   "peak": 2.195399761199951,
+   "changed": true
+  },
+  "fshift-x-both-down-lfo": {
+   "sha256": "b51896a180451a1d1b3c93f15d90ffac102de068a32a530431ee6f28870853b8",
+   "peak": 2.6793360710144043,
+   "changed": true
+  },
+  "fshift-x-negative": {
+   "sha256": "41e24882468e4f1a5ddb7c1fbd2d09f34790963eb62c041d42a498a5e53abc0f",
+   "peak": 1.9394283294677734,
+   "changed": true
+  },
+  "vocoder-new": {
+   "sha256": "1e74f338d9d8cc55d7be86d4277302eefb933c31256b6fbe8fba73e4c32f0331",
+   "peak": 1.6914469003677368,
+   "changed": true
+  },
+  "vocoder-robot": {
+   "sha256": "1e74f338d9d8cc55d7be86d4277302eefb933c31256b6fbe8fba73e4c32f0331",
+   "peak": 1.6914469003677368,
+   "changed": true
+  },
+  "vocoder-daft": {
+   "sha256": "44e5c0da87f4a42be1baee8ac735902749799dabd5fb9a0e34e9f3c3e3c3bb2c",
+   "peak": 1.114352822303772,
+   "changed": true
+  },
+  "vocoder-kraft": {
+   "sha256": "0f86919fcc98b30879a09a52841f0ae3399446a1ad2c915e3b8bafb77a2a47e5",
+   "peak": 2.7425129413604736,
+   "changed": true
+  },
+  "vocoder-talk": {
+   "sha256": "fa072b9e5d365350e66c022c984b219f435eae9c703e2071fc2229d6f19bf40e",
+   "peak": 1.2877581119537354,
+   "changed": true
+  },
+  "vocoder-choir": {
+   "sha256": "f4ef65e6225e7f183c06d5cc983ef6d2e6f2267b5b015b42ec20a5e34166b65a",
+   "peak": 0.7633057832717896,
+   "changed": true
+  },
+  "vocoder-dark": {
+   "sha256": "0d01ffae10feadb6563aefefa99cdf2d5105d70fb9cd5951a6fba3f7fc79eaaa",
+   "peak": 3.1081416606903076,
+   "changed": true
+  },
+  "vocoder-bright": {
+   "sha256": "639b4bea34fe92234214e44e296e2802e0b7de041e6b9345378f0017c8d76c73",
+   "peak": 1.2182103395462036,
+   "changed": true
+  },
+  "vocoder-whisp": {
+   "sha256": "d51b73755bd081ad206c78f8e2f4f93a2dfc5662a63ed5b57ed57eb52d9e868e",
+   "peak": 1.0335676670074463,
+   "changed": true
+  },
+  "vocoder-hoarse": {
+   "sha256": "0aa6de10c170df9a250b298d26be470235c030dadff43494b5b7a2e1024fa1dd",
+   "peak": 1.0834932327270508,
+   "changed": true
+  },
+  "vocoder-ep": {
+   "sha256": "35bd496acf8fa9588fe0a3ed531cd64109a8aab61ca3af30b30a24c69c1601ec",
+   "peak": 0.8323107361793518,
+   "changed": true
+  },
+  "vocoder-cyber": {
+   "sha256": "d90a057ff6bdb7b02b165944978aff20f8a1128a05fda6292e7894963011a12e",
+   "peak": 3.59841251373291,
+   "changed": true
+  },
+  "vocoder-alien": {
+   "sha256": "2d30c3dc7d78cbe74296bee9f0464ce48e215dcf3c2a513a5c8d6ffbf26c9fb1",
+   "peak": 1.2626909017562866,
+   "changed": true
+  },
+  "vocoder-sub": {
+   "sha256": "bf0a3236b33eb2f60d4e7f78fe612b69725f8d4e199cb491c9c9647fc6b1d599",
+   "peak": 2.430098295211792,
+   "changed": true
+  },
+  "vocoder-par": {
+   "sha256": "f581325552b963054f6e5ab4e7b52f14dc0b0586021d9b92fbb90d074f373aa8",
+   "peak": 1.2188541889190674,
+   "changed": true
+  },
+  "vocoder-sib": {
+   "sha256": "a679172f3015c9f82cedc3bccd1c65e2107a2838242d76a800dd16a68ae016fa",
+   "peak": 2.4718682765960693,
+   "changed": true
+  },
+  "vocoder-lush": {
+   "sha256": "35da78ebb6db00fba775ae0bde84edf644db91ac880454618ca5d35e53e7124b",
+   "peak": 0.7251047492027283,
+   "changed": true
+  },
+  "vocoder-psyvox": {
+   "sha256": "31914deae65d3f6a807de218d01bc0a705a95805ce5e16033a87353e9b5508d1",
+   "peak": 1.6346973180770874,
+   "changed": true
+  },
+  "vocoder-psydark": {
+   "sha256": "bd3464391a2d1bbe4ca6184aff9e9017d886882f3ec52f25349c55a058da1583",
+   "peak": 2.066098213195801,
+   "changed": true
+  },
+  "vocoder-x-pulse8": {
+   "sha256": "be8ec63c791e7048aa5cd96efb98542d5262c2999c41a06845ecb5af667c1d03",
+   "peak": 5.161059379577637,
+   "changed": true
+  },
+  "vocoder-x-noise-sib": {
+   "sha256": "5ecdac327a34823f5b9c469d13e379fdc8b520f25ab08911d821adf7b7dbd219",
+   "peak": 1.6687356233596802,
+   "changed": true
+  },
+  "vocoder-x-square32": {
+   "sha256": "2cbf5e27500925e65783c4c3fa3decc3a685b8813cabeeb421ce861c2b1831a8",
+   "peak": 2.27775239944458,
+   "changed": true
+  },
+  "tstop-new": {
+   "sha256": "9a2c8ff1d4a1971c4d7340f865475372e36372eb903ddcf2c248cfb35e082b99",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-end": {
+   "sha256": "9a2c8ff1d4a1971c4d7340f865475372e36372eb903ddcf2c248cfb35e082b99",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-hard": {
+   "sha256": "c79e3c6f5897b6b2f87cd51a09a4d8b0079cf509423ce55a9712805e4fa420e0",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-slow": {
+   "sha256": "f7187b78bf3a3f00aef32eca212a1bddbd3503e68b416c83552b05334171263b",
+   "peak": 2.3803834915161133,
+   "changed": false
+  },
+  "tstop-fill": {
+   "sha256": "9f2c85c1873acf9d81ed6f987eae0f818477522a55b00ac6ff75217534f3504a",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-half": {
+   "sha256": "6b8c357c65924abc19d848f750b3f36fa0d85268a9f94be24f268f9c6343d230",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-half2": {
+   "sha256": "2d0961312ebc30710a42b4747c7c121275a8eb268d65a2862f1c2228f2ea3f42",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-dbl": {
+   "sha256": "2829819339436ca6f2ff84d322c763724eda8cba5a2deb74ebd1099fe79c9db9",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-dbl2": {
+   "sha256": "6022bc51517629c6ce4663d1ee5f249c65567e21dabb22f00e6c9cdde595132f",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-rev": {
+   "sha256": "ad2ddb06eff2979ecf4732cb4c291100c999df573fc3f277eedd7f2ef276f8b5",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-revb": {
+   "sha256": "90c29bfac4201b30392fb367660f61e8b3743fe37171b52a74ac1964bb9083ae",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-st16": {
+   "sha256": "43a629d4314bca3c19ca2a48b02c0e5d1bbda8559c1b0c22c4cecf5dfc3e5ec5",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-st32": {
+   "sha256": "829fd0e790a6276f6236bd0d9046de70131d2bb008575cee5f472de1a789d592",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-st8": {
+   "sha256": "f12ba338c23cc6529e7eea3fb13746d9e88ae3a14e61a18e6da0bc74d9d2338f",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-roll": {
+   "sha256": "7bed3a12e0e96a3b9da9a8cddfd057faa25cba2a335e289d87e5eac11e49993f",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-psyend": {
+   "sha256": "ae140340d86e49952464489eb9a9fbb320454a699de7ef6adc5a0cad19ccce94",
+   "peak": 2.351496458053589,
+   "changed": true
+  },
+  "tstop-psystop": {
+   "sha256": "f7187b78bf3a3f00aef32eca212a1bddbd3503e68b416c83552b05334171263b",
+   "peak": 2.3803834915161133,
+   "changed": false
+  },
+  "tstop-x-hold-rev": {
+   "sha256": "4662ed1435e08c84a9e455103293f5724f5666e8bbb503542e064db23e4b3383",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-x-hold-stutter": {
+   "sha256": "8a0a248b1916a919ec1dfa5c480aac2fd6881786a0e4ff5a282967f3280db850",
+   "peak": 0.9118006229400635,
+   "changed": true
+  },
+  "tstop-x-hold-half": {
+   "sha256": "45de021d8662d06715e30251e7a485f0716eb966dd11b4ad216a759322d387a2",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-x-hold-double": {
+   "sha256": "0ddb23a3f9860d824ca506f2906d0e8606e3d32dcf9bd87b74ee3035bd252bd8",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "tstop-x-hold-tape": {
+   "sha256": "76991178f450033f2a539045bfbb122a05730c32dbd9f47a6ba9e1b4a5a54728",
+   "peak": 1.8356542587280273,
+   "changed": true
+  },
   "chain-drums": {
    "sha256": "56bd6c3cff422d5b0971ac6079b7afc3186e913579cec71a02f15a5a8d7ff3f3",
    "peak": 0.9621788263320923,
@@ -598,6 +1193,16 @@
   "chain-voice": {
    "sha256": "c0f6bc83e8924addd73201b8a85d09d6bb7caab79dc7285e462f3ac84d9d9269",
    "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "chain-space": {
+   "sha256": "35a644bed486a15fb173e66b28892c3bb966c095c4eb48900c2eafae6be8b89c",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "chain-robot": {
+   "sha256": "095b4d3682854b7c0e1bd14e154a13b5e87a1cba0521daebad2de205abd18e8f",
+   "peak": 1.0,
    "changed": true
   }
  }

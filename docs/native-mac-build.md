@@ -233,7 +233,7 @@ The one exception is `chain-robot` (vocoder, tape stop, Bitcrusher): two devices
 
 **Floating-point state (review A6, A7).** `-ffp-contract=off -fno-fast-math` now hold for the whole native tree, not target by target. Every chain sets the web engine's float state when it starts (round to nearest, tiny numbers kept: FTZ and DAZ off on Intel, FZ off on ARM) and puts the caller's back, so a plug-in that leaves flush-to-zero on cannot change AudioLab's devices.
 
-**Checked by:** `tools/native-lab/make_ref_core.py` (the app in headless Chromium: every preset of the ten devices, extra settings for every mode, four chains; 240 cases), `alrender`, `compare_core.py`; `tools/native-lab/wl_node.js` (runs the app's worklet bundle in Node, to trace a difference statement by statement); workflow `native-core.yml` now also runs the maths probe, call sizes 32 and 64, and the system-maths control. On the Mac: queued, no machine yet.
+**Checked by:** `tools/native-lab/make_ref_core.py` (the app in headless Chromium: every preset of the ten devices, extra settings for every mode, four chains; 240 cases), `alrender`, `compare_core.py`; `tools/native-lab/wl_node.js` (runs the app's worklet bundle in Node, to trace a difference statement by statement); workflow `native-core.yml` now also runs the maths probe, call sizes 32 and 64, and the system-maths control. **GitHub's Linux machine, run 46014683118 (Chromium 159): 240 of 240 bit for bit; maths probe 0 differences for all five functions; 239 of 240 at 32 and at 64 frames; 231 with the system's maths; its web renders identical to the ones recorded here.** On the Mac: queued, no machine yet.
 
 ## The research and the review, folded into the stages (27 November 2026)
 
