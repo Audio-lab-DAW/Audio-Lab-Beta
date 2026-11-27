@@ -92,3 +92,7 @@ A later report with the window open: 254,554 blocks at 32 frames (about 170 seco
 - The Zoom AMS-24, once macOS lists it.
 - Kontakt 8, Serum 2, Phase Plant, Kick 3, Melodyne, Scaler 3, SubLabXL and a Steinberg instrument were scanned but not loaded yet.
 - The AMS-24.
+
+## User decision, 27 November 2026 (13:50 Brussels): fold the native Mac research into the engine
+
+Task RN1 wrote `docs/research-native-mac.md` (findings, 16 proposed tasks NR1 to NR16 in section 3, 12 changes for the engine's plan in section 4). Asked what to do with it, the user chose **"Fold them into the native engine"**: task NB adopts the 12 changes of section 4 and works NR1 to NR16 into its own stage order (no separate NR tasks, so two tasks never edit the same engine files). NB: from your next run, read `docs/research-native-mac.md` sections 3 and 4 first, write the new stage order into `docs/native-mac-build.md`, then continue. The same will apply to `docs/research-native-windows.md` (task RN2) for the Windows stages once it is written.
