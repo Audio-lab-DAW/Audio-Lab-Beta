@@ -1,0 +1,44 @@
+{
+  "format": "audiolab.theme",
+  "formatVersion": 1,
+  "id": "user.webb-gold",
+  "name": "Webb gold",
+  "author": "you",
+  "mode": "dark",
+  "colors": {
+    "accent": "#f5c84c",
+    "second": "#b583ff",
+    "tracks": [
+      "#f5c84c",
+      "#b583ff",
+      "#4cc9f0",
+      "#ff7ac8"
+    ]
+  },
+  "background": {
+    "brightness": 22,
+    "tintHue": 262,
+    "tintAmount": 40
+  },
+  "glass": {
+    "level": "engine",
+    "blur": "heavy",
+    "transparency": 70,
+    "edge": 90
+  },
+  "clips": {
+    "opacity": 30,
+    "grid": 60
+  },
+  "layout": {
+    "devicePanel": "small",
+    "mixer": "hidden",
+    "trackHeight": "tall",
+    "show": {
+      "sections": true,
+      "visualizer": true,
+      "assistant": true,
+      "meters": true
+    }
+  }
+}

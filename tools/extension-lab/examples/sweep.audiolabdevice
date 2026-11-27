@@ -1,0 +1,27 @@
+{
+  "format": "audiolab.device",
+  "formatVersion": 1,
+  "id": "user.auto-sweep",
+  "name": "Auto sweep",
+  "kind": "effect",
+  "author": "you",
+  "version": "1.0.0",
+  "params": [
+    {"id": "speed", "name": "Speed", "min": 0.05, "max": 8, "default": 0.4, "unit": "Hz", "curve": "log"},
+    {"id": "centre", "name": "Centre", "min": 200, "max": 5000, "default": 900, "unit": "Hz", "curve": "log"},
+    {"id": "range", "name": "Range", "min": 0, "max": 100, "default": 70, "unit": "%"},
+    {"id": "peak", "name": "Peak", "min": 0.5, "max": 14, "default": 6, "unit": ""}
+  ],
+  "blocks": [
+    {"id": "f", "type": "filter", "mode": "lowpass", "freq": "$centre", "q": "$peak"},
+    {"id": "l", "type": "lfo", "rate": "$speed", "depth": "$centre * $range / 115"}
+  ],
+  "wires": [
+    ["in", "f"],
+    ["f", "out"],
+    ["l", "f.freq"]
+  ],
+  "display": {"type": "spectrum"},
+  "layout": {"style": "dock", "dock": ["speed", "centre", "range", "peak"]},
+  "presets": {}
+}

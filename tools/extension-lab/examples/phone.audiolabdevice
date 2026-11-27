@@ -1,0 +1,31 @@
+{
+  "format": "audiolab.device",
+  "formatVersion": 1,
+  "id": "user.telephone",
+  "name": "Telephone",
+  "kind": "effect",
+  "author": "you",
+  "version": "1.0.0",
+  "params": [
+    {"id": "centre", "name": "Centre", "min": 400, "max": 3000, "default": 1200, "unit": "Hz", "curve": "log"},
+    {"id": "narrow", "name": "Narrow", "min": 0.5, "max": 8, "default": 2.2, "unit": ""},
+    {"id": "grit", "name": "Grit", "min": 0, "max": 100, "default": 60, "unit": "%"},
+    {"id": "level", "name": "Level", "min": -12, "max": 6, "default": -3, "unit": "dB"}
+  ],
+  "blocks": [
+    {"id": "hp", "type": "filter", "mode": "highpass", "freq": "$centre / 2.5"},
+    {"id": "bp", "type": "filter", "mode": "bandpass", "freq": "$centre", "q": "$narrow"},
+    {"id": "sat", "type": "drive", "amount": "$grit"},
+    {"id": "out1", "type": "gain", "gain": "db($level)"}
+  ],
+  "wires": [
+    ["in", "hp"],
+    ["hp", "bp"],
+    ["bp", "sat"],
+    ["sat", "out1"],
+    ["out1", "out"]
+  ],
+  "display": {"type": "spectrum"},
+  "layout": {"style": "dock", "dock": ["centre", "narrow", "grit", "level"]},
+  "presets": {}
+}

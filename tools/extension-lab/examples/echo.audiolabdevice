@@ -1,0 +1,39 @@
+{
+  "format": "audiolab.device",
+  "formatVersion": 1,
+  "id": "user.warm-echo",
+  "name": "Warm echo",
+  "kind": "effect",
+  "author": "you",
+  "version": "1.0.0",
+  "params": [
+    {"id": "time", "name": "Time", "min": 40, "max": 1200, "default": 330, "unit": "ms", "curve": "log"},
+    {"id": "feedback", "name": "Feedback", "min": 0, "max": 90, "default": 48, "unit": "%"},
+    {"id": "tone", "name": "Tone", "min": 300, "max": 12000, "default": 2600, "unit": "Hz", "curve": "log"},
+    {"id": "mix", "name": "Mix", "min": 0, "max": 100, "default": 35, "unit": "%"},
+    {"id": "drive", "name": "Drive", "min": 0, "max": 100, "default": 25, "unit": "%"}
+  ],
+  "blocks": [
+    {"id": "d", "type": "delay", "time": "$time / 1000"},
+    {"id": "lp", "type": "filter", "mode": "lowpass", "freq": "$tone"},
+    {"id": "sat", "type": "drive", "amount": "$drive"},
+    {"id": "fb", "type": "gain", "gain": "$feedback / 100"},
+    {"id": "wet", "type": "gain", "gain": "$mix / 100"}
+  ],
+  "wires": [
+    ["in", "d"],
+    ["d", "lp"],
+    ["lp", "sat"],
+    ["sat", "fb"],
+    ["fb", "d"],
+    ["sat", "wet"],
+    ["wet", "out"],
+    ["in", "out"]
+  ],
+  "display": {"type": "spectrum"},
+  "layout": {"style": "dock", "dock": ["time", "feedback", "tone", "mix"], "more": ["drive"]},
+  "presets": {
+    "slap": ["Slapback",{"time": 95, "feedback": 10, "tone": 6000, "mix": 30, "drive": 10}],
+    "dub": ["Dub",{"time": 375, "feedback": 72, "tone": 1400, "mix": 45, "drive": 55}]
+  }
+}
