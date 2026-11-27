@@ -3338,3 +3338,38 @@ Reading: on the user's Mac in dark mode the app icon had a black background (whi
 
 ### Release
 - Commit on main (no version change, `index.html` untouched, `update-notes.txt` left alone: the note belongs to the program version and there is no new one). Desktop build: see the line below.
+
+## 27 November 2026: task NM1 (a truly native Mac app: plan, plug-in hosting, first tests)
+
+No app changes: `index.html` and `desktop/` were not touched, no version. Plan: `docs/native-mac-plan.md`. Pick page: https://claude.ai/artifact/17AwgeWUCCTaDX1Ct3mmcn . Test app: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-1 .
+
+### Written
+- **`docs/native-mac-plan.md`**: what was read in the app with numbers (31 worklet processors, 42 devices of which 19 are worklets and 16 are built on the browser's own nodes, 32 instruments, 1,238 presets, about 17 windows, 124 settings); four routes with cost in tasks and sources (Swift rewrite 230 to 370; shared C++ engine with native interface 245 to 400; the same engine with the present interface kept, 95 to 150 for the engine; JUCE and its prices); a plug-in hosting chapter (VST3 SDK is MIT since 3.8, a host's duties, folders, Intel-only plug-ins, crash protection and its cost, the device strip, state in the project file, why exports with a plug-in cannot be promised bit-identical, Audio Units, CLAP, and VST2 with its legal limits); the recommendation (route C as the road, B as the destination, C++, no framework for now); five stages that each work on the Mac, with the test that proves the sound at each; what can and cannot be checked without a Mac; distribution without an Apple account.
+- **Assumptions written down** (P1 to P7 on the pick page): instruments and effects; free well-known test plug-ins; own window plus an AudioLab strip; Audio Units then CLAP then VST2; plug-ins inside the engine first; VST2 last; Intel-only plug-ins later.
+
+### Built (`native/`, `tools/native-lab/`, `.github/workflows/native-lab.yml`)
+- **Test A**: `alnative`. The Bitcrusher ported from the worklet `al-crush` (`native/dsp/al_crush.h`), Core Audio device list and an output stream on the HAL (`native/common/coreaudio.cpp`).
+- **Test B**: `alvst3`, a command line VST3 host on Steinberg's SDK 3.8.1 behind a format-neutral interface (`native/host/plugin_api.h`), with scanning in a child process.
+- **Test C**: "AudioLab VST3 test", a small AppKit app (list, load, the plug-in's own window, keys or a test pattern, output device and buffer, a report file).
+- The workflow runs only when started by hand and does not touch `desktop.yml`.
+
+### Tested (workflow run 45933483595 on `macos-15`, a virtual Apple M1; an earlier run 45932930260 passed too)
+- A: 144,000 of 144,000 samples the same bits as the web engine's render (three settings, also with dither and jitter), on Apple Silicon and on Linux x86-64. The Mac's own `pow` and `exp` gave the same numbers as the browser for this device. Building with fused multiply-add allowed made no difference for this device.
+- A: devices listed; default output opened; buffer set to 64 frames; device switched to 96 kHz and back; exclusive use taken and given back. Also on the virtual device BlackHole.
+- B: 6 bundles scanned in child processes, one made to crash on purpose, host alive; Surge XT, Surge XT Effects, mda JX10, Note Expression Synth, ADelay and AGain loaded, played, state saved and restored, export mode, 96 kHz and 32 frames, 0 failed blocks. Surge XT: 19 microseconds per 128-frame block on average. Two fresh copies of Surge XT differ by up to -7.6 dB sample against sample: the measured reason exports with plug-ins cannot be promised identical.
+- C: the app started on the build machine, loaded Surge XT, opened its window (913 x 569), played five seconds with 0 failed blocks and 0 overloads, wrote its report. Screenshot in `docs/native-lab/`.
+- Pick page: no console errors, no sideways scroll at 1280 and 400 px, the picks line fills.
+
+### Not verified
+- Nothing ran on real audio hardware or on an M4. The build machine's devices are virtual and say yes to everything; it reported 6 overloads in one second on its default device right after the buffer change.
+- The test app was never clicked by a hand: the list, the keys, the Buffer menu, a device change while playing, controls in a plug-in's window. The last two layout fixes (plug-in window placement, key hint) were not seen in a picture.
+- No paid plug-in, no plug-in with latency, no side-chain. Vital, Valhalla Supermassive and TAL-NoiseMaker were not put on the build machine (their terms do not allow an automatic download); they are for the user's Mac.
+- The paragraph on rebuilding Chromium's own audio nodes (compressor, convolver) is from knowledge, not checked against Chromium's source.
+
+### Found on the way
+- **Fractals v10 is not in the repository.** The app carries "Fractals remake v6"; v10 exists only as build code in the project doc. "v10 as the only project on a fresh install" needs the file added first (question U5).
+- The repository answers under a new name, `Audio-Lab-Pro-Alpha`; the old address forwards. The desktop app's update addresses still use the old name and work through the forward.
+- The test app is published as a pre-release and not as "latest", so the desktop app's download page and the Windows updater keep pointing at 0.223.0 (checked after publishing).
+
+### Next
+Waiting for the picks line (`NM1 picks: ...`) and, more useful than any answer, the test app's report from the user's Mac. Project doc `claude/audiolab-native-mac-plan.md`.

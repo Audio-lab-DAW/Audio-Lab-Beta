@@ -1,0 +1,415 @@
+<title>AudioLab native Mac</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column in AudioLab's own dark look. Test results first, then the four routes side by side, the stages drawn to scale, then the questions; the picks bar is fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--warn:#f5c84c;--bad:#ff6b6b;--disp:#050507;
+ --f:Inter,system-ui,sans-serif;--fm:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);padding-block:28px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 28px/1.15 var(--f);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--f);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0}
+p{margin:0;max-width:72ch}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+a{color:var(--blue)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:6px 12px;font-weight:500;font-size:12px;white-space:nowrap}
+.btn:hover{border-color:#3a3a45}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+section{display:flex;flex-direction:column;gap:16px}
+.head{display:flex;flex-direction:column;gap:6px}
+header.top{display:flex;flex-direction:column;gap:14px}
+
+/* test results */
+.tests{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.tests>div{background:var(--pn);padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tests .n{font:500 11px var(--fm);color:var(--acc)}
+.tests b{font-weight:600;font-size:14px}
+.tests .big{font:600 22px/1.1 var(--f);font-variant-numeric:tabular-nums}
+.tests .ok{color:var(--acc)}
+.dl{border:1px solid var(--ln);border-left:2px solid var(--blue);background:var(--pn);border-radius:0 10px 10px 0;padding:14px 16px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px}
+.dl ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.dl .col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.dlbtn{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;font-weight:600;border-radius:8px;padding:9px 14px;align-self:flex-start}
+
+/* size */
+.size{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.size div{background:var(--pn);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.size b{font:600 18px/1.2 var(--f);font-variant-numeric:tabular-nums}
+.size i{font-style:normal;color:var(--mut);font-size:12px}
+
+/* routes */
+.routes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+.route{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.route.star{border-color:var(--acc)}
+.route .tag{font:500 11px var(--fm);color:var(--mut)}
+.route.star .tag{color:var(--acc)}
+.route dl{margin:0;display:flex;flex-direction:column;gap:8px}
+.route dt{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.route dd{margin:0}
+.route .cost{font:600 16px var(--f);font-variant-numeric:tabular-nums}
+
+/* stages to scale */
+.scale{display:flex;flex-direction:column;gap:10px;border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:16px}
+.srow{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;align-items:center}
+.srow .nm{display:flex;flex-direction:column;min-width:0}
+.srow .nm b{font-weight:600}
+.srow .nm i{font-style:normal;color:var(--mut);font-size:12px}
+.track{position:relative;height:22px;background:var(--disp);border-radius:4px}
+.bar{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--blue)}
+.bar.hi{background:color-mix(in srgb,var(--blue) 38%,transparent)}
+.bar.done{background:var(--acc)}
+.track span{position:absolute;top:3px;font:500 11px var(--fm);color:var(--ink);white-space:nowrap;padding-left:6px}
+.axis{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px}
+.axis div{position:relative;height:16px}
+.axis span{position:absolute;top:0;font:400 11px var(--fm);color:var(--mut);transform:translateX(-50%)}
+.axis span:first-child{transform:none}
+.stagelist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stage{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.stage .n{font:500 11px var(--fm);color:var(--acc)}
+.stage .lim{color:var(--warn)}
+
+/* the strip mock */
+.strip{border:1px solid var(--ln);border-radius:10px;background:linear-gradient(180deg,#17181e,#111217);padding:12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.strip .id{display:flex;flex-direction:column;gap:2px;min-width:0}
+.strip .id b{font-weight:600} .strip .id i{font-style:normal;font-size:11px;color:var(--mut)}
+.knobs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;min-width:0}
+.knob{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:var(--mut);min-width:0}
+.knob span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dial{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 225deg,var(--acc) calc(var(--v)*270deg),#2a2b33 0 270deg,transparent 0);position:relative}
+.dial::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#15161b}
+.strip .side{display:flex;gap:10px;align-items:center}
+.meter{width:8px;height:44px;border-radius:2px;background:linear-gradient(0deg,var(--acc) 0 62%,#2a2b33 62%)}
+.pre{font-size:11px;border:1px solid var(--ln);border-radius:6px;padding:4px 8px;background:var(--pn2);white-space:nowrap}
+
+/* questions */
+.q{border-top:1px solid var(--ln);padding-top:14px;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:18px}
+.q .ask{display:flex;flex-direction:column;gap:4px;min-width:0}
+.q .id{font:500 11px var(--fm);color:var(--blue)}
+.opts{display:flex;flex-direction:column;gap:6px;min-width:0}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;text-align:left;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:8px 10px}
+.opt:hover{border-color:#3a3a45}
+.opt[aria-pressed=true]{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--pn))}
+.opt .k{font:500 12px var(--fm);color:var(--mut);padding-top:1px}
+.opt[aria-pressed=true] .k{color:var(--blue)}
+.opt .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.opt .t i{font-style:normal;color:var(--mut);font-size:12px}
+.opt .rec{color:var(--acc);font-weight:500}
+textarea.free{width:100%;min-height:54px;background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:8px 10px;resize:vertical;font-size:13px}
+
+/* picks bar */
+.picks{position:fixed;left:0;right:0;bottom:0;background:rgba(14,14,18,.94);border-top:1px solid var(--ln);padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:20}
+.picks>div{max-width:1180px;margin:0 auto;display:flex;gap:8px;align-items:center}
+.picks output{flex:1;min-width:0;font:12px var(--fm);background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:7px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+
+@media (max-width:900px){
+ .routes{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .size{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .strip{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+ .tests,.routes,.stagelist,.dl,.q{grid-template-columns:minmax(0,1fr)}
+ .size{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .srow,.axis{grid-template-columns:minmax(0,1fr)}
+ .axis div:first-child{display:none}
+ .knobs{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .picks>div{flex-wrap:wrap}
+ .picks output{flex-basis:100%}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+ <span class="eyebrow">Task NM1 · pick page</span>
+ <h1>AudioLab as a truly native Mac app</h1>
+ <p>You chose a native Mac app over a finished DMG of the web app, with VST3 plug-ins now and Audio Units, CLAP and VST2 later. This page shows what was tested, the ways to get there with what each gives and costs, the one I recommend, and the questions only you can answer. The full plan with sources is <code>docs/native-mac-plan.md</code> in the repository.</p>
+</header>
+
+<section>
+ <div class="head"><span class="eyebrow">Already proved</span><h2>Three tests, built and run on an Apple Silicon build machine</h2>
+ <p class="mut">The build machine is a virtual M1 with macOS 15, not your M4 and not your DAC. What it can show is that the code is right. What it cannot show is on your Mac, which is what the test app below is for.</p></div>
+ <div class="tests">
+  <div><span class="n">TEST A · SOUND AND CORE AUDIO</span><b>One AudioLab effect, native, against the web engine</b>
+   <span class="big ok">144,000 of 144,000 samples the same</span>
+   <span class="mut">The Bitcrusher was ported from the worklet to C++ and compared bit for bit with the app's own render: three settings, also with dither and jitter. The same program listed the audio devices, opened the output on Core Audio, set a 64-frame buffer, switched the device to 96 kHz and back, and took exclusive use and gave it back. The web engine can do none of those four.</span></div>
+  <div><span class="n">TEST B · VST3 HOST</span><b>A command line host on Steinberg's SDK</b>
+   <span class="big ok">6 of 6 plug-ins loaded and played</span>
+   <span class="mut">Surge XT (instrument), Surge XT Effects, and four of Steinberg's examples: parameters listed, notes played, audio run through, state saved and restored into a new copy, export mode, a switch to 96 kHz and 32 frames while running. Every bundle is scanned in a separate process; one was made to crash on purpose and the host stayed up.</span></div>
+  <div><span class="n">TEST C · THE TEST APP</span><b>"AudioLab VST3 test" for your Mac</b>
+   <span class="big ok">Runs, opens Surge XT's window</span>
+   <span class="mut">A small native window app: finds your VST3 plug-ins, loads one, opens its own window, plays a pattern or your keys through the output you choose. On the build machine it loaded Surge XT, opened its window at 913 × 569 and played with 0 failed blocks.</span></div>
+ </div>
+ <div class="dl">
+  <div class="col">
+   <h3>Try it on your Mac</h3>
+   <p>This is the most useful thing you can do now. It shows which of your plug-ins load, how your Gryphon and your AMS-24 look to a native program, and what a plug-in costs per block on the M4.</p>
+   <a class="dlbtn" href="https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-1">Download the test app</a>
+   <p class="sm mut">The file is AudioLab-VST3-test-mac-arm64.zip. It is not the AudioLab app and it sends nothing anywhere.</p>
+  </div>
+  <div class="col">
+   <h3>Opening an app without an Apple signature</h3>
+   <ol>
+    <li>Double-click the zip, then the app. macOS says it cannot check it. Click Done.</li>
+    <li>Open System Settings, Privacy &amp; Security, scroll to Security. Click Open Anyway next to the app's name, then Open Anyway again, and enter your password.</li>
+    <li>Pick your output at the top, click a plug-in, Load, Open its window, Play test pattern. Try the Buffer menu at 64 and 32.</li>
+    <li>Click Copy report and paste it into the chat.</li>
+   </ol>
+  </div>
+ </div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">How big the app is</span><h2>What a rewrite would have to carry</h2>
+ <p class="mut">Counted in the app's source, version 0.222. The file is 5.8 MB; about 3 MB of it is program code.</p></div>
+ <div class="size">
+  <div><b>31</b><i>audio processors written by AudioLab</i></div>
+  <div><b>42</b><i>devices, 16 of them built on the browser's own audio parts</i></div>
+  <div><b>32</b><i>instruments</i></div>
+  <div><b>1,238</b><i>presets, which move over as they are</i></div>
+  <div><b>17</b><i>windows and sheets, 47 drawing surfaces</i></div>
+  <div><b>124</b><i>settings, 8 themes</i></div>
+ </div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">The routes</span><h2>Four ways to a native app, side by side</h2>
+ <p class="mut">A task is one cloud task of 1 to 3 hours, the kind this project runs. No Mac is in the loop except your own tests and the build machine.</p></div>
+ <div class="routes">
+  <div class="route"><span class="tag">ROUTE A</span><h3>Rewrite everything in Swift</h3>
+   <dl>
+    <dt>What it is</dt><dd>Apple's language and Apple's toolkits for sound and screen, all new.</dd>
+    <dt>Size</dt><dd class="cost">230 to 370 tasks</dd>
+    <dt>You get</dt><dd>Nothing usable until most of it exists.</dd>
+    <dt>Sound</dt><dd>Highest risk. Every line is typed again in a different language.</dd>
+    <dt>Windows</dt><dd>Nothing carries over.</dd>
+   </dl></div>
+  <div class="route"><span class="tag">ROUTE B</span><h3>One C++ engine, native Mac interface</h3>
+   <dl>
+    <dt>What it is</dt><dd>The engine is written once and serves Mac and Windows. The interface is rebuilt in native Mac views.</dd>
+    <dt>Size</dt><dd class="cost">245 to 400 tasks</dd>
+    <dt>You get</dt><dd>Done all at once: nothing until both halves exist.</dd>
+    <dt>Sound</dt><dd>Low risk for AudioLab's own processors: test A gave the same bits.</dd>
+    <dt>Windows</dt><dd>The engine carries over.</dd>
+   </dl></div>
+  <div class="route star"><span class="tag">★ ROUTE C, THEN B</span><h3>The engine first, the interface you have kept on top</h3>
+   <dl>
+    <dt>What it is</dt><dd>The same C++ engine, but AudioLab stays usable the whole way: the engine underneath is replaced first, the screens afterwards.</dd>
+    <dt>Size</dt><dd class="cost">95 to 150 tasks for the engine, then 150 to 250 for the screens</dd>
+    <dt>You get</dt><dd>Something after 8 to 12 tasks, VST3 after 15 to 25 more, then more with every task.</dd>
+    <dt>Sound</dt><dd>Same as B, and each device is compared with the web engine as it moves.</dd>
+    <dt>Windows</dt><dd>The engine carries over; 20 to 30 tasks for Windows devices.</dd>
+   </dl></div>
+  <div class="route"><span class="tag">ROUTE D</span><h3>Build on a framework (JUCE)</h3>
+   <dl>
+    <dt>What it is</dt><dd>A ready layer for audio devices and plug-in hosting on Mac and Windows.</dd>
+    <dt>Size</dt><dd class="cost">Saves about 20 to 35 tasks</dd>
+    <dt>Price</dt><dd>Free up to US$20,000 a year of revenue, then $800 once or $40 a month, $3,500 above $300,000. Or publish AudioLab's source.</dd>
+    <dt>Sound</dt><dd>No help: the engine's arithmetic is AudioLab's own either way.</dd>
+    <dt>Verdict</dt><dd>Not needed for the Mac, since tests A and B ran without it. Kept as the fallback.</dd>
+   </dl></div>
+ </div>
+ <p><b>Said plainly, because you chose "truly native":</b> after the engine has moved, the sound, the devices and the plug-ins are native, and the window is still drawn by the browser inside the app. Only the last stage removes that. It is the largest stage and the one a cloud task can check least, because it cannot see or feel a screen.</p>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">The recommended order</span><h2>Five stages, each one works on your Mac</h2>
+ <p class="mut">Bars are drawn to scale in tasks. The solid part is the low estimate, the faint part reaches the high one.</p></div>
+ <div class="scale" id="scale"></div>
+ <div class="stagelist">
+  <div class="stage"><span class="n">STAGE 1 · 8 TO 12 TASKS</span><h3>Native output</h3>
+   <p>A native engine opens your DAC itself. You pick the device, its sample rate, its buffer, exclusive use and its real format from the app. The web engine still makes the sound and hands it over.</p>
+   <p class="lim">Limit: latency does not drop yet. Playback gets better, live playing not yet.</p></div>
+  <div class="stage"><span class="n">STAGE 2 · 15 TO 25 TASKS</span><h3>VST3 on a plug-in track</h3>
+   <p>A track whose instrument is a VST3, with VST3 effects on it and on the master. The plug-in's own window, a strip in the device chain, its state saved in the project, export. Low latency from day one, since its sound never passes through the browser.</p>
+   <p class="lim">Limit: a VST3 effect on a track the web engine still makes has to wait for stage 3.</p></div>
+  <div class="stage"><span class="n">STAGE 3 · 70 TO 110 TASKS</span><h3>The engine moves</h3>
+   <p>Devices and instruments are ported one by one, each compared with the web engine sample by sample. A track whose whole chain is native runs native. When the last one has moved the browser leaves the audio path: the whole song at 32 or 64 frames, on all cores.</p>
+   <p class="mut">On the way: Fractals plays wholly native as soon as its devices are done.</p></div>
+  <div class="stage"><span class="n">STAGE 4 · 150 TO 250 TASKS</span><h3>The native interface</h3>
+   <p>The screens are rebuilt in native views, window by window, until the browser is gone. The download shrinks from 154 MB today to a few tens and the app starts faster.</p>
+   <p class="lim">Every window needs your eyes: a cloud task can take a screenshot, it cannot feel a drag at 240 Hz.</p></div>
+ </div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Will the sound change?</span><h2>The honest answer, in three parts</h2></div>
+ <ul>
+  <li><b>AudioLab's own processors (19 devices, 10 instruments):</b> the same bits are possible and test A shows it. The engine must be built without merged multiply-and-add instructions and must carry the same maths functions as the browser.</li>
+  <li><b>Devices built on the browser's own audio parts (16 devices, the mixer, both limiters):</b> their arithmetic is Chromium's. It is open and can be rebuilt. Equaliser, gain, pan, delay and shaper should match; the compressor and the convolution reverb are measured and the difference written down per device.</li>
+  <li><b>Third-party plug-ins:</b> no promise is possible. Test B measured it: two fresh copies of Surge XT playing the same notes differ by up to -7 dB sample against sample, because the synth starts its oscillators differently each time. Steinberg's delay and the mda synth came out the same every time. "Same project, same seed, same sound" will hold for AudioLab's own part of a song, and Freeze fixes a plug-in track when you need it fixed.</li>
+ </ul>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Plug-ins in the device chain</span><h2>How a plug-in would sit in AudioLab</h2>
+ <p class="mut">A sketch of the strip from assumption P3: AudioLab's own knobs for eight parameters, a preset menu, a meter, and a button for the plug-in's own window.</p></div>
+ <div class="strip" aria-label="Sketch of a plug-in strip">
+  <div class="id"><b>Surge XT</b><i>Surge Synth Team · VST3</i></div>
+  <div class="knobs" id="knobs"></div>
+  <div class="side"><span class="pre">Init ▾</span><div class="meter"></div><button class="btn" type="button" tabindex="-1">Open window</button></div>
+ </div>
+</section>
+
+<section id="questions">
+ <div class="head"><span class="eyebrow">Your picks</span><h2>Eighteen questions</h2>
+ <p class="mut">★ marks what I recommend or what the scheduling chat assumed. Change any of them. The line at the bottom is what to paste back.</p></div>
+ <div id="qs" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+</div>
+
+<div class="picks"><div><output id="pkLine" aria-label="Your picks line"></output><button class="btn" id="pkStar" type="button">Use the starred picks</button><button class="btn pri" id="pkCopy" type="button">Copy</button></div></div>
+
+<script>
+(function(){
+// ---- stages to scale -------------------------------------------------------------------------
+var stages=[
+ ['Stage 0','The three tests','done',0,3,'done'],
+ ['Stage 1','Native output',8,12],
+ ['Stage 2','VST3 on a plug-in track',15,25],
+ ['Stage 3','The engine moves',70,110],
+ ['Stage 4','The native interface',150,250],
+ ['Windows','Devices and plug-in windows',20,30]
+],MAX=250,sc=document.getElementById('scale'),h='';
+stages.forEach(function(s){
+ var done=s[2]==='done',lo=done?s[4]:s[2],hi=done?s[4]:s[3],label=done?'done in this task':lo+' to '+hi+' tasks';
+ var inside=hi/MAX>0.55;
+ h+='<div class="srow"><div class="nm"><b>'+s[0]+'</b><i>'+s[1]+'</i></div><div class="track">'+
+    (done?'':'<div class="bar hi" style="left:0;width:'+(hi/MAX*100)+'%"></div>')+
+    '<div class="bar'+(done?' done':'')+'" style="left:0;width:'+(lo/MAX*100)+'%"></div>'+
+    '<span style="'+(inside?'left:0':'left:'+(hi/MAX*100)+'%')+'">'+label+'</span></div></div>';
+});
+h+='<div class="axis"><div></div><div>';
+[0,50,100,150,200,250].forEach(function(v){h+='<span style="left:'+(v/MAX*100)+'%'+(v===MAX?';transform:translateX(-100%)':'')+'">'+v+'</span>'});
+h+='</div></div>';
+sc.innerHTML=h;
+
+// ---- strip sketch ----------------------------------------------------------------------------
+var kn=[['Cutoff',.62],['Resonance',.3],['Osc shape',.5],['Sub mix',.18],['Attack',.08],['Release',.44],['FM depth',.27],['Volume',.8]];
+document.getElementById('knobs').innerHTML=kn.map(function(k){return '<div class="knob"><div class="dial" style="--v:'+k[1]+'"></div><span>'+k[0]+'</span></div>'}).join('');
+
+// ---- questions -------------------------------------------------------------------------------
+// [id, question, note, options [key, text, sub], starred key(s), kind]
+var Q=[
+['R1','Which route?','The routes are in the cards above.',[
+  ['a','A: rewrite everything in Swift','230 to 370 tasks, nothing for Windows'],
+  ['b','B: C++ engine and native interface, built together','245 to 400 tasks, nothing usable until late'],
+  ['c','C then B: the engine first, the present interface kept, native screens after','Something that works after every stage'],
+  ['d','D: build on JUCE','Saves 20 to 35 tasks, costs a licence above US$20,000 a year']],'c'],
+['R2','When should the native screens (stage 4) start?','It is the largest stage and needs your eyes on every window.',[
+  ['a','Right after VST3 works, next to the engine work','Fastest to "no browser at all", most of your time'],
+  ['b','Decide when the engine has moved','By then you know how the app feels with native sound'],
+  ['c','Maybe never: if the app feels right at 240 Hz, keep the screens','Native sound, devices and plug-ins; the window stays as it is']],'b'],
+['R3','Own code or a framework under the engine?','Tests A and B were written straight on Core Audio and Steinberg\'s SDK.',[
+  ['a','Own code now, JUCE as the fallback','No licence, no large dependency; more own work for Audio Units and Windows'],
+  ['b','JUCE from the start','Less own code for devices and hosting; licence above US$20,000 a year']],'a'],
+['R4','What comes first?','Both are needed; this is only the order.',[
+  ['a','Native output with device control, then VST3','Your DAC gets exclusive use and its exact rate first'],
+  ['b','VST3 first on a plain output, device control after','Plug-ins sooner, the audiophile settings later']],'a'],
+['R5','When does Windows follow?','The engine is shared; Windows needs its own device layer (WASAPI exclusive, ASIO).',[
+  ['a','After VST3 works on the Mac (stage 2)','Both systems then move together through stage 3'],
+  ['b','After the engine has moved (stage 3)','Mac first all the way, Windows later in one go'],
+  ['c','In step with the Mac from stage 1','Slower on the Mac, never behind on Windows']],'a'],
+['R6','While the screens are still web: which shell?','The system web view on the Mac draws at most 60 frames a second today; your display does 240.',[
+  ['a','Keep the present shell (Electron)','240 Hz works, nothing in the interface changes, the app stays large'],
+  ['b','The system web view','Small app, 60 Hz, a different browser engine than the one everything was tested in']],'a'],
+['P1','Which kinds of plug-ins?','Assumed by the scheduling chat.',[
+  ['a','Instruments and effects','Both from stage 2'],
+  ['b','Instruments first','Effects later'],
+  ['c','Effects first','Instruments later']],'a'],
+['P2','Which plug-ins are the first tests?','The build machine can only install plug-ins whose licence allows an automatic download.',[
+  ['a','Well-known free ones','Surge XT on the build machine; Vital, Valhalla Supermassive and TAL-NoiseMaker on your Mac, where you install them'],
+  ['b','Only the ones I name in U3','They are then tested on your Mac with the test app']],'a'],
+['P3','How does a plug-in show itself?','See the sketch above.',[
+  ['a','Its own window and an AudioLab strip in the device chain','Main parameters, presets and a meter on the strip'],
+  ['b','Its own window only','A plain block in the chain with an Open button'],
+  ['c','The strip only, the window on request','Keeps the look of AudioLab; some plug-ins are hard to use without their window']],'a'],
+['P4','In which order do the other formats follow VST3?','Each is one more piece behind the same interface.',[
+  ['a','Audio Units, CLAP, VST2','Audio Units are what most Mac plug-ins also ship as'],
+  ['b','CLAP, Audio Units, VST2','CLAP is the simplest to add'],
+  ['c','Audio Units, VST2, CLAP','If old plug-ins matter more than new ones']],'a'],
+['P5','Where do plug-ins run?','Scanning is always done in a separate process. This is about running.',[
+  ['a','Inside the engine first, "run apart" per plug-in later','Lowest latency and CPU. A crash stops the sound, not the window or your project'],
+  ['b','Apart from the start','A crash silences one plug-in only. Costs CPU per plug-in and 8 to 12 more tasks before VST3 ships']],'a'],
+['P6','VST2?','Steinberg has given no VST2 licences since 2018. The lawful way left is a header written again from observation, never tested in court, and the name VST may not be used for it.',[
+  ['a','Last, and only if plug-ins I own need it','Named "legacy plug-ins" in the app'],
+  ['b','Leave VST2 out','No legal question at all'],
+  ['c','I need it early','Tell me which plug-ins in U3']],'a'],
+['P7','Plug-ins built only for Intel?','A native Apple Silicon app cannot load them directly; they need a helper that runs under Rosetta.',[
+  ['a','Later, together with "run apart"','The test app tells you which of yours are Intel-only'],
+  ['b','Not needed','Intel-only plug-ins are shown as such and skipped'],
+  ['c','Needed early','The helper comes before the other formats']],'a'],
+['U1','The Apple Developer account (US$99 a year)?','Without it the app opens only through the Open Anyway step. With it: no warning for anyone.',[
+  ['a','I will get it now',''],
+  ['b','When the first native build goes to other people','Nothing in stages 1 to 3 needs it for your own Mac'],
+  ['c','Not for now','']],'b'],
+['U2','App Store or direct download?','The App Store demands a sandbox. A host that loads other makers\' plug-ins fits it badly and approval is not certain.',[
+  ['a','Direct download','The practical way for a plug-in host'],
+  ['b','Direct download now, the App Store looked at later','']],'a'],
+['U4','Which of these matter most on the Mac? Pick any number.','This sets the order inside the stages.',[
+  ['a','Bit-perfect output to the DAC: exclusive use, exact rate and format',''],
+  ['b','Lowest latency when playing and recording',''],
+  ['c','Low CPU, more tracks and devices',''],
+  ['d','My plug-ins',''],
+  ['e','A small app that starts fast',''],
+  ['f','A native look and feel at 240 Hz','']],'abcd','multi'],
+['U5','The Fractals v10 song as the only project on a fresh install?','The v10 file is not in the repository yet; the app still carries v6. It has to be added first, in a task that touches the app.',[
+  ['a','Yes, add v10 and make it the fresh-install song','One small task'],
+  ['b','Later, with the first native build','']],'a'],
+['U3','Which plug-ins do you own that must work?','Names and makers. Paid ones cannot be installed on the build machine, so these are tested on your Mac.',null,'','text']
+];
+var st={},KEY='nm1-picks';
+try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){st={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var qs=document.getElementById('qs');
+qs.innerHTML=Q.map(function(q){
+ var body;
+ if(q[5]==='text')body='<textarea class="free" id="f_'+q[0]+'" placeholder="For example: Serum, FabFilter Pro-Q 3, Valhalla VintageVerb">'+esc(st[q[0]]||'')+'</textarea>';
+ else body=q[3].map(function(o){
+   var star=q[4].indexOf(o[0])>=0;
+   return '<button class="opt" type="button" id="o_'+q[0]+o[0]+'" data-q="'+q[0]+'" data-k="'+o[0]+'" aria-pressed="false"><span class="k">'+q[0]+o[0]+'</span><span class="t"><span>'+(star?'<span class="rec">★ </span>':'')+esc(o[1])+'</span>'+(o[2]?'<i>'+esc(o[2])+'</i>':'')+'</span></button>';
+ }).join('');
+ return '<div class="q"><div class="ask"><span class="id">'+q[0]+'</span><h3>'+esc(q[1])+'</h3><p class="mut sm">'+esc(q[2])+'</p></div><div class="opts">'+body+'</div></div>';
+}).join('');
+function line(){
+ var grp={R:[],P:[],U:[]},txt='';
+ Q.forEach(function(q){
+  var v=st[q[0]];
+  if(q[5]==='text'){if(v&&v.trim())txt=' | '+q[0]+': '+v.trim().replace(/\s+/g,' ');return}
+  grp[q[0][0]].push(q[0]+(v||'?'));
+ });
+ return 'NM1 picks: '+grp.R.join(' ')+' | '+grp.P.join(' ')+' | '+grp.U.join(' ')+txt;
+}
+function paint(){
+ Q.forEach(function(q){
+  if(q[5]==='text')return;
+  q[3].forEach(function(o){var b=document.getElementById('o_'+q[0]+o[0]);b.setAttribute('aria-pressed',(st[q[0]]||'').indexOf(o[0])>=0?'true':'false')});
+ });
+ document.getElementById('pkLine').textContent=line();
+}
+qs.addEventListener('click',function(e){
+ var b=e.target.closest('.opt');if(!b)return;
+ var id=b.dataset.q,k=b.dataset.k,q=Q.filter(function(x){return x[0]===id})[0];
+ if(q[5]==='multi'){var cur=st[id]||'';cur=cur.indexOf(k)>=0?cur.replace(k,''):cur+k;st[id]=cur.split('').sort().join('')}
+ else st[id]=k;
+ save();paint();
+});
+qs.addEventListener('input',function(e){if(e.target.classList.contains('free')){st[e.target.id.slice(2)]=e.target.value;save();document.getElementById('pkLine').textContent=line()}});
+document.getElementById('pkStar').addEventListener('click',function(){Q.forEach(function(q){if(q[5]!=='text')st[q[0]]=q[4]});save();paint()});
+document.getElementById('pkCopy').addEventListener('click',function(){
+ var t=line(),b=this,done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+ var fall=function(){var r=document.createRange();r.selectNodeContents(document.getElementById('pkLine'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Copy on your keyboard';setTimeout(function(){b.textContent='Copy'},2600)};
+ try{navigator.clipboard.writeText(t).then(done,fall)}catch(e){fall()}
+});
+paint();
+})();
+</script>
