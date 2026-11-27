@@ -33,6 +33,8 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .seg button[aria-pressed=true]{background:var(--acc);color:var(--accink)}
 #res,#res2,#live{flex:none}
 #hud.min>:not(h1){display:none}
+#zoom{display:block;width:100%;height:auto;aspect-ratio:372/231;background:var(--well);border-radius:8px;image-rendering:pixelated;flex:none}
+#zbox[hidden]+p{display:none}
 </style>
 
 <div id="stage">
@@ -42,7 +44,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 </div>
 <div id="hud">
   <h1>Glass engine test <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
-  <p>The AudioLab glass engine <span id="ver"></span> over a moving arrangement. The glass draws its own background on the graphics card (lanes, clips as flat rectangles, the playhead); the arrangement canvas is never copied. "Canvas uploads" must stay 0. Press <b>Run</b>, then <b>Find the cost</b>, then <b>Copy tables</b>.</p>
+  <p>The AudioLab glass engine <span id="ver"></span> over a moving arrangement. The glass draws its own background on the graphics card (lanes, clips as flat rectangles, the playhead); the arrangement canvas is never copied. "Canvas uploads" must stay 0. Look at <b>Corners</b> (K1 to K7), then press <b>Run</b> and <b>Copy tables</b>.</p>
   <div class="seg" role="group" aria-label="Glass level" id="lvl">
     <button data-v="glass" aria-pressed="true" title="Lens, quarter-size background, drawn on every frame">Glass</button>
     <button data-v="light" aria-pressed="false" title="The same engine with the lens off, a smaller background, drawn 30 times per second">Light</button>
@@ -60,6 +62,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
   <div class="rowx"><label for="lens">Lens</label><select id="lens"><option value="off">off</option><option value="fine">fine (up to 12 px)</option><option value="apple">Apple (up to 20 px)</option><option value="wide" selected>wide (up to 45 px)</option></select>
     <label for="blur">Blur</label><select id="blur"><option value="light" selected>light</option><option value="regular">regular</option><option value="heavy">heavy</option></select></div>
   <div class="rowx"><label for="face">Face</label><select id="face"><option value="bench" selected>as in the Glass Bench</option><option value="apple">Apple's numbers (0.125 / 1.125)</option></select></div>
+  <div class="rowx"><label for="ksel">Corners</label><select id="ksel"></select></div>
+  <div class="rowx"><label><input type="checkbox" id="zon" checked> zoomed corner (3x)</label><select id="zsel" aria-label="Which corner"><option value="hdrBL" selected>Track headers, bottom left</option><option value="hdrTR">Track headers, top right</option><option value="devTL">Device panel, top left</option><option value="bandTL">Tab band, top left</option><option value="mixTL">Mixer, top left (rounded)</option></select></div>
+  <div id="zbox"><canvas id="zoom" width="372" height="231"></canvas></div>
+  <p>Corners: how the lens of a <b>square</b> panel meets in its corner, and which edges bend. "Free edges" = not the edges on the window border or against another panel. Rounded panels (mixer, menu, pill) look the same with every choice. The star is the engine's default. The zoom stands still while a table runs.</p>
   <div class="rowx"><label><input type="checkbox" id="rt"> Reduce transparency</label><label><input type="checkbox" id="ic"> Increase contrast</label></div>
   <div class="rowx"><button class="b" id="lose">Lose the graphics context</button><button class="b" id="rest">Restore it</button><label><input type="checkbox" id="soft"> allow software drawing</label></div>
   <div id="live">measuring…</div>
@@ -77,6 +83,11 @@ let W=0,H=0,D=1,t0=performance.now(),sceneDirty=true,gA=null,gB=null,cA=null,cB=
    X = switches of "Find the cost" */
 let pm='engine',scn='scroll',drag=true,dmove=false,lensV='wide',fit=false,follow=false,bRect=[0,0,0,0],busy=false,phOn=false;
 const X={noA:false,noB:false,idle:false,no2d:false};
+/* the Corners chooser: number, the engine's corner model, which edges of the docked panels bend ('auto' = the engine finds the free edges, as the app will use it) */
+const KS=[['K1','round','all','as before: rounded lens, every edge'],['K2','blend','all','square, direction turns across the diagonal'],['K3','fade','all','square, bend fades out on the diagonal'],['K4','square','all','square, the two edges add in the corner'],
+  ['K5','blend','auto','as K2, lens only on free edges'],['K6','fade','auto','as K3, lens only on free edges'],['K7','square','auto','as K4, lens only on free edges']],KDEF='K7';
+let kc=KS.find(k=>k[0]===KDEF),zOn=true,zDirty=true,zLast=0,zWhich='hdrBL';
+$('#ksel').innerHTML=KS.map(k=>`<option value="${k[0]}"${k===kc?' selected':''}>${k[0]}${k===kc?' ★':''} ${k[3]}</option>`).join('');
 $('#ver').textContent=AudioLabGlass.version;
 /* layer A = docked glass (under the DOM of the docked panels), layer B = floating glass (over it) */
 const PD=[{k:'hdr',n:'Track headers',L:'A',kind:'docked'},{k:'tr',n:'Transport',L:'A',kind:'docked'},{k:'band',n:'Tab band',L:'A',kind:'docked'},{k:'dev',n:'Device panel',L:'A',kind:'docked'},
@@ -99,7 +110,7 @@ function layout(){const b3=pm==='b3',trH=48,devH=Math.min(262,H*.3|0),bandH=b3?0
   const dw=Math.max(60,Math.min(420,W-250)),dh=Math.max(40,devH-56),dX=Math.min(232,W-dw-12),dY=devTop+38;
   DC.style.cssText=`left:${dX}px;top:${dY}px;width:${dw}px;height:${dh}px`;DC.hidden=!P.dev.on;if(DC.width!==Math.round(dw*D)||DC.height!==Math.round(dh*D)){DC.width=Math.round(dw*D);DC.height=Math.round(dh*D)}drawDisp(0);
   for(const k in P){const p=P[k],e=p.el,on=vis(p);e.hidden=!on;e.style.width=p.w+'px';e.style.height=p.h+'px';e.style.setProperty('--r',p.r+'px');e.style.translate=`${p.x+p.dx}px ${p.y}px`;
-    const g=eng(p);if(g)g.addPanel({id:k,rect:[p.x+p.dx,p.y,p.w,p.h],radius:p.r,kind:p.kind,visible:on,over:p.L==='B'?'flats':'backdrop',z:k==='mix'?0:1})}
+    const g=eng(p);if(g)g.addPanel({id:k,rect:[p.x+p.dx,p.y,p.w,p.h],radius:p.r,kind:p.kind,edges:p.L==='A'?kc[2]:'all',visible:on,over:p.L==='B'?'flats':'backdrop',z:k==='mix'?0:1})}
   /* what floating glass sees where it covers the docked panels: their flat colour and the device display */
   if(gB){for(const k of['hdr','tr','band','dev'])gB.setFlat(k,{rect:[P[k].x,P[k].y,P[k].w,P[k].h],color:FLAT,hidden:!P[k].on});gB.setFlat('disp',{rect:[dX,dY,dw,dh],radius:6,source:DC,hidden:!P.dev.on})}
   placeB()}
@@ -114,7 +125,7 @@ function placeB(){if(!gB)return;const M=34,fl=PD.filter(p=>p.L==='B'&&vis(P[p.k]
   if(r[0]!==bRect[0]||r[1]!==bRect[1]){cB.style.transform=`translate(${r[0]}px,${r[1]}px)`;gB.setOrigin(r[0],r[1])}
   bRect=r}
 const resAll=k=>{gA.resize(W,H,D*k);gB.resize(bRect[2],bRect[3],D*k)};
-function size(){D=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;S.width=Math.round(W*D);S.height=Math.round(H*D);sceneDirty=true;base=0;if(gA){gA.resize(W,H,D);bRect=[0,0,0,0];cB.style.transform='';gB.setOrigin(0,0);gB.resize(W,H,D);feed()}layout();if(pm==='b3'){B3.stop();B3.start()}}
+function size(){zDirty=true;D=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;S.width=Math.round(W*D);S.height=Math.round(H*D);sceneDirty=true;base=0;if(gA){gA.resize(W,H,D);bRect=[0,0,0,0];cB.style.transform='';gB.setOrigin(0,0);gB.resize(W,H,D);feed()}layout();if(pm==='b3'){B3.stop();B3.start()}}
 
 /* ---------- the fake arrangement. Once as a picture (2D canvas, redrawn in full like the app does while it scrolls) ... ---------- */
 const COL=['#e5534b','#4c8dff','#e3b341','#f0883e','#3ecf8e','#b77bff','#45c4d6','#e36fb0'],BG='#0a0a0c';
@@ -142,12 +153,25 @@ function drawDisp(t){const w=DC.width,h=DC.height;dx.fillStyle='#000';dx.fillRec
 const FACE={bench:{sat:1.3,mul:1,add:0},apple:{sat:1.3,mul:1.125,add:.125}},soft=()=>$('#soft').checked||/[?#&]soft/.test(location.href);
 function boot(){for(const g of[gA,gB])if(g)g.destroy();for(const c of[cA,cB])if(c)c.remove();
   const mkc=cls=>{const c=document.createElement('canvas');c.className='full gl '+cls;stage.appendChild(c);return c};cA=mkc('glA');cB=mkc('glB');
-  const o=()=>({allowSoftware:soft(),lens:$('#lens').value,blur:$('#blur').value,level,autoResize:false,
+  const o=()=>({allowSoftware:soft(),corners:kc[1],lens:$('#lens').value,blur:$('#blur').value,level,autoResize:false,
     reduceTransparency:$('#rt').checked?true:null,increaseContrast:$('#ic').checked?true:null,face:FACE[$('#face').value]});
   gA=AudioLabGlass.create(cA,o());gB=AudioLabGlass.create(cB,o());gA.resize(W,H,D);gB.resize(W,H,D);bRect=[0,0,W,H];feed();layout();last2=null;applyX();
-  window.__t={gA,gB,cA,cB,P,S,DC,X,B3,stats,run,find,pieces,boot,layout,setLevel,setSource,setPm,get bRect(){return bRect},get pm(){return pm}}}
+  window.__t={gA,gB,cA,cB,P,S,DC,X,B3,KS,stats,run,find,pieces,boot,layout,setLevel,setSource,setPm,setK,drawZoom,get k(){return kc[0]},get bRect(){return bRect},get pm(){return pm}}}
 function setLevel(v){level=v;both(g=>g.setLevel(v));document.querySelectorAll('#lvl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v))}
 function setSource(v){source=v;$('#srcsel').value=v;feed()}
+function setK(v){const k=KS.find(x=>x[0]===v);if(!k)return;kc=k;$('#ksel').value=v;both(g=>g.setCorners(k[1]));layout();zDirty=true}
+/* the zoomed corner: the arrangement and the glass layer of one corner, three times as large (the panels' DOM border and label are not in it).
+   Drawn at most 12 times per second, never while a table runs, and only when the engine drew or a control changed. */
+const ZC=$('#zoom'),zx=ZC.getContext('2d',{alpha:false});
+function drawZoom(force){const Z=3,w=ZC.width/Z,h=ZC.height/Z,p=P[zWhich.slice(0,-2)],c=zWhich.slice(-2),B=p.L==='B',g=B?gB:gA,cv=B?cB:cA;
+  const x0=c==='TR'?p.x+p.dx+p.w+24-w:p.x+p.dx-(B?16:6),y0=c==='BL'?p.y+p.h+12-h:p.y-16;
+  if(force&&g.mode==='gl')g.debug.draw();
+  zx.imageSmoothingEnabled=false;zx.fillStyle=BG;zx.fillRect(0,0,ZC.width,ZC.height);
+  zx.drawImage(S,x0*D,y0*D,w*D,h*D,0,0,ZC.width,ZC.height);
+  if(pm==='engine'&&vis(p)&&cv.style.display!=='none'){const k=g.info.dpr,o=g.info.origin;zx.drawImage(cv,(x0-o[0])*k,(y0-o[1])*k,w*k,h*k,0,0,ZC.width,ZC.height)}
+  zDirty=false}
+$('#ksel').onchange=e=>setK(e.target.value);$('#zon').onchange=e=>{zOn=e.target.checked;$('#zbox').hidden=!zOn;zDirty=true};$('#zsel').onchange=e=>{zWhich=e.target.value;zDirty=true};
+$('#hud').addEventListener('change',()=>{zDirty=true});$('#hud').addEventListener('click',()=>{zDirty=true});
 /* the faces are drawn again after a canvas was hidden */
 const again=()=>both(g=>g.setAccessibility({}));
 function setPm(v){pm=v;stage.className='m-'+v;if(v==='b3')B3.start();else B3.stop();layout();sceneDirty=true;again()}
@@ -225,7 +249,8 @@ function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&d
   /* what the glass gets: two numbers. Scroll is one uniform, the playhead is one rectangle; the clip list is not touched */
   if(source==='scene')both(g=>{g.setView({scrollX:off});g.setPlayhead(phx==null?null:phx+off)});
   if(dmove&&P.dev.on&&scn!=='still')drawDisp(T);
-  const a=performance.now();if(!X.noA)gA.render(t);if(!X.noB)gB.render(t);cpu+=performance.now()-a;cpuN++}
+  const a=performance.now(),rA=!X.noA&&gA.render(t),rB=!X.noB&&gB.render(t);cpu+=performance.now()-a;cpuN++;
+  if(zOn&&!busy){const dr=zWhich==='mixTL'?rB:rA;if(dr?t-zLast>80:zDirty){drawZoom(!dr);zLast=t}}}
 const kept=(a,b)=>Math.min(100,100*a.length/(a.reduce((x,y)=>x+y,0)/b));
 const snap=()=>({sd:gA.stats.sceneDraws+gB.stats.sceneDraws,up:gA.stats.uploads+gB.stats.uploads,fu:gA.stats.flatUploads+gB.stats.flatUploads,ss:gA.stats.sceneSends+gB.stats.sceneSends,dr:gA.stats.draws+gB.stats.draws,t:performance.now()});
 /* the readout stands still during a run, so the run measures the page and not its own readout */
@@ -237,7 +262,7 @@ setInterval(()=>{if(busy)return;const s=stats(),n=snap();
   if(s)$('#live').textContent=`${s.fps.toFixed(0)} fps · frames delivered ${base?kept(ring,base).toFixed(0):'?'} % of ${base?(1000/base).toFixed(0):'?'} Hz\nmedian ${s.med.toFixed(2)} ms   95% ${s.p95.toFixed(2)} ms   worst ${s.worst.toFixed(1)} ms\nper second: background drawn on GPU ${rate.sd.toFixed(0)} · canvas uploads ${rate.up.toFixed(0)} (displays ${rate.fu.toFixed(0)}) · clip lists sent ${rate.ss.toFixed(0)} · face redraws ${rate.dr.toFixed(0)}\nengine calls ${cpuAvg.toFixed(3)} ms per frame (CPU side)\ndocked layer: ${st(gA)} · floating layer: ${st(gB)}\n${W}x${H} @ ${D}x = ${(S.width*S.height/1e6).toFixed(1)} MP · floating canvas ${gB.info.width}x${gB.info.height}`},500);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)),set=(id,v)=>{const e=$(id);if(e.type==='checkbox')e.checked=v;else e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}))};
 function head(){let ren='?';try{const g=gA.gl,gi=g&&g.getExtension('WEBGL_debug_renderer_info');if(gi)ren=g.getParameter(gi.UNMASKED_RENDERER_WEBGL)}catch(e){}
-  return `${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · mixer moving: ${drag} · display moving: ${dmove} · floating canvas fitted: ${fit}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · lens ${$('#lens').value} · blur ${$('#blur').value} · engine ${AudioLabGlass.version}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n`}
+  return `${W}x${H} @ ${D}x (${(S.width*S.height/1e6).toFixed(1)} MP) · mixer moving: ${drag} · display moving: ${dmove} · floating canvas fitted: ${fit}\npanels: ${PD.filter(p=>P[p.k].on).map(p=>p.k).join(' ')} · lens ${$('#lens').value} · blur ${$('#blur').value} · corners ${kc[0]} · engine ${AudioLabGlass.version}\n${ren}\n${(navigator.userAgent.match(/(Chrome|Version|Firefox|Electron)\/[\d.]+/g)||[]).join(' ')}\n`}
 
 /* ---------- the two tables. A row = a name and the switches it sets; each switch gives back how to undo it. ---------- */
 const M={

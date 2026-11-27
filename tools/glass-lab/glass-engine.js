@@ -1,4 +1,4 @@
-/* AudioLab glass engine (tasks G2, G2b and G2c). Plain JS, no build step, no dependencies.
+/* AudioLab glass engine (tasks G2, G2b, G2c and G2d). Plain JS, no build step, no dependencies.
    One WebGL2 canvas. The engine draws its own backdrop on the GPU: lane backgrounds, clips as flat rectangles, the playhead,
    straight into a quarter-size target (one instanced draw call), then one dual-Kawase pyramid, then every glass surface as one quad in one shader.
    No canvas is uploaded on this path. A small (quarter-size) copy of a canvas is the fallback and the route for other sources (piano roll, device displays).
@@ -6,10 +6,11 @@
    Use: const g = AudioLabGlass.create(canvas, opts); g.setScene({lanes, clips, playheadX, scrollX, zoom, rect}); g.addPanel({id, rect, radius, kind}); g.render();
         per frame: g.setPlayhead(x) / g.setView({scrollX, zoom}) / g.updatePanel(id, {rect}); g.render(t);
         small canvas: g.setOrigin(x, y) when the canvas does not start at the top left of the space the rectangles are given in (2.1)
+        corners and edges (2.2): a panel with square corners gets a square lens; a docked panel bends only along its free edges (panel option edges)
    Docs: docs/glass-engine-module.md */
 (function (root) {
   'use strict';
-  var VERSION = '2.1.0';
+  var VERSION = '2.2.0';
   /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
   var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
   /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
@@ -19,8 +20,10 @@
   var LEVELS = { glass: { base: 4, cut: 1, lens: true, rate: 0 }, light: { base: 8, cut: 2, lens: false, rate: 30 }, solid: { base: 4, cut: 1, lens: false, rate: 0, st: true } };
   var QCOMPAT = { 3: 'glass', 2: 'glass', 1: 'light', 0: 'solid', high: 'glass', medium: 'glass', low: 'light', 'static': 'solid' };
   /* kinds: shadow = strength (0 none), tint = how much panel colour is mixed in, fixed = does not move (lets the blur skip the area not under glass) */
+  /* edges (2.2) = which edges carry the lens: 'all', 'none', any of the letters t r b l, or 'auto' = only the free edges: not the ones that lie on the
+     border of the window or against another fixed panel (a rim there bends content the user never sees enter) */
   var KINDS = {
-    docked: { shadow: 0, tint: 0.5, fixed: true },
+    docked: { shadow: 0, tint: 0.5, fixed: true, edges: 'auto' },
     window: { shadow: 1, tint: 0.5 },
     sheet: { shadow: 1, tint: 0.6 },
     menu: { shadow: 1, tint: 0.6 },
@@ -39,19 +42,42 @@
   var SDF = 'float sd(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}';
   /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
      shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity */
-  var FS_GLASS = '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr;in vec2 p;out vec4 o;' + SDF +
+  /* THE LENS FIELD (2.2). Two shapes, chosen per panel by the uniform sq (one branch on a uniform, the same for every pixel of a panel):
+     sq 0, ROUNDED panels: as before. The lens has its own distance field with a corner radius of at least the band, so the bending direction turns
+       smoothly around the corner and never flips along the corner diagonal.
+     sq 1, SQUARE panels (and panels that bend only along some edges): no arc. dp = how far the pixel is from its nearer vertical and its nearer horizontal
+       edge; e = 1 where that edge carries the lens (ed = top, right, bottom, left). Three ways to join two edges in a corner, picked when the program is built:
+       square: each edge bends along its own axis by the usual profile, and in the corner square the two bends simply add. The band runs straight into the
+               corner on both edges, and because x is moved only by the vertical edge and y only by the horizontal one, nothing can jump on the diagonal.
+       blend:  the nearest edge bends; its direction turns to the other edge's across the diagonal within 4 px (a smooth minimum of the two distances).
+       fade:   the nearest edge bends; the bend goes to nothing on the diagonal (within a third of the band on either side).
+     One texture lookup per pixel in every case, as before; the square shapes need no length() and no division by it. */
+  var KF = 'float kf(float t){float u=1.-clamp(t,0.,1.);return 1.-sqrt(max(0.,1.-u*u));}';
+  var CORNER = {
+    square: 'dv=sg*e*vec2(kf(dp.x/band),kf(dp.y/band));',
+    blend: 'vec2 a=mix(vec2(1e5),dp,e);float s=4.*dpr,h=clamp(.5+.5*(a.y-a.x)/s,0.,1.);dv=sg*normalize(vec2(h,1.-h))*kf((mix(a.y,a.x,h)-s*h*(1.-h))/band);',
+    fade: 'vec2 a=mix(vec2(1e5),dp,e);float f=smoothstep(0.,band/3.,abs(a.x-a.y));dv=a.x<a.y?vec2(sg.x*kf(a.x/band)*f,0.):vec2(0.,sg.y*kf(a.y/band)*f);'
+  };
+  CORNER.round = CORNER.square;   /* 'round' = every panel takes the rounded shape (engine 2.1's look); the program is the same, sq is never set */
+  /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
+     shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity; sq, ed = the lens field (above) */
+  function fsGlass(model) {
+    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq;in vec2 p;out vec4 o;' + SDF + KF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.),sh=0.;' +
     'if(shd.z>0.){float ds=sd(l-vec2(0.,shd.x),hb,rad);sh=shd.z*(1.-smoothstep(-shd.y,shd.y,ds));}' +
     'if(a<=0.){if(sh<.003)discard;o=vec4(0.,0.,0.,sh*md.y);return;}' +
-    /* lens field: own corner radius of at least the band, so the bending direction never flips along a corner diagonal */
-    'float R=min(max(rad,band),min(hb.x,hb.y));vec2 q=abs(l)-hb+R,sg=vec2(l.x<0.?-1.:1.,l.y<0.?-1.:1.),n;float dl;' +
+    'vec2 sg=vec2(l.x<0.?-1.:1.,l.y<0.?-1.:1.),dv;float lit=.7071;' +
+    'if(sq>.5){vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l);' + CORNER[model] + '}else{' +
+    'float R=min(max(rad,band),min(hb.x,hb.y));vec2 q=abs(l)-hb+R,n;float dl;' +
     'if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}' +
+    'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}' +
     'vec3 c;if(md.x>.5){c=tint.rgb+(fract(sin(dot(floor(p),vec2(12.9898,78.233)))*43758.5453)-.5)*.022;}else{' +
-    'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));vec2 sp=p-n*k*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
+    'vec2 sp=p-dv*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
     'float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,face.x)*face.y+face.z;c=mix(c,tint.rgb,tint.a);}' +
-    'float rim=1.-smoothstep(0.,rimp.x,-d),lit=abs(dot(n,vec2(-.7071,-.7071)));c+=rim*(rimp.y+rimp.z*lit);' +
+    'float rim=1.-smoothstep(0.,rimp.x,-d);c+=rim*(rimp.y+rimp.z*lit);' +
     'c=mix(c,vec3(1.),rimp.w*(1.-smoothstep(dpr-.5,dpr+.5,-d)));' +
     'float al=a*md.y;o=vec4(c*al,al+sh*md.y*(1.-a));}';
+  }
   /* a flat picture (a colour or a canvas) put on top of the backdrop before blurring: what a floating glass sees where it covers DOM */
   var FS_FLAT = '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec4 rc,col;uniform float rad,aa,useT;in vec2 p;out vec4 o;' + SDF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float a=clamp(.5-sd(l,hb,rad)/aa,0.,1.);vec4 c=useT>.5?vec4(texture(t,(p-rc.xy)/rc.zw).rgb,col.a):col;o=vec4(c.rgb*c.a*a,c.a*a);}';
@@ -108,6 +134,9 @@
       backdropColor: o.backdropColor || [0.039, 0.039, 0.047], /* where the backdrop picture does not reach */
       face: { sat: 1.3, mul: 1, add: 0 },
       rim: { width: 1.6, base: 0.06, lit: 0.3 },
+      corners: o.corners in CORNER ? o.corners : 'square',       /* how a square panel's lens meets in the corner: 'square' (default), 'blend', 'fade', or 'round' (2.1's look) */
+      squareBelow: o.squareBelow != null ? +o.squareBelow : 8,  /* panels with a corner radius under this many px count as square */
+      bounds: o.bounds ? rectOf(o.bounds) : null,              /* the window, for edges:'auto' (default: the canvas) */
       regionCull: o.regionCull !== false,
       allowSoftware: !!o.allowSoftware,
       autoResize: o.autoResize !== false,
@@ -123,7 +152,7 @@
     var gl = null, prog = null, vao = null, mode = 'none', reason = '', destroyed = false;
     var W = 0, H = 0, D = 1, OX = 0, OY = 0, level = 'glass', LV = LEVELS.glass;
     var userRate = o.backdropRate != null ? +o.backdropRate : null, dbg = { aa: true, freeze: false };
-    var panels = new Map(), order = [], seq = 0, flats = new Map();
+    var panels = new Map(), order = [], seq = 0, flats = new Map(), edDirty = true, iv = [];
     var kind = 'none';   /* where the backdrop comes from: 'scene' (drawn on the GPU), 'copy' (a small copy of a canvas), 'none' */
     var scene = null, sVao = null, sBuf = null, geomDirty = false, sceneDirty = false, lastScene = -1e9;
     var src = null, srcRect = null, srcH = { tex: null, q: null, qx: null }, srcReady = false, lastUp = -1e9;
@@ -142,7 +171,7 @@
     function isStatic() { return !!LV.st || reduceT() || kind === 'none'; }
     /* refreshes per second: the app's own cap (setBackdropRate) wins, never faster than the level's */
     function capOf(copy) { var r = LV.rate || (copy ? opt.copyRate : 0); return userRate > 0 ? (r ? Math.min(r, userRate) : userRate) : r; }
-    function onMq() { panelsDirty = regDirty = true; ask(); }
+    function onMq() { panelsDirty = regDirty = edDirty = true; ask(); }
 
     /* ---------- GL set-up ---------- */
     function mk(vs, fs) {
@@ -171,7 +200,7 @@
       return { t: t, f: f };
     }
     function glInit() {
-      prog = { d: mk(VS_FULL, FS_DOWN), u: mk(VS_FULL, FS_UP), g: mk(VS_QUAD, FS_GLASS), f: mk(VS_QUAD, FS_FLAT), s: mk(VS_SCENE, FS_SCENE), s0: null };
+      prog = { d: mk(VS_FULL, FS_DOWN), u: mk(VS_FULL, FS_UP), g: {}, f: mk(VS_QUAD, FS_FLAT), s: mk(VS_SCENE, FS_SCENE), s0: null };
       /* the rectangles of the scene: 24 bytes each (x,y,w,h floats, colour 4 bytes, mode float), one instance per rectangle */
       sVao = gl.createVertexArray(); sBuf = gl.createBuffer(); gl.bindVertexArray(sVao); gl.bindBuffer(gl.ARRAY_BUFFER, sBuf);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 24, 0); gl.vertexAttribDivisor(0, 1);
@@ -182,7 +211,7 @@
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
       srcH.tex = tex(0, 0); blank = tex(1, 1); srcReady = false; pyrA = pyrB = null;
       flats.forEach(function (f) { f.tex = null; f.dirty = !!f.source; });
-      srcDirty = !!src; geomDirty = sceneDirty = !!scene; lastScene = lastUp = -1e9; pyrDirty = bDirty = panelsDirty = regDirty = true; regKey = '';
+      srcDirty = !!src; geomDirty = sceneDirty = !!scene; lastScene = lastUp = -1e9; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; regKey = '';
     }
     /* level plan: sizes as divisors of the canvas in CSS pixels, so the blur looks the same on a 1x and a 2x screen (and a 2x screen pays no more).
        Glass: 4,(8),(16); "light" is one level plus a same-size pass. Light: 8,(16). The first level is the target the backdrop is drawn into. */
@@ -205,7 +234,7 @@
       }
       return { lev: lev, ready: false };
     }
-    function dropPyr() { freePyr(pyrA); freePyr(pyrB); pyrA = pyrB = null; pyrDirty = bDirty = panelsDirty = regDirty = true; regKey = ''; }
+    function dropPyr() { freePyr(pyrA); freePyr(pyrB); pyrA = pyrB = null; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; regKey = ''; }
 
     /* ---------- which part of the screen is under glass (only when nothing can move) ---------- */
     function regions() {
@@ -376,13 +405,56 @@
     }
 
     /* ---------- the glass faces ---------- */
+    /* which edges of a panel carry the lens, as bits (top 1, right 2, bottom 4, left 8) */
+    function maskOf(e) {
+      if (e == null || e === true || e === 'all') return 15;
+      if (!e || e === 'none') return 0;
+      return (e.indexOf('t') >= 0 ? 1 : 0) | (e.indexOf('r') >= 0 ? 2 : 0) | (e.indexOf('b') >= 0 ? 4 : 0) | (e.indexOf('l') >= 0 ? 8 : 0);
+    }
+    /* edges:'auto'. An edge is closed when it lies on (or beyond) the border of the window, or when other fixed panels reach it from outside along its
+       whole length. side 0 top, 1 right, 2 bottom, 3 left. Runs only after a panel, the size or the origin changed. */
+    function closed(p, side) {
+      var T = 1.01, B = opt.bounds, bx = B ? B.x : OX, by = B ? B.y : OY, bw = B ? B.w : W / D, bh = B ? B.h : H / D, hz = side === 0 || side === 2;
+      var at = side === 0 ? p.y : side === 1 ? p.x + p.w : side === 2 ? p.y + p.h : p.x, a0 = hz ? p.x : p.y, a1 = hz ? p.x + p.w : p.y + p.h, i, q, lo, hi, s, e, cov, end;
+      if (bw > 0 && (side === 0 ? at <= by + T : side === 1 ? at >= bx + bw - T : side === 2 ? at >= by + bh - T : at <= bx + T)) return true;
+      iv.length = 0;
+      for (i = 0; i < order.length; i++) {
+        q = order[i]; if (q === p || !q.visible || !q.K.fixed || q.opacity <= 0) continue;
+        lo = hz ? q.y : q.x; hi = lo + (hz ? q.h : q.w);
+        /* q reaches the edge and lies (at least partly) on its outer side */
+        if (side === 0 || side === 3 ? !(hi >= at - T && lo < at - T) : !(lo <= at + T && hi > at + T)) continue;
+        s = Math.max(a0, hz ? q.x : q.y); e = Math.min(a1, hz ? q.x + q.w : q.y + q.h); if (e > s) iv.push(s, e);
+      }
+      if (!iv.length) return false;
+      /* length of the edge that is covered (few intervals: a simple sweep, start by start) */
+      for (cov = 0, end = a0; ;) {
+        s = 1e9; e = 0;
+        for (i = 0; i < iv.length; i += 2) if (iv[i + 1] > end && iv[i] < s) { s = iv[i]; e = iv[i + 1]; }
+        if (s > 1e8) break;
+        if (s > end + T) return false;
+        end = e;
+      }
+      return end >= a1 - T;
+    }
+    function edges() {
+      var i, p, e, m, sqr, round = opt.corners === 'round';
+      for (i = 0; i < order.length; i++) {
+        p = order[i]; e = p.edges != null ? p.edges : p.K.edges;
+        if (round) { p.em = 15; p.sq = 0; continue; }
+        if (e === 'auto') m = (closed(p, 0) ? 0 : 1) | (closed(p, 1) ? 0 : 2) | (closed(p, 2) ? 0 : 4) | (closed(p, 3) ? 0 : 8); else m = maskOf(e);
+        sqr = p.corners === 'square' || (p.corners !== 'round' && p.radius < opt.squareBelow);
+        p.em = m; p.sq = sqr || m !== 15 ? 1 : 0;
+      }
+      edDirty = false;
+    }
     function drawPanels() {
-      var u = prog.g.u, hc = moreC(), st = isStatic(), ln = LENS[opt.lens], i, p, K, sh, band, amt, tA, bound = null, t, tt, tin, mg, sm, useB;
+      var G = prog.g[opt.corners] || (prog.g[opt.corners] = mk(VS_QUAD, fsGlass(opt.corners))), u = G.u, hc = moreC(), st = isStatic(), ln = LENS[opt.lens], i, p, K, sh, band, amt, tA, bound = null, t, tt, tin, mg, sm, useB, m;
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H); gl.disable(gl.SCISSOR_TEST);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       stats.draws++;
       if (!order.length) return;
-      gl.useProgram(prog.g.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      if (edDirty) edges();
+      gl.useProgram(G.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform2f(u.res, W, H); gl.uniform1f(u.dpr, D); gl.uniform3f(u.face, opt.face.sat, opt.face.mul, opt.face.add);
       for (i = 0; i < order.length; i++) {
         p = order[i]; if (!p.visible || p.opacity <= 0 || p.w <= 0 || p.h <= 0) continue;
@@ -401,6 +473,7 @@
         gl.uniform4f(u.tint, tin[0], tin[1], tin[2], tA);
         gl.uniform4f(u.rimp, opt.rim.width * D, hc ? 0 : opt.rim.base, hc ? 0 : opt.rim.lit, hc ? 0.6 : 0);
         gl.uniform3f(u.shd, 8 * D, (4 + 20 * tt) * D, sm > 0 ? sm * (0.04 + 0.56 * tt) : 0);
+        gl.uniform1f(u.sq, p.sq); m = p.em; gl.uniform4f(u.ed, m & 1, m >> 1 & 1, m >> 2 & 1, m >> 3 & 1);
         gl.uniform2f(u.md, t ? 0 : 1, p.opacity);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
@@ -490,7 +563,7 @@
       if (d.rect) { r = rectOf(d.rect); if (r.x !== p.x || r.y !== p.y || r.w !== p.w || r.h !== p.h) { p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h; ch = true; } }
       if (d.kind != null && d.kind !== p.kind) { p.kind = d.kind; p.K = kinds[d.kind] || kinds.window; ch = true; }
       if (d.z != null && d.z !== p.z) { p.z = +d.z; ch = true; sortOrder(); }
-      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens'].forEach(function (k) {
+      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners'].forEach(function (k) {
         if (k in d && d[k] !== p[k]) { p[k] = d[k]; ch = true; if (k === 'over') bDirty = true; }
       });
       return ch;
@@ -501,19 +574,19 @@
       get mode() { return mode; },            /* 'gl' or 'fallback' */
       get reason() { return reason; },        /* why the fallback is on */
       get pending() { return mode === 'gl' && ((kind === 'scene' ? sceneDirty : srcDirty) || flatWait) && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
-      get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, origin: [OX, OY], level: level, source: kind, lens: LV.lens ? opt.lens : 'off', blur: opt.blur, levels: plan(), rate: capOf(kind === 'copy'), copyRate: capOf(true), sceneRects: scene ? scene.n : 0, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
+      get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, origin: [OX, OY], level: level, source: kind, lens: LV.lens ? opt.lens : 'off', blur: opt.blur, corners: opt.corners, levels: plan(), rate: capOf(kind === 'copy'), copyRate: capOf(true), sceneRects: scene ? scene.n : 0, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
 
       addPanel: function (d) {
         var p = panels.get(d.id);
         if (!p) { p = { id: d.id, x: 0, y: 0, w: 0, h: 0, radius: 0, kind: 'window', K: kinds.window, z: 0, seq: seq++, visible: true, opacity: 1, over: 'backdrop' }; panels.set(d.id, p); }
-        setP(p, d); sortOrder(); panelsDirty = regDirty = true; return api;
+        setP(p, d); sortOrder(); panelsDirty = regDirty = edDirty = true; return api;
       },
       updatePanel: function (id, d) {
         if (id && typeof id === 'object') { d = id; id = d.id; }
         var p = panels.get(id); if (!p) return false;
-        if (setP(p, d || {})) panelsDirty = regDirty = true; return true;
+        if (setP(p, d || {})) panelsDirty = regDirty = edDirty = true; return true;
       },
-      removePanel: function (id) { if (panels.delete(id)) { sortOrder(); panelsDirty = regDirty = true; return true; } return false; },
+      removePanel: function (id) { if (panels.delete(id)) { sortOrder(); panelsDirty = regDirty = edDirty = true; return true; } return false; },
       hasPanel: function (id) { return panels.has(id); },
 
       /* THE BACKDROP, DRAWN ON THE GPU. Everything is optional; what is left out keeps its value.
@@ -577,6 +650,18 @@
       markFlatDirty: function (id) { var f = flats.get(id); if (f && f.source) f.dirty = true; },
       removeFlat: function (id) { var f = flats.get(id); if (!f) return false; if (f.tex && gl) gl.deleteTexture(f.tex); flats.delete(id); bDirty = panelsDirty = true; return true; },
 
+      /* CORNERS AND EDGES (2.2). A panel takes the square lens when its radius is under squareBelow (8 px) or it says corners:'square'; corners:'round' keeps
+         the rounded one. edges (panel option, default by kind: docked 'auto', the others 'all') says which edges bend. setCorners picks how two edges of a
+         square panel meet: 'square' (default), 'blend', 'fade', or 'round' = the rounded lens on every edge of every panel as in 2.1 (edges is then ignored). */
+      setCorners: function (n) { if (!(n in CORNER) || n === opt.corners) return api; opt.corners = n; panelsDirty = edDirty = true; return api; },
+      /* the window in the space the rectangles are given in, for edges:'auto'. null = the canvas (right unless the canvas is smaller than the window). */
+      setBounds: function (r) { opt.bounds = r ? rectOf(r) : null; panelsDirty = edDirty = true; return api; },
+      /* what a panel got: {edges: the letters of the edges that bend, square: true when it has the square lens, band: the lens width in px} */
+      panelInfo: function (id) {
+        var p = panels.get(id), ln = LENS[opt.lens], m; if (!p) return null;
+        if (edDirty) edges(); m = p.em;
+        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0 };
+      },
       setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
       setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },
       /* 'glass': lens, quarter-size backdrop, refreshed on every change. 'light': the same engine with the lens off, a backdrop half that size, refreshed 30 times per second.
@@ -585,13 +670,13 @@
       /* older name: 3 and 2 = glass, 1 = light, 0 = solid */
       setQuality: function (q) { if (q in QCOMPAT) api.setLevel(QCOMPAT[q]); },
       /* true / false to force, null to follow the system setting */
-      setAccessibility: function (d) { if ('reduceTransparency' in d) acc.rt = d.reduceTransparency; if ('increaseContrast' in d) acc.ic = d.increaseContrast; panelsDirty = regDirty = true; },
+      setAccessibility: function (d) { if ('reduceTransparency' in d) acc.rt = d.reduceTransparency; if ('increaseContrast' in d) acc.ic = d.increaseContrast; panelsDirty = regDirty = edDirty = true; },
       setFace: function (d) { for (var k in d) opt.face[k] = d[k]; panelsDirty = true; },
       /* A SMALL CANVAS (2.1). By default the canvas starts at the top left of the space all rectangles are given in (panels, scene rect, backdrop rect, flats).
          A canvas that is only as large as the glass it draws (a floating window plus 34 px for its shadow) sits somewhere inside that space: say where its
          top left corner is, in CSS px (whole device pixels), and keep giving every rectangle in the same space as before. Moving the canvas with its window is
          then: move it with CSS, call setOrigin(x, y), render(). The size stays, so nothing is allocated again. All work shrinks with the canvas. */
-      setOrigin: function (x, y) { x = +x || 0; y = +y || 0; if (x === OX && y === OY) return api; OX = x; OY = y; pyrDirty = bDirty = panelsDirty = regDirty = true; return api; },
+      setOrigin: function (x, y) { x = +x || 0; y = +y || 0; if (x === OX && y === OY) return api; OX = x; OY = y; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; return api; },
       /* the backdrop is drawn again at most n times per second (panels still move on every frame). 0 or null = the level decides (Glass: on every change). */
       setBackdropRate: function (n) { userRate = n > 0 ? +n : null; return api; },
 
@@ -603,7 +688,7 @@
         if (w === W && h === H && d === D) return false;
         W = w; H = h; D = d;
         if (mode === 'gl') { canvas.width = W; canvas.height = H; dropPyr(); }
-        panelsDirty = regDirty = true; return true;
+        panelsDirty = regDirty = edDirty = true; return true;
       },
 
       /* draws only what changed. Returns true when the canvas was redrawn. now = the frame time (performance.now() if left out). */
@@ -683,5 +768,5 @@
     return api;
   }
 
-  root.AudioLabGlass = { create: create, version: VERSION, LENS: LENS, BLUR: BLUR, KINDS: KINDS, LEVELS: LEVELS };
+  root.AudioLabGlass = { create: create, version: VERSION, LENS: LENS, BLUR: BLUR, KINDS: KINDS, LEVELS: LEVELS, CORNERS: Object.keys(CORNER) };
 })(typeof window !== 'undefined' ? window : this);
