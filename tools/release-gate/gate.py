@@ -26,6 +26,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--ref'); ap.add_argument('--promote', action='store_true'); ap.add_argument('--push', action='store_true')
 ap.add_argument('--quick', action='store_true', help='smoke scenarios at 20 s, no UI tests (for trying the gate, never promotes)')
 ap.add_argument('--skip-ui', action='store_true'); ap.add_argument('--secs', type=int, default=60)
+ap.add_argument('--freeze', action='store_true', help='HF1: put desktop/release-freeze.json on main while the gate runs (no lane pushes index.html meanwhile, CLAUDE.md), removed at the end')
 ap.add_argument('--here', action='store_true', help='test the working copy as it is instead of origin/main (never promotes)')
 ap.add_argument('--native', help='task MG1: a native block (JSON) to check (every file downloaded: size, sha256, signature) and put into the live manifest with this promotion')
 ap.add_argument('--native-only', action='store_true', help='task MG1: only check the --native block and, with --promote, put it into the live manifest; the program version stays')
@@ -50,6 +51,27 @@ def worktree(path, rev):
     sh(['git', 'worktree', 'prune']); sh(['git', 'worktree', 'add', '--detach', path, rev], check=True)
     return path
 sh(['git', 'fetch', '-q', 'origin', 'main'], timeout=300)
+FREEZE = 'desktop/release-freeze.json'
+GITID = ['-c', 'user.name=Audio-lab-DAW', '-c', 'user.email=360039460+Audio-lab-DAW@users.noreply.github.com']
+def push_change(tree, msg, edit):
+    # one small commit on top of the newest main, pushed (five tries); edit(tree) makes the change
+    for i in range(5):
+        sh(['git', 'fetch', '-q', 'origin', 'main'], cwd=tree); sh(['git', 'checkout', '-q', '--detach', 'origin/main'], cwd=tree); sh(['git', 'checkout', '--', '.'], cwd=tree)
+        edit(tree); sh(['git', 'add', '-A', FREEZE], cwd=tree)
+        if sh(['git'] + GITID + ['commit', '-q', '-m', msg], cwd=tree).returncode != 0: return True   # nothing to change
+        if sh(['git', 'push', '-q', 'origin', 'HEAD:main'], cwd=tree).returncode == 0: return True
+        time.sleep(5)
+    return False
+def freeze_on(tree):
+    open(os.path.join(tree, FREEZE), 'w').write(json.dumps({'by': 'release gate (tools/release-gate/gate.py)', 'since': time.strftime('%Y-%m-%d %H:%M:%S %Z'), 'rule': 'CLAUDE.md, release channel: while this file is on main, do not push changes to index.html; push other work, or wait'}, indent=1) + '\n')
+def freeze_off(tree):
+    f = os.path.join(tree, FREEZE)
+    if os.path.exists(f): os.remove(f)
+if A.freeze and not A.here:
+    FZ = worktree(os.path.join(OUT, 'freeze'), 'origin/main')
+    if not push_change(FZ, 'release gate: freeze index.html on main while the gate runs (%s)' % FREEZE, freeze_on): raise SystemExit('could not push the freeze')
+    import atexit; atexit.register(lambda: (push_change(FZ, 'release gate: freeze lifted', freeze_off), say('freeze lifted')))
+    sh(['git', 'fetch', '-q', 'origin', 'main'], timeout=300)
 if A.here: NEW = REPO
 else: NEW = worktree(os.path.join(OUT, 'new'), 'origin/main')
 # ---------- task MG1: the native block (the native AudioLab offered to Electron apps, docs/native-migration.md) ----------
@@ -209,10 +231,19 @@ if RES['passed'] and A.promote and not A.quick and not A.skip_ui and not A.here:
     sh(['git', '-c', 'user.name=Audio-lab-DAW', '-c', 'user.email=360039460+Audio-lab-DAW@users.noreply.github.com', 'commit', '-q', '-m', msg], cwd=NEW, check=True)
     RES['promoted'] = VER
     if A.push:
+        # Installed apps download index.html from main and check it against the manifest's fingerprint. A manifest for this build
+        # is only useful while main's index.html is still this build: when another release landed during the gate, nothing is
+        # pushed (old apps would only see "still being published"), and the gate must run again on the newer main (HF1, 27 Nov 2026).
+        tested = RES['commit']
         for i in range(5):
-            if sh(['git', 'pull', '-q', '--rebase', 'origin', 'main'], cwd=NEW).returncode == 0 and sh(['git', 'push', '-q', 'origin', 'HEAD:main'], cwd=NEW).returncode == 0: RES['pushed'] = True; break
-            time.sleep(5)
-    say('PROMOTED v%s: installed apps are offered it%s' % (VER, ' (pushed)' if RES.get('pushed') else ' (committed in %s, not pushed)' % NEW))
+            sh(['git', 'checkout', '--', '.'], cwd=NEW)   # test runs touch tracked files (a .pyc); only the promotion is committed
+            sh(['git', 'fetch', '-q', 'origin', 'main'], cwd=NEW)
+            if sh(['git', 'diff', '--quiet', tested, 'origin/main', '--', 'index.html'], cwd=NEW).returncode != 0:
+                RES['moved'] = sh(['git', 'log', '-1', '--format=%h %s', 'origin/main', '--', 'index.html'], cwd=NEW).stdout.strip()[:120]; break
+            if sh(['git', 'rebase', '-q', 'origin/main'], cwd=NEW).returncode == 0 and sh(['git', 'push', '-q', 'origin', 'HEAD:main'], cwd=NEW).returncode == 0: RES['pushed'] = True; break
+            sh(['git', 'rebase', '--abort'], cwd=NEW); time.sleep(5)
+    if RES.get('moved'): RES['promoted'] = None; say('PASSED but NOT PROMOTED: main has a newer index.html since the tested v%s (%s); installed apps would not get this build. Run the gate again.' % (VER, RES['moved']))
+    else: say('PROMOTED v%s: installed apps are offered it%s' % (VER, ' (pushed)' if RES.get('pushed') else ' (committed in %s, not pushed)' % NEW))
 elif RES['passed']: say('ALL PASSED (v%s). Not promoted: %s.' % (VER, 'run with --promote' if not A.promote else 'a --quick, --skip-ui or --here run never promotes'))
 else: say('NOT PROMOTED: failed: ' + ', '.join(RES['fail']))
 json.dump(RES, open(os.path.join(OUT, 'result.json'), 'w'), indent=1)

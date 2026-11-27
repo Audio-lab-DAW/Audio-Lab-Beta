@@ -12,7 +12,7 @@ Since 27 November 2026 (task HF1) installed apps only get a build that passed th
 ## Running it
 
 ```
-python3 tools/release-gate/gate.py --promote --push      # the real run: decides and promotes
+python3 tools/release-gate/gate.py --freeze --promote --push   # the real run: freezes index.html, decides, promotes, lifts the freeze
 python3 tools/release-gate/gate.py                       # every check, no promotion
 python3 tools/release-gate/gate.py --quick               # smoke scenarios at 20 s, no UI tests, never promotes
 python3 tools/release-gate/gate.py --here --skip-ui      # the working copy as it is, never promotes
@@ -21,6 +21,16 @@ python3 tools/release-gate/gate.py --here --skip-ui      # the working copy as i
 The gate fetches main and tests a fresh worktree of `origin/main` (`tools/release-gate/out/new`). It never tests your working copy, unless you pass `--here`. The reference is the build installed apps have now: the version in `desktop/app-version.json`, checked out from its release commit into `out/ref`. `--ref 0.257` picks another one.
 
 It needs Node 22, Python 3 with Playwright, `xvfb-run`, and Electron (`desktop/node_modules/electron`; the gate installs it when it is missing). The lint needs acorn: `npm install --prefix tools/release-gate/.deps acorn@8.14.0 acorn-walk@8.3.4`. The result is in `tools/release-gate/out/result.json` and `out/gate.log`. A full run takes about an hour on a 2-core machine, most of it the UI tests.
+
+## Why a pass may not promote, and the freeze
+
+Installed apps download the `index.html` that is on main at that moment, and accept it only when its fingerprint matches the promoted manifest. So a manifest is useful only for the build that is still on main.
+
+If another release lands while the gate runs, the gate reports **PASSED but NOT PROMOTED (main moved on)** and pushes nothing. This happened on 27 Nov 2026: v0.264 passed every step, and by the end main was at v0.289.
+
+To stop that, `--freeze` puts `desktop/release-freeze.json` on main for the length of the run. While the file is there, the lanes push no `index.html` (the rule is in CLAUDE.md). The gate removes the file when it ends, pass or fail. If it is ever left behind (the machine died), delete it by hand.
+
+A later desktop app could download the promoted build by its commit instead (the manifest would carry `commit`). Then the freeze would no longer be needed, but every installed app would first need that new app.
 
 ## What it checks
 
