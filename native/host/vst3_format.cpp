@@ -1,6 +1,7 @@
 // VST3 behind the AudioLab plug-in interface (plugin_api.h). Task NM1.
 // Built on Steinberg's VST 3 SDK (MIT licence since 3.8) and its hosting helpers.
 #include "plugin_api.h"
+#include "live_tools.h"
 
 #include "pluginterfaces/gui/iplugview.h"
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
@@ -50,18 +51,24 @@ struct Handler : public IComponentHandler {
     std::atomic<uint32_t> lastId{0};
     std::atomic<double> lastValue{0};
     std::atomic<bool> latencyChanged{false};
-    tresult PLUGIN_API beginEdit(ParamID) override { begins++; return kResultOk; }
+    // task NL7: events as they happen, and the parameters reported since the window last asked
+    std::function<void(uint32_t, uint32_t)> onEvent;
+    std::mutex touchedLock; std::set<uint32_t> touched;
+    void touch(uint32_t id) { std::lock_guard<std::mutex> g(touchedLock); if (touched.size() < 100000) touched.insert(id); }
+    tresult PLUGIN_API beginEdit(ParamID id) override { begins++; if (onEvent) onEvent(evGestureBegin, id); return kResultOk; }
     tresult PLUGIN_API performEdit(ParamID id, ParamValue v) override {
         if (transfer) { std::lock_guard<std::mutex> g(*lock); transfer->addChange(id, v, 0); }
         lastId = id; lastValue = v;
         edits++;
+        touch(id);
         return kResultOk;
     }
-    tresult PLUGIN_API endEdit(ParamID) override { ends++; return kResultOk; }
+    tresult PLUGIN_API endEdit(ParamID id) override { ends++; if (onEvent) onEvent(evGestureEnd, id); return kResultOk; }
     tresult PLUGIN_API restartComponent(int32 flags) override {
         restarts++;
         if (flags & kParamValuesChanged) valueRestarts++;
         if (flags & kLatencyChanged) latencyChanged = true;
+        if (onEvent) onEvent(evRestart, (uint32_t)flags);
         return kResultOk;
     }
     tresult PLUGIN_API queryInterface(const TUID iid, void** obj) override {
@@ -206,7 +213,7 @@ public:
             ParameterInfo pi{};
             if (controller->getParameterInfo(i, pi) != kResultOk) continue;
             ParamInfo p;
-            p.id = pi.id; p.name = VST3::StringConvert::convert(pi.title); p.units = VST3::StringConvert::convert(pi.units);
+            p.id = pi.id; p.name = asciiClean(VST3::StringConvert::convert(pi.title)); p.units = asciiClean(VST3::StringConvert::convert(pi.units));
             p.defaultValue = pi.defaultNormalizedValue; p.steps = pi.stepCount;
             p.automatable = (pi.flags & ParameterInfo::kCanAutomate) != 0; p.readOnly = (pi.flags & ParameterInfo::kIsReadOnly) != 0;
             p.isBypass = (pi.flags & ParameterInfo::kIsBypass) != 0; p.hidden = (pi.flags & ParameterInfo::kIsHidden) != 0;
@@ -216,6 +223,7 @@ public:
     }
     double getParam(uint32_t id) const override { return controller ? controller->getParamNormalized(id) : 0; }
     void setParam(uint32_t id, double value) override {
+        handler.touch(id);
         if (controller) controller->setParamNormalized(id, value);
         std::lock_guard<std::mutex> g(transferLock);
         transfer.addChange(id, value, 0);
@@ -223,7 +231,7 @@ public:
     std::string paramText(uint32_t id, double value) const override {
         String128 s = {0};
         if (!controller || controller->getParamStringByValue(id, value, s) != kResultOk) return "";
-        return VST3::StringConvert::convert(s);
+        return asciiClean(VST3::StringConvert::convert(s));
     }
 
     std::string busLine(MediaType t, BusDirection d, int i) const {
@@ -231,7 +239,7 @@ public:
         tresult r = component->getBusInfo(t, d, i, bi);
         char b[400];
         if (r != kResultOk) { snprintf(b, sizeof b, "%s %s %d: getBusInfo = %s", t == kAudio ? "audio" : "event", d == kInput ? "in" : "out", i, rc(r)); return b; }
-        snprintf(b, sizeof b, "%s %s %d \"%s\": %s, %d ch%s", t == kAudio ? "audio" : "event", d == kInput ? "in" : "out", i, VST3::StringConvert::convert(bi.name).c_str(),
+        snprintf(b, sizeof b, "%s %s %d \"%s\": %s, %d ch%s", t == kAudio ? "audio" : "event", d == kInput ? "in" : "out", i, asciiClean(VST3::StringConvert::convert(bi.name)).c_str(),
                  bi.busType == kMain ? "main" : "aux", bi.channelCount, (bi.flags & BusInfo::kDefaultActive) ? ", default active" : ", default inactive");
         return b;
     }
@@ -421,7 +429,7 @@ public:
                     ProgramListInfo li{}; if (ui->getProgramListInfo(i, li) != kResultOk || li.id != listId) continue;
                     for (int32 k = 0; k < li.programCount && k < 512; k++) {
                         String128 nm = {0}; ui->getProgramName(li.id, k, nm);
-                        PresetInfo p; p.name = VST3::StringConvert::convert(nm); p.source = "program list"; p.index = k; v.push_back(p);
+                        PresetInfo p; p.name = asciiClean(VST3::StringConvert::convert(nm)); p.source = "program list"; p.index = k; v.push_back(p);
                     }
                 }
             }
@@ -445,11 +453,12 @@ public:
             for (fs::recursive_directory_iterator it(dir, fs::directory_options::skip_permission_denied, ec), end; !ec && it != end; it.increment(ec))
                 if (it->path().extension() == ".vstpreset") found.push_back(it->path().string());
             std::sort(found.begin(), found.end());
-            for (auto& f : found) { if (files++ > 500) break; PresetInfo p; p.name = fs::path(f).stem().string(); p.source = f; v.push_back(p); }
+            for (auto& f : found) { if (files++ > 500) break; PresetInfo p; p.name = asciiClean(fs::path(f).stem().string()); p.source = f; v.push_back(p); }
         }
         return v;
     }
     bool loadPreset(const PresetInfo& p, std::string& err) override {
+        if (handler.onEvent) handler.onEvent(evPresetLoaded, (uint32_t)p.index);
         if (p.source == "program list") {
             if (!controller) { err = "no controller"; return false; }
             int n = controller->getParameterCount();
@@ -482,6 +491,7 @@ public:
         return true;
     }
     bool setState(const std::vector<uint8_t>& in) override {
+        if (handler.onEvent) handler.onEvent(evStateSet, (uint32_t)in.size());
         if (in.size() < 12 || memcmp(in.data(), "ALV3", 4)) return false;
         auto get = [&](size_t p) { return (uint32_t)in[p] | ((uint32_t)in[p + 1] << 8) | ((uint32_t)in[p + 2] << 16) | ((uint32_t)in[p + 3] << 24); };
         uint32_t la = get(4); if (8 + (size_t)la + 4 > in.size()) return false;
@@ -539,6 +549,8 @@ public:
         return true;
     }
     int editsFromEditor() const override { return handler.edits.load(); }
+    void setEventSink(std::function<void(uint32_t, uint32_t)> f) override { handler.onEvent = std::move(f); }
+    std::set<uint32_t> takeTouchedParams() override { std::lock_guard<std::mutex> g(handler.touchedLock); std::set<uint32_t> t; t.swap(handler.touched); return t; }
     EditStats editStats() const override {
         EditStats s;
         s.performs = handler.edits.load(); s.begins = handler.begins.load(); s.ends = handler.ends.load();
@@ -592,8 +604,8 @@ public:
         for (auto& c : mod->getFactory().classInfos()) {
             if (c.category() != kVstAudioEffectClass) continue;
             PluginInfo p;
-            p.format = "vst3"; p.path = path; p.uid = c.ID().toString(); p.name = c.name(); p.vendor = c.vendor().empty() ? mod->getFactory().info().vendor() : c.vendor();
-            p.version = c.version(); p.sdk = c.sdkVersion(); p.categories = c.subCategoriesString();
+            p.format = "vst3"; p.path = path; p.uid = c.ID().toString(); p.name = asciiClean(c.name()); p.vendor = asciiClean(c.vendor().empty() ? mod->getFactory().info().vendor() : c.vendor());
+            p.version = asciiClean(c.version()); p.sdk = c.sdkVersion(); p.categories = c.subCategoriesString();
             p.isInstrument = p.categories.find("Instrument") != std::string::npos;
             p.isEffect = !p.isInstrument || p.categories.find("Fx") != std::string::npos;
             r.plugins.push_back(p);
@@ -615,9 +627,9 @@ public:
         for (auto& c : factory.classInfos()) {
             if (c.category() != kVstAudioEffectClass) continue;
             if (!info.uid.empty() && c.ID().toString() != info.uid) continue;
-            if (info.uid.empty() && !info.name.empty() && c.name() != info.name) continue;
+            if (info.uid.empty() && !info.name.empty() && c.name() != info.name && asciiClean(c.name()) != info.name) continue;
             inst->classId = c.ID();
-            inst->pinfo.uid = c.ID().toString(); inst->pinfo.name = c.name(); inst->pinfo.vendor = c.vendor().empty() ? factory.info().vendor() : c.vendor(); inst->pinfo.version = c.version();
+            inst->pinfo.uid = c.ID().toString(); inst->pinfo.name = asciiClean(c.name()); inst->pinfo.vendor = asciiClean(c.vendor().empty() ? factory.info().vendor() : c.vendor()); inst->pinfo.version = asciiClean(c.version());
             inst->pinfo.categories = c.subCategoriesString(); inst->pinfo.sdk = c.sdkVersion(); inst->pinfo.format = "vst3";
             inst->pinfo.isInstrument = inst->pinfo.categories.find("Instrument") != std::string::npos;
             inst->pinfo.isEffect = !inst->pinfo.isInstrument || inst->pinfo.categories.find("Fx") != std::string::npos;

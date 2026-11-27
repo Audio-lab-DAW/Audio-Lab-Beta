@@ -1,4 +1,4 @@
-AudioLab VST3 test 0.5 (tasks NM1, NB-N1, NL4 and NL5)
+AudioLab VST3 test 0.7 (tasks NM1, NB-N1, NL4, NL5 and NL7)
 
 This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
 find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.
@@ -14,30 +14,39 @@ HOW TO OPEN IT (it is not signed with an Apple Developer account, so macOS asks 
 If the button does not appear, open Terminal and paste this line, with the path of the app at the end:
    xattr -dr com.apple.quarantine "/path/to/AudioLab VST3 test.app"
 
-NEW IN 0.5
-- Silent instruments: Phase Plant and Pigments made no sound in 0.4 although the notes reached them. 0.5 sets
-  plug-ins up the way JUCE-based hosts and Steinberg's own validator do. Two things were missing in 0.4: the
-  plug-in's controller was never given the processor's state, and messages between the plug-in's two halves were
-  thrown away when they did not come from the main thread. A plug-in that prepares its patch that way stays silent.
-- "Why silent?": loads the plug-in again in a separate process and plays it under the 0.5 set-up, the 0.4 set-up
-  and one change at a time, then writes [probe] lines and a one-line conclusion into the report. It also runs by
-  itself once, when you stop the pattern and an instrument stayed silent.
-- [diag] lines: what the plug-in asked for (buses, channels) and what the app gave it, with the answer to every
-  call. Untick "Diagnostic lines in the report" to leave them out.
-- "Factory preset": the plug-in's own programs or .vstpreset files, when it offers them through VST3. Phase Plant
-  and Pigments keep their presets in their own window: choose one there, then play the pattern again.
-- A [device] line for a device switched on or plugged in after the start (the Gryphon in report 5 had none).
-- At the end of the report: the Intel-only plug-ins (they need Rosetta: a helper comes later) and the broken ones.
-- The CLAP and Audio Units folders are listed (not loaded): counts and names, for the choice of the next format.
-- The report is plain text that reads the same in any program (report 5 showed odd signs around "%" and "dB").
+NEW IN 0.7 (there is no 0.6 to test: 0.7 holds everything)
+- Too loud: Phase Plant's own output reached +27.9 dBFS in report 7. When a plug-in's output passes 0 dBFS, the
+  report gets a [warning] line (which plug-in, how loud, when) and the meter at the right of the middle row shows a
+  red OVER mark until you click it. The app's own output never passes full scale: a safety limiter on the app's
+  output only (the plug-in itself is not changed); the [level] line says how often it acted.
+- Slow blocks: the [audio] lines now say when the 3 slowest blocks happened and what happened in the 100 ms
+  before each one (a window opened or closed, a preset or program loaded, the plug-in restarted, a knob grabbed,
+  the device switched), so a spike can be tied to its cause.
+- Odd signs in plug-in texts ("17.1 ms" from Phase Plant came out with three odd letters) are gone: every text
+  from a plug-in is cleaned like the app's own.
+- Your DAC's bit depth: the [format] line says what the DAC gets on the wire. The Gryphon got only 16-bit integer.
+  If a deeper format exists at the same rate, a [warning] says how to change it (Audio MIDI Setup > the device >
+  Format), or use the new menu Device > Use the deepest format (only when you choose it; before and after are logged).
+- A device that appears for a moment without a name (a Bluetooth reconnect) is no longer listed.
+- [param] lines for values that changed in the plug-in's window although the plug-in never told the host.
+- The report has no empty lines; "not played: play the pattern to test it" when no notes were sent; [load] gives
+  the latency in samples and milliseconds.
 
 TRY THIS FIRST
-1. Choose the Gryphon at the top, Rate 44100 Hz.
-2. Search "phase plant", Load, "Open its window", Play test pattern for ten seconds, stop it.
-   If it stays silent, wait for the [probe] lines (10 to 40 seconds), or press "Why silent?".
+1. Set the Gryphon to 32-bit: in Audio MIDI Setup > iFi (by AMR) HD USB Audio > Format choose 32-bit Integer
+   at 44.1 kHz, or choose the Gryphon in the app and use the menu Device > Use the deepest format.
+2. Search "phase plant", Load, "Open its window", Play test pattern for ten seconds and turn a few knobs, stop it.
 3. The same with Pigments.
-4. If either is still silent: choose a preset in its own window and play the pattern again.
-5. Copy the report and paste it back.
+4. Copy the report and paste it back.
+
+NEW IN 0.5
+- Silent instruments: Phase Plant and Pigments made no sound in 0.4 although the notes reached them. 0.5 sets
+  plug-ins up the way JUCE-based hosts and Steinberg's own validator do (state given to the controller, messages
+  between the plug-in's two halves from any thread). Both now sound.
+- "Why silent?": loads the plug-in again in a separate process and plays it under several set-ups, then writes
+  [probe] lines into the report. [diag] lines: what the plug-in asked for and what the app gave it.
+- "Factory preset", [device] lines for devices plugged in later, Intel-only and broken plug-ins listed at the end,
+  CLAP and Audio Units folders listed (not loaded), a plain-text report.
 
 WHAT TO DO
 1. The list shows every VST3 plug-in found in /Library/Audio/Plug-Ins/VST3 and in your own

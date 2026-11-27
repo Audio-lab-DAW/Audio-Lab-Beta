@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -105,6 +106,11 @@ public:
     virtual HostDiag diag() const { return HostDiag(); }
     virtual std::vector<PresetInfo> presets() { return {}; }
     virtual bool loadPreset(const PresetInfo&, std::string& err) { err = "not supported"; return false; }
+    // task NL7: what the plug-in tells the host, as it happens (gestures, restarts, state set, preset loaded): kind and
+    // argument as in live_tools.h's EventKind. Called on whichever thread the plug-in uses; must not block.
+    virtual void setEventSink(std::function<void(uint32_t kind, uint32_t arg)>) {}
+    // task NL7: the parameters the plug-in reported (performEdit) or the host set since the last call
+    virtual std::set<uint32_t> takeTouchedParams() { return {}; }
 };
 
 struct ScanResult {

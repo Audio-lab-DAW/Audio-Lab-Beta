@@ -4,6 +4,7 @@
 //          loads the plug-in, lists its parameters, plays notes (instrument) or runs audio through it (effect),
 //          saves and restores its state, renders in real-time and export mode, and reports the time per block.
 #include "plugin_api.h"
+#include "live_tools.h"
 #include "../common/json.h"
 #include "../common/wav.h"
 #include <algorithm>
@@ -13,6 +14,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <thread>
 #include <unistd.h>
 
 using namespace al;
@@ -240,6 +242,102 @@ static int cmdDiag(int argc, char** argv) {
     return 1;
 }
 
+// alvst3 nl7 --plugin AL-STRICT-SYNTH-BUNDLE [--sr 48000] [--outdir DIR --tag TAG]
+// task NL7: the parts of test app 0.7 that need no window and no sound card, on the test instrument:
+//   1 plug-in strings cleaned (U+202F, U+2212, U+00A0 and an accented letter), 2 a plug-in at +20 dBFS and the app's
+//   safety limiter, 3 a parameter that changes without performEdit, found by polling, 4 the event ring (state set, preset)
+static int cmdNl7(int argc, char** argv) {
+    auto o = opts(argc, argv, 2);
+    PluginInfo want; want.format = "vst3"; want.path = opt(o, "plugin"); want.name = opt(o, "name");
+    double sr = atof(opt(o, "sr", "48000").c_str()); int block = 512;
+    std::string out; int fails = 0;
+    auto line = [&](bool ok, const std::string& s) { out += std::string("[nl7] ") + (ok ? "PASS " : "FAIL ") + s + "\n"; if (!ok) fails++; };
+    auto clean = [](const std::string& s) { return s.find("\xE2\x80\xAF") == std::string::npos && s.find("\xE2\x88\x92") == std::string::npos && s.find("\xC2\xA0") == std::string::npos; };
+    // 1. the clean-up itself
+    std::string t = asciiClean("17.1\xE2\x80\xAFms \xE2\x88\x92" "3.26\xC2\xA0" "dB caf\xC3\xA9");
+    line(t == "17.1 ms -3.26 dB caf\xC3\xA9", "text: \"17.1<U+202F>ms <U+2212>3.26<U+00A0>dB caf<e acute>\" -> \"" + t + "\" (the accented letter stays: a report holding it starts with a byte order mark: " + (isAscii(t) ? "no" : "yes") + ")");
+    std::string err;
+    auto p = vst3Format()->create(want, err);
+    if (!p) { fprintf(stderr, "could not load: %s\n", err.c_str()); return 1; }
+    EventRing ring;
+    p->setEventSink([&](uint32_t k, uint32_t a) { ring.push(k, a); });
+    if (!p->prepare(sr, block, false, err)) { fprintf(stderr, "could not start: %s\n", err.c_str()); return 1; }
+    // let the loader thread's message arrive
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    auto ps = p->params();
+    bool allClean = true; std::string shown;
+    std::map<std::string, uint32_t> byName;
+    for (auto& q : ps) {
+        double v = p->getParam(q.id);
+        std::string vt = p->paramText(q.id, v);
+        byName[q.name] = q.id;
+        allClean = allClean && clean(q.name) && clean(q.units) && clean(vt);
+        shown += (shown.empty() ? "" : "; ") + q.name + (q.units.empty() ? "" : " [" + q.units + "]") + " = \"" + vt + "\"";
+    }
+    auto pr = p->presets();
+    for (auto& x : pr) { allClean = allClean && clean(x.name); shown += "; program \"" + x.name + "\""; }
+    line(allClean && !ps.empty(), "plug-in strings (titles, units, value texts, program names) carry none of U+202F, U+2212, U+00A0: " + shown);
+    // 2. loud: the plug-in's own output past 0 dBFS; the app's output never
+    auto find = [&](const char* n) -> int64_t { auto it = byName.find(n); return it == byName.end() ? -1 : (int64_t)it->second; };
+    int64_t loudId = find("Loud (+20 dBFS)"), sneakyId = find("Sneaky drift"), levelId = find("Level");
+    if (loudId >= 0) {
+        p->setParam((uint32_t)loudId, 1.0);
+        SafetyLimiter lim; lim.setRate(sr);
+        std::vector<float> L(block), R(block), z(block, 0);
+        float plugPk = 0, appPk = 0; int over = 0;
+        ProcessContext ctx; ctx.sampleRate = sr;
+        int blocks = (int)(1.5 * sr / block);
+        for (int b = 0; b < blocks; b++) {
+            NoteEvent ne[2]; int nn = 0;
+            if (b % 20 == 0) { ne[0].on = true; ne[0].pitch = 60 + (b / 20) % 12; ne[0].offset = 0; nn = 1; }
+            if (b % 20 == 15) { ne[0].on = false; ne[0].pitch = 60 + (b / 20) % 12; ne[0].offset = 0; nn = 1; }
+            const float* in[2] = {z.data(), z.data()}; float* oo[2] = {L.data(), R.data()};
+            ctx.samplePos = (int64_t)b * block;
+            p->process(in, 2, oo, 2, block, ne, nn, ctx);
+            float bp = 0; for (int i = 0; i < block; i++) bp = std::max(bp, std::max(std::fabs(L[i]), std::fabs(R[i])));
+            if (bp > 1.0f) over++;
+            plugPk = std::max(plugPk, bp);
+            for (int i = 0; i < block; i++) { L[i] *= 0.5f; R[i] *= 0.5f; }
+            appPk = std::max(appPk, lim.process(oo, 2, block));
+        }
+        char b[400];
+        snprintf(b, sizeof b, "loud mode: the plug-in's own output peaked at %+.1f dBFS (%d of %d blocks past 0 dBFS); after the app's half level and safety limiter the output peaked at %.3f (%+.2f dBFS), limiter engaged %llu time(s), most %.1f dB",
+                 20 * std::log10(std::max(plugPk, 1e-9f)), over, blocks, appPk, 20 * std::log10(std::max(appPk, 1e-9f)), (unsigned long long)lim.engaged.load(), lim.deepestDb.load());
+        line(plugPk > 9.0f && appPk <= 1.0f && lim.engaged.load() >= 1, b);
+        p->setParam((uint32_t)loudId, 0.0);
+    } else line(false, "loud mode: no parameter \"Loud (+20 dBFS)\" (not the test instrument?)");
+    // 3. a parameter that changes without performEdit, found by polling every 200 ms
+    if (sneakyId >= 0) {
+        ParamWatch pw;
+        std::vector<uint32_t> ids; std::vector<std::string> names; std::vector<bool> ro;
+        for (auto& q : ps) { ids.push_back(q.id); names.push_back(q.name); ro.push_back(q.readOnly); }
+        pw.setParams(ids, names, ro);
+        auto get = [&](uint32_t id) { return p->getParam(id); };
+        pw.poll(get, p->takeTouchedParams(), false);
+        p->setParam((uint32_t)sneakyId, 1.0);                 // the host's own change: must not count
+        for (int k = 0; k < 6; k++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            if (k == 2 && levelId >= 0) p->setParam((uint32_t)levelId, 0.7);   // the host's own change again
+            pw.poll(get, p->takeTouchedParams(), false);
+        }
+        p->setParam((uint32_t)sneakyId, 0.0);
+        std::string nm; for (auto& n : pw.firstNames) nm += (nm.empty() ? "" : ", ") + n;
+        bool ok = pw.changes >= 3 && pw.firstNames.size() == 1 && pw.firstNames[0].find("rive") != std::string::npos;
+        line(ok, "sneaky mode: " + std::to_string(pw.changes) + " change(s) without telling the host, in: " + nm + " (the host's own changes to Sneaky drift and Level not counted)");
+    } else line(false, "sneaky mode: no parameter \"Sneaky drift\"");
+    // 4. the event ring: the host sets the state and loads a program
+    std::vector<uint8_t> st; p->getState(st); p->setState(st);
+    if (!pr.empty()) p->loadPreset(pr[0], err);
+    bool back = false;
+    auto evs = ring.between(0, UINT64_MAX, &back);
+    int nState = 0, nPreset = 0; for (auto& e : evs) { if (e.kind == evStateSet) nState++; if (e.kind == evPresetLoaded) nPreset++; }
+    line(nState == 1 && nPreset == (pr.empty() ? 0 : 1), "events recorded: " + std::to_string(evs.size()) + " (state set " + std::to_string(nState) + ", preset loaded " + std::to_string(nPreset) + ")");
+    fputs(out.c_str(), stdout);
+    std::string outdir = opt(o, "outdir");
+    if (!outdir.empty()) { FILE* f = fopen((outdir + "/" + opt(o, "tag", "nl7") + "_nl7.txt").c_str(), "wb"); if (f) { fputs(out.c_str(), f); fclose(f); } }
+    return fails ? 1 : 0;
+}
+
 int main(int argc, char** argv) {
     int code = 0;
     if (scannerChildMain(argc, argv, code)) return code;
@@ -248,6 +346,7 @@ int main(int argc, char** argv) {
     if (c == "scan") return cmdScan(argc, argv);
     if (c == "run") return cmdRun(argc, argv);
     if (c == "diag") return cmdDiag(argc, argv);
+    if (c == "nl7") return cmdNl7(argc, argv);
     fprintf(stderr, "usage: alvst3 scan [--folder DIR]... [--json FILE] | alvst3 run --plugin BUNDLE [--name NAME] --outdir DIR --tag TAG [--in FILE.wav]\n");
     return 2;
 }

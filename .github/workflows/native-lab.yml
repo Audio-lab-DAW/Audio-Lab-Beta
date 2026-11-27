@@ -1,4 +1,4 @@
-name: Native lab (task NM1 tests)
+name: Native lab (task NM1 tests; test app 0.7, task NL7)
 
 # The first native tests for the Mac: Core Audio + one effect bit for bit (A), a command line VST3 host (B),
 # and the small "AudioLab VST3 test" app (C). Runs only when started by hand. Does not touch the desktop build.
@@ -12,12 +12,16 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-5'
+        default: 'native-lab-7'
+      release_title:
+        description: 'Title of the pre-release'
+        type: string
+        default: 'AudioLab VST3 test 0.7'
       runner:
-        description: 'macOS runner label (task NL5: macos-15, macos-14 or macos-latest, whichever gets a machine)'
+        description: 'macOS runner label (task NL7: macos-latest; macos-15 got no machine in NL5)'
         type: choice
-        options: [macos-15, macos-14, macos-latest]
-        default: macos-15
+        options: [macos-latest, macos-15, macos-14]
+        default: macos-latest
 
 permissions:
   contents: write
@@ -171,6 +175,14 @@ jobs:
           d "Note Expression Synth" --plugin "$S/note-expression-synth.vst3" --tag sdk_nes_48000
           echo "--- the [diag] lines of the strict synth and Surge XT"; grep '^\[diag\]' out/diag/strict_48000_diag.txt out/diag/surge_xt_48000_diag.txt || true
 
+      - name: 'Task NL7: plug-in strings, a plug-in at +20 dBFS and the safety limiter, unreported parameter changes, the event ring (no window, no sound card)'
+        continue-on-error: true
+        run: |
+          mkdir -p out/nl7
+          build/alvst3 nl7 --plugin "$HOME/Library/Audio/Plug-Ins/VST3/al-strict-synth.vst3" --outdir out/nl7 --tag strict | tee out/nl7/nl7.txt
+          echo "--- live_tools.h on its own: normal, ASan+UBSan, TSan (the event ring with 4 writer threads)"
+          tools/native-lab/nl7/run.sh "$RUNNER_TEMP/nl7-tools" 2>&1 | tee out/nl7/live_tools_test.txt
+
       # ---------------- test C ----------------
       - name: 'Test C: build the test app'
         id: app
@@ -190,9 +202,13 @@ jobs:
         if: steps.app.outcome == 'success'
         continue-on-error: true
         run: |
-          runapp() {   # $1 = output folder, $2 = plug-in name
+          # task NL7: mda JX10 where the app scans, too
+          if [ -d "$RUNNER_TEMP/sdk-vst3/mda-vst3.vst3" ]; then cp -R "$RUNNER_TEMP/sdk-vst3/mda-vst3.vst3" "$HOME/Library/Audio/Plug-Ins/VST3/"; fi
+          runapp() {   # $1 = output folder, $2 = plug-in name, then extra arguments for the app
             mkdir -p "$1"
-            "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/$1" --plugin-name "$2" --probe > "$1/stdout.txt" 2>&1 &
+            OUT="$1"; NAME="$2"; shift 2
+            "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/$OUT" --plugin-name "$NAME" --probe "$@" > "$OUT/stdout.txt" 2>&1 &
+            set -- "$OUT" "$NAME"
             PID=$!
             for i in $(seq 1 60); do [ -f "$1/scanned" ] && break; kill -0 $PID 2>/dev/null || break; sleep 0.5; done
             sleep 0.7; screencapture -x "$1/screen-main.png" || echo "no screenshot"
@@ -201,13 +217,19 @@ jobs:
             for i in $(seq 1 240); do [ -f "$1/done" ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
             kill $PID 2>/dev/null || true
             echo "=== $2: report"; cat "$1/AudioLab-VST3-test-report.txt" || true
-            echo "--- $2: the 0.5 lines"; grep -E '^\[(selftest|notes|probe|presets|clap|au|rosetta|broken|device)\]' "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- $2: the 0.5 and 0.7 lines"; grep -E '^\[(selftest|notes|probe|presets|clap|au|rosetta|broken|device|warning|level|format|audio|param|load)\]' "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- empty lines in the report: $(grep -c '^$' "$1/AudioLab-VST3-test-report.txt" || true)"
             echo "--- first bytes (a UTF-8 BOM is EF BB BF; plain ASCII has none)"; head -c 16 "$1/AudioLab-VST3-test-report.txt" | od -An -tx1 || true
             LC_ALL=C grep -c '[^[:print:][:space:]]' "$1/AudioLab-VST3-test-report.txt" | sed 's/^/lines with bytes outside ASCII: /' || true
             echo "--- output"; tail -30 "$1/stdout.txt" || true
           }
           runapp out/c "Surge XT"
           runapp out/c-strict "AL Strict Synth"
+          # task NL7: the test instrument at +20 dBFS (warning, red mark, safety limiter), and "Use the deepest format" on this machine's device
+          runapp out/c-strict-loud "AL Strict Synth" --set-param "Loud (+20 dBFS)=1" --deepest
+          # task NL7: the test instrument changing a parameter without telling the host, while its window is open
+          runapp out/c-strict-sneaky "AL Strict Synth" --set-param "Sneaky drift=1"
+          runapp out/c-jx10 "mda JX10"
 
       - name: Summary
         if: always()
@@ -244,4 +266,4 @@ jobs:
         run: |
           # a pre-release, never "latest": the desktop app's download page and updater follow the latest full release
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" --prerelease --latest=false --target "$GITHUB_SHA" --title "AudioLab VST3 test (native lab, not the app)" --notes-file tools/native-lab/READ-ME-FIRST.txt "AudioLab-VST3-test-mac-arm64.zip" tools/native-lab/READ-ME-FIRST.txt
+          gh release create "$TAG" --prerelease --latest=false --target "$GITHUB_SHA" --title "${{ inputs.release_title }}" --notes-file tools/native-lab/READ-ME-FIRST.txt "AudioLab-VST3-test-mac-arm64.zip" tools/native-lab/READ-ME-FIRST.txt
