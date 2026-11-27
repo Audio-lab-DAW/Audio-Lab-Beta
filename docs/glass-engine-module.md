@@ -1,16 +1,16 @@
-# AudioLab glass engine: the module (tasks G2, G2b, G2c and G2d, 27 November 2026)
+# AudioLab glass engine: the module (tasks G2, G2b, G2c, G2d and G2e, 27 November 2026)
 
-The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.2 (task G2d). Since 2.0 (task G2b) the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). 2.1 follows the Mac run of the 2.0 test page (plan 3.6): two small savings, a canvas that can be only as large as its glass, a backdrop rate, and a test page that finds the cost; see section 7b. **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here. **2.2 follows the Mac run of the 2.1 test page (plan 3.7): every row kept 100 % at 240 fps, and one thing looked wrong: inside square panels the refraction was rounded. 2.2 gives square panels a square lens and bends only along free edges.**
+The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.3 (task G2e). Since 2.0 (task G2b) the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). 2.1 follows the Mac run of the 2.0 test page (plan 3.6): two small savings, a canvas that can be only as large as its glass, a backdrop rate, and a test page that finds the cost; see section 7b. **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here. **2.2 follows the Mac run of the 2.1 test page (plan 3.7): every row kept 100 % at 240 fps, and one thing looked wrong: inside square panels the refraction was rounded. 2.2 gives square panels a square lens and bends only along free edges.** **2.3 follows the user's look at 2.2 (plan 3.8): K7 is right for square panels, but the mixer window's glass looked rounder than its outline. In 2.3 the lens follows each panel's real corner radius.**
 
 | File | What it is |
 |---|---|
-| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 59 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
+| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 63 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
 | `tools/glass-lab/engine-test.html` | Test page: AudioLab-sized panels over a scrolling arrangement; levels Glass, Light, Solid; background drawn on the GPU or small copy; live frame-share readout and counters; "Run" table like Glass Bench 3 (with Bench 3's own GPU path as a row); "Find the cost" table. Needs `glass-engine.js` beside it. |
-| `tools/glass-lab/engine_test.py` | 171 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
+| `tools/glass-lab/engine_test.py` | 191 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
 
 Test page as an artifact (one file, engine inlined): https://claude.ai/artifact/HCdnmA3jbVsRyz4ifo7yvY
 
-**Please look at it on the Mac** (full window): in the control card, **Corners** has seven choices, K1 to K7, with a zoomed view of one corner under it. K1 is the look before (rounded lens inside square panels), K7 (starred) is the new default. Say which looks right. Then press "Run (about 45 s)" and "Copy tables" once more: every row should still be at 100 % as in plan 3.7.
+**Please look at it on the Mac** (full window): look at the **mixer window's corners** (it has 20 px corners now, like the app's; the zoomed view under **Corners** starts on its top left corner). **K8** (starred) is the new default: the lens follows the corner's own radius. **K7** is engine 2.2 for comparison. The button **Corner sheet** shows a square corner, a 20 px corner, a 10 px corner and a pill at lens Fine, Apple and Wide, K8 beside K7. Then press "Run (about 45 s)" and "Copy tables" once more: every row should still be at 100 % as in plan 3.7.
 
 ## 1. How it works
 
@@ -23,7 +23,31 @@ Test page as an artifact (one file, engine inlined): https://claude.ai/artifact/
 
 `backdrop-filter` is used nowhere.
 
+### The real outline (2.3, plan 3.8): the default
+
+**One lens field for every panel, built on the panel's own corner radius. A square panel is radius 0.**
+
+What was wrong in 2.2: a rounded panel's lens had a corner radius of **at least the lens width** (45 px on Wide), whatever the panel's own radius. On the mixer window (20 px corners) the bend so turned over a 45 px arc inside a 20 px corner, and the crescent between the two arcs was bent at full strength: a bright quarter circle far larger than the corner, which made the glass look rounder than its outline. Measured: the centre that arc turned around lay 25 px further in than the panel's corner centre (45 - 20), 35 px for a 10 px corner.
+
+The field now, per pixel (`dp` = distance to the nearer vertical and the nearer horizontal edge, `r` = the panel's corner radius):
+
+- **At the outline: the true rounded rectangle.** Inside the corner's own square (closer than `r` to both edges) the bend points away from the panel's corner centre, and its depth is counted from the panel's own arc: arcs with the panel's centre, radius `r` at the edge, shrinking inward. Beside the corner it is the plain edge. The bend is perpendicular to the real edge everywhere.
+- **Behind the corner centre: the square corner of 2.2 (K7).** Where the band is deeper than the radius (Wide: 45 against 20), the true field would pinch at the corner centre (every direction meets there) and crease along the diagonal behind it. There each edge bends along its own axis and the two add, as on a square panel.
+- **In between, one turns into the other**: the true field at the outline, the square one at the corner centre, the change spread over the radius (over lens width minus radius when that is less). Nothing jumps anywhere.
+
+So: **radius 0 is exactly 2.2's square lens (K7)**, pixel for pixel. **A radius of at least the lens width** (pills, round buttons, a 20 px window on Apple or Fine) **is exactly the lens of 2.1 and 2.2**, pixel for pixel. In between (a 20 px window or a 10 px menu on Wide, a 10 px menu on Apple) the curved part of the lens stays inside the corner's own radius, and further than the radius from the other edge each edge bends exactly as along its straight part.
+
+**Rim light.** The direction term of the bright line on the outline used the same oversized corner: on a 20 px corner it brightened the top left and darkened the top right over 45 px of each edge. It now uses the panel's own corner, so the line is even along the straight edges right up to the arc.
+
+`edges` works as in 2.2, also on rounded panels. `corners:'square'` on a panel gives it the square lens whatever its radius; `corners:'round'` a lens corner of at least the lens width (2.1's look). `squareBelow` only matters for the older models: a radius of 6 px is now a 6 px lens corner, not rounded down to square.
+
+**Cost.** Still one texture lookup per pixel. One `length()` and at most three square roots per pixel (2.2: one `length()` and one root on rounded panels, two roots on square ones); no extra pass, target or uniform work. This is far below what a table row can show, but **it was not timed on a real graphics card**: the cloud machine has none. The Mac table decides.
+
+The models of 2.2 are still there for comparison (`setCorners`, the test page's chooser: K7 is `'square'`); they are separate programs, built only when chosen.
+
 ### Corners and edges (2.2, plan 3.7)
+
+*(How 2.2 worked. Still true for square panels and for `edges`; the paragraph on rounded panels describes the older model `'square'`, now K7.)*
 
 The lens is the band along a panel's edge where the backdrop is bent. Its shape now follows the panel, and it can be left off on some edges.
 
@@ -46,7 +70,8 @@ Three more corner models exist for comparison (`setCorners`, the test page's cho
 | K3 `'fade'` | nearest edge bends; the bend fades to nothing on the diagonal | every edge | a wedge of unbent picture along the diagonal |
 | K4 `'square'` | each edge on its own axis, the two add | every edge | clean corner; still a rim on edges that border nothing |
 | K5, K6 | K2, K3 | free edges only | |
-| **K7** (default) | **K4** | **free edges only** | **recommended** |
+| K7 (2.2's default) | K4 | free edges only | right for square panels (the user, 27 Nov); rounded panels look rounder than they are |
+| **K8** `'outline'` (**default since 2.3**) | **K4** (the same pixels) | **free edges only** | **the lens follows each panel's own radius** |
 
 **Cost.** One texture lookup per pixel in every model, as before. The square shape needs two square roots and no `length()` or division; the rounded shape runs the same instructions as in 2.1. Which of the two a panel takes is one branch on a uniform (the same for every pixel of the panel). This could not be timed on a real graphics card here; the Mac table decides.
 
@@ -108,7 +133,16 @@ g.panelInfo('hdr')          // {edges:'tr', square:true, band:45}: what the pane
 g.info.corners              // 'square'
 ```
 
-Options of `create`: `corners` (`'square'`), `squareBelow` (8: panels with a radius under this many px take the square lens), `bounds`. `kinds.docked.edges` is `'auto'`; a kind given through `opts.kinds` can set its own `edges`.
+Added in 2.3 (nothing else in the API changed):
+
+```js
+g.setCorners('outline');    // the default: the lens follows each panel's real outline. 'square' = 2.2's model, kept for comparison
+g.panelInfo('mix')          // {edges:'trbl', square:false, band:45, lensRadius:20}: lensRadius = the corner radius of the panel's lens
+g.info.corners              // 'outline'
+AudioLabGlass.CORNERS       // ['square', 'blend', 'fade', 'round', 'outline']
+```
+
+Options of `create`: `corners` (`'outline'` since 2.3), `squareBelow` (8: panels with a radius under this many px take the square lens), `bounds`. `kinds.docked.edges` is `'auto'`; a kind given through `opts.kinds` can set its own `edges`.
 
 `create(canvas, {backdropRate: 120})` sets the rate at the start. `info.sceneRects` is one less than in 2.0: the background colour is no longer a rectangle.
 
@@ -255,7 +289,7 @@ The test page is built exactly this way (two engines, docked and floating, both 
 
 ## 5. What was tested (headless, cloud machine)
 
-`python3 tools/glass-lab/engine_test.py`: **171 checks, all pass**, no console errors or warnings (151 before task G2d, 126 before G2c). `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
+`python3 tools/glass-lab/engine_test.py`: **191 checks, all pass**, no console errors or warnings (171 before task G2e, 151 before G2d, 126 before G2c). `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
 
 - **Uploads == 0 on the scene path**: scrolling and playing for one second at a simulated 240 frames per second with a panel moving: backdrop drawn 240 times, 0 canvas uploads, 0 lists sent, 240 panel redraws. On the test page (1x and 2x): scrolling + mixer moving and playing + mixer moving give 0 uploads and 0 sends on both layers.
 - **A playhead-only change does not send the clips again**: 20 playhead steps give 20 backdrop draws and 0 sends; the same for 20 scroll steps and 20 zoom steps; setting a value it already has does nothing; an edit sends once.
@@ -266,7 +300,16 @@ The test page is built exactly this way (two engines, docked and floating, both 
 - **2.2, rounded panels unchanged**: a window (radius 16), a menu (12), a pill (16) and a sheet (8) are pixel-identical with every corner model, `'round'` included. Checked once by hand against the 2.1 file itself: `corners:'round'` equals 2.1 over the whole frame (difference 0), and the default equals 2.1 on every rounded panel (difference 0).
 - **2.2, edges**: `'tr'` bends the top and right edges by the usual profile and the other two not at all, also in the corners; `'none'` is pixel-identical to a panel without lens; changing `edges` costs one face redraw. **Auto**: a panel on the left border with a bar under it gets top and right; a bar whose top is only partly covered keeps its top; the bottom bar gets nothing; a hidden neighbour frees the edge; two panels that together cover an edge close it, one alone does not; a gap of 1.5 px is free, 0.6 px closed; floating kinds keep every edge on the border and do not close a docked panel's edge; `setBounds` works for a canvas smaller than the window.
 - **2.2, `setCorners`**: one face redraw, no backdrop work, nothing sent; after a lost and restored context the chosen model draws again.
-- **2.2, test page**: the chooser has K1 to K7 with the star on K7, selected; with K7 the bottom left corner and the left edge of the track headers, the device panel and the transport are pixel-identical with the lens on and off, while the top right corner and the right edge still bend; with K1 and K4 that corner does bend; the zoomed corner shows a picture for each of its five corners, draws nothing when nothing moves, and stands still during a table.
+- **2.3, the centre of the arc**: on a 20 px corner with lens Wide every pixel 1.2 to 4.5 px inside the corner arc gives a line through itself along its bend; where the lines meet is the centre the lens turns around. **It lies within 0.1 px of the panel's corner centre** (94 pixels measured). The same measurement on 2.2's model finds it 24.4 px further in, and 34.5 px for a 10 px corner: the cause, measured. Also right (within 1.6 px) for 10 and 30 px corners on Wide, 20 and 10 px on Apple and Fine, and on a 2x screen.
+- **2.3, no curved band wider than the radius**: further than the radius from the other edge, each edge bends as along its straight part, **0 px difference** (20, 10, 30 px corners on Wide, 10 px on Apple). 2.2's model is off by 20, 22 and 11 px there.
+- **2.3, even band, no blob**: just inside the arc the bend is as long as the profile gives at that depth (within 3 px); along the corner diagonal it falls steadily from the outline inward. 2.2's model had 9 px of full bend there (the crescent).
+- **2.3, no seam, no flip**: 3 px or more inside the outline no two neighbouring pixels of the corner differ by more than along a straight edge plus 1 px (20 and 30 px corners; 10 px corner plus 2 px); the two sides of the diagonal mirror each other and both bend inward. The older seam check (pairs across the diagonal) still passes for radius 0, 6 and 16; inside the corner's own arc it now allows the turn of that arc.
+- **2.3, square panels unchanged from K7**: a window, two docked panels with free edges and a sheet with `edges:'tr'`, all radius 0, are **pixel-identical** with `'outline'` and `'square'` on Fine, Apple and Wide. On the test page the whole docked layer is pixel-identical with K8 and K7.
+- **2.3, pills unchanged**: a 32 px pill, a round 40 px button, a 60 px capsule, a window with 60 px corners and a fully round panel are **pixel-identical** with `'outline'` and `'square'` on Fine, Apple and Wide; a 20 px window on Apple too (lens 20 px = the radius).
+- **2.3, rim light**: on a 20 px corner the bright line is the same from 22 to 45 px from the corner as at mid-edge (2.2's model: off by 4 levels or more).
+- **2.3, one lookup**: the shader in use has one `texture()` call; switching the model redraws the faces only.
+- **2.3, test page**: the chooser has K1 to K8 with the star on K8, selected; the mixer has 20 px corners, the menu 10 px; the corner sheet opens with 24 pictures, K8 and K7 are the same picture in the square and pill rows and differ in the 20 px row on Wide and the 10 px row on Apple and Wide; it closes (button, Escape) and leaves no canvas behind; on the page's own mixer window K8 and K7 differ only in the corners.
+- **2.2, test page**: the chooser had K1 to K7 with the star on K7, selected; with K7 the bottom left corner and the left edge of the track headers, the device panel and the transport are pixel-identical with the lens on and off, while the top right corner and the right edge still bend; with K1 and K4 that corner does bend; the zoomed corner shows a picture for each of its five corners, draws nothing when nothing moves, and stands still during a table.
 - **Middle frosted**: detail under glass (11 px clips every 23 px) drops to 28 % of the picture with blur Light, 13 % Regular, 2 % Heavy at level Glass, 14 % at level Light; the same strength on a 2x screen as on a 1x screen.
 - **Levels**: Glass (lens Wide, quarter size, every frame), Light (lens off, an eighth, 30 backdrop draws per second, panels still 240), Solid (no backdrop work); defaults are Glass, Wide 45, blur Light.
 - **Small-copy fallback**: a 1600x1000 canvas over an 800x500 engine goes up as 200x125 (never full size), 100x63 at Light; with the picture dirty on every frame at 240 per second: 60 uploads at Glass, 30 at Light; no upload without `markDirty()`; a 640x480 display shown at 120x90 goes up as 30x23; fed displays follow the same cap.
@@ -285,7 +328,8 @@ Not tested here, for the user's Mac and for Windows:
 
 - **Frame rate and real GPU cost.** This is the point of the Mac run. Bench 3 says the recipe holds 240 Hz at 7.8 megapixels; the module adds exact edge coverage in the rectangle shader and a second layer. The first Mac run of the engine page (plan 3.6) kept 67 % while scrolling and 93 % while playing; which piece costs is what "Find the cost" on the 2.1 page measures.
 - **Whether the fitted canvas or a backdrop rate is needed**: answered by the Mac run of 2.1 (plan 3.7): neither. Every row kept 100 %. They stay in the engine, off.
-- **2.2 on a real graphics card**: that the square lens costs nothing measurable (the table again), and how the corners look to the user (the chooser).
+- **2.2 on a real graphics card**: how the corners look was answered by the user (K7 is right for square panels, plan 3.8).
+- **2.3 on a real graphics card**: that the new field costs nothing measurable (the table again: every row should stay at 100 %), and how the mixer window's corners look to the user.
 - **The small-copy route on a GPU.** The reduction uses the browser's fast setting (`copyQuality: 'low'`, the one Bench 3 measured). `'medium'` would be smoother for thin lines but may cost more; not measured.
 - A real driver context loss (GPU process restart, sleep and wake), Windows drivers.
 - `allowSoftware:false`: Chromium here did not report its software renderer as a "major performance caveat", so the refusal could not be seen working on this machine.
@@ -300,7 +344,7 @@ Open `tools/glass-lab/engine-test.html` in Chrome (or the artifact), full window
 - **Live readout**: frames per second and the **share of the screen's frames that were delivered**, median / 95 % / worst frame time, and per second: background drawn on the GPU, **canvas uploads (must be 0)**, clip lists sent (must be 0), face redraws; CPU time in the engine's calls per frame.
 - **Run (about 45 s)** gives a table to copy, like Glass Bench 3: Solid as in Bench 3 (page only: no engine canvas, plain panels; it sets the screen rate); Solid drawn by the engine; Light and Glass drawn on the GPU while scrolling; Glass while playing; Light and Glass with the small copy; **Bench 3 path** (Bench 3's own GPU code and five panels, on this page). Columns: fps, frames delivered, median, 95 %, worst, and the three counters.
 - **Find the cost (about 2 min)**: Glass while scrolling, 25 rows with one piece switched off at a time: anti-aliasing off; background 120 and 60 per second; background frozen (faces still drawn); engine idle (canvases on screen, nothing drawn); floating layer off; docked layer off; each panel off in turn; scene with 0 clips; page scrolling off (the 2D arrangement stands still, the glass still scrolls its backdrop); mixer not moving; lens off; engine canvases at half size; only the mixer floating, with a full-window and with a fitted canvas; Bench 3 path; Glass playing. The last column is the change in frames delivered against "everything on". Plan 3.6 has the table that says what each jump means.
-- **Corners** (2.2): K1 to K7, see the table in section 1. The star marks the engine's default (K7). Under it a **zoomed corner** (3x) of the track headers' bottom left (the corner in the user's screenshot), their top right (two free edges), the device panel's and the tab band's top left, or the mixer's top left (rounded, for comparison). The zoom shows the arrangement and the glass layer, not the panels' DOM border and label. It is redrawn at most 12 times per second and not at all while a table runs, so the tables measure the same page as before; it can be switched off. The table header names the corner choice.
+- **Corners** (2.3): K1 to K8, see the table in section 1. The star marks the engine's default (K8); K7 is engine 2.2. Under it a **zoomed corner** (3x): the mixer window's top left (the start) or bottom left (20 px), the menu's top left (10 px), the pill's left end, the track headers' bottom left and top right, the device panel's and the tab band's top left. **Corner sheet** opens a still sheet over the window: a square corner, a 20 px corner, a 10 px corner and a pill, each at lens Fine, Apple and Wide, K8 beside K7 (24 pictures, drawn once by a helper engine that is destroyed again; nothing of it runs afterwards). The mixer window has 20 px corners and the menu 10 px (16 and 12 before), like the app's. The zoom shows the arrangement and the glass layer, not the panels' DOM border and label. It is redrawn at most 12 times per second and not at all while a table runs, so the tables measure the same page as before; it can be switched off. The table header names the corner choice.
 - **Copy tables** copies both.
 - **Time the pieces**: each piece alone with the graphics card made to finish (send the list, draw the background + blur, draw the faces, the small copy).
 - Switches: what moves underneath (scrolling, playing, still), move the mixer, floating canvas only as large as its glass, a moving device display (a small copy per refresh, off by default), lens, blur, face, Reduce transparency, Increase contrast, lose and restore the graphics context, each panel on or off.
@@ -344,11 +388,27 @@ The reason and the Mac table are in plan 3.7. API: nothing removed or changed; `
 
 **What looks different in the app after the port, without any call changed:** square docked panels lose the rounded band in their corners, and lose the rim refraction on edges that touch the window border or another docked panel. Rounded panels look the same.
 
-**For the task that ports this into `index.html`** (GS1b): replace the engine text with `tools/glass-lab/glass-engine.js` 2.2.0 as it is. Three things to check in the app:
+**For the task that ports this into `index.html`** (GS1b): replace the engine text with `tools/glass-lab/glass-engine.js` as it is (now 2.3.0, see 7d). Three things to check in the app:
 
 1. `'auto'` only knows the window border and other **docked glass panels of the same engine**, and needs their rectangles to meet within 1 px. Where a docked panel lies against something that is not glass (a solid toolbar or ruler above the track headers, a splitter), that edge counts as free. If it should not bend, give the panel its edges by name, for example `edges:'r'` for the track headers.
 2. If the docked layer's canvas does not cover the whole window, call `setBounds([0, 0, innerWidth, innerHeight])` (in the same space as the panel rectangles) so that the window border is found.
 3. `g.panelInfo(id).edges` says what each panel got; log it once after layout.
+
+## 7d. What changed from engine 2.2 (task G2d) to 2.3 (task G2e)
+
+The reason is in plan 3.8. API: nothing removed; `'outline'` is a new value of `corners` / `setCorners` and the default, `panelInfo` has `lensRadius`.
+
+| 2.2 | 2.3 |
+|---|---|
+| Rounded panels: a lens corner of at least the lens width (45 px on Wide), whatever the panel's radius | The lens corner is the panel's own: same centre, same radius at the edge; behind the corner centre the square corner of K7 |
+| Two lens shapes, chosen per panel (square under 8 px, rounded from 8 px) | One field for every radius; 0 is the square lens |
+| Rim light direction from the lens field's (oversized) corner on rounded panels | From the panel's own corner |
+| Default corner model `'square'` | `'outline'`; `'square'` is kept (K7 on the test page) |
+| A rounded panel that bends only along some edges took the square lens | It keeps its corner arcs; the closed edges' part is left out |
+
+**What looks different in the app after the port, without any call changed:** floating windows, menus and sheets whose corner radius is smaller than the lens width (everything except pills, on Wide; menus under 20 px on Apple) lose the oversized quarter circle in their corners; the glass now reads as round as its outline. Square docked panels and pills look the same, pixel for pixel. Panels with a radius of 1 to 7 px, square until now, get a lens corner of that radius.
+
+**For the task that ports this into `index.html`** (GS1b): take `tools/glass-lab/glass-engine.js` **2.3.0** as it is; the three points of section 7c still apply. One more: give each panel its **real CSS corner radius** (`radius`), since the lens now follows it; a wrong radius shows as an arc that does not match the border.
 
 ## 8. History: first numbers from the user's Mac with engine 1.0 (26 November 2026)
 

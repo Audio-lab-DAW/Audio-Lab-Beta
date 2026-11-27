@@ -100,9 +100,11 @@ def unit_tests(b):
       for(let i=1;i<34;i++){ // pairs on the two sides of the corner diagonal, 1.4 px apart
         const p=T.px(b,28+i+1,28+i), q=T.px(b,28+i,28+i+1); if(p[3]<255||q[3]<255) continue; n++;
         const v1=[p[0]-(28+i+1),p[1]-(28+i)], v2=[q[0]-(28+i),q[1]-(28+i+1)], dv=Math.hypot(v1[0]-v2[0],v1[1]-v2[1]), len=Math.hypot(v1[0],v1[1]);
-        worst=Math.max(worst, dv-0.15*len); if(v1[0]<-1||v1[1]<-1||v2[0]<-1||v2[1]<-1) inward=false; }
+        // inside the panel's own corner the direction turns with the panel's arc (2.3): two points 1.4 px apart at rho px from the corner centre differ by 1.4/rho
+        const rho=(rad-(i+1))*Math.SQRT2, turn=rho>0?Math.max(0.15,1.5/rho):0.15;
+        worst=Math.max(worst, dv-turn*len); if(v1[0]<-1||v1[1]<-1||v2[0]<-1||v2[1]<-1) inward=false; }
       res[l+rad]={worst,inward,n}; g.destroy(); } return res; }""")
-    ok('no corner seam: bending direction is continuous across the corner diagonal (Apple and wide, radius 0, 6, 16)', all(v['worst'] <= 3 and v['inward'] and v['n'] > 10 for v in r.values()), json.dumps({k: round(v['worst'], 2) for k, v in r.items()}))
+    ok('no corner seam: bending direction is continuous across the corner diagonal, apart from the turn of the panel\'s own arc (Apple and wide, radius 0, 6, 16)', all(v['worst'] <= 3 and v['inward'] and v['n'] > 10 for v in r.values()), json.dumps({k: round(v['worst'], 2) for k, v in r.items()}))
 
     # ---- 3. the GPU-drawn backdrop is the right picture ----
     r = pg.evaluate(r"""()=>{ const o={}, g=T.make(512,256,Object.assign({blur:'light',lens:'off'},T.plain));
@@ -416,10 +418,10 @@ def g2d_tests(b):
         for(let i=2;i<40;i+=3) diag.push(Math.hypot(T.px(b,28+i,28+i)[0]-(28+i), T.px(b,28+i,28+i)[1]-(28+i)));
         out[m]={worst,prof,diag,info:g.panelInfo('a'),corners:g.info.corners}; g.destroy(); }
       out.def=AudioLabGlass.create(document.createElement('canvas'),{forceFallback:true}).info.corners; out.ver=AudioLabGlass.version; out.list=AudioLabGlass.CORNERS; return out; }""")
-    ok('engine 2.2.0; the default corner model is "square"; the others are still there (blend, fade, round)', r['ver'] == '2.2.0' and r['def'] == 'square' and sorted(r['list']) == ['blend', 'fade', 'round', 'square'], [r['ver'], r['def']])
+    ok('engine 2.3.0; the default corner model is "outline"; the older ones are still there (square = 2.2, blend, fade, round)', r['ver'] == '2.3.0' and r['def'] == 'outline' and sorted(r['list']) == ['blend', 'fade', 'outline', 'round', 'square'], [r['ver'], r['def']])
     perr = max(max(abs(x - kf(dx)), abs(y - kf(dx)), abs(m - kf(dx))) for dx, x, y, m in r['square']['prof'])
     ok('square panel (radius 0, lens wide): NO curved band in the corner: at every distance from an edge the bend is the same in the corner region as along the straight edge (all four edges, two corners)',
-       r['square']['worst'] <= 1.5 and r['square']['info'] == {'edges': 'trbl', 'square': True, 'band': 45}, 'worst difference %.1f px' % r['square']['worst'])
+       r['square']['worst'] <= 1.5 and r['square']['info'] == {'edges': 'trbl', 'square': True, 'band': 45, 'lensRadius': 0}, 'worst difference %.1f px' % r['square']['worst'])
     ok('square panel: on the corner diagonal each edge bends by its own profile (the two add), so nothing can jump there', perr <= 2.5, 'worst error %.2f px' % perr)
     ok('...and the same comparison does see the arc of the rounded lens (2.1 look, corners "round") and the diagonal of "blend" and "fade", so the check above means something',
        all(r[m]['worst'] >= 8 for m in ['round', 'blend', 'fade']) and not r['round']['info']['square'], {m: round(r[m]['worst'], 1) for m in r if m in ('round', 'blend', 'fade')})
@@ -434,10 +436,10 @@ def g2d_tests(b):
        all(r[m]['d'] == 0 and r[m]['sq'] == [False] * 4 for m in ['square', 'blend', 'fade']) and r['lit'] > 40000, {m: r[m]['d'] for m in ['square', 'blend', 'fade']})
 
     # which panels count as square
-    r = pg.evaluate(r"""()=>{ const g=T.make(300,300,{blur:'light'}); g.setBackdrop(T.ramp(300,300)); const sq=(d)=>{ g.addPanel(Object.assign({id:'a',rect:[40,40,200,200],kind:'window',corners:undefined,edges:undefined},d)); return g.panelInfo('a').square; };
+    r = pg.evaluate(r"""()=>{ const g=T.make(300,300,{blur:'light',corners:'square'}); g.setBackdrop(T.ramp(300,300)); const sq=(d)=>{ g.addPanel(Object.assign({id:'a',rect:[40,40,200,200],kind:'window',corners:undefined,edges:undefined},d)); return g.panelInfo('a').square; };
       const o={r0:sq({radius:0}),r6:sq({radius:6}),r8:sq({radius:8}),r16:sq({radius:16}),force:sq({radius:16,corners:'square'}),keep:sq({radius:0,corners:'round'}),edge:sq({radius:16,edges:'tb'})};
-      const h=T.make(300,300,{blur:'light',squareBelow:20}); h.addPanel({id:'a',rect:[40,40,200,200],radius:16}); o.opt=h.panelInfo('a').square; h.destroy(); g.destroy(); return o; }""")
-    ok('square lens for a radius under 8 px (option squareBelow); corners:"square" / "round" on a panel decide for that panel; a rounded panel that bends only along some edges takes the square lens',
+      const h=T.make(300,300,{blur:'light',corners:'square',squareBelow:20}); h.addPanel({id:'a',rect:[40,40,200,200],radius:16}); o.opt=h.panelInfo('a').square; h.destroy(); g.destroy(); return o; }""")
+    ok('corner model "square" (2.2): square lens for a radius under 8 px (option squareBelow); corners:"square" / "round" on a panel decide for that panel; a rounded panel that bends only along some edges takes the square lens',
        r == {'r0': True, 'r6': True, 'r8': False, 'r16': False, 'force': True, 'keep': False, 'edge': True, 'opt': True}, r)
 
     # edges: only the named edges bend
@@ -488,6 +490,125 @@ def g2d_tests(b):
        r['drew'] and not r['same'] and r['bad'] == 'fade' and r['d'] == {'py': 0, 'sd': 0, 'ss': 0, 'dr': 1} and r['lost'] == 'fallback' and r['mode'] == 'gl' and r['px'][3] == 255 and r['corners'] == 'fade', r)
     ctx.close()
 
+def g2e_tests(b):
+    # engine 2.3 (task G2e): the lens follows the panel's REAL outline. On a rounded panel the bend turns around the corner's own centre (2.2: around a
+    # centre as far in as the lens is wide), nothing curved reaches further in than the radius, square panels are 2.2's K7, pills are unchanged
+    import math
+    ctx, pg = unit_page(b)
+    MEAS = r"""(cases)=>{ const out={};
+      for(const [m,rad,lens] of cases){ const g=T.make(256,256,Object.assign({blur:'light',corners:m,lens},T.plain)); g.setBackdrop(T.ramp(256,256));
+        g.addPanel({id:'a',rect:[28,28,200,200],radius:rad,kind:'window',tintAmount:0,shadow:0}); g.render(); const b=T.read(g), X0=28, C=X0+rad;
+        const dv=(x,y)=>{ const q=T.px(b,x,y); return q[3]<255?null:[q[0]-x,q[1]-y]; };
+        // 1. the arc of the band: every pixel 1.2 to 4.5 px inside the panel's corner arc gives a line (through the pixel, along its bend). Where the lines meet (least squares) is the centre the lens turns around.
+        let A=[[0,0],[0,0]], B=[0,0], n=0; const ring=[];
+        for(let y=X0;y<C;y++) for(let x=X0;x<C;x++){ const px=C-(x+.5), py=C-(y+.5), L=Math.hypot(px,py); if(L>rad-1.2||L<rad-4.5) continue; const v=dv(x,y); if(!v) continue; const len=Math.hypot(v[0],v[1]); if(len<4) continue;
+          const ux=v[0]/len, uy=v[1]/len, P=[[1-ux*ux,-ux*uy],[-ux*uy,1-uy*uy]]; A[0][0]+=P[0][0]; A[0][1]+=P[0][1]; A[1][0]+=P[1][0]; A[1][1]+=P[1][1]; B[0]+=P[0][0]*(x+.5)+P[0][1]*(y+.5); B[1]+=P[1][0]*(x+.5)+P[1][1]*(y+.5); n++; ring.push([rad-L,len]); }
+        const det=A[0][0]*A[1][1]-A[0][1]*A[1][0], cx=(B[0]*A[1][1]-A[0][1]*B[1])/det, cy=(A[0][0]*B[1]-A[1][0]*B[0])/det;
+        // 2. outside the corner's own square (further than the radius from the other edge) the bend of an edge is the straight edge's, to the pixel
+        let beyond=0; for(let dx=rad+1;dx<70;dx++) for(let dy=0;dy<70;dy++){ const a=dv(X0+dx,X0+dy), s=dv(128,X0+dy), a2=dv(X0+dy,X0+dx), s2=dv(X0+dy,128); if(a&&s) beyond=Math.max(beyond,Math.abs(a[1]-s[1])); if(a2&&s2) beyond=Math.max(beyond,Math.abs(a2[0]-s2[0])); }
+        // 3. no seam: the largest step of the bend between two neighbouring pixels, 3 px or more inside the outline, in the 70 px corner; against the largest step along a straight edge
+        let jump=0, ref=0; for(let y=X0;y<X0+70;y++) for(let x=X0;x<X0+70;x++){ const a=dv(x,y), r1=dv(x+1,y), d1=dv(x,y+1); if(!a||!r1||!d1) continue; const px=C-(x+.5), py=C-(y+.5), depth=px>0&&py>0?rad-Math.hypot(px,py):Math.min(x-X0,y-X0); if(depth<3) continue;
+          jump=Math.max(jump,Math.hypot(a[0]-r1[0],a[1]-r1[1]),Math.hypot(a[0]-d1[0],a[1]-d1[1])); }
+        for(let d=3;d<60;d++){ const a=dv(X0+d,128), c=dv(X0+d+1,128); ref=Math.max(ref,Math.abs(a[0]-c[0])); }
+        // 4. along the corner diagonal: how long the bend is, and the two sides of the diagonal against each other
+        const diag=[]; let flip=0; for(let i=0;i<64;i++){ const v=dv(X0+i,X0+i); if(v) diag.push(Math.hypot(v[0],v[1])); const p=dv(X0+i+1,X0+i), q=dv(X0+i,X0+i+1); if(p&&q){ flip=Math.max(flip,Math.abs(p[0]-q[1]),Math.abs(p[1]-q[0])); if(p[0]<-1||p[1]<-1) flip=99; } }
+        out[m+' '+rad+' '+lens]={c:[cx-C,cy-C],n,ring,beyond,jump,ref,diag,flip,info:g.panelInfo('a')}; g.destroy(); }
+      return out; }"""
+    cases = [[m, rad, lens] for m in ['outline', 'square'] for rad, lens in [(20, 'wide'), (10, 'wide'), (20, 'apple'), (10, 'apple'), (20, 'fine'), (10, 'fine'), (30, 'wide')]]
+    r = pg.evaluate(MEAS, cases)
+    off = lambda k: math.hypot(*r[k]['c'])
+    ok('20 px corner, lens wide (the mixer window): the lens band turns around the panel\'s own corner centre (measured from the arc of the band: the lines along the bend meet within 1 px of it)',
+       off('outline 20 wide') <= 1.0 and r['outline 20 wide']['n'] > 60 and r['outline 20 wide']['info'] == {'edges': 'trbl', 'square': False, 'band': 45, 'lensRadius': 20}, 'off by %.2f px (%d pixels measured)' % (off('outline 20 wide'), r['outline 20 wide']['n']))
+    ok('...and the same measurement on engine 2.2\'s lens (corner model "square") finds its centre about 25 px further in (45 - 20): the cause of "rounder than it is"; 10 px corner: 35 px',
+       24 <= r['square 20 wide']['c'][0] <= 26 and abs(r['square 20 wide']['c'][0] - r['square 20 wide']['c'][1]) < .5 and 34 <= r['square 10 wide']['c'][0] <= 36 and r['square 20 wide']['info']['lensRadius'] == 45, [round(v, 1) for v in r['square 20 wide']['c'] + r['square 10 wide']['c']])
+    ok('the corner centre is also right for a 10 px corner (menu) and a 30 px corner on wide, and for 20 and 10 px on Apple and fine (within 1.6 px)',
+       all(off('outline %d %s' % (rad, l)) <= 1.6 for rad, l in [(10, 'wide'), (30, 'wide'), (20, 'apple'), (10, 'apple'), (20, 'fine'), (10, 'fine')]), {k[8:]: round(off(k), 2) for k in r if k.startswith('outline')})
+    ok('no curved band wider than the panel radius: further than the radius from the other edge, each edge bends exactly as along its straight part (0 px difference; 20, 10 and 30 px corners on wide, 10 px on Apple)',
+       all(r['outline %d %s' % (rad, l)]['beyond'] == 0 for rad, l in [(20, 'wide'), (10, 'wide'), (30, 'wide'), (10, 'apple')]), {k[8:]: r[k]['beyond'] for k in r if k.startswith('outline')})
+    ok('...where engine 2.2\'s lens is off the straight edge by 20 px (20 px corner), 22 px (10 px corner) and 11 px (30 px corner) there', r['square 20 wide']['beyond'] >= 15 and r['square 10 wide']['beyond'] >= 15 and r['square 30 wide']['beyond'] >= 8, [r['square %d wide' % x]['beyond'] for x in (20, 10, 30)])
+    cont = lambda v: 1 - math.sqrt(max(0, 1 - (1 - min(1, max(0, v / 45))) ** 2))
+    even = max(abs(ln - cont(d) * 54) for d, ln in r['outline 20 wide']['ring'])
+    ok('the band is as strong in the corner as on the straight edge: 1.2 to 4.5 px inside the arc of the 20 px corner the bend has the length the profile gives at that depth', even <= 3, 'worst %.2f px' % even)
+    d20, o20 = r['outline 20 wide']['diag'], r['square 20 wide']['diag']
+    ok('no blob in the corner: along the corner diagonal the bend falls steadily from the outline inward (20 px corner, wide); engine 2.2 had 9 px of full bend there (the crescent between the outline and its own, wider arc)',
+       all(d20[i + 1] <= d20[i] + 1.5 for i in range(len(d20) - 1)) and sum(1 for v in d20 if v >= 52) <= 1 and sum(1 for v in o20 if v >= 52) >= 6 and d20[-1] <= 1.5, [[round(v) for v in d20[:8]], [round(v) for v in o20[:10]], [i for i in range(len(d20) - 1) if d20[i + 1] > d20[i] + 1.5]])
+    ok('no seam and no flip: 3 px or more inside the outline no two neighbouring pixels of the corner differ by more than along a straight edge (+1 px; 20 and 30 px corners, wide), 10 px corner +2 px; the two sides of the diagonal mirror each other and both bend inward',
+       r['outline 20 wide']['jump'] <= r['outline 20 wide']['ref'] + 1 and r['outline 30 wide']['jump'] <= r['outline 30 wide']['ref'] + 1 and r['outline 10 wide']['jump'] <= r['outline 10 wide']['ref'] + 2 and all(r[k]['flip'] <= 1 for k in r if k.startswith('outline')),
+       {k[8:]: [round(r[k]['jump'], 1), r[k]['ref'], r[k]['flip']] for k in r if k.startswith('outline')})
+
+    # square panels = K7 (2.2), pills and everything at least as round as the lens is wide = 2.1/2.2: the same pixels
+    r = pg.evaluate(r"""()=>{ const res={sq:{},pill:{},lit:0}; const shot=(m,l,add)=>{ const g=T.make(400,300,{blur:'light',corners:m,lens:l}); g.setBackdrop(T.stripes(400,300,0)); add(g); g.render(); const b=T.read(g); g.destroy(); return b; };
+      const SQ=g=>{ g.addPanel({id:'w',rect:[20,20,200,150],radius:0,kind:'window'}); g.addPanel({id:'d',rect:[0,190,150,110],radius:0,kind:'docked'}); g.addPanel({id:'d2',rect:[150,250,250,50],radius:0,kind:'docked'}); g.addPanel({id:'e',rect:[240,30,140,150],radius:0,kind:'sheet',edges:'tr'}); };
+      // a rounded panel told to take the square lens: the same bend; only its rim light now follows its own corner, so that is compared with the rim light off
+      const F=g=>g.addPanel({id:'f',rect:[250,195,120,60],radius:16,kind:'menu',corners:'square'}), shotP=(m)=>{ const g=T.make(400,300,Object.assign({blur:'light',corners:m,lens:'wide'},T.plain)); g.setBackdrop(T.stripes(400,300,0)); F(g); g.render(); const b=T.read(g); g.destroy(); return b; };
+      res.forced=T.maxDiff(shotP('outline'),shotP('square'),0,0,400,300);
+      const PL=g=>{ g.addPanel({id:'p',rect:[20,20,150,32],radius:16,kind:'pill'}); g.addPanel({id:'c',rect:[200,20,40,40],radius:20,kind:'pill'}); g.addPanel({id:'k',rect:[20,80,200,60],radius:30,kind:'pill'}); g.addPanel({id:'w',rect:[20,150,260,140],radius:60,kind:'window'}); g.addPanel({id:'o',rect:[300,150,90,140],radius:999,kind:'window'}); };
+      for(const l of ['fine','apple','wide']){ const a=shot('outline',l,SQ), b=shot('square',l,SQ); res.sq[l]=T.maxDiff(a,b,0,0,400,300); const c=shot('outline',l,PL), d=shot('square',l,PL); res.pill[l]=T.maxDiff(c,d,0,0,400,300); if(l==='wide') for(let i=3;i<c.length;i+=4) if(c[i]>250) res.lit++; }
+      const w20=g=>g.addPanel({id:'w',rect:[20,20,300,200],radius:20,kind:'window'}); res.apple20=T.maxDiff(shot('outline','apple',w20),shot('square','apple',w20),0,0,400,300); res.wide20=T.maxDiff(shot('outline','wide',w20),shot('square','wide',w20),0,0,400,300); return res; }""")
+    ok('square panels are unchanged from K7 (engine 2.2): a window, two docked panels (free edges), and a sheet with edges "tr" are pixel-identical with "outline" and "square", lens fine, Apple and wide; a rounded panel with corners:"square" bends the same (rim light aside)',
+       r['sq'] == {'fine': 0, 'apple': 0, 'wide': 0} and r['forced'] == 0, [r['sq'], r['forced']])
+    ok('pills are unchanged: a 32 px pill, a round 40 px button, a 60 px capsule, a window with 60 px corners and a fully round panel are pixel-identical with "outline" and "square" (= engine 2.1 and 2.2), lens fine, Apple and wide',
+       r['pill'] == {'fine': 0, 'apple': 0, 'wide': 0} and r['lit'] > 30000, r['pill'])
+    ok('a 20 px window is unchanged on Apple (lens 20 px = the radius) and changed on wide (lens 45 px), as it should be', r['apple20'] == 0 and r['wide20'] > 20, [r['apple20'], r['wide20']])
+
+    # the rim light follows the real corner too
+    r = pg.evaluate(r"""()=>{ const o={}; for(const m of ['outline','square']){ const g=T.make(256,256,{blur:'light',corners:m,lens:'wide'}); g.setBackdrop(T.flat(256,256,'#203040'));
+        g.addPanel({id:'a',rect:[28,28,200,200],radius:20,kind:'window',shadow:0}); g.render(); const b=T.read(g); let top=0, left=0, arc=0;
+        for(let d=22;d<46;d++){ top=Math.max(top,Math.abs(T.px(b,28+d,28)[0]-T.px(b,128,28)[0]),Math.abs(T.px(b,227-d,28)[0]-T.px(b,128,28)[0])); left=Math.max(left,Math.abs(T.px(b,28,28+d)[0]-T.px(b,28,128)[0]),Math.abs(T.px(b,28,227-d)[0]-T.px(b,28,128)[0])); }
+        o[m]={top,left,tl:T.px(b,34,34)[0],tr:T.px(b,221,34)[0],mid:T.px(b,128,28)[0]}; g.destroy(); } return o; }""")
+    ok('rim light: on a 20 px corner (lens wide) the bright line is even along the straight edges right up to the corner\'s own arc (22 to 45 px from the corner: same as mid-edge); engine 2.2 lit it by its 45 px arc (brighter towards the top left, darker towards the top right)',
+       r['outline']['top'] <= 1 and r['outline']['left'] <= 1 and r['square']['top'] >= 4 and r['outline']['tl'] > r['outline']['tr'], r)
+
+    # what a panel says, the per-panel switches, edges on a rounded panel, and one lookup per pixel
+    r = pg.evaluate(r"""()=>{ const g=T.make(300,300,Object.assign({blur:'light'},T.plain)); g.setBackdrop(T.ramp(300,300)); const o={};
+      const I=(d)=>{ g.addPanel(Object.assign({id:'a',rect:[40,40,200,200],kind:'window',corners:undefined,edges:undefined,tintAmount:0,shadow:0},d)); const i=g.panelInfo('a'); return [i.lensRadius,i.square]; };
+      o.r0=I({radius:0}); o.r6=I({radius:6}); o.r20=I({radius:20}); o.sq=I({radius:20,corners:'square'}); o.round=I({radius:20,corners:'round'}); o.big=I({radius:500}); g.setLensPreset('apple'); o.roundApple=I({radius:10,corners:'round'}); g.setLensPreset('wide');
+      I({radius:20,edges:'tb'}); g.render(); const b=T.read(g), dv=(x,y)=>[T.px(b,x,y)[0]-x, T.px(b,x,y)[1]-y]; o.tb={left:dv(45,140),top:dv(140,45),info:g.panelInfo('a')};
+      const gl=g.gl, src=gl.getAttachedShaders(gl.getParameter(gl.CURRENT_PROGRAM)).map(s=>gl.getShaderSource(s)).join('\n'); o.lookups=src.split('texture(').length-1; o.len=src.split('length(').length-1; o.model=g.info.corners;
+      const st={...g.stats}; g.setCorners('square'); g.render(); g.setCorners('outline'); o.drew=g.render(); const s1=g.stats; o.d=[s1.draws-st.draws,s1.pyramids-st.pyramids,s1.uploads-st.uploads]; g.destroy(); return o; }""")
+    ok('panelInfo.lensRadius: the panel\'s own radius (0, 6, 20; never more than half the short side); corners:"square" on a panel = 0, corners:"round" = at least the lens width (45 on wide, 20 on Apple); a radius of 6 is no longer rounded down to square',
+       [r[k] for k in ['r0', 'r6', 'r20', 'sq', 'round', 'big', 'roundApple']] == [[0, True], [6, False], [20, False], [0, True], [45, False], [100, False], [20, False]], {k: r[k] for k in ['r0', 'r6', 'r20', 'sq', 'round', 'big', 'roundApple']})
+    ok('edges on a rounded panel: with edges "tb" the left edge of a 20 px window does not bend, the top edge does', abs(r['tb']['left'][0]) <= 1 and abs(r['tb']['left'][1]) <= 1 and r['tb']['top'][1] > 20 and r['tb']['info']['edges'] == 'tb', r['tb'])
+    ok('still one texture lookup per pixel (the shader in use has one texture() call and three length()); switching the model back and forth redraws the faces only (no backdrop work, no upload)',
+       r['lookups'] == 1 and r['len'] <= 3 and r['model'] == 'outline' and r['drew'] and r['d'] == [2, 0, 0], [r['lookups'], r['len'], r['d']])
+
+    # 2x screen: the same picture, twice as large
+    r = pg.evaluate(r"""()=>{ const g=T.make(128,128,Object.assign({blur:'light',lens:'wide'},T.plain)); g.resize(128,128,2); g.setBackdrop(T.ramp(128,128));
+      g.addPanel({id:'a',rect:[14,14,100,100],radius:20,kind:'window',tintAmount:0,shadow:0}); g.render(); const b=T.read(g), X0=28, C=X0+40; let A=[[0,0],[0,0]], B=[0,0], n=0;
+      // the picture is 128 px shown at 2x: a device pixel (x,y) shows picture coordinate x/2, so red*2 - x is the bend in device pixels
+      for(let y=X0;y<C;y++) for(let x=X0;x<C;x++){ const px=C-(x+.5), py=C-(y+.5), L=Math.hypot(px,py); if(L>40-2.4||L<40-9) continue; const q=T.px(b,x,y); if(q[3]<255) continue; const v=[q[0]*2-x,q[1]*2-y], len=Math.hypot(v[0],v[1]); if(len<8) continue;
+        const ux=v[0]/len, uy=v[1]/len, P=[[1-ux*ux,-ux*uy],[-ux*uy,1-uy*uy]]; A[0][0]+=P[0][0]; A[0][1]+=P[0][1]; A[1][0]+=P[1][0]; A[1][1]+=P[1][1]; B[0]+=P[0][0]*(x+.5)+P[0][1]*(y+.5); B[1]+=P[1][0]*(x+.5)+P[1][1]*(y+.5); n++; }
+      const det=A[0][0]*A[1][1]-A[0][1]*A[1][0]; g.destroy(); return {c:[(B[0]*A[1][1]-A[0][1]*B[1])/det-C,(A[0][0]*B[1]-A[1][0]*B[0])/det-C],n}; }""")
+    ok('2x screen: the lens of a 20 px corner turns around the corner centre there too (within 2 device pixels)', math.hypot(*r['c']) <= 2 and r['n'] > 200, [round(v, 2) for v in r['c']] + [r['n']])
+    ctx.close()
+
+def g2e_page(b):
+    # the test page: the mixer window is the 20 px case, the corner sheet
+    ctx = b.new_context(viewport={'width': 1600, 'height': 1000}, device_scale_factor=1)
+    pg = ctx.new_page(); watch(pg)
+    pg.goto('file://' + HERE + '/engine-test.html?soft=1'); pg.wait_for_function("()=>window.__t&&__t.gA.stats.draws>0", timeout=30000)
+    pg.wait_for_timeout(400)
+    r = pg.evaluate("""async()=>{ const w=ms=>new Promise(r=>setTimeout(r,ms)), o={}; o.r=['mix','menu','pill','hdr'].map(k=>__t.P[k].r); o.zsel=document.querySelector('#zsel').value; o.zopts=document.querySelector('#zsel').options.length;
+      const cv=()=>document.querySelectorAll('canvas').length, c0=cv(); document.querySelector('#shb').click(); await w(300); const el=document.querySelector('#sheet'); o.open=!!el; o.cells=el?el.querySelectorAll('.g canvas').length:0; o.heads=el?[...el.querySelectorAll('.g .h')].map(e=>e.textContent):[];
+      o.wide=el?el.scrollWidth<=el.clientWidth+1:false; document.querySelector('#shx').click(); await w(100); o.closed=!document.querySelector('#sheet'); o.canvases=cv()-c0;
+      o.info=__t.sheet(); await w(100); o.shown=!!document.querySelector('#sheet'); return o; }""")
+    ok('test page: the mixer window has 20 px corners, the menu 10 px, the pill is 32 px high; the zoom starts on the mixer window\'s corner and has eight corners to pick from', r['r'] == [20, 10, 16, 0] and r['zsel'] == 'mixTL' and r['zopts'] == 8, [r['r'], r['zsel']])
+    ok('test page: "Corner sheet" opens a still sheet of 24 pictures (4 shapes x lens Fine, Apple, Wide x K8 and K7), closes again and leaves no canvas behind', r['open'] and r['cells'] == 24 and len(r['heads']) == 6 and r['heads'][0].startswith('Fine') and 'K8' in r['heads'][0] and 'K7' in r['heads'][1] and r['wide'] and r['closed'] and r['canvases'] == 0, r['heads'])
+    i = r['info']; d = i['diff']   # rows: square, 20 px, 10 px, pill; columns: fine, apple, wide
+    ok('corner sheet: every picture shows something; K8 and K7 are the same picture in the square row and the pill row (all three lens widths) and for the 20 px corner on Fine and Apple; they differ for the 20 px corner on Wide and the 10 px corner on Apple and Wide',
+       r['shown'] and i['cells'] == 24 and all(c >= 4 for c in i['colours']) and d[0:3] == [0, 0, 0] and d[9:12] == [0, 0, 0] and d[3] == 0 and d[4] == 0 and d[5] > 20 and d[7] > 8 and d[8] > 20, d)
+    pg.wait_for_timeout(200); pg.screenshot(path=os.path.join(OUT, 'engine-test-sheet.png'))
+    r = pg.evaluate("""async()=>{ const w=ms=>new Promise(r=>setTimeout(r,ms)); document.querySelector('#shx').focus(); document.querySelector('#shx').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); await w(100);
+      const s=(id,v)=>{const e=document.querySelector(id);if(e.type==='checkbox')e.checked=v;else e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}))}; s('#scn','still'); s('#drag',false); await w(500);
+      // the mixer window on the page itself: its top left corner with K8 against K7, lens on
+      const g=__t.gB, gl=g.gl, W=gl.drawingBufferWidth, H=gl.drawingBufferHeight, P=__t.P.mix, rd=k=>{ __t.setK(k); g.render(); g.debug.draw(); const b=new Uint8Array(W*H*4); gl.readPixels(0,0,W,H,gl.RGBA,gl.UNSIGNED_BYTE,b); return b; };
+      const a=rd('K8'), b=rd('K7'); __t.setK('K8'); const diff=(x0,y0,x1,y1)=>{ let m=0; for(let y=y0;y<y1;y++) for(let x=x0;x<x1;x++){ const i=((H-1-y)*W+x)*4; for(let c=0;c<3;c++) m=Math.max(m,Math.abs(a[i+c]-b[i+c])); } return m; };
+      const gA=__t.gA, la=gA.gl, WA=la.drawingBufferWidth, HA=la.drawingBufferHeight, rdA=k=>{ __t.setK(k); gA.render(); gA.debug.draw(); const b=new Uint8Array(WA*HA*4); la.readPixels(0,0,WA,HA,la.RGBA,la.UNSIGNED_BYTE,b); return b; }, a8=rdA('K8'), a7=rdA('K7'); __t.setK('K8');
+      let dock=0, litA=0; for(let i=0;i<a8.length;i++){ dock=Math.max(dock,Math.abs(a8[i]-a7[i])); if((i&3)===3&&a8[i]>250) litA++; }
+      const x=P.x+P.dx, y=P.y, o={dock, litA, esc:!document.querySelector('#sheet'), corner:diff(x,y,x+60,y+60), far:diff(x+70,y,x+P.w-70,y+P.h), mid:diff(x,y+70,x+P.w,y+P.h-70), lr:g.panelInfo('mix').lensRadius, k:__t.k}; s('#scn','scroll'); s('#drag',true); return o; }""")
+    ok('test page: Escape closes the sheet; on the page\'s own mixer window K8 and K7 differ only in the corners (the straight edges and the middle are the same pixels), and the mixer\'s lens radius is 20; the docked layer (all square panels) is pixel-identical with K8 and K7', r['dock'] == 0 and r['litA'] > 100000 and r['esc'] and r['corner'] > 8 and r['far'] == 0 and r['mid'] == 0 and r['lr'] == 20 and r['k'] == 'K8', r)
+    ctx.close()
+
 def g2d_page(b):
     # the Corners chooser and the zoomed corner on the test page
     ctx = b.new_context(viewport={'width': 1600, 'height': 1000}, device_scale_factor=1)
@@ -496,29 +617,29 @@ def g2d_page(b):
     pg.wait_for_timeout(400)
     E = "()=>Object.fromEntries(Object.keys(__t.P).map(k=>[k,(k==='mix'||k==='menu'||k==='pill'?__t.gB:__t.gA).panelInfo(k)]))"
     r = pg.evaluate("()=>({opts:[...document.querySelectorAll('#ksel option')].map(o=>o.textContent),sel:document.querySelector('#ksel').value,k:__t.k,a:__t.gA.info.corners,b:__t.gB.info.corners,ver:document.querySelector('#ver').textContent})")
-    ok('test page: Corners chooser K1 to K7, the star on K7 (square, lens only on free edges), which is selected and is what the engine does by default', len(r['opts']) == 7 and [o[:2] for o in r['opts']] == ['K%d' % i for i in range(1, 8)] and r['opts'][6].startswith('K7 ★') and sum('★' in o for o in r['opts']) == 1 and r['sel'] == 'K7' and r['k'] == 'K7' and r['a'] == 'square' and r['b'] == 'square' and r['ver'] == '2.2.0', r['opts'])
+    ok('test page: Corners chooser K1 to K8, the star on K8 (the real outline, lens only on free edges), which is selected and is what the engine does by default; K7 (engine 2.2) is still there', len(r['opts']) == 8 and [o[:2] for o in r['opts']] == ['K%d' % i for i in range(1, 9)] and r['opts'][7].startswith('K8 ★') and r['opts'][6].startswith('K7 engine 2.2') and sum('★' in o for o in r['opts']) == 1 and r['sel'] == 'K8' and r['k'] == 'K8' and r['a'] == 'outline' and r['b'] == 'outline' and r['ver'] == '2.3.0', r['opts'])
     e = pg.evaluate(E)
-    ok('test page, K7 (as the app will use it: the engine finds the free edges): track headers bend on top and right only, the tab band on top only, device panel and transport nowhere; mixer, menu and pill on every edge with the rounded lens',
-       [e[k]['edges'] for k in ['hdr', 'band', 'dev', 'tr', 'mix', 'menu', 'pill']] == ['tr', 't', '', '', 'trbl', 'trbl', 'trbl'] and all(e[k]['square'] for k in ['hdr', 'band', 'dev', 'tr']) and not any(e[k]['square'] for k in ['mix', 'menu', 'pill']), {k: v['edges'] for k, v in e.items()})
+    ok('test page, K8 (as the app will use it: the engine finds the free edges): track headers bend on top and right only, the tab band on top only, device panel and transport nowhere; mixer, menu and pill on every edge with a lens of their own corner radius (20, 10 and 16 px)',
+       [e[k]['edges'] for k in ['hdr', 'band', 'dev', 'tr', 'mix', 'menu', 'pill']] == ['tr', 't', '', '', 'trbl', 'trbl', 'trbl'] and all(e[k]['square'] for k in ['hdr', 'band', 'dev', 'tr']) and not any(e[k]['square'] for k in ['mix', 'menu', 'pill']) and [e[k]['lensRadius'] for k in ['hdr', 'mix', 'menu', 'pill']] == [0, 20, 10, 16], {k: v['edges'] for k, v in e.items()})
     # pixels of the docked layer, the same instant: lens on against lens off
     shot = r"""(k)=>{ const g=__t.gA, gl=g.gl, W=gl.drawingBufferWidth, H=gl.drawingBufferHeight, P=__t.P.hdr, rd=()=>{ g.render(); g.debug.draw(); const b=new Uint8Array(W*H*4); gl.readPixels(0,0,W,H,gl.RGBA,gl.UNSIGNED_BYTE,b); return b; };
       __t.setK(k); g.setLensPreset('wide'); const on=rd(); g.setLensPreset('off'); const off=rd(); g.setLensPreset('wide'); g.render();
       const diff=(x0,y0,x1,y1)=>{ let m=0; for(let y=y0;y<y1;y++) for(let x=x0;x<x1;x++){ const i=((H-1-y)*W+x)*4; for(let c=0;c<3;c++) m=Math.max(m,Math.abs(on[i+c]-off[i+c])); } return m; };
       const bot=P.y+P.h; return {bl:diff(0,bot-70,70,bot), left:diff(0,P.y+60,44,bot-60), tr:diff(P.x+P.w-44,P.y,P.x+P.w,P.y+44), right:diff(P.x+P.w-44,P.y+60,P.x+P.w,bot-60), dev:diff(0,__t.P.dev.y,300,__t.P.dev.y+60), trn:diff(0,__t.P.tr.y,300,__t.P.tr.y+48)}; }"""
-    k7 = pg.evaluate(shot, 'K7'); k4 = pg.evaluate(shot, 'K4'); k1 = pg.evaluate(shot, 'K1'); pg.evaluate("()=>__t.setK('K7')")
+    k7 = pg.evaluate(shot, 'K7'); k4 = pg.evaluate(shot, 'K4'); k1 = pg.evaluate(shot, 'K1'); pg.evaluate("()=>__t.setK('K8')")
     ok('test page, K7 in pixels: the bottom left corner and the left edge of the track headers, the device panel and the transport are identical with the lens on and off (no rim on edges that border nothing); the top right corner and the right edge still bend',
        k7['bl'] == 0 and k7['left'] == 0 and k7['dev'] == 0 and k7['trn'] == 0 and k7['tr'] > 8 and k7['right'] > 8, k7)
     ok('test page: K4 (every edge) and K1 (as before) do bend in that corner, so the chooser changes what it says it changes', k4['bl'] > 8 and k1['bl'] > 8 and k1['dev'] > 8, [k4, k1])
     r = pg.evaluate("""async()=>{ const s=(id,v)=>{const e=document.querySelector(id);if(e.type==='checkbox')e.checked=v;else e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}))}, w=ms=>new Promise(r=>setTimeout(r,ms)), o={};
       const E=()=>['hdr','band','dev','tr'].map(k=>__t.gA.panelInfo(k).edges).join(' '); s('#p_band',false); await w(100); o.noBand=E(); s('#p_band',true); await w(100); o.back=E();
       const zc=document.querySelector('#zoom'), seen=()=>{ const d=zc.getContext('2d').getImageData(0,0,zc.width,zc.height).data, c=new Set(); for(let i=0;i<d.length;i+=16) c.add(d[i]>>3<<10|d[i+1]>>3<<5|d[i+2]>>3); return c.size; };
-      o.zoom={}; for(const z of ['hdrBL','hdrTR','devTL','bandTL','mixTL']){ s('#zsel',z); await w(350); o.zoom[z]=seen(); } s('#zsel','hdrBL');
+      o.zoom={}; for(const z of ['hdrBL','hdrTR','devTL','bandTL','mixTL','mixBL','menuTL','pillTL']){ s('#zsel',z); await w(350); o.zoom[z]=seen(); } s('#zsel','hdrBL');
       s('#scn','still'); s('#drag',false); await w(500); const d0=__t.gA.stats.draws+__t.gB.stats.draws; await w(500); o.idle=__t.gA.stats.draws+__t.gB.stats.draws-d0;
-      s('#ksel','K2'); await w(300); o.k2=[__t.k,__t.gA.info.corners,E()]; o.afterChange=__t.gA.stats.draws+__t.gB.stats.draws-d0; s('#ksel','K7'); await w(200);
+      s('#ksel','K2'); await w(300); o.k2=[__t.k,__t.gA.info.corners,E()]; o.afterChange=__t.gA.stats.draws+__t.gB.stats.draws-d0; s('#ksel','K8'); await w(200);
       s('#zon',false); o.hidden=document.querySelector('#zbox').hidden; s('#zon',true); s('#scn','scroll'); s('#drag',true); return o; }""")
     ok('test page: hiding the tab band frees the edges it closed (track headers bottom, device panel top) and showing it closes them again', r['noBand'] == 'trb t t ' and r['back'] == 'tr t  ', [r['noBand'], r['back']])
-    ok('test page: the zoomed corner shows a picture for each of its five corners; with nothing moving it draws nothing (0 face redraws in half a second) and a change of the chooser redraws it', all(v >= 4 for v in r['zoom'].values()) and r['idle'] == 0 and 1 <= r['afterChange'] <= 6 and r['k2'] == ['K2', 'blend', 'trbl trbl trbl trbl'] and r['hidden'], [r['zoom'], r['idle'], r['afterChange']])
-    for k in ['K1', 'K4', 'K7']:
+    ok('test page: the zoomed corner shows a picture for each of its eight corners; with nothing moving it draws nothing (0 face redraws in half a second) and a change of the chooser redraws it', all(v >= 4 for v in r['zoom'].values()) and r['idle'] == 0 and 1 <= r['afterChange'] <= 6 and r['k2'] == ['K2', 'blend', 'trbl trbl trbl trbl'] and r['hidden'], [r['zoom'], r['idle'], r['afterChange']])
+    for k in ['K1', 'K4', 'K7', 'K8']:
         pg.evaluate("k=>{__t.setK(k)}", k); pg.wait_for_timeout(400); pg.screenshot(path=os.path.join(OUT, 'engine-test-%s.png' % k))
     ctx.close()
 
@@ -717,8 +838,10 @@ if __name__ == '__main__':
         unit_tests(b)
         g2c_tests(b)
         g2d_tests(b)
+        g2e_tests(b)
         if not os.environ.get('GLASS_UNIT_ONLY'):
             g2d_page(b)
+            g2e_page(b)
             for dsf in (1, 2): page_tests(b, dsf)
         b.close()
     ok('no console errors or warnings in any test', not LOGS, LOGS[:5])

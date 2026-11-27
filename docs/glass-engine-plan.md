@@ -368,6 +368,52 @@ Checked headless: `python3 tools/glass-lab/engine_test.py`, **171 checks, all pa
 - Slightly rounded panels (radius 8 to 44 px with the Wide lens) keep 2.1's lens, whose corner radius is the lens width and not the panel's. Nobody has pointed at it; on the 12 and 16 px corners of menus and windows it reads as round glass.
 - For GS1b: where a docked panel lies against something that is not glass (toolbar, ruler), auto cannot know; such an edge is named in the app (`edges:'r'`). See `docs/glass-engine-module.md` section 7c.
 
+### 3.8 The user's look at engine 2.2: K7 picked, rounded corners looked too round; engine 2.3 (task G2e, 27 Nov)
+
+**The user's answer** (27 Nov, on the Mac): "K7 looks good, but there's still some weirdness in the round corners. When you look at the mixer window, it looks like the corner is more rounded than it's actually square."
+
+**Decided: K7 for square panels** (square lens, each edge on its own axis, the two add; lens only on free edges). It stays, unchanged to the pixel, inside the new default.
+
+**The remaining problem.** The screenshot shows the floating Mixer window (corners of about 20 px) over the arrangement with lens Wide. In its top left, top right and bottom left corners a bright refracted band sweeps a large quarter circle, far bigger than the window's own corner; the straight edges look right. The glass so looks as if its corner were much rounder than its outline.
+
+**Cause, found in the shader and measured.** For rounded panels the lens field used `R = max(panel radius, lens width)`: 45 px on Wide for a 20 px corner. That was the earlier fix against a flip on the corner diagonal (section 1), and 3.7 had left it "open on purpose" for radii of 8 to 44 px. Two things follow from it. The bend direction turns around a centre 45 px in from both edges, not 20: measured from the picture, the centre of the band's arc lay **24.4 px** from the panel's corner centre (34.5 px for a 10 px corner). And every pixel between the panel's real arc and the lens's wider arc counts as "at the edge" and is bent at full strength: **9 px of full bend along the diagonal**, the bright crescent. The rim light's direction term used the same oversized corner (top left brighter, top right darker, over 45 px of each edge).
+
+**The model now (engine 2.3, corner model `'outline'`, K8 on the test page).** One field for every panel, built on the panel's own radius `r`; a square panel is `r = 0`.
+
+- **At the outline** it is the true rounded-rectangle field: inside the corner's own square the bend points away from the panel's corner centre and its depth is counted from the panel's own arc (arcs with the panel's centre, radius `r` at the edge, shrinking inward); beside the corner it is the plain edge.
+- **Behind the corner centre**, where the band is deeper than the radius (45 against 20), the true field would pinch at the centre and crease along the diagonal. There it is K7's square corner: each edge on its own axis, the two add.
+- **In between, one turns into the other** over the radius (over lens width minus radius when that is less): the true field at the outline, K7's at the corner centre. No seam, no flip.
+- **`r = 0` is K7 exactly; `r` of at least the lens width is the lens of 2.1 and 2.2 exactly** (pills, round buttons, a 20 px window on Apple and Fine).
+- The rim light takes its direction from the panel's own corner.
+- Lens only on free edges: as in 2.2.
+
+**Why not the true field all the way in.** It was the first thing considered. With the band deeper than the radius its arcs shrink to a point at the corner centre while the bend there is still 9 px (20 px corner, Wide) or 20 px (10 px corner): every direction meets in one point, and behind it the diagonal crease of K2 returns. The blend removes both and keeps everything curved inside the corner's own radius.
+
+**Checked headless** (`python3 tools/glass-lab/engine_test.py`, **191 checks, all pass**, no console errors; was 171):
+
+| | Engine 2.2 (K7) | Engine 2.3 (K8) |
+|---|---|---|
+| 20 px corner, Wide: centre of the band's arc, distance from the panel's corner centre | 24.4 px (both axes) | **0.0 px** |
+| 10 px corner, Wide | 34.5 px | 0.7 px (both axes) |
+| Bend further than the radius from the other edge, against the straight edge (20 / 10 / 30 px corners) | 20 / 22 / 11 px off | **0 / 0 / 0** |
+| Full bend along the corner diagonal (20 px corner) | 9 px (the crescent) | none; falls steadily from the outline |
+| Largest step between neighbouring pixels, 3 px or more inside (20 px corner; a straight edge has 3) | 10.4 px | 3.2 px |
+| Rim light 22 to 45 px from the corner against mid-edge | 4 levels or more | 0 to 1 |
+| Square panels | | pixel-identical to K7 (Fine, Apple, Wide; the test page's whole docked layer) |
+| Pills, round buttons, corners of 60 px, fully round | | pixel-identical to 2.2 (Fine, Apple, Wide) |
+
+**Cost.** Still one texture lookup per pixel; one `length()` and at most three square roots, no new pass. **Not measured**: the cloud machine has no graphics card. Nothing in the two tables' rows was changed (same eight rows of Run, same 25 of Find the cost); the Mac run must show every row still at 100 %.
+
+**Test page** (same artifact link, `docs/glass-engine-module.md`): Corners K1 to K8, the star on K8, K7 kept for comparison. The mixer window now has 20 px corners and the menu 10 px, like the app's. The zoomed corner starts on the mixer window. **Corner sheet**: a square corner, a 20 px corner, a 10 px corner and a pill, each at lens Fine, Apple and Wide, K8 beside K7.
+
+**What the user is asked to do:** look at the mixer window's corners (and the corner sheet) and run the table once more.
+
+**Left open on purpose:**
+- A small-radius corner under a wide lens keeps one visible property of a true outline: right at a straight edge the picture is moved only across that edge, and the other edge's share fades in over the radius. On a 10 px corner on Wide that is up to 20 px of sideways move appearing within 10 px. It reads as the corner of the glass; if the user sees it as a fault, the fade can be made longer (one number).
+- The rim light still runs along every edge, closed ones too (as in 3.7).
+- The "Bench 3 path" row keeps Bench 3's own shader: a speed reference, not a look.
+- `index.html` still carries an older engine; GS1b ports 2.3.0 (module doc section 7d).
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
