@@ -84,7 +84,7 @@ o = e.cmd(cmd="open", uid=bh["uid"], rate=48000, buffer=256)   # a shared virtua
 R["steps"]["open"] = {k: o.get(k) for k in ("ok", "error", "notes", "tookMilliseconds", "device", "rate", "buffer", "onTheWire", "handedToUs", "latencyFrames")}
 print("open:", R["steps"]["open"])
 sock = os.path.join("/tmp", "alengine-test-%d.sock" % os.getpid())
-s = e.cmd(cmd="source", type="socket", path=sock, prefillMs=150, highMs=1500)
+s = e.cmd(cmd="source", type="socket", path=sock, prefillMs=150, highMs=1500, pageRate=48000)
 sent = wav_read(os.path.join(HERE, "ref", "crush_plain_web.wav")) + wav_read(os.path.join(HERE, "ref", "crush_filter_web.wav")) + wav_read(os.path.join(HERE, "ref", "crush_dither_web.wav"))
 sent = sent * 2                                     # 3 seconds of the web engine's own renders
 rec = subprocess.Popen([alnative, "record", "--device", str(bh["id"]), "--seconds", "5", "--to", os.path.join(out, "loopback.wav")], stdout=subprocess.PIPE, text=True)

@@ -7,7 +7,9 @@
 //   available()            { mac, engine, bridge }: is there an engine to start
 //   start()                starts the helper; events come back through on(cb) as { ev, ... }
 //   cmd(name, options)     devices, formats, open, close, volume, mute, status, clock
-//   sound(options)         opens the way for sound ({ prefillMs, highMs, clock: 'exact' | 'follow' })
+//   sound(options)         opens the way for sound ({ pageRate, prefillMs, highMs, clock: 'exact' | 'follow' }); pageRate
+//                          must be the device's rate (task NB-R2). A 'rate' event with soundPaused: true means the
+//                          device changed rate: make the AudioContext again at event.value and call sound() again
 //   stop()                 stops the helper
 // Events besides the engine's own: 'restarted' { ok, attempt } after a crash, 'gave-up' when the page should
 // play through the web engine again.
@@ -71,7 +73,7 @@ function setup({ ipcMain, app }) {
     const r = await start(owner);
     let ok = !!r.ok;
     if (ok && lastOpen) ok = !!(await eng.send(Object.assign({}, lastOpen, { cmd: 'open' }))).ok;
-    if (ok && lastSound) ok = !!(await eng.startSound(lastSound)).ok;
+    if (ok && lastSound) ok = !!(await eng.startSound(lastSound)).ok;   // refused if the device came back at another rate: then gave-up below
     tell('restarted', { ok, attempt: restarts.length, code: m && m.code });
     if (!ok) { wanted = false; closePort(); tell('gave-up', { reason: 'the engine could not be started again' }); }
   }
@@ -91,7 +93,8 @@ function setup({ ipcMain, app }) {
     if (!eng) return { ok: false, error: 'the engine is not running' };
     Object.assign(tap, { blocks: 0, frames: 0, firstAt: 0, lastAt: 0, worstGapMs: 0, notFloat: 0 });
     o = o || {};
-    const so = { prefillMs: +o.prefillMs || 30, highMs: +o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: Math.min(20000, Math.max(100, +o.limitPpm || 2000)) };
+    // task NB-R2: pageRate (the page's AudioContext rate) is required; the engine refuses a rate that is not the device's
+    const so = { prefillMs: +o.prefillMs || 30, highMs: +o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: Math.min(20000, Math.max(100, +o.limitPpm || 2000)), pageRate: +o.pageRate || 0 };
     const r = await eng.startSound(so); if (r.ok) lastSound = so;
     return r;
   });

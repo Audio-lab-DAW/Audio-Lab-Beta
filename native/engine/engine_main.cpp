@@ -3,7 +3,8 @@
 // app (or a test) can run it as a helper:
 //   {"cmd":"devices"}                                    every device with rates, buffer range, volume, formats
 //   {"cmd":"open","uid":"...","rate":96000,"buffer":64,"exclusive":true,"bits":24,"integer":false}
-//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120,"clock":"exact"|"follow"}
+//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120,"clock":"exact"|"follow",
+//    "pageRate":48000}   (task NB-R2: a socket source must say its rate; refused unless it equals the device's)
 //   {"cmd":"clock","mode":"exact"|"follow"}   (task NB-N2b: follow the sender's clock smoothly, see follow.h)
 //   {"cmd":"volume","value":0.5}   {"cmd":"mute","on":true}   {"cmd":"status"}   {"cmd":"close"}   {"cmd":"quit"}
 // Things that change outside the program arrive as {"ev":"volume","value":0.4}, {"ev":"devices"}, ...
@@ -22,12 +23,13 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#ifdef __APPLE__
-#include "../common/coreaudio.h"
+#include "../common/coreaudio.h"   // on the Mac Core Audio; elsewhere the null device (common/nulldevice.cpp, task NB-R2)
+#ifndef __APPLE__
+#include "../common/nulldevice.h"
+#endif
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#endif
 
 using namespace al;
 
@@ -97,12 +99,19 @@ static int selftest() {
     return bad ? 1 : 0;
 }
 
-#ifdef __APPLE__
+// The engine itself. Runs on the Mac with Core Audio, and anywhere else with the null device (task NB-R2), so the
+// same code is tested on every push.
 struct Eng {
     OutputStream stream; Watcher watcher;
-    uint32_t dev = 0; bool isOpen = false, hog = false, fallback = true;
+    std::atomic<uint32_t> dev{0}; bool isOpen = false, hog = false, fallback = true;   // dev is read by the listener thread (review C5)
     std::atomic<int> source{0};     // 0 silence, 1 tone, 2 file, 3 socket
-    double rate = 48000, tonePhase = 0;
+    std::atomic<double> rate{48000};  // the device's rate; written by the listener thread, read by the device's thread (review C5)
+    double tonePhase = 0;
+    // task NB-R2, the rate contract (review A1): the page says at which rate it renders; sound plays only while that
+    // equals the device's rate. Otherwise the device plays silence and what arrives is thrown away and counted.
+    std::atomic<double> pageRate{0}; std::atomic<bool> rateOk{true}; std::atomic<uint64_t> mismatchFrames{0};
+    // task NB-R2, the hand-shake that replaces the 30 ms sleep (review C1): the device's thread marks itself inside render
+    std::atomic<int> inRender{0};
     Wav file; std::atomic<size_t> filePos{0};
     Ring ring;
     int listenFd = -1; std::thread sockThread; std::atomic<bool> sockRun{false}; std::atomic<uint64_t> sockFrames{0}; std::atomic<bool> sockClient{false};
@@ -112,20 +121,32 @@ struct Eng {
 static Eng E;
 
 static void render(void*, float** out, int, int frames) {
+    E.inRender.store(1);
     int src = E.source.load();
     if (src == 1) {
-        double inc = 440.0 / E.rate;
+        double inc = 440.0 / E.rate.load();
         for (int i = 0; i < frames; i++) { float v = (float)(std::sin(E.tonePhase * 6.283185307179586) * 0.1); out[0][i] = v; out[1][i] = v; E.tonePhase += inc; if (E.tonePhase >= 1) E.tonePhase -= 1; }
     } else if (src == 2 && E.file.frames()) {
         size_t n = E.file.frames(), p = E.filePos.load();
         for (int i = 0; i < frames; i++) { out[0][i] = E.file.data[2 * p]; out[1][i] = E.file.data[2 * p + 1]; if (++p >= n) p = 0; }
         E.filePos.store(p);
-    } else if (src == 3) {
+    } else if (src == 3 && E.rateOk.load()) {
         E.ring.read(out[0], out[1], (size_t)frames);
+    } else if (src == 3) {   // the page renders at another rate: silence, never sound at the wrong speed
+        E.mismatchFrames += E.ring.drain();
+        memset(out[0], 0, sizeof(float) * frames); memset(out[1], 0, sizeof(float) * frames);
     } else { memset(out[0], 0, sizeof(float) * frames); memset(out[1], 0, sizeof(float) * frames); }
     float pk = E.peak.load();
     for (int i = 0; i < frames; i++) { float a = std::fabs(out[0][i]), b = std::fabs(out[1][i]); if (a > pk) pk = a; if (b > pk) pk = b; }
     E.peak.store(pk);
+    E.inRender.store(0);
+}
+
+// Takes the device's thread off every source and waits until it has left render (review C1). Sequentially
+// consistent on both sides: either render saw source 0, or this sees inRender 1 and waits. No sleep guesses.
+static void quiesce() {
+    E.source = 0;
+    for (int i = 0; E.inRender.load() && i < 200000; i++) std::this_thread::sleep_for(std::chrono::microseconds(50));
 }
 
 static void stopSocket() {
@@ -188,6 +209,7 @@ static std::string statusJson() {
         ",\"callbacks\":" + std::to_string(cb) + ",\"framesPerCallbackMin\":" + std::to_string(cb ? E.stream.minFrames.load() : 0) + ",\"framesPerCallbackMax\":" + std::to_string(E.stream.maxFrames.load()) +
         ",\"overloads\":" + std::to_string(E.stream.overloads.load()) + ",\"renderAvgMicroseconds\":" + jnum(cb ? E.stream.sumNs.load() / 1000.0 / cb : 0) + ",\"renderWorstMicroseconds\":" + jnum(E.stream.worstNs.load() / 1000.0) +
         ",\"source\":" + std::to_string(E.source.load()) + ",\"peak\":" + jnum(E.peak.load()) +
+        ",\"pageRate\":" + jnum(E.pageRate.load()) + ",\"rateOk\":" + tf(E.source.load() != 3 || E.rateOk.load()) + ",\"framesAtWrongRate\":" + std::to_string(E.mismatchFrames.load()) +
         ",\"ring\":{\"fill\":" + std::to_string(E.ring.frames ? E.ring.fill() : 0) + ",\"received\":" + std::to_string(E.sockFrames.load()) + ",\"ranEmpty\":" + std::to_string(E.ring.underruns.load()) +
         ",\"droppedTimes\":" + std::to_string(E.ring.skips.load()) + ",\"droppedFrames\":" + std::to_string(E.ring.skippedFrames.load()) + ",\"silentFrames\":" + std::to_string(E.ring.silentFrames.load()) + ",\"connected\":" + tf(E.sockClient.load()) +
         ",\"clock\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + ",\"ppm\":" + jnum(E.ring.ppmMilli.load() / 1000.0) + ",\"ppmMin\":" + jnum(E.ring.ppmMinMilli.load() / 1000.0) + ",\"ppmMax\":" + jnum(E.ring.ppmMaxMilli.load() / 1000.0) + "}";
@@ -222,6 +244,7 @@ static std::string openDevice(const Msg& m) {
     }
     if (m.has("buffer")) { uint32_t now = 0; std::string e; if (!setDeviceBuffer(want, (uint32_t)m.num("buffer"), now, e)) notes += "buffer not set, the device runs " + std::to_string(now) + " frames; "; }
     E.rate = deviceInfo(want).rate;
+    if (E.source.load() == 3) E.rateOk = E.pageRate.load() == E.rate.load();   // another device or rate: the contract is checked again
     resetCounters();
     bool ok = E.stream.start(want, render, nullptr, err);
     E.isOpen = ok;
@@ -233,7 +256,14 @@ static std::string openDevice(const Msg& m) {
 static void onWatch(void*, const char* what, uint32_t dev) {
     std::string w = what;
     if (w == "volume" || w == "mute") { double v = -1; getVolume(E.dev, v); bool mu = false; getMute(E.dev, mu); say("{\"ev\":\"volume\",\"value\":" + jnum(v) + ",\"mute\":" + tf(mu) + "}"); }
-    else if (w == "rate") { DeviceInfo d = deviceInfo(E.dev); E.rate = d.rate; say("{\"ev\":\"rate\",\"value\":" + jnum(d.rate) + "}"); }
+    else if (w == "rate") {
+        // task NB-R2: the device changed rate (the user, Audio MIDI Setup, another program). While the page sends at the
+        // old rate the device plays silence; the page is told to make its context again at the new rate and send
+        // "source" again. If the device comes back to the page's rate, sound resumes by itself.
+        DeviceInfo d = deviceInfo(E.dev); E.rate = d.rate;
+        bool sock = E.source.load() == 3; double pr = E.pageRate.load(); bool ok = !sock || pr == d.rate; bool was = E.rateOk.exchange(ok);
+        say("{\"ev\":\"rate\",\"value\":" + jnum(d.rate) + (sock ? ",\"pageRate\":" + jnum(pr) + ",\"soundPaused\":" + tf(!ok) + ",\"resumed\":" + tf(ok && !was) : std::string()) + "}");
+    }
     else if (w == "buffer") { say("{\"ev\":\"buffer\",\"value\":" + std::to_string(deviceInfo(E.dev).buffer) + "}"); }
     else if (w == "exclusive") { say("{\"ev\":\"exclusive\",\"owner\":" + std::to_string(deviceInfo(E.dev).hogPid) + "}"); }
     else if (w == "default-output") { say("{\"ev\":\"default-output\",\"id\":" + std::to_string(defaultOutputDevice()) + ",\"name\":" + jstr(deviceInfo(defaultOutputDevice()).name) + "}"); }
@@ -245,8 +275,14 @@ static void onWatch(void*, const char* what, uint32_t dev) {
 }
 
 static int run() {
+    SincTable::get();   // built here, not on the device's thread the first time follow mode reads (review C2)
     E.watcher.start(onWatch, nullptr);
-    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.2\",\"pid\":" + std::to_string((int)getpid()) + "}");
+#ifdef __APPLE__
+    const char* backend = "coreaudio";
+#else
+    const char* backend = "null";
+#endif
+    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.3\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"pid\":" + std::to_string((int)getpid()) + "}");
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
@@ -254,30 +290,43 @@ static int run() {
         if (!parseMsg(line, m)) { say("{\"re\":\"?\",\"ok\":false,\"error\":\"not a JSON object\"}"); continue; }
         std::string c = m.str("cmd"), re = "{\"re\":" + jstr(c) + ",";
         if (c == "devices") say(re + "\"defaultOutput\":" + std::to_string(defaultOutputDevice()) + ",\"devices\":" + devicesJson(listDevices()) + "}");
-        else if (c == "formats") { uint32_t d = m.has("uid") ? deviceByUid(m.str("uid")) : m.has("id") ? (uint32_t)m.num("id") : E.dev; say(re + "\"formats\":" + formatsJson(d) + "}"); }
+        else if (c == "formats") { uint32_t d = m.has("uid") ? deviceByUid(m.str("uid")) : m.has("id") ? (uint32_t)m.num("id") : E.dev.load(); say(re + "\"formats\":" + formatsJson(d) + "}"); }
         else if (c == "open") say(re + openDevice(m) + "}");
         else if (c == "close") { closeDevice(true); say(re + "\"ok\":true}"); }
         else if (c == "volume") { std::string e; bool ok = setVolume(E.dev, m.num("value"), e); double v = -1; getVolume(E.dev, v); say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(e) + ",\"value\":" + jnum(v) + "}"); }
         else if (c == "mute") { bool ok = setMute(E.dev, m.flag("on")); bool mu = false; getMute(E.dev, mu); say(re + "\"ok\":" + tf(ok) + ",\"mute\":" + tf(mu) + "}"); }
         else if (c == "source") {
-            std::string t = m.str("type"), err; bool ok = true;
-            if (t == "tone") E.source = 1;
-            else if (t == "file") { Wav w; ok = wavRead(m.str("path"), w, err) && w.ch == 2; if (ok) { E.source = 0; std::this_thread::sleep_for(std::chrono::milliseconds(30)); E.file = w; E.filePos = 0; E.source = 2; } else if (err.empty()) err = "needs a stereo 32-bit float WAV"; }
+            // task NB-R2: every switch stops the socket's thread first and waits for the device's thread to leave
+            // render (quiesce), so nothing touches the ring or the file while they are replaced (review C1)
+            std::string t = m.str("type"), err, extra; bool ok = true;
+            if (t == "tone") { stopSocket(); E.source = 1; }
+            else if (t == "file") { Wav w; ok = wavRead(m.str("path"), w, err) && w.ch == 2; if (ok) { stopSocket(); quiesce(); E.file = w; E.filePos = 0; E.source = 2; } else if (err.empty()) err = "needs a stereo 32-bit float WAV"; }
             else if (t == "socket") {
-                E.source = 0; std::this_thread::sleep_for(std::chrono::milliseconds(30));
-                double r = E.rate > 0 ? E.rate : 48000;
-                E.ring.init((size_t)(r * 2), (size_t)(r * m.num("prefillMs", 30) / 1000), (size_t)(r * m.num("highMs", 120) / 1000));
-                E.ring.rate = r; E.ring.follow = m.str("clock") == "follow";   // task NB-N2b: "exact" (default) or "follow"
-                E.ring.steer.limit = m.num("limitPpm", 2000) / 1e6;
-                ok = startSocket(m.str("path"), err);
-                if (ok) E.source = 3;
-            } else { E.source = 0; }
-            say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(err) + ",\"type\":" + jstr(t) + "}");
+                double dr = E.rate.load(); if (!(dr > 0)) dr = 48000;
+                double pr = m.num("pageRate", 0);
+                if (!(pr > 0)) { ok = false; err = "the page's sample rate is missing (pageRate); the device runs " + jnum(dr) + " Hz"; }
+                else if (pr != dr) { ok = false; err = "the page renders at " + jnum(pr) + " Hz but the device runs " + jnum(dr) + " Hz: make the page's AudioContext at " + jnum(dr) + " Hz"; }
+                extra = ",\"pageRate\":" + jnum(pr) + ",\"deviceRate\":" + jnum(dr);
+                if (ok) {
+                    stopSocket(); quiesce();
+                    E.ring.init((size_t)(dr * 2), (size_t)(dr * m.num("prefillMs", 30) / 1000), (size_t)(dr * m.num("highMs", 120) / 1000));
+                    E.ring.rate = dr; E.ring.follow = m.str("clock") == "follow";   // task NB-N2b: "exact" (default) or "follow"
+                    E.ring.steer.limit = m.num("limitPpm", 2000) / 1e6;
+                    E.pageRate = pr; E.rateOk = true; E.mismatchFrames = 0;
+                    ok = startSocket(m.str("path"), err);
+                    if (ok) E.source = 3;
+                }
+            } else { stopSocket(); quiesce(); }
+            say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(err) + ",\"type\":" + jstr(t) + extra + "}");
         }
-        else if (c == "clock") { std::string mo = m.str("mode"); bool ok = mo == "follow" || mo == "exact"; if (ok) { E.ring.steer.reset(); E.ring.follow = mo == "follow"; } say(re + "\"ok\":" + tf(ok) + ",\"mode\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + "}"); }
+        else if (c == "clock") { std::string mo = m.str("mode"); bool ok = mo == "follow" || mo == "exact"; if (ok) { E.ring.requestSteerReset(); E.ring.follow = mo == "follow"; } say(re + "\"ok\":" + tf(ok) + ",\"mode\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + "}"); }
         else if (c == "status") say(re + statusJson() + "}");
         else if (c == "reset") { resetCounters(); say(re + "\"ok\":true}"); }
         else if (c == "selftest") selftest();
+#ifndef __APPLE__
+        // the null device only: change a pretend device as another program would ({"change":"rate","value":96000})
+        else if (c == "null") { std::string e = nullExternal(m.str("change"), m.num("value", 0), m.has("id") ? (uint32_t)m.num("id") : E.dev.load()); say(re + "\"ok\":" + tf(e.empty()) + ",\"error\":" + jstr(e) + "}"); }
+#endif
         else if (c == "quit") { say(re + "\"ok\":true}"); break; }
         else say(re + "\"ok\":false,\"error\":\"unknown command\"}");
     }
@@ -287,14 +336,8 @@ static int run() {
     E.watcher.stop();
     return 0;
 }
-#endif
 
 int main(int argc, char** argv) {
     if (argc > 1 && std::string(argv[1]) == "selftest") return selftest();
-#ifdef __APPLE__
     return run();
-#else
-    fprintf(stderr, "alengine needs macOS for sound; on this system only 'alengine selftest' runs.\n");
-    return 2;
-#endif
 }

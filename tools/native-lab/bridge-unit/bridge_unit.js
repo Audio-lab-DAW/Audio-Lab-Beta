@@ -58,7 +58,11 @@ function makeShell() {
     check(d.devices && d.devices[0].uid === 'fake-dac', 'devices answered (options null accepted)', d);
     const o = await S.call('al:native-cmd', 'open', { uid: 'fake-dac', rate: 96000, buffer: 64, cmd: 'quit' });
     check(o.ok && o.rate === 96000, 'open answered; a "cmd" field in the options cannot change the command', o);
-    const snd = await S.call('al:native-sound', { prefillMs: 'x', clock: 'follow', limitPpm: 1e9 });
+    const noRate = await S.call('al:native-sound', { clock: 'follow' });
+    check(!noRate.ok, 'sound without the page rate is refused (task NB-R2)', noRate);
+    const badRate = await S.call('al:native-sound', { clock: 'follow', pageRate: 16000 });
+    check(!badRate.ok && badRate.deviceRate === 96000, 'sound at 16 kHz into a device at 96 kHz is refused (task NB-R2)', badRate);
+    const snd = await S.call('al:native-sound', { prefillMs: 'x', clock: 'follow', limitPpm: 1e9, pageRate: 96000 });
     const srcCmd = logLines().filter(l => l.cmd && l.cmd.cmd === 'source').pop();
     check(snd.ok && srcCmd && srcCmd.cmd.prefillMs === 30 && srcCmd.cmd.clock === 'follow' && srcCmd.cmd.limitPpm === 20000, 'sound: bad numbers fall back, the speed limit is capped at 20000 ppm', srcCmd);
     // the worklet port: 100 blocks of 128 stereo frames as Float32Array, ArrayBuffer and a typed view; one non-float message

@@ -32,11 +32,11 @@ if(APPLE)
 endif()
 
 # ---- the engine, first part (task NB-N1): owns the audio output, driven by JSON lines -------------------
-add_executable(alengine engine/engine_main.cpp common/coreaudio.cpp)
+add_executable(alengine engine/engine_main.cpp common/coreaudio.cpp common/nulldevice.cpp)
 if(APPLE)
   target_link_libraries(alengine PRIVATE "-framework CoreAudio" "-framework CoreFoundation")
 else()
-  target_link_libraries(alengine PRIVATE pthread)
+  target_link_libraries(alengine PRIVATE pthread)   # the null device stands in for Core Audio (task NB-R2)
 endif()
 # the ring under two real threads (task NB-R1); CI builds it with -fsanitize=thread as well
 add_executable(alringstress tests/ring_stress.cpp)

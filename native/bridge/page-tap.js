@@ -37,4 +37,15 @@ async function alNativeTap(ctx, src) {
     detach() { try { if (src) src.disconnect(node); } catch (e) { /* not connected */ } try { node.disconnect(); } catch (e) { /* ignore */ } node.port.postMessage({ on: false }); try { ch.port2.close(); } catch (e) { /* moved */ } }
   };
 }
-if (typeof module !== 'undefined') module.exports = { alNativeTap };
+
+// task NB-R2, the rate contract (review A1). The page's AudioContext must render at the rate the engine's device runs
+// (the page's own clock device may run at anything, eqMac's Bose copy ran at 16 kHz: Chromium resamples on its side,
+// which is harmless because that device only plays silence). The engine refuses any other rate, and when the device
+// changes rate while sound plays it goes silent and sends { ev: 'rate', value, soundPaused: true }.
+//   const ctx = alNativeContext(status.rate);                 // status from nativeEngine.cmd('status')
+//   const stop = alNativeWatchRate(nativeEngine, async rate => { /* make the context again at rate, tap it, sound({ pageRate: rate }) */ });
+function alNativeContext(rate, latencyHint) { return new AudioContext({ sampleRate: rate, latencyHint: latencyHint || 'interactive' }); }
+function alNativeWatchRate(nativeEngine, onNewRate) {
+  return nativeEngine.on(e => { if (e && e.ev === 'rate' && e.soundPaused) onNewRate(e.value, e); });
+}
+if (typeof module !== 'undefined') module.exports = { alNativeTap, alNativeContext, alNativeWatchRate };

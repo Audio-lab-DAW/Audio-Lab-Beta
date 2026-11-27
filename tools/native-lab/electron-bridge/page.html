@@ -19,7 +19,7 @@
     const o = await N.cmd('open', { uid: bh.uid, rate: SR, buffer: 256 });
     T.open = { ok: o.ok, rate: o.rate, buffer: o.buffer, notes: o.notes, error: o.error };
     if (!o.ok) { T.error = 'open: ' + o.error; return; }
-    const s = await N.sound({ prefillMs: 100, highMs: 1000, clock: CLOCK });
+    const s = await N.sound({ prefillMs: 100, highMs: 1000, clock: CLOCK, pageRate: SR });
     T.sound = { ok: s.ok, error: s.error };
     if (!s.ok) { T.error = 'sound: ' + s.error; return; }
     T.deviceId = bh.id; T.stage = 'opened';

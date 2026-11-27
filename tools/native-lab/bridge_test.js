@@ -22,7 +22,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (!bh) { R.error = 'no loop-back device on this machine'; fs.writeFileSync(path.join(out, 'bridge.json'), JSON.stringify(R, null, 1)); console.log(R.error); await eng.stop(); return; }
   const o = await eng.open({ uid: bh.uid, rate: 48000, buffer: 256 });
   R.open = { ok: o.ok, notes: o.notes, tookMilliseconds: o.tookMilliseconds, rate: o.rate, buffer: o.buffer };
-  await eng.startSound({ prefillMs: 150, highMs: 1500 });
+  await eng.startSound({ prefillMs: 150, highMs: 1500, pageRate: 48000 });
   const ref = f => wavData(path.join(__dirname, 'ref', f));
   const one = Buffer.concat([ref('crush_plain_web.wav'), ref('crush_filter_web.wav'), ref('crush_dither_web.wav')]);
   const sent = Buffer.concat([one, one]);

@@ -6,7 +6,9 @@ name: Native CI (task NB)
 #   linux:  Release and AddressSanitizer + UndefinedBehaviorSanitizer builds of every native target; alengine
 #           selftest, the ring under two threads, the mixer (10 scenes) and every ported device (all presets, at
 #           128 and 7 frames per call) against the web engine rendered in headless Chromium, bit for bit
-#   tsan:   the ring under two threads with ThreadSanitizer (exact and follow modes)
+#   tsan:   the ring under two threads, and the whole engine on the null device, with ThreadSanitizer
+#   (linux also runs the engine on the null device end to end: the rate contract, the hand-over bit for bit, a
+#   device that changes rate while sound plays, 300 source switches under load; task NB-R2)
 #   node:   syntax of every bridge file, and the shell's side of the bridge against a stand-in engine
 #           (crash recovery, gave-up, a hung engine, the worklet port, what the page may send)
 on:
@@ -69,6 +71,10 @@ jobs:
         run: |
           build/alringstress 5 | tee out/ringstress.json
           build-asan/alringstress 3 | tee out/ringstress-asan.json
+      - name: 'The engine on the null device, end to end (rate contract, hand-over bit for bit, source switching; Release and sanitizers)'
+        run: |
+          python3 tools/native-lab/engine_null_test.py build/alengine out/null | tee out/engine-null.txt
+          python3 tools/native-lab/engine_null_test.py build-asan/alengine out/null-asan | tee out/engine-null-asan.txt
       - name: 'The mixer against the web engine (10 scenes, Release and sanitizers)'
         run: |
           python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix | tail -1 | tee out/mix.txt
@@ -97,7 +103,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/mix.txt out/mix-asan.txt out/core-compare.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -117,6 +123,18 @@ jobs:
           g++ -std=c++17 -O1 -g -fsanitize=thread -ffp-contract=off -fno-fast-math native/tests/ring_stress.cpp -o ringstress-tsan -lpthread
           TSAN_OPTIONS="halt_on_error=1 second_deadlock_stack=1" ./ringstress-tsan 10 | tee ringstress-tsan.json
           echo '```' >> "$GITHUB_STEP_SUMMARY"; cat ringstress-tsan.json >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: The engine on the null device with ThreadSanitizer (source switching under load, rate changes from the listener thread)
+        run: |
+          cmake -S native -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-fsanitize=thread" -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" > cmake-tsan.txt 2>&1 || { tail -30 cmake-tsan.txt; exit 1; }
+          cmake --build build-tsan --target alengine -j 4 2>&1 | grep -E ' error' || true
+          python3 tools/native-lab/engine_null_test.py build-tsan/alengine out-tsan | tee engine-null-tsan.txt
+          { echo '```'; cat engine-null-tsan.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: native-ci-tsan
+          path: out-tsan
+          retention-days: 14
 
   node:
     runs-on: ubuntu-24.04

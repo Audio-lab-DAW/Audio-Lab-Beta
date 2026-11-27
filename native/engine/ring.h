@@ -27,6 +27,11 @@ struct Ring {
     Steer steer;
     std::atomic<int64_t> ppmMilli{0};    // the last steering value in thousandths of a part per million (for status)
     std::atomic<int64_t> ppmMinMilli{0}, ppmMaxMilli{0};
+    // task NB-R2 (review C5): requests from other threads, carried out by the reader itself
+    std::atomic<bool> steerResetReq{false};
+    void requestSteerReset() { steerResetReq = true; }
+    // reader only: forget everything not yet played (used while the page's rate does not match the device's)
+    size_t drain() { uint64_t wp = w.load(), rp = r.load(); r.store(wp); primed = false; return (size_t)(wp - rp); }
     static constexpr size_t HISTORY = 128; // frames behind the read position the writer must leave alone (the interpolator looks back)
 
     void init(size_t capacityFrames, size_t targetFrames, size_t highFrames) {
@@ -63,6 +68,7 @@ struct Ring {
     // task NB-N2b: the follower. Reads between the samples at a steered speed (follow.h).
     void readFollow(float* L, float* R, size_t n) {
         const SincTable& S = SincTable::get();
+        if (steerResetReq.exchange(false)) steer.reset();
         const int H = SincTable::HALF, T = SincTable::TAPS, P = SincTable::PHASES;
         size_t have = fill();
         if (!primed.load()) {
