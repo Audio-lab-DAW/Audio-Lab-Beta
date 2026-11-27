@@ -13,7 +13,7 @@ Lane K owns the audio graph: `syncGraph`, `busRoute`, `fxLat`, `trkLat`, `pdcMap
 | Step | Options | What | Status |
 |---|---|---|---|
 | MX-0 | | this plan | **done** (27 Nov) |
-| MX-1 | X12, X13 | pre or post per send (blue and yellow rings); output to any group, return or track; one loop check for every link | next |
+| MX-1 | X12, X13 | pre or post per send (blue and yellow rings); output to any group, return or track; one loop check for every link | claimed (27 Nov, in progress) |
 | MX-2 | X5, X6 | delay compensation for returns, sends and sidechain triggers, live and in export; latency changes re-aligned without a click; latency you can see, subtly, in few places | |
 | MX-3 | X1, X4 | sidechain from anything (`mxScPick`, tap points) on Compressor, Gate, Multiband, OTT and the EQ's dynamic bands; "Duck under the kick" on each return and in the cable menu | |
 | MX-4 | X3, X19 | the Ducker's Spectral focus (32 bands); Bass mono switch; `MX_HOOKS.bandFilter` for lane E's band listen (X17) | |
