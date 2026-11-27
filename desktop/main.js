@@ -98,7 +98,7 @@ function registerScheme() {
   });
 }
 
-/* ---------- app icon: Ocean Yellow by default, any picker icon by choice (v0.203) ----------
+/* ---------- app icon: J3 Dipole Field by default (task IC4; Ocean Yellow before), any picker icon by choice (v0.203) ----------
    The choice lives in app-icon.json in the user-data folder. macOS: the Dock icon while the app runs (Finder and Launchpad keep the
    bundle icon, which cannot change without breaking the app's signature). Windows: every window and the taskbar, plus the Start menu
    and desktop shortcuts (an .ico written to the user-data folder). */
@@ -106,16 +106,23 @@ const ICON_DIR = path.join(__dirname, 'icon-assets', 'picker');
 let iconList = null;
 function readIcons() {
   if (iconList) return iconList;
-  try { iconList = JSON.parse(fs.readFileSync(path.join(ICON_DIR, 'icons.json'), 'utf8')); } catch (e) { iconList = { default: 'ocean-yellow', groups: [] }; }
+  try { iconList = JSON.parse(fs.readFileSync(path.join(ICON_DIR, 'icons.json'), 'utf8')); } catch (e) { iconList = { default: IC4_ICON.def, groups: [] }; }
   return iconList;
 }
+// IC4_ICON (task IC4, 27 Nov 2026): the default became J3 "Dipole Field". A choice saved before IC4 carries no version; if it is the
+// old default (Ocean Yellow) it meant "the default", so it now gives J3. Choices saved from IC4 on carry v: 2 and are kept as they are.
+const IC4_ICON = { def: 'dipole-field' };
+function icDef() { return readIcons().default || IC4_ICON.def; }
 function findIcon(id) { for (const g of readIcons().groups || []) for (const ic of g.icons || []) if (ic.id === id) return ic; return null; }
 const iconPrefFile = () => path.join(app.getPath('userData'), 'app-icon.json');
-function savedIcon() { try { const id = JSON.parse(fs.readFileSync(iconPrefFile(), 'utf8')).id; if (findIcon(id)) return id; } catch (e) { /* none saved */ } return readIcons().default || 'ocean-yellow'; }
+function savedIcon() {
+  try { const j = JSON.parse(fs.readFileSync(iconPrefFile(), 'utf8')), id = j.id; if (!j.v && id === readIcons().previous_default) return icDef(); if (findIcon(id)) return id; } catch (e) { /* none saved */ }
+  return icDef();
+}
 let curIcon = null;
 // The picker pictures are 512 px with the Apple margin (50 px). macOS wants the margin; Windows wants the tile edge to edge.
 function iconImage(id, full) {
-  const def = id === (readIcons().default || 'ocean-yellow');
+  const def = id === icDef();
   if (def && isMac) { const im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) return im; }
   const ic = findIcon(id); if (!ic) return null;
   let im = nativeImage.createFromPath(path.join(ICON_DIR, ic.file));
@@ -136,7 +143,21 @@ function defaultIcon() {
 function macBundleIcon() {
   try { return isMac && parseInt(require('os').release(), 10) >= 25 && fs.existsSync(path.join(process.resourcesPath || '', 'Assets.car')); } catch (e) { return false; }
 }
-function winIcon() { return !isMac && curIcon && curIcon !== (readIcons().default || 'ocean-yellow') ? iconImage(curIcon, true) : null; }
+function winIcon() { if (isMac || !curIcon || curIcon === icDef()) return null; return icoImage(curIcon) || iconImage(curIcon, true); }
+// Windows: a picker choice as a multi-size .ico (its own small pictures at 16, 32 and 48 px, task IC4), so the title bar and the
+// taskbar show the small versions drawn for those sizes instead of the 512 px picture shrunk. Written once per icon in user data.
+function icoFor(id) {
+  try {
+    const im = iconImage(id, true); if (!im) return null;
+    const f = path.join(app.getPath('userData'), 'app-icon-' + id + '.ico');
+    if (!fs.existsSync(f)) fs.writeFileSync(f, makeIco(im, findIcon(id)));
+    return f;
+  } catch (e) { return null; }
+}
+function icoImage(id) {
+  if (process.platform !== 'win32') return null;
+  try { const f = icoFor(id); if (!f) return null; const im = nativeImage.createFromPath(f); return im.isEmpty() ? null : im; } catch (e) { return null; }
+}
 function applyIcon(id, startup) {
   curIcon = id;
   try {
@@ -145,7 +166,7 @@ function applyIcon(id, startup) {
       // macOS 26 and later with the Icon Composer icon in the bundle (Assets.car, task IC1): the Dock draws the app's own icon, which is
       // blue in every icon style. A picture set here is a flat bitmap the system may treat on its own, so the default sets none:
       // nothing at the start, and null (back to the bundle icon) when coming back from another icon.
-      if (id === (readIcons().default || 'ocean-yellow') && macBundleIcon()) {
+      if (id === icDef() && macBundleIcon()) {
         if (!startup) { try { app.dock.setIcon(null); } catch (e) { const im = iconImage(id, false); if (im) app.dock.setIcon(im); } }
         return;
       }
@@ -153,14 +174,18 @@ function applyIcon(id, startup) {
       return;
     }
     // Windows and Linux: the default is the program's own icon (from icon.ico), so at start nothing needs doing.
-    if (startup && id === (readIcons().default || 'ocean-yellow')) return;
-    const im = (id === (readIcons().default || 'ocean-yellow') && defaultIcon()) || iconImage(id, true);
+    if (startup && id === icDef()) return;
+    const im = (id === icDef() && defaultIcon()) || icoImage(id) || iconImage(id, true);
     if (im) for (const w of BrowserWindow.getAllWindows()) { try { w.setIcon(im); } catch (e) { /* ignore */ } }
   } catch (e) { /* the icon is a nicety, never a reason to fail */ }
 }
-// A PNG-in-ICO file (Windows Vista and later read these): 256, 48, 32 and 16 px.
-function makeIco(im) {
-  const pngs = [256, 48, 32, 16].map((n) => ({ n, b: im.resize({ width: n, height: n, quality: 'best' }).toPNG() }));
+// A PNG-in-ICO file (Windows Vista and later read these): 256, 48, 32 and 16 px. The icon's own small pictures (icons.json 'small',
+// task IC4) are used at 16, 32 and 48 px when it has them; otherwise the big picture is shrunk.
+function smallPng(ic, n) {
+  try { const f = ic && ic.small && ic.small[String(n)]; if (!f) return null; const im = nativeImage.createFromPath(path.join(ICON_DIR, f)); const s = im.getSize(); return !im.isEmpty() && s.width === n ? im.toPNG() : null; } catch (e) { return null; }
+}
+function makeIco(im, ic) {
+  const pngs = [256, 48, 32, 16].map((n) => ({ n, b: smallPng(ic, n) || im.resize({ width: n, height: n, quality: 'best' }).toPNG() }));
   const head = Buffer.alloc(6 + 16 * pngs.length);
   head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(pngs.length, 4);
   let off = head.length;
@@ -171,13 +196,11 @@ function makeIco(im) {
 function updateShortcuts(id) {
   if (process.platform !== 'win32' || !app.isPackaged) return;
   try {
-    const def = id === (readIcons().default || 'ocean-yellow');
+    const def = id === icDef();
     const ud = app.getPath('userData');
     let ico = process.execPath;
     if (!def) {
-      const im = iconImage(id, true); if (!im) return;
-      ico = path.join(ud, 'app-icon-' + id + '.ico');   // a new name per icon, so Windows does not show a cached picture
-      if (!fs.existsSync(ico)) fs.writeFileSync(ico, makeIco(im));
+      ico = icoFor(id); if (!ico) return;   // a new name per icon, so Windows does not show a cached picture
     }
     for (const f of fs.readdirSync(ud)) if (/^app-icon-.*\.ico$/.test(f) && path.join(ud, f) !== ico) { try { fs.unlinkSync(path.join(ud, f)); } catch (e) { /* ignore */ } }
     const links = [path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'AudioLab Pro.lnk'), path.join(app.getPath('desktop'), 'AudioLab Pro.lnk')];
@@ -192,13 +215,13 @@ function updateShortcuts(id) {
 }
 ipcMain.handle('al:app-icons', () => {
   const L = readIcons();
-  return { default: L.default || 'ocean-yellow', current: curIcon || savedIcon(), base: `${SCHEME}://${HOST}/app-icons/`, platform: process.platform,
+  return { default: icDef(), current: curIcon || savedIcon(), base: `${SCHEME}://${HOST}/app-icons/`, platform: process.platform,
     groups: (L.groups || []).map((g) => ({ key: g.key, name: g.name, icons: (g.icons || []).map((ic) => ({ id: ic.id, name: ic.name, file: ic.file })) })) };
 });
 ipcMain.handle('al:set-app-icon', (e, id) => {
   id = String(id || '');
   if (!findIcon(id)) return { ok: false, current: curIcon || savedIcon() };
-  try { fs.writeFileSync(iconPrefFile(), JSON.stringify({ id })); } catch (x) { /* still applied for this run */ }
+  try { fs.writeFileSync(iconPrefFile(), JSON.stringify({ id, v: 2 })); } catch (x) { /* still applied for this run */ }
   applyIcon(id, false);
   setTimeout(() => updateShortcuts(id), 50);
   return { ok: true, current: id };
@@ -689,9 +712,9 @@ if (!gotLock) {
     if (f) pendingFile = f;
     // macOS only reveals audio-device names after microphone permission; ask once, quietly.
     if (isMac) { try { if (systemPreferences.getMediaAccessStatus('microphone') === 'not-determined') systemPreferences.askForMediaAccess('microphone'); } catch (e) { /* ignore */ } }
-    // The chosen icon (Ocean Yellow unless another was picked) in the Dock, also when macOS cached an older one from a previous version.
+    // The chosen icon (J3 Dipole Field unless another was picked, task IC4) in the Dock, also when macOS cached an older one from a previous version.
     applyIcon(savedIcon(), true);
-    if (curIcon !== (readIcons().default || 'ocean-yellow')) setTimeout(() => updateShortcuts(curIcon), 4000);   // an app update puts the installer's shortcuts back
+    if (curIcon !== icDef()) setTimeout(() => updateShortcuts(curIcon), 4000);   // an app update puts the installer's shortcuts back
     createWindow();
     setupUpdater();
     try { require('./voice-ai').setup({ ipcMain, app }); } catch (e) { console.warn('AI voices', e); }  // task Z2: AI voices (desktop/voice-ai.js)

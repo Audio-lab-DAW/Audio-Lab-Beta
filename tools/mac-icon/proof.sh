@@ -6,9 +6,10 @@
 #    are drawn by macOS itself (NSWorkspace) under each 'Icon & widget style', as far as a runner without a logged-in desktop allows.
 set -uo pipefail
 FAIL=0
-blue() {  # blue <label> <output of render-icon>: the tile must be the Ocean blue (20 80 168), give or take 14
+blue() {  # blue <label> <output of render-icon>: the tile must be Orbit night navy, give or take 14 a channel (task IC4; IC1: Ocean blue 20 80 168)
+  # at the sampled spot (35 %, 14 % of the picture) J3 shows the navy of its gradient: 22 31 65 (tools/icon-lab/ic4 render); the fill is 19 32 68
   local t; t=$(echo "$2" | awk '/^TILE/ {print $2, $3, $4}'); echo "   $1: tile colour $t"
-  echo "$t" | awk '{ exit !(($1-20)^2 <= 196 && ($2-80)^2 <= 196 && ($3-168)^2 <= 196) }' || { echo "   NOT BLUE: $1"; FAIL=1; }
+  echo "$t" | awk '{ exit !(($1-21)^2 <= 196 && ($2-32)^2 <= 196 && ($3-66)^2 <= 196) }' || { echo "   NOT BLUE: $1"; FAIL=1; }
 }
 OUT="${1:-icon-proof}"; APP="${2:-}"
 mkdir -p "$OUT"; OUT="$(cd "$OUT" && pwd)"

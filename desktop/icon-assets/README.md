@@ -1,4 +1,22 @@
-# AudioLab Pro icon assets: Ocean Yellow
+# AudioLab Pro icon assets: J3 "Dipole Field" (task IC4, 27 November 2026)
+
+Since IC4 the app icon is **J3** from round 3 (`docs/app-icon-round-3.md`): the dipole field tilted 10 degrees round the yellow nucleus,
+with the thinner W7 rings at 90 % so the field shows through them, in **Orbit night** (P2: tile #132044 to #070910, rings #EAF1FF,
+nucleus #FFC43C, electron #4CC9F0, field #6096FF). Everything is drawn from code: `python3 tools/icon-lab/ic4/ship.py` writes every file
+below (it reads `tools/icon-lab/round3/icons3.js` and `tools/icon-lab/ic4/small.js`).
+
+| Size | Picture |
+|---|---|
+| 128 px and up | J3 (full detail); 96 px J3 at its bold level |
+| 64 px and below | the **small master** (`tools/icon-lab/ic4/small.js`): the zoomed, tilted W7 crop, thin rings (about 1 px at 16, 1.3 px at 32, 2.3 px at 64) at 90 %, nucleus and electron with whole-pixel sizes on the pixel grid, the ring edges on pixel centres |
+
+- `icon.icns`: 16 pt and 32 pt (1x and 2x) the small master on the Apple grid, 128 to 512 pt J3. `icon.ico`: 16, 20, 24, 32, 40, 48, 64 the small master, 96, 128, 256 J3.
+- `dock-icon.png`, `icon.png`: J3 on the Apple grid at 1024. `web-*.png` and the website's favicons: 16, 32, 48 the small master, 180 to 512 J3.
+- `mac-icon/AppIcon.icon`: fill #132044 for the default, dark and tinted appearance (Dark stays navy); one layer, the whole J3 picture taken apart against that fill (`mac-icon/make_icon.py`).
+- Picker: group "Dipole field" first: Dipole Field (J3, default), Field Orbits (J4), Porthole Field (J6), Measured Field (J8), Measured Field, Chart Paper (J8 P8), Field Dial (J10), Field Dial, Chart Paper (J10 P8). Each has `picker/<id>.png` (512, Apple margin), `thumb/<id>.png` (128) and `small/<id>-{16,32,48}.png` (its own small versions, used in the Windows .ico the app writes for a choice). `icons.json` has `previous_default: ocean-yellow`: a choice of Ocean Yellow saved before IC4 means the default and now gives J3.
+- `shortcut/` keeps the W7 files of task AH (v0.219) as a record; nothing ships from there any more.
+
+## Before IC4: Ocean Yellow
 
 Final app icon: the tapered atom with a satellite electron (design code PR4), colour **Ocean Yellow**.
 Ocean blue tile `#1450A8`, white rings `#FFFFFF`, yellow nucleus and electron `#FFD23A`.

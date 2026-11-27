@@ -1,6 +1,89 @@
 {
- "default": "ocean-yellow",
+ "default": "dipole-field",
  "groups": [
+  {
+   "key": "dipole",
+   "name": "Dipole field",
+   "icons": [
+    {
+     "id": "dipole-field",
+     "name": "Dipole Field",
+     "file": "dipole-field.png",
+     "small": {
+      "16": "small/dipole-field-16.png",
+      "32": "small/dipole-field-32.png",
+      "48": "small/dipole-field-48.png"
+     },
+     "design_code": "J3 P2"
+    },
+    {
+     "id": "field-orbits",
+     "name": "Field Orbits",
+     "file": "field-orbits.png",
+     "small": {
+      "16": "small/field-orbits-16.png",
+      "32": "small/field-orbits-32.png",
+      "48": "small/field-orbits-48.png"
+     },
+     "design_code": "J4 P2"
+    },
+    {
+     "id": "porthole-field",
+     "name": "Porthole Field",
+     "file": "porthole-field.png",
+     "small": {
+      "16": "small/porthole-field-16.png",
+      "32": "small/porthole-field-32.png",
+      "48": "small/porthole-field-48.png"
+     },
+     "design_code": "J6 P2"
+    },
+    {
+     "id": "measured-field",
+     "name": "Measured Field",
+     "file": "measured-field.png",
+     "small": {
+      "16": "small/measured-field-16.png",
+      "32": "small/measured-field-32.png",
+      "48": "small/measured-field-48.png"
+     },
+     "design_code": "J8 P2"
+    },
+    {
+     "id": "measured-field-paper",
+     "name": "Measured Field, Chart Paper",
+     "file": "measured-field-paper.png",
+     "small": {
+      "16": "small/measured-field-paper-16.png",
+      "32": "small/measured-field-paper-32.png",
+      "48": "small/measured-field-paper-48.png"
+     },
+     "design_code": "J8 P8"
+    },
+    {
+     "id": "field-dial",
+     "name": "Field Dial",
+     "file": "field-dial.png",
+     "small": {
+      "16": "small/field-dial-16.png",
+      "32": "small/field-dial-32.png",
+      "48": "small/field-dial-48.png"
+     },
+     "design_code": "J10 P2"
+    },
+    {
+     "id": "field-dial-paper",
+     "name": "Field Dial, Chart Paper",
+     "file": "field-dial-paper.png",
+     "small": {
+      "16": "small/field-dial-paper-16.png",
+      "32": "small/field-dial-paper-32.png",
+      "48": "small/field-dial-paper-48.png"
+     },
+     "design_code": "J10 P8"
+    }
+   ]
+  },
   {
    "key": "colours",
    "name": "Main logo colours",
@@ -337,5 +420,6 @@
     }
    ]
   }
- ]
+ ],
+ "previous_default": "ocean-yellow"
 }

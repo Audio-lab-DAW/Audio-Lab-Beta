@@ -1,7 +1,7 @@
 {
   "name": "audiolab-studio",
   "productName": "AudioLab Pro",
-  "version": "0.269.0",
+  "version": "0.270.0",
   "description": "AudioLab Pro - a Digital Audio Workstation",
   "author": "Audio-lab-DAW",
   "license": "UNLICENSED",
@@ -38,6 +38,7 @@
       "icon-assets/picker/*.png",
       "icon-assets/picker/icons.json",
       "icon-assets/picker/thumb/*.png",
+      "icon-assets/picker/small/*.png",
       "app/**/*",
       "package.json",
       "voice-ai.js",
