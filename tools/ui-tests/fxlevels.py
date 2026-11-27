@@ -15,7 +15,7 @@ with sync_playwright() as p:
     # what each stop does to the page: elements with a backdrop filter, large see-through panels, outer shadows, glass layers in the page
     info=lambda:json.loads(run("""JSON.stringify((()=>{let bf=0,lens=0,see=[],sh=0;for(const e of document.querySelectorAll('body *')){if(!e.getClientRects().length)continue;const cs=getComputedStyle(e);const v=cs.backdropFilter;if(v&&v!=='none'){bf++;if(/url\\(/.test(v))lens++}
       const r=e.getBoundingClientRect();if(r.width*r.height<40000)continue;const m=cs.backgroundColor.match(/rgba\\((.*)\\)/),al=m?+m[1].split(',')[3]:1;if(m&&al>.2&&al<1)see.push(e.id||String(e.className).slice(0,20));if(cs.boxShadow!=='none'&&!/inset/.test(cs.boxShadow))sh++}
-      return{pm:UI.pm,fx:UI.fx,lite:UI.lite,cls:document.body.className,bf,lens,see,sh,layers:{rf:!!(rfSvg&&rfSvg.isConnected),arrBlur:!!document.getElementById('arrBlur'),arrBack:!!document.getElementById('arrBack')}}})())"""))
+      return{pm:UI.pm,fx:UI.fx,lite:UI.lite,cls:document.body.className,bf,lens,see,sh,layers:{rf:typeof rfSvg!=='undefined'&&!!(rfSvg&&rfSvg.isConnected),arrBlur:!!document.getElementById('arrBlur'),arrBack:!!document.getElementById('arrBack')}}})())"""))
     res={}
     run("(()=>{const t=S.tracks.find(t=>t.name==='Kick');selectTrack(t.id);renderFx();openMixer()})()");pg.wait_for_timeout(800)
     for st in [3,2,1,0]:
@@ -27,14 +27,14 @@ with sync_playwright() as p:
         pg.click('#pmSl [data-st="%d"] i'%st);pg.wait_for_timeout(600);res['click%d'%st]=[run("UI.pm.st"),run("document.getElementById('pmCap').textContent")];pg.locator('#set .sheet').screenshot(path=f'{out}/tab-stop{st}.png')
     pg.click('.pmsw i');pg.wait_for_timeout(400);res['switch-off']=info()['fx'];pg.locator('#set .sheet').screenshot(path=f'{out}/tab-off.png')
     pg.click('.pmsw i');pg.wait_for_timeout(400);res['switch-on']=info()['pm']
-    # effect toggles: refraction, blur, edge light, animations and the savers
+    # effect toggles: edge light, animations and the savers (v0.228, task GS3: the Refraction and Blur rows and the two old blur savers are gone)
     pg.click('#pmSl [data-st="2"] i');pg.wait_for_timeout(300)
-    for sel in ['[data-pr=refr] .bpsw i','#pmBlur [data-bm=live]','[data-pr=edge] .bpsw i','[data-pr=anim] .bpsw i']:
+    for sel in ['[data-pr=edge] .bpsw i','[data-pr=anim] .bpsw i']:
         pg.click(sel);pg.wait_for_timeout(300);res['toggle '+sel]=[run("JSON.stringify(UI.fx)"),run("UI.pm.st")]
-    t0=run("JSON.stringify([UI.glBack!==false,UI.glPlay!==false,UI.fxSleep!==false,UI.noteCache!==false])")
-    for sel in ['[data-pr=glBack] .bpsw i','[data-pr=glPlay] .bpsw i','[data-pr=slpOn] .bpsw i','[data-pr=ncOn] .bpsw i']:pg.click(sel);pg.wait_for_timeout(250)
-    res['savers']=[t0,run("JSON.stringify([UI.glBack!==false,UI.glPlay!==false,UI.fxSleep!==false,UI.noteCache!==false])")]
-    for sel in ['[data-pr=glBack] .bpsw i','[data-pr=glPlay] .bpsw i','[data-pr=slpOn] .bpsw i','[data-pr=ncOn] .bpsw i']:pg.click(sel);pg.wait_for_timeout(250)
+    t0=run("JSON.stringify([UI.fxSleep!==false,UI.noteCache!==false])")
+    for sel in ['[data-pr=slpOn] .bpsw i','[data-pr=ncOn] .bpsw i']:pg.click(sel);pg.wait_for_timeout(250)
+    res['savers']=[t0,run("JSON.stringify([UI.fxSleep!==false,UI.noteCache!==false])")]
+    for sel in ['[data-pr=slpOn] .bpsw i','[data-pr=ncOn] .bpsw i']:pg.click(sel);pg.wait_for_timeout(250)
     # Automatic: never Lightest, Undo restores
     pg.click('#pmSl [data-st="0"] i');pg.wait_for_timeout(300)
     for fake in [None,60,20]:

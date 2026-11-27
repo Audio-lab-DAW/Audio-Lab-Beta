@@ -53,15 +53,17 @@ with sync_playwright() as p:
     b, pg, logs, R = boot(p)
     R("pmSetOn(false)"); pg.wait_for_timeout(1500)
     s = json.loads(R("JSON.stringify({v:VERSION,on:GLE.on,lv:GLE.lv,mode:GLF.mode,max:GLF.max,act:GLF.act,L:GLF.L.length,cv:document.querySelectorAll('canvas.glfCv').length})"))
-    ok(s['v'] == '0.227', 'version 0.227', s['v'])
+    ok(tuple(map(int, s['v'].split('.'))) >= (0, 227), 'version 0.227 or later', s['v'])
     ok(s['on'] and s['lv'] == 'glass' and s['mode'] == 'layer' and s['max'] == 3, 'Full effects: docked engine at Glass, floating glass in layer mode, at most 3 layers', s)
     ok(not s['act'] and s['cv'] == 0, 'nothing floating open: no floating engine, no extra canvas', s)
     r = pg.evaluate("()=>GT.bf()")
     ok(r['n'] == 0, 'no element or pseudo element has a backdrop-filter (Full effects, nothing open)', r)
-    r = R("JSON.stringify({svg:!!rfSvg,rfx:RFX.size,old:[typeof rfBuild,typeof rfMap,typeof rfStyle,typeof rfAttach,/feImage/.test(rfAttach.toString())||/feImage/.test(document.documentElement.innerHTML.slice(0,0))]})")
-    r = json.loads(r)
-    ok(not r['svg'] and r['rfx'] == 0 and r['old'][:4] == ['function'] * 4, 'old lens code still in the file but unused: no SVG filter, no map, nothing attached', r)
-    ok("const f=mk('filter'" in SRC and 'function rfMap(' in SRC and 'feImage' in SRC, 'rfAttach, rfBuild, rfMap, rfStyle and the feImage lens are still in the file (step 3 deletes them)')
+    if R("typeof RFX==='undefined'"):   # v0.228 (task GS3, glass step 3): deleted
+        ok(R("typeof rfBuild==='undefined'&&typeof rfMap==='undefined'&&typeof rfStyle==='undefined'") and "mk('feImage'" not in SRC and not R("!!document.querySelector('svg filter[id^=rf]')"), 'old lens code deleted (glass step 3): no rfBuild, rfMap, rfStyle, no feImage, no SVG filter in the page')
+    else:
+        r = json.loads(R("JSON.stringify({svg:!!rfSvg,rfx:RFX.size,old:[typeof rfBuild,typeof rfMap,typeof rfStyle,typeof rfAttach]})"))
+        ok(not r['svg'] and r['rfx'] == 0 and r['old'][:4] == ['function'] * 4, 'old lens code still in the file but unused: no SVG filter, no map, nothing attached', r)
+        ok("const f=mk('filter'" in SRC and 'function rfMap(' in SRC and 'feImage' in SRC, 'rfAttach, rfBuild, rfMap, rfStyle and the feImage lens are still in the file (step 3 deletes them)')
 
     # ---- the mixer window ----
     R("openMixer()"); pg.wait_for_timeout(1500)

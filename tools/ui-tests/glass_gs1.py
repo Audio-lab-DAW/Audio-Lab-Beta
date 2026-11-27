@@ -65,10 +65,13 @@ with sync_playwright() as p:
     # ---- 2. no backdrop-filter on a docked surface, the SVG lens does not run for them ----
     bf = pg.evaluate("()=>GT.bf()")
     ok(all(x[0] == 'none' and x[1] == '' for x in bf), 'Glass: no docked surface has a backdrop-filter (computed and inline)', bf)
-    rf = json.loads(R("JSON.stringify([...RFX.entries()].filter(([el])=>el.id==='hglass'||el.id==='tr'||el.id==='fxband').map(([el,o])=>[el.id,o.v,(o.img.getAttribute('href')||'').length,o.built]))"))
-    # v0.227 (task GS2): rfAttach makes nothing any more, so no panel is attached at all (len 0 is the stronger result)
-    ok(all(x[1] == '' and x[2] == 0 and x[3] == '' for x in rf), 'the old lens (rfBuild, rfMap, rfStyle) made no map and no filter for the docked panels', rf)
-    ok(R("typeof rfAttach==='function'&&typeof rfBuild==='function'&&typeof rfMap==='function'&&typeof rfStyle==='function'") and 'feImage' in SRC, 'the old lens code is still there (step 3 removes it; since v0.227 it is in the file but makes no SVG filter)')
+    # v0.228 (task GS3, glass step 3): the old lens code is deleted; before that it was in the file but made nothing (v0.227) or nothing for the docked panels (v0.223)
+    if R("typeof RFX==='undefined'"):
+        ok(R("typeof rfBuild==='undefined'&&typeof rfMap==='undefined'&&typeof rfStyle==='undefined'") and "mk('feImage'" not in SRC and not R("!!document.querySelector('svg filter[id^=rf]')"), 'the old lens code is gone (glass step 3): no rfBuild, rfMap, rfStyle, no feImage map, no SVG filter in the page')
+    else:
+        rf = json.loads(R("JSON.stringify([...RFX.entries()].filter(([el])=>el.id==='hglass'||el.id==='tr'||el.id==='fxband').map(([el,o])=>[el.id,o.v,(o.img.getAttribute('href')||'').length,o.built]))"))
+        ok(all(x[1] == '' and x[2] == 0 and x[3] == '' for x in rf), 'the old lens (rfBuild, rfMap, rfStyle) made no map and no filter for the docked panels', rf)
+        ok(R("typeof rfAttach==='function'&&typeof rfBuild==='function'&&typeof rfMap==='function'&&typeof rfStyle==='function'") and 'feImage' in SRC, 'the old lens code is still there (step 3 removes it; since v0.227 it is in the file but makes no SVG filter)')
     # ---- 3. pixel checks on the engine canvas ----
     r = pg.evaluate(r"""()=>{const b=GT.read(),tr=GT.rect('tr'),fx=GT.rect('fxglass'),hg=GT.rect('hglass'),o={tr,fx,hg,w:b.w,h:b.h};
       o.aTr=GT.px(b,tr.x+tr.w/2,tr.y+tr.h/2)[3];o.aFx=GT.px(b,fx.x+fx.w/2,fx.y+fx.h/2)[3];o.aHg=GT.px(b,hg.x+hg.w/2,hg.y+hg.h/2)[3];o.aOpen=GT.px(b,900,200)[3];o.aOpen2=GT.px(b,400,400)[3];
