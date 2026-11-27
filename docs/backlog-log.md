@@ -6289,3 +6289,61 @@ Fired by the scheduler at about 22:35 UTC. N2c still waits for the design chain 
 ### Assumptions
 - V8's Math.tanh and Math.atan are fdlibm's (V8's ieee754, which Chromium's fdlibm copies); the curve cases with tanh and atan matching bit for bit support it.
 - An engine buffer that changes size after the first call moves a shaper to holding once (its latency changes then); the live engine keeps one buffer size per stream.
+
+## 27 November 2026: task NB-N3g, parts 1 and 2 (Chromium's FFT, oscillators and the Sidechain pump, bit for bit)
+
+Fired by the scheduler at 22:03 UTC (manual fire; its note read as data, and its points match the task's own order: the next stage from the running list, and fold AE2 L12 to L17, AE3 X5, AE4 and AE1 into the stages). N2c still waits for the design chain. The next device Fractals needs after the compressor is the sidechain pump (Bass, Music, FX). Every remaining Fractals device uses a browser node built on Chromium's FFT or its oscillators, so this run did that foundation first. `index.html`, `desktop/`, `native/host/` and `native/testapp/` (task NL8) untouched; no version.
+
+### Built
+- **Chromium's FFT.** Since Chromium 158, `FFTFrame` (fft_frame.cc) calls the RustFFT crate through a small Rust wrapper (rustfft_ffi.rs) on every platform. `native/third_party/rustfft_ffi`: that wrapper unchanged, with a C interface instead of the cxx bridge, and rustfft 6.4.1 plus its five dependencies at the versions in Chromium's Cargo.lock. CMake builds it with cargo (`al_rustfft`). Without cargo, CMake still configures (NL8's targets do not need it).
+- `native/engine/core/webnodes.h`:
+  - PeriodicWaveHandler: the band-limited tables of the four basic waveforms, 2048, 4096 or 16384 points depending on the sample rate.
+  - OscillatorNode:
+    - its k-rate path;
+    - the a-rate path Chromium takes while a value just set is still an event;
+    - the 4-frame kernels lane by lane. The SSE2 and NEON versions differ: double against float start index, division against multiplication.
+  - The scheduled-source rules: start and stop on the frame grid, the sub-sample start.
+  - ConstantSourceNode.
+  - WaveShaperNode without oversampling.
+- `native/engine/core/dev_side.h`: the app's Sidechain device, its graph node for node (see its header), registered as `side`. `RenderContext` now carries the song's `bpm` and start beat. `alrender` and `albus` read them from the case files.
+- Tools:
+  - `alnodes` and `make_ref_nodes.py`/`compare_nodes.py`: the nodes alone against plain Chromium.
+  - `make_ref_core.py`: `side` cases.
+  - `make_bus_ref.py`: scenes `sidebus`, `sidebus128`.
+  - Both reference scripts now set `SIDE_B0` to 0 before each device is made, and record `S.bpm`.
+  - CI runs the node cases in Release, under ASan+UBSan, and on the Mac.
+
+### Found by measuring against Chromium
+- **Every `AudioParam.value = v` is a setValueAtTime event.** Two consequences:
+  - With one event, the param is sample-accurate in the quantum that holds it. An oscillator started at 0 takes its a-rate path there and its k-rate path after; the two differ in the last bit.
+  - With two events (the app sets the oscillator's frequency twice), the a-rate path is used for the first two quanta the oscillator computes, however late it starts.
+  - In the first quantum the GainNodes multiply (also by 1 and by 0), and nothing is flagged silent.
+- **The pump is louder before its first beat.** The wave shaper keeps running on the oscillator's silence before the start, because its curve is not 0 at 0 and its tail is endless. So until the first beat, duck.gain is 1 + curve(0): about 1.5 at full depth, 2 at depth 0. The web engine's exports are up to 3.5 dB louder through a pump before the first beat (with depth 0, 6 dB). This is the web engine's own sound, so the native engine reproduces it. Whether to fix it is a decision for lane L or K, and fixing it would change the sound.
+- **`SIDE_B0` is shared, so a pump's phase can shift.** The app's own background renders set it, and two references made during them started a quarter beat early. In the app, an export running while such a render starts (the level journey, an analysis) could shift a pump's phase the same way. For lanes K (`renderMix`) and D (the analysis renders): pass the start beat to the device instead of a shared variable.
+
+### Proven (Linux, this machine, headless Chromium 158.0.8127.36, app v0.291)
+- Nodes alone: **52 of 52 bit for bit**. They cover:
+  - the four waveforms from 0 Hz to past Nyquist, through every interpolation path (5-point, 3-point, 2-point and the 4-frame kernel);
+  - starts between frames, and starts inside the first quantum;
+  - stops, detune, negative frequencies;
+  - 22.05, 44.1, 48 and 96 kHz; quanta 128 and 512;
+  - the pump's curves, including the shaper on silence.
+- Devices:
+  - **137 of 137** at 1, 7, 64, 128 and 512 frames per call: 26 pump cases, plus the EQ, chorus and limiter cases, plus the chains `chain-side-bass` (Fractals' Bass EQ, then its pump) and `chain-side-mix`. The 26 pump cases are every preset, Fractals' Bass (depth 100, shape 24), Music (35, 40) and FX (25, 40), every sync, depth and shape at their ends, punch and sustain with their compressors, and both negative.
+  - At the export's 512 quantum: **87 of 87** (pump and compressor) at 512, 128 and 7 frames per call.
+- Buses: **20 of 20 identical**. New: `sidebus` and `sidebus128`, with a pump on the Bass after its EQ, pumped groups at Fractals' Music and FX settings, a mono source through a 1/8 pump (comes out stereo), and the compressor and limiter on the master.
+- Cost per 128 stereo frames: 1.5 to 3 µs, 12.7 µs with punch (two compressors).
+- GitHub run 46078204995 (part 1, with the Mac job): every job green; the node cases on Apple Silicon against the Mac's Chromium too. Run 46079736723 (part 2): the Mac job green (every device case and bus scene on Apple Silicon, the pump included); GitHub's Linux machine failed all 40 pump cases: the page read the song's tempo once while the app was still opening Fractals (120 against 145), so those cases ran at another tempo than the file said. Fixed in 33021c2: every case and scene records the tempo the devices were made with. The rerun is native-ci 46081605979 (also carries part 3).
+- **Two NB runs at the same time again:** a parallel run built part 3 (the Soft Clipper and the Drive) on this run's part 1 and logged it above; this entry covers parts 1 and 2.
+
+### The picks folded in
+The AE2 picks L12 to L17, AE3's X5, the AE4 and AE1 ports and AE1's Q9 are placed in the stages in `docs/native-mac-build.md` ("The picks folded into the stages").
+
+### Left
+- Fractals' remaining devices: the tempo delay (DelayNodes in a feedback cycle, a sine LFO on their delay time, setTargetAtTime), the plate reverb (ConvolverNode: now possible on RustFFT), the clipper (WaveShaperNode at 4x: Chromium's up- and down-samplers).
+- The pump in live play: the oscillator synced to the transport (`play.t0`), not the offline grid.
+- Three or more value events on one param (taken as one sample-accurate quantum each; only one and two are measured).
+
+### Assumptions
+- Chromium 158's source and crate versions stand for the shipped Electron. Electron 45 is Chromium 156, which may still use the older FFT. The comparison is against Chromium 158 here and the Mac's Playwright Chromium in CI, as for N3e.
+- An offline render starts at context time 0. The pump's start and the value events are worked out from there.
