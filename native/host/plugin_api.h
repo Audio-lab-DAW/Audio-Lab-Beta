@@ -35,6 +35,16 @@ struct ProcessContext {
     bool playing = true;
 };
 
+// What a plug-in told the host from its own window (VST3: IComponentHandler).
+struct EditStats {
+    int performs = 0;          // performEdit: a control was moved
+    int begins = 0, ends = 0;  // beginEdit / endEdit: a gesture started / ended
+    int restarts = 0;          // restartComponent, any reason
+    int valueRestarts = 0;     // restartComponent with "parameter values changed"
+    uint32_t lastId = 0;       // the last parameter moved, and its value (0..1)
+    double lastValue = 0;
+};
+
 struct BusLayout { int audioIns = 0, audioOuts = 0, mainInChannels = 0, mainOutChannels = 0, eventIns = 0, eventOuts = 0; };
 
 class PluginInstance {
@@ -62,6 +72,7 @@ public:
     // Things the plug-in told the host since the last call (latency changed, parameters changed from its window).
     virtual bool takeLatencyChanged() = 0;
     virtual int editsFromEditor() const = 0;
+    virtual EditStats editStats() const { EditStats s; s.performs = editsFromEditor(); return s; }
 };
 
 struct ScanResult {

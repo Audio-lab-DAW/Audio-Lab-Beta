@@ -2,13 +2,18 @@
 // it lists the VST3 plug-ins found on this Mac (each bundle is scanned in a separate process), loads one,
 // opens the plug-in's own window, plays notes from the computer keyboard or a test pattern through the
 // chosen output device (Core Audio, straight on the device), and writes a report file.
+// 0.4 (task NL4): a search over the list (name, maker, kind; Cmd+F, Escape), sort and group by maker, a kind
+// filter, recently loaded plug-ins on top; parameter moves from a plug-in's own window counted and logged per
+// plug-in; notes sent to each instrument logged; a warning when the output runs at 16 kHz or less (Bluetooth call mode).
 #import <Cocoa/Cocoa.h>
 #include "../common/coreaudio.h"
 #include "../host/plugin_api.h"
+#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <sys/sysctl.h>
 #include <time.h>
 #include <vector>
@@ -35,6 +40,7 @@ struct Engine {
     // figures for the report
     std::atomic<uint64_t> blocks{0}, sumNs{0}, worstNs{0}, budgetNs{0}, failed{0};
     std::atomic<float> peak{0};
+    std::atomic<uint32_t> notesPattern{0}, notesKeys{0}, fedBlocks{0};   // note-ons that reached the plug-in; blocks of test sound fed to an effect
     void pushNote(int pitch, bool on) { uint32_t w = noteW.load(); notes[w & 255] = {pitch, on}; noteW.store(w + 1); }
 };
 static Engine G;
@@ -45,7 +51,7 @@ static void renderCb(void*, float** out, int, int frames) {
     if (G.plug && G.ready && frames <= G.maxBlock) {
         NoteEvent ev[64]; int n = 0;
         uint32_t r = G.noteR.load(), w = G.noteW.load();
-        while (r != w && n < 60) { ev[n].offset = 0; ev[n].on = G.notes[r & 255].on; ev[n].pitch = G.notes[r & 255].pitch; ev[n].velocity = 0.8f; ev[n].channel = 0; n++; r++; }
+        while (r != w && n < 60) { ev[n].offset = 0; ev[n].on = G.notes[r & 255].on; ev[n].pitch = G.notes[r & 255].pitch; ev[n].velocity = 0.8f; ev[n].channel = 0; if (ev[n].on) G.notesKeys.fetch_add(1, std::memory_order_relaxed); n++; r++; }
         G.noteR.store(r);
         bool pat = G.pattern.load();
         const int seq[8] = {48, 60, 55, 63, 67, 60, 72, 63};
@@ -61,6 +67,7 @@ static void renderCb(void*, float** out, int, int frames) {
                         if (G.patNote >= 0) { ev[n].offset = i; ev[n].on = false; ev[n].pitch = G.patNote; ev[n].channel = 0; ev[n].velocity = 0; n++; }
                         G.patNote = seq[step & 7]; G.patStep = step;
                         ev[n].offset = i; ev[n].on = true; ev[n].pitch = G.patNote; ev[n].channel = 0; ev[n].velocity = 0.8f; n++;
+                        G.notesPattern.fetch_add(1, std::memory_order_relaxed);
                     }
                 } else {
                     // for an effect: a plucked saw line as the sound to run through it
@@ -73,6 +80,7 @@ static void renderCb(void*, float** out, int, int frames) {
             } else if (G.patNote >= 0 && n < 62) { ev[n].offset = i; ev[n].on = false; ev[n].pitch = G.patNote; ev[n].channel = 0; ev[n].velocity = 0; n++; G.patNote = -1; G.patStep = -1; }
             G.in[0][i] = x; G.in[1][i] = x;
         }
+        if (pat && !G.instrument) G.fedBlocks.fetch_add(1, std::memory_order_relaxed);
         const float* inp[2] = {G.in[0].data(), G.in[1].data()};
         ProcessContext c; c.sampleRate = G.sr; c.tempo = 120; c.samplePos = G.pos; c.playing = true;
         uint64_t t0 = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
@@ -99,8 +107,11 @@ static void renderCb(void*, float** out, int, int frames) {
 
 // ---- the window --------------------------------------------------------------------------------------
 struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok = false, instrument = false; };
+// what the table shows: a plug-in (idx into _rows) or a group heading (idx -1)
+struct ViewRow { int idx = -1; std::string heading; };
+static NSString* fold(NSString* s) { return [s stringByFoldingWithOptions:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch locale:nil] ?: @""; }
 
-@interface App : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
+@interface App : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate, NSSearchFieldDelegate>
 - (void)outside:(NSString*)what;
 @end
 static __weak App* gApp;
@@ -126,6 +137,14 @@ static void watchCb(void*, const char* what, uint32_t) {
     NSMutableSet* _down;
     BOOL _selftest;
     int _bundles, _bundlesOk;
+    // 0.4: the list's search, sort, kind filter and recently loaded
+    NSSearchField* _search; NSPopUpButton* _sortPop; NSPopUpButton* _kindPop; NSTextField* _countLbl;
+    std::vector<ViewRow> _view;
+    NSMutableArray<NSString*>* _recent;
+    // 0.4: the output warning, and what the loaded plug-in did
+    NSTextField* _warn; std::string _warnText;
+    std::unordered_map<uint32_t, std::string> _paramNames;
+    int _plugMouse, _plugDrags, _lastMoves; BOOL _windowOpened, _firstMoveLogged;
 }
 
 - (void)say:(NSString*)line {
@@ -144,6 +163,11 @@ static void watchCb(void*, const char* what, uint32_t) {
     [full writeToFile:[self reportPath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
 }
 - (NSString*)liveFigures {
+    NSString* a = [self audioFigures];
+    NSString* p = [self plugSummary];
+    return p.length ? [NSString stringWithFormat:@"%@%@\n", a, p] : a;
+}
+- (NSString*)audioFigures {
     uint64_t b = G.blocks.load();
     if (!b) return @"\n[audio] no audio block has run through a plug-in yet\n";
     double avg = G.sumNs.load() / 1000.0 / b, worst = G.worstNs.load() / 1000.0, budget = G.budgetNs.load() / 1000.0;
@@ -169,8 +193,15 @@ static void watchCb(void*, const char* what, uint32_t) {
     // menu with Quit
     NSMenu* bar = [NSMenu new]; NSMenuItem* appItem = [NSMenuItem new]; [bar addItem:appItem];
     NSMenu* appMenu = [NSMenu new]; [appMenu addItemWithTitle:@"Quit AudioLab VST3 test" action:@selector(terminate:) keyEquivalent:@"q"]; appItem.submenu = appMenu; NSApp.mainMenu = bar;
+    // Edit menu, so copy, paste and select all work in the search field
+    NSMenuItem* editItem = [NSMenuItem new]; [bar addItem:editItem];
+    NSMenu* edit = [[NSMenu alloc] initWithTitle:@"Edit"];
+    [edit addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"]; [edit addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+    [edit addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"]; [edit addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+    [edit addItem:NSMenuItem.separatorItem]; [edit addItemWithTitle:@"Find Plug-in" action:@selector(focusSearch:) keyEquivalent:@"f"];
+    editItem.submenu = edit;
 
-    const CGFloat W = 980, H = 640;
+    const CGFloat W = 980, H = 700;
     _win = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, W, H) styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
     _win.title = @"AudioLab VST3 test"; _win.delegate = self; [_win center];
     [self label:@"Output" frame:NSMakeRect(16, H - 40, 50, 20)];
@@ -187,7 +218,22 @@ static void watchCb(void*, const char* what, uint32_t) {
     [self label:@"Device volume" frame:NSMakeRect(440, H - 74, 96, 20)];
     _vol = [NSSlider sliderWithValue:1 minValue:0 maxValue:1 target:self action:@selector(volChanged:)]; _vol.frame = NSMakeRect(536, H - 76, 220, 22); _vol.continuous = YES; [_win.contentView addSubview:_vol];
     _volLbl = [self label:@"" frame:NSMakeRect(764, H - 74, W - 780, 20)];
-    NSScrollView* sv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 250, W - 32, H - 340)]; sv.hasVerticalScroller = YES; sv.borderType = NSBezelBorder;
+    _warn = [self label:@"" frame:NSMakeRect(16, H - 104, W - 32, 20)];
+    _warn.font = [NSFont systemFontOfSize:12 weight:NSFontWeightSemibold];
+    // the list's search row
+    _search = [[NSSearchField alloc] initWithFrame:NSMakeRect(16, H - 140, 360, 26)];
+    _search.placeholderString = @"Search name, maker, instrument or effect  (\u2318F)";
+    _search.target = self; _search.action = @selector(searchChanged:); _search.delegate = self;
+    _search.sendsSearchStringImmediately = YES; _search.sendsWholeSearchString = NO;
+    [_win.contentView addSubview:_search];
+    _kindPop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(388, H - 141, 140, 26) pullsDown:NO]; _kindPop.target = self; _kindPop.action = @selector(searchChanged:);
+    [_kindPop addItemsWithTitles:@[@"All kinds", @"Instruments", @"Effects", @"Cannot load"]]; [_win.contentView addSubview:_kindPop];
+    _sortPop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(536, H - 141, 170, 26) pullsDown:NO]; _sortPop.target = self; _sortPop.action = @selector(searchChanged:);
+    [_sortPop addItemsWithTitles:@[@"Sort by name", @"Sort by maker", @"Group by maker"]]; [_win.contentView addSubview:_sortPop];
+    _countLbl = [self label:@"" frame:NSMakeRect(716, H - 136, W - 732, 20)];
+    _countLbl.font = [NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];
+    @try { NSArray* r = [NSUserDefaults.standardUserDefaults arrayForKey:@"recentPlugins"]; _recent = r ? [r mutableCopy] : [NSMutableArray array]; } @catch (NSException* e) { _recent = [NSMutableArray array]; }
+    NSScrollView* sv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 250, W - 32, H - 400)]; sv.hasVerticalScroller = YES; sv.borderType = NSBezelBorder;
     _table = [[NSTableView alloc] initWithFrame:sv.bounds]; _table.dataSource = self; _table.delegate = self; _table.usesAlternatingRowBackgroundColors = YES; _table.doubleAction = @selector(load:); _table.target = self;
     for (NSArray* c in @[@[@"name", @"Plug-in", @270], @[@"vendor", @"Maker", @170], @[@"kind", @"Kind", @90], @[@"status", @"Found / problem", @380]]) {
         NSTableColumn* col = [[NSTableColumn alloc] initWithIdentifier:c[0]]; col.title = c[1]; col.width = [c[2] doubleValue]; col.editable = NO; [_table addTableColumn:col];
@@ -199,7 +245,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     _patBtn = [self button:@"Play test pattern" action:@selector(togglePattern:) frame:NSMakeRect(254, 208, 150, 30)];
     [self button:@"Show report file" action:@selector(showReport:) frame:NSMakeRect(W - 300, 208, 140, 30)];
     [self button:@"Copy report" action:@selector(copyReport:) frame:NSMakeRect(W - 156, 208, 140, 30)];
-    [self label:@"Keys A W S E D F T G Y H U J K play notes, C to C (click this window first). Sound comes out at half level." frame:NSMakeRect(16, 184, W - 32, 18)];
+    [self label:@"Keys A W S E D F T G Y H U J K play notes, C to C (click the list first, not the search field). Sound comes out at half level." frame:NSMakeRect(16, 184, W - 32, 18)];
     _cpu = [self label:@"" frame:NSMakeRect(16, 162, W - 32, 18)];
     _cpu.font = [NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];
 
@@ -210,6 +256,8 @@ static void watchCb(void*, const char* what, uint32_t) {
 
     __weak App* me = self;
     [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown | NSEventMaskKeyUp handler:^NSEvent*(NSEvent* e) { return [me key:e] ? nil : e; }];
+    // the mouse in the plug-in's own window: counted, so the report can say "knobs were touched but no move reached the host"
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown | NSEventMaskLeftMouseDragged | NSEventMaskScrollWheel handler:^NSEvent*(NSEvent* e) { [me plugMouse:e]; return e; }];
     [NSTimer scheduledTimerWithTimeInterval:0.25 repeats:YES block:^(NSTimer* t) { [me tick]; }];
 
     gApp = self;
@@ -221,7 +269,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 
 - (void)machineInfo {
     char model[128] = {0}, cpu[128] = {0}; size_t l = sizeof model; sysctlbyname("hw.model", model, &l, nullptr, 0); l = sizeof cpu; sysctlbyname("machdep.cpu.brand_string", cpu, &l, nullptr, 0);
-    [self say:@"AudioLab VST3 test 0.3 (tasks NM1 and NB-N1). Report file: paste all of it back."];
+    [self say:@"AudioLab VST3 test 0.4 (tasks NM1, NB-N1 and NL4). Report file: paste all of it back."];
     [self say:[NSString stringWithFormat:@"[machine] %s, %s, macOS %@, this app runs as %s", model, cpu, NSProcessInfo.processInfo.operatingSystemVersionString, hostArch().c_str()]];
 }
 
@@ -259,6 +307,31 @@ static void watchCb(void*, const char* what, uint32_t) {
                now.rate ? now.buffer / now.rate * 1000 : 0, now.latency, now.safetyOffset, now.streamLatency, ok ? "" : (" (" + err + ")").c_str()]];
     _watch.watchDevice(d.id);
     [self fillControls:now];
+    [self checkOutput:now];
+}
+// A plain warning when the output runs at 16 kHz or less, most often a Bluetooth speaker in call mode.
+- (void)checkOutput:(const DeviceInfo&)d {
+    std::string w;
+    if (d.rate > 0 && d.rate <= 16000) {
+        std::string bt;
+        for (auto& x : listDevices()) {
+            if (x.transport.find("Bluetooth") == std::string::npos || x.name.empty()) continue;
+            if (x.id == d.id || d.name.find(x.name) != std::string::npos) { bt = x.name; break; }
+        }
+        char buf[900];
+        if (!bt.empty())
+            snprintf(buf, sizeof buf, "%s runs at %.0f Hz: the Bluetooth speaker %s is in call mode because an app has its microphone open, so music and plug-ins lose everything above %.0f kHz and some instruments stay silent. Fix: in System Settings > Sound > Input choose another input (or quit the app using the microphone); this app follows the rate when it comes back.",
+                     d.name.c_str(), d.rate, bt.c_str(), d.rate / 2000);
+        else
+            snprintf(buf, sizeof buf, "%s runs at %.0f Hz, too low for music: plug-ins lose everything above %.0f kHz and some instruments stay silent. Fix: set the Rate above to 44100 Hz or more (or in Audio MIDI Setup), or choose another output.",
+                     d.name.c_str(), d.rate, d.rate / 2000);
+        w = buf;
+    }
+    if (w == _warnText) return;
+    _warnText = w;
+    if (w.empty()) { _warn.stringValue = [NSString stringWithFormat:@"Output %s at %.0f Hz.", d.name.c_str(), d.rate]; _warn.textColor = NSColor.secondaryLabelColor; _warn.toolTip = nil; return; }
+    _warn.stringValue = S("\u26A0 " + w); _warn.textColor = NSColor.systemRedColor; _warn.toolTip = S(w);
+    [self say:S("[warning] " + w)];
 }
 - (void)fillControls:(const DeviceInfo&)d {
     [_ratePop removeAllItems];
@@ -299,6 +372,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     } else if ([what isEqualToString:@"devices"] || [what isEqualToString:@"alive"]) {
         std::vector<DeviceInfo> outs; bool here = false; int sel = -1;
         for (auto& d : listDevices()) { if (d.outChannels < 1) continue; if (d.id == _dev) { here = true; sel = (int)outs.size(); } outs.push_back(d); }
+        if (_dev) [self checkOutput:deviceInfo(_dev)];
         if (outs.size() == _devs.size() && here) { bool same = true; for (size_t i = 0; i < outs.size(); i++) if (outs[i].id != _devs[i].id) same = false; if (same) return; }
         _devs = outs; [_devPop removeAllItems];
         for (auto& d : _devs) [_devPop addItemWithTitle:S(d.name + "  (" + std::to_string((int)d.rate) + " Hz)")];
@@ -323,7 +397,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 
 - (void)scan:(id)s {
     _scanBtn.enabled = NO; _status.stringValue = @"Scanning plug-ins";
-    _rows.clear(); _scan.clear(); [_table reloadData];
+    _rows.clear(); _scan.clear(); [self refilter];
     std::string exe = U(NSBundle.mainBundle.executablePath);
     __weak App* me = self;
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
@@ -343,7 +417,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     _scan.push_back(r);
     std::string file = r.path.substr(r.path.find_last_of('/') + 1);
     if (!r.ok) {
-        Row row; row.name = file; row.status = "PROBLEM: " + r.error; row.path = r.path; row.archs = r.archs; _rows.push_back(row);
+        Row row; row.name = file; row.kind = "cannot load"; row.status = "PROBLEM: " + r.error; row.path = r.path; row.archs = r.archs; _rows.push_back(row);
         [self say:[NSString stringWithFormat:@"[scan] PROBLEM %s [%s]: %s", r.path.c_str(), r.archs.c_str(), r.error.c_str()]];
     }
     for (auto& p : r.plugins) {
@@ -353,7 +427,7 @@ static void watchCb(void*, const char* what, uint32_t) {
         [self say:[NSString stringWithFormat:@"[scan] found %s by %s, %s, version %s [%s] in %s (%.2f s)", p.name.c_str(), p.vendor.c_str(), row.kind.c_str(), p.version.c_str(), r.archs.c_str(), file.c_str(), r.seconds]];
     }
     _status.stringValue = [NSString stringWithFormat:@"Scanning plug-ins: %d of %d", i, n];
-    [_table reloadData];
+    [self refilter];
 }
 - (void)scanDone:(int)n folders:(std::vector<std::string>)folders {
     int ok = 0, plugs = 0; for (auto& r : _scan) { if (r.ok) ok++; plugs += (int)r.plugins.size(); }
@@ -369,22 +443,105 @@ static void watchCb(void*, const char* what, uint32_t) {
     }
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView*)t { return (NSInteger)_rows.size(); }
+// ---- the list: search, kind filter, sort or group by maker, recently loaded on top ------------------------
+- (NSString*)recentKey:(const Row&)x { return S(x.path + "\n" + x.uid + "\n" + x.name); }
+- (int)plugIndexAtViewRow:(NSInteger)r { return (r >= 0 && r < (NSInteger)_view.size()) ? _view[r].idx : -1; }
+- (void)searchChanged:(id)s { [self refilter]; }
+- (void)focusSearch:(id)s { [_win makeKeyAndOrderFront:nil]; [_win makeFirstResponder:_search]; }
+- (void)refilter {
+    int keep = [self plugIndexAtViewRow:_table.selectedRow];
+    NSArray<NSString*>* words = [[fold(_search.stringValue) stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet] componentsSeparatedByCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
+    NSInteger kind = _kindPop.indexOfSelectedItem, sort = _sortPop.indexOfSelectedItem;
+    std::vector<int> hits;
+    int total = 0, shownOk = 0, shownBad = 0;
+    for (int i = 0; i < (int)_rows.size(); i++) {
+        const Row& x = _rows[i];
+        if (x.ok) total++;
+        if (kind == 1 && !(x.ok && x.instrument)) continue;
+        if (kind == 2 && !(x.ok && !x.instrument)) continue;
+        if (kind == 3 && x.ok) continue;
+        NSString* hay = fold(S(x.name + " " + x.vendor + " " + x.kind + " " + x.path.substr(x.path.find_last_of('/') + 1)));
+        bool all = true;
+        for (NSString* w in words) if (w.length && [hay rangeOfString:w].location == NSNotFound) { all = false; break; }
+        if (!all) continue;
+        hits.push_back(i);
+        if (x.ok) shownOk++; else shownBad++;
+    }
+    auto lower = [&](const std::string& a) { return U(fold(S(a))); };
+    std::stable_sort(hits.begin(), hits.end(), [&](int a, int b) {
+        const Row &x = _rows[a], &y = _rows[b];
+        if (x.ok != y.ok) return x.ok;                                     // the ones that cannot load go last
+        if (sort >= 1) { std::string vx = lower(x.vendor), vy = lower(y.vendor); if (vx != vy) return vx < vy; }
+        return lower(x.name) < lower(y.name);
+    });
+    // recently loaded first, newest on top
+    std::vector<int> recent, rest;
+    for (int i : hits) ([_recent indexOfObject:[self recentKey:_rows[i]]] != NSNotFound ? recent : rest).push_back(i);
+    std::sort(recent.begin(), recent.end(), [&](int a, int b) { return [_recent indexOfObject:[self recentKey:_rows[a]]] < [_recent indexOfObject:[self recentKey:_rows[b]]]; });
+    _view.clear();
+    bool group = sort == 2;
+    if (!recent.empty()) { if (group) { ViewRow h; h.heading = "Recently loaded"; _view.push_back(h); } for (int i : recent) { ViewRow v; v.idx = i; _view.push_back(v); } }
+    std::string cur = "\x01";
+    for (int i : rest) {
+        if (group) {
+            const Row& x = _rows[i];
+            std::string g = x.ok ? (x.vendor.empty() ? std::string("(no maker given)") : x.vendor) : std::string("Cannot load");
+            if (g != cur) {
+                int n = 0; for (int j : rest) { const Row& y = _rows[j]; std::string gy = y.ok ? (y.vendor.empty() ? std::string("(no maker given)") : y.vendor) : std::string("Cannot load"); if (gy == g) n++; }
+                ViewRow h; h.heading = g + "  (" + std::to_string(n) + ")"; _view.push_back(h); cur = g;
+            }
+        }
+        ViewRow v; v.idx = i; _view.push_back(v);
+    }
+    [_table reloadData];
+    _countLbl.stringValue = shownBad ? [NSString stringWithFormat:@"%d of %d  (+%d cannot load)", shownOk, total, shownBad] : [NSString stringWithFormat:@"%d of %d", shownOk, total];
+    // keep the selection, or pick the first match while searching
+    NSInteger sel = -1;
+    for (NSInteger r = 0; r < (NSInteger)_view.size(); r++) if (_view[r].idx >= 0 && _view[r].idx == keep) { sel = r; break; }
+    if (sel < 0 && _search.stringValue.length) for (NSInteger r = 0; r < (NSInteger)_view.size(); r++) if (_view[r].idx >= 0) { sel = r; break; }
+    if (sel >= 0) { [_table selectRowIndexes:[NSIndexSet indexSetWithIndex:sel] byExtendingSelection:NO]; [_table scrollRowToVisible:sel]; }
+    else [_table deselectAll:nil];
+}
+- (void)noteRecent:(const Row&)x {
+    NSString* k = [self recentKey:x];
+    [_recent removeObject:k]; [_recent insertObject:k atIndex:0];
+    while (_recent.count > 8) [_recent removeLastObject];
+    @try { [NSUserDefaults.standardUserDefaults setObject:_recent forKey:@"recentPlugins"]; } @catch (NSException* e) {}
+}
+// Enter in the search field loads the selected match; the down arrow moves into the list.
+- (BOOL)control:(NSControl*)c textView:(NSTextView*)tv doCommandBySelector:(SEL)cmd {
+    if (c != _search) return NO;
+    if (cmd == @selector(insertNewline:)) { [self load:nil]; return YES; }
+    if (cmd == @selector(moveDown:)) { [_win makeFirstResponder:_table]; return YES; }
+    if (cmd == @selector(cancelOperation:)) { _search.stringValue = @""; [self refilter]; return YES; }
+    return NO;
+}
+- (NSInteger)numberOfRowsInTableView:(NSTableView*)t { return (NSInteger)_view.size(); }
 - (id)tableView:(NSTableView*)t objectValueForTableColumn:(NSTableColumn*)c row:(NSInteger)r {
-    if (r < 0 || r >= (NSInteger)_rows.size()) return @"";
-    const Row& x = _rows[r]; NSString* k = c.identifier;
+    if (r < 0 || r >= (NSInteger)_view.size()) return @"";
+    const ViewRow& v = _view[r];
+    if (v.idx < 0) return c == nil || [c.identifier isEqualToString:@"name"] ? S(v.heading) : @"";
+    const Row& x = _rows[v.idx]; NSString* k = c.identifier;
+    if ([k isEqualToString:@"status"] && [_recent indexOfObject:[self recentKey:x]] != NSNotFound) return S("recently loaded · " + x.status);
     return S([k isEqualToString:@"name"] ? x.name : [k isEqualToString:@"vendor"] ? x.vendor : [k isEqualToString:@"kind"] ? x.kind : x.status);
 }
+- (BOOL)tableView:(NSTableView*)t isGroupRow:(NSInteger)r { return r >= 0 && r < (NSInteger)_view.size() && _view[r].idx < 0; }
+- (NSCell*)tableView:(NSTableView*)t dataCellForTableColumn:(NSTableColumn*)c row:(NSInteger)r {
+    if (c == nil) { if ([self tableView:t isGroupRow:r]) { NSTextFieldCell* cell = [[NSTextFieldCell alloc] initTextCell:@""]; cell.font = [NSFont boldSystemFontOfSize:12]; return cell; } return nil; }
+    return [c dataCellForRow:r];
+}
+- (BOOL)tableView:(NSTableView*)t shouldSelectRow:(NSInteger)r { return ![self tableView:t isGroupRow:r]; }
 
 - (void)load:(id)s {
-    NSInteger r = _table.selectedRow;
-    if (r < 0 || r >= (NSInteger)_rows.size()) { [self say:@"[load] pick a plug-in in the list first"]; return; }
-    [self loadRow:(int)r];
+    int r = [self plugIndexAtViewRow:_table.selectedRow];
+    if (r < 0 || r >= (int)_rows.size()) { [self say:@"[load] pick a plug-in in the list first"]; return; }
+    [self loadRow:r];
 }
 - (BOOL)loadRow:(int)r {
     Row& x = _rows[r];
     if (!x.ok) { [self say:[NSString stringWithFormat:@"[load] %s cannot be loaded: %s", x.name.c_str(), x.status.c_str()]]; return NO; }
     [self closePlugWindow];
+    [self flushPlugSummary];
     { std::lock_guard<std::mutex> g(G.lock); G.ready = false; G.plug.reset(); }
     PluginInfo pi; pi.format = "vst3"; pi.path = x.path; pi.uid = x.uid; pi.name = x.name;
     std::string err;
@@ -402,11 +559,15 @@ static void watchCb(void*, const char* what, uint32_t) {
     [self say:[NSString stringWithFormat:@"[load] %s %s in %.0f ms: %s, audio in %d ch, out %d ch, note inputs %d, %zu parameters (first: %s), state %s (%zu bytes), latency %d samples%s",
                x.name.c_str(), ok ? "loaded" : "loaded but could not be started", ms, inst ? "instrument" : "effect", b.mainInChannels, b.mainOutChannels, b.eventIns, ps.size(), names.c_str(), gotState ? "saved" : "NOT saved", st.size(), lat,
                ok ? "" : (" (" + err + ")").c_str()]];
-    x.status = ok ? "loaded" : "FAILED to start: " + err; [_table reloadData];
-    G.blocks = 0; G.sumNs = 0; G.worstNs = 0; G.failed = 0; G.peak = 0;
+    x.status = ok ? "loaded" : "FAILED to start: " + err;
+    _paramNames.clear(); for (auto& q : ps) _paramNames[q.id] = q.name;
+    _plugMouse = 0; _plugDrags = 0; _lastMoves = 0; _windowOpened = NO; _firstMoveLogged = NO;
+    G.blocks = 0; G.sumNs = 0; G.worstNs = 0; G.failed = 0; G.peak = 0; G.notesPattern = 0; G.notesKeys = 0; G.fedBlocks = 0;
     { std::lock_guard<std::mutex> g(G.lock); G.plug = std::move(p); G.instrument = inst; G.ready = ok; G.patStep = -1; G.patNote = -1; }
     _loaded = x.name;
     _status.stringValue = S("Loaded: " + x.name);
+    if (ok) [self noteRecent:x];
+    [self refilter];
     return ok;
 }
 
@@ -428,6 +589,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     CGFloat top = NSMaxY(mf); if (top - pf.size.height < NSMinY(vis)) top = NSMinY(vis) + pf.size.height; if (top > NSMaxY(vis)) top = NSMaxY(vis);
     [_plugWin setFrameTopLeftPoint:NSMakePoint(x, top)];
     [_plugWin makeKeyAndOrderFront:nil];
+    _windowOpened = YES;
     [self say:[NSString stringWithFormat:@"[window] %s: its own window is open, %d x %d", _loaded.c_str(), w, h]];
 }
 - (void)closePlugWindow {
@@ -441,7 +603,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 - (void)windowWillClose:(NSNotification*)n { if (n.object == _win) [NSApp terminate:nil]; }
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)a { return YES; }
 - (void)applicationWillTerminate:(NSNotification*)n {
-    [self writeReport];
+    [self writeReport];          // its end holds the loaded plug-in's [param] and [notes] lines
     _stream.stop();
     _watch.stop();
     if (_hog && _dev) { int o; std::string e; setHog(_dev, false, o, e); }
@@ -456,8 +618,13 @@ static void watchCb(void*, const char* what, uint32_t) {
     [self say:on ? @"[pattern] test pattern on" : [@"[pattern] test pattern off. " stringByAppendingString:[[self liveFigures] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet]]];
 }
 - (BOOL)key:(NSEvent*)e {
-    if (e.modifierFlags & (NSEventModifierFlagCommand | NSEventModifierFlagControl | NSEventModifierFlagOption)) return NO;
     if (e.window != _win) return NO;      // keys typed in the plug-in's own window belong to the plug-in
+    NSEventModifierFlags mods = e.modifierFlags & (NSEventModifierFlagCommand | NSEventModifierFlagControl | NSEventModifierFlagOption);
+    if (e.type == NSEventTypeKeyDown && mods == NSEventModifierFlagCommand && [e.charactersIgnoringModifiers.lowercaseString isEqualToString:@"f"]) { [_win makeFirstResponder:_search]; return YES; }
+    if (e.type == NSEventTypeKeyDown && e.keyCode == 53 && _search.stringValue.length) { _search.stringValue = @""; [self refilter]; [_win makeFirstResponder:_table]; return YES; }   // Escape clears the search
+    if (mods) return NO;
+    NSResponder* fr = _win.firstResponder;
+    if ([fr isKindOfClass:NSText.class] || fr == _search) return NO;     // typing in the search field is not notes
     static NSString* keys = @"awsedftgyhujk";
     NSString* c = e.charactersIgnoringModifiers.lowercaseString;
     if (c.length != 1) return NO;
@@ -469,12 +636,63 @@ static void watchCb(void*, const char* what, uint32_t) {
     return YES;
 }
 - (void)tick {
+    EditStats es; if (G.plug) es = G.plug->editStats();
+    if (G.plug && es.performs > 0 && !_firstMoveLogged) {
+        _firstMoveLogged = YES;
+        [self say:[NSString stringWithFormat:@"[param] %s: first move from its window: %s", _loaded.c_str(), [self paramDesc:es.lastId value:es.lastValue].c_str()]];
+    }
+    if (G.plug && es.performs != _lastMoves) { _lastMoves = es.performs; [self writeReport]; }
+    uint32_t notes = G.notesPattern.load() + G.notesKeys.load();
+    NSString* plugPart = G.plug ? [NSString stringWithFormat:@"   moves in its window: %d   notes sent: %u", es.performs, notes] : @"";
     uint64_t b = G.blocks.load();
-    if (!b) { _cpu.stringValue = G.plug ? @"Loaded. Play the test pattern or press keys." : @"No plug-in loaded."; return; }
+    if (!b) { _cpu.stringValue = G.plug ? [@"Loaded. Play the test pattern or press keys." stringByAppendingString:plugPart] : @"No plug-in loaded."; return; }
     double avg = G.sumNs.load() / 1000.0 / b, worst = G.worstNs.load() / 1000.0, budget = G.budgetNs.load() / 1000.0;
-    _cpu.stringValue = [NSString stringWithFormat:@"Plug-in time per block: average %.1f µs (%.2f %%), worst %.1f µs (%.1f %%)   block %.2f ms at %.0f Hz   overloads %llu   level %.2f   moves in its window %d",
-                        avg, budget ? avg / budget * 100 : 0, worst, budget ? worst / budget * 100 : 0, budget / 1000, G.sr, _stream.overloads.load(), G.peak.load(), G.plug ? G.plug->editsFromEditor() : 0];
+    _cpu.stringValue = [NSString stringWithFormat:@"Time per block: avg %.1f µs (%.2f %%), worst %.1f µs (%.1f %%)   block %.2f ms at %.0f Hz   overloads %llu   level %.2f%@",
+                        avg, budget ? avg / budget * 100 : 0, worst, budget ? worst / budget * 100 : 0, budget / 1000, G.sr, _stream.overloads.load(), G.peak.load(), plugPart];
 }
+- (void)plugMouse:(NSEvent*)e {
+    if (!_plugWin || e.window != _plugWin) return;
+    if (e.type == NSEventTypeLeftMouseDragged) _plugDrags++; else _plugMouse++;
+}
+- (std::string)paramDesc:(uint32_t)pid value:(double)v {
+    auto it = _paramNames.find(pid);
+    std::string name = it != _paramNames.end() ? it->second : "parameter " + std::to_string(pid);
+    char buf[64]; snprintf(buf, sizeof buf, "%.2f", v);
+    std::string t = G.plug ? G.plug->paramText(pid, v) : "";
+    return name + " = " + buf + (t.empty() ? "" : " (" + t + ")");
+}
+// The per plug-in lines of the report: parameter moves from its own window, and the notes it was sent.
+- (NSString*)plugSummary {
+    if (!G.plug || _loaded.empty()) return @"";
+    EditStats es = G.plug->editStats();
+    const char* nm = _loaded.c_str();
+    NSMutableString* o = [NSMutableString string];
+    NSString* restarts = es.restarts ? [NSString stringWithFormat:@"; it asked the host to restart %d time(s), %d of them because all its values changed", es.restarts, es.valueRestarts] : @"";
+    if (es.performs > 0)
+        [o appendFormat:@"[param] %s: %d moves from its window (gestures begun %d, ended %d), last: %s%@", nm, es.performs, es.begins, es.ends, [self paramDesc:es.lastId value:es.lastValue].c_str(), restarts];
+    else if (_plugMouse + _plugDrags > 0)
+        [o appendFormat:@"[param] %s: NO parameter moves reached the host from its window, although the mouse was used in it %d time(s) (%d click(s) or scroll(s), %d drag step(s)); gestures begun %d%@. If you turned knobs, this plug-in does not tell the host about them (or not through VST3's component handler)", nm, _plugMouse + _plugDrags, _plugMouse, _plugDrags, es.begins, restarts];
+    else if (_windowOpened)
+        [o appendFormat:@"[param] %s: no moves from its window (the mouse was not used in it)%@", nm, restarts];
+    else
+        [o appendFormat:@"[param] %s: its window was not opened, so no moves from it%@", nm, restarts];
+    uint32_t np = G.notesPattern.load(), nk = G.notesKeys.load();
+    float pk = G.peak.load();
+    if (G.instrument) {
+        [o appendFormat:@"\n[notes] %s: %u notes sent (%u from the test pattern, %u from the keys), output peak %.3f", nm, np + nk, np, nk, pk];
+        if (np + nk == 0) [o appendString:@": no notes were sent to it"];
+        else if (pk <= 0) {
+            if (G.sr < 44100) [o appendFormat:@": SILENT although the notes reached it. The output runs at %.0f Hz; many instruments make no sound below 44.1 kHz (Pigments played at 44.1 kHz in an earlier report and was silent at 16 kHz). Choose an output at 44.1 kHz or more and play again", G.sr];
+            else [o appendString:@": SILENT although the notes reached it. Check its patch (an empty start patch makes no sound) and its own volume"];
+        } else [o appendString:@": it sounded"];
+    } else {
+        uint32_t fb = G.fedBlocks.load();
+        [o appendFormat:@"\n[notes] %s: an effect, no notes sent; the test sound ran through it for %u block(s), output peak %.3f%s", nm, fb, pk,
+         fb == 0 ? " (silence is expected: nothing was fed into it; play the test pattern while it is loaded)" : (pk <= 0 ? " (SILENT although the test sound was fed into it)" : "")];
+    }
+    return o;
+}
+- (void)flushPlugSummary { NSString* p = [self plugSummary]; if (p.length) [self say:p]; }
 - (void)showReport:(id)s { [self writeReport]; [NSWorkspace.sharedWorkspace selectFile:[self reportPath] inFileViewerRootedAtPath:@""]; }
 - (void)copyReport:(id)s {
     [self writeReport];
@@ -489,7 +707,17 @@ static void watchCb(void*, const char* what, uint32_t) {
     for (int i = 0; i < (int)_rows.size(); i++) { if (!_rows[i].ok) continue; if (!_selfName.empty() ? _rows[i].name == _selfName : _rows[i].instrument) { pick = i; break; } }
     if (pick < 0) for (int i = 0; i < (int)_rows.size(); i++) if (_rows[i].ok) { pick = i; break; }
     if (pick < 0) { [self say:@"[selftest] no plug-in to load"]; [self selftestEnd]; return; }
-    [_table selectRowIndexes:[NSIndexSet indexSetWithIndex:pick] byExtendingSelection:NO]; [_table scrollRowToVisible:pick];
+    // the search: case and accents do not matter, every word must match name, maker or kind
+    NSString* q = S(_rows[pick].name); q = [q.uppercaseString stringByReplacingOccurrencesOfString:@"U" withString:@"\u00DC"];
+    for (NSString* t in @[q, @"instrument", @"effect", @"zzzz-nothing"]) {
+        _search.stringValue = t; [self refilter];
+        [self say:[NSString stringWithFormat:@"[selftest] search \"%@\": %@, first: %s", t, _countLbl.stringValue, _table.selectedRow >= 0 ? _rows[[self plugIndexAtViewRow:_table.selectedRow]].name.c_str() : "(none)"]];
+    }
+    [_sortPop selectItemAtIndex:2]; _search.stringValue = @""; [self refilter];
+    int heads = 0; for (auto& v : _view) if (v.idx < 0) heads++;
+    [self say:[NSString stringWithFormat:@"[selftest] grouped by maker: %d group heading(s), %zu rows", heads, _view.size()]];
+    [_sortPop selectItemAtIndex:0]; [self refilter];
+    for (NSInteger r = 0; r < (NSInteger)_view.size(); r++) if (_view[r].idx == pick) { [_table selectRowIndexes:[NSIndexSet indexSetWithIndex:r] byExtendingSelection:NO]; [_table scrollRowToVisible:r]; }
     BOOL ok = [self loadRow:pick];
     [self say:[NSString stringWithFormat:@"[selftest] load %s", ok ? "ok" : "FAILED"]];
     __weak App* me = self;
@@ -497,10 +725,30 @@ static void watchCb(void*, const char* what, uint32_t) {
         [me openEditor:nil]; [me togglePattern:nil];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [me say:@"[selftest] five seconds of the pattern played"];
+            [me selftestDrags];
             [me writeMarker:@"ready-for-screenshot"];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(6.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me togglePattern:nil]; [me selftestEnd]; });
         });
     });
+}
+// Drags with the mouse over a grid of points in the plug-in's window, as a person turning knobs would
+// (events sent to the window by the app itself; a JUCE plug-in such as Surge XT turns its knobs on them).
+- (void)selftestDrags {
+    if (!_plugWin) { [self say:@"[selftest] no plug-in window to drag in"]; return; }
+    NSView* v = _plugWin.contentView; NSRect b = v.bounds; NSInteger wn = _plugWin.windowNumber;
+    int before = G.plug ? G.plug->editStats().performs : 0;
+    auto ev = [&](NSEventType t, NSPoint p) {
+        NSEvent* e = [NSEvent mouseEventWithType:t location:p modifierFlags:0 timestamp:NSProcessInfo.processInfo.systemUptime windowNumber:wn context:nil eventNumber:0 clickCount:1 pressure:t == NSEventTypeLeftMouseUp ? 0 : 1];
+        if (e) [NSApp sendEvent:e];
+    };
+    for (int gy = 1; gy <= 4; gy++) for (int gx = 1; gx <= 6; gx++) {
+        NSPoint p = NSMakePoint(b.size.width * gx / 7, b.size.height * gy / 5);
+        ev(NSEventTypeLeftMouseDown, p);
+        for (int k = 1; k <= 4; k++) ev(NSEventTypeLeftMouseDragged, NSMakePoint(p.x, p.y + 6 * k));
+        ev(NSEventTypeLeftMouseUp, NSMakePoint(p.x, p.y + 24));
+    }
+    int after = G.plug ? G.plug->editStats().performs : 0;
+    [self say:[NSString stringWithFormat:@"[selftest] 24 drags in the plug-in's window: %d parameter move(s) reached the host", after - before]];
 }
 - (void)writeMarker:(NSString*)name { [@"1" writeToFile:[S(_selfOut) stringByAppendingPathComponent:name] atomically:YES encoding:NSUTF8StringEncoding error:nil]; }
 - (void)selftestEnd { [self say:@"[selftest] end"]; [self writeMarker:@"done"]; [NSApp terminate:nil]; }

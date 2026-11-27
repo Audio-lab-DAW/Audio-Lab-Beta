@@ -1,4 +1,4 @@
-AudioLab VST3 test 0.3 (tasks NM1 and NB-N1)
+AudioLab VST3 test 0.4 (tasks NM1, NB-N1 and NL4)
 
 This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
 find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.
@@ -13,6 +13,25 @@ HOW TO OPEN IT (it is not signed with an Apple Developer account, so macOS asks 
 4. From now on it opens normally.
 If the button does not appear, open Terminal and paste this line, with the path of the app at the end:
    xattr -dr com.apple.quarantine "/path/to/AudioLab VST3 test.app"
+
+NEW IN 0.4
+- A search field above the list: type part of a name, a maker or "instrument" / "effect" and the list narrows as
+  you type (capitals and accents do not matter). Cmd+F jumps to it, Escape clears it, Enter loads the selected
+  match. Next to it: show all kinds, only instruments, only effects or the ones that cannot load; sort by name,
+  by maker, or group by maker. The count shows how many are shown ("12 of 222"). Plug-ins you loaded recently
+  stay at the top.
+- Knobs: every knob or slider you move in a plug-in's own window is counted. The line under the buttons shows
+  "moves in its window: N"; the report gets a [param] line per plug-in (how many moves, the last one and its value),
+  and says so plainly if you used the mouse in its window but the plug-in told the app nothing.
+- Notes: the report gets a [notes] line per plug-in (how many notes reached an instrument and whether it sounded).
+- A red warning at the top when the output runs at 16 kHz or less, for example a Bluetooth speaker in call mode
+  because an app has its microphone open, with the fix in one line.
+
+TRY THIS FIRST
+1. Type "phase plant" in the search field (or press Cmd+F first). Load it, then "Open its window".
+2. Turn a few knobs in its window. The read-out under the buttons should count up.
+3. Play the test pattern (click the list first if you use the keys A to K).
+4. Copy the report and paste it back.
 
 WHAT TO DO
 1. The list shows every VST3 plug-in found in /Library/Audio/Plug-Ins/VST3 and in your own

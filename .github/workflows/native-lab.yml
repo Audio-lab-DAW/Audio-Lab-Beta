@@ -12,7 +12,7 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-3'
+        default: 'native-lab-4'
 
 permissions:
   contents: write
@@ -136,6 +136,9 @@ jobs:
           run "SDK example: ADelay (effect)" --plugin "$RUNNER_TEMP/sdk-vst3/adelay.vst3" --tag sdk_adelay
           run "SDK example: Note Expression Synth (instrument)" --plugin "$RUNNER_TEMP/sdk-vst3/note-expression-synth.vst3" --tag sdk_note_expression_synth
           run "SDK example: AGain (effect)" --plugin "$RUNNER_TEMP/sdk-vst3/again.vst3" --tag sdk_again
+          # task NL4: do instruments sound at 16 kHz (a Bluetooth speaker in call mode)? Pigments was silent there on the user's Mac
+          run "Surge XT at 16000 Hz" --plugin "$V/Surge XT.vst3" --tag surge_xt_16k --sr 16000
+          run "SDK example: mda JX10 at 16000 Hz" --plugin "$RUNNER_TEMP/sdk-vst3/mda-vst3.vst3" --name "mda JX10" --tag sdk_mda_jx10_16k --sr 16000
           for f in out/b/*.json; do echo "--- $f"; cat "$f"; done
           rm -f out/b/*_export.wav
 
@@ -168,6 +171,7 @@ jobs:
           for i in $(seq 1 40); do [ -f out/c/done ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
           kill $PID 2>/dev/null || true
           echo "--- report"; cat out/c/AudioLab-VST3-test-report.txt || true
+          echo "--- the 0.4 lines (search, parameter moves, notes, warning)"; grep -E '^\[(selftest|param|notes|warning)\]' out/c/AudioLab-VST3-test-report.txt || true
           echo "--- output"; tail -30 out/c/stdout.txt || true
           ls -la out/c
 

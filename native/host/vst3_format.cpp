@@ -39,17 +39,21 @@ static HostApplication& hostApp() {
 struct Handler : public IComponentHandler {
     ParameterChangeTransfer* transfer = nullptr;
     std::mutex* lock = nullptr;
-    std::atomic<int> edits{0}, restarts{0};
+    std::atomic<int> edits{0}, begins{0}, ends{0}, restarts{0}, valueRestarts{0};
+    std::atomic<uint32_t> lastId{0};
+    std::atomic<double> lastValue{0};
     std::atomic<bool> latencyChanged{false};
-    tresult PLUGIN_API beginEdit(ParamID) override { return kResultOk; }
+    tresult PLUGIN_API beginEdit(ParamID) override { begins++; return kResultOk; }
     tresult PLUGIN_API performEdit(ParamID id, ParamValue v) override {
         if (transfer) { std::lock_guard<std::mutex> g(*lock); transfer->addChange(id, v, 0); }
+        lastId = id; lastValue = v;
         edits++;
         return kResultOk;
     }
-    tresult PLUGIN_API endEdit(ParamID) override { return kResultOk; }
+    tresult PLUGIN_API endEdit(ParamID) override { ends++; return kResultOk; }
     tresult PLUGIN_API restartComponent(int32 flags) override {
         restarts++;
+        if (flags & kParamValuesChanged) valueRestarts++;
         if (flags & kLatencyChanged) latencyChanged = true;
         return kResultOk;
     }
@@ -289,6 +293,13 @@ public:
         return true;
     }
     int editsFromEditor() const override { return handler.edits.load(); }
+    EditStats editStats() const override {
+        EditStats s;
+        s.performs = handler.edits.load(); s.begins = handler.begins.load(); s.ends = handler.ends.load();
+        s.restarts = handler.restarts.load(); s.valueRestarts = handler.valueRestarts.load();
+        s.lastId = handler.lastId.load(); s.lastValue = handler.lastValue.load();
+        return s;
+    }
 };
 
 class Vst3Format : public PluginFormat {
