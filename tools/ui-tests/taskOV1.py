@@ -69,7 +69,7 @@ with sync_playwright() as p:
     lab = J("(()=>{const b=document.activeElement;return b&&b.closest('#ctxm')?b.textContent:''})()")
     ok(not J("ctxm.hidden") and lab != '', 'right-click on a track header opens its menu with the first entry focused', lab[:40])
     m0 = J("S.tracks[1].mute")
-    R("(()=>{const b=[...ctxm.querySelectorAll('button[data-i]')].find(b=>/^Mute track|^Unmute track/.test(b.textContent.trim()));b.focus()})()")
+    R("(()=>{const b=[...ctxm.querySelectorAll('button[data-i]')].find(b=>/^Mute track|^Unmute track/.test((b.getAttribute('aria-label')||b.textContent).trim()));b.focus()})()")
     pg.keyboard.press('Enter'); pg.wait_for_timeout(150)
     ok(J("S.tracks[1].mute") != m0 and J("ctxm.hidden"), 'Enter on Mute track runs it and closes the menu', [m0, J("S.tracks[1].mute")])
     R("S.tracks[1].mute=%s;dirty=true" % ('true' if m0 else 'false'))
