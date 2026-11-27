@@ -99,3 +99,10 @@ Regenerate: `node render4.js && python3 shrink.py && python3 build_page.py`.
 - J4, J6, J8, J10 stay in the picker. K1 to K5, the other M variants and the hybrids are not used. Animated particles: later.
 - Built by task IC6; the new icons reach the Dock with the next desktop build (the final builds after the UI lanes, or an earlier interim build).
 
+## What shipped (task IC6, 27 November 2026)
+- **Default: J3 P2 as shipped in v0.270**, not redrawn (every picture at 96 px and up byte for byte the v0.270 file; Dark stays navy, `AppIcon.icon` unchanged).
+- **S1 is the small icon**: `icon.icns` 16 and 32 pt at 1x and 2x (each 2x drawn for its point size), `icon.ico` 16 to 32 (40 to 64 stay on the small master, now S1, because J3's own drawing there has fat rings), the favicons 16, 32, 48. Identical to the S1 renders of this round's page. No menu bar or tray icon exists in the app.
+- **Picker, group "Dipole field"**: Dipole Field (J3, default), Dipole Field, Chart Paper (J3 P8), Field Orbits (J4), Field to the Edge (M3, P2 and P8), Field Depth (M5, P2 and P8), Porthole Field (J6), Measured Field (J8, P2 and P8), Field Dial (J10, P2 and P8): 12, 61 icons in all. Every icon has small versions at 16, 32, 48 drawn the S1 way (M3 and M5 by a new S1-style master for field orbits: two thin orbits on the pixel grid).
+- Code: `tools/icon-lab/ic6/` (`small6.js`, `svgs6.js`, `ship6.py`); renders and old against new: `tools/icon-lab/ic6/renders/`. Mac runner (macos-latest, macOS 26.7.2): Assets.car compiled, assetutil shows the navy fill for default, dark and tinted.
+- Reaches the Dock with the next desktop build (no build was run). In `index.html` only the browser tab icon of a picked icon changes (its own 32 px small picture); that edit waits for the release freeze.
+
