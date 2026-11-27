@@ -88,7 +88,7 @@ jobs:
           python3 tools/native-lab/stream_compare.py out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav out/bridge/bridge_compare.json | tee -a out/bridge.txt
           rm -f out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav
 
-      - name: 'Stage N2, first proof: the desktop shell (Electron) sends a page'"'"'s sound to the engine'
+      - name: "Stage N2, first proof: the desktop shell (Electron) sends the sound of a page to the engine"
         continue-on-error: true
         run: |
           ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
