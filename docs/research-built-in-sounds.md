@@ -4,7 +4,7 @@
 
 This was a research and pick-page task. Nothing in `index.html`, `desktop/` or `native/` was changed. Files: this document, `tools/engine-lab/ae4/` (`measure.py` and `results.json`: the measurements; `demos.py`: the "today" half of the demos, written to `page/demos/`; `page/pick.html`: the pick page source).
 
-Parallel tasks started from the same request (27 Nov, 20:02 Brussels) and not repeated here: **AE1** sound quality (engine-wide sample rate, resampling, dither, oversampling policy), **AE2** performance, **AE3** mixing (bus, gain staging, master chain). Their documents are written in `docs/` at the same time. Where a card here touches their ground (the Limiter's true-peak, B30) it says "check with AE3".
+Parallel tasks started from the same request (27 Nov, 20:02 Brussels) and not repeated here: **AE1** sound quality (engine-wide sample rate, resampling, dither, oversampling policy), **AE2** performance (`docs/research-engine-performance.md`), **AE3** mixing (`docs/research-mixing.md`: sidechain routing, delay compensation, gain staging, reference and loudness). AE1's document was not in the repository when this was written. Where a card here touches their ground it says so: the Limiter's true-peak (B30) is checked with AE3, and the sidechain *source menu* for the Compressor is AE3's X1 (task MX-3); Compressor v2 (B26) only provides the detector input and its high-pass filter that X1 plugs into.
 
 ## 1. Summary
 
