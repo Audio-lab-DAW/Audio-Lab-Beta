@@ -250,4 +250,13 @@ Lane J owns only `lm*` names, `LM_LESSONS` and `UI.lm`; it adds one row to the C
 
 ## The user's picks
 
-(waiting)
+27 November 2026, 21:20 Brussels: `Learn picks: N5 H1 P1 W1 L1 G1 (Learn)`
+
+- **N5: the name is "Learn"** (as in Ableton's Learn View). The hover mode is called **"What is this?"** (not Identify); lessons are **Lessons**. Everywhere this doc says Field guide or Identify, read Learn and "What is this?".
+- **H1** the ? opens a small Help menu (search first; What is this? on F1; Lessons with progress; Keyboard shortcuts ⌘/; What's new; the Assistant ⌘K).
+- **P1** the guide points with the T3 callout, never covers what it points at, shows the live value, moves on when the project reaches the target, never blocks.
+- **W1** "What is this?" is a toggle (F1) that never blocks: hover for name, live value, what it does, default, range, key, command id and the lesson that uses it.
+- **L1** lessons of 4 to 6 steps on your own song, steps wait for a state, "already done", Back, Skip, "Do it for me", End/Esc.
+- **G1** quiet progress: ticks and "2 of 4 done", no streaks or points.
+
+Who builds it (section 6): LM0 ids and commands in lane H (XT, steps DL1 and DL2, already in its plan); LM1 the guide engine, LM2 the Help menu and LM3 What is this? in lane F (OV, after OV1 and OV8; LM1 replaces `tutSet`); LM4 to LM6 in a new lane M, task **LM** (lessons, prefix `lm`: `LM_LESSONS`, `UI.lm`, the lesson runner, the four psytrance lessons, the Assistant tools).

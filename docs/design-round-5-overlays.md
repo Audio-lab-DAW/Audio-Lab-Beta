@@ -327,3 +327,8 @@ OV2 and OV4 to OV7 can be done in any order after OV1; OV3 waits for the rules f
 `DR5 picks: R2 D3 T3 N1 X1 K1`
 
 Right-click menus R2, dialogs D3, tooltips and help line T3, notifications N1, drag and drop X1, command palette K1 (on ⌘K with the Assistant inside, as K1 describes). Built by the steps of section 5 (OV1 to OV8) with the picked options in place of the starred ones, drawn with the look tokens of task LK (DR3 picks).
+
+## Added from the learn-mode picks (UX3, 27 Nov 2026, 21:20 Brussels): lane F builds LM1 to LM3
+
+The user picked `Learn picks: N5 H1 P1 W1 L1 G1 (Learn)` (docs/research-learn-mode.md, picks at its end; the name is **Learn**, the hover mode **What is this?**). Lane F builds, after OV1 and OV8 and in the order of that doc's section 6: **LM1** the guide engine `ovGuide(id, card)` with the P1 callout (shares T3's leader drawing), which replaces `tutSet` and its capture listeners (F1 and the ? button move to it); **LM2** the H1 Help menu (search over commands, controls, lessons and settings, shortcuts sheet, what's new, the Assistant row; shares rows with the OV8 palette); **LM3** W1 What is this? (fed by `TIPS`, the S4 settings table and `INS` live values with units). Lane M (task LM) builds the lessons on top of LM1.
+
