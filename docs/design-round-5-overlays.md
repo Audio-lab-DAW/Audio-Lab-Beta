@@ -321,3 +321,9 @@ OV2 and OV4 to OV7 can be done in any order after OV1; OV3 waits for the rules f
   - no `backdrop-filter`;
   - no sideways scroll at 400 px;
   - no console errors in dark or light.
+
+## The user's picks (27 November 2026, 17:39 Brussels)
+
+`DR5 picks: R2 D3 T3 N1 X1 K1`
+
+Right-click menus R2, dialogs D3, tooltips and help line T3, notifications N1, drag and drop X1, command palette K1 (on ⌘K with the Assistant inside, as K1 describes). Built by the steps of section 5 (OV1 to OV8) with the picked options in place of the starred ones, drawn with the look tokens of task LK (DR3 picks).
