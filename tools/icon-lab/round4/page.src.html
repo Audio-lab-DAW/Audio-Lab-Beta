@@ -1,0 +1,451 @@
+<title>AudioLab app icon, round 4: J3 and J4, and the small J9</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One dark lab sheet, as rounds 1 to 3: the J3 row, the J4 row, the hybrids, the bench, the compare view, the small sizes,
+   the picker row; the picks bar is fixed at the bottom. Dark in both themes on purpose (a lab sheet); light desktops are inside the mock-ups. */
+:root{
+  --bg:#07080c; --panel:#0e1017; --panel2:#141722; --line:#232838; --fg:#e8ebf2; --mute:#8a90a2; --dim:#6a7083;
+  --acc:#6096ff; --star:#ffc43c; --alt:#4cc9f0; --sm:#5fd39a;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07080c}}
+:root[data-theme="dark"]{--bg:#07080c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 var(--sans);padding-block:28px 150px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font:700 22px/1.25 var(--sans);margin:0;text-wrap:balance}
+h2{font:600 15px/1.3 var(--sans);margin:0 0 4px;text-wrap:balance}
+.lede{color:var(--mute);max-width:84ch;margin:6px 0 0}
+.lede q{color:#c9cfdc}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sec-h p{margin:0;color:var(--mute);font-size:12px;max-width:84ch}
+.mono{font-family:var(--mono)}
+.tag{font:600 11px var(--mono);color:var(--dim);letter-spacing:.06em}
+button,select{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,.card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 11px;font-size:12px;color:var(--mute)}
+.chip:hover,.chip.on{color:var(--fg);border-color:var(--acc)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.card.ref{background:transparent;border-style:dashed}
+.card.sel{border-color:var(--acc)}
+.card.main{box-shadow:0 0 0 2px var(--star) inset} .card.alt{box-shadow:0 0 0 2px var(--alt) inset} .card.small{box-shadow:0 0 0 2px var(--sm) inset}
+.card .art{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#f2f4f8,#cfd7e3 80%)}
+.card .art.dk{background:radial-gradient(circle at 50% 40%,#161b2b,#0a0b10 75%)}
+.card .art svg{width:86%;height:auto;display:block}
+.card .hd{display:flex;align-items:baseline;gap:8px}
+.card .hd b{font:600 13.5px var(--sans)}
+.card .hd .st{margin-left:auto;color:var(--star);font-size:13px;white-space:nowrap}
+.card .note{color:var(--mute);font-size:12px;line-height:1.4;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel2);padding:4px 9px;font:600 11.5px var(--mono);color:var(--mute);display:flex;align-items:center;gap:6px}
+.seg button i{width:11px;height:11px;border-radius:50%;display:block;border:1px solid rgba(255,255,255,.25)}
+.seg button.on{background:#22283a;color:var(--fg)}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pick{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:4px 9px;font-size:12px}
+.pick.main.on{background:var(--star);color:#1a1300;border-color:var(--star);font-weight:600}
+.pick.alt.on{background:var(--alt);color:#001a22;border-color:var(--alt);font-weight:600}
+.pick.small.on{background:var(--sm);color:#00170b;border-color:var(--sm);font-weight:600}
+.fam{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;color:var(--mute);font-size:12px}
+.fam b{color:var(--fg)}
+
+.bench{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:22px}
+.bench-top{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:24px;align-items:start}
+.big{border-radius:14px;overflow:hidden;aspect-ratio:1;max-width:100%}
+.big svg{width:100%;height:auto;display:block}
+.wp-dark{background:linear-gradient(135deg,#1a1c26,#0a0b10)} .wp-light{background:linear-gradient(135deg,#eef1f6,#c9d4e4)}
+.info h2{font-size:18px}
+.info .why{color:#c9cfdc;margin:8px 0 0;max-width:66ch}
+.ladder{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-top:16px}
+.ladder figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+figcaption{font:500 10.5px var(--mono);color:var(--dim)}
+.mocks{display:grid;grid-template-columns:1fr;gap:14px}
+.mock{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+.mock svg{display:block;height:auto;margin:0 auto}
+.mock-h{font:600 12px var(--sans);color:var(--mute);margin:0 0 6px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.two>div,.mocks>div,.bench-top>*,.grid>*{min-width:0}
+.note-s{color:var(--dim);font-size:11.5px;margin:6px 0 0;max-width:96ch}
+
+.cmp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.cmp-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cmp-ctl label{display:flex;gap:6px;align-items:center;color:var(--mute);font-size:12px}
+.cmp-ctl select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--fg)}
+.stagecmp{position:relative;width:min(100%,520px);aspect-ratio:1;margin:0 auto;border-radius:14px;overflow:hidden;touch-action:none}
+.stagecmp canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:auto}
+.stagecmp.px canvas{image-rendering:pixelated}
+.stagecmp .lab{position:absolute;top:8px;font:600 11px var(--mono);background:rgba(0,0,0,.55);color:#fff;padding:2px 7px;border-radius:6px;pointer-events:none}
+.stagecmp .divider{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
+.stagecmp .knob{position:absolute;top:calc(100% - 22px);width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none}
+.sbs{display:none;gap:14px;justify-content:center;flex-wrap:wrap}
+.sbs canvas{width:min(46vw,300px);height:auto;aspect-ratio:1;border-radius:12px}
+.sbs.px canvas{image-rendering:pixelated}
+.cmp.side .stagecmp,.cmp.side #cmpRange{display:none} .cmp.side .sbs{display:flex}
+#cmpRange{width:min(100%,520px);margin:0 auto;display:block}
+
+.smallsec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:18px}
+.sgrid{display:grid;grid-template-columns:1fr;gap:12px}
+.scard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:auto auto minmax(200px,1fr);gap:10px 18px;align-items:start;min-width:0}
+.scard>.hd{grid-column:1/-1}
+.scard .txt{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+@media (max-width:900px){.scard{grid-template-columns:1fr}}
+.scard.small{box-shadow:0 0 0 2px var(--sm) inset}
+.scard.ref{background:transparent;border-style:dashed}
+.pxrow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.pxrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pxrow canvas{image-rendering:pixelated;display:block;border-radius:4px}
+.bgd{background:#1c1d22;padding:6px;border-radius:8px} .bgl{background:#e6e8ee;padding:6px;border-radius:8px}
+.family{display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-radius:12px}
+.family figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.family canvas{image-rendering:pixelated}
+.strip{display:flex;align-items:center;gap:14px;padding:8px 14px;border-radius:10px;flex-wrap:wrap}
+.strip.mbd{background:#2a2b30;color:#eee} .strip.mbl{background:#e9e9ec;color:#222}
+.strip.tbd{background:#202020;color:#eee} .strip.tbl{background:#f3f3f3;color:#222}
+.strip span{font:500 12px var(--sans)}
+.tab{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px 8px 0 0;font:500 12px var(--sans)}
+.tab.d{background:#35363a;color:#eee} .tab.l{background:#fff;color:#222}
+.tabs{display:flex;gap:2px;align-items:flex-end;padding:8px 8px 0;border-radius:10px 10px 0 0}
+.tabs.d{background:#202124} .tabs.l{background:#dee1e6}
+
+.keep{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.keep figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.keep svg{width:84px;height:84px;display:block}
+
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.rec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:76px 1fr;gap:12px;cursor:pointer;text-align:left}
+.rec svg,.rec canvas{width:76px;height:76px;display:block}
+.rec b{font:600 13px var(--sans)} .rec p{margin:4px 0 0;color:var(--mute);font-size:12px;line-height:1.4}
+.after{color:var(--mute);max-width:96ch}
+.after li{margin:4px 0}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(10,11,16,.96);border-top:1px solid var(--line);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar .in{max-width:1320px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar code{flex:1;min-width:0;font:500 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;overflow-wrap:anywhere;user-select:all}
+.bar .btn{border:0;border-radius:8px;padding:9px 14px;font-weight:600;background:var(--acc);color:#04122e}
+.bar .ghost{background:var(--panel2);color:var(--mute);border:1px solid var(--line)}
+.bar small{width:100%;color:var(--dim);font-size:11.5px}
+.bar small b{font-weight:600} .k-main{color:var(--star)} .k-alt{color:var(--alt)} .k-small{color:var(--sm)}
+@media (max-width:760px){.bench-top{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC5 · 27 NOVEMBER 2026 · ROUND 4</div>
+    <h1>AudioLab app icon, round 4: J3 and J4, and the small J9</h1>
+    <p class="lede">From your picks after v0.270: <q>We are picking J3 as our main logo. And we will keep J4 in the background. Let's actually work on J3 and J4 together … I do like J4. We'll keep J6 as an extra in the options. Same for J8. And let's use W7 field, that is J9 … for the 32 pixels, maybe the small one. And let's keep J10 in the options.</q></p>
+    <p class="lede">Below: J3 refined five ways (K1 to K5), J4 refined five ways (M1 to M5), two hybrids that take from both (H1, H2), each in Orbit night (P2) with Chart paper (P8) on the switch; a bench for the selected design (1024 to 64, the Dock on a dark and a light desktop, macOS 26 Default and Dark); a compare view with a slider; and J9 redrawn as the small icon (S1 to S4) at 16 and 32 px, 1x and 2x, next to IC4's current small master. Give one design <b class="k-main">Main</b>, one <b class="k-alt">Alt</b> and one S <b class="k-small">Small</b>, then copy the line from the bar.</p>
+  </header>
+
+  <section aria-labelledby="h-k">
+    <div class="sec-h"><h2 id="h-k">J3 refined: K1 to K5</h2><p>The rings are now drawn as strokes, so their weight and transparency are free. J3 as shipped is the dashed card. ★ recommended.</p></div>
+    <div class="grid" id="gridK"></div>
+  </section>
+  <section aria-labelledby="h-m">
+    <div class="sec-h"><h2 id="h-m">J4 refined: M1 to M5</h2><p>The field lines are the orbits. J4 of round 3 is the dashed card.</p></div>
+    <div class="grid" id="gridM"></div>
+  </section>
+  <section aria-labelledby="h-h">
+    <div class="sec-h"><h2 id="h-h">Hybrids: H1, H2</h2><p>J3's transparent rings with J4's field orbits, two ways round.</p></div>
+    <div class="grid" id="gridH"></div>
+  </section>
+
+  <section class="bench" id="bench" aria-labelledby="h-bench">
+    <div class="bench-top">
+      <div class="big wp-light" id="big"></div>
+      <div class="info">
+        <div class="tag" id="bTag"></div>
+        <h2 id="h-bench">Bench</h2>
+        <p class="why" id="bNote"></p>
+        <div class="row" style="margin-top:12px"><span class="seg" id="bSeg"></span><span id="bPicks" class="row"></span><button class="chip" id="bWp" type="button">Wallpaper: light</button></div>
+        <div class="ladder" id="ladder"></div>
+        <p class="note-s">1024 to 128 draw everything; 48 to 96 keep the bold structure (three field lines, heavier rings, no particles). Below that the small icon takes over (the S row further down).</p>
+      </div>
+    </div>
+    <div class="mocks">
+      <div class="two">
+        <div><p class="mock-h">Dock, dark desktop (64 pt icons; the others are invented stand-ins)</p><div class="mock" id="dockD"></div></div>
+        <div><p class="mock-h">Dock, light desktop</p><div class="mock" id="dockL"></div></div>
+      </div>
+      <div><p class="mock-h">macOS 26: Default and Dark</p><div class="mock" id="styles" style="max-width:620px"></div>
+        <p class="note-s" id="stNote"></p></div>
+    </div>
+  </section>
+
+  <section class="cmp" id="cmp" aria-labelledby="h-cmp">
+    <div class="sec-h" style="margin:0"><h2 id="h-cmp">Compare</h2><p>Any two designs at the same size. Drag the slider (or the picture) to wipe between them; sizes 64 and below show the real pixels, magnified.</p></div>
+    <div class="cmp-ctl">
+      <label>Left <select id="cA"></select></label><span class="seg" id="cAp"></span>
+      <label>Right <select id="cB"></select></label><span class="seg" id="cBp"></span>
+      <label>Size <select id="cS"></select></label>
+      <button class="chip" id="cMode" type="button">Side by side</button>
+      <button class="chip" id="cWp" type="button">Wallpaper: dark</button>
+    </div>
+    <div class="stagecmp wp-dark" id="cStage"><canvas id="cvB" aria-label="Right design"></canvas><canvas id="cvA" aria-label="Left design"></canvas><span class="lab" id="labA" style="left:8px"></span><span class="lab" id="labB" style="right:8px"></span><div class="divider" id="cDiv"></div><div class="knob" id="cKnob"></div></div>
+    <input type="range" id="cmpRange" min="0" max="100" value="50" aria-label="Wipe between the left and the right design">
+    <div class="sbs" id="cSbs"><figure style="margin:0"><canvas id="sbA"></canvas><figcaption id="sbAl"></figcaption></figure><figure style="margin:0"><canvas id="sbB"></canvas><figcaption id="sbBl"></figcaption></figure></div>
+  </section>
+
+  <section class="smallsec" aria-labelledby="h-s">
+    <div class="sec-h" style="margin:0"><h2 id="h-s">J9 as the small icon: S1 to S4</h2><p>J9 is W7's crop and tilt with the dipole field centred on its nucleus, cut by the tile edge. Redrawn for 32 px and below: rings in device pixels (1 px at 16, 1.3 at 32) with their straight edges on the pixel grid, nucleus and electron on whole pixels, the field a hairline. Each picture is drawn at its own size, never shrunk. Magnified views are the real pixels.</p></div>
+    <div class="row"><span class="seg" id="sSeg"></span></div>
+    <div class="sgrid" id="sgrid"></div>
+    <div>
+      <p class="mock-h">The family: big icon (Main and Alt picks, or K1 and M2), and the small one at the sizes it ships at</p>
+      <div class="two"><div class="family wp-dark" id="famD"></div><div class="family wp-light" id="famL"></div></div>
+    </div>
+    <div class="two">
+      <div><p class="mock-h">Windows taskbar, 100 % (24 px) and the window title (16 px)</p>
+        <div class="strip tbd" id="tbD"></div><div class="strip tbl" id="tbL" style="margin-top:8px"></div></div>
+      <div><p class="mock-h">Browser tab (favicon 16 px, drawn at 32 on a 2x screen)</p>
+        <div class="tabs d" id="tabD"></div><div class="tabs l" id="tabL" style="margin-top:8px"></div></div>
+    </div>
+    <div><p class="mock-h">Menu bar or tray (if one is added later): one-colour template, 16 pt at 1x and 2x</p>
+      <div class="two"><div class="strip mbd" id="mbD"></div><div class="strip mbl" id="mbL"></div></div>
+      <p class="note-s">AudioLab has no menu-bar or tray icon today; this is how the small master would serve one. The app's menu bar shows its name, not its icon.</p></div>
+  </section>
+
+  <section aria-labelledby="h-keep">
+    <div class="sec-h"><h2 id="h-keep">Stays in the picker</h2><p>Unchanged from round 3 and v0.270: options in Settings › App icon, together with J4 (or the M you pick as Alt).</p></div>
+    <div class="keep" id="keep"></div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2><p>Click one to load it on the bench.</p></div>
+    <div class="recs" id="recs"></div>
+  </section>
+
+  <section aria-labelledby="h-after" class="after">
+    <h2 id="h-after">After you pick</h2>
+    <ol>
+      <li><b>Main</b> becomes the default app icon through the IC1 pipeline (<span class="mono">mac-icon/AppIcon.icon</span> → <span class="mono">Assets.car</span>): the navy tile as the fill for Default, Dark and Tinted, so Dark stays navy. A P8 Main gets the P8N tile and layer for Dark.</li>
+      <li><b>Alt</b> goes into Settings › App icon next to J6, J8 and J10 (and J4 itself if you pick an M, so the original stays available).</li>
+      <li><b>Small</b> replaces IC4's small master everywhere at 32 px and below: <span class="mono">icon.icns</span> (16 and 32 pt, 1x and 2x), <span class="mono">icon.ico</span> (16 to 32; 48 and up from Main), the favicons. <span class="mono">icon.icns</span>, <span class="mono">icon.ico</span>, <span class="mono">Assets.car</span> and the favicons are made again, then a desktop build.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <code id="line">Round 4 picks: (nothing picked yet)</code>
+    <button class="btn" id="copy" type="button">Copy</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+    <small><b class="k-main">Main</b>: the default icon. <b class="k-alt">Alt</b>: added to the picker. <b class="k-small">Small</b>: 32 px and below. Paste the line into the chat.</small>
+  </div>
+</div>
+
+<script>/*GEOM*/</script>
+<script>/*ICONS3*/</script>
+<script>/*ICONS4*/</script>
+<script>/*SMALL4*/</script>
+<script>
+(function(){
+  var A3 = window.AL3, A = window.AL4, SM = window.AL4S, $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var PB = A.PAL;
+  /* every design the page knows: round 4's, the round 3 references, the small S variants and IC4's small master */
+  var REF = { J3: { id: 'J3', name: 'J3 as shipped (v0.270)', note: 'Round 3\'s J3, the default icon since v0.270: the tilted field, W7 rings at 90 %.', fam: 'J3', ref: true },
+              J4: { id: 'J4', name: 'J4 of round 3', note: 'Round 3\'s J4: three field lines in the ring colour are the orbits.', fam: 'J4', ref: true },
+              J9: { id: 'J9', name: 'J9 of round 3', note: 'W7 field, drawn big.', ref: true } };
+  var ALL = {};
+  A.DESIGNS.forEach(function(d){ ALL[d.id] = d; });
+  Object.keys(REF).forEach(function(k){ ALL[k] = REF[k]; });
+  SM.IDS.concat(['IC4']).forEach(function(k){ ALL[k] = { id: k, name: SM.VARIANTS[k].name, note: SM.VARIANTS[k].note, small: true }; });
+  function bigSvg(id, p, size, frame, style){ if (ALL[id].ref) return A3.svg(id, p, size, { frame: frame || 'mac', style: style === 'dark' && p === 'P8' ? null : style }); return A.svg(id, p, size, { frame: frame || 'mac', style: style }); }
+  /* any design at any size: S variants are drawn at their pixel size (16 to 64), beyond that the big Main stands in */
+  function anySvg(id, p, size, frame){ if (ALL[id].small) return SM.smallSvg(id, p, Math.min(size, 64), frame || 'full'); return bigSvg(id, p, size, frame || 'full'); }
+
+  var REC = {}; A.RECS.forEach(function(r){ REC[r.d] = r; });
+  var state = { sel: 'K1', cur: {}, main: null, alt: null, small: null, wp: 'light', sp: 'P2', cmp: { a: 'J3', ap: 'P2', b: 'K1', bp: 'P2', s: 256, pos: 50, side: false, wp: 'dark' } };
+  Object.keys(ALL).forEach(function(k){ state.cur[k] = 'P2'; });
+  try { var sv = JSON.parse(localStorage.getItem('al4-picks') || 'null'); if (sv) { ['main', 'alt', 'small'].forEach(function(k){ if (sv[k] && (ALL[sv[k].d])) state[k] = sv[k]; }); if (sv.cur) Object.keys(sv.cur).forEach(function(k){ if (state.cur[k]) state.cur[k] = sv.cur[k]; }); } } catch (e) {}
+  function save(){ try { localStorage.setItem('al4-picks', JSON.stringify({ main: state.main, alt: state.alt, small: state.small, cur: state.cur })); } catch (e) {} }
+
+  function segHtml(key, cur, attr){ return ['P2', 'P8'].map(function(p){ var P = PB[p]; return '<button type="button" class="' + (cur === p ? 'on' : '') + '" ' + attr + '="' + key + '" data-p="' + p + '" aria-pressed="' + (cur === p) + '" title="' + p + ' ' + esc(P.name) + '"><i style="background:linear-gradient(135deg,' + P.bg[0] + ' 0 55%,' + P.nuc + ' 55% 100%)"></i>' + p + '</button>'; }).join(''); }
+  function isRole(role, id){ var x = state[role]; return !!x && x.d === id && (role === 'small' || x.p === state.cur[id]); }
+  function roleBtns(id){
+    var p = state.cur[id];
+    return ['main', 'alt'].map(function(r){ var on = isRole(r, id); return '<button type="button" class="pick ' + r + (on ? ' on' : '') + '" data-role="' + r + '" data-id="' + id + '" aria-pressed="' + on + '">' + (r === 'main' ? 'Main' : 'Alt') + '</button>'; }).join('');
+  }
+  function card(id){
+    var d = ALL[id], p = state.cur[id], r = REC[id];
+    var cls = 'card' + (d.ref ? ' ref' : '') + (state.sel === id ? ' sel' : '') + (isRole('main', id) ? ' main' : isRole('alt', id) ? ' alt' : '');
+    return '<div class="' + cls + '" tabindex="0" data-d="' + id + '"><div class="art' + (p === 'P8' ? ' dk' : '') + '">' + bigSvg(id, p, 256) + '</div>' +
+      '<div class="hd"><span class="tag">' + id + '</span><b>' + esc(d.name) + '</b>' + (r ? '<span class="st" title="Recommended">★ ' + (r.role === 'main' ? 'main' : 'alt') + '</span>' : '') + '</div>' +
+      '<p class="note">' + esc(d.note) + '</p>' +
+      '<div class="row"><span class="seg">' + segHtml(id, p, 'data-d') + '</span>' + roleBtns(id) + '</div></div>';
+  }
+  function drawGrids(){
+    $('gridK').innerHTML = ['J3', 'K1', 'K2', 'K3', 'K4', 'K5'].map(card).join('');
+    $('gridM').innerHTML = ['J4', 'M1', 'M2', 'M3', 'M4', 'M5'].map(card).join('');
+    $('gridH').innerHTML = ['H1', 'H2'].map(card).join('');
+  }
+  function onGrid(e){
+    var b = e.target.closest('button');
+    if (b && b.hasAttribute('data-p')) { var id = b.getAttribute('data-d'); state.cur[id] = b.getAttribute('data-p'); state.sel = id; save(); drawAll(); return; }
+    if (b && b.hasAttribute('data-role')) { setRole(b.getAttribute('data-role'), b.getAttribute('data-id')); return; }
+    var c = e.target.closest('.card'); if (c) { state.sel = c.getAttribute('data-d'); drawGrids(); drawBench(); }
+  }
+  ['gridK', 'gridM', 'gridH'].forEach(function(g){
+    $(g).addEventListener('click', onGrid);
+    $(g).addEventListener('keydown', function(e){ var c = e.target.closest('.card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.sel = c.getAttribute('data-d'); drawGrids(); drawBench(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+  });
+  function setRole(role, id){
+    var p = state.cur[id];
+    if (isRole(role, id)) state[role] = null;
+    else { state[role] = role === 'small' ? { d: id } : { d: id, p: p }; if (role !== 'small') { var o = role === 'main' ? 'alt' : 'main'; if (state[o] && state[o].d === id && state[o].p === p) state[o] = null; } }
+    save(); drawGrids(); drawBench(); drawSmall(); drawLine();
+  }
+  function drawLine(){
+    var parts = [];
+    if (state.main) parts.push('main ' + state.main.d + (state.main.p !== 'P2' ? ' ' + state.main.p : ''));
+    if (state.alt) parts.push('alt ' + state.alt.d + (state.alt.p !== 'P2' ? ' ' + state.alt.p : ''));
+    if (state.small) parts.push('small ' + state.small.d);
+    $('line').textContent = 'Round 4 picks: ' + (parts.length ? parts.join(' | ') : '(nothing picked yet)');
+  }
+  $('copy').addEventListener('click', function(){
+    var t = $('line').textContent, b = $('copy');
+    var sel = function(){ var r = document.createRange(); r.selectNodeContents($('line')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected, press Copy'; };
+    try { navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1400); }, sel); } catch (e) { sel(); }
+  });
+  $('clear').addEventListener('click', function(){ state.main = state.alt = state.small = null; save(); drawAll(); });
+
+  /* pixel-true drawing: the SVG drawn into a canvas of n x n device pixels, shown k times larger */
+  function rasterInto(cv, svgStr, n, cssW){
+    cv.width = n; cv.height = n; if (cssW) { cv.style.width = cssW + 'px'; cv.style.height = cssW + 'px'; }
+    var img = new Image(), url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+    img.onload = function(){ var g = cv.getContext('2d'); g.clearRect(0, 0, n, n); g.drawImage(img, 0, 0, n, n); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+
+  /* bench */
+  function drawBench(){
+    var id = state.sel, d = ALL[id], p = state.cur[id], P = PB[p], r = REC[id];
+    $('big').className = 'big wp-' + state.wp; $('big').innerHTML = bigSvg(id, p, 1024);
+    $('bTag').textContent = id + ' · ' + p + ' ' + P.name + (d.fam ? ' · ' + (d.fam === 'Hybrid' ? 'hybrid of J3 and J4' : d.fam + ' refined') : '');
+    $('h-bench').textContent = d.name + (r ? '  ★' : '');
+    $('bNote').textContent = d.note + (r ? ' ★ ' + r.why : '');
+    $('bSeg').innerHTML = segHtml(id, p, 'data-d');
+    $('bPicks').innerHTML = roleBtns(id);
+    $('bWp').textContent = 'Wallpaper: ' + state.wp;
+    $('ladder').innerHTML = [[1024, 200], [512, 160], [128, 128], [64, 64]].map(function(z){ return '<figure><div style="width:' + z[1] + 'px;height:' + z[1] + 'px">' + bigSvg(id, p, z[0]).replace(/width="\d+" height="\d+"/, 'width="' + z[1] + '" height="' + z[1] + '"') + '</div><figcaption>' + z[0] + (z[0] > z[1] ? ' (shown at ' + z[1] + ')' : '') + '</figcaption></figure>'; }).join('');
+    var dr = function(z){ return bigSvg(id, p, z); };
+    $('dockD').innerHTML = A.dock(dr, 'dark'); $('dockL').innerHTML = A.dock(dr, 'light');
+    $('styles').innerHTML = A.styles(function(z, st){ return d.ref ? A3.svg(id, st === 'dark' && p === 'P8' ? 'P8N' : p, z, { frame: 'mac' }) : A.svg(id, p, z, { frame: 'mac', style: st }); }, p);
+    $('stNote').textContent = p === 'P2' ? 'P2: Default and Dark are the same navy tile. The Icon Composer file of IC1 gives the Dark appearance the same fill, so Dark stays navy (confirmed on macOS 26.7.2 for v0.270). Tinted and Clear are the system\'s own and are not shown.'
+      : 'P8 is a light tile: in Dark it takes its proposed P8N entry (paper and ink swapped), which needs its own dark fill and layer in AppIcon.icon. P8 is safest as a picker option.';
+    [['dockD', 2], ['dockL', 2], ['styles', 1]].forEach(function(x){ var s = $(x[0]).querySelector('svg'); s.style.width = '100%'; s.style.maxWidth = (s.getAttribute('width') / x[1]) + 'px'; });
+  }
+  $('bSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); });
+  $('bPicks').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) setRole(b.getAttribute('data-role'), b.getAttribute('data-id')); });
+  $('bWp').addEventListener('click', function(){ state.wp = state.wp === 'light' ? 'dark' : 'light'; drawBench(); });
+
+  /* compare */
+  var ORDER = ['J3', 'K1', 'K2', 'K3', 'K4', 'K5', 'J4', 'M1', 'M2', 'M3', 'M4', 'M5', 'H1', 'H2', 'J9', 'S1', 'S2', 'S3', 'S4', 'IC4'];
+  var SIZES = [1024, 512, 256, 128, 64, 48, 32, 24, 16];
+  function opts(sel){ return ORDER.map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + k + ' · ' + esc(ALL[k].name) + '</option>'; }).join(''); }
+  function drawCmp(){
+    var C = state.cmp;
+    $('cA').innerHTML = opts(C.a); $('cB').innerHTML = opts(C.b);
+    $('cS').innerHTML = SIZES.map(function(z){ return '<option value="' + z + '"' + (z === C.s ? ' selected' : '') + '>' + z + ' px</option>'; }).join('');
+    $('cAp').innerHTML = segHtml('a', C.ap, 'data-c'); $('cBp').innerHTML = segHtml('b', C.bp, 'data-c');
+    var px = C.s <= 64, n = C.s;
+    var note = function(id){ return ALL[id].small && C.s > 64 ? ' (drawn at 64; the S row is for 64 px and below)' : !ALL[id].small && C.s <= 32 ? ' (big drawing at its smallest level; the S row is what ships here)' : ''; };
+    $('cStage').className = 'stagecmp wp-' + C.wp + (px ? ' px' : ''); $('cSbs').className = 'sbs' + (px ? ' px' : '');
+    $('cWp').textContent = 'Wallpaper: ' + C.wp;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), big = Math.min(1024, Math.round(520 * dpr));
+    var nA = px ? n : big, nB = px ? n : big;
+    /* above 64 the canvas holds the drawing at screen resolution, with the level of detail of the chosen size */
+    rasterInto($('cvA'), anySvg(C.a, C.ap, C.s), ALL[C.a].small && !px ? 64 : nA);
+    rasterInto($('cvB'), anySvg(C.b, C.bp, C.s), ALL[C.b].small && !px ? 64 : nB);
+    rasterInto($('sbA'), anySvg(C.a, C.ap, C.s), ALL[C.a].small && !px ? 64 : nA);
+    rasterInto($('sbB'), anySvg(C.b, C.bp, C.s), ALL[C.b].small && !px ? 64 : nB);
+    $('labA').textContent = C.a + ' ' + C.ap; $('labB').textContent = C.b + ' ' + C.bp;
+    $('sbAl').textContent = C.a + ' ' + C.ap + ' at ' + C.s + ' px' + note(C.a); $('sbBl').textContent = C.b + ' ' + C.bp + ' at ' + C.s + ' px' + note(C.b);
+    $('cSbs').style.background = C.wp === 'dark' ? '#0f1118' : '#dfe5ee'; $('cSbs').style.padding = '12px'; $('cSbs').style.borderRadius = '12px';
+    $('cmp').classList.toggle('side', C.side); $('cMode').textContent = C.side ? 'Slider' : 'Side by side';
+    wipe();
+  }
+  function wipe(){ var v = state.cmp.pos; $('cvA').style.clipPath = 'inset(0 ' + (100 - v) + '% 0 0)'; $('cDiv').style.left = v + '%'; $('cKnob').style.left = v + '%'; $('cmpRange').value = v; }
+  $('cA').addEventListener('change', function(){ state.cmp.a = this.value; drawCmp(); });
+  $('cB').addEventListener('change', function(){ state.cmp.b = this.value; drawCmp(); });
+  $('cS').addEventListener('change', function(){ state.cmp.s = parseInt(this.value, 10); drawCmp(); });
+  [$('cAp'), $('cBp')].forEach(function(el){ el.addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cmp[b.getAttribute('data-c') + 'p'] = b.getAttribute('data-p'); drawCmp(); }); });
+  $('cMode').addEventListener('click', function(){ state.cmp.side = !state.cmp.side; drawCmp(); });
+  $('cWp').addEventListener('click', function(){ state.cmp.wp = state.cmp.wp === 'dark' ? 'light' : 'dark'; drawCmp(); });
+  $('cmpRange').addEventListener('input', function(){ state.cmp.pos = +this.value; wipe(); });
+  (function(){ var st = $('cStage'), drag = false;
+    function at(e){ var r = st.getBoundingClientRect(); state.cmp.pos = Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)); wipe(); }
+    st.addEventListener('pointerdown', function(e){ drag = true; st.setPointerCapture(e.pointerId); at(e); });
+    st.addEventListener('pointermove', function(e){ if (drag) at(e); });
+    st.addEventListener('pointerup', function(){ drag = false; }); st.addEventListener('pointercancel', function(){ drag = false; });
+  })();
+
+  /* small icons */
+  function fig(svgStr, n, cssW, cap, cls){ return '<figure><div class="' + cls + '"><canvas data-svg="' + encodeURIComponent(svgStr) + '" data-n="' + n + '" data-w="' + cssW + '"></canvas></div><figcaption>' + cap + '</figcaption></figure>'; }
+  function hydrate(root){ Array.prototype.forEach.call(root.querySelectorAll('canvas[data-svg]'), function(cv){ rasterInto(cv, decodeURIComponent(cv.getAttribute('data-svg')), +cv.getAttribute('data-n'), +cv.getAttribute('data-w')); }); }
+  function drawSmall(){
+    var p = state.sp;
+    $('sSeg').innerHTML = '<span class="tag" style="margin-right:8px">PALETTE</span>' + segHtml('s', p, 'data-s');
+    $('sgrid').innerHTML = SM.IDS.concat(['IC4']).map(function(id){
+      var V = SM.VARIANTS[id], on = isRole('small', id), rec = SM.RECS.filter(function(r){ return r.s === id; })[0];
+      var bg = p === 'P8' ? 'bgd' : 'bgl';
+      return '<div class="scard' + (id === 'IC4' ? ' ref' : '') + (on ? ' small' : '') + '"><div class="hd row"><span class="tag">' + id + '</span><b>' + esc(V.name) + '</b>' + (rec ? '<span style="color:var(--star);margin-left:auto">★</span>' : '') + '</div>' +
+        '<div class="pxrow">' +
+        fig(SM.smallSvg(id, p, 16, 'full'), 16, 96, '16 @1x ×6', 'bgd') + fig(SM.smallSvg(id, p, 32, 'full', { pt: 16 }), 32, 96, '16 @2x ×3', 'bgd') +
+        fig(SM.smallSvg(id, p, 32, 'full'), 32, 128, '32 @1x ×4', 'bgd') + fig(SM.smallSvg(id, p, 64, 'full', { pt: 32 }), 64, 128, '32 @2x ×2', 'bgd') + '</div>' +
+        '<div class="pxrow">' + [16, 20, 24, 32, 48].map(function(z){ return fig(SM.smallSvg(id, p, z, 'full'), z, z, z, bg); }).join('') + fig(SM.smallSvg(id, p, 32, 'mac'), 32, 32, 'mac 32', bg) + '</div>' +
+        '<div class="txt"><p class="note" style="color:var(--mute);margin:0;font-size:12px">' + esc(V.note) + (rec ? ' ★ ' + esc(rec.why) : '') + '</p>' +
+        (id === 'IC4' ? '' : '<button type="button" class="pick small' + (on ? ' on' : '') + '" data-role="small" data-id="' + id + '" aria-pressed="' + on + '">Small</button>') + '</div></div>';
+    }).join('');
+    hydrate($('sgrid'));
+    var mainId = state.main ? state.main.d : 'K1', mainP = state.main ? state.main.p : 'P2', altId = state.alt ? state.alt.d : 'M2', altP = state.alt ? state.alt.p : 'P2', sid = state.small ? state.small.d : 'S1';
+    ['famD', 'famL'].forEach(function(el){
+      $(el).innerHTML = '<figure>' + bigSvg(mainId, mainP, 128).replace(/width="128" height="128"/, 'width="128" height="128"') + '<figcaption>' + mainId + ' 128</figcaption></figure><figure>' + bigSvg(altId, altP, 128) + '<figcaption>' + altId + ' 128</figcaption></figure>' +
+        '<figure><canvas data-svg="' + encodeURIComponent(bigSvg(mainId, mainP, 64)) + '" data-n="64" data-w="64"></canvas><figcaption>' + mainId + ' 64</figcaption></figure>' +
+        '<figure><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 32, 'mac')) + '" data-n="32" data-w="32"></canvas><figcaption>' + sid + ' 32</figcaption></figure>' +
+        '<figure><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 16, 'mac')) + '" data-n="16" data-w="16"></canvas><figcaption>' + sid + ' 16</figcaption></figure>' +
+        '<figure><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 64, 'mac', { pt: 32 })) + '" data-n="64" data-w="32"></canvas><figcaption>' + sid + ' 32 @2x</figcaption></figure>';
+      hydrate($(el));
+    });
+    var stand = function(i, w){ return A.standSvg(i, 0, 0, w, true).replace(/^<svg /, '<svg xmlns="http://www.w3.org/2000/svg" '); };
+    ['tbD', 'tbL'].forEach(function(el){
+      var h = ''; [0, 1, 3].forEach(function(i){ h += '<span style="display:inline-block;width:24px;height:24px">' + stand(i, 24) + '</span>'; });
+      h += '<canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 24, 'full')) + '" data-n="24" data-w="24"></canvas>';
+      [6, 4].forEach(function(i){ h += '<span style="display:inline-block;width:24px;height:24px">' + stand(i, 24) + '</span>'; });
+      h += '<span style="margin-left:auto;display:flex;gap:8px;align-items:center"><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 16, 'full')) + '" data-n="16" data-w="16"></canvas> AudioLab Pro</span>';
+      $(el).innerHTML = h; hydrate($(el));
+    });
+    ['tabD', 'tabL'].forEach(function(el, i){
+      var t = i ? 'l' : 'd';
+      $(el).innerHTML = '<div class="tab ' + t + '"><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 32, 'full', { pt: 16 })) + '" data-n="32" data-w="16"></canvas>AudioLab Pro</div><div class="tab ' + t + '" style="opacity:.6"><canvas data-svg="' + encodeURIComponent(SM.smallSvg(sid, p, 16, 'full')) + '" data-n="16" data-w="16"></canvas>1x: AudioLab Pro</div>';
+      hydrate($(el));
+    });
+    [['mbD', '#FFFFFF'], ['mbL', '#000000']].forEach(function(x){
+      $(x[0]).innerHTML = '<span>File&nbsp; Edit&nbsp; View</span><span style="margin-left:auto;display:flex;gap:12px;align-items:center"><canvas data-svg="' + encodeURIComponent(SM.template(sid, 16, x[1])) + '" data-n="16" data-w="16"></canvas><canvas data-svg="' + encodeURIComponent(SM.template(sid, 32, x[1])) + '" data-n="32" data-w="16"></canvas><span>1x · 2x</span></span>';
+      hydrate($(x[0]));
+    });
+  }
+  $('sSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.sp = b.getAttribute('data-p'); drawSmall(); });
+  $('sgrid').addEventListener('click', function(e){ var b = e.target.closest('button[data-role]'); if (b) setRole('small', b.getAttribute('data-id')); });
+
+  /* stays in the picker */
+  $('keep').innerHTML = [['J6', 'P2'], ['J8', 'P2'], ['J8', 'P8'], ['J10', 'P2'], ['J10', 'P8']].map(function(x){ var d = A3.DESIGNS.filter(function(z){ return z.id === x[0]; })[0]; return '<figure>' + A3.svg(x[0], x[1], 128, { frame: 'mac' }) + '<figcaption>' + x[0] + ' ' + x[1] + ' · ' + esc(d.name) + '</figcaption></figure>'; }).join('');
+
+  /* recommendations */
+  function drawRecs(){
+    var h = A.RECS.map(function(r){ var d = ALL[r.d]; return '<button type="button" class="rec" data-d="' + r.d + '" data-p="' + r.p + '">' + bigSvg(r.d, r.p, 128) + '<span><span class="tag">★ ' + r.d + ' · ' + (r.role === 'main' ? 'AS MAIN' : 'AS ALT') + '</span><br><b>' + esc(d.name) + ', ' + esc(PB[r.p].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    h += SM.RECS.map(function(r){ return '<button type="button" class="rec" data-s="' + r.s + '"><canvas data-svg="' + encodeURIComponent(SM.smallSvg(r.s, 'P2', 32, 'full')) + '" data-n="32" data-w="76" style="image-rendering:pixelated"></canvas><span><span class="tag">★ ' + r.s + ' · AS SMALL</span><br><b>' + esc(SM.VARIANTS[r.s].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    $('recs').innerHTML = h; hydrate($('recs'));
+  }
+  $('recs').addEventListener('click', function(e){ var b = e.target.closest('.rec'); if (!b) return;
+    if (b.hasAttribute('data-s')) { state.cmp.a = 'IC4'; state.cmp.b = b.getAttribute('data-s'); state.cmp.s = 32; drawCmp(); $('cmp').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    state.sel = b.getAttribute('data-d'); state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  function drawAll(){ drawGrids(); drawBench(); drawSmall(); drawLine(); }
+  drawAll(); drawCmp(); drawRecs();
+})();
+</script>
