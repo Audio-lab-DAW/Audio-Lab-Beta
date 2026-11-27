@@ -1,6 +1,6 @@
 """Device layout with side headers (v0.196, task T): python3 tools/ui-tests/sideheaders.py [index.html] [out dir]
 Fractals demo, headless. For every device of several tracks and the master: a strip on the left (on/off or logo at the top, the name, remove at the bottom),
-a strip on the right (pin at the top, the show and hide parameters button), the preset row on top of the parameters, nothing clipped, at two panel heights,
+a strip on the right (pin at the top, the show and hide parameters button; since v0.262, task DV-1: the pill with the eye and the pin at the top right of the display), the preset row on top of the parameters, nothing clipped, at two panel heights,
 parameters open and shut. Mouse tests: on/off, show and hide parameters, next preset, Change (Escape), pin and unpin (and the layout in the window), remove
 and undo, remove on an instrument (asks; Keep it), the panel's own Devices tab (hide, show), the overflow buttons of the track tabs at a narrow width."""
 import sys, os, json
@@ -28,24 +28,24 @@ def sel(pg, name):
 
 # every laid-out device in a root: geometry of the strips, the row, and anything outside the device or the visible panel
 GEO = r"""(root=>{const out=[];const R0=root.getBoundingClientRect();for(const D of root.querySelectorAll(':scope>.dev[data-d=inst],:scope>.dev[data-d=fx],.pinb>.dev')){if(!D.classList.contains('du'))continue;
- const R=D.getBoundingClientRect(),L=D.querySelector(':scope>.devh'),Rs=D.querySelector(':scope>.dsr'),l=L&&L.getBoundingClientRect(),r=Rs&&Rs.getBoundingClientRect();
+ const R=D.getBoundingClientRect(),L=D.querySelector(':scope>.devh'),Rs=D.querySelector(':scope>.dsr')||D.querySelector(':scope>.devb>.dvtr'),l=L&&L.getBoundingClientRect(),r=Rs&&Rs.getBoundingClientRect();
  const first=L&&L.firstElementChild,rm=L&&L.querySelector(':scope>.dsrm'),pin=Rs&&Rs.querySelector(':scope>.pinbtn'),ar=Rs&&Rs.querySelector(':scope>.duar'),row=D.querySelector('.dspr');
- const bad=[];for(const el of D.querySelectorAll('.kn,.vb,.hb,button,select,canvas,label')){const q=el.getBoundingClientRect();if(!q.width||!el.offsetParent)continue;if(el.closest('.kscroll,.gridwrap,.pzscroll,[data-scroll],.gwrap'))continue;
+ const bad=[];for(const el of D.querySelectorAll('.kn,.vb,.hb,button,select,canvas,label')){const q=el.getBoundingClientRect();if(!q.width||!el.offsetParent)continue;if(el.closest('.kscroll,.gridwrap,.pzscroll,[data-scroll],.gwrap'))continue;if(D.classList.contains('dvshut')&&el.closest('.dfs,.eqside,.dug'))continue;
    if(q.left<R.left-1||q.right>R.right+1||q.top<R.top-1||q.bottom>R.bottom+1)bad.push((el.title||el.textContent||el.className||el.tagName).toString().trim().slice(0,18))}
- const nm=L&&L.querySelector(':scope>span');out.push({d:D.dataset.d,name:nm?(nm.title||nm.textContent).trim():'?',ds:D.classList.contains('ds'),shut:D.classList.contains('dushut'),
+ const nm=L&&L.querySelector(':scope>span');out.push({d:D.dataset.d,name:nm?(nm.title||nm.textContent).trim():'?',ds:D.classList.contains('ds'),shut:D.classList.contains('dushut')||D.classList.contains('dvshut'),
   left:l?Math.round(l.left-R.left):-1,lw:l?Math.round(l.width):0,right:r?Math.round(R.right-r.right):-1,
   top:first?(first.classList.contains('pw')?'onoff':first.tagName.toLowerCase()==='svg'?'logo':first.className):'-',
   rmBottom:rm?Math.round(R.bottom-rm.getBoundingClientRect().bottom):-1,rmLeft:rm?Math.round(rm.getBoundingClientRect().left-R.left):-1,
   pinTop:pin?Math.round(pin.getBoundingClientRect().top-R.top):-1,pinRight:pin?Math.round(R.right-pin.getBoundingClientRect().right):-1,arrow:!!ar,
-  row:row?(row.classList.contains('dsfl')?'float':'side'):'none',rowVis:!!(row&&row.offsetParent),
+  row:row?(row.classList.contains('dsfl')?'float':'side'):'none',rowVis:!!(row&&row.offsetParent&&getComputedStyle(row.closest('.dfs,.eqside')||row).opacity!=='0'),
   rowTop:row&&row.offsetParent?Math.round(row.getBoundingClientRect().top-R.top):-1,
   inPanel:root.id!=='fxin'||root.classList.contains('wrap')||(R.top>=R0.top-1&&R.bottom<=R0.bottom+1),bad:bad.slice(0,4),w:Math.round(R.width),h:Math.round(R.height)})}return JSON.stringify(out)})"""
 def check(pg, tag, root='fxin'):
     rows = json.loads(run(pg, GEO + "(document.getElementById('%s'))" % root if root == 'fxin' else GEO + "(document.querySelector('%s'))" % root))
     for d in rows:
         m = '%s %-18s %4dx%-3d' % (tag, d['name'][:18], d['w'], d['h'])
-        good = d['ds'] and 0 <= d['left'] <= 2 and 0 <= d['right'] <= 2 and d['top'] in ('onoff', 'logo') and 0 <= d['rmBottom'] <= 8 and d['rmLeft'] <= 4 \
-            and 0 <= d['pinTop'] <= 8 and 0 <= d['pinRight'] <= 4 and not d['bad'] and d['inPanel'] \
+        good = d['ds'] and 0 <= d['left'] <= 2 and 0 <= d['right'] <= 8 and d['top'] in ('onoff', 'logo') and 0 <= d['rmBottom'] <= 8 and d['rmLeft'] <= 4 \
+            and 0 <= d['pinTop'] <= 10 and 0 <= d['pinRight'] <= 8 and not d['bad'] and d['inPanel'] \
             and (d['shut'] and not d['rowVis'] or not d['shut'] and (d['row'] != 'none' and d['rowVis'] and d['rowTop'] <= 10))
         ok(good, m + ' strips L%d R%d top %s remove %d from bottom, pin %d from top, row %s at %d%s%s' % (d['left'], d['right'], d['top'], d['rmBottom'], d['pinTop'],
             d['row'] if not d['shut'] else 'hidden (shut)', d['rowTop'], '' if d['inPanel'] else ' NOT IN PANEL', (' clipped: ' + ', '.join(d['bad'])) if d['bad'] else ''))
@@ -84,12 +84,12 @@ with sync_playwright() as p:
         pg.mouse.click(r[0], r[1]); pg.wait_for_timeout(350)
     on0 = run(pg, "curT().fx[1].on"); click(fxdev(1), '.devh>.pw'); on1 = run(pg, "curT().fx[1].on"); click(fxdev(1), '.devh>.pw'); on2 = run(pg, "curT().fx[1].on")
     ok(on0 != on1 and on2 == on0, 'on/off on the Sidechain by mouse: %s > %s > %s' % (on0, on1, on2))
-    click(fxdev(1), '.dsr>.duar'); pg.wait_for_timeout(300); k1 = run(pg, "curT().fx[1].kOpen"); w1 = run(pg, fxdev(1) + ".offsetWidth")
-    click(fxdev(1), '.dsr>.duar'); pg.wait_for_timeout(300); k2 = run(pg, "curT().fx[1].kOpen"); w2 = run(pg, fxdev(1) + ".offsetWidth")
+    click(fxdev(1), ':is(.dsr>.duar,.dvtr>.dveye)'); pg.wait_for_timeout(300); k1 = run(pg, "curT().fx[1].kOpen"); w1 = run(pg, fxdev(1) + ".offsetWidth")
+    click(fxdev(1), ':is(.dsr>.duar,.dvtr>.dveye)'); pg.wait_for_timeout(300); k2 = run(pg, "curT().fx[1].kOpen"); w2 = run(pg, fxdev(1) + ".offsetWidth")
     ok(k1 is False and k2 is True and w1 < w2, 'show and hide parameters by mouse on the Sidechain: kOpen %s > %s, width %s > %s' % (k1, k2, w1, w2))
-    click("fxin.querySelector(':scope>.dev[data-d=inst]')", '.dsr>.duar'); pg.wait_for_timeout(300); ki = run(pg, "curT().inst.kOpen")
+    click("fxin.querySelector(':scope>.dev[data-d=inst]')", ':is(.dsr>.duar,.dvtr>.dveye)'); pg.wait_for_timeout(300); ki = run(pg, "curT().inst.kOpen")
     pg.screenshot(path=os.path.join(OUT, 'mouse_plant_shut.png'))
-    click("fxin.querySelector(':scope>.dev[data-d=inst]')", '.dsr>.duar'); pg.wait_for_timeout(300); ki2 = run(pg, "curT().inst.kOpen")
+    click("fxin.querySelector(':scope>.dev[data-d=inst]')", ':is(.dsr>.duar,.dvtr>.dveye)'); pg.wait_for_timeout(300); ki2 = run(pg, "curT().inst.kOpen")
     ok(ki is False and ki2 is not False, 'show and hide parameters by mouse on Plant: %s > %s' % (ki, ki2))
     p0 = run(pg, "curT().inst.ipk||''"); click("fxin.querySelector(':scope>.dev[data-d=inst]')", '.dspr .kpre button:last-of-type'); p1 = run(pg, "curT().inst.ipk||''")
     run(pg, "(()=>{undo();return 1})()"); pg.wait_for_timeout(300)
@@ -108,7 +108,7 @@ with sync_playwright() as p:
     pg.click('#cdlg button:has-text("Keep it")'); pg.wait_for_timeout(400); t1 = run(pg, "S.tracks.length")
     ok(bool(dl) and t1 == t0, 'remove on the instrument asks (%s), Keep it keeps the track (%d > %d)' % (dl, t0, t1))
     # pin the Sidechain and the instrument; the window has the same layout
-    click(fxdev(1), '.dsr>.pinbtn'); pg.wait_for_timeout(600); click("fxin.querySelector(':scope>.dev[data-d=inst]')", '.dsr>.pinbtn'); pg.wait_for_timeout(600)
+    click(fxdev(1), ':is(.dsr,.dvtr)>.pinbtn'); pg.wait_for_timeout(600); click("fxin.querySelector(':scope>.dev[data-d=inst]')", ':is(.dsr,.dvtr)>.pinbtn'); pg.wait_for_timeout(600)
     nw = run(pg, "PIN.wins.size"); ok(nw == 2, 'pinned two devices by mouse: %d windows' % nw)
     sel(pg, 'Kick'); pg.wait_for_timeout(400)
     for i, w in enumerate(json.loads(run(pg, "JSON.stringify([...PIN.wins.keys()])"))):

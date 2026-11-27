@@ -37,7 +37,7 @@ for k in ('ratchet','rain','beat'):
     al.run("(()=>{const s=document.querySelector('%s select[data-s=ipre]');s.value='%s';s.dispatchEvent(new Event('change',{bubbles:true}))})()"%(D,k));al.page.wait_for_timeout(500);print('preset',k,I('ipk'),'material',I('mat'),'rhythm',I('sync'));shot('bounce_%s.png'%k)
 al.run("undo();undo();undo();1");al.page.wait_for_timeout(300);print('after three undos: preset',I('ipk'))
 # shut and open
-al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('bounce_shut.png');al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
+al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('bounce_shut.png');al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
 # playing: the balls of the clip
 al.run("pos=0;1");al.page.keyboard.press('Space');al.page.wait_for_timeout(1300);shot('bounce_playing.png');al.page.wait_for_timeout(900);shot('bounce_playing2.png');al.page.keyboard.press('Space');al.page.wait_for_timeout(400)
 # a key played by hand drops a ball in the picture

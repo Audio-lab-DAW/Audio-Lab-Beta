@@ -48,13 +48,13 @@ al.page.mouse.dblclick(b[0],b[1]+b[2]/2);W(300);print('  double-click: effect og
 for red in (False,True):
     R("AT.reduce=%s;1"%('true' if red else 'false'))
     for sel,get in (('.dev[data-d=inst]',"S.tracks[0].inst.kOpen"),('.dev[data-d=fx]',"S.tracks[0].fx[0].kOpen")):
-        w0=R("fxin.querySelector('%s').offsetWidth"%sel);al.page.click('#fxin %s .duar'%sel);W(450);w1=R("fxin.querySelector('%s').offsetWidth"%sel);k1=R(get);t1=R("fxin.querySelector('%s .duar').getAttribute('aria-label')"%sel)
-        al.page.click('#fxin %s .duar'%sel);W(450);w2=R("fxin.querySelector('%s').offsetWidth"%sel)
-        print('arrow %-18s animations %s: width %s > %s > %s, kOpen when shut %s, label when shut "%s", attribute %s'%(sel,'off' if red else 'on',w0,w1,w2,k1,t1,R("fxin.querySelector('%s .duar').hasAttribute('data-kt')||fxin.querySelector('%s .duar').hasAttribute('data-ikt')"%(sel,sel))))
+        w0=R("fxin.querySelector('%s').offsetWidth"%sel);al.page.click('#fxin %s :is(.duar,.dveye)'%sel);W(450);w1=R("fxin.querySelector('%s').offsetWidth"%sel);k1=R(get);t1=R("fxin.querySelector('%s :is(.duar,.dveye)').getAttribute('aria-label')"%sel)
+        al.page.click('#fxin %s :is(.duar,.dveye)'%sel);W(450);w2=R("fxin.querySelector('%s').offsetWidth"%sel)
+        print('arrow %-18s animations %s: width %s > %s > %s, kOpen when shut %s, label when shut "%s", attribute %s'%(sel,'off' if red else 'on',w0,w1,w2,k1,t1,R("fxin.querySelector('%s :is(.duar,.dveye)').hasAttribute('data-kt')||fxin.querySelector('%s :is(.duar,.dveye)').hasAttribute('data-ikt')"%(sel,sel))))
 R("AT.reduce=false;1")
 # shut in the saved project, open again after loading
-al.page.click('#fxin .dev[data-d=fx] .duar');W(450);print('saved with the project: kOpen',R("JSON.parse(JSON.stringify(S)).tracks[0].fx[0].kOpen"),'| title when shut:',R("[...fxin.querySelector('.dev[data-d=fx] .devh').children].filter(e=>e.getBoundingClientRect().width>0&&!e.classList.contains('dusp')).map(e=>e.className||e.tagName).join(' ')"))
-al.page.screenshot(path=os.path.join(out,'design_shut.png'));al.page.click('#fxin .dev[data-d=fx] .duar');W(450)
+al.page.click('#fxin .dev[data-d=fx] :is(.duar,.dveye)');W(450);print('saved with the project: kOpen',R("JSON.parse(JSON.stringify(S)).tracks[0].fx[0].kOpen"),'| title when shut:',R("[...fxin.querySelector('.dev[data-d=fx] .devh').children].filter(e=>e.getBoundingClientRect().width>0&&!e.classList.contains('dusp')).map(e=>e.className||e.tagName).join(' ')"))
+al.page.screenshot(path=os.path.join(out,'design_shut.png'));al.page.click('#fxin .dev[data-d=fx] :is(.duar,.dveye)');W(450)
 # 7. title text has no em dash, every title control has a tooltip
 print('em dashes in titles',R("[...fxin.querySelectorAll('.dev.du .devh [title]')].filter(e=>e.title.includes('\\u2014')).length"),'| title buttons without tooltip',R("[...fxin.querySelectorAll('.dev.du .devh button')].filter(e=>!e.title&&!e.getAttribute('aria-label')).map(e=>e.textContent).join(',')||'none'"))
 # 8. the picture of the basic instrument follows the knobs

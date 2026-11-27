@@ -1,0 +1,27 @@
+/* v0.262 display-first devices, the shared frame (task DV-1). Selectors carry :not(.pinb) so pinned windows keep their own look (pinCss leaves them alone). */
+#fxin:not(.pinb) .dev.dvf>.devb{background:#06070a!important;position:relative!important;border-radius:0 0 6px 0}
+#fxin:not(.pinb) .dev.dvf>.devb>.dfv{flex:1 1 auto!important}
+#fxin:not(.pinb) .dev.dvf>.devb>:is(.dfs,.eqside,.dug){position:relative;z-index:3}
+#fxin:not(.pinb) .dev.dvf>.devb>.dug{padding-top:28px!important;box-sizing:border-box}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvrail{position:absolute;z-index:2;border-radius:12px;pointer-events:none;background:rgba(30,32,40,.9);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.07),0 6px 18px rgba(0,0,0,.35)}
+body.dvg #fxin:not(.pinb) .dev.dvf>.devb>.dvrail{background:rgba(34,36,46,.5)}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr{position:absolute;right:6px;top:6px;z-index:5;display:flex;gap:2px;padding:1px;border-radius:8px;background:rgba(18,19,25,.78);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>button{width:22px;min-width:22px;height:22px;min-height:22px;padding:0!important;margin:0;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#a3a7b4;background:transparent!important;border:0!important;border-radius:6px;cursor:pointer;box-shadow:none!important}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>button svg{width:14px;height:14px;display:block}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>button:hover{color:#fff;background:rgba(255,255,255,.1)!important}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>.dveye.on{color:#7fb0ff}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>.pinbtn.on{color:#ffd166}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvtr>button:focus-visible{outline:2px solid #7fb0ff;outline-offset:1px}
+/* rail closed: the controls float over the picture and show on hover, on keyboard focus, or after a tap */
+#fxin:not(.pinb) .dev.dvf.dvshut>.devb>:is(.dfs,.eqside){position:absolute!important;right:var(--dvdr,6px);top:6px;bottom:6px;margin:0!important}
+#fxin:not(.pinb) .dev.dvf.dvshut>.devb>.dug{position:absolute!important;right:6px;top:6px;bottom:6px;margin:0!important}
+#fxin:not(.pinb) .dev.dvf.dvshut>.devb>:is(.dfs,.eqside,.dug,.dvrail){opacity:0;pointer-events:none;transform:translateX(10px);transition:opacity .15s ease-out,transform .15s ease-out}
+#fxin:not(.pinb) .dev.dvf.dvshut:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.eqside,.dug):focus-within))>.devb>:is(.dfs,.eqside,.dug,.dvrail){opacity:1;pointer-events:auto;transform:none}
+#fxin:not(.pinb) .dev.dvf.dvshut:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.eqside,.dug):focus-within))>.devb>.dvrail{pointer-events:none}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvval{position:absolute;left:10px;right:64px;bottom:6px;z-index:2;font:500 11px/1.5 var(--ffu,Inter,system-ui,sans-serif);color:rgba(236,236,241,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;transition:opacity .15s ease-out;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvval span{margin-right:10px}
+#fxin:not(.pinb) .dev.dvf>.devb>.dvval b{font-weight:600;color:#fff}
+#fxin:not(.pinb) .dev.dvf.dvshut:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.eqside,.dug):focus-within))>.devb>.dvval{opacity:0}
+@media (prefers-reduced-motion:reduce){#fxin:not(.pinb) .dev.dvf>.devb>*{transition:none!important}}
+/* the glass engine's canvas over the devices panel: above the displays, under the controls */
+.dvgCv{position:absolute;z-index:1;pointer-events:none;display:block}

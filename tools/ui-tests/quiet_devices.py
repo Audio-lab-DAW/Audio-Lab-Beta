@@ -31,7 +31,7 @@ def quiet():
         if tap()[0] < 10 ** (-90 / 20): return True
     return False
 def tap(): return json.loads(al.run("JSON.stringify([__tap.pk,__calls.slice()])"))
-SKIP = "'.dsrm,.duchg,.pinbtn,.duar,.pw,.fxov,[data-ip=play],[data-dk=play],[data-kk=play],[data-seltrk],[data-mst],[data-s=browse],.dchg'"
+SKIP = "'.dsrm,.duchg,.pinbtn,.duar,.dveye,.pw,.fxov,[data-ip=play],[data-dk=play],[data-kk=play],[data-seltrk],[data-mst],[data-s=browse],.dchg'"
 PLAYB = "[...D.querySelectorAll('[data-ip=play],[data-dk=play],[data-kk=play],button')].filter(b=>b.offsetParent&&b.matches('[data-ip=play],[data-dk=play],[data-kk=play]'))"
 DEV = "[...fxin.querySelectorAll(':scope>.dev[data-d=%s]')][%s]"
 def targets(kind, idx):

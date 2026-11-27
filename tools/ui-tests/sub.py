@@ -40,7 +40,7 @@ al.page.click(D+' [data-sbb="tab:t"]');al.page.wait_for_timeout(200);al.page.cli
 print('duck to kick: effects',al.run("JSON.stringify(S.tracks[1].fx.map(f=>f.type+' source '+trkById(f.p.src).name))"),'button',al.run("document.querySelector('%s [data-sbb=duck]').textContent"%D));shot('sub_duck.png')
 al.page.click(D+' [data-sbb="duck"]');al.page.wait_for_timeout(400);print('duck off: effects',al.run("S.tracks[1].fx.length"));al.run("undo();1");al.page.wait_for_timeout(300);print('undo: effects',al.run("S.tracks[1].fx.length"));al.run("undo();1");al.page.wait_for_timeout(300)
 # shut and open
-al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('sub_shut.png');al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
+al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('sub_shut.png');al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
 # playing: the bars light up
 al.run("pos=0;1");al.page.keyboard.press('Space');al.page.wait_for_timeout(1500);shot('sub_playing.png');al.page.keyboard.press('Space');al.page.wait_for_timeout(400)
 # browser

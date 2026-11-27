@@ -46,7 +46,7 @@ al.page.click(D+' [data-psb="tab:s"]');al.page.wait_for_timeout(200);al.page.cli
 al.run("(()=>{const s=document.querySelector('%s select[data-pss=so]');s.value='1';s.dispatchEvent(new Event('change',{bubbles:true}))})()"%D);al.page.wait_for_timeout(200)
 print('filter',I('ft'),'restart',I('rt'),'sub octave',I('so'));al.run("undo();undo();undo();1");al.page.wait_for_timeout(300);print('after undos: filter',I('ft'),'restart',I('rt'),'sub octave',I('so'))
 al.page.click(D+' [data-psb="tab:r"]');al.page.wait_for_timeout(200)
-al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('psb_shut.png');al.run("(document.querySelector('%s .duar')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
+al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('shut');shot('psb_shut.png');al.run("(document.querySelector('%s :is(.duar,.dveye)')||{click(){}}).click();1"%D);al.page.wait_for_timeout(500);inside('open again')
 al.run("pos=0;1");al.page.keyboard.press('Space');al.page.wait_for_timeout(1500);shot('psb_playing.png');al.page.keyboard.press('Space');al.page.wait_for_timeout(400)
 # live keys with the roll on: a held key plays the pattern, no errors
 al.run("S.tracks[1].inst.pon=true;psbPush(S.tracks[1].inst);1");h=al.run("(()=>{window._h=voiceOn(S.tracks[1],33,.9);return !!window._h})()");al.page.wait_for_timeout(800);al.run("window._h&&window._h.off();1");al.page.wait_for_timeout(300);print('live key with the roll on: started',h,'errors',al.errors)
