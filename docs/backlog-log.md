@@ -3819,7 +3819,7 @@ No app changes: `index.html` was not touched (task AB2 had work in progress ther
 - The JavaScript files pass Node's syntax check; `native-engine.js` loads in plain Node.
 
 ### Not proven
-- **Nothing ran on a Mac this run.** From about 12:36 UTC no macOS run in the repository got a machine: two runs of the new workflow on `macos-15` waited 15 minutes and were cancelled, one on `macos-14` was cancelled at once (no reason shown), the same happened to other tasks' runs (native-lab, ui-bench), and one dispatch got a 502 from GitHub. The Core Audio side of the change (the `clock` command and status fields) is therefore not compiled on macOS yet; the next run must dispatch `native-engine.yml` first and fix anything it shows before going on. Cases A to D are written and waiting.
+- **Nothing ran on a Mac this run.** From about 12:36 UTC no macOS run in the repository got a machine: two runs of the new workflow on `macos-15` waited 15 minutes and were cancelled, one on `macos-14` was cancelled at once (no reason shown), the same happened to other tasks' runs (native-lab, ui-bench), one dispatch got a 502 from GitHub, and a fourth run (46005232344, 13:13 UTC) was again cancelled after exactly 15 minutes in the queue. Every queued macOS job is cancelled at 15 minutes; the cause is not visible from here (a GitHub capacity problem, or a limit on the account's macOS minutes). The Core Audio side of the change (the `clock` command and status fields) is therefore not compiled on macOS yet; the next run must dispatch `native-engine.yml` first and fix anything it shows before going on. Cases A to D are written and waiting.
 - Real clocks: how far the page's device and the Gryphon drift on the M4. Nothing here ran on the user's Mac.
 
 ### Assumptions
