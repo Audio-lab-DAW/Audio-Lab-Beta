@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><title>tap test</title>
+<body style="font:14px system-ui;background:#111;color:#ddd">Sending the page's sound to the native engine.
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search), SECONDS = +q.get('seconds'), SR = +q.get('sr');
+  const info = { asked: SR };
+  let ctx;
+  try { ctx = new AudioContext({ sampleRate: SR, sinkId: { type: 'none' }, latencyHint: 'interactive' }); info.silentOutput = 'sinkId none'; }
+  catch (e) { ctx = new AudioContext({ sampleRate: SR }); info.silentOutput = 'not available: ' + e.message; }
+  info.rate = ctx.sampleRate;
+  const src = `class Tap extends AudioWorkletProcessor {
+    constructor(o) { super(); this.st = 0x2468ace1 >>> 0; this.left = o.processorOptions.frames; this.out = null; this.via = 'none';
+      this.port.onmessage = e => { if (e.data.port) { this.out = e.data.port; this.via = 'own port'; } else if (e.data.fallback) { this.out = this.port; this.via = 'through the page thread'; } }; }
+    process(i, o) {
+      if (!this.out || this.left <= 0) return true;
+      const n = Math.min(128, this.left), f = new Float32Array(n * 2);
+      for (let k = 0; k < n; k++) {
+        this.st = (Math.imul(this.st, 1664525) + 1013904223) >>> 0; f[2 * k] = ((this.st >>> 8) / 16777216 * 2 - 1) * 0.25;
+        this.st = (Math.imul(this.st, 1664525) + 1013904223) >>> 0; f[2 * k + 1] = ((this.st >>> 8) / 16777216 * 2 - 1) * 0.25;
+      }
+      this.left -= n;
+      this.out.postMessage(f, [f.buffer]);
+      return true;
+    } }
+  registerProcessor('tap', Tap);`;
+  await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([src], { type: 'application/javascript' })));
+  const node = new AudioWorkletNode(ctx, 'tap', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { frames: SECONDS * SR } });
+  node.connect(ctx.destination);
+  const ch = new MessageChannel();
+  window.postMessage('tap-port', '*', [ch.port2]);
+  try { node.port.postMessage({ port: ch.port1 }, [ch.port1]); info.path = 'worklet thread straight to the main process'; }
+  catch (e) {            // the port could not be moved into the worklet: go through the page thread instead
+    info.path = 'through the page thread (' + e.message + ')';
+    node.port.onmessage = m => ch.port1.postMessage(m.data, [m.data.buffer]);
+    node.port.postMessage({ fallback: true });
+  }
+  await ctx.resume();
+  info.state = ctx.state; info.baseLatency = ctx.baseLatency;
+  window.postMessage({ tapInfo: info }, '*');
+})();
+</script>
