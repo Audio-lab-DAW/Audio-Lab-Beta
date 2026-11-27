@@ -216,4 +216,12 @@ Lanes as in CLAUDE.md. Several options change a shared value (the quiet grey, th
 
 ## The user's picks
 
-(waiting: paste the line from the page's picks bar, for example `UX2 picks: E2 E4 E6 E10 E20 E21`)
+27 November 2026, 22:23 Brussels. The user did not want the options as written and said specifically what they want (their words, shortened):
+
+- **Map: a Hide button.** "There should be a button on the map that says Hide, and then you can hold your mouse close to the map wherever it is, and it will appear. And when you press the Hide button again, it turns back into its docked position. But don't leave a black space there: in Hide mode everything is full screen, and the map comes up over everything when you want to see it." (This replaces E12's "map hides until the pointer reaches the bottom".)
+- **OLED care, Night mode and Focus mode in Settings, together, each turned on there by the user (off by default).** OLED care = E13's card with E10 (static brights dimmed) and E11 (dim when idle) as switches; Night = E14 (brightness and warmth, optional schedule); Focus = E15 (arrangement, transport and map only).
+- **Calmer Follow page turns (E19) as the standard behaviour**, not a setting.
+- **Follow macOS Reduce motion and Dim flashing lights (E20)**, on by default, with a switch to turn it off buried in the advanced part of Settings, not out in the open.
+- Not wanted: E1 to E9, E16, E17, E18, E21 as a separate Comfort group (the three modes sit together in Settings instead), E22.
+
+Who builds it: a new lane P, task **CF** (comfort modes, prefix `cf`): CF-1 the map's Hide button and its overlay, CF-2 OLED care, CF-3 Night mode, CF-4 Focus mode, their Settings rows through lane B's hooks in one place together. Lane O (UV, view engine, owner of scrolling) builds E19 as the standard Follow behaviour. Lane F (OV, owner of the motion tokens) builds E20 with the advanced switch through lane B's hooks.

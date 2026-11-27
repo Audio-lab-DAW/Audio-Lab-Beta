@@ -335,3 +335,7 @@ The user picked `Learn picks: N5 H1 P1 W1 L1 G1 (Learn)` (docs/research-learn-mo
 ## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels): S16 and S18 for lane F
 
 **S16 motion timings, faster than the page proposed, as the user asked** ("make it even faster. Like 100 milliseconds, or maybe even 75 or 80"): LOOK tokens **0 / 50 / 80 / 120 ms** (instant; menus, tooltips, hovers 50 ms; panels, sheets and dialogs opening and closing 80 ms; page turns and view changes 120 ms), one ease-out, interruptible, reduced motion respected; apply them to every overlay you own and offer them to the other lanes through LOOK. **S18:** a progress line and the rule that every action answers within 100 ms (a visible start within 100 ms, long work in slices or a worker by its owner lane).
+
+## Added from the long-sessions wishes (UX2, 27 Nov 2026, 22:23 Brussels)
+
+**E20:** follow macOS Reduce motion and Dim flashing lights (and Windows' animation setting) by default: your motion tokens drop to 0 and flashing elements stop when the system asks. A switch to ignore the system setting goes in the advanced part of Settings (lane B's hook), not out in the open.
