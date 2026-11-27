@@ -32,7 +32,7 @@ def compare(want, got):
     if g < 0:
         return r
     r["lineUpFound"] = True
-    w = first; same = diff = gaps = 0; B = 4096
+    w = first; same = diff = gaps = lost = 0; B = 4096
     while w < len(want) and g < len(got):
         n = min(B, len(want) - w, len(got) - g)
         if want[w:w + n] == got[g:g + n]:
@@ -54,10 +54,22 @@ def compare(want, got):
         if f >= 0:
             gaps += 1; g = f
         else:
-            diff += 1; w += 4; g += 4
+            # nothing later in the recording matches: maybe sent samples never arrived. Look for the recording's next piece later in what was sent
+            p2 = got[g:g + 256]; f2 = -1
+            if len(p2) == 256 and p2.strip(b"\x00"):
+                s2 = w
+                while True:
+                    s2 = want.find(p2, s2, w + 96000 * 8)
+                    if s2 < 0 or (s2 - w) % 4 == 0:
+                        f2 = s2; break
+                    s2 += 1
+            if f2 >= 0:
+                lost += (f2 - w) // 4; gaps += 1; w = f2
+            else:
+                diff += 1; w += 4; g += 4
         if gaps > 2000 or diff > 200000:
             r["gaveUp"] = True; break
-    r.update({"comparedSamples": same + diff, "identical": same, "different": diff, "gapsInTheRecording": gaps})
+    r.update({"comparedSamples": same + diff, "identical": same, "different": diff, "gapsInTheRecording": gaps, "sentButNeverArrived": lost})
     return r
 
 
