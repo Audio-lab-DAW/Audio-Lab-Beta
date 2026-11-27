@@ -36,6 +36,13 @@ else()
   target_link_libraries(alengine PRIVATE pthread)
 endif()
 
+# ---- the engine core (task NB-N3a): ported devices, chains, offline render; no sound card needed ---------
+add_executable(alrender engine/alrender.cpp engine/core/devices.cpp)
+target_compile_options(alrender PRIVATE -ffp-contract=off)
+# the control: fusing allowed, to show on each machine whether the rule matters for these devices
+add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
+target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
+
 # ---- tests B and C: need the VST 3 SDK ---------------------------------------------------------------
 if(VST3_SDK_ROOT)
   if(APPLE)

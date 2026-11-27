@@ -1,0 +1,604 @@
+{
+ "app": "0.229",
+ "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+ "sr": 48000,
+ "frames": 312064,
+ "input_sha256": "f7187b78bf3a3f00aef32eca212a1bddbd3503e68b416c83552b05334171263b",
+ "cases": {
+  "limit-new": {
+   "sha256": "9ede1e8304065ee6a145dd0ee9388a06d16c5f4e9fef879738203ed4578d48b7",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "limit-trans": {
+   "sha256": "9ede1e8304065ee6a145dd0ee9388a06d16c5f4e9fef879738203ed4578d48b7",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "limit-stream": {
+   "sha256": "5bf8622ed1f5b828668379801cd638fda9036b0c8589916eb26b96e1684d3aaf",
+   "peak": 0.8912509083747864,
+   "changed": true
+  },
+  "limit-glue": {
+   "sha256": "9f5c34ae756a9f9c0d7e37dbba5281806dc6a07892a1f56884edd5dc52c048cb",
+   "peak": 0.9440608620643616,
+   "changed": true
+  },
+  "limit-club": {
+   "sha256": "fdae243bd51bbf1e41759d1a8d59db8d8209ac3ecfaafb95caf273c97147bb05",
+   "peak": 0.8413951396942139,
+   "changed": true
+  },
+  "limit-loud": {
+   "sha256": "457d209a0ca0e67902c935d7b1fa9326dc06284d0ad465b9448066b4b2b16863",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "limit-max": {
+   "sha256": "ccc9ffac9a1378a8965a787355388c40eae3d256e2bbea4e43560be13b61ba91",
+   "peak": 0.9885531067848206,
+   "changed": true
+  },
+  "limit-safe": {
+   "sha256": "118d44179205f139ad623c18b2ba2ea170ebe6d153a0214bdaf737760bc2fc29",
+   "peak": 0.8912509083747864,
+   "changed": true
+  },
+  "limit-drum": {
+   "sha256": "1c09bdc822f9ce7a5c1d17e63fb16200e828d14248cae04bb3b14202a82a2ae1",
+   "peak": 0.8912509083747864,
+   "changed": true
+  },
+  "limit-kick": {
+   "sha256": "728c3b8d43c2dfec8c24349c2f59751754bfc06eca0d9051e48a44521a828bb1",
+   "peak": 0.7943282127380371,
+   "changed": true
+  },
+  "limit-bass": {
+   "sha256": "841181d253550fc6e0ad3c010b334e565968deece9ee83ea8b02ce9bc5eae7bd",
+   "peak": 0.7079457640647888,
+   "changed": true
+  },
+  "limit-vox": {
+   "sha256": "955e7171f442ac88cb975594ca20a6fcd9f8509b21e67cf101c70466af864626",
+   "peak": 0.7943282127380371,
+   "changed": true
+  },
+  "limit-syn": {
+   "sha256": "0ffa65be049ab1c6e28fec9c65c2badeee12db067b2b3fcc985740e128b0d992",
+   "peak": 0.7079457640647888,
+   "changed": true
+  },
+  "limit-sum": {
+   "sha256": "f837944ecd1804d9fbfaa62991699a94cd9fa4642b4ec5924d2f94e1c4e3c9e6",
+   "peak": 0.9440608620643616,
+   "changed": true
+  },
+  "limit-fx": {
+   "sha256": "e8308d308c72451253caae6aeac1e8e85f7f79e42f70fa467aee7c973afe52d9",
+   "peak": 0.5011872053146362,
+   "changed": true
+  },
+  "limit-hard": {
+   "sha256": "a8a8ec9ea24b4933bd363595b6a8c65d8e6bd7e205febfd9580038dc2d2f4fae",
+   "peak": 0.5011872053146362,
+   "changed": true
+  },
+  "limit-psy": {
+   "sha256": "d77b7d1c63388c9e04ba76fb8bd801ff5c9add8209015258ab50c0df9cd7c90e",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "limit-psymaster": {
+   "sha256": "01b6ef4792b69a595777e97fe3d3368f95ea8c420ee66dad3e869b0af7cf34cf",
+   "peak": 0.8912509083747864,
+   "changed": true
+  },
+  "limit-psykb": {
+   "sha256": "b1b61408634c9d3fa157b0c8c93d15eb8ae3926d267f1922b14ea6f804504b70",
+   "peak": 0.7079457640647888,
+   "changed": true
+  },
+  "limit-x-punchy-notp": {
+   "sha256": "b98f4b433d33f2c43635ab8ad1cd412f5c86c53fe6e9f5537b89bbbc3b0549fd",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "limit-x-aggressive": {
+   "sha256": "92a0fd16aa58ad9a96eabae84f8d016fea0e4eb283ce7a869f200767f4bdf4d7",
+   "peak": 0.6683439016342163,
+   "changed": true
+  },
+  "limit-x-clean": {
+   "sha256": "17700e86bd60cc6d5107e467d8ffb90a1737ba86b7e0defc0143f127a4bbf1af",
+   "peak": 0.9660508632659912,
+   "changed": true
+  },
+  "gate-new": {
+   "sha256": "4fdb6dba0dbde5cddf336439e68fb1a52235cd956b8fa0897923443e97c53670",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-kick": {
+   "sha256": "4fdb6dba0dbde5cddf336439e68fb1a52235cd956b8fa0897923443e97c53670",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-snare": {
+   "sha256": "604b73d09f3f6db3c0e2ad3742d1f5cc3f628de40eaffecd8a1231cc00018e78",
+   "peak": 2.3803818225860596,
+   "changed": true
+  },
+  "gate-tom": {
+   "sha256": "5cc43d69a1ebfa357545949f4447ffeb79d81edadc5aacbd656fc404827f229b",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-hat": {
+   "sha256": "41f834bee38e2a21cc12d1f6cf7bb4dff68a4ec3d4e5323aa851e316f2871beb",
+   "peak": 2.3803648948669434,
+   "changed": true
+  },
+  "gate-room": {
+   "sha256": "48f5967f63ee88b9630da47d4c0eb6ed1c3260a722bf126dd33785d1f079c165",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-clap": {
+   "sha256": "b6174d9de87916c915717f751e91a8e4fbd1bdd74c75a9586b629daf98ef9101",
+   "peak": 2.380375862121582,
+   "changed": true
+  },
+  "gate-bass": {
+   "sha256": "74d9f5b5cfcc2f95abfeebac9ddab068d7a7d4dd2dd9c2f5c8ff96966dd7b2c2",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-sub": {
+   "sha256": "4f6d3f1a83bcb533d99a7f862a8675d671bee2a256520ecf7f5411868e5e8e1b",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-lead": {
+   "sha256": "98aea043757e80339f03f0c2d77276e07476d7ba6df54145f109078a96c6736f",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-pad": {
+   "sha256": "6128ae2b230d8bcd93cd614c1152032154e8350b068e24b63796f268b5ea8e11",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-chop": {
+   "sha256": "c0ac8303caad285b88ab1215a7606c92f6aeb6501bd0c70e914b0c2af9ced4d4",
+   "peak": 2.3803751468658447,
+   "changed": true
+  },
+  "gate-stutter": {
+   "sha256": "f51fbd50f21b222424f38adb7635cb20eb3580adeea32eb535b832c1bded4523",
+   "peak": 2.380375862121582,
+   "changed": true
+  },
+  "gate-tail": {
+   "sha256": "efa2e5f31370a5298ae21f70aeefa2d411e3009631d7f280654c227d2b63f5e3",
+   "peak": 2.3567724227905273,
+   "changed": true
+  },
+  "gate-duck": {
+   "sha256": "e8c7456c131a56b7726943269bbc766d9412f468d69134322277d977020bd4b4",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-vox": {
+   "sha256": "4bc26275120eff5d98cd28e8fb020da89081ac5f3e2cfb6cb9d91aaeffbc2a3a",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-voxexp": {
+   "sha256": "2a744b7a72523ca403fc55c694867ef3f986f536030b0b465a0af6d9b945b96d",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-gtr": {
+   "sha256": "2aa306eba76ed3d09d1bf7dc85587b562972c99bc583084c9348a8aa8683e584",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-clean": {
+   "sha256": "294135107bb4130f6acc73fccb17f84f9c369cc1892fd75eb6b026bfef1751ef",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-psygated": {
+   "sha256": "defaed5c18608bc5b372fbe031dfa94f6a86b7a3e5258ff0433261dd24d8826f",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-psykick": {
+   "sha256": "079f8462030f7d1f43e8d2ec001b25e56b560b585fc9f2dbd3dc53aa9299376d",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-x-expander": {
+   "sha256": "59157e4d88e13bec6caa05a10a8bbf760f24b66ecf490fee26067e432d8a2e00",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "gate-x-listen": {
+   "sha256": "a2a2236d90f5eab8374c9f0cc1ac167db377e7c16272b90abbec73414cf1e917",
+   "peak": 1.2402937412261963,
+   "changed": true
+  },
+  "gate-x-look": {
+   "sha256": "bc63aeede56e555e8c738a49956a3151d755919445abab10fd103b811b2f23ce",
+   "peak": 2.3803834915161133,
+   "changed": true
+  },
+  "trans-new": {
+   "sha256": "0d2b0e48ffa4b5fe882669318cc37722c501d225ef2a02a39ce1631880d5b1dc",
+   "peak": 5.261665344238281,
+   "changed": true
+  },
+  "trans-punch": {
+   "sha256": "0d2b0e48ffa4b5fe882669318cc37722c501d225ef2a02a39ce1631880d5b1dc",
+   "peak": 5.261665344238281,
+   "changed": true
+  },
+  "trans-kick": {
+   "sha256": "fcfac0c1901ca9b86f81e2f94a4d7c7e4f2e566292772fe7e73be29a16f38aea",
+   "peak": 3.2667055130004883,
+   "changed": true
+  },
+  "trans-snare": {
+   "sha256": "c2e625b98de5d297a5ab3459d09953c551725d947debb0c9db39d5c71a351799",
+   "peak": 4.673253536224365,
+   "changed": true
+  },
+  "trans-room": {
+   "sha256": "3411e82955548bd69870b4c5285ca28721b02855865981908f70bd8b9f627aa1",
+   "peak": 3.940443277359009,
+   "changed": true
+  },
+  "trans-dry": {
+   "sha256": "ddf3be918c240ed24fefb23d15962f49b86d5d4c23de63bc71aa593ba36ea9f4",
+   "peak": 2.3871970176696777,
+   "changed": true
+  },
+  "trans-soft": {
+   "sha256": "f83f94886ab3eb13d4cf9ae02c74ce899e58f0ffb891324fe737e6057aa893c0",
+   "peak": 2.3325772285461426,
+   "changed": true
+  },
+  "trans-hat": {
+   "sha256": "91234499441a184fc44ae1ba8785d3451a324ad224cb35e5bcbd2ce4c5a8691d",
+   "peak": 3.4983983039855957,
+   "changed": true
+  },
+  "trans-tom": {
+   "sha256": "b7bde103fae774616ba7a255bc6ba17416e981c752ea6fa86959bb6d8037f98e",
+   "peak": 3.2287991046905518,
+   "changed": true
+  },
+  "trans-loop": {
+   "sha256": "d8e4f8bf98bd4d987847f93d71292caca9656bbdd51d217f9e78b02c4c76cbd0",
+   "peak": 3.2006733417510986,
+   "changed": true
+  },
+  "trans-bass": {
+   "sha256": "f88c19fa3853111fbd937d4058f16585c89cd85564f1506c67650895a0197343",
+   "peak": 2.5141494274139404,
+   "changed": true
+  },
+  "trans-gtr": {
+   "sha256": "b0e7dffe4cbaffdca1ed0c321214dc174dae13b9e76507db11e456304211ea2a",
+   "peak": 3.1412148475646973,
+   "changed": true
+  },
+  "trans-pluck": {
+   "sha256": "0f34d43c3c28a644c000ecc223568b3c94581bee0026c738c513b9cb1c8ca167",
+   "peak": 2.7621841430664062,
+   "changed": true
+  },
+  "trans-pad": {
+   "sha256": "84df6f1d601d4028efc638d55d2d11647f0dc080dbd9c71429aa03e36201d7ec",
+   "peak": 2.8892455101013184,
+   "changed": true
+  },
+  "trans-piano": {
+   "sha256": "b5274175e00910a3d22444304fce7948b17cf6a6c7aab0bf4d793c6a7994f6af",
+   "peak": 3.5329642295837402,
+   "changed": true
+  },
+  "trans-synth": {
+   "sha256": "2c5f8a5e3d53aa3ac8fa0b317b2e1375a12f236db521ab92b838eefe748f59f2",
+   "peak": 4.558314800262451,
+   "changed": true
+  },
+  "trans-gateish": {
+   "sha256": "242b5e3c64bb6559947b1095af5c5b3c2cd4c6f3bfb36bb4da2a074f728733da",
+   "peak": 2.1734793186187744,
+   "changed": true
+  },
+  "trans-snap": {
+   "sha256": "4a49cb059f11442ad6552809743c46a69d67f648f6b1a2cd617d8d785c545ab6",
+   "peak": 6.93533182144165,
+   "changed": true
+  },
+  "trans-bloom": {
+   "sha256": "1e39ea6d9e6c0945243bc3e06c53c0b9f3a4690351708b68694d97fd54a5c5e7",
+   "peak": 4.864293575286865,
+   "changed": true
+  },
+  "trans-squash": {
+   "sha256": "5b3953b0e79eab12d1446016b512def16fa88e4aa43063de7d93d79529ec0c93",
+   "peak": 2.1805548667907715,
+   "changed": true
+  },
+  "trans-psykick": {
+   "sha256": "c93bffb6c692ce500a9565edcbe9d3e9fd34182ee81b21eea93bcf7f4f558d6c",
+   "peak": 3.807957410812378,
+   "changed": true
+  },
+  "trans-psybass": {
+   "sha256": "a8561c5867c80a84f5f97be53437c00e4560efa93da9bf9059ebfc282ad68a57",
+   "peak": 2.5420758724212646,
+   "changed": true
+  },
+  "trans-x-sustain-up": {
+   "sha256": "adfe06499ac2019ecb7dbef8979a243b19355facaf7bf675d4303e22e928560e",
+   "peak": 5.121462821960449,
+   "changed": true
+  },
+  "trans-x-zero": {
+   "sha256": "151c0dfc6cb6f7c76284021f8ea830b99226c3cd1a9c152bf2e5d1e0835ccb79",
+   "peak": 3.3623809814453125,
+   "changed": true
+  },
+  "deess-new": {
+   "sha256": "641a7cc042886614025a477aaeae40f2267e225d50bdc2a2234ff78cade9cd33",
+   "peak": 2.2557406425476074,
+   "changed": true
+  },
+  "deess-voc": {
+   "sha256": "641a7cc042886614025a477aaeae40f2267e225d50bdc2a2234ff78cade9cd33",
+   "peak": 2.2557406425476074,
+   "changed": true
+  },
+  "deess-fem": {
+   "sha256": "6973cfc795f4c5043a8ed67328e11f8bbc8222df51baec7d35846259a2681105",
+   "peak": 2.191596031188965,
+   "changed": true
+  },
+  "deess-male": {
+   "sha256": "79fa6c388c5da14920964366f86054cf5bad6f196d4b607c218e2e499d69b3e0",
+   "peak": 2.3722875118255615,
+   "changed": true
+  },
+  "deess-gentle": {
+   "sha256": "53c10759cb710aea67c43b5cce7cf1f83329b0536932ffb7641562771cafc19a",
+   "peak": 2.297441244125366,
+   "changed": true
+  },
+  "deess-strong": {
+   "sha256": "3ffc2248b8a4484a42bee1f8186a97c1d382e9e00d8103e357343fc25bc2e19b",
+   "peak": 2.393479585647583,
+   "changed": true
+  },
+  "deess-narr": {
+   "sha256": "924fbaa87d7fd47f03abffd6d69572225a1ca36155826c3424ee1bfe3a2c1ef0",
+   "peak": 2.309764862060547,
+   "changed": true
+  },
+  "deess-rap": {
+   "sha256": "a6561e88cdd22575903c5d214b2c821aa889f18dfa20ddf9d69bfa1779016a42",
+   "peak": 2.162111520767212,
+   "changed": true
+  },
+  "deess-sing": {
+   "sha256": "a3ee9b26db85e98f7ccca11ab9d83290cf95b42631534c5c4429a7da931991d6",
+   "peak": 2.2743492126464844,
+   "changed": true
+  },
+  "deess-hat": {
+   "sha256": "5298c30cd2baf04851b349ba5f137f84ff60f966f38355bfa6ebb0963a9e5f33",
+   "peak": 2.358614683151245,
+   "changed": true
+  },
+  "deess-cym": {
+   "sha256": "605de4df2f5dda1a2b7c941541388b3de5fbf686cdf83daa85b2bf48ffc2c014",
+   "peak": 2.2833735942840576,
+   "changed": true
+  },
+  "deess-acg": {
+   "sha256": "850c74413cca5734fdc169a2f80d7731d64d010385c91f2b4025efcf2c074b2c",
+   "peak": 2.237812042236328,
+   "changed": true
+  },
+  "deess-mix": {
+   "sha256": "a24c31d0e4c62ac88273e85c775a0a2e62173fc648d4d2dc4447c3f944e91176",
+   "peak": 2.3234152793884277,
+   "changed": true
+  },
+  "deess-syn": {
+   "sha256": "4c6180343f6382ab8d1c5fd39229e6e44c0bf1ed41a1815033b8f27e2e4011b2",
+   "peak": 2.3656394481658936,
+   "changed": true
+  },
+  "deess-lead": {
+   "sha256": "c4ae8b9f3b7718556dfe6d03dfafead531b9d3d4fa128e8ff4819a84bd24f940",
+   "peak": 2.3682689666748047,
+   "changed": true
+  },
+  "deess-fix": {
+   "sha256": "c408aa9926f5ca5c107a7fe610f4ff6818985b01155c54d378ee64dbfe458abb",
+   "peak": 3.242943286895752,
+   "changed": true
+  },
+  "deess-loud": {
+   "sha256": "8c0e0426b82bc14490218f46dcc16e6d701037260f6ccadd4bbe2c1c73ee4377",
+   "peak": 2.1783578395843506,
+   "changed": true
+  },
+  "deess-lisp": {
+   "sha256": "7195438cc33bd6f828a1f236655bac50d435f94debcc4e53ce7830c650045ae7",
+   "peak": 3.1356096267700195,
+   "changed": true
+  },
+  "deess-psyvox": {
+   "sha256": "db1b41b2b48418c7c819bc571d89c593e360cf324a1e630d5f2962cf6c1e6a46",
+   "peak": 2.1893208026885986,
+   "changed": true
+  },
+  "deess-psyhat": {
+   "sha256": "f725f88f5278252ff3de7e2c3b205e8af36749217378e8ad650dc076bb383aee",
+   "peak": 2.365917921066284,
+   "changed": true
+  },
+  "deess-x-wide": {
+   "sha256": "adadae64bf856163c0cde12fb4f53d9db23471946fe3880b0b8e897bee9e75f8",
+   "peak": 1.2190157175064087,
+   "changed": true
+  },
+  "deess-x-listen": {
+   "sha256": "89ceb01a0df91e35063de133283dd65eafdd84b4cee69adebe0005cbc114b8ec",
+   "peak": 1.2453885078430176,
+   "changed": true
+  },
+  "deess-x-high": {
+   "sha256": "9b7aa2e82bde9b96cc168f4ca153733811e12dc3ba44823cb94b9559142a8212",
+   "peak": 2.3803834915161133,
+   "changed": false
+  },
+  "crush-new": {
+   "sha256": "6ce86ef1d601252672890e3a4eb3474c3dca0a1733d9111b98a06588637edab4",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-8bit": {
+   "sha256": "6ce86ef1d601252672890e3a4eb3474c3dca0a1733d9111b98a06588637edab4",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-12bit": {
+   "sha256": "c55b116a5b4433352808cbd2891e28ac3d74646d30db761a31772c316ab90311",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-sp1200": {
+   "sha256": "5a1113f9554ed52b7675dd67ffa23d4bb585e1341e8b196d483bd8157d77ff46",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-nes": {
+   "sha256": "bd26ba530945edfae6618a942a8b3104fdb7559dfee02626bc1b6bad84d77e3e",
+   "peak": 0.7943282127380371,
+   "changed": true
+  },
+  "crush-gb": {
+   "sha256": "60916db42f42a8d9e1f693e7af5ecfb5aa75fc87b4078ae8a86b6a37c0885765",
+   "peak": 0.7498942017555237,
+   "changed": true
+  },
+  "crush-tape": {
+   "sha256": "00eb4fc2fc7ba12994117e6faab1770e067c88a9d3762217af1ea8abbe18e1ce",
+   "peak": 0.7943282127380371,
+   "changed": true
+  },
+  "crush-radio": {
+   "sha256": "03d6cbe96f48fa342ffb0ace0d31bc45b676db7ebe0f08c7ed42dc81d8f7f361",
+   "peak": 0.7943282127380371,
+   "changed": true
+  },
+  "crush-alias": {
+   "sha256": "710fa2da9b13a943d5b548c92ab437ca1f0bc36cdef845f7827835b248c2568a",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-grit": {
+   "sha256": "45182e185d3f8be093e8f93fc6e4b63206f7912df9fee39d962c02feed082e66",
+   "peak": 1.2701442241668701,
+   "changed": true
+  },
+  "crush-crush": {
+   "sha256": "5369ab106346e563ff057261a4c76fe04845fddeb05b61f5986206e81c1b000e",
+   "peak": 0.5308844447135925,
+   "changed": true
+  },
+  "crush-noise": {
+   "sha256": "a7a8800a62d69b81dd0ac9be5f8343429799215f1ef6573feef5e1f0536edb4c",
+   "peak": 1.2760766744613647,
+   "changed": true
+  },
+  "crush-robot": {
+   "sha256": "d343dca7f3532a17feca9fe5bb911089df5e6b4f6555f7742bff396a5e7a9731",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-warm": {
+   "sha256": "15dd969277156f419d09af23feb834f87e0bee9d0b23ee344ce97a269a43b3c3",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-air": {
+   "sha256": "69bf78e8bae7c619caccbf727f8d5d9a48ce3f28a0f3d29b1b59230d55806769",
+   "peak": 1.8972492218017578,
+   "changed": true
+  },
+  "crush-hat": {
+   "sha256": "90994297dd2164af375151bf977af639f2e90c9edcd6d80021dcd603476f0b5b",
+   "peak": 1.673543095588684,
+   "changed": true
+  },
+  "crush-bass": {
+   "sha256": "8bea01495255471df67f40e0d2cf225ed1c6776de3b4cc99c344ed67bfdf8d44",
+   "peak": 1.9186869859695435,
+   "changed": true
+  },
+  "crush-sub": {
+   "sha256": "b63ead213d1c6cb56e2d38597efe84fbce47952de4f799897e0ae87862991a71",
+   "peak": 1.3388899564743042,
+   "changed": true
+  },
+  "crush-shred": {
+   "sha256": "afea695504486e5c070d799db5d2abc4e56f4f85e31716d5e831f10e2e3971bd",
+   "peak": 1.2678183317184448,
+   "changed": true
+  },
+  "crush-psyhat": {
+   "sha256": "7749f26c8cd6ddae68de37f8b55cbc309941e1732c6f27af99d70593f7fd1d25",
+   "peak": 1.8091254234313965,
+   "changed": true
+  },
+  "crush-psyfx": {
+   "sha256": "bf979598cb530c2328d5670c5635306aabf1a984d72725cc9ffac5ab8939edfa",
+   "peak": 1.414115071296692,
+   "changed": true
+  },
+  "crush-x-fold-dither": {
+   "sha256": "ef8cc9ba136777ff2d255a6629b0bc37eb1296034d7754e25b91b7314091b634",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-x-trunc": {
+   "sha256": "d057a3d8e0ed7ad717b7bffd7854c9a8655ff12ae536b36d0d7a9a2ccce18dbe",
+   "peak": 1.0,
+   "changed": true
+  },
+  "crush-x-floor": {
+   "sha256": "e49c6f47539a3afadf74cdc8d7162e4b395d947ada45580e1f22f29093cebc93",
+   "peak": 1.8172165155410767,
+   "changed": true
+  },
+  "chain-drums": {
+   "sha256": "56bd6c3cff422d5b0971ac6079b7afc3186e913579cec71a02f15a5a8d7ff3f3",
+   "peak": 0.9621788263320923,
+   "changed": true
+  },
+  "chain-voice": {
+   "sha256": "c0f6bc83e8924addd73201b8a85d09d6bb7caab79dc7285e462f3ac84d9d9269",
+   "peak": 0.9660508632659912,
+   "changed": true
+  }
+ }
+}

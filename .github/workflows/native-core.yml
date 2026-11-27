@@ -1,0 +1,91 @@
+name: Native engine core (task NB)
+
+# Stage N3 checks: the native engine core's ported devices against the web engine, bit for bit. Started by hand.
+# Each job renders the app's own devices in headless Chromium (every preset), renders the same through the
+# native core (alrender), and compares every sample. No sound card needed. The Linux job runs when no Mac is free.
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'macOS runner label (Apple Silicon)'
+        type: string
+        default: 'macos-15'
+      types:
+        description: 'Device types to check (comma separated; empty = all the core has)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [linux, mac]
+    runs-on: ${{ matrix.os == 'mac' && (inputs.runner || 'macos-15') || 'ubuntu-24.04' }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Machine
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; uname -a; (sw_vers 2>/dev/null || true); (c++ --version | head -1); python3 --version; } | tee out/machine.txt
+
+      - name: Build the core (alrender, and the fused control)
+        run: |
+          cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
+          cmake --build build --target alrender alrender_fused -j 4
+          build/alrender list | tee out/types.json
+
+      - name: Python, Playwright and Chromium (to run the app's own engine)
+        run: |
+          python3 -m pip install --quiet --break-system-packages playwright numpy || python3 -m pip install --quiet playwright numpy
+          python3 -m playwright install chromium > out/playwright.txt 2>&1 || { tail -20 out/playwright.txt; exit 1; }
+          if [ "$(uname)" = "Linux" ]; then python3 -m playwright install-deps chromium > /dev/null 2>&1 || true; fi
+
+      - name: Web engine references (the app in headless Chromium, every preset)
+        run: |
+          T="${{ inputs.types }}"; [ -n "$T" ] || T=$(python3 -c "import json;print(','.join(json.load(open('out/types.json'))))")
+          python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -5
+
+      - name: 'Native core renders, and the comparison (bit for bit)'
+        run: |
+          mkdir -p out/core/native
+          build/alrender cases out/core/cases.json out/core/in.wav out/core/native > out/core/native.jsonl
+          python3 tools/native-lab/compare_core.py out/core | tee out/compare.txt
+
+      - name: 'Control: the same with fused multiply-add allowed'
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p out/fused/native
+          cp -r out/core/web out/core/cases.json out/fused/ 2>/dev/null || true
+          build/alrender_fused cases out/core/cases.json out/core/in.wav out/fused/native > out/fused/native.jsonl
+          python3 tools/native-lab/compare_core.py out/fused | tail -1 | tee out/compare-fused.txt
+
+      - name: 'Does this machine''s browser render what the Linux browser rendered? (web against web)'
+        if: always()
+        run: |
+          python3 - <<'PY' | tee out/web-vs-linux.txt
+          import json
+          a = json.load(open('tools/native-lab/ref/core_web_linux.json')); b = json.load(open('out/core/web.json'))
+          print('input same as the committed one:', a['input_sha256'] == b['input_sha256'])
+          same = [k for k in b['cases'] if k in a['cases'] and a['cases'][k]['sha256'] == b['cases'][k]['sha256']]
+          print('web renders identical to the committed Linux ones: %d of %d' % (len(same), len(b['cases'])))
+          print('browser here:', b['userAgent'])
+          PY
+
+      - name: Keep the results (small files only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-core-${{ matrix.os }}
+          path: |
+            out/*.txt
+            out/*.json
+            out/core/*.json
+            out/core/native.jsonl
+          retention-days: 30
