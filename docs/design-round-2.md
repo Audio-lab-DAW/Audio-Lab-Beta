@@ -196,3 +196,9 @@ Small and visible first, the shared grid before the things drawn on it, the brow
 - **Options:** `tools/design-lab/page/index.html` (the published page; the artifact service adds the document head). Four parameterised canvas renderers (arrangement, piano roll, browser, transport) draw every look and detail from one set of switches, at the app's sizes and colours (`--bg #0a0a0c`, `--pn #121216`, `--ink #ececf1`, `--mut #8b8b97`, green `#3ecf8e`, blue `#4c8dff`, track colours from the palette).
 - **Checked:** `tools/design-lab/check_page.py` at 1280 x 720 (dark page), 1920 x 1080 (light page) and 400 x 800: no console errors, no sideways scroll, both app looks, "Take all ★" gives `My picks: A3 P3 B3 T2`, draw times as in section 5.
 - Honest limits: the mock-ups are drawings in the style of the app, not the app's drawing code; the glass in them is a tinted panel with a rim, not the engine; names, presets and numbers are examples from the Fractals project at 145 BPM; the "Today (redrawn)" cards in the detail rows are approximations, the large Today cards are real screenshots.
+
+## The user's picks (27 November 2026, 14:36 Brussels)
+
+`A5 P4 B3 T3 | AC3 AW3 AG2 AP2 PN3 PV3 PS3 PK3 PG1 BR2 BP1 BM2 TT3 TB3 TM1 TC1 TS1 TL1`
+
+Built by the steps of section 6 (DR2-A1 to DR2-B2), only the picked items. The grid step (DR2-A1, AG2) is shared with the arrangement-lines round (docs/design-grid-lines.md, proposed task GL1): if the user's lines picks are in by then, GL1 and DR2-A1 are one step.
