@@ -160,7 +160,7 @@ jobs:
 
   mac:
     if: github.event_name == 'workflow_dispatch' && inputs.mac
-    runs-on: ${{ inputs.runner || 'macos-15' }}
+    runs-on: ${{ inputs.runner || 'macos-latest' }}
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5

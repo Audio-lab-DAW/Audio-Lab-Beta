@@ -28,7 +28,7 @@ env:
 
 jobs:
   mac:
-    runs-on: ${{ inputs.runner || 'macos-15' }}          # Apple Silicon runner
+    runs-on: ${{ inputs.runner || 'macos-latest' }}          # Apple Silicon runner
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5

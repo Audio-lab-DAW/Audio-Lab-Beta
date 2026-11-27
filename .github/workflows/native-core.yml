@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [linux, mac]
-    runs-on: ${{ matrix.os == 'mac' && (inputs.runner || 'macos-15') || 'ubuntu-24.04' }}
+    runs-on: ${{ matrix.os == 'mac' && (inputs.runner || 'macos-latest') || 'ubuntu-24.04' }}
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
