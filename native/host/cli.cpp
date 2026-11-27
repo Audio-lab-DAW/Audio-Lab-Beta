@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <unistd.h>
 
 using namespace al;
 
@@ -213,12 +214,40 @@ static int cmdRun(int argc, char** argv) {
     return finish(R1.ok && R1.peak > 0 ? 0 : 1);
 }
 
+// alvst3 diag --plugin BUNDLE [--name NAME] [--sr 48000] [--block 512] [--seconds 2] --outdir DIR --tag TAG
+// task NL5: the plug-in under the 0.5 host, the 0.4 host and one change at a time; what it asked for and what it got.
+static int cmdDiag(int argc, char** argv) {
+    auto o = opts(argc, argv, 2);
+    PluginInfo want; want.format = "vst3"; want.path = opt(o, "plugin"); want.name = opt(o, "name");
+    std::string outdir = opt(o, "outdir", "."), tag = opt(o, "tag", "plugin");
+    double sr = atof(opt(o, "sr", "48000").c_str()), seconds = atof(opt(o, "seconds", "2").c_str());
+    int block = atoi(opt(o, "block", "512").c_str());
+    std::string err;
+    auto p = vst3Format()->create(want, err);
+    if (!p) { fprintf(stderr, "could not load: %s\n", err.c_str()); return 1; }
+    PluginInfo pi = p->info();
+    std::string diag0;
+    { std::string e; if (p->prepare(sr, block, false, e)) diag0 = diagText(pi.name, p->diag()); }
+    auto ps = p->presets();
+    p.reset();
+    auto v = probeSilence(pi, sr, block, seconds, true, [](double s) { if (s > 0) usleep((useconds_t)(s * 1e6)); });
+    std::string text = diag0 + "[presets] " + pi.name + ": " + std::to_string(ps.size()) + " reachable through VST3" + (ps.empty() ? "" : " (first: \"" + ps[0].name + "\", " + ps[0].source + ")") + "\n" + probeText(pi.name, v);
+    std::string js = probeJson(pi, sr, block, v);
+    FILE* f = fopen((outdir + "/" + tag + "_diag.json").c_str(), "wb"); if (f) { fputs(js.c_str(), f); fclose(f); }
+    f = fopen((outdir + "/" + tag + "_diag.txt").c_str(), "wb"); if (f) { fputs(text.c_str(), f); fclose(f); }
+    fputs(text.c_str(), stdout);
+    for (auto& x : v) if (x.key == "host-0.5") return x.ran && x.peak > 0 ? 0 : 1;
+    return 1;
+}
+
 int main(int argc, char** argv) {
     int code = 0;
     if (scannerChildMain(argc, argv, code)) return code;
+    if (probeChildMain(argc, argv, code, [](double s) { if (s > 0) usleep((useconds_t)(s * 1e6)); })) return code;
     std::string c = argc > 1 ? argv[1] : "";
     if (c == "scan") return cmdScan(argc, argv);
     if (c == "run") return cmdRun(argc, argv);
+    if (c == "diag") return cmdDiag(argc, argv);
     fprintf(stderr, "usage: alvst3 scan [--folder DIR]... [--json FILE] | alvst3 run --plugin BUNDLE [--name NAME] --outdir DIR --tag TAG [--in FILE.wav]\n");
     return 2;
 }

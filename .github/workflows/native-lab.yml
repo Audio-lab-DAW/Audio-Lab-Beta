@@ -12,7 +12,12 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-4'
+        default: 'native-lab-5'
+      runner:
+        description: 'macOS runner label (task NL5: macos-15, macos-14 or macos-latest, whichever gets a machine)'
+        type: choice
+        options: [macos-15, macos-14, macos-latest]
+        default: macos-15
 
 permissions:
   contents: write
@@ -23,7 +28,7 @@ env:
 
 jobs:
   mac:
-    runs-on: macos-15          # Apple Silicon runner
+    runs-on: ${{ inputs.runner || 'macos-15' }}          # Apple Silicon runner
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
@@ -103,7 +108,7 @@ jobs:
       - name: Build the SDK's own example plug-ins (fallback and extra subjects)
         continue-on-error: true
         run: |
-          for t in adelay mda-vst3 again note-expression-synth; do cmake --build build --target $t -j 4 > "out/build-$t.txt" 2>&1 && echo "built $t" || { echo "could not build $t"; tail -5 "out/build-$t.txt"; }; done
+          for t in adelay mda-vst3 again note-expression-synth al-strict-synth; do cmake --build build --target $t -j 4 > "out/build-$t.txt" 2>&1 && echo "built $t" || { echo "could not build $t"; tail -5 "out/build-$t.txt"; }; done
           mkdir -p "$RUNNER_TEMP/sdk-vst3"
           # only the bundles that were really built (cmake makes an empty folder for every example)
           find build -name '*.vst3' -maxdepth 6 -type d | while read -r b; do if [ -d "$b/Contents/MacOS" ] && [ -n "$(ls -A "$b/Contents/MacOS")" ]; then echo "$b"; cp -R "$b" "$RUNNER_TEMP/sdk-vst3/"; fi; done
@@ -118,6 +123,16 @@ jobs:
           unzip -q "$RUNNER_TEMP/surge.zip" -d "$RUNNER_TEMP/surge"
           find "$RUNNER_TEMP/surge" -name '*.vst3' -maxdepth 4 -type d -print -exec cp -R {} "$HOME/Library/Audio/Plug-Ins/VST3/" \;
           ls -la "$HOME/Library/Audio/Plug-Ins/VST3"
+
+      - name: 'Task NL5: the test instrument that needs its controller state and off-main-thread messages, where the app scans'
+        continue-on-error: true
+        run: |
+          mkdir -p "$HOME/Library/Audio/Plug-Ins/VST3"
+          if [ -d "$RUNNER_TEMP/sdk-vst3/al-strict-synth.vst3" ]; then cp -R "$RUNNER_TEMP/sdk-vst3/al-strict-synth.vst3" "$HOME/Library/Audio/Plug-Ins/VST3/"; fi
+          # an empty CLAP folder and one Audio Unit (BlackHole has none; Surge's zip may carry them), so the D5 listing has something to list
+          find "$RUNNER_TEMP/surge" -name '*.clap' -maxdepth 4 -print -exec sh -c 'mkdir -p "$HOME/Library/Audio/Plug-Ins/CLAP" && cp -R "$1" "$HOME/Library/Audio/Plug-Ins/CLAP/"' _ {} \; || true
+          find "$RUNNER_TEMP/surge" -name '*.component' -maxdepth 4 -print -exec sh -c 'mkdir -p "$HOME/Library/Audio/Plug-Ins/Components" && cp -R "$1" "$HOME/Library/Audio/Plug-Ins/Components/"' _ {} \; || true
+          ls -la "$HOME/Library/Audio/Plug-Ins/"* || true
 
       - name: 'Test B: scan (each bundle in its own process), with one pretended crash'
         run: |
@@ -142,6 +157,20 @@ jobs:
           for f in out/b/*.json; do echo "--- $f"; cat "$f"; done
           rm -f out/b/*_export.wav
 
+      - name: 'Task NL5: why instruments are silent: each plug-in under the 0.5 host, the 0.4 host and one change at a time'
+        continue-on-error: true
+        run: |
+          V="$HOME/Library/Audio/Plug-Ins/VST3"; S="$RUNNER_TEMP/sdk-vst3"
+          mkdir -p out/diag
+          d() { echo "=== $1"; shift; build/alvst3 diag "$@" --outdir out/diag > /dev/null || echo "(silent with the 0.5 host, or not found)"; f=$(ls -t out/diag/*_diag.txt | head -1); grep -v '^\[diag\]' "$f" || true; }
+          for SR in 48000 44100; do
+            d "AL Strict Synth at $SR (the test instrument: sounds only if the controller gets the state and its loader thread's message arrives)" --plugin "$V/al-strict-synth.vst3" --tag strict_$SR --sr $SR
+            d "Surge XT at $SR" --plugin "$V/Surge XT.vst3" --tag surge_xt_$SR --sr $SR
+            d "mda JX10 at $SR" --plugin "$S/mda-vst3.vst3" --name "mda JX10" --tag sdk_mda_jx10_$SR --sr $SR
+          done
+          d "Note Expression Synth" --plugin "$S/note-expression-synth.vst3" --tag sdk_nes_48000
+          echo "--- the [diag] lines of the strict synth and Surge XT"; grep '^\[diag\]' out/diag/strict_48000_diag.txt out/diag/surge_xt_48000_diag.txt || true
+
       # ---------------- test C ----------------
       - name: 'Test C: build the test app'
         id: app
@@ -157,23 +186,28 @@ jobs:
           ( cd build && ditto -c -k --keepParent "AudioLab VST3 test.app" "../AudioLab-VST3-test-mac-arm64.zip" )
           ls -la AudioLab-VST3-test-mac-arm64.zip
 
-      - name: 'Test C: start the app on the build machine (loads Surge XT, opens its window, plays the pattern)'
+      - name: 'Test C: start the app on the build machine (loads a plug-in, opens its window, plays the pattern, runs the silence probe)'
         if: steps.app.outcome == 'success'
         continue-on-error: true
         run: |
-          mkdir -p out/c
-          "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/out/c" --plugin-name "Surge XT" > out/c/stdout.txt 2>&1 &
-          PID=$!
-          for i in $(seq 1 60); do [ -f out/c/scanned ] && break; kill -0 $PID 2>/dev/null || break; sleep 0.5; done
-          sleep 0.7; screencapture -x out/c/screen-main.png || echo "no screenshot"
-          for i in $(seq 1 120); do [ -f out/c/ready-for-screenshot ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
-          screencapture -x out/c/screen.png || echo "no screenshot"
-          for i in $(seq 1 40); do [ -f out/c/done ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
-          kill $PID 2>/dev/null || true
-          echo "--- report"; cat out/c/AudioLab-VST3-test-report.txt || true
-          echo "--- the 0.4 lines (search, parameter moves, notes, warning)"; grep -E '^\[(selftest|param|notes|warning)\]' out/c/AudioLab-VST3-test-report.txt || true
-          echo "--- output"; tail -30 out/c/stdout.txt || true
-          ls -la out/c
+          runapp() {   # $1 = output folder, $2 = plug-in name
+            mkdir -p "$1"
+            "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/$1" --plugin-name "$2" --probe > "$1/stdout.txt" 2>&1 &
+            PID=$!
+            for i in $(seq 1 60); do [ -f "$1/scanned" ] && break; kill -0 $PID 2>/dev/null || break; sleep 0.5; done
+            sleep 0.7; screencapture -x "$1/screen-main.png" || echo "no screenshot"
+            for i in $(seq 1 120); do [ -f "$1/ready-for-screenshot" ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
+            screencapture -x "$1/screen.png" || echo "no screenshot"
+            for i in $(seq 1 240); do [ -f "$1/done" ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
+            kill $PID 2>/dev/null || true
+            echo "=== $2: report"; cat "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- $2: the 0.5 lines"; grep -E '^\[(selftest|notes|probe|presets|clap|au|rosetta|broken|device)\]' "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- first bytes (a UTF-8 BOM is EF BB BF; plain ASCII has none)"; head -c 16 "$1/AudioLab-VST3-test-report.txt" | od -An -tx1 || true
+            LC_ALL=C grep -c '[^[:print:][:space:]]' "$1/AudioLab-VST3-test-report.txt" | sed 's/^/lines with bytes outside ASCII: /' || true
+            echo "--- output"; tail -30 "$1/stdout.txt" || true
+          }
+          runapp out/c "Surge XT"
+          runapp out/c-strict "AL Strict Synth"
 
       - name: Summary
         if: always()

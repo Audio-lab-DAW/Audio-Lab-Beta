@@ -87,7 +87,9 @@ if(VST3_SDK_ROOT)
   set(AL_HOST_SOURCES
     host/vst3_format.cpp
     host/scan.cpp
+    host/diag.cpp
     ${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/plugprovider.cpp
+    ${VST3_SDK_ROOT}/public.sdk/source/vst/vstpresetfile.cpp
   ${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp
   )
   if(APPLE)
@@ -103,6 +105,12 @@ if(VST3_SDK_ROOT)
     target_link_libraries(alhost PUBLIC "-framework CoreFoundation" "-framework Foundation")
   else()
     target_link_libraries(alhost PUBLIC dl pthread)
+  endif()
+
+  # task NL5: a test instrument that only sounds when the host gives its controller the processor's state and delivers
+  # the controller's messages from a loader thread (as we suspect Phase Plant and Pigments need). Built only for the tests.
+  if(AL_SDK_EXAMPLES)
+    add_subdirectory(testapp/strictsynth)
   endif()
 
   add_executable(alvst3 host/cli.cpp)

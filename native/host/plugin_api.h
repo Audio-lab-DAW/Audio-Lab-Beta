@@ -47,6 +47,33 @@ struct EditStats {
 
 struct BusLayout { int audioIns = 0, audioOuts = 0, mainInChannels = 0, mainOutChannels = 0, eventIns = 0, eventOuts = 0; };
 
+// How the host sets a plug-in up (task NL5). The defaults are the 0.5 host, which follows the SDK's validator and
+// JUCE's VST3 host. Each switch puts one 0.4 behaviour back, so a silent instrument can be measured against each.
+struct HostOptions {
+    bool syncControllerState = true;   // controller->setComponentState(the processor's state) after both are set up (0.4: never)
+    bool messagesAnyThread = true;     // controller <-> processor messages delivered from any thread (0.4: the SDK's proxy dropped all but the main thread's)
+    bool validatorOrder = true;        // setupProcessing, setBusArrangements, activateBus, setActive, setProcessing (0.4: arrangements and buses first)
+    bool preferredArrangements = true; // give each bus the arrangement the plug-in asks for (0.4: stereo forced on the main buses)
+    bool allEventInputs = true;        // every event input bus active (0.4: only the first)
+    bool uniqueNoteIds = false;        // false: noteId -1, as JUCE; true: a new id per note, its note-off carrying the same id
+    bool allAudioBuses = false;        // also activate aux audio buses (normally only main buses are active; aux buses get buffers anyway)
+    bool fullContext = true;           // system time and bar position in the process context (0.4: without)
+    static HostOptions legacy04() { HostOptions o; o.syncControllerState = false; o.messagesAnyThread = false; o.validatorOrder = false; o.preferredArrangements = false; o.allEventInputs = false; o.fullContext = false; return o; }
+};
+
+// What the host measured about one plug-in instance (task NL5): set-up lines, then live counters from the audio thread.
+struct HostDiag {
+    std::vector<std::string> setup;    // plain lines: what the plug-in asked for, what the host gave, the result of every call
+    uint64_t blocks = 0, blocksMainNonZero = 0, blocksOtherNonZero = 0, blocksSilenceFlag = 0, processNotOk = 0;
+    uint64_t noteOns = 0, noteOffs = 0, eventsRejected = 0, paramChanges = 0;
+    float peakMain = 0, peakOther = 0;  // the plug-in's own output buffers, before the host copies or scales anything
+    int lastProcessResult = 0;
+    int msgToProcessor = 0, msgToController = 0, msgOffMainThread = 0, msgDropped = 0;   // IConnectionPoint traffic
+    int setComponentStateResult = -999;  // -999: not called
+    int stateBytes = 0;
+};
+struct PresetInfo { std::string name, source; int index = 0; };   // source: "program list" or a .vstpreset path
+
 class PluginInstance {
 public:
     virtual ~PluginInstance() {}
@@ -73,6 +100,11 @@ public:
     virtual bool takeLatencyChanged() = 0;
     virtual int editsFromEditor() const = 0;
     virtual EditStats editStats() const { EditStats s; s.performs = editsFromEditor(); return s; }
+    // task NL5: host options (call before prepare), the host's measurements, factory presets
+    virtual void setHostOptions(const HostOptions&) {}
+    virtual HostDiag diag() const { return HostDiag(); }
+    virtual std::vector<PresetInfo> presets() { return {}; }
+    virtual bool loadPreset(const PresetInfo&, std::string& err) { err = "not supported"; return false; }
 };
 
 struct ScanResult {
@@ -92,6 +124,8 @@ public:
     // Loads the bundle in THIS process and lists what is inside. Only the scanner child process calls this.
     virtual ScanResult scanInProcess(const std::string& path) = 0;
     virtual std::unique_ptr<PluginInstance> create(const PluginInfo& info, std::string& err) = 0;
+    // task NL5: with host options that matter while the plug-in is set up (state given to the controller, messages)
+    virtual std::unique_ptr<PluginInstance> createWith(const PluginInfo& info, const HostOptions& o, std::string& err) { auto p = create(info, err); if (p) p->setHostOptions(o); return p; }
 };
 
 PluginFormat* vst3Format();
@@ -106,5 +140,23 @@ std::string scanResultJson(const ScanResult& r);
 // Which processor kinds a bundle's program holds (macOS). "" on other systems.
 std::string bundleArchs(const std::string& bundle);
 std::string hostArch();
+
+// --- task NL5: why is an instrument silent? -----------------------------------------------------------
+// Renders a fresh instance of the plug-in under several host set-ups (the 0.5 host, the 0.4 host, and the 0.5 host with
+// one thing changed at a time), with notes, and measures each. idle() is called between blocks so the caller can pump
+// its main run loop (plug-ins that do work there). Runs in the calling thread, which must be the main thread.
+struct ProbeVariant { std::string key, what; bool ran = false; std::string error; HostDiag d; double peak = 0; int firstSoundBlock = -1; };
+std::vector<ProbeVariant> probeSilence(const PluginInfo& info, double sampleRate, int block, double seconds, bool withPreset, const std::function<void(double)>& idle);
+std::string probeJson(const PluginInfo& info, double sampleRate, int block, const std::vector<ProbeVariant>& v);
+std::string probeText(const std::string& name, const std::vector<ProbeVariant>& v);   // plain lines for a report
+// The probe in a child process (so a plug-in that crashes cannot take the app down):
+//   <self> --al-probe <bundle> <uid> <rate> <block> <out.json>
+bool probeChildMain(int argc, char** argv, int& exitCode, const std::function<void(double)>& idle);
+// Runs probeChildMain in a child process (this same program) and returns its text (the [probe] lines).
+std::string probeOutOfProcess(const std::string& selfExe, const PluginInfo& info, double sampleRate, int block, const std::string& outFile, int timeoutSeconds, std::string& err);
+std::string diagText(const std::string& name, const HostDiag& d);      // the [diag] lines for one instance
+// Lists bundles of other formats without loading them (decision D5): CLAP folders and Audio Units (Components).
+struct ListedBundle { std::string path, name, archs, kind; };
+std::vector<ListedBundle> listOtherFormat(const std::string& format, std::vector<std::string>& foldersOut);
 
 }  // namespace al

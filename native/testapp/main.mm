@@ -5,6 +5,11 @@
 // 0.4 (task NL4): a search over the list (name, maker, kind; Cmd+F, Escape), sort and group by maker, a kind
 // filter, recently loaded plug-ins on top; parameter moves from a plug-in's own window counted and logged per
 // plug-in; notes sent to each instrument logged; a warning when the output runs at 16 kHz or less (Bluetooth call mode).
+// 0.5 (task NL5): the host gives the controller the processor's state and delivers messages between the two from any
+// thread (0.4 skipped the first and dropped the second, as the SDK's PlugProvider does); buses set up in the validator's
+// order; [diag] lines per plug-in; a silence probe in a child process; factory presets; a [device] line for devices
+// plugged in later; the Intel-only and broken bundles listed at the end; CLAP and Audio Unit folders listed (not loaded);
+// the report in plain ASCII.
 #import <Cocoa/Cocoa.h>
 #include "../common/coreaudio.h"
 #include "../host/plugin_api.h"
@@ -13,6 +18,7 @@
 #include <cmath>
 #include <mutex>
 #include <string>
+#include <map>
 #include <unordered_map>
 #include <sys/sysctl.h>
 #include <time.h>
@@ -21,6 +27,17 @@
 using namespace al;
 
 static NSString* S(const std::string& s) { return [NSString stringWithUTF8String:s.c_str()] ?: @""; }
+// The report in plain ASCII where it can be: narrow and no-break spaces become spaces, the minus sign and dashes a
+// hyphen-minus, and so on. Report 5 was read as Mac Roman ("12\u201a\u00c4\u00d8 %"); what is left (accented names) is
+// written with a UTF-8 byte order mark, so it reads right wherever it is opened.
+static NSString* asciiish(NSString* src) {
+    static NSDictionary<NSString*, NSString*>* map = @{@"\u202F": @" ", @"\u00A0": @" ", @"\u2009": @" ", @"\u2007": @" ", @"\u2002": @" ", @"\u2003": @" ", @"\u200A": @" ",
+        @"\u2212": @"-", @"\u2010": @"-", @"\u2011": @"-", @"\u2013": @"-", @"\u2014": @"-", @"\u2026": @"...", @"\u00D7": @"x", @"\u2018": @"'", @"\u2019": @"'",
+        @"\u201C": @"\"", @"\u201D": @"\"", @"\u00B5": @"u", @"\u03BC": @"u", @"\u00B0": @" deg", @"\u2032": @"'", @"\u2033": @"\"", @"\u221E": @"inf", @"\u2318": @"Cmd", @"\u26A0": @"!", @"\u00B1": @"+/-", @"\u2192": @"->"};
+    NSMutableString* o = [src mutableCopy];
+    for (NSString* k in map) [o replaceOccurrencesOfString:k withString:map[k] options:0 range:NSMakeRange(0, o.length)];
+    return o;
+}
 static std::string U(NSString* s) { return s ? std::string([s UTF8String]) : std::string(); }
 
 // ---- the audio side ---------------------------------------------------------------------------------
@@ -40,7 +57,8 @@ struct Engine {
     // figures for the report
     std::atomic<uint64_t> blocks{0}, sumNs{0}, worstNs{0}, budgetNs{0}, failed{0};
     std::atomic<float> peak{0};
-    std::atomic<uint32_t> notesPattern{0}, notesKeys{0}, fedBlocks{0};   // note-ons that reached the plug-in; blocks of test sound fed to an effect
+    std::atomic<uint32_t> notesPattern{0}, notesKeys{0}, fedBlocks{0};
+    bool silentChecked = false;   // note-ons that reached the plug-in; blocks of test sound fed to an effect
     void pushNote(int pitch, bool on) { uint32_t w = noteW.load(); notes[w & 255] = {pitch, on}; noteW.store(w + 1); }
 };
 static Engine G;
@@ -145,9 +163,16 @@ static void watchCb(void*, const char* what, uint32_t) {
     NSTextField* _warn; std::string _warnText;
     std::unordered_map<uint32_t, std::string> _paramNames;
     int _plugMouse, _plugDrags, _lastMoves; BOOL _windowOpened, _firstMoveLogged;
+    // 0.5
+    NSMutableSet* _seenDevs;
+    NSPopUpButton* _presetPop; NSButton* _probeBtn; NSButton* _diagBtn;
+    std::vector<PresetInfo> _presets;
+    PluginInfo _loadedInfo; size_t _loadStateBytes; BOOL _probing, _probedThis;
+    std::string _selfProbe;
 }
 
 - (void)say:(NSString*)line {
+    line = asciiish(line);
     _report += U(line) + "\n";
     NSAttributedString* a = [[NSAttributedString alloc] initWithString:[line stringByAppendingString:@"\n"] attributes:@{NSFontAttributeName: [NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular], NSForegroundColorAttributeName: NSColor.textColor}];
     [_log.textStorage appendAttributedString:a];
@@ -159,13 +184,32 @@ static void watchCb(void*, const char* what, uint32_t) {
     return [[NSHomeDirectory() stringByAppendingPathComponent:@"Desktop"] stringByAppendingPathComponent:@"AudioLab-VST3-test-report.txt"];
 }
 - (void)writeReport {
-    NSString* full = [S(_report) stringByAppendingString:[self liveFigures]];
-    [full writeToFile:[self reportPath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    NSString* full = asciiish([S(_report) stringByAppendingString:[self liveFigures]]);
+    NSMutableData* d = [NSMutableData data];
+    if (![full canBeConvertedToEncoding:NSASCIIStringEncoding]) { const unsigned char bom[3] = {0xEF, 0xBB, 0xBF}; [d appendBytes:bom length:3]; }   // UTF-8, said so at the start
+    [d appendData:[full dataUsingEncoding:NSUTF8StringEncoding]];
+    [d writeToFile:[self reportPath] atomically:YES];
 }
 - (NSString*)liveFigures {
     NSString* a = [self audioFigures];
     NSString* p = [self plugSummary];
-    return p.length ? [NSString stringWithFormat:@"%@%@\n", a, p] : a;
+    NSString* lists = [self bundleLists];
+    return [NSString stringWithFormat:@"%@%@%@", a, p.length ? [p stringByAppendingString:@"\n"] : @"", lists];
+}
+// At the end of every report: the bundles this app cannot load, in a plain list.
+- (NSString*)bundleLists {
+    if (_scan.empty()) return @"";
+    std::string intel, broken; int ni = 0, nb = 0;
+    for (auto& r : _scan) {
+        if (r.ok) continue;
+        std::string file = r.path.substr(r.path.find_last_of('/') + 1);
+        if (r.wrongArch) { intel += "\n  " + file + "  (" + r.path + ")"; ni++; }
+        else { broken += "\n  " + file + ": " + r.error + "  (" + r.path + ")"; nb++; }
+    }
+    NSMutableString* o = [NSMutableString string];
+    if (ni) [o appendFormat:@"\n[rosetta] %d bundle(s) are built for Intel (x86_64) only. These need Rosetta: a helper comes later. Until then they cannot load here:%s\n", ni, intel.c_str()];
+    if (nb) [o appendFormat:@"\n[broken] %d bundle(s) could not be read at all (damaged, or not a plug-in):%s\n", nb, broken.c_str()];
+    return o;
 }
 - (NSString*)audioFigures {
     uint64_t b = G.blocks.load();
@@ -188,6 +232,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     for (NSUInteger i = 1; i < args.count; i++) {
         if ([args[i] isEqualToString:@"--selftest"] && i + 1 < args.count) { _selftest = YES; _selfOut = U(args[i + 1]); }
         if ([args[i] isEqualToString:@"--plugin-name"] && i + 1 < args.count) _selfName = U(args[i + 1]);
+        if ([args[i] isEqualToString:@"--probe"]) _selfProbe = "1";
     }
     _down = [NSMutableSet set];
     // menu with Quit
@@ -243,9 +288,15 @@ static void watchCb(void*, const char* what, uint32_t) {
     _loadBtn = [self button:@"Load" action:@selector(load:) frame:NSMakeRect(16, 208, 90, 30)];
     _openBtn = [self button:@"Open its window" action:@selector(openEditor:) frame:NSMakeRect(110, 208, 140, 30)];
     _patBtn = [self button:@"Play test pattern" action:@selector(togglePattern:) frame:NSMakeRect(254, 208, 150, 30)];
+    _presetPop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(410, 210, 150, 26) pullsDown:NO]; _presetPop.target = self; _presetPop.action = @selector(presetChosen:);
+    [_presetPop addItemWithTitle:@"Factory preset"]; _presetPop.enabled = NO; _presetPop.toolTip = @"The plug-in's own programs and .vstpreset files, when it offers any through VST3. Most synths keep their presets in their own window: choose one there.";
+    [_win.contentView addSubview:_presetPop];
+    _probeBtn = [self button:@"Why silent?" action:@selector(probe:) frame:NSMakeRect(564, 208, 112, 30)];
+    _probeBtn.toolTip = @"Loads the plug-in again in a separate process and plays it under the 0.5 host, the 0.4 host and one change at a time; writes [probe] lines into the report.";
     [self button:@"Show report file" action:@selector(showReport:) frame:NSMakeRect(W - 300, 208, 140, 30)];
     [self button:@"Copy report" action:@selector(copyReport:) frame:NSMakeRect(W - 156, 208, 140, 30)];
-    [self label:@"Keys A W S E D F T G Y H U J K play notes, C to C (click the list first, not the search field). Sound comes out at half level." frame:NSMakeRect(16, 184, W - 32, 18)];
+    [self label:@"Keys A W S E D F T G Y H U J K play notes, C to C (click the list first, not the search field). Sound comes out at half level." frame:NSMakeRect(16, 184, W - 260, 18)];
+    _diagBtn = [NSButton checkboxWithTitle:@"Diagnostic lines in the report" target:nil action:nil]; _diagBtn.frame = NSMakeRect(W - 236, 182, 220, 22); _diagBtn.state = NSControlStateValueOn; [_win.contentView addSubview:_diagBtn];
     _cpu = [self label:@"" frame:NSMakeRect(16, 162, W - 32, 18)];
     _cpu.font = [NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];
 
@@ -269,7 +320,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 
 - (void)machineInfo {
     char model[128] = {0}, cpu[128] = {0}; size_t l = sizeof model; sysctlbyname("hw.model", model, &l, nullptr, 0); l = sizeof cpu; sysctlbyname("machdep.cpu.brand_string", cpu, &l, nullptr, 0);
-    [self say:@"AudioLab VST3 test 0.4 (tasks NM1, NB-N1 and NL4). Report file: paste all of it back."];
+    [self say:@"AudioLab VST3 test 0.5 (tasks NM1, NB-N1, NL4 and NL5). Report file: paste all of it back."];
     [self say:[NSString stringWithFormat:@"[machine] %s, %s, macOS %@, this app runs as %s", model, cpu, NSProcessInfo.processInfo.operatingSystemVersionString, hostArch().c_str()]];
 }
 
@@ -277,11 +328,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     _devs.clear(); [_devPop removeAllItems];
     uint32_t def = defaultOutputDevice(); int sel = -1;
     for (auto& d : listDevices()) {
-        std::string rates; for (double r : d.rates) rates += (rates.empty() ? "" : " ") + std::to_string((int)r);
-        for (auto& rr : d.rateRanges) rates += (rates.empty() ? "" : " ") + std::to_string((int)rr.first) + "-" + std::to_string((int)rr.second);
-        [self say:[NSString stringWithFormat:@"[device] %s (%s, %s): out %d ch, in %d ch, now %.0f Hz, rates offered: %s, rate can be set: %s, buffer %u (range %u to %u), volume the computer can set: %s%s, format on the wire: %s (%d formats offered), exclusive use can be taken: %s%s",
-                   d.name.c_str(), d.manufacturer.c_str(), d.transport.c_str(), d.outChannels, d.inChannels, d.rate, rates.c_str(), d.rateSettable ? "yes" : "no", d.buffer, d.bufferMin, d.bufferMax,
-                   d.hasVolume ? (d.volumeSettable ? "yes" : "has one but fixed") : "no", d.hasVolume ? (" (" + d.volumeWhere + ")").c_str() : "", d.physicalFormat.c_str(), d.physicalFormats, d.hogSettable ? "yes" : "no", d.isDefaultOutput ? ", DEFAULT OUTPUT" : ""]];
+        [self deviceLine:d later:NO];
         if (d.outChannels < 1) continue;
         if (d.id == def) sel = (int)_devs.size();
         _devs.push_back(d);
@@ -291,6 +338,18 @@ static void watchCb(void*, const char* what, uint32_t) {
     if (sel < 0) sel = 0;
     [_devPop selectItemAtIndex:sel];
     [self startDevice:_devs[sel]];
+}
+// One [device] line per device, the first time it is seen: at the start, and for a device plugged in or switched on later.
+- (void)deviceLine:(const DeviceInfo&)d later:(BOOL)later {
+    if (!_seenDevs) _seenDevs = [NSMutableSet set];
+    NSString* key = [NSString stringWithFormat:@"%u %s", d.id, d.name.c_str()];
+    if ([_seenDevs containsObject:key]) return;
+    [_seenDevs addObject:key];
+    std::string rates; for (double r : d.rates) rates += (rates.empty() ? "" : " ") + std::to_string((int)r);
+    for (auto& rr : d.rateRanges) rates += (rates.empty() ? "" : " ") + std::to_string((int)rr.first) + "-" + std::to_string((int)rr.second);
+    [self say:[NSString stringWithFormat:@"[device] %s%s (%s, %s): out %d ch, in %d ch, now %.0f Hz, rates offered: %s, rate can be set: %s, buffer %u (range %u to %u), volume the computer can set: %s%s, format on the wire: %s (%d formats offered), exclusive use can be taken: %s%s",
+               later ? "appeared: " : "", d.name.c_str(), d.manufacturer.c_str(), d.transport.c_str(), d.outChannels, d.inChannels, d.rate, rates.c_str(), d.rateSettable ? "yes" : "no", d.buffer, d.bufferMin, d.bufferMax,
+               d.hasVolume ? (d.volumeSettable ? "yes" : "has one but fixed") : "no", d.hasVolume ? (" (" + d.volumeWhere + ")").c_str() : "", d.physicalFormat.c_str(), d.physicalFormats, d.hogSettable ? "yes" : "no", d.isDefaultOutput ? ", DEFAULT OUTPUT" : ""]];
 }
 - (void)startDevice:(const DeviceInfo&)d0 {
     // ask the device again: a list made when the device was plugged in can hold the rate it had for a moment only
@@ -371,7 +430,9 @@ static void watchCb(void*, const char* what, uint32_t) {
         if (d.rate > 0 && d.rate != G.sr) { [self say:[NSString stringWithFormat:@"[rate] the device was switched to %.0f Hz from outside this app; following it", d.rate]]; [self startDevice:d]; }
     } else if ([what isEqualToString:@"devices"] || [what isEqualToString:@"alive"]) {
         std::vector<DeviceInfo> outs; bool here = false; int sel = -1;
-        for (auto& d : listDevices()) { if (d.outChannels < 1) continue; if (d.id == _dev) { here = true; sel = (int)outs.size(); } outs.push_back(d); }
+        auto all = listDevices();
+        for (auto& d : all) [self deviceLine:d later:YES];      // a device that appeared since the start gets its own line, with the same details
+        for (auto& d : all) { if (d.outChannels < 1) continue; if (d.id == _dev) { here = true; sel = (int)outs.size(); } outs.push_back(d); }
         if (_dev) [self checkOutput:deviceInfo(_dev)];
         if (outs.size() == _devs.size() && here) { bool same = true; for (size_t i = 0; i < outs.size(); i++) if (outs[i].id != _devs[i].id) same = false; if (same) return; }
         _devs = outs; [_devPop removeAllItems];
@@ -436,10 +497,31 @@ static void watchCb(void*, const char* what, uint32_t) {
     [self say:[NSString stringWithFormat:@"[scan] done: %d bundle(s) in %s; %d could be read, %d could not; %d plug-in(s). The app itself was never at risk: every bundle was opened in a separate process.", n, fl.c_str(), ok, n - ok, plugs]];
     _status.stringValue = [NSString stringWithFormat:@"%d plug-in(s) found", plugs];
     _scanBtn.enabled = YES;
+    int ni = 0, nb = 0; for (auto& r : _scan) if (!r.ok) { if (r.wrongArch) ni++; else nb++; }
+    if (ni + nb) [self say:[NSString stringWithFormat:@"[scan] %d bundle(s) are Intel-only (they need Rosetta: a helper comes later) and %d could not be read: both lists are at the end of this report", ni, nb]];
+    [self listOtherFormats];
     if (_selftest) {     // leave the main window alone for two seconds so the build machine can take a picture of it
         [self writeMarker:@"scanned"];
         __weak App* me = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me selftestStart]; });
+    }
+}
+
+// Decision D5 (CLAP or Audio Units next): list what is installed in both formats, without loading anything.
+- (void)listOtherFormats {
+    for (NSString* f in @[@"clap", @"au"]) {
+        std::vector<std::string> folders;
+        auto v = listOtherFormat(U(f), folders);
+        std::string fl; for (auto& x : folders) fl += (fl.empty() ? "" : ", ") + x;
+        int arm = 0, intel = 0; std::map<std::string, int> kinds;
+        for (auto& b : v) { if (b.archs.find("arm64") != std::string::npos) arm++; else if (!b.archs.empty()) intel++; if (!b.kind.empty()) kinds[b.kind]++; }
+        std::string ks; for (auto& k : kinds) ks += (ks.empty() ? "" : ", ") + std::to_string(k.second) + " " + k.first;
+        BOOL clap = [f isEqualToString:@"clap"];
+        [self say:[NSString stringWithFormat:@"[%@] %zu %s bundle(s) in %s (listed, not loaded): %d for Apple Silicon, %d Intel-only%s%s", f, v.size(), clap ? "CLAP" : "Audio Unit", fl.c_str(), arm, intel,
+                   ks.empty() ? "" : "; kinds: ", ks.c_str()]];
+        std::string names; int n = 0;
+        for (auto& b : v) { names += (n ? "; " : "") + b.name + (b.kind.empty() ? "" : " (" + b.kind + ")") + (b.archs.empty() || b.archs.find("arm64") != std::string::npos ? "" : " [" + b.archs + " only]"); n++; }
+        if (n) [self say:[NSString stringWithFormat:@"[%@] names: %s", f, names.c_str()]];
     }
 }
 
@@ -546,7 +628,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     PluginInfo pi; pi.format = "vst3"; pi.path = x.path; pi.uid = x.uid; pi.name = x.name;
     std::string err;
     CFAbsoluteTime t0 = CFAbsoluteTimeGetCurrent();
-    std::unique_ptr<PluginInstance> p = vst3Format()->create(pi, err);
+    std::unique_ptr<PluginInstance> p = vst3Format()->create(pi, err);     // the 0.5 host (HostOptions defaults)
     double ms = (CFAbsoluteTimeGetCurrent() - t0) * 1000;
     if (!p) { x.status = "FAILED to load: " + err; [_table reloadData]; [self say:[NSString stringWithFormat:@"[load] FAILED %s: %s", x.name.c_str(), err.c_str()]]; return NO; }
     BusLayout b = p->buses();
@@ -560,6 +642,19 @@ static void watchCb(void*, const char* what, uint32_t) {
                x.name.c_str(), ok ? "loaded" : "loaded but could not be started", ms, inst ? "instrument" : "effect", b.mainInChannels, b.mainOutChannels, b.eventIns, ps.size(), names.c_str(), gotState ? "saved" : "NOT saved", st.size(), lat,
                ok ? "" : (" (" + err + ")").c_str()]];
     x.status = ok ? "loaded" : "FAILED to start: " + err;
+    _loadedInfo = p->info(); _loadStateBytes = st.size(); _probedThis = NO;
+    if (_diagBtn.state == NSControlStateValueOn) {
+        std::string t = diagText(x.name, p->diag());
+        size_t cut = t.rfind("[diag]");                  // the last line holds the live counters: written later, at the summary
+        for (NSString* l in [S(t.substr(0, cut)) componentsSeparatedByString:@"\n"]) if (l.length) [self say:l];
+    }
+    _presets = p->presets();
+    [_presetPop removeAllItems];
+    [_presetPop addItemWithTitle:_presets.empty() ? @"No presets via VST3" : [NSString stringWithFormat:@"Factory preset (%zu)", _presets.size()]];
+    for (size_t i = 0; i < _presets.size() && i < 300; i++) [_presetPop addItemWithTitle:[NSString stringWithFormat:@"%zu. %s", i + 1, _presets[i].name.c_str()]];
+    _presetPop.enabled = !_presets.empty();
+    [self say:[NSString stringWithFormat:@"[presets] %s: %zu reachable through VST3%s", x.name.c_str(), _presets.size(),
+               _presets.empty() ? " (no program list, no .vstpreset file): to rule out an empty start patch, choose a preset in its own window, then play the pattern" : (" (first: \"" + _presets[0].name + "\"); choose one in the Factory preset menu").c_str()]];
     _paramNames.clear(); for (auto& q : ps) _paramNames[q.id] = q.name;
     _plugMouse = 0; _plugDrags = 0; _lastMoves = 0; _windowOpened = NO; _firstMoveLogged = NO;
     G.blocks = 0; G.sumNs = 0; G.worstNs = 0; G.failed = 0; G.peak = 0; G.notesPattern = 0; G.notesKeys = 0; G.fedBlocks = 0;
@@ -615,7 +710,9 @@ static void watchCb(void*, const char* what, uint32_t) {
     if (!G.plug && !G.pattern.load()) { [self say:@"[pattern] nothing to play yet: click a plug-in in the list and Load first"]; _status.stringValue = @"Load a plug-in first"; return; }
     bool on = !G.pattern.load(); G.pattern = on;
     _patBtn.title = on ? @"Stop test pattern" : @"Play test pattern";
-    [self say:on ? @"[pattern] test pattern on" : [@"[pattern] test pattern off. " stringByAppendingString:[[self liveFigures] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet]]];
+    [self say:on ? @"[pattern] test pattern on" : [@"[pattern] test pattern off. " stringByAppendingString:[[NSString stringWithFormat:@"%@%@", [self audioFigures], [self plugSummary]] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet]]];
+    // an instrument that stayed silent although notes reached it: probe it once, by itself
+    if (!on && G.plug && G.instrument && !_probedThis && !_selftest && G.peak.load() <= 0 && G.notesPattern.load() + G.notesKeys.load() >= 8) [self probe:nil];
 }
 - (BOOL)key:(NSEvent*)e {
     if (e.window != _win) return NO;      // keys typed in the plug-in's own window belong to the plug-in
@@ -683,16 +780,57 @@ static void watchCb(void*, const char* what, uint32_t) {
         if (np + nk == 0) [o appendString:@": no notes were sent to it"];
         else if (pk <= 0) {
             if (G.sr < 44100) [o appendFormat:@": SILENT although the notes reached it. The output runs at %.0f Hz; some instruments make no sound at such a low rate (Pigments played at 44.1 kHz in an earlier report and was silent at 16 kHz; Surge XT and mda JX10 do sound at 16 kHz). Choose an output at 44.1 kHz or more and play again", G.sr];
-            else [o appendString:@": SILENT although the notes reached it. Check its patch (an empty start patch makes no sound) and its own volume"];
+            else [o appendString:@": SILENT although the notes reached it"];
         } else [o appendString:@": it sounded"];
+        if (np + nk > 0 && pk <= 0 && !_probedThis) [o appendString:@". Press \"Why silent?\" (it also runs by itself once you stop the pattern) for [probe] lines that say which part of the host set-up it needs"];
     } else {
         uint32_t fb = G.fedBlocks.load();
         [o appendFormat:@"\n[notes] %s: an effect, no notes sent; the test sound ran through it for %u block(s), output peak %.3f%s", nm, fb, pk,
          fb == 0 ? " (silence is expected: nothing was fed into it; play the test pattern while it is loaded)" : (pk <= 0 ? " (SILENT although the test sound was fed into it)" : "")];
     }
+    if (_diagBtn.state == NSControlStateValueOn) {
+        std::string t = diagText(nm, G.plug->diag());
+        size_t cut = t.rfind("[diag]");
+        std::string last = t.substr(cut); while (!last.empty() && last.back() == '\n') last.pop_back();
+        [o appendFormat:@"\n%s", last.c_str()];
+        std::vector<uint8_t> st; if (G.plug->getState(st) && st.size() != _loadStateBytes)
+            [o appendFormat:@"\n[state] %s: its state is now %zu bytes (%zu when loaded): a preset or patch was loaded or changed since", nm, st.size(), _loadStateBytes];
+    }
     return o;
 }
 - (void)flushPlugSummary { NSString* p = [self plugSummary]; if (p.length) [self say:p]; }
+
+// ---- 0.5: factory presets and the silence probe ---------------------------------------------------------
+- (void)presetChosen:(id)s {
+    NSInteger i = _presetPop.indexOfSelectedItem - 1;
+    if (!G.plug || i < 0 || i >= (NSInteger)_presets.size()) return;
+    std::string err; bool ok;
+    { std::lock_guard<std::mutex> g(G.lock); ok = G.plug->loadPreset(_presets[i], err); }
+    [self say:[NSString stringWithFormat:@"[preset] %s: \"%s\" (%s) %s%s", _loaded.c_str(), _presets[i].name.c_str(), _presets[i].source.c_str(), ok ? "loaded" : "NOT loaded: ", ok ? "" : err.c_str()]];
+}
+- (void)probe:(id)s {
+    if (!G.plug || _loadedInfo.path.empty()) { [self say:@"[probe] load a plug-in first"]; return; }
+    if (_probing) return;
+    _probing = YES; _probedThis = YES; _probeBtn.enabled = NO;
+    _status.stringValue = [NSString stringWithFormat:@"Probing %s (about 10 to 40 s)", _loaded.c_str()];
+    [self say:[NSString stringWithFormat:@"[probe] %s: loading it again in a separate process and playing it under several host set-ups at %.0f Hz (your sound keeps playing meanwhile)", _loaded.c_str(), G.sr]];
+    std::string exe = U(NSBundle.mainBundle.executablePath);
+    PluginInfo pi = _loadedInfo; double sr = G.sr; std::string name = _loaded;
+    std::string out = U([NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"audiolab-probe-%d.json", (int)getpid()]]);
+    __weak App* me = self;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        std::string err;
+        std::string text = probeOutOfProcess(exe, pi, sr, 512, out, 200, err);
+        dispatch_async(dispatch_get_main_queue(), ^{ [me probeDone:text error:err name:name]; });
+    });
+}
+- (void)probeDone:(std::string)text error:(std::string)err name:(std::string)name {
+    _probing = NO; _probeBtn.enabled = YES;
+    for (NSString* l in [S(text) componentsSeparatedByString:@"\n"]) if (l.length) [self say:l];
+    if (!err.empty()) [self say:[NSString stringWithFormat:@"[probe] %s: %s", name.c_str(), err.c_str()]];
+    _status.stringValue = [NSString stringWithFormat:@"Probe of %s done: see the report", name.c_str()];
+    if (_selftest && !_selfProbe.empty()) [self selftestEnd];
+}
 - (void)showReport:(id)s { [self writeReport]; [NSWorkspace.sharedWorkspace selectFile:[self reportPath] inFileViewerRootedAtPath:@""]; }
 - (void)copyReport:(id)s {
     [self writeReport];
@@ -727,7 +865,7 @@ static void watchCb(void*, const char* what, uint32_t) {
             [me say:@"[selftest] five seconds of the pattern played"];
             [me selftestDrags];
             [me writeMarker:@"ready-for-screenshot"];
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(6.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me togglePattern:nil]; [me selftestEnd]; });
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(6.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me togglePattern:nil]; [me selftestProbeOrEnd]; });
         });
     });
 }
@@ -754,6 +892,7 @@ static void watchCb(void*, const char* what, uint32_t) {
         [me say:[NSString stringWithFormat:@"[selftest] 24 drags in the plug-in's window: %d parameter move(s) reached the host", after - before]];
     });
 }
+- (void)selftestProbeOrEnd { if (_selfProbe.empty()) [self selftestEnd]; else { [self flushPlugSummary]; [self probe:nil]; } }
 - (void)writeMarker:(NSString*)name { [@"1" writeToFile:[S(_selfOut) stringByAppendingPathComponent:name] atomically:YES encoding:NSUTF8StringEncoding error:nil]; }
 - (void)selftestEnd { [self say:@"[selftest] end"]; [self writeMarker:@"done"]; [NSApp terminate:nil]; }
 @end
@@ -761,6 +900,8 @@ static void watchCb(void*, const char* what, uint32_t) {
 int main(int argc, char** argv) {
     int code = 0;
     if (scannerChildMain(argc, argv, code)) return code;     // this same program is the scanner child
+    // ... and the silence probe's child: the plug-in on its main thread, with the run loop turning between blocks
+    if (probeChildMain(argc, argv, code, [](double s) { @autoreleasepool { if (s > 0) CFRunLoopRunInMode(kCFRunLoopDefaultMode, s, false); else CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true); } })) return code;
     @autoreleasepool {
         NSApplication* app = [NSApplication sharedApplication];
         [app setActivationPolicy:NSApplicationActivationPolicyRegular];

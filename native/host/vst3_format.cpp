@@ -15,10 +15,17 @@
 #include "public.sdk/source/vst/hosting/module.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/hosting/plugprovider.h"
+#include "public.sdk/source/vst/vstpresetfile.h"
+#include "pluginterfaces/vst/ivstunits.h"
+#include "pluginterfaces/vst/ivstmessage.h"
 #include "public.sdk/source/vst/hosting/processdata.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
 
+#include <algorithm>
 #include <atomic>
+#include <chrono>
+#include <cmath>
+#include <thread>
 #include <cstring>
 #include <filesystem>
 #include <mutex>
@@ -82,15 +89,65 @@ struct Frame : public IPlugFrame {
     uint32 PLUGIN_API release() override { return 1000; }
 };
 
+static const char* rc(tresult r) {
+    switch (r) {
+        case kResultOk: return "ok";
+        case kResultFalse: return "false";
+        case kNotImplemented: return "not implemented";
+        case kInvalidArgument: return "invalid argument";
+        case kNoInterface: return "no interface";
+        case kInternalError: return "internal error";
+        case kNotInitialized: return "not initialised";
+        case kOutOfMemory: return "out of memory";
+        default: return "unknown code";
+    }
+}
+static std::string arrName(SpeakerArrangement a) {
+    if (a == SpeakerArr::kEmpty) return "empty";
+    if (a == SpeakerArr::kMono) return "mono";
+    if (a == SpeakerArr::kStereo) return "stereo";
+    char b[48]; snprintf(b, sizeof b, "%d ch (0x%llx)", SpeakerArr::getChannelCount(a), (unsigned long long)a); return b;
+}
+static SpeakerArrangement arrFor(int ch) { return ch == 1 ? SpeakerArr::kMono : ch == 2 ? SpeakerArr::kStereo : ch <= 0 ? SpeakerArr::kEmpty : (SpeakerArrangement)((1ull << ch) - 1); }
+
+// Between the plug-in's processor and its controller (IConnectionPoint). The SDK's own ConnectionProxy (used by
+// PlugProvider in test apps 0.1 to 0.4) silently DROPS every message not sent from the thread that made it; JUCE's
+// host connects the two directly. This link delivers like JUCE (or drops like the SDK, as an option) and counts.
+struct Link : public IConnectionPoint {
+    IConnectionPoint* src = nullptr;   // the side that sends through this link
+    IConnectionPoint* dst = nullptr;   // the side that receives
+    std::thread::id mainId;
+    const bool* anyThread = nullptr;
+    std::atomic<int>* count = nullptr; std::atomic<int>* off = nullptr; std::atomic<int>* dropped = nullptr;
+    tresult PLUGIN_API connect(IConnectionPoint* other) override { if (!other) return kInvalidArgument; dst = other; return kResultTrue; }
+    tresult PLUGIN_API disconnect(IConnectionPoint* other) override { if (other == dst) dst = nullptr; return kResultTrue; }
+    tresult PLUGIN_API notify(IMessage* m) override {
+        if (count) (*count)++;
+        bool onMain = std::this_thread::get_id() == mainId;
+        if (!onMain && off) (*off)++;
+        if (!onMain && anyThread && !*anyThread) { if (dropped) (*dropped)++; return kResultFalse; }
+        return dst ? dst->notify(m) : kResultFalse;
+    }
+    tresult PLUGIN_API queryInterface(const TUID iid, void** obj) override {
+        if (FUnknownPrivate::iidEqual(iid, IConnectionPoint::iid) || FUnknownPrivate::iidEqual(iid, FUnknown::iid)) { *obj = static_cast<IConnectionPoint*>(this); return kResultOk; }
+        *obj = nullptr; return kNoInterface;
+    }
+    uint32 PLUGIN_API addRef() override { return 1000; }
+    uint32 PLUGIN_API release() override { return 1000; }
+};
+
 class Vst3Instance : public PluginInstance {
 public:
     PluginInfo pinfo;
     VST3::Hosting::Module::Ptr module;
-    IPtr<PlugProvider> provider;
+    VST3::UID classId;
     IPtr<IComponent> component;
     IPtr<IEditController> controller;
     IPtr<IAudioProcessor> processor;
     IPtr<IPlugView> view;
+    bool singleObject = false, connected = false;
+    IPtr<IConnectionPoint> compCP, ctrlCP;
+    Link toController, toProcessor;     // toController: the processor's messages; toProcessor: the controller's
     Handler handler;
     Frame frame;
     HostProcessData data;
@@ -99,21 +156,38 @@ public:
     ParameterChangeTransfer transfer{512};
     std::mutex transferLock;
     Vst::ProcessContext pctx{};
+    HostOptions opt;
     bool active = false;
     int maxBlock = 0;
     int latency = 0;
     int64_t tail = 0;
+    // diagnostics
+    std::vector<std::string> createLines, prepareLines;
+    std::atomic<uint64_t> dBlocks{0}, dMainNZ{0}, dOtherNZ{0}, dSilFlag{0}, dNotOk{0}, dOn{0}, dOff{0}, dRej{0}, dParams{0};
+    std::atomic<float> dPeakMain{0}, dPeakOther{0};
+    std::atomic<int> dLastRes{0};
+    std::atomic<int> mToProc{0}, mToCtrl{0}, mOff{0}, mDrop{0};
+    int syncRes = -999, stateBytes = 0;
+    int32 nextNoteId = 1;
+    int32 liveIds[16][128];
 
+    Vst3Instance() { for (auto& c : liveIds) for (auto& x : c) x = -1; }
     ~Vst3Instance() override {
         closeEditor();
         if (active && processor) { processor->setProcessing(false); component->setActive(false); }
         data.unprepare();
         if (controller) controller->setComponentHandler(nullptr);
-        processor = nullptr; component = nullptr; controller = nullptr;
-        provider = nullptr;   // terminates the plug-in
+        if (connected) { if (compCP) compCP->disconnect(&toController); if (ctrlCP) ctrlCP->disconnect(&toProcessor); }
+        compCP = nullptr; ctrlCP = nullptr;
+        processor = nullptr;
+        if (controller && !singleObject) { controller->terminate(); }
+        controller = nullptr;
+        if (component) component->terminate();
+        component = nullptr;
         module = nullptr;
     }
     const PluginInfo& info() const override { return pinfo; }
+    void setHostOptions(const HostOptions& o) override { opt = o; }
 
     BusLayout buses() const override {
         BusLayout b;
@@ -152,32 +226,102 @@ public:
         return VST3::StringConvert::convert(s);
     }
 
+    std::string busLine(MediaType t, BusDirection d, int i) const {
+        BusInfo bi{};
+        tresult r = component->getBusInfo(t, d, i, bi);
+        char b[400];
+        if (r != kResultOk) { snprintf(b, sizeof b, "%s %s %d: getBusInfo = %s", t == kAudio ? "audio" : "event", d == kInput ? "in" : "out", i, rc(r)); return b; }
+        snprintf(b, sizeof b, "%s %s %d \"%s\": %s, %d ch%s", t == kAudio ? "audio" : "event", d == kInput ? "in" : "out", i, VST3::StringConvert::convert(bi.name).c_str(),
+                 bi.busType == kMain ? "main" : "aux", bi.channelCount, (bi.flags & BusInfo::kDefaultActive) ? ", default active" : ", default inactive");
+        return b;
+    }
+
     bool prepare(double sr, int block, bool offline, std::string& err) override {
+        std::vector<std::string>& L = prepareLines; L.clear();
+        char b[600];
         if (active) { processor->setProcessing(false); component->setActive(false); active = false; }
-        // ask for stereo on the main buses; a plug-in may say no and keep its own layout
         int nIn = component->getBusCount(kAudio, kInput), nOut = component->getBusCount(kAudio, kOutput);
-        std::vector<SpeakerArrangement> ins(nIn), outs(nOut);
-        for (int i = 0; i < nIn; i++) { processor->getBusArrangement(kInput, i, ins[i]); if (i == 0) ins[i] = SpeakerArr::kStereo; }
-        for (int i = 0; i < nOut; i++) { processor->getBusArrangement(kOutput, i, outs[i]); if (i == 0) outs[i] = SpeakerArr::kStereo; }
-        processor->setBusArrangements(nIn ? ins.data() : nullptr, nIn, nOut ? outs.data() : nullptr, nOut);
-        for (int i = 0; i < nIn; i++) component->activateBus(kAudio, kInput, i, i == 0);
-        for (int i = 0; i < nOut; i++) component->activateBus(kAudio, kOutput, i, i == 0);
-        for (int i = 0; i < component->getBusCount(kEvent, kInput); i++) component->activateBus(kEvent, kInput, i, i == 0);
+        int nEvIn = component->getBusCount(kEvent, kInput), nEvOut = component->getBusCount(kEvent, kOutput);
+        std::string asked = "buses the plug-in offers:";
+        for (int i = 0; i < nIn; i++) asked += " [" + busLine(kAudio, kInput, i) + "]";
+        for (int i = 0; i < nOut; i++) asked += " [" + busLine(kAudio, kOutput, i) + "]";
+        for (int i = 0; i < nEvIn; i++) asked += " [" + busLine(kEvent, kInput, i) + "]";
+        for (int i = 0; i < nEvOut; i++) asked += " [" + busLine(kEvent, kOutput, i) + "]";
+        L.push_back(asked);
+        if (processor->canProcessSampleSize(kSample32) != kResultOk) { err = "the plug-in cannot work with 32-bit float audio"; L.push_back("canProcessSampleSize(32-bit) = no"); return false; }
         ProcessSetup setup{offline ? kOffline : kRealtime, kSample32, block, sr};
-        if (processor->canProcessSampleSize(kSample32) != kResultOk) { err = "the plug-in cannot work with 32-bit float audio"; return false; }
-        tresult r = processor->setupProcessing(setup);
-        if (r != kResultOk && r != kNotImplemented) { err = "setupProcessing failed"; return false; }
-        if (component->setActive(true) != kResultOk) { err = "setActive failed"; return false; }
-        processor->setProcessing(true);
+        auto doSetup = [&]() -> bool {
+            tresult r = processor->setupProcessing(setup);
+            snprintf(b, sizeof b, "setupProcessing(%s, 32-bit float, %.0f Hz, largest block %d) = %s", offline ? "offline" : "realtime", sr, block, rc(r)); L.push_back(b);
+            if (r != kResultOk && r != kNotImplemented) { err = std::string("setupProcessing failed: ") + rc(r); return false; }
+            return true;
+        };
+        auto doBuses = [&]() {
+            std::vector<SpeakerArrangement> ins(nIn), outs(nOut);
+            std::string pref;
+            for (int i = 0; i < nIn; i++) {
+                BusInfo bi{}; component->getBusInfo(kAudio, kInput, i, bi);
+                tresult r = processor->getBusArrangement(kInput, i, ins[i]);
+                if (r != kResultOk) ins[i] = arrFor(bi.channelCount);
+                pref += " in " + std::to_string(i) + ": " + arrName(ins[i]) + (r != kResultOk ? std::string(" (getBusArrangement = ") + rc(r) + ")" : "");
+                if (!opt.preferredArrangements && i == 0) ins[i] = SpeakerArr::kStereo;
+            }
+            for (int i = 0; i < nOut; i++) {
+                BusInfo bi{}; component->getBusInfo(kAudio, kOutput, i, bi);
+                tresult r = processor->getBusArrangement(kOutput, i, outs[i]);
+                if (r != kResultOk) outs[i] = arrFor(bi.channelCount);
+                pref += " out " + std::to_string(i) + ": " + arrName(outs[i]) + (r != kResultOk ? std::string(" (getBusArrangement = ") + rc(r) + ")" : "");
+                if (!opt.preferredArrangements && i == 0) outs[i] = SpeakerArr::kStereo;
+            }
+            L.push_back("arrangements the plug-in prefers:" + (pref.empty() ? std::string(" none") : pref));
+            SpeakerArrangement none = SpeakerArr::kEmpty;     // some plug-ins crash on a null pointer here (JUCE's note)
+            tresult r = processor->setBusArrangements(nIn ? ins.data() : &none, nIn, nOut ? outs.data() : &none, nOut);
+            std::string gave;
+            for (int i = 0; i < nIn; i++) gave += " in " + std::to_string(i) + ": " + arrName(ins[i]);
+            for (int i = 0; i < nOut; i++) gave += " out " + std::to_string(i) + ": " + arrName(outs[i]);
+            std::string now;
+            for (int i = 0; i < nIn; i++) { SpeakerArrangement a = 0; processor->getBusArrangement(kInput, i, a); now += " in " + std::to_string(i) + ": " + arrName(a); }
+            for (int i = 0; i < nOut; i++) { SpeakerArrangement a = 0; processor->getBusArrangement(kOutput, i, a); now += " out " + std::to_string(i) + ": " + arrName(a); }
+            L.push_back(std::string("setBusArrangements(") + (gave.empty() ? " none" : gave) + " ) = " + rc(r) + "; the plug-in now has" + (now.empty() ? " none" : now));
+            std::string act = "activateBus:";
+            for (int dir = 0; dir < 2; dir++) {
+                BusDirection d = dir == 0 ? kInput : kOutput; int n = dir == 0 ? nIn : nOut;
+                for (int i = 0; i < n; i++) {
+                    BusInfo bi{}; component->getBusInfo(kAudio, d, i, bi);
+                    bool on = opt.preferredArrangements ? (opt.allAudioBuses || (bi.busType == kMain && (i == 0 || (bi.flags & BusInfo::kDefaultActive)))) : (i == 0 || opt.allAudioBuses);   // main buses the plug-in wants on; aux buses off (they still get buffers)
+                    tresult ar = component->activateBus(kAudio, d, i, on);
+                    act += std::string(" audio ") + (d == kInput ? "in " : "out ") + std::to_string(i) + (on ? " on" : " off") + " = " + rc(ar) + ";";
+                }
+            }
+            for (int i = 0; i < nEvIn; i++) {
+                bool on = opt.allEventInputs || i == 0;
+                tresult ar = component->activateBus(kEvent, kInput, i, on);
+                act += " event in " + std::to_string(i) + (on ? " on" : " off") + " = " + rc(ar) + ";";
+            }
+            L.push_back(act);
+        };
+        if (opt.validatorOrder) { if (!doSetup()) return false; doBuses(); }
+        else { doBuses(); if (!doSetup()) return false; }
+        tresult ra = component->setActive(true);
+        snprintf(b, sizeof b, "setActive(true) = %s", rc(ra)); L.push_back(b);
+        if (ra != kResultOk) { err = std::string("setActive failed: ") + rc(ra); return false; }
+        tresult rp = processor->setProcessing(true);
+        snprintf(b, sizeof b, "setProcessing(true) = %s%s", rc(rp), rp == kNotImplemented ? " (allowed)" : ""); L.push_back(b);
         active = true; maxBlock = block;
         data.unprepare();
-        data.prepare(*component, block, kSample32);    // buffers for every bus, owned by the host
+        data.prepare(*component, block, kSample32);    // buffers for every bus (aux buses too, active or not), owned by the host
         data.inputEvents = &events; data.inputParameterChanges = &inChanges; data.outputParameterChanges = &outChanges;
         data.processContext = &pctx; data.processMode = setup.processMode; data.symbolicSampleSize = kSample32;
+        std::string bufs = "process data: ";
+        for (int i = 0; i < data.numInputs; i++) bufs += "in bus " + std::to_string(i) + " " + std::to_string(data.inputs[i].numChannels) + " ch; ";
+        for (int i = 0; i < data.numOutputs; i++) bufs += "out bus " + std::to_string(i) + " " + std::to_string(data.outputs[i].numChannels) + " ch; ";
+        bufs += "event list, parameter changes in and out, process context (tempo 120, 4/4, playing" + std::string(opt.fullContext ? ", system time, bar position" : "") + "), note ids " + (opt.uniqueNoteIds ? "unique" : "-1");
+        L.push_back(bufs);
         latency = (int)processor->getLatencySamples();
         uint32 t = processor->getTailSamples();
         tail = t == kInfiniteTail ? -1 : (int64_t)t;
         handler.latencyChanged = false;
+        dBlocks = 0; dMainNZ = 0; dOtherNZ = 0; dSilFlag = 0; dNotOk = 0; dPeakMain = 0; dPeakOther = 0;
         return true;
     }
 
@@ -185,15 +329,32 @@ public:
         if (!active || frames > maxBlock) return false;
         for (int i = 0; i < noteCount; i++) {
             Event e{};
-            e.busIndex = 0; e.sampleOffset = notes[i].offset; e.flags = Event::kIsLive;
-            if (notes[i].on) { e.type = Event::kNoteOnEvent; e.noteOn.channel = (int16)notes[i].channel; e.noteOn.pitch = (int16)notes[i].pitch; e.noteOn.velocity = notes[i].velocity; e.noteOn.noteId = -1; }
-            else { e.type = Event::kNoteOffEvent; e.noteOff.channel = (int16)notes[i].channel; e.noteOff.pitch = (int16)notes[i].pitch; e.noteOff.velocity = 0; e.noteOff.noteId = -1; }
-            events.addEvent(e);
+            int ch = notes[i].channel & 15, pitch = notes[i].pitch & 127;
+            e.busIndex = 0; e.sampleOffset = std::max(0, std::min(frames - 1, notes[i].offset)); e.flags = Event::kIsLive;
+            if (notes[i].on) {
+                int32 id = -1;
+                if (opt.uniqueNoteIds) { id = nextNoteId++; if (nextNoteId > 0x3fffffff) nextNoteId = 1; liveIds[ch][pitch] = id; }
+                e.type = Event::kNoteOnEvent; e.noteOn.channel = (int16)ch; e.noteOn.pitch = (int16)pitch; e.noteOn.velocity = std::max(0.f, std::min(1.f, notes[i].velocity)); e.noteOn.noteId = id; e.noteOn.length = 0; e.noteOn.tuning = 0;
+                dOn++;
+            } else {
+                int32 id = -1;
+                if (opt.uniqueNoteIds) { id = liveIds[ch][pitch]; liveIds[ch][pitch] = -1; }
+                e.type = Event::kNoteOffEvent; e.noteOff.channel = (int16)ch; e.noteOff.pitch = (int16)pitch; e.noteOff.velocity = 0; e.noteOff.noteId = id; e.noteOff.tuning = 0;
+                dOff++;
+            }
+            if (events.addEvent(e) != kResultOk) dRej++;
         }
         if (transferLock.try_lock()) { transfer.transferChangesTo(inChanges); transferLock.unlock(); }
+        if (inChanges.getParameterCount() > 0) dParams += inChanges.getParameterCount();
+        double ppq = (double)c.samplePos / c.sampleRate * c.tempo / 60.0;
         pctx.state = (c.playing ? Vst::ProcessContext::kPlaying : 0) | Vst::ProcessContext::kTempoValid | Vst::ProcessContext::kTimeSigValid | Vst::ProcessContext::kProjectTimeMusicValid | Vst::ProcessContext::kContTimeValid;
         pctx.sampleRate = c.sampleRate; pctx.tempo = c.tempo; pctx.projectTimeSamples = c.samplePos; pctx.continousTimeSamples = c.samplePos;
-        pctx.projectTimeMusic = (double)c.samplePos / c.sampleRate * c.tempo / 60.0; pctx.timeSigNumerator = 4; pctx.timeSigDenominator = 4;
+        pctx.projectTimeMusic = ppq; pctx.timeSigNumerator = 4; pctx.timeSigDenominator = 4;
+        if (opt.fullContext) {
+            pctx.state |= Vst::ProcessContext::kSystemTimeValid | Vst::ProcessContext::kBarPositionValid;
+            pctx.systemTime = (int64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+            pctx.barPositionMusic = std::floor(ppq / 4.0) * 4.0;
+        } else { pctx.systemTime = 0; pctx.barPositionMusic = 0; }
         data.numSamples = frames;
         for (int b = 0; b < data.numInputs; b++) {
             data.inputs[b].silenceFlags = 0;
@@ -209,6 +370,18 @@ public:
             for (int ch = 0; ch < data.outputs[b].numChannels; ch++) if (data.outputs[b].channelBuffers32[ch]) memset(data.outputs[b].channelBuffers32[ch], 0, sizeof(float) * frames);
         }
         tresult r = processor->process(data);
+        // measure what the plug-in wrote, before the host touches it
+        dBlocks++; dLastRes = (int)r; if (r != kResultOk) dNotOk++;
+        for (int b = 0; b < data.numOutputs; b++) {
+            float pk = 0;
+            for (int ch = 0; ch < data.outputs[b].numChannels; ch++) {
+                const float* d = data.outputs[b].channelBuffers32[ch]; if (!d) continue;
+                for (int i = 0; i < frames; i++) { float a = std::fabs(d[i]); if (a > pk) pk = a; }
+            }
+            if (data.outputs[b].silenceFlags) dSilFlag++;
+            if (b == 0) { if (pk > 0) dMainNZ++; if (pk > dPeakMain.load()) dPeakMain = pk; }
+            else { if (pk > 0) dOtherNZ++; if (pk > dPeakOther.load()) dPeakOther = pk; }
+        }
         if (data.numOutputs > 0) {
             int have = data.outputs[0].numChannels;
             for (int ch = 0; ch < outCh; ch++) {
@@ -221,6 +394,79 @@ public:
     }
     int latencySamples() const override { return latency; }
     int64_t tailSamples() const override { return tail; }
+
+    HostDiag diag() const override {
+        HostDiag d;
+        d.setup = createLines; d.setup.insert(d.setup.end(), prepareLines.begin(), prepareLines.end());
+        d.blocks = dBlocks; d.blocksMainNonZero = dMainNZ; d.blocksOtherNonZero = dOtherNZ; d.blocksSilenceFlag = dSilFlag; d.processNotOk = dNotOk;
+        d.noteOns = dOn; d.noteOffs = dOff; d.eventsRejected = dRej; d.paramChanges = dParams;
+        d.peakMain = dPeakMain; d.peakOther = dPeakOther; d.lastProcessResult = dLastRes;
+        d.msgToProcessor = mToProc; d.msgToController = mToCtrl; d.msgOffMainThread = mOff; d.msgDropped = mDrop;
+        d.setComponentStateResult = syncRes; d.stateBytes = stateBytes;
+        return d;
+    }
+
+    // ---- factory presets: the plug-in's program list, then .vstpreset files in the standard folders ----
+    std::vector<PresetInfo> presets() override {
+        std::vector<PresetInfo> v;
+        if (controller) {
+            FUnknownPtr<IUnitInfo> ui(controller);
+            ProgramListID listId = kNoProgramListId;
+            bool hasPc = false;
+            for (int i = 0, n = controller->getParameterCount(); i < n; i++) { ParameterInfo pi{}; if (controller->getParameterInfo(i, pi) == kResultOk && (pi.flags & ParameterInfo::kIsProgramChange)) { hasPc = true; break; } }
+            if (ui && hasPc) {
+                for (int32 i = 0; i < ui->getUnitCount(); i++) { UnitInfo u{}; if (ui->getUnitInfo(i, u) == kResultOk && u.id == kRootUnitId) listId = u.programListId; }
+                if (listId == kNoProgramListId && ui->getProgramListCount() > 0) { ProgramListInfo li{}; if (ui->getProgramListInfo(0, li) == kResultOk) listId = li.id; }
+                for (int32 i = 0; i < ui->getProgramListCount(); i++) {
+                    ProgramListInfo li{}; if (ui->getProgramListInfo(i, li) != kResultOk || li.id != listId) continue;
+                    for (int32 k = 0; k < li.programCount && k < 512; k++) {
+                        String128 nm = {0}; ui->getProgramName(li.id, k, nm);
+                        PresetInfo p; p.name = VST3::StringConvert::convert(nm); p.source = "program list"; p.index = k; v.push_back(p);
+                    }
+                }
+            }
+        }
+        namespace fs = std::filesystem;
+        std::vector<std::string> roots;
+        const char* home = getenv("HOME");
+#if defined(__APPLE__)
+        if (home) roots.push_back(std::string(home) + "/Library/Audio/Presets");
+        roots.push_back("/Library/Audio/Presets");
+#else
+        if (home) roots.push_back(std::string(home) + "/.vst3/presets");
+        roots.push_back("/usr/share/vst3/presets"); roots.push_back("/usr/local/share/vst3/presets");
+#endif
+        int files = 0;
+        for (auto& r : roots) {
+            fs::path dir = fs::path(r) / pinfo.vendor / pinfo.name;
+            std::error_code ec;
+            if (!fs::is_directory(dir, ec)) continue;
+            std::vector<std::string> found;
+            for (fs::recursive_directory_iterator it(dir, fs::directory_options::skip_permission_denied, ec), end; !ec && it != end; it.increment(ec))
+                if (it->path().extension() == ".vstpreset") found.push_back(it->path().string());
+            std::sort(found.begin(), found.end());
+            for (auto& f : found) { if (files++ > 500) break; PresetInfo p; p.name = fs::path(f).stem().string(); p.source = f; v.push_back(p); }
+        }
+        return v;
+    }
+    bool loadPreset(const PresetInfo& p, std::string& err) override {
+        if (p.source == "program list") {
+            if (!controller) { err = "no controller"; return false; }
+            int n = controller->getParameterCount();
+            for (int i = 0; i < n; i++) {
+                ParameterInfo pi{};
+                if (controller->getParameterInfo(i, pi) != kResultOk || !(pi.flags & ParameterInfo::kIsProgramChange)) continue;
+                double v = pi.stepCount > 0 ? std::min(1.0, (double)p.index / pi.stepCount) : 0;
+                setParam(pi.id, v);
+                return true;
+            }
+            err = "the plug-in lists programs but has no program-change parameter"; return false;
+        }
+        IPtr<IBStream> st = owned(FileStream::open(p.source.c_str(), "rb"));
+        if (!st) { err = "could not open " + p.source; return false; }
+        if (!PresetFile::loadPreset(st, FUID::fromTUID(classId.data()), component, controller)) { err = "the preset file was not accepted (another plug-in's, or damaged)"; return false; }
+        return true;
+    }
 
     // Project file format of a plug-in's state: "ALV3", then the processor part and the controller part, each
     // with its length. Both parts are the plug-in's own bytes, untouched.
@@ -355,21 +601,23 @@ public:
         r.ok = true;
         return r;
     }
-    std::unique_ptr<PluginInstance> create(const PluginInfo& info, std::string& err) override {
-        hostApp();
+    std::unique_ptr<PluginInstance> create(const PluginInfo& info, std::string& err) override { return createWith(info, HostOptions(), err); }
+    std::unique_ptr<PluginInstance> createWith(const PluginInfo& info, const HostOptions& o, std::string& err) override {
+        FUnknown* ctx = static_cast<IHostApplication*>(&hostApp());
         auto inst = std::make_unique<Vst3Instance>();
-        inst->pinfo = info;
+        inst->pinfo = info; inst->opt = o;
         inst->module = VST3::Hosting::Module::create(info.path, err);
         if (!inst->module) { if (err.empty()) err = "the bundle could not be loaded"; return nullptr; }
         auto factory = inst->module->getFactory();
         bool found = false;
+        char b[400];
+        auto& L = inst->createLines;
         for (auto& c : factory.classInfos()) {
             if (c.category() != kVstAudioEffectClass) continue;
             if (!info.uid.empty() && c.ID().toString() != info.uid) continue;
             if (info.uid.empty() && !info.name.empty() && c.name() != info.name) continue;
-            inst->provider = owned(new PlugProvider(factory, c, true));
-            if (!inst->provider->initialize()) { err = "the plug-in failed to initialise"; return nullptr; }
-            inst->pinfo.uid = c.ID().toString(); inst->pinfo.name = c.name(); inst->pinfo.vendor = c.vendor(); inst->pinfo.version = c.version();
+            inst->classId = c.ID();
+            inst->pinfo.uid = c.ID().toString(); inst->pinfo.name = c.name(); inst->pinfo.vendor = c.vendor().empty() ? factory.info().vendor() : c.vendor(); inst->pinfo.version = c.version();
             inst->pinfo.categories = c.subCategoriesString(); inst->pinfo.sdk = c.sdkVersion(); inst->pinfo.format = "vst3";
             inst->pinfo.isInstrument = inst->pinfo.categories.find("Instrument") != std::string::npos;
             inst->pinfo.isEffect = !inst->pinfo.isInstrument || inst->pinfo.categories.find("Fx") != std::string::npos;
@@ -377,13 +625,69 @@ public:
             break;
         }
         if (!found) { err = "no such plug-in in this bundle"; return nullptr; }
-        inst->component = inst->provider->getComponentPtr();
-        inst->controller = inst->provider->getControllerPtr();
+        snprintf(b, sizeof b, "plug-in: %s by %s, version %s, built with %s, categories %s", inst->pinfo.name.c_str(), inst->pinfo.vendor.c_str(), inst->pinfo.version.c_str(), inst->pinfo.sdk.c_str(), inst->pinfo.categories.c_str());
+        L.push_back(b);
+        // the processor part ("component")
+        inst->component = factory.createInstance<IComponent>(inst->classId);
         if (!inst->component) { err = "the plug-in gave no audio component"; return nullptr; }
+        tresult r = inst->component->initialize(ctx);
+        snprintf(b, sizeof b, "component initialize = %s", rc(r)); L.push_back(b);
+        if (r != kResultOk) { err = std::string("the plug-in failed to initialise: ") + rc(r); inst->component = nullptr; return nullptr; }
         inst->processor = FUnknownPtr<IAudioProcessor>(inst->component);
         if (!inst->processor) { err = "the plug-in gave no audio processor"; return nullptr; }
+        // the controller part: the same object, or a second class made from its id
+        IEditController* same = nullptr;
+        if (inst->component->queryInterface(IEditController::iid, (void**)&same) == kResultOk && same) {
+            inst->controller = owned(same); inst->singleObject = true;
+            L.push_back("controller: the same object as the processor (single component)");
+        } else {
+            TUID cid;
+            if (inst->component->getControllerClassId(cid) == kResultOk) {
+                inst->controller = factory.createInstance<IEditController>(VST3::UID(cid));
+                if (inst->controller) {
+                    tresult rc2 = inst->controller->initialize(ctx);
+                    snprintf(b, sizeof b, "controller: a separate object, initialize = %s", rc(rc2)); L.push_back(b);
+                    if (rc2 != kResultOk) inst->controller = nullptr;
+                } else L.push_back("controller: its class could not be created");
+            } else L.push_back("controller: none (the plug-in names no controller class)");
+        }
         inst->handler.transfer = &inst->transfer; inst->handler.lock = &inst->transferLock;
         if (inst->controller) inst->controller->setComponentHandler(&inst->handler);
+        // connect the two parts through counting links (only when they are separate objects)
+        if (inst->controller && !inst->singleObject) {
+            inst->compCP = FUnknownPtr<IConnectionPoint>(inst->component);
+            inst->ctrlCP = FUnknownPtr<IConnectionPoint>(inst->controller);
+            if (inst->compCP && inst->ctrlCP) {
+                auto tid = std::this_thread::get_id();
+                inst->toController.mainId = tid; inst->toController.anyThread = &inst->opt.messagesAnyThread;
+                inst->toController.count = &inst->mToCtrl; inst->toController.off = &inst->mOff; inst->toController.dropped = &inst->mDrop;
+                inst->toProcessor.mainId = tid; inst->toProcessor.anyThread = &inst->opt.messagesAnyThread;
+                inst->toProcessor.count = &inst->mToProc; inst->toProcessor.off = &inst->mOff; inst->toProcessor.dropped = &inst->mDrop;
+                inst->toController.src = inst->compCP; inst->toController.dst = inst->ctrlCP;
+                inst->toProcessor.src = inst->ctrlCP; inst->toProcessor.dst = inst->compCP;
+                tresult c1 = inst->compCP->connect(&inst->toController);
+                tresult c2 = inst->ctrlCP->connect(&inst->toProcessor);
+                inst->connected = true;
+                snprintf(b, sizeof b, "processor and controller connected (IConnectionPoint): processor = %s, controller = %s; messages from other threads: %s", rc(c1), rc(c2),
+                         o.messagesAnyThread ? "delivered (as JUCE's host)" : "dropped (as the SDK's proxy in 0.4)");
+                L.push_back(b);
+            } else L.push_back(std::string("processor and controller NOT connected: IConnectionPoint on the processor ") + (inst->compCP ? "yes" : "no") + ", on the controller " + (inst->ctrlCP ? "yes" : "no"));
+        }
+        // give the controller the processor's state, so both start from the same patch (JUCE: synchroniseStates)
+        if (inst->controller && o.syncControllerState) {
+            MemoryStream st;
+            tresult g = inst->component->getState(&st);
+            inst->stateBytes = (int)st.getSize();
+            if (g == kResultOk) {
+                st.seek(0, IBStream::kIBSeekSet, nullptr);
+                tresult sr2 = inst->controller->setComponentState(&st);
+                inst->syncRes = (int)sr2;
+                snprintf(b, sizeof b, "controller->setComponentState(the processor's state, %d bytes) = %s", inst->stateBytes, rc(sr2)); L.push_back(b);
+            } else { snprintf(b, sizeof b, "component->getState = %s, so the controller was not given it", rc(g)); L.push_back(b); }
+        } else if (inst->controller) L.push_back("controller->setComponentState: not called (as in 0.4)");
+        int np = inst->controller ? inst->controller->getParameterCount() : 0;
+        snprintf(b, sizeof b, "parameters: %d; messages so far: %d to the processor, %d to the controller, %d from other threads, %d dropped", np, inst->mToProc.load(), inst->mToCtrl.load(), inst->mOff.load(), inst->mDrop.load());
+        L.push_back(b);
         return inst;
     }
 };
