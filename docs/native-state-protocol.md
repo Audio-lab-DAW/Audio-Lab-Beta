@@ -42,7 +42,7 @@ A path is a list of object keys (strings) and array indices (numbers): `["tracks
 
 **Every operation carries the old value.** So every edit is its own undo (the inverse of `set` swaps `v` and `w`, `ins` and `rm` swap, `del` becomes `set`), and the engine checks the old value before it changes anything: a page and an engine that drifted apart find out at the first edit that touches the difference, not later in the sound.
 
-**The difference of two projects** (`diff` in `doc-sync.js`): objects key by key; arrays keep the elements that match at both ends (equal, or objects with the same `id`: tracks, clips, devices, sections all have one) and compare those inside, then compare a same-sized middle element by element (notes moved in place) or remove and insert it. Any result is correct, the tests prove that; these rules keep the usual edits small: moving a clip is one `set` of 70 bytes, adding a note one `ins`.
+**The difference of two projects** (`diff` in `doc-sync.js`): objects key by key; arrays keep the elements that match at both ends (equal, or objects with the same `id`: tracks, clips, devices, sections all have one) and compare those inside. In the middle: objects with ids keep the longest run that is still in order, and only the others are removed and inserted (moving one of Fractals' 30 tracks to the end is a 0.7 KB edit, not the 513 KB of all tracks); a same-sized middle without ids is compared element by element (notes changed in place); anything else is removed and inserted. Any result is correct, the tests prove that (also on 3,000 shuffled arrays); these rules keep the usual edits small: moving a clip is one `set` of about 70 bytes, adding a note one `ins`.
 
 ## 4. Numbers, order, and what happens when something goes wrong
 
@@ -57,7 +57,7 @@ A path is a list of object keys (strings) and array indices (numbers): `["tracks
 - **Steps.** The app's `pushUndo()` opens a step (`beginStep`); every edit until the next one belongs to it (a knob drag sends many edits, one step). The engine undoes and redoes whole steps.
 - **Until N4 the app's own undo stays** (80 snapshots, restore on undo): the restore is just another change, sent as a diff. The tests prove both ways: the app's undo (phase A) and the engine's undo sent back to the page (phase B).
 - **From N4 the engine's undo** replaces the snapshots: `doc.undo` answers with the operations it applied, the page applies them to `S` (`remote`). In the tests every engine undo gave exactly the state before its step, and undoing all of them gave the song as loaded, bit for bit.
-- **Size.** The history keeps operations, not snapshots. After 800 random edits of Fractals (including whole tracks added and deleted) it held 42 MB; the limit is 64 MB, oldest steps dropped first. Snapshots of the same history would be 80 x 514 KB for only 80 steps.
+- **Size.** The history keeps operations, not snapshots. After about 800 random edits (including whole tracks added and deleted) it holds 8 to 27 MB per song (62 MB before moved tracks were made small); the limit is 64 MB, and the oldest **whole steps** are dropped first (half a step undone would be a state the app never had: the sanitizer run found the first version cutting steps in half, and the test now checks that undoing everything reaches the oldest step still kept). The app's 80 snapshots of Fractals are 41 MB for 80 steps only. Keeping the history as compact text instead of parsed values would make it several times smaller; not needed yet.
 
 ## 6. A song that is half web and half native (stage 3)
 
@@ -78,7 +78,7 @@ Measured: Fractals 517 KB in 23 ms including the flush to disk, the Psytrance de
 | `JSON.stringify(S)`, which the app already does at every `pushUndo` | 3.4 ms |
 | a commit when nothing changed (copy and compare) | about 10 ms in Node 22 |
 | the hash in the page / in the engine | 10 ms / 2.4 ms |
-| an edit on the wire, average over 850 random edits | 0.5 KB (moving a clip: 70 bytes) |
+| an edit on the wire, over about 980 random edits per song | median 176 to 179 bytes, 90 % under 1.3 to 1.6 KB, mean 1.0 to 2.4 KB; the largest carry whole tracks added or deleted (203 KB in Fractals) |
 | applying an edit in the engine | a few microseconds |
 | the whole project (`doc.load`) | 514 KB |
 
@@ -102,7 +102,7 @@ Four small places in `index.html`, behind the "Native output" switch:
 
 ## 11. What is proven, and what is not
 
-Proven on Linux (this machine; CI on every push from now on, and on the Mac job when it gets a machine): `aldoc selftest` (21 checks, also under AddressSanitizer and UndefinedBehaviorSanitizer) and `doc_sync_test.js` on Fractals, the Psytrance demo and Shrine Legion, 1,000 steps each:
+Proven on Linux (this machine; CI on every push from now on, and on the Mac job when it gets a machine): `aldoc selftest` (22 checks, also under AddressSanitizer and UndefinedBehaviorSanitizer); the diff alone on 3,000 arrays moved, reversed, shuffled, filtered and changed, with and without ids (phase F); and `doc_sync_test.js` on Fractals, the Psytrance demo and Shrine Legion, 1,000 steps each:
 - **A**, the page owns: about 850 random edits of 34 kinds (clips moved, dragged, resized, duplicated, deleted, reordered; notes added, removed, moved and sorted; velocities; volume drags; pans; mutes; device settings, devices added, removed and reordered; instruments; tracks added, deleted, moved; names with quotes, line breaks, control characters, accents, Japanese, emoji and unpaired surrogates; tempo; sections; automation points; keyed automation; keys that look like numbers and `__proto__`; keys added and removed; values changing type; awkward numbers: 5e-324, 1e21, -0, 2^53+2, NaN and Infinity, which JSON turns into null; fields set to undefined or a function; a change and its change back) and about 100 undos and redos by the app's own snapshot restore: **the engine's hash equal to the page's after every step**, the whole JSON equal every 100 steps, the page's own diff and apply agree.
 - **B**, the engine owns undo: about 210 engine undos and 15 redos among the edits: every undo gives exactly the state before its step; undoing everything gives the song as loaded.
 - **C**, 200 times the engine's change overtook the page's edit: refused as stale, rebased, equal every time.
@@ -117,3 +117,4 @@ Not proven yet: the page side inside the real app (N2c), the cost in Chromium an
 - The app's undo stays until N4 rather than moving to the engine with N2c: N2c is about sound, and moving undo then would change how undo feels before anything else is native.
 - 64 MB of undo history in the engine, oldest dropped first; five older copies of a save.
 - Plug-in blobs move into a side store by content hash when they pass 64 KB.
+- The page commits at most once per screen frame; the engine autosaves its document 2 s after the last edit and every 2 minutes while editing goes on; the page checks the hash after 2 s without changes and before every save.

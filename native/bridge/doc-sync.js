@@ -133,8 +133,36 @@
     // the middle first, from the end of a's middle so that the indices before it stay valid
     let same = ma === mb && ma > 0 && ma <= 64;
     for (let i = s; same && i < s + ma; i++) if (idOf(a[i]) !== undefined) same = false;
+    let ids = ma > 0 && mb > 0;
+    for (let i = s; ids && i < s + ma; i++) if (idOf(a[i]) === undefined) ids = false;
+    for (let i = s; ids && i < s + mb; i++) if (idOf(b[i]) === undefined) ids = false;
     if (same) {
       for (let i = 0; i < ma; i++) { path[d] = s + i; diffAt(a[s + i], b[s + i], path, out); }
+    } else if (ids) {
+      // objects with ids (tracks, clips, devices): remove the ones gone, move the ones that moved, insert the new
+      // ones, then compare the kept ones inside. A moved track costs its value twice, not the whole list.
+      // the ones that stay where they are: the longest run of b's order already in a's order (patience sorting)
+      const posA = new Map(); for (let i = s; i < s + ma; i++) if (!posA.has(idOf(a[i]))) posA.set(idOf(a[i]), i - s);
+      const seq = []; for (let i = s; i < s + mb; i++) { const q = posA.get(idOf(b[i])); seq.push(q === undefined ? -1 : q); }
+      const tails = [], tailAt = [], prev = new Array(seq.length).fill(-1);
+      for (let i = 0; i < seq.length; i++) {
+        if (seq[i] < 0) continue;
+        let lo = 0, hi = tails.length;
+        while (lo < hi) { const mid = (lo + hi) >> 1; if (tails[mid] < seq[i]) lo = mid + 1; else hi = mid; }
+        tails[lo] = seq[i]; tailAt[lo] = i; prev[i] = lo ? tailAt[lo - 1] : -1;
+      }
+      const stayB = new Set(), stayA = new Set();
+      for (let i = tails.length ? tailAt[tails.length - 1] : -1; i >= 0; i = prev[i]) { stayB.add(i); stayA.add(seq[i]); }
+      // remove everything in a's middle that does not stay (gone or moved), from the end
+      for (let k = ma - 1; k >= 0; k--) if (!stayA.has(k)) { path[d] = s + k; out.push({ o: 'rm', p: path.slice(), w: canon(a[s + k]) }); }
+      // insert in b's order whatever does not stay (new or moved); the ones that stay are already in place
+      const work = []; for (let k = 0; k < ma; k++) if (stayA.has(k)) work.push(a[s + k]);
+      const kept = [];
+      for (let i = 0; i < mb; i++) {
+        if (stayB.has(i)) { kept.push(i); continue; }
+        path[d] = s + i; out.push({ o: 'ins', p: path.slice(), v: canon(b[s + i]) }); work.splice(i, 0, b[s + i]);
+      }
+      for (const i of kept) { path[d] = s + i; diffAt(work[i], b[s + i], path, out); }
     } else {
       for (let i = s + ma - 1; i >= s; i--) { path[d] = i; out.push({ o: 'rm', p: path.slice(), w: canon(a[i]) }); }
       for (let i = 0; i < mb; i++) { path[d] = s + i; out.push({ o: 'ins', p: path.slice(), v: canon(b[s + i]) }); }

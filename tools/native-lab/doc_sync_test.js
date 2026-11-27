@@ -199,9 +199,11 @@ async function phaseB(name, S0, eng) {
   let back = 0;
   while (true) { const r2 = await eng.call({ cmd: 'doc.undo', rq: 'all' }); if (!r2.ops.length) break; pg.deliver(r2); back++; }
   await pg.flush();
-  const atStart = D.hashDoc(D.canon(pg.S)) === D.hashDoc(D.canon(S0));
+  // the size limit drops whole steps from the oldest end; then undoing everything reaches the state after them
+  const target = stats.droppedSteps ? hist[stats.droppedSteps] : D.hashDoc(D.canon(S0));
+  const atStart = D.hashDoc(D.canon(pg.S)) === target;
   check(bad === 0 && (await pg.verify('', true)), `B ${name}: ${STEPS} steps with ${undos} undos and ${redos} redos done by the engine and sent to the page: every undo gives exactly the state before its step, page and engine equal throughout`);
-  check(atStart, `B ${name}: ${back} undo steps in the engine take the project back to the song as loaded, bit for bit (history ${(stats.historyBytes / 1024).toFixed(0)} KB)`);
+  check(atStart, `B ${name}: ${back} undo steps in the engine take the project back to ${stats.droppedSteps ? 'the oldest step still kept (' + stats.droppedSteps + ' oldest dropped by the 64 MB limit, whole steps)' : 'the song as loaded'}, bit for bit (history ${(stats.historyBytes / 1024).toFixed(0)} KB)`);
 }
 
 async function phaseC(name, S0, eng) {
@@ -294,6 +296,33 @@ async function phaseE(name, S0) {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ---------------------------------------------------------------- the diff alone, on arrays shuffled every way
+function phaseF() {
+  let ok = 0, n = 0, moveBytes = 0;
+  const mk = k => ({ id: 'i' + k, v: k, big: 'x'.repeat(50) });
+  for (let t = 0; t < 3000; t++) {
+    const a = Array.from({ length: ri(12) }, (_, k) => rnd() < .15 ? { v: k } : mk(k));
+    let b = D.canon(a);
+    const kind = ri(6);
+    if (kind === 0 && b.length) { const [x] = b.splice(ri(b.length), 1); b.splice(ri(b.length + 1), 0, x); }   // one moved
+    else if (kind === 1) b.reverse();
+    else if (kind === 2) b.sort(() => rnd() - .5);
+    else if (kind === 3) { b = b.filter(() => rnd() < .7); b.splice(ri(b.length + 1), 0, mk(100 + t)); }
+    else if (kind === 4) for (const x of b) if (rnd() < .3) x.v = -1;
+    else { b.sort(() => rnd() - .5); for (const x of b) if (rnd() < .3) x.v = 7; b.push(mk(200 + t)); }
+    const ops = D.diff(a, b);
+    n++;
+    try { const r = D.applyOps(D.canon(a), ops, true); const back = D.applyOps(D.canon(r), D.inverseAll(ops), true); if (D.equal(r, b) && D.equal(back, a)) ok++; } catch (e) {}
+  }
+  // one track of 30 moved to the end of Fractals: the edit carries that track twice, not the list
+  const S = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(__dirname, 'ref', 'doc', 'fractals.json.gz'))).toString('utf8'));
+  const S2 = D.canon(S); S2.tracks.push(S2.tracks.shift());
+  moveBytes = JSON.stringify(D.diff(S, S2)).length;
+  const trackBytes = JSON.stringify(S.tracks[0]).length;
+  check(ok === n, `F: the diff on ${n} arrays (moved, reversed, shuffled, filtered, changed, mixed with and without ids): applying it gives the new array and its inverse the old one, every time`);
+  check(moveBytes < 3 * trackBytes + 200, `F: moving one Fractals track to the end is an edit of ${(moveBytes / 1024).toFixed(1)} KB (the track is ${(trackBytes / 1024).toFixed(1)} KB, all tracks ${(JSON.stringify(S.tracks).length / 1024).toFixed(0)} KB)`);
+}
+
 // ---------------------------------------------------------------- timing on the biggest song
 async function timing(S0) {
   const S = D.canon(S0), N = 50;
@@ -316,6 +345,7 @@ async function timing(S0) {
 (async () => {
   const songs = ['fractals', 'psytrance', 'shrine'].map(n => [n, JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(__dirname, 'ref', 'doc', n + '.json.gz'))).toString('utf8'))]);
   const results = [];
+  phaseF();
   for (const [name, S] of songs) {
     const eng = new Engine();
     results.push(await phaseA(name, S, eng));

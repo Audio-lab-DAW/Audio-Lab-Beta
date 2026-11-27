@@ -179,8 +179,8 @@ jobs:
       - name: Build every native target without the plug-in SDK (arm64)
         run: |
           cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
-          cmake --build build -j 4 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true
-          file build/alengine build/alrender build/almix build/alringstress | tee out/file.txt
+          cmake --build build -j 4 -- -k 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true   # -k: one failing target does not hide the others
+          file build/alengine build/alrender build/almix build/alringstress build/aldoc | tee out/file.txt
       - name: alengine selftest, the ring, the mixer
         run: |
           build/alengine selftest | tee out/selftest.json

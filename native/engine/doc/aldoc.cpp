@@ -82,6 +82,19 @@ static int selftest() {
     for (auto& j : bj.a) { Op op; readOp(j, op, err); bad.push_back(op); }
     check(!doc.edit(doc.seq, "2", "bad", bad, err) && hashOf(doc.root) == hb, "a wrong old value refuses the whole edit, nothing changed");
     check(!doc.edit(doc.seq - 1, "2", "stale", {}, err) && err == "stale", "an edit on an old seq is refused as stale");
+    // the history limit drops whole steps, oldest first
+    {
+        Document h; Val r0; parse(R"({"v":0})", r0, err); h.load(r0);
+        for (int k = 1; k <= 6; k++) {                     // three steps of two edits each
+            Op op; op.kind = Op::Set; Seg g; g.k = "v"; op.p.push_back(g); op.hasV = op.hasW = true; op.v = Val::num(k); op.w = Val::num(k - 1);
+            h.edit(h.seq, std::to_string((k + 1) / 2), "", {op}, err);
+        }
+        h.historyLimit = h.historyBytes * 2 / 3;            // room for two steps: the oldest whole step goes
+        h.trim();
+        std::string lb; int undone = 0;
+        while (!h.undoStep(lb).empty()) undone++;
+        check(h.droppedSteps == 1 && undone == 2 && h.root.get("v")->n == 2, "the size limit drops the oldest whole step, never half of one");
+    }
     // saving: atomic, rotating, a crash before the rename keeps the old file
     char tmpl[] = "/tmp/aldocXXXXXX"; char* dir = mkdtemp(tmpl);
     std::string path = std::string(dir) + "/song.aldoc";
@@ -165,7 +178,7 @@ int main(int argc, char** argv) {
             }
         } else if (cmd == "doc.stats") {
             o += ",\"seq\":" + std::to_string(doc.seq) + ",\"undo\":" + std::to_string(doc.undo.size()) + ",\"redo\":" + std::to_string(doc.redo.size()) +
-                 ",\"historyBytes\":" + std::to_string(doc.historyBytes);
+                 ",\"historyBytes\":" + std::to_string(doc.historyBytes) + ",\"droppedSteps\":" + std::to_string(doc.droppedSteps);
         } else {
             o += ",\"error\":\"unknown command\"";
         }

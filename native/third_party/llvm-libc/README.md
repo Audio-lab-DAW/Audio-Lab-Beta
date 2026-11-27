@@ -14,3 +14,10 @@ the same functions so that its devices give the browser's bits on every system.
   so the native engine does the same (`js::pow` in `native/engine/core/jsmath.h`).
 - Licence: Apache License 2.0 with LLVM Exceptions (`LICENSE.TXT`). Attribution belongs in the app's notices
   when the native engine ships (see `docs/research-native-qa-legal.md`, the licence audit).
+
+- Apple Silicon and other 64-bit ARM (task NB-R7, 27 November 2026): the first macOS build machine (native-ci run
+  46052838752) found that the 143 files were gathered on an Intel machine and missed the ARM branches
+  (`aarch64/nearest_integer.h`, the Darwin and Linux floating-point environments, the FMA range reduction and the small
+  `memcpy` they use). 13 files added from the same commit, paths unchanged, found by compiling for `aarch64` until
+  nothing was missing. The ARM build uses fused multiply-add inside these functions; they are correctly rounded, so the
+  results are the same bits (the Mac job's maths probe is the check).

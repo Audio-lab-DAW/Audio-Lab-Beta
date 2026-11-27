@@ -429,8 +429,17 @@ struct Document {
         trim();
         return true;
     }
+    uint64_t droppedSteps = 0;                    // whole steps dropped from the oldest end by the size limit
     void trim() {
-        while (historyBytes > historyLimit && undo.size() > 1) { historyBytes -= undo.front().bytes; undo.erase(undo.begin()); }
+        // whole steps only: half a step undone would leave a state the app never had
+        while (historyBytes > historyLimit && undo.size() > 1) {
+            std::string step = undo.front().step;
+            size_t n = 0;
+            while (n < undo.size() - 1 && (n == 0 || (!step.empty() && undo[n].step == step))) n++;
+            for (size_t k = 0; k < n; k++) historyBytes -= undo[k].bytes;
+            undo.erase(undo.begin(), undo.begin() + (ptrdiff_t)n);
+            droppedSteps++;
+        }
     }
     // undo the newest step: returns the operations applied (to send to the page), empty if nothing to undo
     std::vector<Op> undoStep(std::string& label) {
