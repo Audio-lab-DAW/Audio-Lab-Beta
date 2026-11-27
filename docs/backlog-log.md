@@ -3590,3 +3590,9 @@ Nearest step; a tie (11.5, 12.5, 14) goes to the smaller step, so that less text
 ### Release
 - v0.226: commit ebaaada on main (`index.html` was not touched by other sessions during the run). App copy synced (`node desktop/scripts/sync-app.js`), update note written ("One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown."), no desktop build. `taskSP1.py`: 147 of 149 while other tests ran beside it (two timing checks), 149 of 149 run alone.
 - Edit script `tools/edits/taskD3.py` with `taskD3_css.txt` and `taskD3_pins.json`; tests `tools/ui-tests/taskD3.py`, `taskD3_census.js`, `taskD3_compare.py`, `taskD3_probe.js`, `taskD3_pins.py`.
+
+
+## 27 November 2026: task HR1 (contributors removed from the history)
+- All 7 branches rewritten with git filter-repo and pushed: every commit is now by `Audio-lab-DAW <360039460+Audio-lab-DAW@users.noreply.github.com>`, all `Co-Authored-By:`, `Claude-Session:` and `Generated with` lines removed, trees and dates unchanged. main: 22619e7 -> ed0ddb4. Full record: project doc `claude/audiolab-history-rewrite.md`.
+- Not done: the 105 release tags still point at the old commits (this session was not allowed to force-push tags). The commands for the owner are in the project doc. The Contributors box is built from the default branch, so it should clear without them; GitHub caches it for about a day.
+- `CLAUDE.md` added with the commit identity rule (added by the scheduling chat after HR1 stopped at the tags).
