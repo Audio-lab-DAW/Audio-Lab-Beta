@@ -219,6 +219,17 @@ What the proxy must contain in the real app (keep it this small): the track lane
 
 Caveat: one run, on a test page, in Chrome 157; the app runs in Electron's Chromium 156. The first real check is glass step 1 in the app on this Mac.
 
+### 3.5 The Light level also uses the engine (27 Nov)
+
+The user saw a slight flicker (shimmer, like aliasing) in the background of the **Blur** mode on the bench while the arrangement scrolled, and none in the GL engine. Blur mode is Chromium's `backdrop-filter: blur()`, which blurs a reduced copy with a cheap filter; moving sharp edges shimmer through it. It cannot be tuned from the page.
+
+So the three levels become:
+- **Glass**: the engine with lens (default Wide 45, blur Light).
+- **Light**: the same engine with the lens off and a cheaper backdrop (smaller, refreshed less often, for example 30 per second). No `backdrop-filter`.
+- **Solid**: no glass. Also the fallback when WebGL2 is not available.
+
+`backdrop-filter` is then used nowhere in the app. On the bench, Light corresponds to the GL engine with Lens set to off.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
