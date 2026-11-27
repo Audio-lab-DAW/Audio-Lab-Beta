@@ -138,3 +138,16 @@ The same rules apply where the lines are shared: `drawPR` gets the same ladder a
 10. Version bump and the usual release routine; screenshots at 2194 × 1139 @1.75x at the three zooms before and after.
 
 Not decided yet (for the user): which design and rows; whether L2's centre ticks should hide under clips (today's clips are see-through, so ticks show through faintly).
+
+## The user's picks (27 November 2026, 17:44 Brussels)
+
+`L5 · R3 P1 S0 T2 Z2`
+
+- **L5** bar bands with hairline beats (no bar lines; bands cross-fade between 1, 4 and 16 bars while zooming).
+- **R3** dual-scale ruler (bars on the top edge, min:sec in 1-2-5 steps on the bottom edge).
+- **P1** solid crisp playhead with a cap.
+- **S0** selection and loop edges stay as today.
+- **T2** engraved track separators.
+- **Z2** subdivisions fade over one octave of spacing.
+
+As section 1 proposes, these replace design round 2's AG2 grid detail and the line part of AP2 and the piano roll's grid: task DS builds GL1 together with its step DS-A1 (one step, so the grid is built once), and the playhead line P1 goes into that same step because it does not need MD1; DS-A2 keeps only the playhead flag with position and time from AP2. Line weights and colours come from the LOOK tokens (task LK, DR3 W1 hairlines).
