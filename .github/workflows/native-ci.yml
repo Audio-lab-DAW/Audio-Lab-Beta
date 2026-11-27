@@ -58,7 +58,7 @@ jobs:
         run: |
           cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
           cmake --build build -j 4 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true
-          test -x build/alengine && test -x build/alrender && test -x build/almix && test -x build/alringstress && test -x build/aldoc
+          test -x build/alengine && test -x build/alrender && test -x build/almix && test -x build/alringstress && test -x build/aldoc && test -x build/albus
       # shift-base is left out: the vendored LLVM libc shifts negative values (defined behaviour from C++20, and in
       # every compiler we use), see native/third_party/llvm-libc/src/__support/math/log_range_reduction.h
       - name: AddressSanitizer + UndefinedBehaviorSanitizer build
@@ -86,6 +86,11 @@ jobs:
           python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix | tail -1 | tee out/mix.txt
           python3 tools/native-lab/run_mix.py "$PWD/build-asan/almix" out/mix-asan | tail -1 | tee out/mix-asan.txt
           grep -q 'ALL IDENTICAL' out/mix.txt && grep -q 'ALL IDENTICAL' out/mix-asan.txt
+      - name: "The mixer's buses against the web engine (task NB-N3d: groups, sends, returns, delay compensation, the master's devices; Release and sanitizers)"
+        run: |
+          python3 tools/native-lab/run_bus.py build/albus out/bus | tail -1 | tee out/bus.txt
+          python3 tools/native-lab/run_bus.py build-asan/albus out/bus-asan | tail -1 | tee out/bus-asan.txt
+          grep -q 'ALL IDENTICAL' out/bus.txt && grep -q 'ALL IDENTICAL' out/bus-asan.txt
       - name: 'The project document and its edit protocol (task NB-R7): 1,000 random edits and undos per song, page and engine equal'
         run: |
           build/aldoc selftest | tee out/aldoc-selftest.txt
@@ -116,7 +121,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/bus.txt out/bus-asan.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -180,7 +185,7 @@ jobs:
         run: |
           cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
           cmake --build build -j 4 -- -k 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true   # -k: one failing target does not hide the others
-          file build/alengine build/alrender build/almix build/alringstress build/aldoc | tee out/file.txt
+          file build/alengine build/alrender build/almix build/alringstress build/aldoc build/albus | tee out/file.txt
       - name: alengine selftest, the ring, the mixer
         run: |
           build/alengine selftest | tee out/selftest.json
@@ -191,6 +196,26 @@ jobs:
           build/aldoc selftest | tail -1 | tee out/aldoc-selftest.txt
           node tools/native-lab/doc_sync_test.js build/aldoc --steps 300 | tail -8 | tee out/doc-sync.txt
           grep -q '^PASS' out/doc-sync.txt
+      - name: "The mixer's buses against the references made on Linux (task NB-N3d; the Mac's own references below decide)"
+        continue-on-error: true
+        run: python3 tools/native-lab/run_bus.py build/albus out/bus-linuxref | tee out/bus-linuxref.txt
+      - name: "Playwright and Chromium on the Mac (for the Mac's own web references, review D3)"
+        id: macchrome
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet --break-system-packages playwright numpy > out/pip.txt 2>&1 || python3 -m pip install --quiet --user playwright numpy >> out/pip.txt 2>&1
+          python3 -m playwright install chromium > out/playwright.txt 2>&1 || { tail -20 out/playwright.txt; exit 1; }
+      - name: "Every ported device and the mixer's buses against the web engine on the Mac, bit for bit (tasks NB-N3a, N3c, N3d)"
+        if: steps.macchrome.outcome == 'success'
+        run: |
+          T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
+          python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
+          mkdir -p out/core/native
+          build/alrender cases out/core/cases.json out/core/in.wav out/core/native 128 > out/core/native.jsonl
+          python3 tools/native-lab/compare_core.py out/core | tail -3 | tee out/core-compare.txt
+          python3 tools/native-lab/make_bus_ref.py out/busref | tail -3
+          python3 tools/native-lab/run_bus.py build/albus out/bus out/busref | tee out/bus.txt
+          grep -q 'ALL IDENTICAL' out/bus.txt
       - name: ThreadSanitizer (clang) on the ring
         run: |
           clang++ -std=c++17 -O1 -g -fsanitize=thread -ffp-contract=off -fno-fast-math native/tests/ring_stress.cpp -o build/ringstress-tsan
@@ -200,7 +225,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/doc-sync.txt out/bridge-unit.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/core-compare.txt out/bus.txt out/bus-linuxref.txt out/doc-sync.txt out/bridge-unit.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

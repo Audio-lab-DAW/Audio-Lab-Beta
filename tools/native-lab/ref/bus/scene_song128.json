@@ -1,0 +1,192 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 128,
+ "master": 0.75,
+ "masterFx": [
+  {
+   "type": "limit",
+   "p": {
+    "gain": 3,
+    "ceil": -0.3,
+    "rel": 150,
+    "look": 3,
+    "out": 0,
+    "style": "transparent",
+    "tp": true
+   },
+   "lat": 144
+  }
+ ],
+ "nodes": [
+  {
+   "id": "drums",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "trans",
+     "p": {
+      "attack": 60,
+      "sustain": -10,
+      "speed": 1,
+      "sens": 50,
+      "out": 0
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "k",
+   "kind": "audio",
+   "in": "in_mono_a.wav",
+   "vol": 1.0,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "gate",
+     "p": {
+      "thr": -34,
+      "hyst": 5,
+      "floor": -80,
+      "att": 0.1,
+      "hold": 25,
+      "rel": 90,
+      "look": 0,
+      "hpf": 40,
+      "lpf": 5000,
+      "ratio": 2,
+      "mode": "gate",
+      "listen": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "h",
+   "kind": "audio",
+   "in": "in_st_c.wav",
+   "vol": 0.5,
+   "pan": 0.3,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "music",
+   "kind": "group",
+   "in": null,
+   "vol": 0.8,
+   "pan": -0.05,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "bs",
+   "kind": "audio",
+   "in": "in_mono_b.wav",
+   "vol": 0.9,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "ld",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.7,
+   "pan": -0.35,
+   "fx": [
+    {
+     "type": "chorus",
+     "p": {
+      "mode": "chorus",
+      "rate": 0.6,
+      "depth": 45,
+      "delay": 10,
+      "fb": 0,
+      "width": 85,
+      "mix": 50,
+      "lowcut": 20,
+      "highcut": 20000,
+      "shape": "sine"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "rv",
+   "kind": "return",
+   "in": null,
+   "vol": 0.6,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "imager",
+     "p": {
+      "x1": 120,
+      "x2": 1000,
+      "x3": 6000,
+      "w1": 100,
+      "w2": 110,
+      "w3": 130,
+      "w4": 150,
+      "mg": 0,
+      "sg": 0,
+      "out": 0,
+      "bmono": false,
+      "solo": 0
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "drums"
+   },
+   {
+    "from": "music"
+   },
+   {
+    "from": "rv"
+   }
+  ],
+  "drums": [
+   {
+    "from": "k"
+   },
+   {
+    "from": "h"
+   }
+  ],
+  "rv": [
+   {
+    "from": "h",
+    "send": 0.2
+   },
+   {
+    "from": "ld",
+    "send": 0.4
+   }
+  ],
+  "music": [
+   {
+    "from": "bs"
+   },
+   {
+    "from": "ld"
+   }
+  ]
+ }
+}

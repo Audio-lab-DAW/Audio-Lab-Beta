@@ -1,0 +1,68 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 1.0,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.8,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "r",
+   "kind": "return",
+   "in": null,
+   "vol": 0.8,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "chorus",
+     "p": {
+      "mode": "chorus",
+      "rate": 0.6,
+      "depth": 45,
+      "delay": 10,
+      "fb": 0,
+      "width": 85,
+      "mix": 50,
+      "lowcut": 20,
+      "highcut": 20000,
+      "shape": "sine"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g"
+   },
+   {
+    "from": "r"
+   }
+  ],
+  "g": [
+   {
+    "from": "a"
+   }
+  ]
+ }
+}

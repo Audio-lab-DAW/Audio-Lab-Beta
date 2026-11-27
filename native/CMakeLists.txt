@@ -64,6 +64,11 @@ add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
 target_link_libraries(alrender_fused PRIVATE al_jsmath)
 # ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
+# the mixer's buses with the core's devices: groups, sends, returns, delay compensation, the master's chain (task NB-N3d)
+add_executable(albus engine/mix/albus.cpp engine/core/devices.cpp)
+target_compile_options(albus PRIVATE -ffp-contract=off)
+target_link_libraries(albus PRIVATE al_jsmath)
+
 # the project document and its edit protocol (task NB-R7): the state the engine will own
 add_executable(aldoc engine/doc/aldoc.cpp)
 

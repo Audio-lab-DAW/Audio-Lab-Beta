@@ -1,0 +1,98 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 1.0,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.8,
+   "pan": -0.1,
+   "fx": [
+    {
+     "type": "chorus",
+     "p": {
+      "mode": "chorus",
+      "rate": 0.6,
+      "depth": 45,
+      "delay": 10,
+      "fb": 0,
+      "width": 85,
+      "mix": 50,
+      "lowcut": 20,
+      "highcut": 20000,
+      "shape": "sine"
+     },
+     "lat": 0
+    },
+    {
+     "type": "limit",
+     "p": {
+      "gain": 6,
+      "ceil": -0.3,
+      "rel": 90,
+      "look": 2,
+      "out": 0,
+      "style": "punchy",
+      "tp": true
+     },
+     "lat": 96
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.9,
+   "pan": 0.5,
+   "fx": [
+    {
+     "type": "crush",
+     "p": {
+      "bits": 12,
+      "rate": 2,
+      "jit": 0,
+      "dith": 0,
+      "pre": 9000,
+      "post": 12000,
+      "drive": 0,
+      "mix": 100,
+      "out": 0,
+      "shape": "round"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_mono_a.wav",
+   "vol": 0.6,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g"
+   }
+  ],
+  "g": [
+   {
+    "from": "a"
+   },
+   {
+    "from": "b"
+   }
+  ]
+ }
+}

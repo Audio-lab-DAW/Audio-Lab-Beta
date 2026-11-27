@@ -1,0 +1,25 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 1.0,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_st_d.wav",
+   "vol": 0.7,
+   "pan": -0.2,
+   "fx": [],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "b"
+   }
+  ]
+ }
+}

@@ -1,0 +1,296 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 0.7,
+ "masterFx": [
+  {
+   "type": "imager",
+   "p": {
+    "x1": 120,
+    "x2": 1000,
+    "x3": 6000,
+    "w1": 100,
+    "w2": 110,
+    "w3": 130,
+    "w4": 150,
+    "mg": 0,
+    "sg": 0,
+    "out": 0,
+    "bmono": false,
+    "solo": 0
+   },
+   "lat": 0
+  },
+  {
+   "type": "limit",
+   "p": {
+    "gain": 6,
+    "ceil": -0.3,
+    "rel": 90,
+    "look": 2,
+    "out": 0,
+    "style": "punchy",
+    "tp": true
+   },
+   "lat": 96
+  }
+ ],
+ "nodes": [
+  {
+   "id": "bus",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.05,
+   "fx": [
+    {
+     "type": "deess",
+     "p": {
+      "freq": 6500,
+      "q": 1.5,
+      "thr": -30,
+      "ratio": 4,
+      "range": 12,
+      "att": 1,
+      "rel": 60,
+      "out": 0,
+      "mode": "split",
+      "listen": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "sub",
+   "kind": "group",
+   "in": null,
+   "vol": 0.95,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "tstop",
+     "p": {
+      "fx": "tape",
+      "stop": 500,
+      "len": 0.25,
+      "bpm": 145,
+      "t0": -257.7931034482759,
+      "run": true,
+      "steps": [
+       0,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "rate": 1,
+      "hold": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "v1",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.6,
+   "pan": -0.6,
+   "fx": [
+    {
+     "type": "gate",
+     "p": {
+      "thr": -40,
+      "hyst": 6,
+      "floor": -24,
+      "att": 1,
+      "hold": 60,
+      "rel": 240,
+      "look": 0,
+      "hpf": 100,
+      "lpf": 10000,
+      "ratio": 2,
+      "mode": "expander",
+      "listen": false
+     },
+     "lat": 0
+    },
+    {
+     "type": "trans",
+     "p": {
+      "attack": 60,
+      "sustain": -10,
+      "speed": 1,
+      "sens": 50,
+      "out": 0
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 96
+  },
+  {
+   "id": "v2",
+   "kind": "audio",
+   "in": "in_st_d.wav",
+   "vol": 0.7,
+   "pan": 0.6,
+   "fx": [
+    {
+     "type": "limit",
+     "p": {
+      "gain": 6,
+      "ceil": -0.3,
+      "rel": 90,
+      "look": 2,
+      "out": 0,
+      "style": "punchy",
+      "tp": true
+     },
+     "lat": 96
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "v3",
+   "kind": "audio",
+   "in": "in_mono_b.wav",
+   "vol": 0.8,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "fshift",
+     "p": {
+      "shift": 0.4,
+      "fb": 60,
+      "mix": 60,
+      "lfoRate": 0,
+      "lfoDepth": 0,
+      "mode": "shift",
+      "dir": "up",
+      "out": 0
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 96
+  },
+  {
+   "id": "r1",
+   "kind": "return",
+   "in": null,
+   "vol": 0.5,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "chorus",
+     "p": {
+      "mode": "chorus",
+      "rate": 0.6,
+      "depth": 45,
+      "delay": 10,
+      "fb": 0,
+      "width": 85,
+      "mix": 50,
+      "lowcut": 20,
+      "highcut": 20000,
+      "shape": "sine"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "r2",
+   "kind": "return",
+   "in": null,
+   "vol": 0.4,
+   "pan": 0.3,
+   "fx": [
+    {
+     "type": "vocoder",
+     "p": {
+      "bands": 16,
+      "pitch": 45,
+      "chord": [],
+      "detune": 8,
+      "oct": 0,
+      "carrier": "saw",
+      "noise": 12,
+      "sib": 40,
+      "formant": 0,
+      "bw": 1.2,
+      "att": 3,
+      "rel": 40,
+      "mix": 100,
+      "out": 12
+     },
+     "lat": 214
+    }
+   ],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "bus"
+   },
+   {
+    "from": "r1"
+   },
+   {
+    "from": "r2"
+   }
+  ],
+  "bus": [
+   {
+    "from": "sub"
+   },
+   {
+    "from": "v3"
+   }
+  ],
+  "sub": [
+   {
+    "from": "v1"
+   },
+   {
+    "from": "v2"
+   }
+  ],
+  "r1": [
+   {
+    "from": "v1",
+    "send": 0.3
+   },
+   {
+    "from": "v2",
+    "send": 0.25
+   }
+  ],
+  "r2": [
+   {
+    "from": "v1",
+    "send": 0.15
+   }
+  ]
+ }
+}

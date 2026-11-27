@@ -1,0 +1,51 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 0.8,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.2,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.7,
+   "pan": -0.4,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_st_b.wav",
+   "vol": 1.1,
+   "pan": 0.3,
+   "fx": [],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g"
+   }
+  ],
+  "g": [
+   {
+    "from": "a"
+   },
+   {
+    "from": "b"
+   }
+  ]
+ }
+}

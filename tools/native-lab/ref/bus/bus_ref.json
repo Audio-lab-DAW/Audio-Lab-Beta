@@ -1,0 +1,260 @@
+{
+ "app": "0.263",
+ "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+ "sr": 48000,
+ "frames": 24000,
+ "scenes": {
+  "group2": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "b"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "b": 0
+   },
+   "largestBus": 2,
+   "peak": 1.3336436748504639,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "groupfx": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "b"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "b": 0
+   },
+   "largestBus": 2,
+   "peak": 0.8441815376281738,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "nested": {
+   "quantum": 128,
+   "built": [
+    "g1",
+    "g2",
+    "a",
+    "b"
+   ],
+   "delays": {
+    "g1": 0,
+    "g2": 0,
+    "a": 0,
+    "b": 0
+   },
+   "largestBus": 2,
+   "peak": 0.9029207825660706,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "send": {
+   "quantum": 512,
+   "built": [
+    "a",
+    "r"
+   ],
+   "delays": {
+    "a": 0,
+    "r": 0
+   },
+   "largestBus": 2,
+   "peak": 0.7371645569801331,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "send2": {
+   "quantum": 128,
+   "built": [
+    "a",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "a": 0,
+    "b": 0,
+    "r": 0
+   },
+   "largestBus": 3,
+   "peak": 0.8783205151557922,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 12676
+  },
+  "master": {
+   "quantum": 512,
+   "built": [
+    "a",
+    "b"
+   ],
+   "delays": {
+    "a": 0,
+    "b": 0
+   },
+   "largestBus": 2,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "pdc": {
+   "quantum": 512,
+   "built": [
+    "a",
+    "b"
+   ],
+   "delays": {
+    "a": 0,
+    "b": 96
+   },
+   "largestBus": 2,
+   "peak": 1.542589783668518,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "pdcgrp": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "b"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "b": 144
+   },
+   "largestBus": 2,
+   "peak": 1.2460298538208008,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "mute": {
+   "quantum": 512,
+   "built": [
+    "a",
+    "c"
+   ],
+   "delays": {
+    "a": 0,
+    "c": 0
+   },
+   "largestBus": 2,
+   "peak": 1.1190670728683472,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "solo": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "r"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "r": 0
+   },
+   "largestBus": 2,
+   "peak": 0.5907475352287292,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "mutedgroup": {
+   "quantum": 512,
+   "built": [
+    "b"
+   ],
+   "delays": {
+    "b": 0
+   },
+   "largestBus": 1,
+   "peak": 0.7037762999534607,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "song": {
+   "quantum": 512,
+   "built": [
+    "drums",
+    "k",
+    "h",
+    "music",
+    "bs",
+    "ld",
+    "rv"
+   ],
+   "delays": {
+    "drums": 0,
+    "k": 0,
+    "h": 0,
+    "music": 0,
+    "bs": 0,
+    "ld": 0,
+    "rv": 0
+   },
+   "largestBus": 3,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 16342
+  },
+  "song128": {
+   "quantum": 128,
+   "built": [
+    "drums",
+    "k",
+    "h",
+    "music",
+    "bs",
+    "ld",
+    "rv"
+   ],
+   "delays": {
+    "drums": 0,
+    "k": 0,
+    "h": 0,
+    "music": 0,
+    "bs": 0,
+    "ld": 0,
+    "rv": 0
+   },
+   "largestBus": 3,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 11858
+  },
+  "wide": {
+   "quantum": 512,
+   "built": [
+    "bus",
+    "sub",
+    "v1",
+    "v2",
+    "v3",
+    "r1",
+    "r2"
+   ],
+   "delays": {
+    "bus": 0,
+    "sub": 0,
+    "v1": 96,
+    "v2": 0,
+    "v3": 96,
+    "r1": 0,
+    "r2": 0
+   },
+   "largestBus": 3,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 26328
+  }
+ }
+}

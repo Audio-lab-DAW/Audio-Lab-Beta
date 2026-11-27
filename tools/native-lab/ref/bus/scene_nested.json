@@ -1,0 +1,84 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 128,
+ "master": 0.9,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "g1",
+   "kind": "group",
+   "in": null,
+   "vol": 0.85,
+   "pan": 0.25,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "g2",
+   "kind": "group",
+   "in": null,
+   "vol": 1.2,
+   "pan": -0.3,
+   "fx": [
+    {
+     "type": "imager",
+     "p": {
+      "x1": 120,
+      "x2": 1000,
+      "x3": 6000,
+      "w1": 100,
+      "w2": 110,
+      "w3": 130,
+      "w4": 150,
+      "mg": 0,
+      "sg": 0,
+      "out": 0,
+      "bmono": false,
+      "solo": 0
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_c.wav",
+   "vol": 0.5,
+   "pan": 0.1,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.75,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g1"
+   }
+  ],
+  "g1": [
+   {
+    "from": "g2"
+   },
+   {
+    "from": "b"
+   }
+  ],
+  "g2": [
+   {
+    "from": "a"
+   }
+  ]
+ }
+}

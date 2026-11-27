@@ -1,0 +1,84 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 0.9,
+ "masterFx": [],
+ "nodes": [
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "gate",
+     "p": {
+      "thr": -34,
+      "hyst": 5,
+      "floor": -80,
+      "att": 0.1,
+      "hold": 25,
+      "rel": 90,
+      "look": 0,
+      "hpf": 40,
+      "lpf": 5000,
+      "ratio": 2,
+      "mode": "gate",
+      "listen": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_c.wav",
+   "vol": 0.8,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "limit",
+     "p": {
+      "gain": 3,
+      "ceil": -0.3,
+      "rel": 150,
+      "look": 3,
+      "out": 0,
+      "style": "transparent",
+      "tp": true
+     },
+     "lat": 144
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_st_b.wav",
+   "vol": 0.7,
+   "pan": 0.5,
+   "fx": [],
+   "delay": 144
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g"
+   },
+   {
+    "from": "b"
+   }
+  ],
+  "g": [
+   {
+    "from": "a"
+   }
+  ]
+ }
+}
