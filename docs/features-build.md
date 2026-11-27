@@ -66,7 +66,7 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 ### Group S: the starred cards (section 4 order of the research)
 | Step | What | Status |
 |---|---|---|
-| FT-F1 | Linked clips: chain mark, edits change every copy, Make unique, Alt-Shift-drag makes a linked copy, MIDI clips then audio clip settings, the demo's repeated clips linked; one undo step; small file. | open |
+| FT-F1 | Linked clips: chain mark, edits change every copy, Make unique, Alt-Shift-drag makes a linked copy, MIDI clips then audio clip settings, the demo's repeated clips linked; one undo step; small file. | | in progress (a lane C run started it at 16:45 UTC, 27 Nov; another run should take the next open step) |
 | FT-F2 | Arranger moves: drag a section with its clips, automation, tempo and signature changes; Alt copies; insert empty bars; delete and close the gap; one undo step; bit-identical to the same edit by hand. | open |
 | FT-F9a | Step sequencer clips, part 1: clip type with 16, 32 or 64 steps over drum pads or notes of the key; level, accent, slide, chance and ratchet per step; editor. | open |
 | FT-F9b | Step sequencer clips, part 2: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide plays legato into Acid and Psy Bass; same render as the equal notes. Push's step lane (C2b) gets these clips. | open |
