@@ -1,4 +1,4 @@
-/* AudioLab glass engine (tasks G2, G2b, G2c and G2d). Plain JS, no build step, no dependencies.
+/* AudioLab glass engine (tasks G2, G2b, G2c, G2d and G2e). Plain JS, no build step, no dependencies.
    One WebGL2 canvas. The engine draws its own backdrop on the GPU: lane backgrounds, clips as flat rectangles, the playhead,
    straight into a quarter-size target (one instanced draw call), then one dual-Kawase pyramid, then every glass surface as one quad in one shader.
    No canvas is uploaded on this path. A small (quarter-size) copy of a canvas is the fallback and the route for other sources (piano roll, device displays).
@@ -7,10 +7,11 @@
         per frame: g.setPlayhead(x) / g.setView({scrollX, zoom}) / g.updatePanel(id, {rect}); g.render(t);
         small canvas: g.setOrigin(x, y) when the canvas does not start at the top left of the space the rectangles are given in (2.1)
         corners and edges (2.2): a panel with square corners gets a square lens; a docked panel bends only along its free edges (panel option edges)
+        the real outline (2.3): the lens follows the panel's own corner radius (same centre, same radius at the edge); a square panel is radius 0
    Docs: docs/glass-engine-module.md */
 (function (root) {
   'use strict';
-  var VERSION = '2.2.0';
+  var VERSION = '2.3.0';
   /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
   var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
   /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
@@ -59,18 +60,35 @@
     fade: 'vec2 a=mix(vec2(1e5),dp,e);float f=smoothstep(0.,band/3.,abs(a.x-a.y));dv=a.x<a.y?vec2(sg.x*kf(a.x/band)*f,0.):vec2(0.,sg.y*kf(a.y/band)*f);'
   };
   CORNER.round = CORNER.square;   /* 'round' = every panel takes the rounded shape (engine 2.1's look); the program is the same, sq is never set */
+  /* THE REAL OUTLINE (2.3, the default, corner model 'outline'). ONE field for every panel; lr = the panel's own corner radius (0 = square).
+     Up to 2.2 a rounded panel's lens had a corner radius of at least the band (45 px on Wide), so inside a 20 px corner the bend turned over a 45 px arc
+     and the glass looked rounder than its outline. Now:
+       dp = distance to the nearer vertical and the nearer horizontal edge; m = how far the pixel is out from the corner's own centre (lr - dp, not below 0).
+       rv = the true rounded-rectangle field: in the corner square the bend points away from the corner centre and its depth is counted from the panel's own
+            arc (arcs with the panel's centre, radius lr at the edge, shrinking inward); beside the corner it is the plain edge.
+       kv = the square corner of 2.2 (K7): each edge bends along its own axis, the two add.
+     rv alone would pinch at the corner centre (every direction meets there) and crease along the diagonal behind it wherever the band is deeper than the
+     radius. So the field is rv AT the outline and turns into kv on the way in: all of kv at the corner centre and behind it, the change spread over the
+     radius (over band - lr when that is less). A radius of 0 leaves kv alone = 2.2's square lens, exactly. A radius of at least the band (pills, round
+     buttons) leaves rv alone = the lens of 2.1 and 2.2, exactly. In between, nothing curved reaches further in than the panel's own radius.
+     ed still switches single edges off (x belongs to the vertical edges, y to the horizontal ones). The rim light's direction (lit) is taken from the
+     panel's own corner as well, not from a larger one. One texture lookup per pixel as before; one length() and at most three square roots. */
+  var OUTLINE = 'vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l),m=max(lr-dp,0.),kv=vec2(kf(dp.x/band),kf(dp.y/band));float L=length(m);' +
+    'if(L>0.)dv=mix(m/L*kf((lr-L)/band),kv,1.-smoothstep(0.,max(min(lr,band-lr),1e-4),min(L,lr)));else dv=kv;dv*=sg*e;' +
+    'vec2 qr=rad-dp;if(rad>.5&&qr.x>0.&&qr.y>0.)lit=abs(dot(qr/length(qr)*sg,vec2(-.7071,-.7071)));';
+  CORNER.outline = OUTLINE;
   /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
      shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity; sq, ed = the lens field (above) */
   function fsGlass(model) {
-    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq;in vec2 p;out vec4 o;' + SDF + KF +
+    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;in vec2 p;out vec4 o;' + SDF + KF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.),sh=0.;' +
     'if(shd.z>0.){float ds=sd(l-vec2(0.,shd.x),hb,rad);sh=shd.z*(1.-smoothstep(-shd.y,shd.y,ds));}' +
     'if(a<=0.){if(sh<.003)discard;o=vec4(0.,0.,0.,sh*md.y);return;}' +
     'vec2 sg=vec2(l.x<0.?-1.:1.,l.y<0.?-1.:1.),dv;float lit=.7071;' +
-    'if(sq>.5){vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l);' + CORNER[model] + '}else{' +
+    (model === 'outline' ? OUTLINE : 'if(sq>.5){vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l);' + CORNER[model] + '}else{' +
     'float R=min(max(rad,band),min(hb.x,hb.y));vec2 q=abs(l)-hb+R,n;float dl;' +
     'if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}' +
-    'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}' +
+    'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}') +
     'vec3 c;if(md.x>.5){c=tint.rgb+(fract(sin(dot(floor(p),vec2(12.9898,78.233)))*43758.5453)-.5)*.022;}else{' +
     'vec2 sp=p-dv*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
     'float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,face.x)*face.y+face.z;c=mix(c,tint.rgb,tint.a);}' +
@@ -134,8 +152,8 @@
       backdropColor: o.backdropColor || [0.039, 0.039, 0.047], /* where the backdrop picture does not reach */
       face: { sat: 1.3, mul: 1, add: 0 },
       rim: { width: 1.6, base: 0.06, lit: 0.3 },
-      corners: o.corners in CORNER ? o.corners : 'square',       /* how a square panel's lens meets in the corner: 'square' (default), 'blend', 'fade', or 'round' (2.1's look) */
-      squareBelow: o.squareBelow != null ? +o.squareBelow : 8,  /* panels with a corner radius under this many px count as square */
+      corners: o.corners in CORNER ? o.corners : 'outline',      /* the lens field: 'outline' (default, 2.3: the panel's real outline), or the older ones: 'square' (2.2), 'blend', 'fade', 'round' (2.1) */
+      squareBelow: o.squareBelow != null ? +o.squareBelow : 8,  /* only for the older corner models: panels with a corner radius under this many px count as square */
       bounds: o.bounds ? rectOf(o.bounds) : null,              /* the window, for edges:'auto' (default: the canvas) */
       regionCull: o.regionCull !== false,
       allowSoftware: !!o.allowSoftware,
@@ -437,15 +455,20 @@
       return end >= a1 - T;
     }
     function edges() {
-      var i, p, e, m, sqr, round = opt.corners === 'round';
+      var i, p, e, m, sqr, round = opt.corners === 'round', outl = opt.corners === 'outline';
       for (i = 0; i < order.length; i++) {
         p = order[i]; e = p.edges != null ? p.edges : p.K.edges;
         if (round) { p.em = 15; p.sq = 0; continue; }
         if (e === 'auto') m = (closed(p, 0) ? 0 : 1) | (closed(p, 1) ? 0 : 2) | (closed(p, 2) ? 0 : 4) | (closed(p, 3) ? 0 : 8); else m = maskOf(e);
         sqr = p.corners === 'square' || (p.corners !== 'round' && p.radius < opt.squareBelow);
-        p.em = m; p.sq = sqr || m !== 15 ? 1 : 0;
+        p.em = m; p.sq = outl ? (p.corners === 'square' || (p.corners !== 'round' && !(p.radius > 0)) ? 1 : 0) : sqr || m !== 15 ? 1 : 0;
       }
       edDirty = false;
+    }
+    /* the corner radius of a panel's lens in the 'outline' model: the panel's own; corners:'square' on a panel = 0, corners:'round' = at least the band (2.1's look) */
+    function lensR(p, band) {
+      var h = Math.min(p.w, p.h) / 2, r = Math.max(0, Math.min(p.radius, h));
+      return p.corners === 'square' ? 0 : p.corners === 'round' ? Math.min(Math.max(r, band), h) : r;
     }
     function drawPanels() {
       var G = prog.g[opt.corners] || (prog.g[opt.corners] = mk(VS_QUAD, fsGlass(opt.corners))), u = G.u, hc = moreC(), st = isStatic(), ln = LENS[opt.lens], i, p, K, sh, band, amt, tA, bound = null, t, tt, tin, mg, sm, useB, m;
@@ -470,6 +493,7 @@
         sm = p.shadow != null ? +p.shadow : K.shadow; tt = Math.max(0, Math.min(1, (sh - 64) / 96)); mg = sm > 0 ? (4 + 20 * tt + 8) * D + 1 : 1;
         gl.uniform4f(u.rc, (p.x - OX) * D, (p.y - OY) * D, p.w * D, p.h * D); gl.uniform1f(u.mg, mg);
         gl.uniform1f(u.rad, Math.min(p.radius, sh / 2) * D); gl.uniform1f(u.band, band * D); gl.uniform1f(u.amt, amt * D);
+        if (u.lr) gl.uniform1f(u.lr, lensR(p, band) * D);
         gl.uniform4f(u.tint, tin[0], tin[1], tin[2], tA);
         gl.uniform4f(u.rimp, opt.rim.width * D, hc ? 0 : opt.rim.base, hc ? 0 : opt.rim.lit, hc ? 0.6 : 0);
         gl.uniform3f(u.shd, 8 * D, (4 + 20 * tt) * D, sm > 0 ? sm * (0.04 + 0.56 * tt) : 0);
@@ -650,17 +674,23 @@
       markFlatDirty: function (id) { var f = flats.get(id); if (f && f.source) f.dirty = true; },
       removeFlat: function (id) { var f = flats.get(id); if (!f) return false; if (f.tex && gl) gl.deleteTexture(f.tex); flats.delete(id); bDirty = panelsDirty = true; return true; },
 
-      /* CORNERS AND EDGES (2.2). A panel takes the square lens when its radius is under squareBelow (8 px) or it says corners:'square'; corners:'round' keeps
-         the rounded one. edges (panel option, default by kind: docked 'auto', the others 'all') says which edges bend. setCorners picks how two edges of a
-         square panel meet: 'square' (default), 'blend', 'fade', or 'round' = the rounded lens on every edge of every panel as in 2.1 (edges is then ignored). */
+      /* CORNERS AND EDGES. edges (panel option, default by kind: docked 'auto', the others 'all') says which edges bend.
+         setCorners picks the lens field. 'outline' (default, 2.3): the lens follows each panel's own corner radius, a square panel is radius 0;
+         corners:'square' on a panel gives it the square lens whatever its radius, corners:'round' a lens corner of at least the band (2.1's look).
+         The older fields, kept for comparison: 'square' (2.2: square lens for a radius under squareBelow, 8 px, or corners:'square'; rounded panels get a
+         lens corner of at least the band), 'blend', 'fade' (two other ways to join the edges of a square panel), 'round' (2.1: the rounded lens on every
+         edge of every panel, edges is ignored). */
       setCorners: function (n) { if (!(n in CORNER) || n === opt.corners) return api; opt.corners = n; panelsDirty = edDirty = true; return api; },
       /* the window in the space the rectangles are given in, for edges:'auto'. null = the canvas (right unless the canvas is smaller than the window). */
       setBounds: function (r) { opt.bounds = r ? rectOf(r) : null; panelsDirty = edDirty = true; return api; },
-      /* what a panel got: {edges: the letters of the edges that bend, square: true when it has the square lens, band: the lens width in px} */
+      /* what a panel got: {edges: the letters of the edges that bend, square: true when it has the square lens, band: the lens width in px,
+         lensRadius: the corner radius of its lens in px ('outline': the panel's own; older models: at least the band on rounded panels)} */
       panelInfo: function (id) {
         var p = panels.get(id), ln = LENS[opt.lens], m; if (!p) return null;
         if (edDirty) edges(); m = p.em;
-        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0 };
+        var bd = ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0, h = Math.min(p.w, p.h) / 2;
+        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
+          lensRadius: opt.corners === 'outline' ? lensR(p, bd) : p.sq ? 0 : Math.min(Math.max(Math.min(p.radius, h), bd), h) };
       },
       setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
       setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },

@@ -35,6 +35,16 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 #hud.min>:not(h1){display:none}
 #zoom{display:block;width:100%;height:auto;aspect-ratio:372/231;background:var(--well);border-radius:8px;image-rendering:pixelated;flex:none}
 #zbox[hidden]+p{display:none}
+#ksel,#zsel{min-width:0;max-width:100%;flex:1 1 0}
+/* the corner sheet: a still picture over the whole window, 4 shapes x 3 lens widths, new model beside the old one */
+#sheet{position:fixed;inset:0;z-index:20;background:rgba(6,7,10,.96);overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px}
+#sheet .in{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+#sheet h2{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#sheet p{margin:0;color:var(--mut);font-size:12px;max-width:100ch}
+#sheet .sc{overflow-x:auto}
+#sheet .g{display:grid;grid-template-columns:auto repeat(6,minmax(96px,1fr));gap:4px;align-items:center;font-size:11px;color:var(--mut);min-width:680px}
+#sheet .g b{color:var(--fg);font-weight:600}#sheet .g .h{text-align:center;padding:2px}
+#sheet .g canvas{display:block;width:100%;height:auto;border-radius:6px;image-rendering:pixelated;background:var(--well)}
 </style>
 
 <div id="stage">
@@ -44,7 +54,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 </div>
 <div id="hud">
   <h1>Glass engine test <button class="b" id="minb" aria-label="Fold the control card">Fold</button></h1>
-  <p>The AudioLab glass engine <span id="ver"></span> over a moving arrangement. The glass draws its own background on the graphics card (lanes, clips as flat rectangles, the playhead); the arrangement canvas is never copied. "Canvas uploads" must stay 0. Look at <b>Corners</b> (K1 to K7), then press <b>Run</b> and <b>Copy tables</b>.</p>
+  <p>The AudioLab glass engine <span id="ver"></span> over a moving arrangement. The glass draws its own background on the graphics card (lanes, clips as flat rectangles, the playhead); the arrangement canvas is never copied. "Canvas uploads" must stay 0. Look at the <b>mixer window's corners</b> and the <b>Corner sheet</b>, then press <b>Run</b> and <b>Copy tables</b>.</p>
   <div class="seg" role="group" aria-label="Glass level" id="lvl">
     <button data-v="glass" aria-pressed="true" title="Lens, quarter-size background, drawn on every frame">Glass</button>
     <button data-v="light" aria-pressed="false" title="The same engine with the lens off, a smaller background, drawn 30 times per second">Light</button>
@@ -63,9 +73,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
     <label for="blur">Blur</label><select id="blur"><option value="light" selected>light</option><option value="regular">regular</option><option value="heavy">heavy</option></select></div>
   <div class="rowx"><label for="face">Face</label><select id="face"><option value="bench" selected>as in the Glass Bench</option><option value="apple">Apple's numbers (0.125 / 1.125)</option></select></div>
   <div class="rowx"><label for="ksel">Corners</label><select id="ksel"></select></div>
-  <div class="rowx"><label><input type="checkbox" id="zon" checked> zoomed corner (3x)</label><select id="zsel" aria-label="Which corner"><option value="hdrBL" selected>Track headers, bottom left</option><option value="hdrTR">Track headers, top right</option><option value="devTL">Device panel, top left</option><option value="bandTL">Tab band, top left</option><option value="mixTL">Mixer, top left (rounded)</option></select></div>
+  <div class="rowx"><label><input type="checkbox" id="zon" checked> zoomed corner (3x)</label><select id="zsel" aria-label="Which corner"><option value="hdrBL">Track headers, bottom left</option><option value="hdrTR">Track headers, top right</option><option value="devTL">Device panel, top left</option><option value="bandTL">Tab band, top left</option><option value="mixTL" selected>Mixer window, top left (20 px)</option><option value="mixBL">Mixer window, bottom left (20 px)</option><option value="menuTL">Menu, top left (10 px)</option><option value="pillTL">Pill, left end</option></select><button class="b" id="shb">Corner sheet</button></div>
   <div id="zbox"><canvas id="zoom" width="372" height="231"></canvas></div>
-  <p>Corners: how the lens of a <b>square</b> panel meets in its corner, and which edges bend. "Free edges" = not the edges on the window border or against another panel. Rounded panels (mixer, menu, pill) look the same with every choice. The star is the engine's default. The zoom stands still while a table runs.</p>
+  <p>Corners: the shape of the lens. <b>K8</b> (the star, the engine's default): the lens follows each panel's real outline, so the bend in a rounded corner turns around that corner's own centre; square panels are as in K7. <b>K7</b> is engine 2.2 for comparison: on rounded panels its lens corner is as wide as the lens (45 px on Wide), which made the mixer window look rounder than it is. K1 to K6 are the earlier choices for square panels. "Free edges" = not the edges on the window border or against another panel. <b>Corner sheet</b> shows a square corner, a 20 px, a 10 px corner and a pill at Fine, Apple and Wide, K8 beside K7. The zoom stands still while a table runs.</p>
   <div class="rowx"><label><input type="checkbox" id="rt"> Reduce transparency</label><label><input type="checkbox" id="ic"> Increase contrast</label></div>
   <div class="rowx"><button class="b" id="lose">Lose the graphics context</button><button class="b" id="rest">Restore it</button><label><input type="checkbox" id="soft"> allow software drawing</label></div>
   <div id="live">measuring…</div>
@@ -85,8 +95,9 @@ let pm='engine',scn='scroll',drag=true,dmove=false,lensV='wide',fit=false,follow
 const X={noA:false,noB:false,idle:false,no2d:false};
 /* the Corners chooser: number, the engine's corner model, which edges of the docked panels bend ('auto' = the engine finds the free edges, as the app will use it) */
 const KS=[['K1','round','all','as before: rounded lens, every edge'],['K2','blend','all','square, direction turns across the diagonal'],['K3','fade','all','square, bend fades out on the diagonal'],['K4','square','all','square, the two edges add in the corner'],
-  ['K5','blend','auto','as K2, lens only on free edges'],['K6','fade','auto','as K3, lens only on free edges'],['K7','square','auto','as K4, lens only on free edges']],KDEF='K7';
-let kc=KS.find(k=>k[0]===KDEF),zOn=true,zDirty=true,zLast=0,zWhich='hdrBL';
+  ['K5','blend','auto','as K2, lens only on free edges'],['K6','fade','auto','as K3, lens only on free edges'],['K7','square','auto','engine 2.2: as K4, free edges; rounded panels get a lens corner as wide as the lens'],
+  ['K8','outline','auto','the real outline: the lens follows each corner\'s own radius; square as K7']],KDEF='K8';
+let kc=KS.find(k=>k[0]===KDEF),zOn=true,zDirty=true,zLast=0,zWhich='mixTL';
 $('#ksel').innerHTML=KS.map(k=>`<option value="${k[0]}"${k===kc?' selected':''}>${k[0]}${k===kc?' ★':''} ${k[3]}</option>`).join('');
 $('#ver').textContent=AudioLabGlass.version;
 /* layer A = docked glass (under the DOM of the docked panels), layer B = floating glass (over it) */
@@ -104,8 +115,8 @@ function layout(){const b3=pm==='b3',trH=48,devH=Math.min(262,H*.3|0),bandH=b3?0
   Object.assign(P.tr,{x:0,y:H-trH,w:W,h:trH,r:0});
   Object.assign(P.band,{x:0,y:devTop-28,w:W,h:28,r:0});
   Object.assign(P.dev,{x:0,y:devTop,w:W,h:devH,r:0});
-  const mw=Math.min(1100,W-60),mh=Math.min(430,H-trH-140);Object.assign(P.mix,{x:(W-mw)/2|0,y:70,w:mw,h:mh,r:16});
-  Object.assign(P.menu,{x:Math.min(250,W-236),y:devTop-90,w:220,h:Math.min(230,devH+40),r:12});
+  const mw=Math.min(1100,W-60),mh=Math.min(430,H-trH-140);Object.assign(P.mix,{x:(W-mw)/2|0,y:70,w:mw,h:mh,r:20});
+  Object.assign(P.menu,{x:Math.min(250,W-236),y:devTop-90,w:220,h:Math.min(230,devH+40),r:10});
   Object.assign(P.pill,{x:W-170,y:devTop-bandH-44,w:150,h:32,r:16});
   const dw=Math.max(60,Math.min(420,W-250)),dh=Math.max(40,devH-56),dX=Math.min(232,W-dw-12),dY=devTop+38;
   DC.style.cssText=`left:${dX}px;top:${dY}px;width:${dw}px;height:${dh}px`;DC.hidden=!P.dev.on;if(DC.width!==Math.round(dw*D)||DC.height!==Math.round(dh*D)){DC.width=Math.round(dw*D);DC.height=Math.round(dh*D)}drawDisp(0);
@@ -156,7 +167,7 @@ function boot(){for(const g of[gA,gB])if(g)g.destroy();for(const c of[cA,cB])if(
   const o=()=>({allowSoftware:soft(),corners:kc[1],lens:$('#lens').value,blur:$('#blur').value,level,autoResize:false,
     reduceTransparency:$('#rt').checked?true:null,increaseContrast:$('#ic').checked?true:null,face:FACE[$('#face').value]});
   gA=AudioLabGlass.create(cA,o());gB=AudioLabGlass.create(cB,o());gA.resize(W,H,D);gB.resize(W,H,D);bRect=[0,0,W,H];feed();layout();last2=null;applyX();
-  window.__t={gA,gB,cA,cB,P,S,DC,X,B3,KS,stats,run,find,pieces,boot,layout,setLevel,setSource,setPm,setK,drawZoom,get k(){return kc[0]},get bRect(){return bRect},get pm(){return pm}}}
+  window.__t={gA,gB,cA,cB,P,S,DC,X,B3,KS,stats,run,find,pieces,boot,layout,setLevel,setSource,setPm,setK,drawZoom,sheet,get k(){return kc[0]},get bRect(){return bRect},get pm(){return pm}}}
 function setLevel(v){level=v;both(g=>g.setLevel(v));document.querySelectorAll('#lvl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v))}
 function setSource(v){source=v;$('#srcsel').value=v;feed()}
 function setK(v){const k=KS.find(x=>x[0]===v);if(!k)return;kc=k;$('#ksel').value=v;both(g=>g.setCorners(k[1]));layout();zDirty=true}
@@ -170,6 +181,29 @@ function drawZoom(force){const Z=3,w=ZC.width/Z,h=ZC.height/Z,p=P[zWhich.slice(0
   zx.drawImage(S,x0*D,y0*D,w*D,h*D,0,0,ZC.width,ZC.height);
   if(pm==='engine'&&vis(p)&&cv.style.display!=='none'){const k=g.info.dpr,o=g.info.origin;zx.drawImage(cv,(x0-o[0])*k,(y0-o[1])*k,w*k,h*k,0,0,ZC.width,ZC.height)}
   zDirty=false}
+/* THE CORNER SHEET: a square corner, a 20 px corner (the mixer window), a 10 px corner (a menu) and a pill, each at lens Fine, Apple and Wide, with the new
+   model (K8) beside engine 2.2's (K7). A still picture: a helper engine draws the four shapes over a piece of the arrangement six times, each corner is copied
+   out three times as large, and the helper is destroyed again. Nothing of it runs afterwards, so the tables are not touched. */
+const SHAPES=[['Square corner',0,300,190,'window'],['20 px corner (mixer window)',20,300,190,'window'],['10 px corner (menu)',10,220,190,'menu'],['Pill (32 px high)',16,150,32,'pill']],SLENS=[['fine','Fine'],['apple','Apple'],['wide','Wide']],SMOD=[['outline','K8 new'],['square','K7 (2.2)']];
+function sheet(){let el=$('#sheet');if(el){el.remove();return null}
+  const cw=92,ch=68,Z=3,k=Math.min(2,D),SW=340,w=SW*4,h=280,info={cells:0,colours:[],diff:[]};
+  el=document.createElement('div');el.id='sheet';el.setAttribute('role','dialog');el.setAttribute('aria-label','Corner sheet');
+  el.innerHTML='<div class="in"><h2>Corner sheet: K8 (the real outline) beside K7 (engine 2.2) <button class="b" id="shx">Close</button></h2><p>Each picture is the top left corner of a panel over the arrangement, three times as large. In K8 the curved part of the lens stays inside the corner\'s own radius; in K7 a rounded panel\'s lens turns over an arc as wide as the lens (look at the 20 px and 10 px rows at Wide). The square row and the pill row must look the same in both.</p><div class="sc"><div class="g"></div></div></div>';
+  document.body.appendChild(el);const G=el.querySelector('.g');G.innerHTML='<span></span>'+SLENS.map(l=>SMOD.map(m=>`<span class="h"><b>${l[1]}</b> · ${m[1]}</span>`).join('')).join('');
+  /* the piece of arrangement under the shapes: the same clips as the page, as a picture (for what lies outside the glass) and as a list (for the glass) */
+  const lanes=[],clips=[],bk=document.createElement('canvas');bk.width=w*k;bk.height=h*k;const bx=bk.getContext('2d');bx.scale(k,k);bx.fillStyle=BG;bx.fillRect(0,0,w,h);
+  for(let r=0,y=8;y<h;r++,y+=64){lanes.push({y,h:64,color:BG});for(let i=-1;i<w/120+2;i++){const seed=(i*7+r*13)%11;if(seed<3)continue;const c={x:i*120+(r%2)*60+1,y:y+2,w:118,h:60,color:COL[r%8]};clips.push(c);bx.fillStyle=c.color+'88';bx.fillRect(c.x,c.y,c.w,c.h);bx.fillStyle=c.color;bx.fillRect(c.x,c.y,c.w,14)}}
+  const hc=document.createElement('canvas');hc.style.cssText=`position:absolute;left:-9999px;top:0;width:${w}px;height:${h}px`;document.body.appendChild(hc);
+  const g=AudioLabGlass.create(hc,{allowSoftware:soft(),autoResize:false,blur:$('#blur').value,face:FACE[$('#face').value]});g.resize(w,h,k);g.setScene({lanes,clips,bg:BG,rect:[0,0,w,h]});
+  SHAPES.forEach((s,i)=>g.addPanel({id:'s'+i,rect:[i*SW+26,30,s[2],s[3]],radius:s[1],kind:s[4],edges:'all'}));
+  const cells=SHAPES.map(s=>{const lab=document.createElement('b');lab.textContent=s[0];G.appendChild(lab);return SLENS.map(()=>SMOD.map(()=>{const c=document.createElement('canvas');c.width=cw*Z*k;c.height=ch*Z*k;G.appendChild(c);return c}))});
+  if(g.mode==='gl')SLENS.forEach((l,li)=>SMOD.forEach((m,mi)=>{g.setLensPreset(l[0]);g.setCorners(m[0]);g.render();g.debug.draw();
+    SHAPES.forEach((s,i)=>{const c=cells[i][li][mi],x=c.getContext('2d'),x0=i*SW+26-10,y0=30-10;x.imageSmoothingEnabled=false;x.drawImage(bk,x0*k,y0*k,cw*k,ch*k,0,0,c.width,c.height);x.drawImage(hc,x0*k,y0*k,cw*k,ch*k,0,0,c.width,c.height);info.cells++})}));
+  g.destroy();hc.remove();
+  /* for the headless check: how many colours a picture has, and how far K8 is from K7 in each pair (0 = the same picture) */
+  cells.forEach((row,i)=>row.forEach((pair,li)=>{const d=pair.map(c=>c.getContext('2d').getImageData(0,0,c.width,c.height).data),set=new Set();let m=0;for(let j=0;j<d[0].length;j+=4){if(j%64===0)set.add(d[0][j]>>3<<10|d[0][j+1]>>3<<5|d[0][j+2]>>3);for(let q=0;q<3;q++)m=Math.max(m,Math.abs(d[0][j+q]-d[1][j+q]))}info.colours.push(set.size);info.diff.push(m)}));
+  el.querySelector('#shx').onclick=()=>el.remove();el.querySelector('#shx').focus();el.addEventListener('keydown',e=>{if(e.key==='Escape')el.remove()});return info}
+$('#shb').onclick=()=>sheet();
 $('#ksel').onchange=e=>setK(e.target.value);$('#zon').onchange=e=>{zOn=e.target.checked;$('#zbox').hidden=!zOn;zDirty=true};$('#zsel').onchange=e=>{zWhich=e.target.value;zDirty=true};
 $('#hud').addEventListener('change',()=>{zDirty=true});$('#hud').addEventListener('click',()=>{zDirty=true});
 /* the faces are drawn again after a canvas was hidden */
@@ -250,7 +284,7 @@ function frame(t){requestAnimationFrame(frame);const dt=t-last;last=t;if(dt>0&&d
   if(source==='scene')both(g=>{g.setView({scrollX:off});g.setPlayhead(phx==null?null:phx+off)});
   if(dmove&&P.dev.on&&scn!=='still')drawDisp(T);
   const a=performance.now(),rA=!X.noA&&gA.render(t),rB=!X.noB&&gB.render(t);cpu+=performance.now()-a;cpuN++;
-  if(zOn&&!busy){const dr=zWhich==='mixTL'?rB:rA;if(dr?t-zLast>80:zDirty){drawZoom(!dr);zLast=t}}}
+  if(zOn&&!busy){const dr=P[zWhich.slice(0,-2)].L==='B'?rB:rA;if(dr?t-zLast>80:zDirty){drawZoom(!dr);zLast=t}}}
 const kept=(a,b)=>Math.min(100,100*a.length/(a.reduce((x,y)=>x+y,0)/b));
 const snap=()=>({sd:gA.stats.sceneDraws+gB.stats.sceneDraws,up:gA.stats.uploads+gB.stats.uploads,fu:gA.stats.flatUploads+gB.stats.flatUploads,ss:gA.stats.sceneSends+gB.stats.sceneSends,dr:gA.stats.draws+gB.stats.draws,t:performance.now()});
 /* the readout stands still during a run, so the run measures the page and not its own readout */
