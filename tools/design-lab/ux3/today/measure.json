@@ -1,0 +1,16 @@
+{
+ "version": "0.263",
+ "button": {
+  "x": 1485,
+  "y": 3,
+  "width": 44,
+  "height": 23
+ },
+ "tutSetMs": 163.34999999997672,
+ "outlines": 200,
+ "scanMs": 86.4890000000014,
+ "clickBlocked": true,
+ "tipsKeys": 89,
+ "tutxKeys": 9,
+ "titled": 675
+}

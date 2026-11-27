@@ -1,0 +1,925 @@
+<title>AudioLab learn mode</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Task UX3: the learn mode pick page. Same family as the DR5 and settings pick pages.
+   Four live mocks of AudioLab at its own proportions (16:10, drawn at 1120 x 700 and scaled to fit).
+   Every control in the mock works and makes sound; the guide points at the real controls by id and never blocks them. */
+:root{color-scheme:dark;
+ --bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--amber:#f5c84c;--red:#ff5d6c;--cyan:#4cc9f0;--bar:#0e0e12f2;
+ --a-bg:#0b0c10;--a-lane0:#121318;--a-lane1:#0f1014;--a-hd:#16171c;--a-ln:#24252d;--a-ink:#e6e8ee;--a-mut:#8c8f9b;--a-grid:rgba(255,255,255,.05);--a-dev:#101116;
+ --fl:#1d1e24f7;--fl-ln:rgba(255,255,255,.10);--fl-sh:0 12px 32px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.04) inset;--chip:#2a2b33;--hi:rgba(76,141,255,.17);
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace;--mo:1}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#13945c;--blue:#2f6fe0;--amber:#9a6d00;--red:#d22b3d;--cyan:#0a7ea4;--bar:#fffffff2}}
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#13945c;--blue:#2f6fe0;--amber:#9a6d00;--red:#d22b3d;--cyan:#0a7ea4;--bar:#fffffff2}
+:root[data-motion="reduce"]{--mo:0}
+@media (prefers-reduced-motion: reduce){:root:not([data-motion="full"]){--mo:0}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);margin:0;padding-block:28px 150px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 14px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--mut)}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#04130c}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--fm);color:var(--mut)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--bg)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:15px;line-height:1.55}
+.how{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12px;color:var(--mut)}
+.how b{color:var(--ink);font-weight:500}
+section.fam{display:flex;flex-direction:column;gap:14px;scroll-margin-top:12px}
+.gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;border-bottom:1px solid var(--ln);padding-bottom:8px}
+.gh .k{font:500 12px var(--fm);color:var(--mut)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.card.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.card.live{outline:1px dashed var(--amber);outline-offset:2px}
+.ch{display:flex;align-items:center;gap:8px}
+.id{font:500 12px var(--fm);color:var(--blue);background:color-mix(in srgb,var(--blue) 9%,transparent);border:1px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:6px;padding:1px 6px;flex:none}
+.id.t0{color:var(--mut);border-color:var(--ln2);background:transparent}
+.star{color:var(--amber);font-size:14px;line-height:1;flex:none}
+.ch h3{flex:1;min-width:0}
+.pk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);cursor:pointer;user-select:none;flex:none}
+.pk input{accent-color:var(--acc);width:15px;height:15px;margin:0}
+.card p{font-size:12.5px}
+.card ul{margin:0;padding-left:16px;font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:2px}
+.tim{font:11px/1.5 var(--fm);color:var(--mut);display:flex;flex-wrap:wrap;gap:2px 12px;border-top:1px dashed var(--ln);padding-top:7px;margin-top:auto}
+.tim b{font-weight:500;color:var(--ink)}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+ul.src{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:12.5px}
+table{border-collapse:collapse;font-size:12px;width:100%}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+td.n{font-family:var(--fm);white-space:nowrap}
+.tw{overflow-x:auto}
+.shot{border:1px solid var(--ln);border-radius:8px;overflow:hidden;background:#000}
+.shot img{display:block;width:100%;height:auto}
+.cap{font:11px var(--fm);color:var(--mut)}
+pre{margin:0;background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:10px 12px;font:11.5px/1.55 var(--fm);overflow-x:auto;white-space:pre}
+.bar2{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px;color:var(--mut)}
+.bar2 .lab{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.nm{font:600 22px/1.1 var(--h);margin:2px 0}
+.nm small{display:block;font:400 11.5px/1.4 var(--f);color:var(--mut);margin-top:4px}
+.kbd,kbd{font:500 10.5px var(--fm);background:var(--chip);border:1px solid var(--fl-ln);border-radius:4px;padding:0 5px;color:var(--ink)}
+
+/* ================= the mock app ================= */
+.appwrap{position:relative;width:100%;aspect-ratio:16/10;border:1px solid var(--ln2);border-radius:10px;overflow:hidden;background:#07080a}
+.app{position:absolute;left:0;top:0;width:1120px;height:700px;transform-origin:0 0;background:var(--a-bg);color:var(--a-ink);font:12px/1.3 var(--f);user-select:none;-webkit-user-select:none;--rp:0px;outline:none;color-scheme:dark}
+.app *{box-sizing:border-box}
+.app button{border:0;background:none;color:inherit;font:inherit;padding:0;cursor:default}
+.app .rg{position:absolute;left:0;right:var(--rp)}
+.app .tb{top:0;height:30px;background:var(--a-hd);border-bottom:1px solid var(--a-ln);display:flex;align-items:center;gap:6px;padding:0 8px}
+.app .tab{display:flex;align-items:center;gap:8px;padding:3px 10px;border-radius:6px;background:#1c1d23;border:1px solid var(--a-ln);font-size:11.5px}
+.app .tab.ls{border-color:color-mix(in srgb,var(--amber) 60%,transparent);color:var(--amber)}
+.app .tab i{color:var(--a-mut);font-style:normal}
+.app .tb .tm{font:11px var(--fm);color:var(--a-mut);margin-left:10px}
+.app .tb .sp{flex:1}
+.app .ib{width:34px;height:22px;border-radius:6px;background:#1c1d23;border:1px solid var(--a-ln)!important;display:grid;place-items:center;color:#aeb2bd}
+.app .ib svg{width:15px;height:15px}
+.app .ib.on{background:var(--cyan);color:#04121a;box-shadow:0 0 12px rgba(76,201,240,.5)}
+.app .ib.hl{background:#2a2c35;color:#fff}
+.app .rul{top:30px;height:18px;left:180px;border-bottom:1px solid var(--a-ln);background:#0d0e12;font:10px var(--fm);color:var(--a-mut)}
+.app .rul span{position:absolute;top:3px;transform:translateX(3px)}
+.app .rul span::before{content:'';position:absolute;left:-3px;top:-3px;height:18px;border-left:1px solid var(--a-ln)}
+.app .secs{top:48px;height:16px;left:180px;border-bottom:1px solid var(--a-ln);background:#0d0e12}
+.app .sec{position:absolute;top:2px;bottom:2px;border-radius:3px;font-size:9.5px;padding:0 5px;line-height:12px;border:1px solid;cursor:default;overflow:hidden;white-space:nowrap}
+.app .sec.lp{box-shadow:0 0 0 1px var(--amber) inset;color:#fff}
+.app .hdrs{top:64px;width:180px;right:auto!important;border-right:1px solid var(--a-ln)}
+.app .hdr{height:48px;border-bottom:1px solid var(--a-ln);background:var(--a-hd);display:flex;align-items:center;gap:6px;padding:0 6px 0 0;position:relative}
+.app .hdr .cs{width:4px;align-self:stretch}
+.app .hdr b{font-weight:500;width:56px;overflow:hidden;white-space:nowrap}
+.app .hdr .vol{font:11px var(--fm);background:#0b0c10;border:1px solid var(--a-ln);border-radius:4px;padding:1px 5px;width:62px;text-align:right;cursor:ns-resize}
+.app .ms{width:20px;height:18px;border-radius:4px;border:1px solid var(--a-ln)!important;background:#1c1d23!important;font:600 10px var(--f)!important;color:var(--a-mut)!important;display:grid;place-items:center}
+.app .ms.m.on{background:#f5c84c!important;color:#1a1400!important}
+.app .ms.s.on{background:#4c8dff!important;color:#fff!important}
+.app .lanes{top:64px;left:180px;height:240px}
+.app .lane{height:48px;border-bottom:1px solid var(--a-ln);position:relative;background-image:repeating-linear-gradient(90deg,var(--a-grid) 0 1px,transparent 1px calc(100%/32))}
+.app .lane:nth-child(odd){background-color:var(--a-lane0)} .app .lane:nth-child(even){background-color:var(--a-lane1)}
+.app .clip{position:absolute;top:4px;bottom:4px;border-radius:3px;font-size:9.5px;padding:1px 4px;color:#fff;overflow:hidden;white-space:nowrap;border:1px solid rgba(255,255,255,.12)}
+.app .auto{position:absolute;inset:0;pointer-events:none}
+.app .ph{position:absolute;top:30px;height:274px;width:1px;background:#fff;opacity:.85;pointer-events:none;left:180px}
+.app .dtabs{top:306px;height:24px;display:flex;align-items:center;gap:4px;padding:0 6px;border-top:1px solid var(--a-ln);border-bottom:1px solid var(--a-ln);background:var(--a-hd)}
+.app .dtab{font-size:11px;padding:2px 8px;border-radius:5px;background:#1c1d23;border:1px solid var(--a-ln)}
+.app .dtab.on{border-color:#4c8dff;color:#fff}
+.app .dev{top:330px;height:272px;background:var(--a-dev);display:flex;gap:8px;padding:8px}
+.app .devhid{top:330px;height:272px;display:grid;place-items:center;color:var(--a-mut);font-size:12px;background:var(--a-dev)}
+.app .dv{background:#15161b;border:1px solid var(--a-ln);border-radius:8px;display:flex;flex-direction:column;min-width:0}
+.app .dv .dh{height:24px;display:flex;align-items:center;gap:7px;padding:0 8px;border-bottom:1px solid var(--a-ln);font-weight:500;font-size:11.5px}
+.app .pw{width:16px;height:16px;border-radius:50%;border:1.5px solid #555!important;display:grid;place-items:center}
+.app .pw.on{border-color:var(--acc)!important;box-shadow:0 0 6px var(--acc)}
+.app .pw::after{content:'';width:6px;height:6px;border-radius:50%;background:#555}
+.app .pw.on::after{background:var(--acc)}
+.app .dvb{flex:1;display:flex;gap:8px;padding:8px;min-height:0}
+.app .knobs{display:flex;gap:6px;flex-wrap:wrap;align-content:flex-start}
+.app .kn{width:66px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 0;border-radius:6px;cursor:ns-resize;touch-action:none}
+.app .kn svg{width:40px;height:40px}
+.app .kn .tr{fill:none;stroke:#2b2d36;stroke-width:3.5;stroke-linecap:round}
+.app .kn .ar{fill:none;stroke:#4c8dff;stroke-width:3.5;stroke-linecap:round}
+.app .kn .pt{stroke:#e6e8ee;stroke-width:2;stroke-linecap:round}
+.app .kn b{font-weight:500;font-size:10.5px;color:#c9ccd5}
+.app .kn .v,.app .num .v{font:10.5px var(--fm);color:#e6e8ee}
+.app u{text-decoration:none;color:var(--amber);font-size:.82em;margin-left:2px;letter-spacing:.03em}
+.app .kn:focus-visible,.app .num:focus-visible,.app .vol:focus-visible{outline:1.5px solid var(--blue);outline-offset:1px}
+.app .disp{background:#0a0b0e;border:1px solid var(--a-ln);border-radius:5px;position:relative;overflow:hidden}
+.app .disp svg{display:block;width:100%;height:100%}
+.app .disp .ro{position:absolute;left:6px;top:4px;font:9.5px var(--fm);color:#9aa0ad;letter-spacing:.03em}
+.app .steps{display:grid;grid-template-columns:40px repeat(16,1fr);gap:3px;align-items:center;font-size:10px;color:var(--a-mut)}
+.app .st{height:20px;border-radius:3px;background:#1d1f26;border:1px solid #2a2c35!important}
+.app .st.b4{background:#23252d}
+.app .st.on.k{background:#e8664c;border-color:#e8664c!important}
+.app .st.on.b{background:#4c8dff;border-color:#4c8dff!important}
+.app .st.now{box-shadow:0 0 0 1.5px #fff inset}
+.app .meter{width:16px;background:#0a0b0e;border:1px solid var(--a-ln);border-radius:3px;position:relative;overflow:hidden}
+.app .meter i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#ff5d6c 0 6%,#f5c84c 6% 22%,#3ecf8e 22%);height:0}
+.app .meter s{position:absolute;left:0;right:0;height:1px;background:#fff}
+.app .trn{top:602px;height:36px;border-top:1px solid var(--a-ln);background:var(--a-hd);display:flex;align-items:center;gap:6px;padding:0 8px}
+.app .tbn{height:24px;min-width:28px;padding:0 7px;border-radius:5px;background:#1c1d23!important;border:1px solid var(--a-ln)!important;display:inline-flex;align-items:center;justify-content:center;gap:5px;font:500 11px var(--f)!important;color:#d6d9e0!important}
+.app .tbn svg{width:14px;height:14px}
+.app .tbn.on{border-color:var(--acc)!important;color:var(--acc)!important}
+.app .tbn.rec.on{border-color:#ff5d6c!important;color:#ff5d6c!important}
+.app .tbn.w.on{border-color:var(--amber)!important;color:var(--amber)!important}
+.app .num{height:24px;display:inline-flex;align-items:center;gap:4px;padding:0 8px;border-radius:5px;background:#0b0c10;border:1px solid var(--a-ln);cursor:ns-resize;touch-action:none}
+.app .num .v{font-size:12px}
+.app .pos{font:12px var(--fm);padding:0 8px;height:24px;display:inline-flex;align-items:center;background:#0b0c10;border:1px solid var(--a-ln);border-radius:5px;min-width:86px}
+.app .trn .sp{flex:1}
+.app .hl{top:638px;height:22px;border-top:1px solid var(--a-ln);background:#0d0e12;font-size:11px;color:var(--a-mut);display:flex;align-items:center;gap:8px;padding:0 10px;white-space:nowrap;overflow:hidden}
+.app .hl b{color:var(--a-ink);font-weight:500}
+.app .hl .ro{font:10.5px var(--fm);color:#c9ccd5}
+.app .map{top:660px;height:40px;background:#08090b;border-top:1px solid var(--a-ln)}
+.app .map i{position:absolute;height:3px;border-radius:1px;opacity:.8}
+/* guide layer */
+.app .gl{position:absolute;inset:0;pointer-events:none;z-index:20}
+.app .gl>*{pointer-events:auto}
+.app .gl svg.lead{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.app .gring{position:absolute;border:1px solid var(--amber);border-radius:7px;pointer-events:none!important;box-shadow:0 0 0 3px rgba(245,200,76,.12)}
+.app .gring.pulse{animation:gp calc(var(--mo)*1.6s) ease-out infinite}
+@keyframes gp{0%{box-shadow:0 0 0 0 rgba(245,200,76,.55)}100%{box-shadow:0 0 0 12px rgba(245,200,76,0)}}
+.app .gcard{position:absolute;width:276px;background:#1b1c22f7;border:1px solid rgba(255,255,255,.1);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.55);padding:10px 12px;font-size:12px;line-height:1.42;color:#e6e8ee}
+.app .gcard .gk{font:500 9.5px var(--fm);letter-spacing:.08em;color:var(--amber);text-transform:uppercase;display:flex;gap:8px}
+.app .gcard .gk span{margin-left:auto;color:#8c8f9b}
+.app .gcard h4{margin:4px 0 3px;font:600 13.5px/1.25 var(--f);display:flex;align-items:baseline;gap:8px}
+.app .gcard h4 .val{margin-left:auto;font:500 12px var(--fm)}
+.app .gcard p{margin:0;color:#c3c7d1}
+.app .gcard .glive{margin-top:7px;font:11px/1.45 var(--fm);color:#e6e8ee;background:#0f1014;border:1px solid #2a2c35;border-radius:6px;padding:5px 8px}
+.app .gcard .glive.ok{border-color:rgba(62,207,142,.6);color:#3ecf8e}
+.app .gcard .gvis{margin-top:7px;height:62px;background:#0a0b0e;border:1px solid #2a2c35;border-radius:6px}
+.app .gcard .gvis svg{width:100%;height:100%;display:block}
+.app .gcard dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:1px 10px;font:10.5px var(--fm)}
+.app .gcard dt{color:#8c8f9b;letter-spacing:.06em}
+.app .gcard dd{margin:0;color:#e6e8ee}
+.app .gcard .gb{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.app .gcard .gb button{border:1px solid #33353f!important;background:#24252d!important;border-radius:6px;padding:2px 8px!important;font-size:11px!important;cursor:pointer!important}
+.app .gcard .gb button.pri{background:#4c8dff!important;border-color:#4c8dff!important;color:#fff!important}
+.app .gcard .gb .sp{flex:1}
+.app .gcard .gdots{display:flex;gap:4px;margin-top:8px}
+.app .gcard .gdots i{width:14px;height:3px;border-radius:2px;background:#33353f}
+.app .gcard .gdots i.d{background:#3ecf8e} .app .gcard .gdots i.c{background:var(--amber)}
+.app .gcard a{color:#7fb0ff;cursor:pointer;text-decoration:none}
+.app .gcard.done{border-color:rgba(62,207,142,.7)}
+.app .gpill{position:absolute;left:50%;top:36px;transform:translateX(-50%);background:#1b1c22f7;border:1px solid rgba(245,200,76,.55);border-radius:20px;padding:4px 12px;font-size:11.5px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.4);white-space:nowrap}
+.app .gpill b{color:var(--amber);font-weight:600}
+.app .gpill button{border:1px solid #33353f!important;border-radius:5px;padding:0 7px!important;background:#24252d!important;cursor:pointer!important}
+.app .hov{position:absolute;border:1px dashed rgba(245,200,76,.8);border-radius:6px;pointer-events:none!important}
+/* today's blocking mode */
+.app .blk{position:absolute;inset:0;background:rgba(0,0,0,.28);pointer-events:auto}
+.app .blk i{position:absolute;border:1px solid rgba(76,201,240,.55);border-radius:5px;background:rgba(76,201,240,.06)}
+.app .blkbar{position:absolute;left:50%;top:36px;transform:translateX(-50%);background:#14161cf5;border:1px solid #2c3a44;border-radius:10px;padding:6px 10px;font-size:11.5px;display:flex;gap:10px;align-items:center;white-space:nowrap}
+.app .blkbar b{color:var(--cyan)} .app .blkbar button{background:var(--cyan)!important;color:#04121a!important;border-radius:6px;padding:2px 10px!important;font-weight:600!important;cursor:pointer!important}
+.app .blkcard{position:absolute;width:250px;background:#15171df5;border:1px solid #2c3a44;border-radius:10px;padding:9px 11px;font-size:12px}
+.app .blkcard b{display:block;margin-bottom:3px}
+.app .shake{animation:sh .35s}
+.app .gcard.p0{border-color:rgba(76,201,240,.6)} .app .gcard.p0 .gk{color:var(--cyan)}
+.app .shake2{animation:sh2 .3s}@keyframes sh2{25%{margin-left:-6px}75%{margin-left:6px}}
+@keyframes sh{0%,100%{transform:translateX(-50%)}25%{transform:translateX(calc(-50% - 6px))}75%{transform:translateX(calc(-50% + 6px))}}
+/* help surfaces */
+.app .pop{position:absolute;background:#1b1c22fa;border:1px solid rgba(255,255,255,.11);border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.6);color:#e6e8ee;font-size:12px;overflow:hidden;display:flex;flex-direction:column}
+.app .pop .q{margin:8px;height:28px;border-radius:7px;background:#0f1014;border:1px solid #33353f;display:flex;align-items:center;gap:6px;padding:0 8px}
+.app .pop .q input{flex:1;background:none;border:0;outline:none;color:#e6e8ee;font:12px var(--f);min-width:0}
+.app .pop .q svg{width:13px;height:13px;color:#8c8f9b}
+.app .pop .gh2{font:500 9.5px var(--fm);letter-spacing:.08em;color:#8c8f9b;text-transform:uppercase;padding:6px 12px 2px}
+.app .pop .row{display:flex;align-items:center;gap:9px;padding:5px 12px;min-height:28px;cursor:default!important;width:100%;text-align:left}
+.app .pop .row.f{background:rgba(76,141,255,.18);box-shadow:2px 0 0 #4c8dff inset}
+.app .pop .row .ic{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;flex:none;background:#24252d;color:#c9ccd5}
+.app .pop .row .ic svg{width:12px;height:12px}
+.app .pop .row .lb{flex:1;min-width:0;display:flex;flex-direction:column}
+.app .pop .row .lb small{color:#8c8f9b;font-size:10.5px}
+.app .pop .row .tg{font:500 9px var(--fm);letter-spacing:.06em;color:#8c8f9b;border:1px solid #33353f;border-radius:4px;padding:0 4px}
+.app .pop .row kbd{font:500 10px var(--fm);background:#24252d;border:1px solid #33353f;border-radius:4px;padding:0 5px;color:#c9ccd5}
+.app .pop .row mark{background:none;color:#7fb0ff}
+.app .pop .sepl{height:1px;background:#2a2c35;margin:4px 0}
+.app .pop .foot{border-top:1px solid #2a2c35;padding:6px 12px;font:10.5px var(--fm);color:#8c8f9b;display:flex;gap:10px}
+.app .prog{display:flex;gap:2px} .app .prog i{width:8px;height:3px;border-radius:2px;background:#33353f} .app .prog i.d{background:#3ecf8e}
+.app .side{position:absolute;right:0;top:30px;bottom:0;width:280px;background:#14151a;border-left:1px solid var(--a-ln);display:flex;flex-direction:column;z-index:15}
+.app .side .sh{height:30px;display:flex;align-items:center;gap:4px;padding:0 6px;border-bottom:1px solid var(--a-ln)}
+.app .side .sh button{font-size:11px;padding:3px 8px!important;border-radius:5px;color:#8c8f9b}
+.app .side .sh button.on{background:#24252d!important;color:#fff}
+.app .side .sh .x{margin-left:auto}
+.app .side .pop{position:static;border:0;box-shadow:none;border-radius:0;background:none;flex:1;overflow:auto}
+.app .sheet{position:absolute;left:50%;top:40px;transform:translateX(-50%);width:520px;max-height:520px}
+.app .sheet .body{overflow:auto;padding:0 0 8px}
+.app .chk{display:flex;gap:8px;align-items:flex-start;padding:5px 12px}
+.app .chk .bx{width:15px;height:15px;border-radius:4px;border:1.5px solid #555;flex:none;margin-top:1px;display:grid;place-items:center;font-size:10px}
+.app .chk.d .bx{background:#3ecf8e;border-color:#3ecf8e;color:#04130c}
+.app .chk.d .t{color:#8c8f9b;text-decoration:line-through}
+.app .chk a{color:#7fb0ff;cursor:pointer;margin-left:6px;font-size:11px}
+.app .focus{position:absolute;left:190px;top:72px;width:560px;height:auto;z-index:18}
+.app .focus .fh{display:flex;gap:8px;align-items:center;font:500 9.5px var(--fm);letter-spacing:.08em;color:var(--amber);padding:7px 10px 0}
+.app .focus .fb{display:flex;gap:10px;padding:8px 10px;align-items:flex-start}
+.app .ai{position:absolute;left:8px;bottom:42px;width:330px;height:300px}
+.app .ai .msgs{flex:1;overflow:auto;padding:8px 12px;display:flex;flex-direction:column;gap:8px}
+.app .ai .m{font-size:12px;line-height:1.45;max-width:92%}
+.app .ai .m.u{align-self:flex-end;background:#24314d;border-radius:8px;padding:5px 9px}
+.app .ai .m.a a{color:#f5c84c;cursor:pointer;border-bottom:1px dotted}
+.app .ai .chips{display:flex;flex-wrap:wrap;gap:5px;padding:0 10px 8px}
+.app .ai .chips button{font-size:11px;border:1px solid #33353f!important;border-radius:12px;padding:2px 9px!important;background:#24252d!important;cursor:pointer!important}
+.stagebar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px;color:var(--mut)}
+.stagebar .lab{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase}
+.stagebar .cost{font:11px var(--fm);margin-left:auto}
+.stagebar .cost b{color:var(--ink);font-weight:500}
+/* picks bar */
+.pbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);border-top:1px solid var(--ln2);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:50}
+.pbar .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pbar .line{font:500 13px var(--fm);flex:1;min-width:240px;background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:5px 10px;user-select:all;overflow-wrap:anywhere}
+.pbar .fams{display:flex;flex-wrap:wrap;gap:4px}
+.pbar .fams a{font:500 11px var(--fm);color:var(--mut);text-decoration:none;border:1px solid var(--ln2);border-radius:6px;padding:2px 6px}
+.pbar .fams a.set{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.pbar input{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 8px;color:var(--ink);font:12px var(--f);min-width:160px;flex:0 1 220px}
+@media (max-width:640px){h1{font-size:25px}.cards{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · first use and help · task UX3 · 27 November 2026</div>
+ <h1>AudioLab learn mode</h1>
+ <p class="lede">Today the <b>?</b> button turns on a tutorial mode that freezes the app: you can hover and read, but nothing you click works. This page proposes a guide that points at the <b>real controls while they stay fully usable</b>, reacts to what you do, and runs short psytrance lessons on your own song. Every mock below is AudioLab at its own 16:10 proportions; every knob turns, the steps play, and the pointers are found by control id, not by position.</p>
+ <div class="how"><span><b>1.</b> Try each mock (press Play: it makes sound).</span><span><b>2.</b> Pick one number per family; ★ is the recommendation.</span><span><b>3.</b> Copy the line in the bar at the bottom and paste it in the chat.</span></div>
+ <div class="bar2"><span class="lab">Page</span><div class="seg" id="theme"><button data-v="">Auto</button><button data-v="dark">Dark</button><button data-v="light">Light</button></div><span class="lab">Motion</span><div class="seg" id="motion"><button data-v="">System</button><button data-v="full">Full</button><button data-v="reduce">Reduced</button></div><span class="mut">The mocks stay dark, as the app does.</span></div>
+</header>
+
+<section class="fam" id="today">
+ <div class="gh"><h2>What exists today (v0.263)</h2><span class="k">read from index.html and measured headless</span></div>
+ <div class="two">
+  <div class="box">
+   <div class="shot"><img src="today/03-tutorial-hover.jpg" alt="Today's tutorial mode: a banner says nothing you click changes anything; a blue arrow card explains Play"></div>
+   <div class="cap">Tutorial mode on (F1 or the ? button at the top right), hovering Play. Fractals demo, 1600 × 1000.</div>
+  </div>
+  <div class="box">
+   <table><tbody>
+    <tr><td class="n">? button</td><td><code>#bTut</code> in the tab bar, between redo and full screen. Toggles <b>tutorial mode</b> (F1). It is the only help entry point; no menu.</td></tr>
+    <tr><td class="n">Tutorial mode</td><td><code>tutSet</code>: a banner “Hover any button or area to see what it does. <b>Nothing you click changes anything.</b>” Every click, key, double-click and right-click is swallowed (checked: the metronome did not toggle). Esc or F1 leaves.</td></tr>
+    <tr><td class="n">Outlines</td><td><b id="m-out">200</b> blue boxes (the cap) drawn over every control with text; the scan uses <code>elementFromPoint</code> on 5 points per control and re-runs <b>every 900 ms</b>: <b id="m-scan">86 ms</b> per scan here (software drawing), <b id="m-set">163 ms</b> to switch on.</td></tr>
+    <tr><td class="n">Texts</td><td><code>TIPS</code> 89 entries, <code>TUTX</code> 9, plus 675 elements with <code>title</code>; virtual areas for the ruler, sections, clips and the loudness map. Pictures (<code>TV</code>) show some gestures.</td></tr>
+    <tr><td class="n">Tooltips</td><td>Rich card after 420 ms; hidden while tutorial mode is on. Your pick <b>T3</b> (callout with an amber leader) is being built by lane F (OV).</td></tr>
+    <tr><td class="n">Commands</td><td><code>SCA</code>: 63 commands with ids, groups, keys; <code>tour</code> is one of them. Settings › Keyboard shortcuts on ⌘/. K1 palette on ⌘K with the Assistant inside is planned (OV8).</td></tr>
+    <tr><td class="n">Assistant</td><td>⌘K chat that edits the song with tools: <code>get_song, add_notes, add_fx_hit, set_track, set_instrument_param, add_effect, set_effect_param, set_tempo, add_section, silence_range, automate</code>. It cannot point at controls yet.</td></tr>
+    <tr><td class="n">Missing</td><td>Search, a shortcuts sheet from Help, what's new, lessons, progress, keyboard focus explanations, and any way to learn while working.</td></tr>
+   </tbody></table>
+  </div>
+ </div>
+</section>
+
+<section class="fam" id="fam-N">
+ <div class="gh"><h2>N · The name</h2><span class="k">picking one renames it in every mock below</span></div>
+ <p class="mut">The mode needs a name that sounds like the rest of the app (science instruments, read-outs, a drafting grid), says that it explains, and has a short verb for the “what is this?” part.</p>
+ <div class="names" id="cards-N"></div>
+</section>
+
+<section class="fam" id="fam-H">
+ <div class="gh"><h2>H · The Help button and what it opens</h2><span class="k">click the ? at the top right of the mock</span></div>
+ <div class="stagebar"><span class="lab">Try</span><div class="seg" id="seg-H"></div><span class="cost" id="cost-H"></span></div>
+ <div class="appwrap" id="st-H"></div>
+ <div class="cards" id="cards-H"></div>
+</section>
+
+<section class="fam" id="fam-P">
+ <div class="gh"><h2>P · How the guide points at a control you can still use</h2><span class="k">a lesson step is running: turn Decay</span></div>
+ <div class="stagebar"><span class="lab">Try</span><div class="seg" id="seg-P"></div><button class="btn" id="p-restart">Restart the step</button><span class="cost" id="cost-P"></span></div>
+ <div class="appwrap" id="st-P"></div>
+ <div class="cards" id="cards-P"></div>
+</section>
+
+<section class="fam" id="fam-W">
+ <div class="gh"><h2>W · “What is this?”</h2><span class="k">turn it on, then hover and use anything</span></div>
+ <div class="stagebar"><span class="lab">Try</span><div class="seg" id="seg-W"></div><button class="btn" id="w-on">Turn it on (F1)</button><span class="mut sm" id="w-hint"></span><span class="cost" id="cost-W"></span></div>
+ <div class="appwrap" id="st-W"></div>
+ <div class="cards" id="cards-W"></div>
+</section>
+
+<section class="fam" id="fam-L">
+ <div class="gh"><h2>L · Lessons that wait for what you do</h2><span class="k">four psytrance lessons on the mock song</span></div>
+ <div class="stagebar"><span class="lab">Format</span><div class="seg" id="seg-L"></div><span class="lab">Lesson</span><div class="seg" id="lessonpick"></div><button class="btn" id="shuffle" title="Moves the knobs and swaps the devices; the guide still finds every control by its id">Shuffle the layout</button><button class="btn" id="hidedev">Hide devices</button><span class="cost" id="cost-L"></span></div>
+ <div class="appwrap" id="st-L"></div>
+ <div class="cards" id="cards-L"></div>
+</section>
+
+<section class="fam" id="fam-G">
+ <div class="gh"><h2>G · Progress</h2><span class="k">how much of it the app keeps and shows</span></div>
+ <div class="cards" id="cards-G"></div>
+</section>
+
+<section class="fam" id="ids">
+ <div class="gh"><h2>Why lessons survive layout changes</h2><span class="k">command ids and control ids, not positions</span></div>
+ <div class="two">
+  <div class="box">
+   <p>A lesson names <b>what</b> to point at, never <b>where</b>. Each step targets a control id from the ids registry (<code>data-al</code>, extensions step DL1) or a command id from the commands registry (<code>COMMANDS</code>, grown from <code>SCA</code> in DL2), and says when it is done with a check on the project state, not on clicks. When the control is not on screen, the guide runs the command that shows it (or offers it as a button), then points.</p>
+   <p>Try it in the L mock: <b>Shuffle the layout</b> moves the knobs and swaps the devices, <b>Hide devices</b> closes the panel. The running step finds its control again, or offers “Show devices ⇧D”.</p>
+   <p class="mut sm">A headless test walks every lesson against the app: each target id must resolve to a visible control after its reveal command, and each check must flip when its action is simulated. A renamed or removed control fails the test, not the user.</p>
+  </div>
+  <pre id="lessonjson"></pre>
+ </div>
+</section>
+
+<section class="fam" id="research">
+ <div class="gh"><h2>Research</h2><span class="k">sources opened on 27 November 2026</span></div>
+ <div class="two">
+  <div class="box"><h3>Music software</h3><ul class="src">
+   <li><b>Bitwig</b>: “Interactive Help is built in to every device, modulator, and Grid module.” F1, Show Help in the Inspector, or right-click › Show Item Help opens “a live, editable copy of the device”; in the Grid “parameters can be freely adjusted while this view is open.” <a href="https://www.bitwig.com/userguide/latest/device_descriptions">Device descriptions</a>, <a href="https://www.bitwig.com/userguide/latest/welcome_to_the_grid">Welcome to the Grid</a>. → option P3 and the Assistant's “explain this device”.</li>
+   <li><b>Ableton Live</b>: Info View “displays the name and function of whatever element of the UI that you hover over”, toggled with <kbd>?</kbd>. Live 12.4 (May 2026) added a <b>Learn View</b> that “replaces the earlier Help View and its associated lessons”, with modules, filters and completion tracking. <a href="https://www.ableton.com/en/live-manual/12/first-steps/">Live 12 manual, First steps</a>, <a href="https://www.ableton.com/release-notes/live-12/">Live 12 release notes</a>. → W3, H2, G1.</li>
+   <li><b>Logic Pro</b>: Quick Help “shows a brief description of interface elements without interrupting your work”, in the inspector, a floating window or bubbles at the pointer. <a href="https://support.apple.com/en-ae/guide/logicpro/lgcpa0902aeb/mac">Logic Pro User Guide</a>. → W1 never interrupts.</li>
+   <li><b>FL Studio</b>: the hint bar: “If you place your cursor over any control a short description of it will appear here”, also values while you adjust; the floating hint panel is “transparent to mouse clicks”. <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/toolbar_panels.htm">FL Studio manual, toolbar panels</a>. → P2, W3.</li>
+  </ul></div>
+  <div class="box"><h3>Other software and research</h3><ul class="src">
+   <li><b>Blender</b>: tooltips after a short delay, Python tooltips that show the operator's id, and F1 or right-click › Online Manual for the hovered control (“We do not currently have 100% coverage”). <a href="https://docs.blender.org/manual/en/4.2/getting_started/help.html">Blender manual, Help system</a>. → the id line in W1's card.</li>
+   <li><b>Figma</b> (vendor teardown): “Figma Basics” files on first login so people “learn by touching actual objects”. <a href="https://supademo.com/content/plg-onboarding-gallery/figma">Supademo</a>. <b>Duolingo</b>: a lesson before sign-up, short lessons, a progress bar that “sets a user's expectations of effort”. <a href="https://goodux.appcues.com/blog/duolingo-user-onboarding">Appcues GoodUX</a>. → L2, G1.</li>
+   <li><b>NN/g</b>: “Tutorials interrupt users, don't necessarily improve task performance, and are quickly forgotten”; prefer <b>pull revelations</b>, help “triggered by some signal that the user would benefit from that information at that moment”; make help “easy to dismiss (and recall)”; “skip the obvious stuff”. <a href="https://www.nngroup.com/articles/onboarding-tutorials/">Onboarding tutorials</a>, <a href="https://www.nngroup.com/articles/help-and-documentation/">Help and documentation</a>.</li>
+   <li><b>Coach marks</b>: “If users are in the middle of a task, coachmarks can be perceived as an obstruction”; we remember 3–4 things at a time. <a href="https://ui-patterns.com/patterns/coachmarks">UI-Patterns</a>. Vendor rule of thumb: more than 3–5 tips in a first session is too many; stop a tip once the feature is used. <a href="https://www.chameleon.io/blog/contextual-help-ux">Chameleon</a>.</li>
+   <li><b>Accessible tours</b>: non-modal popovers that do not close on outside clicks, an explicit close, focus returned to the control, a heading per step, and no covering of the focused control (WCAG 2.4.11). <a href="https://developer.chrome.com/docs/modern-web-guidance/guides/ui-components/persistent-app-tours">Chrome, persistent app tours</a>.</li>
+  </ul></div>
+ </div>
+ <div class="box"><h3>What makes tutorials annoying, and the rule each option follows</h3>
+  <table><thead><tr><th>Annoyance</th><th>Rule here</th></tr></thead><tbody>
+   <tr><td>It blocks the app (today's mode)</td><td>Nothing is ever blocked. No scrim, no swallowed clicks. The callout never covers its control or the focused control.</td></tr>
+   <tr><td>Too long, can't skip</td><td>Lessons are 4 to 6 steps, 2 to 4 minutes. Skip step, Back, End and Esc on every step. Steps you already did are passed with “already done”.</td></tr>
+   <tr><td>Pushed at you</td><td>Nothing starts by itself. First run gets one line in the notification stack (N1) offering the guide; the rest is pulled from Help.</td></tr>
+   <tr><td>Forgotten at once</td><td>You do the thing on your own song while it plays; the guide only confirms. A lesson can be reopened any time from Help.</td></tr>
+   <tr><td>Costs speed</td><td>Off: no elements, no listeners beyond the ? button and F1, no timers. On: one card, one SVG leader, one ring; re-placed only when the target moves or a value changes.</td></tr>
+  </tbody></table>
+ </div>
+</section>
+
+<section class="fam" id="tasks">
+ <div class="gh"><h2>Proposed tasks after the picks</h2><span class="k">who builds what (CLAUDE.md lanes)</span></div>
+ <div class="tw box"><table><thead><tr><th>Step</th><th>Lane</th><th>What</th><th>Needs</th></tr></thead><tbody>
+  <tr><td class="n">LM0</td><td>H (XT)</td><td>Ids first: <code>data-al</code> on the transport, track headers, device knobs and the ? button (DL1 part 1 and the knob part of DL7); <code>COMMANDS</code> with <code>runCommand(id)</code> (DL2). No visible change.</td><td>none</td></tr>
+  <tr><td class="n">LM1</td><td>F (OV)</td><td>The guide engine <code>ovGuide</code>: callout with the amber leader (shares T3's drawing), ring, placement that never covers the control, reveal by command, Esc and focus rules. Replaces <code>tutSet</code>; F1 and the ? button move to it.</td><td>LM0, OV1</td></tr>
+  <tr><td class="n">LM2</td><td>F (OV)</td><td>The Help menu (the picked H) with search over commands, controls, lessons and settings; shortcuts sheet; what's new from <code>desktop/update-notes.txt</code>; the Assistant row.</td><td>LM1, OV8 (palette)</td></tr>
+  <tr><td class="n">LM3</td><td>F (OV)</td><td>“What is this?” (the picked W), fed by <code>TIPS</code>, the settings table (S4) and <code>INS</code> for live values with units.</td><td>LM1, S4</td></tr>
+  <tr><td class="n">LM4</td><td>new lane J (lessons, prefix <code>lm</code>)</td><td>The lesson runner and the four psytrance lessons as data (<code>LM_LESSONS</code>): steps by id, state checks, “already done”, progress in <code>UI.lm</code>. A headless test walks every lesson.</td><td>LM1</td></tr>
+  <tr><td class="n">LM5</td><td>J with C (FT) hooks</td><td>Lesson checks that need engine state (sidechain, automation write, master peak) read it through <code>FT_HOOKS</code> / <code>INS</code> getters, never by reaching into another lane's code.</td><td>LM4</td></tr>
+  <tr><td class="n">LM6</td><td>J and the Assistant</td><td>Assistant tools <code>point_at(id, text)</code> and <code>start_lesson(id)</code>, so “what does Decay do?” answers with a pointer on the real knob.</td><td>LM1, LM4</td></tr>
+ </tbody></table></div>
+</section>
+
+</div>
+
+<div class="pbar" role="region" aria-label="Your picks"><div class="in">
+ <div class="fams" id="pfams"></div>
+ <span class="line" id="pline" aria-live="polite">Learn picks: N? H? P? W? L? G?</span>
+ <input id="pnote" placeholder="note (optional)" aria-label="Note to add to the picks line">
+ <button class="btn" id="rec">Use ★ picks</button>
+ <button class="btn ok" id="copy">Copy</button><span class="mut sm" id="copied" aria-live="polite"></span>
+</div></div>
+
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const store={get(k){try{return JSON.parse(localStorage.getItem('ux3.'+k))}catch(e){return null}},set(k,v){try{localStorage.setItem('ux3.'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* ---------- page theme / motion ---------- */
+function segBind(id,key,apply){const s=$('#'+id),v=store.get(key)||'';const set=x=>{$$('button',s).forEach(b=>b.classList.toggle('on',b.dataset.v===x));apply(x);store.set(key,x)};$$('button',s).forEach(b=>b.onclick=()=>set(b.dataset.v));set(v)}
+segBind('theme','theme',v=>v?document.documentElement.dataset.theme=v:delete document.documentElement.dataset.theme);
+segBind('motion','motion',v=>v?document.documentElement.dataset.motion=v:delete document.documentElement.dataset.motion);
+const reduced=()=>getComputedStyle(document.documentElement).getPropertyValue('--mo').trim()==='0';
+
+/* ---------- names ---------- */
+const NAMES={
+ N1:{n:'Field guide',id:'Identify',les:'Lessons',why:'A field guide is what a scientist carries while working outdoors: you look something up beside the real thing. “Identify” is the field guide verb for “what is this?”.',star:1},
+ N2:{n:'Lab notes',id:'Annotate',les:'Lessons',why:'Matches the lab look and the Workshop. Reads as notes you keep, less as a mode you enter.'},
+ N3:{n:'Explain',id:'Explain',les:'Lessons',why:'Plain and searchable; says exactly what it does. Less character.'},
+ N4:{n:'Guide',id:'What is this?',les:'Lessons',why:'Short and universal; the risk is it sounds like a one-time tour.'},
+ N5:{n:'Learn',id:'What is this?',les:'Lessons',why:'Ableton now uses Learn View; familiar to Live users, but the same word.'},
+ N6:{n:'Bench notes',id:'Annotate',les:'Exercises',why:'A lab-bench feel next to the Workshop; less obvious to a newcomer.'}};
+let CUR=Object.assign({N:'N1',H:'H1',P:'P1',W:'W1',L:'L1',G:'G1'},store.get('cur')||{});
+let PICK=Object.assign({N:null,H:null,P:null,W:null,L:null,G:null},store.get('picks')||{});
+const REC={N:'N1',H:'H1',P:'P1',W:'W1',L:'L1',G:'G1'};
+const nm=()=>NAMES[CUR.N]||NAMES.N1;
+
+/* ---------- parameters, controls, commands ---------- */
+const P={
+ 'transport.tempo':{n:'Tempo',min:60,max:200,def:138,u:'BPM',step:1},
+ 'bass.cutoff':{n:'Cutoff',min:60,max:18000,def:900,u:'Hz',log:1},
+ 'bass.res':{n:'Resonance',min:.5,max:18,def:2,u:'Q',log:1},
+ 'bass.decay':{n:'Decay',min:20,max:800,def:320,u:'ms',log:1},
+ 'bass.drive':{n:'Drive',min:0,max:100,def:0,u:'%'},
+ 'pump.depth':{n:'Depth',min:0,max:100,def:0,u:'%'},
+ 'pump.release':{n:'Release',min:10,max:600,def:250,u:'ms',log:1}};
+const TR=[['kick','Kick','#e8664c'],['bass','Bass','#4c8dff'],['lead','Lead','#f5c84c'],['pad','Pad','#b583ff'],['fx','FX','#cfd3db']];
+TR.forEach(([k,n])=>P['trk.'+k+'.vol']={n:n+' level',min:-40,max:6,def:-3,u:'dB',step:.5});
+function fmtv(al,v){const p=P[al];if(!p)return '';const u=p.u;let s;
+ if(u==='Hz')s=v>=1000?[(v/1000).toFixed(v>=10000?1:2),'kHz']:[Math.round(v),'Hz'];else if(u==='ms')s=[Math.round(v),'ms'];else if(u==='%')s=[Math.round(v),'%'];
+ else if(u==='dB')s=[(v<=-39.9?'−∞':(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)),'dB'];else if(u==='BPM')s=[v.toFixed(2),'BPM'];else s=[v.toFixed(1),u];return s}
+const fv=(al,v)=>{const[a,b]=fmtv(al,v);return `${a}<u>${b}</u>`},ft=(al,v)=>fmtv(al,v).join(' ');
+const norm=(p,v)=>p.log?Math.log(v/p.min)/Math.log(p.max/p.min):(v-p.min)/(p.max-p.min);
+const den=(p,n)=>{n=clamp(n,0,1);let v=p.log?p.min*Math.pow(p.max/p.min,n):p.min+n*(p.max-p.min);if(p.step)v=Math.round(v/p.step)*p.step;return v};
+const six=M=>60000/M.p['transport.tempo']/4;
+/* what each control is: the text a TIPS row or the settings table would hold */
+const INFO={
+ 'help.button':{t:'Help',d:'Opens help: search, “what is this?”, lessons, keyboard shortcuts, what\'s new and the Assistant.',k:'F1 · what is this?',cmd:'help.menu'},
+ 'assistant.button':{t:'Assistant',d:'Ask in words. It can change the song (with undo) and point at controls.',k:'⌘K',cmd:'help.assistant'},
+ 'transport.play':{t:'Play',d:'Starts or pauses playback from the playhead.',k:'Space',cmd:'transport.play'},
+ 'transport.stop':{t:'Stop',d:'Stops and returns the playhead to where play started.',k:'⇧Space',cmd:'transport.stop'},
+ 'transport.loop':{t:'Cycle',d:'Plays the loop range over and over. Click a section to loop it.',k:'⇧L',cmd:'transport.loop'},
+ 'transport.rec':{t:'Record',d:'Records what you play into armed tracks.',k:'⇧R',cmd:'transport.rec'},
+ 'transport.autoW':{t:'Automation write',d:'While it plays, every knob you move is written as a line on its track. Turn it off to let the line play the knob.',k:'W',cmd:'transport.autoWrite'},
+ 'transport.tempo':{t:'Tempo',d:'Beats per minute of the whole song. Drag up or down, scroll, or use the arrow keys.',k:'↑ ↓ when focused',lesson:'roll'},
+ 'transport.pos':{t:'Position',d:'Bar . beat . sixteenth of the playhead.',k:'—'},
+ 'bass.cutoff':{t:'Cutoff',d:'The low-pass filter\'s corner frequency. Lower is darker and rounder; higher lets the bite through.',k:'—',lesson:'roll'},
+ 'bass.res':{t:'Resonance',d:'A peak at the cutoff. High values whistle; a little adds punch to a rolling bass.',k:'—'},
+ 'bass.decay':{t:'Decay',d:'How long each note takes to fade. In a rolling bass every note must end before the next 16th starts.',k:'—',lesson:'roll'},
+ 'bass.drive':{t:'Drive',d:'Soft saturation after the filter. Adds harmonics so the bass is heard on small speakers.',k:'—'},
+ 'bass.power':{t:'Bass synth on / off',d:'Bypasses the synth\'s filter and drive.',k:'—'},
+ 'pump.power':{t:'Sidechain pump on / off',d:'Turns the ducking on or off. Compare both to judge it.',k:'—',lesson:'side'},
+ 'pump.depth':{t:'Depth',d:'How far the bass drops each time the kick hits.',k:'—',lesson:'side'},
+ 'pump.release':{t:'Release',d:'How fast the bass comes back after the kick. Matching it to a 16th makes the groove breathe.',k:'—',lesson:'side'},
+ 'bass.display':{t:'Filter and envelope display',d:'Yellow: the filter\'s response from 20 Hz to 20 kHz. Cyan: one note\'s envelope against the 16th grid of one beat.',k:'—'},
+ 'pump.display':{t:'Pump display',d:'The bass\'s level over one beat: the dip at the kick and the way back.',k:'—'},
+ 'master.meter':{t:'Master peak meter',d:'The highest sample of the mix, in dBFS. Red above −1 dBFS: leave room for the master.',k:'—',lesson:'drop'},
+ 'kick.steps':{t:'Kick steps',d:'One bar in 16ths. Click a step to place or remove a kick.',k:'—'},
+ 'bass.steps':{t:'Bass steps',d:'One bar in 16ths. A rolling bass fills the three 16ths after each kick.',k:'—',lesson:'roll'},
+ 'arr.sections':{t:'Sections',d:'Named parts of the song. Click one to loop it while you work.',k:'—',lesson:'build'},
+ 'arr.section.intro':{t:'Intro section',d:'Bars 1 to 8. Click to loop it.',k:'—'},
+ 'arr.section.build':{t:'Build section',d:'Bars 9 to 16. Click to loop it.',k:'—',lesson:'build'},
+ 'arr.section.drop':{t:'Drop section',d:'Bars 17 to 32. Click to loop it.',k:'—',lesson:'drop'},
+ 'view.devices':{t:'Devices',d:'Shows or hides the device panel of the selected track.',k:'⇧D',cmd:'view.devices'}};
+TR.forEach(([k,n])=>{INFO['trk.'+k+'.vol']={t:n+' level',d:'The track\'s fader in dB. Drag up or down; double-click for the default.',k:'—',lesson:k==='kick'||k==='bass'?'drop':null};INFO['trk.'+k+'.mute']={t:'Mute '+n,d:'Silences this track.',k:'M on the selected track'};INFO['trk.'+k+'.solo']={t:'Solo '+n,d:'Only soloed tracks are heard. Click again to bring everything back.',k:'S on the selected track',lesson:k==='kick'?'drop':null}});
+const CMDS=[
+ {id:'transport.play',sca:'play',l:'Play / pause',k:'Space',run:a=>a.toggle()},
+ {id:'transport.stop',sca:'stop',l:'Stop',k:'⇧Space',run:a=>a.stop()},
+ {id:'transport.loop',sca:'loop',l:'Cycle on / off',k:'⇧L',run:a=>a.set('loopOn',!a.M.loopOn)},
+ {id:'transport.autoWrite',l:'Automation write',k:'W',run:a=>a.set('autoW',!a.M.autoW)},
+ {id:'view.devices',sca:'devs',l:'Show / hide devices',k:'⇧D',run:a=>a.set('devs',!a.M.devs)},
+ {id:'view.mixer',sca:'mixer',l:'Mixer window',k:'⇧M',run:a=>a.toast('The mixer is not in this mock')},
+ {id:'help.identify',sca:'tour',l:'What is this? (identify)',k:'F1',run:a=>a.identify(true)},
+ {id:'help.keys',sca:'keys',l:'Keyboard shortcuts',k:'⌘/',run:a=>a.sheet('keys')},
+ {id:'help.assistant',sca:'ai',l:'Assistant',k:'⌘K',run:a=>a.assistant()},
+ {id:'help.whatsnew',l:'What\'s new',k:'',run:a=>a.sheet('new')},
+ {id:'edit.undo',sca:'undo',l:'Undo',k:'⌘Z',run:a=>a.toast('Undo')},
+ {id:'project.save',sca:'save',l:'Save project',k:'⌘S',run:a=>a.toast('Saved')},
+ {id:'view.pianoroll',sca:'pianoroll',l:'Open the selected clip in the piano roll',k:'',run:a=>a.toast('Not in this mock')}];
+const CMD=Object.fromEntries(CMDS.map(c=>[c.id,c]));
+const NEWS=[['0.263','The spectrum is an analyser front panel: REF, RBW, markers, max hold'],['0.262','Piano roll rows follow the key; chord names in the ruler'],['0.260','The clash card offers two fixes for a masked channel'],['0.259','Loudness history in the loudness meter'],['0.257','Level meters: RMS core and peak hold'],['0.256','Menus and dialogs: the new overlay look (OV1)']];
+
+/* ---------- lessons ---------- */
+const sixTxt=M=>`1/16 at ${M.p['transport.tempo'].toFixed(0)} BPM = ${Math.round(six(M))}<u>ms</u>`;
+const BOFF=[1,2,3,5,6,7,9,10,11,13,14,15],KON=[0,4,8,12];
+const LESSONS=[
+ {id:'roll',t:'A rolling bass',mins:3,skill:'Bass',steps:[
+  {al:'transport.tempo',t:'Set psytrance tempo',b:'Drag the tempo up, scroll on it, or click it and use the arrow keys. Psytrance usually sits between 138 and 148 BPM; this lesson uses 143 to 147.',live:M=>`Now ${fv('transport.tempo',M.p['transport.tempo'])} · target 143–147`,done:M=>M.p['transport.tempo']>=143&&M.p['transport.tempo']<=147},
+  {al:'transport.play',cmd:'transport.play',t:'Press Play and keep it playing',b:'Space works too. From here on every step reacts while you listen.',done:M=>M.playing},
+  {al:'bass.steps',t:'Fill the three 16ths after each kick',b:'The kick plays on steps 1, 5, 9 and 13. A rolling bass plays the three steps in between each time: 2 3 4, 6 7 8, 10 11 12, 14 15 16.',live:M=>{const n=BOFF.filter(i=>M.bass[i]).length,c=KON.filter(i=>M.bass[i]).length;return `${n} of 12 placed${c?` · ${c} on a kick step: clear ${c>1?'those':'it'}`:''}`},done:M=>BOFF.every(i=>M.bass[i])&&!KON.some(i=>M.bass[i]),doit:a=>{BOFF.forEach(i=>a.M.bass[i]=1);KON.forEach(i=>a.M.bass[i]=0);a.set('bass',a.M.bass)}},
+  {al:'bass.decay',vis:'env',t:'Make each note shorter than a 16th',b:'Turn Decay down while it plays. Notes longer than a 16th blur into the next one and smear the roll.',live:M=>`Decay ${fv('bass.decay',M.p['bass.decay'])} · ${sixTxt(M)} · ${M.p['bass.decay']<six(M)?'fits ✓':'still overlaps'}`,done:M=>M.p['bass.decay']<six(M)},
+  {al:'bass.cutoff',vis:'filt',t:'Shape the tone with Cutoff',b:'Move Cutoff while it plays. Lower is rounder, higher brings out the bite. Between 300 Hz and 2 kHz suits a rolling bass.',live:(M,s0)=>`Cutoff ${fv('bass.cutoff',M.p['bass.cutoff'])} · moved ${Math.abs(Math.log2(M.p['bass.cutoff']/s0.p['bass.cutoff'])).toFixed(1)} oct`,done:(M,s0)=>Math.abs(Math.log2(M.p['bass.cutoff']/s0.p['bass.cutoff']))>.4&&M.p['bass.cutoff']>=300&&M.p['bass.cutoff']<=2000,must:1}]},
+ {id:'side',t:'Sidechain kick and bass',mins:2,skill:'Groove',steps:[
+  {al:'transport.play',cmd:'transport.play',t:'Press Play',b:'Listen to the kick and the bass fighting for the low end.',done:M=>M.playing},
+  {al:'pump.power',t:'Turn the Sidechain pump on',b:'Click its power button. The pump lowers the bass each time the kick hits.',done:M=>M.pumpOn},
+  {al:'pump.depth',vis:'pump',t:'Duck the bass under the kick',b:'Raise Depth to between 50 and 80 %. Watch the display: the dip is the space the kick gets.',live:M=>`Depth ${fv('pump.depth',M.p['pump.depth'])} · target 50–80`,done:M=>M.p['pump.depth']>=50&&M.p['pump.depth']<=85},
+  {al:'pump.release',vis:'pump',t:'Let it come back in time',b:'Release sets how fast the bass returns. Near one 16th, the bass breathes with the groove.',live:M=>{const r=M.p['pump.release']/six(M);return `Release ${fv('pump.release',M.p['pump.release'])} · ${sixTxt(M)} · ratio ${r.toFixed(2)}${r>=.6&&r<=1.5?' ✓':''}`},done:M=>{const r=M.p['pump.release']/six(M);return r>=.6&&r<=1.5}},
+  {al:'pump.power',t:'Compare: off, then on',b:'Click the power button twice. Hearing it without the pump is the quickest way to judge it.',live:(M,s0)=>`${Math.min(2,M.pumpToggles-s0.pumpToggles)} of 2 clicks`,done:(M,s0)=>M.pumpToggles-s0.pumpToggles>=2&&M.pumpOn,must:1}]},
+ {id:'build',t:'A build with a filter sweep',mins:3,skill:'Arrangement',steps:[
+  {al:'arr.section.build',t:'Loop the Build',b:'Click the Build section above the tracks. The loop plays it over and over while you work.',done:M=>M.loop==='build'&&M.loopOn},
+  {al:'bass.cutoff',t:'Start dark',b:'Turn Cutoff all the way down, under 200 Hz. The sweep starts from here.',live:M=>`Cutoff ${fv('bass.cutoff',M.p['bass.cutoff'])}`,done:M=>M.p['bass.cutoff']<200},
+  {al:'transport.autoW',cmd:'transport.autoWrite',t:'Turn on automation write',b:'W records every knob you move while it plays. Press W or click the button.',done:M=>M.autoW},
+  {al:'transport.play',cmd:'transport.play',t:'Press Play',b:'Recording starts with the movement, not with Play.',done:M=>M.playing},
+  {al:'bass.cutoff',vis:'auto',t:'Sweep Cutoff up across the 8 bars',b:'Turn it slowly from low to high. AudioLab writes the movement as an amber line on the Bass track.',live:M=>{const a=M.auto.filter(x=>x!=null);if(!a.length)return 'Nothing written yet';const lo=Math.min(...a),hi=Math.max(...a);return `Written ${ft('bass.cutoff',lo)} → ${ft('bass.cutoff',hi)} · ${Math.log2(hi/lo).toFixed(1)} oct · ${Math.round(a.length/M.auto.length*100)}<u>%</u> of the build`},done:M=>{const a=M.auto.filter(x=>x!=null);return a.length>M.auto.length*.4&&Math.log2(Math.max(...a)/Math.min(...a))>=4}},
+  {al:'transport.autoW',cmd:'transport.autoWrite',t:'Turn write off and listen',b:'Now the line plays the knob for you: watch Cutoff move on its own.',done:M=>!M.autoW&&M.auto.some(x=>x!=null)}]},
+ {id:'drop',t:'Mixing a drop',mins:4,skill:'Mixing',steps:[
+  {al:'arr.section.drop',t:'Loop the Drop',b:'Click the Drop section, then press Play.',done:M=>M.loop==='drop'&&M.loopOn&&M.playing},
+  {al:'trk.kick.solo',t:'Solo the kick',b:'Mix from the kick up: alone, it sets the level everything else fits under.',done:M=>M.solo.kick&&TR.every(([k])=>k==='kick'||!M.solo[k])},
+  {al:'trk.kick.vol',t:'Kick peaks near −6 dBFS',b:'Drag the Kick level until the master meter peaks between −8 and −4 dBFS. That leaves room for the bass and the master.',live:M=>`Master peak ${M.peak<=-60?'−∞':M.peak.toFixed(1)}<u>dBFS</u> · target −8 … −4`,done:M=>M.solo.kick&&M.playing&&M.peak>=-8&&M.peak<=-4,watch:'master.meter'},
+  {al:'trk.kick.solo',t:'Unsolo the kick',b:'Bring the whole drop back.',done:M=>TR.every(([k])=>!M.solo[k])},
+  {al:'trk.bass.vol',t:'Fit the bass under the kick',b:'Set the Bass level so the master peak stays below −1 dBFS and the bass sits at least 2 dB under the kick.',live:M=>`Master peak ${M.peak<=-60?'−∞':M.peak.toFixed(1)}<u>dBFS</u> · bass ${(M.p['trk.bass.vol']-M.p['trk.kick.vol']).toFixed(1)}<u>dB</u> vs kick`,done:M=>M.playing&&M.peak<-1&&M.peak>-16&&M.p['trk.bass.vol']<=M.p['trk.kick.vol']-2,watch:'master.meter'},
+  {al:'pump.depth',t:'Check the pump',b:'With the pump on and at least 30 % Depth the kick cuts through without turning it up.',done:M=>M.pumpOn&&M.p['pump.depth']>=30}]}];
+const LES=Object.fromEntries(LESSONS.map(l=>[l.id,l]));
+let PROG=store.get('prog')||{};/* lesson id -> highest finished step count, 'done' when complete */
+function progOf(id){const v=PROG[id];return v==='done'?LES[id].steps.length:(v||0)}
+
+/* ---------- audio: one shared context; one mock plays at a time ---------- */
+let AC=null,PLAYING=null;
+function ac(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)()}if(AC.state==='suspended')AC.resume();return AC}
+
+/* ---------- the mock app ---------- */
+const ICON={
+ help:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.1 6.3a1.9 1.9 0 1 1 2.7 1.7c-.5.3-.8.6-.8 1.2v.3M8 11.6v.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+ tm:'<svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v2.5h2.5M8 5v3l2 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ undo:'<svg viewBox="0 0 16 16"><path d="M5 5H10a3.5 3.5 0 0 1 0 7H6M5 5l2.5-2.5M5 5l2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ redo:'<svg viewBox="0 0 16 16"><path d="M11 5H6a3.5 3.5 0 0 0 0 7h4M11 5L8.5 2.5M11 5L8.5 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ full:'<svg viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+ play:'<svg viewBox="0 0 16 16"><path d="M5 3.5l8 4.5-8 4.5z" fill="currentColor"/></svg>',pause:'<svg viewBox="0 0 16 16"><path d="M4.5 3.5h2.5v9H4.5zM9 3.5h2.5v9H9z" fill="currentColor"/></svg>',
+ stop:'<svg viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" fill="currentColor"/></svg>',loop:'<svg viewBox="0 0 16 16"><path d="M3 7V6a2 2 0 0 1 2-2h7l-2-2M13 9v1a2 2 0 0 1-2 2H4l2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ rec:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4" fill="currentColor"/></svg>',chat:'<svg viewBox="0 0 16 16"><path d="M2.5 3.5h11v7H7l-3 2.5v-2.5H2.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+ search:'<svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+ eye:'<svg viewBox="0 0 16 16"><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>',
+ book:'<svg viewBox="0 0 16 16"><path d="M2.5 3h4a2 2 0 0 1 1.5.7A2 2 0 0 1 9.5 3h4v9.5h-4a1.5 1.5 0 0 0-1.5 1 1.5 1.5 0 0 0-1.5-1h-4z" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
+ keys:'<svg viewBox="0 0 16 16"><rect x="1.5" y="4" width="13" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4 7h1M7 7h1M10 7h1M5 9.5h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+ star:'<svg viewBox="0 0 16 16"><path d="M8 2l1.8 3.9 4.2.4-3.2 2.8 1 4.1L8 11l-3.8 2.2 1-4.1L2 6.3l4.2-.4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+ line:'<svg viewBox="0 0 16 16"><path d="M2 12.5h12M2 9h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'};
+const SECS=[['intro','Intro',0,8,'#3a5f7a'],['build','Build',8,16,'#7a5a2a'],['drop','Drop',16,32,'#7a2f3a']];
+
+function makeApp(host,fam){
+ const app=document.createElement('div');app.className='app';app.tabIndex=0;app.setAttribute('role','application');app.setAttribute('aria-label','AudioLab mock ('+fam+')');host.appendChild(app);
+ const M={p:{},playing:false,step:0,bar:0,kick:Array(16).fill(0),bass:Array(16).fill(0),loop:'drop',loopOn:true,autoW:false,auto:[],pumpOn:false,pumpToggles:0,solo:{},mute:{},devs:true,peak:-90,lesson:null,tab:null,layout:0};
+ for(const k in P)M.p[k]=P[k].def;KON.forEach(i=>M.kick[i]=1);BOFF.forEach(i=>M.bass[i]=1);M.p['transport.tempo']=145;M.p['bass.decay']=90;M.p['trk.bass.vol']=-6;
+ const A={app,M,fam,ls:new Set(),
+  on(f){this.ls.add(f)},emit(k){for(const f of this.ls)f(k)},
+  set(k,v){if(k in P){M.p[k]=v}else M[k]=v;sync(k);this.emit(k)},
+  find(al){const el=app.querySelector(`[data-al="${al}"]`);if(!el)return null;if(!el.getClientRects().length)return null;return el},
+  rect(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect(),s=a.width/1120;return{x:(r.left-a.left)/s,y:(r.top-a.top)/s,w:r.width/s,h:r.height/s}},
+  toggle(){M.playing?pause():play()},stop(){pause();M.step=0;M.bar=SECS.find(s=>s[0]===M.loop)[2];sync('pos')},
+  toast(t){const d=document.createElement('div');d.className='gpill';d.style.top='auto';d.style.bottom='70px';d.innerHTML=esc(t);app.appendChild(d);setTimeout(()=>d.remove(),1600)}};
+ /* ----- markup ----- */
+ const knob=al=>`<div class="kn" data-al="${al}" data-sl="${al}" role="slider" tabindex="0" aria-label="${P[al].n}"><svg viewBox="0 0 40 40"><path class="tr" d="${arc(0,1)}"/><path class="ar"/><line class="pt" x1="20" y1="20"/></svg><b>${P[al].n}</b><span class="v"></span></div>`;
+ app.innerHTML=`
+ <div class="rg tb"><div class="tab"><span class="tn">Fractals_remake</span><i>×</i></div><span class="tm">00:00</span><span class="sp"></span>
+  <button class="ib" tabindex="-1">${ICON.tm}</button><button class="ib" tabindex="-1">${ICON.undo}</button><button class="ib" tabindex="-1">${ICON.redo}</button>
+  <button class="ib hb" data-al="help.button" data-act="help" aria-label="Help" aria-haspopup="true">${ICON.help}</button><button class="ib" tabindex="-1">${ICON.full}</button></div>
+ <div class="rg rul">${Array.from({length:8},(_,i)=>`<span style="left:${i*12.5}%">${i*4+1}</span>`).join('')}</div>
+ <div class="rg secs" data-al="arr.sections">${SECS.map(([id,n,a,b,c])=>`<button class="sec" data-al="arr.section.${id}" data-act="sec:${id}" style="left:${a/32*100}%;width:calc(${(b-a)/32*100}% - 2px);background:${c}55;border-color:${c}">${n}</button>`).join('')}</div>
+ <div class="rg hdrs">${TR.map(([k,n,c])=>`<div class="hdr"><i class="cs" style="background:${c}"></i><b>${n}</b><span class="vol" data-al="trk.${k}.vol" data-sl="trk.${k}.vol" role="slider" tabindex="0" aria-label="${n} level"><span class="v"></span></span><button class="ms m" data-al="trk.${k}.mute" data-act="mute:${k}" aria-label="Mute ${n}">M</button><button class="ms s" data-al="trk.${k}.solo" data-act="solo:${k}" aria-label="Solo ${n}">S</button></div>`).join('')}</div>
+ <div class="rg lanes">${TR.map(([k,n,c],i)=>`<div class="lane" data-lane="${k}">${clipsFor(k,n,c)}${k==='bass'?'<svg class="auto" viewBox="0 0 1000 48" preserveAspectRatio="none"><path fill="none" stroke="#f5c84c" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>':''}</div>`).join('')}</div>
+ <div class="ph"></div>
+ <div class="rg dtabs"><span class="dtab on">Bass</span><span class="dtab">Kick</span><span class="dtab">Lead</span><span style="flex:1"></span><button class="dtab" data-al="view.devices" data-act="devs">Devices ▾</button></div>
+ <div class="rg dev">
+  <div class="dv" data-dev="synth" style="flex:1.75"><div class="dh"><button class="pw on" data-al="bass.power" aria-label="Bass synth on"></button>Bass synth<span style="margin-left:auto;font:10px var(--fm);color:var(--a-mut)">SAW · F1</span></div>
+   <div class="dvb" style="flex-direction:column"><div style="display:flex;gap:8px"><div class="knobs" data-kn>${['bass.cutoff','bass.res','bass.decay','bass.drive'].map(knob).join('')}</div>
+    <div class="disp" data-al="bass.display" style="flex:1;height:96px"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><g class="gr"></g><path class="fr" fill="none" stroke="#f5c84c" stroke-width="1.5"/><path class="en" fill="rgba(76,201,240,.12)" stroke="#4cc9f0" stroke-width="1.5"/></svg><span class="ro"></span></div></div>
+    <div class="steps" data-al="kick.steps"><span>Kick</span>${Array.from({length:16},(_,i)=>`<button class="st k${(i>>2)&1?' b4':''}" data-act="ks:${i}" aria-label="Kick step ${i+1}"></button>`).join('')}</div>
+    <div class="steps" data-al="bass.steps"><span>Bass</span>${Array.from({length:16},(_,i)=>`<button class="st b${(i>>2)&1?' b4':''}" data-act="bs:${i}" aria-label="Bass step ${i+1}"></button>`).join('')}</div></div></div>
+  <div class="dv" data-dev="pump" style="flex:1"><div class="dh"><button class="pw" data-al="pump.power" data-act="pump" aria-label="Sidechain pump on or off"></button>Sidechain pump<span style="margin-left:auto;font:10px var(--fm);color:var(--a-mut)">KEY ← KICK</span></div>
+   <div class="dvb" style="flex-direction:column"><div class="knobs" data-kn>${['pump.depth','pump.release'].map(knob).join('')}</div><div class="disp" data-al="pump.display" style="height:96px"><svg viewBox="0 0 220 96" preserveAspectRatio="none"><g class="gr"></g><path class="pc" fill="rgba(76,141,255,.08)" stroke="none"/><path class="pl" fill="none" stroke="#4c8dff" stroke-width="1.5"/></svg><span class="ro"></span></div></div></div>
+  <div class="dv" data-dev="master" style="width:120px;flex:none"><div class="dh">Master</div><div class="dvb" style="align-items:stretch"><div class="meter" data-al="master.meter"><i></i><s></s></div><div style="display:flex;flex-direction:column;gap:6px;font:10px var(--fm);color:var(--a-mut)"><span>PEAK</span><span class="pk" style="color:#e6e8ee;font-size:12px">−∞</span><span>dBFS</span></div></div></div>
+ </div>
+ <div class="rg devhid" hidden>Devices are hidden · <button data-act="devs" style="color:#7fb0ff">Show devices ⇧D</button></div>
+ <div class="rg trn"><button class="tbn" tabindex="-1" aria-hidden="true">◎</button><button class="tbn" data-al="assistant.button" data-act="ai" aria-label="Assistant">${ICON.chat}</button>
+  <span class="pos" data-al="transport.pos"></span><button class="tbn" data-al="transport.stop" data-act="stop" aria-label="Stop">${ICON.stop}</button><button class="tbn pl" data-al="transport.play" data-act="play" aria-label="Play">${ICON.play}</button>
+  <button class="tbn" data-al="transport.loop" data-act="loop" aria-label="Cycle">${ICON.loop}</button><button class="tbn rec" data-al="transport.rec" data-act="rec" aria-label="Record">${ICON.rec}</button><button class="tbn w" data-al="transport.autoW" data-act="autoW" aria-label="Automation write">W</button>
+  <span class="num" data-al="transport.tempo" data-sl="transport.tempo" role="slider" tabindex="0" aria-label="Tempo"><span class="v"></span></span><span class="sp"></span><span style="font:11px var(--fm);color:var(--a-mut)">CPU 3<u>%</u></span></div>
+ <div class="rg hl"><span class="hlt"><b>Map</b> · drag the box to move · pull its edges to zoom</span></div>
+ <div class="rg map">${TR.map(([k,n,c],i)=>SECS.filter(s=>hasClip(k,s[0])).map(s=>`<i style="left:${s[2]/32*100}%;width:${(s[3]-s[2])/32*100}%;top:${6+i*6}px;background:${c}"></i>`).join('')).join('')}</div>
+ <div class="gl"></div>`;
+ function hasClip(k,s){return({kick:['intro','build','drop'],bass:['build','drop'],lead:['drop'],pad:['intro','build'],fx:['build']})[k].includes(s)}
+ function clipsFor(k,n,c){return SECS.filter(s=>hasClip(k,s[0])).map(([id,sn,a,b])=>`<div class="clip" style="left:${a/32*100}%;width:calc(${(b-a)/32*100}% - 2px);background:${c}44;border-color:${c}88">${n} ${a+1}</div>`).join('')}
+ A.layer=$('.gl',app);
+ /* scale to fit */
+ const ro=new ResizeObserver(()=>{const s=host.clientWidth/1120;app.style.transform=`scale(${s})`;A.emit('layout')});ro.observe(host);
+ /* ----- sync DOM from state ----- */
+ function sync(k){
+  for(const al in P){if(k&&k!==al&&k!=='all')continue;const v=M.p[al],p=P[al];
+   for(const el of app.querySelectorAll(`[data-sl="${al}"]`)){const vs=$('.v',el);if(vs)vs.innerHTML=fv(al,v);el.setAttribute('aria-valuenow',String(v));el.setAttribute('aria-valuetext',ft(al,v));
+    const a=$('.ar',el);if(a){const n=norm(p,v);a.setAttribute('d',n>.002?arc(0,n):'');const an=(-225+n*270)*Math.PI/180,pt=$('.pt',el);pt.setAttribute('x2',20+Math.cos(an)*11);pt.setAttribute('y2',20+Math.sin(an)*11)}}}
+  if(!k||k==='all'||k.startsWith('bass.')||k==='transport.tempo')drawSynth();
+  if(!k||k==='all'||k.startsWith('pump')||k==='transport.tempo')drawPump();
+  $$('[data-act^="ks:"]',app).forEach((b,i)=>{b.classList.toggle('on',!!M.kick[i])});$$('[data-act^="bs:"]',app).forEach((b,i)=>{b.classList.toggle('on',!!M.bass[i])});
+  const pb=$('.pl',app);pb.innerHTML=M.playing?ICON.pause:ICON.play;pb.classList.toggle('on',M.playing);
+  $('[data-al="transport.loop"]',app).classList.toggle('on',M.loopOn);$('[data-al="transport.autoW"]',app).classList.toggle('on',M.autoW);
+  $('[data-al="pump.power"]',app).classList.toggle('on',M.pumpOn);
+  $$('.sec',app).forEach(b=>b.classList.toggle('lp',M.loopOn&&b.dataset.act==='sec:'+M.loop));
+  TR.forEach(([t])=>{$(`[data-al="trk.${t}.solo"]`,app).classList.toggle('on',!!M.solo[t]);$(`[data-al="trk.${t}.mute"]`,app).classList.toggle('on',!!M.mute[t])});
+  $('.dev',app).hidden=!M.devs;$('.devhid',app).hidden=M.devs;$('.dtabs [data-act="devs"]',app).textContent=M.devs?'Devices ▾':'Devices ▸';
+  $('[data-al="transport.pos"]',app).textContent=`${M.bar+1} . ${(M.step>>2)+1} . ${(M.step&3)+1}`;
+  const s=SECS.find(x=>x[0]===M.loop),ph=$('.ph',app);ph.style.left=`calc(180px + (100% - 180px - var(--rp)) * ${(M.bar+M.step/16)/32})`;
+  drawAuto()}
+ function drawAuto(){const p=$('.lanes .auto path',app);const s=SECS.find(x=>x[0]==='build'),n=M.auto.length;if(!n||!M.auto.some(v=>v!=null)){p.setAttribute('d','');return}
+  let d='';M.auto.forEach((v,i)=>{if(v==null)return;const x=(s[2]+i/n*(s[3]-s[2]))/32*1000,y=44-norm(P['bass.cutoff'],v)*40;d+=(d&&M.auto[i-1]!=null?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)});p.setAttribute('d',d)}
+ function grat(svg,w,h,nx,ny){const g=$('.gr',svg);if(g.childNodes.length)return;let s='';for(let i=1;i<nx;i++)s+=`<line x1="${i*w/nx}" x2="${i*w/nx}" y1="0" y2="${h}" stroke="rgba(255,255,255,.06)"/>`;for(let i=1;i<ny;i++)s+=`<line y1="${i*h/ny}" y2="${i*h/ny}" x1="0" x2="${w}" stroke="rgba(255,255,255,.06)"/>`;g.innerHTML=s}
+ function drawSynth(){const d=$('[data-al="bass.display"]',app),svg=$('svg',d);grat(svg,300,96,10,4);const fc=M.p['bass.cutoff'],Q=M.p['bass.res'];let fr='';
+  for(let i=0;i<=150;i++){const f=20*Math.pow(1000,i/150),r=f/fc,mag=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Q,2)),db=20*Math.log10(mag),y=clamp(30-db*1.2,2,94);fr+=(i?'L':'M')+(i*2).toFixed(1)+' '+y.toFixed(1)}$('.fr',svg).setAttribute('d',fr);
+  /* one beat = 4 sixteenths over the right part: envelope of a note at each 16th */
+  const beat=60000/M.p['transport.tempo'],dec=M.p['bass.decay'];let en='M0 94';for(let i=0;i<=120;i++){const t=i/120*beat,ph=t%(beat/4),a=Math.exp(-ph/(dec/3)),y=94-a*56;en+=`L${(i/120*300).toFixed(1)} ${y.toFixed(1)}`}en+='L300 94Z';$('.en',svg).setAttribute('d',en);
+  $('.ro',d).innerHTML=`CUT ${fv('bass.cutoff',fc)} · Q ${Q.toFixed(1)} · DEC ${fv('bass.decay',dec)} · 1/16 ${Math.round(beat/4)}<u>ms</u>`}
+ function drawPump(){const d=$('[data-al="pump.display"]',app),svg=$('svg',d);grat(svg,220,96,4,4);const beat=60000/M.p['transport.tempo'],dep=M.pumpOn?M.p['pump.depth']/100:0,rel=M.p['pump.release'];let s='M0 94';
+  for(let i=0;i<=110;i++){const t=i/110*beat,g=1-dep*Math.exp(-t/(rel/3)),y=94-g*70;s+=`L${(i*2).toFixed(1)} ${y.toFixed(1)}`}$('.pl',svg).setAttribute('d',s.replace('M0 94L','M'));s+='L220 94Z';$('.pc',svg).setAttribute('d',s);
+  $('.ro',d).innerHTML=`${M.pumpOn?'ON':'OFF'} · DEPTH ${fv('pump.depth',M.p['pump.depth'])} · REL ${fv('pump.release',rel)}`}
+ /* ----- input: sliders (drag, wheel, keys, double-click) ----- */
+ let drag=null;
+ app.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-sl]');if(!el||e.button!==0)return;e.preventDefault();el.focus({preventScroll:true});el.setPointerCapture(e.pointerId);drag={el,al:el.dataset.sl,y:e.clientY,n:norm(P[el.dataset.sl],M.p[el.dataset.sl])}});
+ app.addEventListener('pointermove',e=>{if(!drag)return;const s=app.getBoundingClientRect().width/1120,dy=(drag.y-e.clientY)/s;A.set(drag.al,den(P[drag.al],drag.n+dy/(e.shiftKey?600:160)))});
+ const end=()=>{drag=null};app.addEventListener('pointerup',end);app.addEventListener('pointercancel',end);
+ app.addEventListener('wheel',e=>{const el=e.target.closest('[data-sl]');if(!el)return;e.preventDefault();const al=el.dataset.sl,p=P[al];A.set(al,den(p,norm(p,M.p[al])+(e.deltaY<0?1:-1)*(p.step?p.step/(p.max-p.min):.02)))},{passive:false});
+ app.addEventListener('dblclick',e=>{const el=e.target.closest('[data-sl]');if(el)A.set(el.dataset.sl,P[el.dataset.sl].def)});
+ app.addEventListener('keydown',e=>{const el=e.target.closest&&e.target.closest('[data-sl]');
+  if(el&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End'].includes(e.key)){e.preventDefault();const al=el.dataset.sl,p=P[al],st=p.step?p.step/(p.max-p.min):.01,n=norm(p,M.p[al]);
+   const d={ArrowUp:st,ArrowRight:st,ArrowDown:-st,ArrowLeft:-st,PageUp:st*10,PageDown:-st*10}[e.key];A.set(al,e.key==='Home'?p.min:e.key==='End'?p.max:den(p,n+d*(e.shiftKey?.25:1)));return}
+  if(e.target.tagName==='INPUT')return;
+  if(e.key===' '){e.preventDefault();A.toggle()}else if(e.key==='F1'){e.preventDefault();A.identify(!A.idOn)}else if((e.key==='w'||e.key==='W')&&!e.metaKey&&!e.ctrlKey)CMD['transport.autoWrite'].run(A);else if(e.key==='D'&&e.shiftKey)CMD['view.devices'].run(A);else if(e.key==='Escape')A.escape();else if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();A.assistant()}else if((e.metaKey||e.ctrlKey)&&e.key==='/'){e.preventDefault();A.sheet('keys')}});
+ /* ----- input: buttons ----- */
+ app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||!app.contains(b))return;const[a,x]=b.dataset.act.split(':');ac();
+  if(a==='play')A.toggle();else if(a==='stop')A.stop();else if(a==='loop')A.set('loopOn',!M.loopOn);else if(a==='rec')b.classList.toggle('on');else if(a==='autoW')A.set('autoW',!M.autoW);
+  else if(a==='ks'){M.kick[+x]^=1;A.set('kick',M.kick)}else if(a==='bs'){M.bass[+x]^=1;A.set('bass',M.bass)}
+  else if(a==='pump'){M.pumpToggles++;A.set('pumpOn',!M.pumpOn)}else if(a==='sec'){M.loop=x;M.loopOn=true;M.bar=SECS.find(s=>s[0]===x)[2];M.step=0;if(M.playing)A._jump(M.bar);A.set('loop',x)}
+  else if(a==='solo'){M.solo[x]=!M.solo[x];A.set('solo',M.solo)}else if(a==='mute'){M.mute[x]=!M.mute[x];A.set('mute',M.mute)}else if(a==='devs')CMD['view.devices'].run(A);
+  else if(a==='help')A.helpButton(b);else if(a==='ai')A.assistant()});
+ /* ----- sound ----- */
+ let tmr=0,nextT=0,G=null,ns=0,nb=0;A._jump=b=>{nb=b;ns=0};
+ function graph(){const c=ac();if(G)return G;const mst=c.createGain(),an=c.createAnalyser();an.fftSize=1024;mst.connect(an);an.connect(c.destination);
+  const kg=c.createGain(),bg=c.createGain(),duck=c.createGain(),flt=c.createBiquadFilter(),sh=c.createWaveShaper();flt.type='lowpass';
+  const cur=new Float32Array(1024);let drv=-1;G={c,mst,an,kg,bg,duck,flt,sh,buf:new Float32Array(1024),setDrive(d){if(d===drv)return;drv=d;const k=1+d/12;for(let i=0;i<1024;i++){const x=i/511.5-1;cur[i]=Math.tanh(k*x)/Math.tanh(k)}sh.curve=cur}};
+  flt.connect(sh);sh.connect(duck);duck.connect(bg);bg.connect(mst);kg.connect(mst);G.setDrive(0);return G}
+ const dbg=d=>d<=-39.9?0:Math.pow(10,d/20);
+ function levels(){if(!G)return;const any=TR.some(([k])=>M.solo[k]),on=k=>!M.mute[k]&&(!any||M.solo[k]);const t=G.c.currentTime;
+  G.kg.gain.setTargetAtTime(on('kick')?dbg(M.p['trk.kick.vol']):0,t,.01);G.bg.gain.setTargetAtTime(on('bass')?dbg(M.p['trk.bass.vol']):0,t,.01);
+  G.flt.Q.setTargetAtTime(M.p['bass.res'],t,.01);G.setDrive(M.p['bass.drive'])}
+ function sched(){const c=G.c,spb=60/M.p['transport.tempo']/4;while(nextT<c.currentTime+.12){const st=ns,sec=SECS.find(s=>s[0]===M.loop),bi=nb;
+   const auto=M.loop==='build'&&!M.autoW&&M.auto.length?M.auto[(bi-8)*16+st]:null,cut=auto??M.p['bass.cutoff'];if(auto!=null&&Math.abs(auto-M.p['bass.cutoff'])>1){M.p['bass.cutoff']=auto;queueMicrotask(()=>{sync('bass.cutoff');A.emit('bass.cutoff')})}
+   G.flt.frequency.setTargetAtTime(cut,nextT,.006);
+   if(M.kick[st]){const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(150,nextT);o.frequency.exponentialRampToValueAtTime(45,nextT+.12);g.gain.setValueAtTime(1,nextT);g.gain.exponentialRampToValueAtTime(.001,nextT+.32);o.connect(g);g.connect(G.kg);o.start(nextT);o.stop(nextT+.35);
+    if(M.pumpOn){const d=1-M.p['pump.depth']/100;G.duck.gain.cancelScheduledValues(nextT);G.duck.gain.setValueAtTime(Math.max(d,.0001),nextT+.002);G.duck.gain.setTargetAtTime(1,nextT+.01,M.p['pump.release']/1000/3)}else{G.duck.gain.cancelScheduledValues(nextT);G.duck.gain.setValueAtTime(1,nextT)}}
+   if(M.bass[st]){const o=c.createOscillator(),g=c.createGain(),dur=M.p['bass.decay']/1000;o.type='sawtooth';o.frequency.value=43.65;g.gain.setValueAtTime(0,nextT);g.gain.linearRampToValueAtTime(.55,nextT+.003);g.gain.setTargetAtTime(0,nextT+.004,dur/3);o.connect(g);g.connect(G.flt);o.start(nextT);o.stop(nextT+dur*2+.05)}
+   const when=nextT;setTimeout(()=>{if(!M.playing)return;M.step=st;M.bar=bi;stepUI()},Math.max(0,(when-c.currentTime)*1000));
+   nextT+=spb;ns=(st+1)%16;if(ns===0){nb=bi+1;if(M.loopOn&&(nb>=sec[3]||nb<sec[2]))nb=sec[2];if(nb>=32)nb=0}}}
+ function stepUI(){$$('.st.now',app).forEach(b=>b.classList.remove('now'));const i=M.step;const k=$$('[data-act^="ks:"]',app)[i],b=$$('[data-act^="bs:"]',app)[i];k&&k.classList.add('now');b&&b.classList.add('now');
+  $('[data-al="transport.pos"]',app).textContent=`${M.bar+1} . ${(M.step>>2)+1} . ${(M.step&3)+1}`;$('.ph',app).style.left=`calc(180px + (100% - 180px - var(--rp)) * ${(M.bar+M.step/16)/32})`;
+  if(M.autoW&&M.loop==='build'&&M.bar>=8&&M.bar<16){if(M.auto.length!==128)M.auto=Array(128).fill(null);M.auto[(M.bar-8)*16+M.step]=M.p['bass.cutoff'];drawAuto();A.emit('auto')}}
+ let mraf=0,pkHist=[];function meter(){if(!M.playing||!G){mraf=0;return}G.an.getFloatTimeDomainData(G.buf);let pk=0;for(const v of G.buf)pk=Math.max(pk,Math.abs(v));const db=pk>0?20*Math.log10(pk):-90,now=performance.now();pkHist.push([now,db]);pkHist=pkHist.filter(x=>now-x[0]<1500);
+  const hold=Math.max(...pkHist.map(x=>x[1]));const mt=$('.meter',app),h=clamp((db+60)/60,0,1),hh=clamp((hold+60)/60,0,1);$('i',mt).style.height=h*100+'%';$('s',mt).style.bottom=hh*100+'%';$('.pk',app).textContent=hold<=-60?'−∞':hold.toFixed(1).replace('-','−');$('.pk',app).style.color=hold>-1?'#ff5d6c':'#e6e8ee';
+  if(Math.abs(hold-M.peak)>.3){M.peak=hold;if(!meter.t||now-meter.t>200){meter.t=now;A.emit('peak')}}mraf=requestAnimationFrame(meter)}
+ function play(){graph();if(PLAYING&&PLAYING!==A)PLAYING.stop();PLAYING=A;levels();M.playing=true;nextT=G.c.currentTime+.05;const s=SECS.find(x=>x[0]===M.loop);if(M.loopOn&&(M.bar<s[2]||M.bar>=s[3])){M.bar=s[2];M.step=0}ns=M.step;nb=M.bar;tmr=setInterval(sched,25);sched();if(!mraf)mraf=requestAnimationFrame(meter);sync('play');A.emit('playing')}
+ function pause(){M.playing=false;clearInterval(tmr);if(G)G.duck.gain.cancelScheduledValues(0);$$('.st.now',app).forEach(b=>b.classList.remove('now'));M.peak=-90;pkHist=[];const mt=$('.meter',app);$('i',mt).style.height='0';$('s',mt).style.bottom='0';$('.pk',app).textContent='−∞';sync('play');A.emit('playing')}
+ A.on(k=>{if(G&&(k==='solo'||k==='mute'||String(k).startsWith('trk.')||k==='bass.res'||k==='bass.drive'))levels()});
+ A.on(k=>{if(k==='transport.tempo'&&M.loop==='build'){}});
+ attachHelp(A);sync('all');return A}
+function arc(a,b){const r=15,s=(-225+a*270)*Math.PI/180,e=(-225+b*270)*Math.PI/180,x0=20+r*Math.cos(s),y0=20+r*Math.sin(s),x1=20+r*Math.cos(e),y1=20+r*Math.sin(e);return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${(b-a)*270>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`}
+
+/* ---------- the guide: callout with an amber leader (and the other P styles) ---------- */
+function attachHelp(A){const app=A.app,L=A.layer,M=A.M;let cur=null,card=null,lead=null,ring=null,raf=0;const cost=()=>A.emit('cost');
+ A.gcount=()=>L.querySelectorAll('*').length;
+ function els(){if(!lead){lead=document.createElementNS('http://www.w3.org/2000/svg','svg');lead.setAttribute('class','lead');L.appendChild(lead)}if(!ring){ring=document.createElement('div');ring.className='gring';L.appendChild(ring)}if(!card){card=document.createElement('div');card.className='gcard';card.setAttribute('role','dialog');card.setAttribute('aria-live','polite');L.appendChild(card);card.addEventListener('click',onCard)}}
+ function clear(){if(cur&&cur.blk)cur.blk.remove();if(cur&&cur.style==='P2')hl('');cur=null;for(const x of[card,lead,ring])x&&x.remove();card=lead=ring=null;const f=$('.focus',L);f&&f.remove();hl('');cost()}
+ A.unpoint=clear;
+ /* point(al, {html()->string, style, onAct}) */
+ A.point=(al,o)=>{const prev=cur;cur=Object.assign({al},o);const ob=prev&&prev.blk;if(ob){if(cur.style==='P0')cur.blk=ob;else ob.remove()}const f=$('.focus',L);if(f&&cur.style!=='P3')f.remove();if(prev&&prev.style==='P2'&&cur.style!=='P2')hl('');if(cur.style==='P3')buildFocus();place();cost()};
+ A.repoint=()=>{if(cur)place()};
+ function hl(html){const h=$('.hlt',app);h.innerHTML=html||'<b>Map</b> · drag the box to move · pull its edges to zoom'}
+ function place(){if(!cur)return;const style=cur.style||'P1';const el=A.find(cur.al);
+  if(style==='P2'){/* ring + help line */for(const x of[card,lead])x&&x.remove();card=lead=null;if(!ring){ring=document.createElement('div');ring.className='gring';L.appendChild(ring)}ring.classList.toggle('pulse',!reduced());
+   if(el){const r=A.rect(el);Object.assign(ring.style,{left:r.x-4+'px',top:r.y-4+'px',width:r.w+8+'px',height:r.h+8+'px',display:'block'})}else ring.style.display='none';
+   hl(cur.line?cur.line():'');return}
+  if(style==='P0'&&!cur.blk){const b=document.createElement('div');b.className='blk';b.style.background='rgba(0,0,0,.35)';b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(card){card.classList.remove('shake2');void card.offsetWidth;card.classList.add('shake2')}});b.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation()},{passive:false});L.insertBefore(b,L.firstChild);cur.blk=b}
+  els();ring.classList.remove('pulse');card.innerHTML=cur.html(!el)+(style==='P0'?'<div class="glive" style="color:#4cc9f0">Tutorial mode: the controls are locked while this card is open.</div>':'');card.classList.toggle('p0',style==='P0');ring.style.borderColor=style==='P0'?'#4cc9f0':'';
+  const cw=276,ch=card.offsetHeight;
+  if(!el){ring.style.display='none';lead.innerHTML='';card.style.left=(1120-cw)/2+'px';card.style.top='250px';return}
+  const r=A.rect(el),W=1120-parseFloat(getComputedStyle(app).getPropertyValue('--rp')||0),H=700,gap=56;Object.assign(ring.style,{left:r.x-4+'px',top:r.y-4+'px',width:r.w+8+'px',height:r.h+8+'px',display:'block'});
+  const avoid=cur.avoid?cur.avoid.map(a=>A.find(a)).filter(Boolean).map(A.rect):[];
+  const cand=[['r',r.x+r.w+gap,r.y+r.h/2-ch/2],['l',r.x-gap-cw,r.y+r.h/2-ch/2],['t',r.x+r.w/2-cw/2,r.y-gap-ch],['b',r.x+r.w/2-cw/2,r.y+r.h+gap]];
+  const fits=([s,x,y])=>x>=6&&y>=34&&x+cw<=W-6&&y+ch<=H-6,hit=(x,y,b)=>!(x+cw<b.x-4||x>b.x+b.w+4||y+ch<b.y-4||y>b.y+b.h+4);
+  let best=null,bs=-1e9;for(const c of cand){let[s,x,y]=c;const nx=clamp(x,6,W-cw-6),ny=clamp(y,34,H-ch-6);let sc=fits(c)?100:0;sc-=Math.abs(nx-x)+Math.abs(ny-y);if(hit(nx,ny,r))sc-=1000;for(const b of avoid)if(hit(nx,ny,b))sc-=300;if(sc>bs){bs=sc;best=[s,nx,ny]}}
+  const[side,x,y]=best;card.style.left=x+'px';card.style.top=y+'px';
+  /* leader: from the card's edge to the control's edge, a hairline and a dot */
+  let sx,sy,tx,ty;const cx=clamp(r.x+r.w/2,x+12,x+cw-12),cy=clamp(r.y+r.h/2,y+12,y+ch-12);
+  if(side==='r'){sx=x;sy=cy;tx=r.x+r.w+3;ty=clamp(sy,r.y+2,r.y+r.h-2)}else if(side==='l'){sx=x+cw;sy=cy;tx=r.x-3;ty=clamp(sy,r.y+2,r.y+r.h-2)}else if(side==='t'){sx=cx;sy=y+ch;tx=clamp(sx,r.x+2,r.x+r.w-2);ty=r.y-3}else{sx=cx;sy=y;tx=clamp(sx,r.x+2,r.x+r.w-2);ty=r.y+r.h+3}
+  const hor=side==='r'||side==='l',mx=(sx+tx)/2,my=(sy+ty)/2,d=hor?`M${sx} ${sy}H${mx}V${ty}H${tx}`:`M${sx} ${sy}V${my}H${tx}V${ty}`;
+  const lc=style==='P0'?'#4cc9f0':'#f5c84c';lead.innerHTML=`<path d="${d}" fill="none" stroke="${lc}" stroke-width="${style==='P0'?2:1}"/><circle cx="${tx}" cy="${ty}" r="3" fill="${lc}"/><circle cx="${sx}" cy="${sy}" r="2" fill="${lc}"/>`}
+ function onCard(e){const b=e.target.closest('[data-g]');if(!b)return;e.stopPropagation();cur&&cur.onAct&&cur.onAct(b.dataset.g,b)}
+ /* P3: a focus strip with live copies of the controls the step needs (Bitwig-like) */
+ function buildFocus(){let f=$('.focus',L);if(f)f.remove();f=document.createElement('div');f.className='focus pop';const ks=cur.copies||[cur.al];
+  f.innerHTML=`<div class="fh">FOCUS · LIVE COPIES · THE ORIGINALS STAY WHERE THEY ARE<span style="margin-left:auto;color:#8c8f9b">P3</span></div><div class="fb">${ks.filter(k=>P[k]).map(al=>`<div class="kn" data-sl="${al}" role="slider" tabindex="0" aria-label="${P[al].n} (copy)" style="width:80px"><svg viewBox="0 0 40 40" style="width:56px;height:56px"><path class="tr" d="${arc(0,1)}"/><path class="ar"/><line class="pt" x1="20" y1="20"/></svg><b>${P[al].n}</b><span class="v"></span></div>`).join('')}<div class="gvis" style="flex:1;height:120px;margin:0"></div></div>`;
+  L.appendChild(f);cur.focusEl=f;ks.forEach(k=>P[k]&&A.set(k,M.p[k]))}
+ let rq=0;const re=()=>{if(rq)return;rq=requestAnimationFrame(()=>{rq=0;place();if(cur&&cur.focusEl){const v=$('.gvis',cur.focusEl);if(v)v.innerHTML=vis(cur.vis||'env',M)}})};
+ A.on(k=>{if(cur&&k!=='peak'||k==='layout')re();else if(cur&&k==='peak')re()});
+ /* the rest of help: identify, menus, lessons */
+ helpSurfaces(A,hl,()=>cur)}
+
+/* small live pictures for guide cards */
+function vis(kind,M){const W=260,H=60;if(kind==='env'){const beat=60000/M.p['transport.tempo'],dec=M.p['bass.decay'];let s=`M0 ${H}`;for(let i=0;i<=130;i++){const t=i/130*beat,ph=t%(beat/4),a=Math.exp(-ph/(dec/3));s+=`L${(i/130*W).toFixed(1)} ${(H-2-a*(H-8)).toFixed(1)}`}
+  let g='';for(let i=1;i<4;i++)g+=`<line x1="${i*W/4}" x2="${i*W/4}" y1="0" y2="${H}" stroke="rgba(245,200,76,.5)" stroke-dasharray="2 3"/>`;return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${g}<path d="${s}L${W} ${H}Z" fill="rgba(76,201,240,.15)" stroke="#4cc9f0" stroke-width="1.5"/><text x="4" y="10" fill="#9aa0ad" font-size="8" font-family="JetBrains Mono,ui-monospace,Menlo,monospace">ONE BEAT · AMBER = 16ths</text></svg>`}
+ if(kind==='filt'){const fc=M.p['bass.cutoff'],Q=M.p['bass.res'];let s='';for(let i=0;i<=120;i++){const f=20*Math.pow(1000,i/120),r=f/fc,mag=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Q,2)),y=clamp(22-20*Math.log10(mag)*1,2,H-2);s+=(i?'L':'M')+(i/120*W).toFixed(1)+' '+y.toFixed(1)}const xc=Math.log(fc/20)/Math.log(1000)*W;return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${xc}" x2="${xc}" y1="0" y2="${H}" stroke="rgba(245,200,76,.6)" stroke-dasharray="2 3"/><path d="${s}" fill="none" stroke="#f5c84c" stroke-width="1.5"/><text x="4" y="10" fill="#9aa0ad" font-size="8" font-family="JetBrains Mono,ui-monospace,Menlo,monospace">20 Hz … 20 kHz</text></svg>`}
+ if(kind==='pump'){const beat=60000/M.p['transport.tempo'],dep=M.pumpOn?M.p['pump.depth']/100:0,rel=M.p['pump.release'];let s=`M0 ${H}`;for(let i=0;i<=120;i++){const t=i/120*beat,g=1-dep*Math.exp(-t/(rel/3));s+=`L${(i/120*W).toFixed(1)} ${(H-2-g*(H-10)).toFixed(1)}`}const x16=W/4;return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${x16}" x2="${x16}" y1="0" y2="${H}" stroke="rgba(245,200,76,.6)" stroke-dasharray="2 3"/><path d="${s}L${W} ${H}Z" fill="rgba(76,141,255,.15)" stroke="#4c8dff" stroke-width="1.5"/><text x="4" y="10" fill="#9aa0ad" font-size="8" font-family="JetBrains Mono,ui-monospace,Menlo,monospace">BASS LEVEL OVER ONE BEAT · AMBER = 1/16</text></svg>`}
+ if(kind==='auto'){const a=M.auto;if(!a.length)return '';let s='';a.forEach((v,i)=>{if(v==null)return;s+=(s&&a[i-1]!=null?'L':'M')+(i/a.length*W).toFixed(1)+' '+(H-4-norm(P['bass.cutoff'],v)*(H-8)).toFixed(1)});return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${s}" fill="none" stroke="#f5c84c" stroke-width="1.5"/><text x="4" y="10" fill="#9aa0ad" font-size="8" font-family="JetBrains Mono,ui-monospace,Menlo,monospace">CUTOFF OVER THE 8 BARS</text></svg>`}return ''}
+
+/* identify card */
+function idCard(A,al,missing){const i=INFO[al]||{t:al,d:''},M=A.M,p=P[al],les=i.lesson&&LES[i.lesson];
+ return `<div class="gk">${esc(nm().id)}<span>${esc(al)}</span></div><h4>${esc(i.t)}${p?`<span class="val">${fv(al,M.p[al])}</span>`:''}</h4><p>${esc(i.d)}</p>
+ <dl>${p?`<dt>DEFAULT</dt><dd>${fv(al,p.def)}</dd><dt>RANGE</dt><dd>${ft(al,p.min)} – ${ft(al,p.max)}</dd>`:''}<dt>KEY</dt><dd>${esc(i.k||'—')}</dd>${i.cmd?`<dt>COMMAND</dt><dd>${esc(i.cmd)}</dd>`:''}</dl>
+ ${les?`<div class="gb"><a data-g="les:${les.id}">${esc(nm().les.replace(/s$/,''))}: ${esc(les.t)} ›</a></div>`:''}`}
+function lineFor(A,al){const i=INFO[al]||{t:al,d:''},p=P[al];return `<b>${esc(i.t)}</b>${p?` <span class="ro">${fv(al,A.M.p[al])}</span>`:''} · ${esc(i.d)} ${p?`<span class="ro">DEFAULT ${ft(al,p.def)}</span>`:''} ${i.k&&i.k!=='—'?`<span class="ro">KEY ${esc(i.k)}</span>`:''}`}
+
+function helpSurfaces(A,hl,curGuide){const app=A.app,L=A.layer,M=A.M;
+ /* ===== identify ("what is this?") ===== */
+ let pill=null,hov=null,idAl=null,blk=null;A.idOn=false;
+ A.identify=(on,how)=>{A.idOn=on;const mode=how||CUR.W;A.idMode=mode;closeMenus();
+  if(blk){blk.remove();blk=null}if(pill){pill.remove();pill=null}if(hov){hov.remove();hov=null}if(!on){idAl=null;if(!A.lesson)A.unpoint();hl('');app.querySelector('.hb').classList.remove('on');A.emit('id');return}
+  app.querySelector('.hb').classList.add('on');
+  if(mode==='W0'){blocking();A.emit('id');return}
+  if(mode!=='W3'){pill=document.createElement('div');pill.className='gpill';pill.innerHTML=mode==='W2'?`<b>${esc(nm().n)} · ${esc(nm().id)}</b><span>while you hold <kbd class="kbd">?</kbd></span>`:`<b>${esc(nm().n)} · ${esc(nm().id)}</b><span>Hover anything. Everything still works.</span><button data-x>Done · Esc</button>`;L.appendChild(pill);pill.querySelector('[data-x]')&&(pill.querySelector('[data-x]').onclick=()=>A.identify(false))}
+  else{hl('<b>Help line on</b> · hover any control: its name, value, default and key show here')}
+  A.emit('id')};
+ app.addEventListener('pointermove',e=>{if(!A.idOn||A.idMode==='W0')return;if(e.target.closest('.gcard,.gpill,.pop'))return;const el=e.target.closest('[data-al]');const al=el&&el.dataset.al;if(al===idAl)return;idAl=al;
+  if(A.lesson)return;if(!al){if(A.idMode!=='W3')A.unpoint();else hl('<b>Help line on</b> · hover any control');return}
+  if(A.idMode==='W3'){hl(lineFor(A,al));return}
+  A.point(al,{style:'P1',html:m=>idCard(A,al,m),onAct:act=>{if(act.startsWith('les:')){A.identify(false);A.startLesson(act.slice(4))}}})});
+ app.addEventListener('pointerleave',()=>{if(A.idOn&&A.idMode!=='W0'&&!A.lesson){idAl=null;A.idMode==='W3'?hl('<b>Help line on</b> · hover any control'):A.unpoint()}});
+ A.on(k=>{if(A.idOn&&A.idMode==='W3'&&idAl)hl(lineFor(A,idAl))});
+ /* W2: hold ? */
+ app.addEventListener('keydown',e=>{if(e.key==='?'&&CUR.W==='W2'&&!A.idOn&&e.target.tagName!=='INPUT'){e.preventDefault();A.identify(true,'W2')}});
+ app.addEventListener('keyup',e=>{if(A.idOn&&A.idMode==='W2'&&(e.key==='?'||e.key==='/'||e.key==='Shift'))A.identify(false)});
+ /* W0 / H0: today's blocking tutorial mode */
+ function blocking(){blk=document.createElement('div');blk.className='blk';const a=app.getBoundingClientRect(),s=a.width/1120;let h='';for(const el of app.querySelectorAll('[data-al]')){if(!el.getClientRects().length)continue;const r=A.rect(el);if(r.w<8)continue;h+=`<i style="left:${r.x-2}px;top:${r.y-2}px;width:${r.w+4}px;height:${r.h+4}px" data-for="${el.dataset.al}"></i>`}
+  blk.innerHTML=h+`<div class="blkbar"><b>Tutorial mode</b><span>Hover any button or area to see what it does. Nothing you click changes anything.</span><button>Done</button></div><div class="blkcard" hidden></div>`;L.appendChild(blk);
+  $('.blkbar button',blk).onclick=e=>{e.stopPropagation();A.identify(false)};
+  blk.addEventListener('pointermove',e=>{const r=A.rect({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0})});let f=null;for(const i of $$('i',blk)){const x=parseFloat(i.style.left),y=parseFloat(i.style.top),w=parseFloat(i.style.width),hh=parseFloat(i.style.height);if(r.x>=x&&r.x<=x+w&&r.y>=y&&r.y<=y+hh){if(!f||w*hh<f[1])f=[i,w*hh]}}
+   const c=$('.blkcard',blk);if(!f){c.hidden=true;return}const al=f[0].dataset.for,inf=INFO[al]||{t:al,d:''};c.innerHTML=`<b>${esc(inf.t)}</b>${esc(inf.d)}`;c.hidden=false;const x=parseFloat(f[0].style.left),y=parseFloat(f[0].style.top);c.style.left=clamp(x,6,1120-260)+'px';c.style.top=(y>400?y-90:y+parseFloat(f[0].style.height)+40)+'px'});
+  blk.addEventListener('pointerdown',e=>{if(e.target.closest('.blkbar button'))return;e.preventDefault();e.stopPropagation();const b=$('.blkbar',blk);b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')});
+  blk.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation()},{passive:false})}
+ /* ===== help button ===== */
+ A.helpButton=b=>{const m=CUR.H;if(m==='H0'){A.identify(!A.idOn,'W0');return}if(A.idOn&&A.idMode!=='W2'){A.identify(false);return}
+  if(m==='H1')openMenu();else if(m==='H2')toggleSide();else if(m==='H3')openPalette()};
+ let menu=null,side=null;
+ function closeMenus(){if(menu){menu.remove();menu=null;app.querySelector('.hb').classList.remove('hl')}const sh=$('.sheet',L);sh&&sh.remove()}
+ A.escape=()=>{if(menu||$('.sheet',L)){closeMenus();app.querySelector('.hb').focus();return}if(A.idOn){A.identify(false);return}if(A.lesson){A.endLesson();return}if(curGuide()){A.unpoint();return}if(side&&CUR.H==='H2'){toggleSide(false)}};
+ document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!e.target.closest('.hb'))closeMenus()},true);
+ function rowsFor(q){q=q.trim().toLowerCase();const N=nm();const out=[];
+  if(!q){out.push({g:'Help'},{ic:'eye',l:N.id,s:'Hover anything to see what it is; it keeps working',k:'F1',run:()=>A.identify(true)},{ic:'book',l:N.les,s:LESSONS.filter(l=>progOf(l.id)===l.steps.length).length+' of '+LESSONS.length+' done',sub:'lessons'},{ic:'keys',l:'Keyboard shortcuts',k:'⌘/',run:()=>A.sheet('keys')},{ic:'star',l:'What\'s new in 0.263',s:NEWS[0][1],run:()=>A.sheet('new')},{ic:'chat',l:'Ask the Assistant',s:'In words; it can point at controls',k:'⌘K',run:()=>A.assistant()});
+   out.push({g:N.les});for(const l of LESSONS)out.push({ic:'book',l:l.t,s:`${l.steps.length} steps · about ${l.mins} min`,prog:l,run:()=>A.startLesson(l.id)});return out}
+  const hit=(s)=>{const t=s.toLowerCase();return q.split(/\s+/).every(w=>t.includes(w))},mk=s=>{let r=esc(s);for(const w of q.split(/\s+/).filter(Boolean))r=r.replace(new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>');return r};
+  for(const al in INFO){const i=INFO[al];if(hit(i.t+' '+i.d+' '+al))out.push({ic:'eye',l:mk(i.t),raw:1,s:i.d,tg:'CONTROL',run:()=>showMe(al)})}
+  for(const c of CMDS)if(hit(c.l+' '+c.id))out.push({ic:'keys',l:mk(c.l),raw:1,s:c.id,tg:'COMMAND',k:c.k,run:()=>c.run(A)});
+  for(const l of LESSONS)if(hit(l.t+' '+l.skill+' '+l.steps.map(s=>s.t).join(' ')))out.push({ic:'book',l:mk(l.t),raw:1,s:`${l.steps.length} steps`,tg:'LESSON',run:()=>A.startLesson(l.id)});
+  for(const n of NEWS)if(hit(n[1]))out.push({ic:'star',l:mk(n[1]),raw:1,s:'v'+n[0],tg:'NEW',run:()=>A.sheet('new')});
+  if(out.length<9)out.push({ic:'chat',l:'Ask the Assistant: “'+esc(q)+'”',raw:1,tg:'ASK',run:()=>A.assistant(q)});return out.slice(0,10)}
+ function showMe(al){closeMenus();A.point(al,{style:'P1',html:m=>idCard(A,al,m)+'<div class="gb"><span class="sp"></span><button data-g="x">Close</button></div>',onAct:a=>{if(a==='x')A.unpoint();else if(a.startsWith('les:'))A.startLesson(a.slice(4))}})}
+ A.showMe=showMe;
+ function renderList(box,q,opts={}){const rows=rowsFor(q);let fi=-1;box.innerHTML=rows.map((r,i)=>{if(r.g)return `<div class="gh2">${esc(r.g)}</div>`;if(fi<0)fi=i;
+   const prog=r.prog?`<span class="prog">${r.prog.steps.map((_,j)=>`<i class="${j<progOf(r.prog.id)?'d':''}"></i>`).join('')}</span>`:'';
+   return `<button class="row" role="option" data-i="${i}"><span class="ic">${ICON[r.ic]||''}</span><span class="lb"><span>${r.raw?r.l:esc(r.l)}</span>${r.s?`<small>${esc(r.s)}</small>`:''}</span>${r.tg?`<span class="tg">${r.tg}</span>`:''}${prog}${r.k?`<kbd>${esc(r.k)}</kbd>`:''}${r.sub?'<span style="color:#8c8f9b">›</span>':''}</button>`}).join('');
+  const btns=$$('.row',box);let f=0;const foc=i=>{f=clamp(i,0,btns.length-1);btns.forEach((b,j)=>b.classList.toggle('f',j===f));btns[f]&&btns[f].scrollIntoView({block:'nearest'})};foc(0);
+  btns.forEach((b,j)=>{b.onmouseenter=()=>foc(j);b.onclick=()=>act(rows[+b.dataset.i])});
+  box._key=e=>{if(e.key==='ArrowDown'){e.preventDefault();foc(f+1)}else if(e.key==='ArrowUp'){e.preventDefault();foc(f-1)}else if(e.key==='Enter'){e.preventDefault();btns[f]&&btns[f].click()}};
+  function act(r){if(r.sub==='lessons'){const q=box.closest('.pop').querySelector('input');renderLessonsOnly(box);return}if(opts.keep&&r.prog){r.run();return}closeMenus();r.run&&r.run()}}
+ function renderLessonsOnly(box){box.innerHTML=`<div class="gh2">${esc(nm().les)}</div>`+LESSONS.map(l=>`<button class="row" data-l="${l.id}"><span class="ic">${ICON.book}</span><span class="lb"><span>${esc(l.t)}</span><small>${l.skill} · ${l.steps.length} steps · about ${l.mins} min</small></span><span class="prog">${l.steps.map((_,j)=>`<i class="${j<progOf(l.id)?'d':''}"></i>`).join('')}</span></button>`).join('');$$('[data-l]',box).forEach(b=>b.onclick=()=>{closeMenus();A.startLesson(b.dataset.l)})}
+ function searchBox(ph){return `<div class="q">${ICON.search}<input placeholder="${ph}" aria-label="Search help"><kbd style="font:500 10px var(--fm);color:#8c8f9b">esc</kbd></div>`}
+ function openMenu(){closeMenus();const hb=app.querySelector('.hb'),r=A.rect(hb);hb.classList.add('hl');menu=document.createElement('div');menu.className='pop';menu.setAttribute('role','dialog');menu.setAttribute('aria-label','Help');
+  Object.assign(menu.style,{width:'340px',right:(1120-r.x-r.w)+'px',top:r.y+r.h+6+'px',maxHeight:'520px'});
+  menu.innerHTML=`${searchBox('Search controls, commands, '+nm().les.toLowerCase()+'…')}<div class="list" role="listbox" style="overflow:auto;flex:1"></div><div class="foot"><span>${esc(nm().n)}</span><span style="margin-left:auto">↑↓ ↵ · esc</span></div>`;L.appendChild(menu);
+  const inp=$('input',menu),list=$('.list',menu);renderList(list,'');inp.oninput=()=>renderList(list,inp.value);inp.onkeydown=e=>{if(e.key==='Escape'){e.stopPropagation();closeMenus();hb.focus()}else list._key(e)};inp.focus()}
+ function openPalette(){closeMenus();menu=document.createElement('div');menu.className='pop';Object.assign(menu.style,{width:'520px',left:'300px',top:'40px',maxHeight:'440px'});
+  menu.innerHTML=`<div class="q" style="height:34px">${ICON.search}<input value="? " aria-label="Command palette"><kbd style="font:500 10px var(--fm);color:#8c8f9b">⌘K</kbd></div><div class="list" style="overflow:auto;flex:1"></div><div class="foot"><span>? help · > commands · plain words ask the Assistant</span></div>`;L.appendChild(menu);
+  const inp=$('input',menu),list=$('.list',menu),go=()=>renderList(list,inp.value.replace(/^[?>]\s*/,''));go();inp.oninput=go;inp.onkeydown=e=>{if(e.key==='Escape'){e.stopPropagation();closeMenus()}else list._key(e)};inp.focus();inp.setSelectionRange(2,2)}
+ function toggleSide(force){const on=force??!side;if(!on){side&&side.remove();side=null;app.style.setProperty('--rp','0px');app.querySelector('.hb').classList.remove('on');A.emit('layout');return}
+  if(side)return;side=document.createElement('div');side.className='side';side.innerHTML=`<div class="sh"><button class="on" data-t="les">${esc(nm().les)}</button><button data-t="find">Search</button><button data-t="keys">Keys</button><button data-t="new">New</button><button class="x" aria-label="Close">×</button></div><div class="pop"></div>`;app.appendChild(side);app.style.setProperty('--rp','280px');app.querySelector('.hb').classList.add('on');
+  const body=$('.pop',side),tab=t=>{$$('.sh button',side).forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='les'){renderLessonsOnly(body);const rows=$$('[data-l]',body);rows.forEach(b=>b.onclick=()=>A.startLesson(b.dataset.l));body.insertAdjacentHTML('beforeend',`<div class="gh2">${esc(nm().id)}</div><button class="row" data-id><span class="ic">${ICON.eye}</span><span class="lb"><span>${esc(nm().id)}: hover anything</span><small>F1 · everything keeps working</small></span></button>`);$('[data-id]',body).onclick=()=>A.identify(!A.idOn)}
+   else if(t==='find'){body.innerHTML=searchBox('Search…')+'<div class="list"></div>';const i=$('input',body),l=$('.list',body);renderList(l,'',{keep:1});i.oninput=()=>renderList(l,i.value,{keep:1});i.onkeydown=e=>l._key(e);i.focus()}
+   else if(t==='keys'){body.innerHTML=keysHTML()}else body.innerHTML=newsHTML()};
+  $$('.sh button[data-t]',side).forEach(b=>b.onclick=()=>tab(b.dataset.t));$('.sh .x',side).onclick=()=>toggleSide(false);tab('les');A.emit('layout')}
+ A.side=()=>side;A.closeSide=()=>toggleSide(false);
+ const keysHTML=()=>`<div class="gh2">Keyboard shortcuts · commands registry</div>`+CMDS.filter(c=>c.k).map(c=>`<div class="row"><span class="lb"><span>${esc(c.l)}</span><small style="font-family:var(--fm)">${c.id}</small></span><kbd>${esc(c.k)}</kbd></div>`).join('');
+ const newsHTML=()=>`<div class="gh2">What's new</div>`+NEWS.map(n=>`<div class="row"><span class="tg">v${n[0]}</span><span class="lb"><span>${esc(n[1])}</span></span></div>`).join('');
+ A.sheet=k=>{closeMenus();const s=document.createElement('div');s.className='pop sheet';s.innerHTML=`<div class="gh2" style="display:flex;padding:10px 12px 4px"><span>${k==='keys'?'Keyboard shortcuts':'What\'s new'}</span><button style="margin-left:auto;color:#8c8f9b" aria-label="Close">×</button></div><div class="body">${k==='keys'?keysHTML():newsHTML()}</div>`;L.appendChild(s);$('button',s).onclick=()=>s.remove()};
+ /* ===== the Assistant, now able to point ===== */
+ A.assistant=q=>{closeMenus();let p=$('.ai',L);if(p&&!q){p.remove();return}if(!p){p=document.createElement('div');p.className='pop ai';p.innerHTML=`<div class="gh2" style="display:flex;padding:9px 12px 4px"><span>Assistant</span><button style="margin-left:auto;color:#8c8f9b" aria-label="Close">×</button></div><div class="msgs"><div class="m a">Ask in words. I can change the song, and point at the control I mean.</div></div><div class="chips"><button>What does Decay do?</button><button>Why is my bass muddy?</button><button>Explain this device</button><button>Teach me sidechain</button></div><div class="q" style="margin:0 8px 8px">${ICON.chat}<input placeholder="Ask…"></div>`;L.appendChild(p);$('button',p).onclick=()=>p.remove();
+   $$('.chips button',p).forEach(b=>b.onclick=()=>say(b.textContent));const inp=$('input',p);inp.onkeydown=e=>{if(e.key==='Enter'&&inp.value.trim()){say(inp.value);inp.value=''}else if(e.key==='Escape')p.remove()}}
+  if(q)say(q);function say(t){const ms=$('.msgs',p);ms.insertAdjacentHTML('beforeend',`<div class="m u">${esc(t)}</div>`);const r=answer(t);ms.insertAdjacentHTML('beforeend',`<div class="m a">${r}</div>`);ms.scrollTop=1e5;$$('a[data-p]',ms).forEach(a=>a.onclick=()=>showMe(a.dataset.p));$$('a[data-l]',ms).forEach(a=>a.onclick=()=>{p.remove();A.startLesson(a.dataset.l)});$$('a[data-tour]',ms).forEach(a=>a.onclick=()=>{p.remove();tour()})}};
+ function answer(t){t=t.toLowerCase();const L=(al,txt)=>`<a data-p="${al}">${txt}</a>`;
+  if(/decay/.test(t)){setTimeout(()=>showMe('bass.decay'),50);return `${L('bass.decay','Decay')} sets how long each bass note rings. It is ${ft('bass.decay',A.M.p['bass.decay'])} now; at this tempo a 16th lasts ${Math.round(six(A.M))} ms, so keep it shorter for a tight roll. I'm pointing at it: turn it while it plays.`}
+  if(/mudd|muddy|boom/.test(t))return `Three usual causes: notes ringing into each other (${L('bass.decay','Decay')} longer than a 16th), the bass and kick overlapping (${L('pump.depth','sidechain Depth')}), or too much low end from ${L('bass.res','Resonance')}. Click a name and I'll point at it.`;
+  if(/device|explain/.test(t))return `This is the Bass synth: a saw through a low-pass filter and soft drive. <a data-tour>Walk me through its four knobs</a> (each one stays usable while I explain it).`;
+  if(/side|pump|duck/.test(t))return `Sidechain lowers the bass while the kick hits. <a data-l="side">Start the 2-minute lesson</a>, or ${L('pump.depth','see Depth')}.`;
+  return `With the full Assistant connected I'd answer this and point at the controls involved. In this mock, try the suggestions.`}
+ function tour(){const ks=['bass.cutoff','bass.res','bass.decay','bass.drive'];let i=0;const go=()=>{const al=ks[i];A.point(al,{style:CUR.P==='P0'?'P1':CUR.P,html:()=>idCard(A,al)+`<div class="gb"><span style="font:10.5px var(--fm);color:#8c8f9b">${i+1} / ${ks.length}</span><span class="sp"></span>${i?'<button data-g="b">‹</button>':''}<button class="pri" data-g="n">${i<ks.length-1?'Next':'Done'}</button></div>`,line:()=>lineFor(A,al),onAct:a=>{if(a==='n'){if(++i<ks.length)go();else A.unpoint()}else if(a==='b'){i--;go()}}})};go()}
+ /* ===== lessons ===== */
+ A.startLesson=(id,at,fmt)=>{closeMenus();if(A.idOn)A.identify(false);const les=LES[id];if(!les)return;fmt=fmt||CUR.L;A.lesson={les,i:at||0,s0:snap(),done:false,log:[],fmt};
+  if(fmt==='L2'){A.saved=JSON.stringify({p:M.p,kick:M.kick,bass:M.bass,auto:M.auto,pumpOn:M.pumpOn,solo:M.solo,loop:M.loop});const t=$('.tab',app);t.insertAdjacentHTML('afterend',`<div class="tab ls" data-lt><span>Lesson · ${esc(les.t)}</span><i>×</i></div>`);$('.tab .tn',app).parentElement.style.opacity=.55;
+   Object.assign(M.p,{'transport.tempo':138,'bass.decay':320,'bass.cutoff':900,'pump.depth':0,'pump.release':250,'trk.kick.vol':-1,'trk.bass.vol':0});M.bass=Array(16).fill(0);M.auto=[];M.pumpOn=false;M.solo={};A.set('all',0)}
+  if(fmt==='L3')checklist();step(true);A.emit('lesson')};
+ A.restep=()=>{if(A.lesson){A.unpoint();step()}};
+ A.endLesson=(fin)=>{const l=A.lesson;if(!l)return;A.lesson=null;A.unpoint();const ck=$('.side.ck',app);ck&&ck.remove();if(ck)app.style.setProperty('--rp','0px');
+  if(l.fmt==='L2'&&A.saved){const s=JSON.parse(A.saved);Object.assign(M,{kick:s.kick,bass:s.bass,auto:s.auto,pumpOn:s.pumpOn,solo:s.solo,loop:s.loop});Object.assign(M.p,s.p);A.saved=null;const t=$('[data-lt]',app);t&&t.remove();$('.tab .tn',app).parentElement.style.opacity=1;A.set('all',0)}
+  if(fin){A.toast(`${l.les.t}: done ✓`)}A.emit('lesson');A.emit('layout')};
+ function snap(){return JSON.parse(JSON.stringify({p:M.p,pumpToggles:M.pumpToggles}))}
+ function step(){const l=A.lesson;if(!l)return;const st=l.les.steps[l.i];l.s0=snap();l.ok=false;l.already=false;
+  if(l.fmt==='L3'){renderChecklist();return}
+  /* already done (and not a step that needs a fresh action): pass it with a note */
+  if(!st.must&&st.done(M,l.s0)){l.ok=true;l.already=true}
+  show();if(l.already){clearTimeout(adv);adv=setTimeout(()=>{if(A.lesson===l&&l.ok)next()},1300)}}
+ function cardHTML(missing){const l=A.lesson,st=l.les.steps[l.i],n=l.les.steps.length,ok=l.ok;
+  const reveal=missing?`<div class="glive">Not on screen. <a data-g="reveal">${!M.devs?'Show devices ⇧D':'Show it'}</a></div>`:'';
+  return `<div class="gk">${esc(nm().les.replace(/s$/,''))} · ${esc(l.les.t)}<span>${l.i+1} / ${n}</span></div><h4>${ok?'✓ ':''}${esc(st.t)}</h4><p>${esc(st.b)}</p>${reveal}
+  ${l.already?'<div class="glive ok">Already done ✓ · moving on</div>':st.live&&!missing?`<div class="glive${ok?' ok':''}">${st.live(M,l.s0)}</div>`:ok&&!missing?'<div class="glive ok">Done ✓</div>':''}
+  ${st.vis&&CUR.P!=='P3'?`<div class="gvis">${vis(st.vis,M)}</div>`:''}
+  <div class="gb">${l.i?'<button data-g="back" aria-label="Back">‹</button>':''}<button data-g="skip">Skip step</button>${st.doit&&!ok?'<button data-g="doit">Do it for me</button>':''}<span class="sp"></span><button data-g="end">End · Esc</button></div>
+  <div class="gdots">${l.les.steps.map((_,j)=>`<i class="${j<l.i||(j===l.i&&ok)?'d':j===l.i?'c':''}"></i>`).join('')}</div>`}
+ function show(){const l=A.lesson,st=l.les.steps[l.i];
+  A.point(st.al,{style:CUR.P,html:cardHTML,copies:st.vis==='pump'?['pump.depth','pump.release']:['bass.cutoff','bass.decay','bass.res'],vis:st.vis,avoid:st.watch?[st.watch]:null,
+   line:()=>`<b>${esc(l.les.t)} ${l.i+1}/${l.les.steps.length}</b> · ${esc(st.t)} · ${st.live?st.live(M,l.s0):esc(st.b)}`,onAct:act});cost()}
+ function act(a){const l=A.lesson;if(!l)return;const st=l.les.steps[l.i];if(a==='end')A.endLesson();else if(a==='skip')next();else if(a==='back'){l.i=Math.max(0,l.i-1);step()}else if(a==='doit'){st.doit(A)}else if(a==='reveal'){CMD['view.devices'].run(A)}}
+ function next(){const l=A.lesson;if(!l)return;PROG[l.les.id]=PROG[l.les.id]==='done'?'done':Math.max(progOf(l.les.id),l.i+1);if(l.i+1>=l.les.steps.length){PROG[l.les.id]='done';store.set('prog',PROG);A.endLesson(true);refreshProg();return}store.set('prog',PROG);l.i++;step();refreshProg()}
+ let adv=0;A.on(k=>{const l=A.lesson;if(!l||k==='lesson'||k==='cost'||k==='layout'&&l.fmt!=='L3')return;if(l.fmt==='L3'){renderChecklist();return}if(l.already)return;const st=l.les.steps[l.i];const ok=!!st.done(M,l.s0);
+  if(ok&&!l.ok){l.ok=true;clearTimeout(adv);A.repoint();adv=setTimeout(()=>{if(A.lesson===l&&l.ok)next()},reduced()?1400:1000)}else if(!ok&&l.ok){l.ok=false;clearTimeout(adv);A.repoint()}});
+ /* L3 checklist */
+ function checklist(){const c=document.createElement('div');c.className='side ck';c.innerHTML=`<div class="sh"><span style="font:500 10px var(--fm);letter-spacing:.08em;color:var(--amber);padding-left:6px">${esc(A.lesson.les.t.toUpperCase())}</span><button class="x" aria-label="End">×</button></div><div class="pop"></div>`;app.appendChild(c);app.style.setProperty('--rp','280px');$('.x',c).onclick=()=>A.endLesson();A.emit('layout')}
+ function renderChecklist(){const l=A.lesson,c=$('.side.ck .pop',app);if(!l||!c)return;let all=true;
+  c.innerHTML=`<div class="gh2">Do these in any order</div>`+l.les.steps.map((st,j)=>{const d=l.log[j]==='ok'||(!st.must&&st.done(M,l.s0));if(d&&l.log[j]!=='ok'&&st.must)l.log[j]='ok';if(!d)all=false;return `<div class="chk${d?' d':''}"><span class="bx">${d?'✓':''}</span><span><span class="t">${esc(st.t)}</span><a data-show="${j}">Show me</a><br><small style="color:#8c8f9b">${st.live?st.live(M,l.s0):''}</small></span></div>`}).join('')+(all?'<div class="chk d"><span class="bx">✓</span><b>All done</b></div>':'');
+  $$('[data-show]',c).forEach(a=>a.onclick=()=>{const st=l.les.steps[+a.dataset.show];A.point(st.al,{style:'P1',html:()=>`<div class="gk">${esc(l.les.t)}</div><h4>${esc(st.t)}</h4><p>${esc(st.b)}</p><div class="gb"><span class="sp"></span><button data-g="x">Close</button></div>`,onAct:()=>A.unpoint()})});
+  if(all&&!l.fin){l.fin=1;PROG[l.les.id]='done';store.set('prog',PROG);refreshProg()}}
+ function cost(){A.emit('cost')}}
+
+/* ---------- page: families, stages, picks ---------- */
+const FAMS={N:'Name',H:'Help button',P:'Pointer',W:'What is this?',L:'Lessons',G:'Progress'};
+const OPT={
+ H:[['H0','Today: a blocking mode','The ? toggles tutorial mode: outlines, a banner, and nothing you click works.',['Only entry point is a mode','No search, no lessons, no shortcuts'],'0 menus · 200 outlines when on'],
+  ['H1','A Help menu with search',`The ? opens a small menu under it: a search box first (controls, commands, lessons, what's new; no match asks the Assistant), then ${'“what is this?”'}, lessons with progress, keyboard shortcuts, what's new and the Assistant. Arrow keys, Enter, Esc.`,['One click to everything','Search finds a control and points at it','Same rows feed the K1 palette'],'off: 0 elements · open: 1 popover',1],
+  ['H2','A side panel beside the work','The ? docks a panel at the right (Ableton\'s Learn View, Logic\'s Quick Help in the inspector): tabs for lessons, search, keys and what\'s new. The arrangement narrows; the panel stays while you work.',['Good for long lessons','Costs 280 px of width while open'],'open: 1 panel, layout shifts'],
+  ['H3','Help inside the palette','The ? opens the K1 command palette with a “?” scope: the same search and rows, one surface for commands and help.',['Least new UI','Help is less discoverable to newcomers'],'open: 1 popover']],
+ P:[['P0','Today: blocking arrow card','Dim layer, blue arrow card; the knob cannot be turned while it explains.',['You cannot try what you read'],'200 outlines, scan every 900 ms'],
+  ['P1','Callout with an amber leader',`Your T3 callout, used for teaching: an amber hairline and dot from a card to the control. The card never covers the control (or the meter it asks you to watch), shows the live value, a small picture that moves with you (envelope against the 16th grid), and ticks when you get there.`,['Same drawing as T3 tooltips','Reacts to every move','Next step comes by itself'],'on: 1 card, 1 SVG, 1 ring',1],
+  ['P2','Ring and help line','A pulsing amber ring on the control and the step text in the help line at the foot (FL Studio\'s hint bar, Ableton\'s Info View). Nothing floats.',['Lightest','Easy to miss the text at the foot'],'on: 1 ring, the help line'],
+  ['P3','Rearranged focus (Bitwig style)','The guide lifts live copies of the knobs the step needs into a focus strip over the arrangement, with a bigger picture; the originals stay usable and move together.',['Clear for devices with many knobs','Covers part of the arrangement while on'],'on: 1 strip with copies']],
+ W:[['W0','Today: tutorial mode','Everything outlined, clicks swallowed, Esc or F1 to leave.',['Cannot learn by trying'],'200 outlines, 86 ms per 900 ms scan'],
+  ['W1','Identify: a toggle that never blocks','F1 or Help › Identify. Hover anything: a callout gives the name, the live value with its unit, what it does, default, range, key and id, and a link to the lesson that uses it. Clicks, drags and keys keep working; the card updates as you turn.',['Logic\'s Quick Help, made live','Esc leaves; a pill says it is on'],'on: 1 pill, 1 card on hover',1],
+  ['W2','Hold ? to identify','A quasimode: only while you hold ?. Nothing to forget to turn off.',['Fast for experts','Hard to discover; awkward with a mouse drag'],'on only while held'],
+  ['W3','Help line only','The foot line shows the hovered control\'s name, value, default and key (Ableton Info View, FL hint bar). No callouts.',['Calm, always there','Eyes travel to the foot of the window'],'on: 1 line']],
+ L:[['L1','Steps that wait for you','A lesson is 4 to 6 steps on your own song. Each step points at a control and waits until the project is in the right state (tempo in range, notes placed, pump on), then ticks and moves on. Steps you already did pass with “already done”. Back, Skip, “Do it for me” where it helps, End on every step.',['Learn by doing, on your real song','Undo covers every change'],'1 callout; checks run on change only',1],
+  ['L2','A lesson project','The lesson opens in its own tab from a prepared starting point (Figma Basics, Ableton lesson Sets); your song stays untouched. “Back to your song” on exit.',['Nothing of yours changes','You do not learn on your own material'],'a second project in memory'],
+  ['L3','A checklist','The lesson is a list in a side panel; tick items in any order, “Show me” points at each one. No sequence.',['Good for people who half know it','Less hand-holding for beginners'],'1 panel']],
+ G:[['G0','None','Lessons are always fresh; nothing is stored.',['Simplest'],'0 bytes'],
+  ['G1','Quiet progress','Ticks on lessons and steps in Help, “2 of 4 done”, a finished lesson shows a short line in the notification log. No streaks, points or reminders.',['Ableton\'s completion tracking','Stored in UI.lm, a few bytes'],'a few bytes in UI',1],
+  ['G2','Streaks and points','Duolingo-style: a daily streak, points per lesson, a reminder.',['Motivating for some','Out of place in a studio tool; nags'],'reminders, badges']]};
+const LMAP={N:'cards-N'};
+function card(fam,[id,t,p,ul,timing,star]){const c=document.createElement('div');c.className='card';c.dataset.id=id;
+ c.innerHTML=`<div class="ch"><span class="id${id.endsWith('0')?' t0':''}">${id}</span>${star?'<span class="star" title="Recommended">★</span>':''}<h3>${esc(t)}</h3><label class="pk"><input type="radio" name="pk-${fam}"${PICK[fam]===id?' checked':''}> pick</label></div><p>${esc(p)}</p>${ul&&ul.length?`<ul>${ul.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${timing?`<div class="tim">${fam==='G'?'':'<b>cost</b>'} ${esc(timing)}</div>`:''}`;
+ $('input',c).onchange=()=>{PICK[fam]=id;store.set('picks',PICK);syncPicks()};
+ if(fam!=='G')c.addEventListener('click',e=>{if(e.target.closest('label'))return;setCur(fam,id)});return c}
+function setCur(fam,id){CUR[fam]=id;store.set('cur',CUR);$$('#seg-'+fam+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===id));$$('#cards-'+fam+' .card').forEach(c=>c.classList.toggle('live',c.dataset.id===id));onCur(fam)}
+/* names */
+for(const id in NAMES){const n=NAMES[id],c=document.createElement('div');c.className='card';c.dataset.id=id;c.innerHTML=`<div class="ch"><span class="id">${id}</span>${n.star?'<span class="star">★</span>':''}<span style="flex:1"></span><label class="pk"><input type="radio" name="pk-N"${PICK.N===id?' checked':''}> pick</label></div><div class="nm">${esc(n.n)}<small>Help › ${esc(n.n)} · “what is this?” = ${esc(n.id)} · ${esc(n.les)}</small></div><p class="sm mut">${esc(n.why)}</p>`;
+ $('input',c).onchange=()=>{PICK.N=id;store.set('picks',PICK);syncPicks();setCur('N',id)};c.addEventListener('click',e=>{if(!e.target.closest('label'))setCur('N',id)});$('#cards-N').appendChild(c)}
+for(const f of['H','P','W','L','G']){for(const o of OPT[f])$('#cards-'+f).appendChild(card(f,o));if(f!=='G'){const s=$('#seg-'+f);s.innerHTML=OPT[f].map(o=>`<button data-v="${o[0]}">${o[0]}${o[5]?' ★':''}</button>`).join('');$$('button',s).forEach(b=>b.onclick=()=>setCur(f,b.dataset.v))}}
+/* stages */
+const ST={H:makeApp($('#st-H'),'H'),P:makeApp($('#st-P'),'P'),W:makeApp($('#st-W'),'W'),L:makeApp($('#st-L'),'L')};
+function costLine(f){const A=ST[f],n=A.gcount();$('#cost-'+f).innerHTML=`guide layer: <b>${n}</b> element${n===1?'':'s'}${n?'':' (nothing drawn)'}`}
+for(const f in ST){ST[f].on(k=>{if(k==='cost'||k==='lesson'||k==='id')requestAnimationFrame(()=>costLine(f))});costLine(f)}
+/* P stage: the decay step of the rolling bass lesson */
+function pStart(){const A=ST.P;if(A.lesson)A.endLesson();Object.assign(A.M.p,{'transport.tempo':145,'bass.decay':320});A.set('all',0);A.startLesson('roll',3,'L1')}
+$('#p-restart').onclick=pStart;
+/* W stage */
+$('#w-on').onclick=()=>{const A=ST.W;if(CUR.W==='W2'){A.app.focus();$('#w-hint').textContent='Click the mock, then hold ? (Shift + /).';return}A.identify(!A.idOn);A.app.focus()};
+/* L stage */
+$('#lessonpick').innerHTML=LESSONS.map(l=>`<button data-v="${l.id}">${esc(l.t)}</button>`).join('');
+$$('#lessonpick button').forEach(b=>b.onclick=()=>{$$('#lessonpick button').forEach(x=>x.classList.toggle('on',x===b));if(ST.L.lesson)ST.L.endLesson();ST.L.startLesson(b.dataset.v);ST.L.app.focus()});
+$('#shuffle').onclick=()=>{const A=ST.L,app=A.app;for(const k of $$('[data-kn]',app)){const ch=[...k.children];ch.sort(()=>Math.random()-.5).forEach(c=>k.appendChild(c))}const dev=$('.dev',app),ds=$$('.dv',dev);dev.insertBefore(ds[1],ds[0]);A.M.layout++;A.emit('layout')};
+$('#hidedev').onclick=()=>{CMD['view.devices'].run(ST.L);$('#hidedev').textContent=ST.L.M.devs?'Hide devices':'Show devices'};
+ST.L.on(k=>{if(k==='devs')$('#hidedev').textContent=ST.L.M.devs?'Hide devices':'Show devices'});
+function refreshProg(){/* help menus re-read PROG when opened; nothing to redraw here */}
+function onCur(f){if(f==='N'){for(const k in ST){const A=ST[k];A.repoint();if(A.idOn){A.identify(false);A.identify(true)}}}
+ if(f==='P'){const A=ST.P;if(!A.lesson)pStart();else A.restep();if(ST.L.lesson)ST.L.restep()}
+ if(f==='W'){const A=ST.W;if(A.idOn)A.identify(false);$('#w-hint').textContent=CUR.W==='W2'?'Click the mock, then hold ? (Shift + /).':CUR.W==='W3'?'Turn it on, then hover: the foot line explains.':'';}
+ if(f==='H'){for(const k in ST){const A=ST[k];if(A.side())A.closeSide()}}
+ if(f==='L'){const A=ST.L;if(A.lesson){const id=A.lesson.les.id;A.endLesson();A.startLesson(id)}}}
+for(const f of['N','H','P','W','L'])setCur(f,CUR[f]);
+/* lesson json */
+$('#lessonjson').textContent=`// LM_LESSONS (lane J): data, not code paths into other lanes
+{ "id": "lm.rollingBass", "title": "A rolling bass", "minutes": 3,
+  "steps": [
+    { "target": "transport.tempo",            // a data-al id (DL1)
+      "check":  "song.bpm >= 143 && song.bpm <= 147",
+      "text":   "Set psytrance tempo" },
+    { "target": "transport.play", "command": "transport.play",
+      "check":  "transport.playing" },
+    { "target": "device.bass.steps",
+      "reveal": "view.devices",               // a command id (DL2): shows it first
+      "check":  "steps.bass.offbeats == 12 && steps.bass.onKick == 0",
+      "doIt":   "lm.fillRollingBass" },
+    { "target": "device.bass.decay", "reveal": "view.devices",
+      "check":  "param('device.bass.decay') < sixteenthMs()",
+      "live":   "Decay {value} · 1/16 = {sixteenthMs} ms",
+      "picture": "envelopeVsSixteenths" },
+    { "target": "device.bass.cutoff", "mustAct": true,
+      "check":  "movedOctaves('device.bass.cutoff') > 0.4 && inRange(300, 2000)" }
+  ] }`;
+/* picks bar */
+function syncPicks(){const note=$('#pnote').value.trim();$('#pline').textContent='Learn picks: '+Object.keys(FAMS).map(f=>PICK[f]||f+'?').join(' ')+(PICK.N?` (${NAMES[PICK.N].n})`:'')+(note?' | note: '+note:'');
+ $('#pfams').innerHTML=Object.keys(FAMS).map(f=>`<a href="#fam-${f}" class="${PICK[f]?'set':''}" title="${FAMS[f]}">${PICK[f]||f+' ·'}</a>`).join('');
+ for(const f in FAMS)$$(`#cards-${f} .card`).forEach(c=>{c.classList.toggle('picked',PICK[f]===c.dataset.id);const r=$('input',c);if(r)r.checked=PICK[f]===c.dataset.id})}
+$('#pnote').oninput=syncPicks;
+$('#rec').onclick=()=>{Object.assign(PICK,REC);store.set('picks',PICK);syncPicks()};
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{sel();ok()});else{sel();ok()}
+ function sel(){const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(e){}}};
+syncPicks();
+/* measured numbers for today (from tools/design-lab/ux3/today/measure.json) */
+</script>
