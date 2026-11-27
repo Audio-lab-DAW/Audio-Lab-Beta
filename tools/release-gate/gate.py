@@ -27,6 +27,8 @@ ap.add_argument('--ref'); ap.add_argument('--promote', action='store_true'); ap.
 ap.add_argument('--quick', action='store_true', help='smoke scenarios at 20 s, no UI tests (for trying the gate, never promotes)')
 ap.add_argument('--skip-ui', action='store_true'); ap.add_argument('--secs', type=int, default=60)
 ap.add_argument('--here', action='store_true', help='test the working copy as it is instead of origin/main (never promotes)')
+ap.add_argument('--native', help='task MG1: a native block (JSON) to check (every file downloaded: size, sha256, signature) and put into the live manifest with this promotion')
+ap.add_argument('--native-only', action='store_true', help='task MG1: only check the --native block and, with --promote, put it into the live manifest; the program version stays')
 A = ap.parse_args()
 os.makedirs(OUT, exist_ok=True)
 LOG = open(os.path.join(OUT, 'gate.log'), 'a', encoding='utf-8')
@@ -50,6 +52,27 @@ def worktree(path, rev):
 sh(['git', 'fetch', '-q', 'origin', 'main'], timeout=300)
 if A.here: NEW = REPO
 else: NEW = worktree(os.path.join(OUT, 'new'), 'origin/main')
+# ---------- task MG1: the native block (the native AudioLab offered to Electron apps, docs/native-migration.md) ----------
+NB = os.path.join(HERE, 'native_block.py')
+def native_check():
+    r = sh(['python3', NB, 'check', os.path.abspath(A.native), '--download'], timeout=3600)
+    say(r.stdout.strip()); return r.returncode == 0, (r.stdout.strip().splitlines() or [r.stderr[-300:]])[-1]
+if A.native_only:
+    if not A.native: raise SystemExit('--native-only needs --native BLOCK.json')
+    okn, det = native_check(); step('f native build', okn, det)
+    if okn and A.promote and not A.here:
+        r = sh(['python3', NB, 'write', os.path.abspath(A.native), os.path.join('desktop', 'app-version.json')], cwd=NEW); say(r.stdout.strip())
+        if r.returncode: raise SystemExit('could not write the native block')
+        nv = json.load(open(A.native))['version']
+        sh(['git', 'add', 'desktop/app-version.json'], cwd=NEW)
+        sh(['git', '-c', 'user.name=Audio-lab-DAW', '-c', 'user.email=360039460+Audio-lab-DAW@users.noreply.github.com', 'commit', '-q', '-m', 'release gate: offer the native AudioLab %s to Electron apps (native block checked: every file downloaded, size, sha256%s)' % (nv, ', signature' if os.environ.get('AL_NATIVE_PUBKEY') else '')], cwd=NEW, check=True)
+        RES['promotedNative'] = nv
+        if A.push:
+            for i in range(5):
+                if sh(['git', 'pull', '-q', '--rebase', 'origin', 'main'], cwd=NEW).returncode == 0 and sh(['git', 'push', '-q', 'origin', 'HEAD:main'], cwd=NEW).returncode == 0: RES['pushed'] = True; break
+                time.sleep(5)
+        say('NATIVE %s OFFERED to Electron apps%s' % (nv, ' (pushed)' if RES.get('pushed') else ' (committed in %s, not pushed)' % NEW))
+    RES['passed'] = okn; json.dump(RES, open(os.path.join(OUT, 'result.json'), 'w'), indent=1); sys.exit(0 if okn else 1)
 VER = re.search(r"const VERSION='([\d.]+)'", open(os.path.join(NEW, 'index.html'), encoding='utf-8').read()).group(1)
 live = json.load(open(os.path.join(NEW, 'desktop', 'app-version.json')))
 REFV = A.ref or live['version']
@@ -136,6 +159,9 @@ step('e Fractals levels and exports', bool(en[0]) and fixed and not diff,
      else 'changed: ' + ('; '.join(diff) if diff else ' | '.join(fx) or en[1].stderr[-300:]))
 if [x for x in en[0] if 'errors' in x]: pass
 
+# ---------- f) task MG1: a native block that goes along with this promotion ----------
+if A.native: okn, det = native_check(); step('f native build', okn, det)
+
 # ---------- b) every UI test ----------
 HELPERS = {'taskAH_fake.js', 'aivoice_server.js', 'taskAL_synth.js', 'taskD3_census.js', 'taskD3_probe.js'}
 try: SKIP = json.load(open(os.path.join(HERE, 'ui-skip.json')))
@@ -175,7 +201,7 @@ if RES['passed'] and A.promote and not A.quick and not A.skip_ui and not A.here:
     notes = os.path.join(NEW, 'desktop', 'update-notes.txt')
     L = [l for l in open(notes, encoding='utf-8').read().splitlines() if l.strip()][:10]   # the newest line is on top
     open(notes, 'w', encoding='utf-8').write('\n'.join(L) + '\n')
-    r = sh(['node', os.path.join('desktop', 'scripts', 'sync-app.js')], cwd=NEW, env=dict(os.environ, AL_PROMOTE='1'))
+    r = sh(['node', os.path.join('desktop', 'scripts', 'sync-app.js')], cwd=NEW, env=dict(os.environ, AL_PROMOTE='1', **({'AL_NATIVE_BLOCK': os.path.abspath(A.native)} if A.native else {})))   # task MG1: the native block is kept, or replaced by --native
     say(r.stdout.strip()); m = json.load(open(os.path.join(NEW, 'desktop', 'app-version.json')))
     assert m['version'] == VER, m['version']
     sh(['git', 'add', 'desktop/app-version.json', 'desktop/update-notes.txt', 'desktop/package.json'], cwd=NEW)

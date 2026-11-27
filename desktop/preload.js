@@ -28,6 +28,22 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
     set: (s) => ipcRenderer.send('al:activity-set', { playing: !!(s && s.playing), frozen: !!(s && s.frozen) })
   },
   metrics: () => ipcRenderer.invoke('al:metrics'),
+  // task MG1: the path to the native AudioLab (desktop/native-migrate.js). status(): { offer, due, laterAt, installed, busy, migrateDir };
+  // export*: the page writes every project and setting into the folder the native app reads; install() downloads and checks; finish() installs and opens it.
+  nativeMigrate: {
+    status: () => ipcRenderer.invoke('al:mg-status'),
+    later: () => ipcRenderer.invoke('al:mg-later'),
+    prepare: () => ipcRenderer.invoke('al:mg-prepare'),
+    exportBegin: (o) => ipcRenderer.invoke('al:mg-export-begin', o || {}),
+    exportFile: (rel, data, kind) => ipcRenderer.invoke('al:mg-export-file', String(rel), data, String(kind || '')),
+    exportEnd: (m) => ipcRenderer.invoke('al:mg-export-end', m || {}),
+    install: () => ipcRenderer.invoke('al:mg-install'),
+    finish: () => ipcRenderer.invoke('al:mg-finish'),
+    cancel: () => ipcRenderer.invoke('al:mg-cancel'),
+    open: () => ipcRenderer.invoke('al:mg-open'),
+    reveal: (what) => ipcRenderer.invoke('al:mg-reveal', String(what || '')),
+    on: (cb) => { const f = (e, d) => cb(d); ipcRenderer.on('al:mg-ev', f); return () => ipcRenderer.removeListener('al:mg-ev', f); }
+  },
   // v0.203: the app icon picker in Settings (Ocean Yellow by default)
   listAppIcons: () => ipcRenderer.invoke('al:app-icons'),
   setAppIcon: (id) => ipcRenderer.invoke('al:set-app-icon', id),

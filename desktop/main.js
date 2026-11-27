@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 /* The app was called AudioLab Studio before v0.167. Its settings, projects list and downloaded updates stay in the folder with the old name,
    so nothing is lost when the app is installed under the new name. */
+if (process.env.AL_TEST_APPDATA) { try { app.setPath('appData', process.env.AL_TEST_APPDATA); } catch (e) {} }   // task MG1: tests only
 try { app.setPath('userData', path.join(app.getPath('appData'), 'AudioLab Studio')); } catch (e) {}
 
 const SCHEME = 'audiolab';
@@ -29,6 +30,10 @@ app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('enable-zero-copy');
 
 let win = null;
+/* task MG1: the path to the native AudioLab (desktop/native-migrate.js): the manifest's optional "native" block, the centred window in the page
+   (mg* in index.html), the export of projects and settings, the download, the check and the install. Missing module: nothing is offered. */
+let NM = null;
+try { NM = require('./native-migrate'); } catch (e) { try { NM = require('./app/native-migrate.js'); } catch (e2) { NM = null; } }   // app/: the copy sync-app.js puts there, so a build made before package.json lists the module still has it
 let pendingFile = null;   // a .audiolab path waiting for the app to finish loading
 let appReady = false;     // the web app's global functions exist
 
@@ -307,6 +312,13 @@ app.on('open-file', (e, file) => { e.preventDefault(); openFileInApp(file); }); 
 function runInApp(code) {
   if (win && !win.isDestroyed()) win.webContents.executeJavaScript(code, true).catch(() => {});
 }
+// task MG1: "Install the native AudioLab…" opens the page's centred window; once installed, "Open the native AudioLab"
+function mgMenu() {
+  let st = null; try { st = NM && NM.status(); } catch (e) { st = null; }
+  if (!st || !st.offer) return [];
+  if (st.installed && cmpV(st.installed.version, st.offer.version) >= 0) return [{ label: 'Open the native AudioLab', click: () => runInApp("window.audiolabHost&&window.audiolabHost.mgOpen&&window.audiolabHost.mgOpen(true)") }];
+  return [{ label: 'Install the native AudioLab…', click: () => runInApp("window.audiolabHost&&window.audiolabHost.mgOpen&&window.audiolabHost.mgOpen(true)") }];
+}
 function buildMenu() {
   const tpl = [
     ...(isMac ? [{
@@ -314,6 +326,7 @@ function buildMenu() {
       submenu: [
         { role: 'about' },
         { label: 'Check for Updates…', click: () => checkUpdates(true) },
+        ...mgMenu(),
         { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },
@@ -346,7 +359,7 @@ function buildMenu() {
     {
       label: 'Help',
       submenu: [
-        ...(!isMac ? [{ label: 'Check for Updates…', click: () => checkUpdates(true) }] : []),
+        ...(!isMac ? [{ label: 'Check for Updates…', click: () => checkUpdates(true) }, ...mgMenu()] : []),
         { label: 'AudioLab Pro on GitHub', click: () => shell.openExternal('https://github.com/Audio-lab-DAW/Audio-Lab-Beta') },
         { label: 'Releases', click: () => shell.openExternal(RELEASES) }
       ]
@@ -397,6 +410,7 @@ async function updDo(download) {
   try {
     m = JSON.parse((await updFetch('desktop/app-version.json', 15000)).toString('utf8'));
     if (!m || !m.version || !m.sha256) throw new Error('bad manifest');
+    try { if (NM) NM.seen(m); } catch (x) { /* task MG1: a bad native block never stops the program's own update */ }
   } catch (e) {
     if (updReady) return fin({ status: 'ready', latest: updReady.version, notes: updReady.notes || '', size: updReady.size || 0 });
     return fin({ status: 'error', reason: updWhy(e), error: String(e && e.message || e) });
@@ -500,7 +514,7 @@ async function checkUpdates(manual) {
   else say('Could not check for updates.', r.reason === 'offline' ? 'This computer is not connected to the internet.' : r.reason === 'timeout' ? 'GitHub did not answer in time. Try again in a moment.' : 'GitHub could not be reached (' + (r.error || 'unknown reason') + ').', 'warning');
 }
 ipcMain.handle('al:update-check', (e, o) => updCheck(!!(o && o.download)));
-ipcMain.handle('al:update-status', () => Object.assign({}, updLast, { installed: liveVer || app.getVersion(), app: app.getVersion(), ready: updReady ? updReady.version : null, platform: process.platform }));
+ipcMain.handle('al:update-status', () => { let nat = null; try { nat = NM ? NM.status().offer : null; } catch (e) { nat = null; } return Object.assign({}, updLast, { installed: liveVer || app.getVersion(), app: app.getVersion(), ready: updReady ? updReady.version : null, platform: process.platform, native: nat }); });   // task MG1: native = the native build offered here, or null
 ipcMain.handle('al:install-app', () => { if (!autoUpdater) return false; askQuit(() => { quitOK = true; autoUpdater.quitAndInstall(); }); return true; });   // v0.207: "Restart and install" in the page's update window
 ipcMain.handle('al:update-app', () => { if (autoUpdater) { autoUpdater.checkForUpdates().catch(() => {}); return 'auto'; } shell.openExternal(RELEASES); return 'page'; });
 ipcMain.handle('al:version', () => app.getVersion());
@@ -682,6 +696,7 @@ if (!gotLock) {
     setupUpdater();
     try { require('./voice-ai').setup({ ipcMain, app }); } catch (e) { console.warn('AI voices', e); }  // task Z2: AI voices (desktop/voice-ai.js)
     try { require('./native-engine').setup({ ipcMain, app }); } catch (e) { console.warn('native engine', e); }  // task NB-N2b: idle until the page asks (desktop/native-engine.js)
+    try { if (NM) NM.setup({ app, ipcMain, shell, getWin: () => win, dockAll, rebuildMenu: buildMenu, quitNow: () => { quitOK = true; quitting = true; app.quit(); } }); } catch (e) { console.warn('native migrate', e); }  // task MG1
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
 

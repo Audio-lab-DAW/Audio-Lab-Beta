@@ -1,0 +1,59 @@
+name: Native migrate (task MG1)
+
+# The path from the Electron app to the native AudioLab, tested in the real desktop app on a Mac and on Windows against a stand-in
+# native build served by a local update server (tools/migrate-tests/fake_native.js, AL_UPDATE_BASE): the centred window, Later for 3 days,
+# a wrong checksum or signature refused, Install now (download, check, export of projects and settings, install, open, quit), the export
+# read back equal, the shell before MG1 ignoring the manifest's native block. Does not build or publish the desktop app.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/native-migrate.js'
+      - 'tools/migrate-tests/**'
+      - 'tools/ui-tests/taskMG1_electron.js'
+      - '.github/workflows/native-migrate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]     # macos-latest: macos-15 got no machine on 27 Nov
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0                       # the test runs the shell from before MG1 too
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the desktop app's packages and Playwright
+        shell: bash
+        run: |
+          ( cd desktop && npm ci --no-audit --no-fund )
+          npm install --no-save --no-audit --no-fund playwright@1.63.0
+          node desktop/scripts/sync-app.js
+      - name: Unit checks
+        shell: bash
+        run: node tools/migrate-tests/unit_native_migrate.js
+      - name: 'The window and the install (zip on the Mac, the installer on Windows)'
+        shell: bash
+        env:
+          MG_REAL_DEST: '1'
+        run: node tools/ui-tests/taskMG1_electron.js desktop 2>&1 | tee mg1-${{ runner.os }}.txt; exit ${PIPESTATUS[0]}
+      - name: 'Mac: the same with a DMG'
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          MG_DMG: '1'
+        run: node tools/ui-tests/taskMG1_electron.js desktop 2>&1 | tee mg1-macOS-dmg.txt; exit ${PIPESTATUS[0]}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mg1-${{ runner.os }}
+          path: mg1-*.txt

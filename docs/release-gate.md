@@ -88,3 +88,17 @@ It needs Node 22, Python 3 with Playwright, `xvfb-run`, and Electron (`desktop/n
   - Mackie and HUI motor faders
 - A device that keeps returning what it was sent (at least 24 a second, at least 60 % of its messages) is stopped for the session with a notice: "a MIDI loop". So is one that sends over 1500 messages a second. Ticking **Use this device** again retries it.
 - **Stop all controllers**, on the Controllers page and in the command list, ignores all MIDI controllers and sends them nothing. It stays that way after a restart (`UI.ctlStop`), until the user starts them again.
+
+## The native block (task MG1)
+
+The live manifest may carry a `native` block: the native AudioLab that Electron shells from MG1 on offer in a centred window (Install now / Later), see `docs/native-migration.md`. Only the gate writes it:
+
+```
+python3 tools/release-gate/gate.py --native native-1.0.0.json --native-only --promote --push   # offer a native build; the program version stays
+python3 tools/release-gate/gate.py --native native-1.0.0.json --promote --push                 # together with a program promotion
+```
+
+- **f) native build** (`native_block.py check --download`): the block is well formed (https URLs, sizes, sha256, platform keys, kinds, the bundle not named `AudioLab Pro.app`), every platform's file is downloaded and its size and sha256 match; with `AL_NATIVE_PUBKEY` set, its Ed25519 signature too.
+- `--native-only` changes only the `native` block of `desktop/app-version.json` (`native_block.py write`); nothing else in the manifest moves.
+- An ordinary promotion keeps the block that is already live (`sync-app.js` with `AL_PROMOTE=1`; a new one comes in `AL_NATIVE_BLOCK`). The dev manifest never has one.
+- Shells before MG1 ignore the block (they read only version, sha256, size, minShell and notes).
