@@ -6223,6 +6223,7 @@ Step FT-F16a of `docs/features-build.md` (starred card F16 of `docs/research-fea
 
 ### Left
 - FT-F16b: triggered by notes of another track (ghost kick) or by audio, up to three bands (only the lows duck). The curve behind the waveform in the arrangement: lane A through `FT_HOOKS.volumeShaper`. Lane E may restyle the display, lane L may move the processor into the shared bundle. Next in lane C: **FT-F16b**.
+
 ## 27 November 2026: task NL8 (VST3 test app 0.8: the output stays where the user put it, silence flags per block, the degree sign)
 
 No app changes: `index.html`, `desktop/`, `native/engine/` and `native/bridge/` were not touched, no version. Touched: `native/host/` (`live_tools.h`, `vst3_format.cpp`, `plugin_api.h`, `diag.cpp`, `cli.cpp`: `alvst3 nl8`), `native/testapp/` (the app, AL Strict Synth 0.8 with a 33-bus variant, Info.plist 0.8), `tools/native-lab/nl7/live_tools_test.cpp`, `tools/native-lab/READ-ME-FIRST.txt`, `.github/workflows/native-lab.yml`, `docs/native-mac-build.md`, this log. Ran in parallel with the other lanes.
