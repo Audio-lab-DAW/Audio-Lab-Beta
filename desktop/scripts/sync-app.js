@@ -21,6 +21,11 @@ if (m) {
   const sha = require('crypto').createHash('sha256').update(Buffer.from(html, 'utf8')).digest('hex');
   let notes = '';
   try { notes = fs.readFileSync(path.join(__dirname, '..', 'update-notes.txt'), 'utf8').trim(); } catch (e) { /* optional */ }
-  fs.writeFileSync(path.join(__dirname, '..', 'app-version.json'), JSON.stringify({ version: m[1], sha256: sha, size: Buffer.byteLength(html, 'utf8'), minShell: MIN_SHELL, notes }, null, 2) + '\n');
+  // RELEASE CHANNEL (the owner's rule, 27 Nov 2026): installed apps update from desktop/app-version.json on main.
+  // An ordinary release writes only desktop/app-version-dev.json; the live manifest changes only when the release gate
+  // promotes a build that passed the start-up checks (AL_PROMOTE=1 node desktop/scripts/sync-app.js). See CLAUDE.md.
+  const manifest = JSON.stringify({ version: m[1], sha256: sha, size: Buffer.byteLength(html, 'utf8'), minShell: MIN_SHELL, notes }, null, 2) + '\n';
+  fs.writeFileSync(path.join(__dirname, '..', process.env.AL_PROMOTE === '1' ? 'app-version.json' : 'app-version-dev.json'), manifest);
+  if (process.env.AL_PROMOTE !== '1') console.log('Not promoted: installed apps keep their version until the release gate promotes one.');
 }
 console.log('Synced index.html (' + (html.length / 1048576).toFixed(2) + ' MB)');
