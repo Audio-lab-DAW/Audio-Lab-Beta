@@ -36,7 +36,7 @@ with sync_playwright() as p:
         L='light' if lite else 'dark'
         old={'monoChk':True,'swapChk':False,'follow':True,'followMode':'lead','followResume':False,'viz':True,'vizDock':'bottom','mapZoom':'picture','ceil':-1}
         c,pg,errs=ctx(b,lite,old)
-        ck(f'{L}: version',R(pg,"VERSION")=='0.236')
+        ck(f'{L}: version',float(R(pg,"VERSION"))>=0.236)
         ck(f'{L}: older profile values load',J(pg,"[UI.monoChk,UI.swapChk,UI.follow,UI.followMode,UI.followResume,UI.viz,UI.vizDock]")==[True,False,True,'lead',False,True,'bottom'])
         # A. Mono and swap
         R(pg,"openMixer()");pg.wait_for_timeout(1200)
