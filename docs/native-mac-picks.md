@@ -58,7 +58,18 @@ Plan: `docs/native-mac-plan.md`. Pick page: https://claude.ai/artifact/17AwgeWUC
 - **Serum 2.vst3** holds two plug-ins in one bundle (instrument and effect); the scanner listed both.
 - **Scaler 3 and ChordPotion** are note plug-ins: they need note output from a plug-in to reach another track. Not in stage 2's first cut; written down here.
 
+### Second report, the same day: plug-ins loaded and played
+- **43 loads of 41 different plug-ins, none failed.** FabFilter (One, Micro, Pro-C 2, Pro-DS, Pro-G, Pro-L 2, Pro-Q 2, 3 and 4, Pro-R and Pro-R 2, Saturn and Saturn 2, Simplon, Timeless 2 and 3, Twin 2 and 3, Volcano 2 and 3), iZotope (Aurora, six Neutron 4 modules and Neutron 4, six Ozone 11 modules), Native Instruments (Flair, Freak), BABY Audio (Atoms, BA-1, Parallel Aggressor), OTT, Omnivocal Beta, Pigments. The Intel-only Arcade was refused with the right reason.
+- **Load times:** most 15 to 190 ms; every Neutron 4 module about 1.1 s; Ozone 11 Master Rebalance 0.6 s; Pigments 3.3 and 4.1 s.
+- **Latency is reported by real plug-ins** (the build machine had none): Pro-L 2 2,875 samples, Ozone 11 Vintage Tape 2,227, Master Rebalance 2,048, Aurora 1,152, Ozone Clarity and Neutron Unmask 1,024, Pro-DS 661, Neutron Compressor 353, Neutron Transient Shaper 132, Pigments 44, Flair and Freak 16, OTT 2.
+- **State sizes:** 99 bytes (Micro) to 284,170 bytes (Pigments).
+- **Parameter counts:** up to 4,365 (Pigments); several above 2,000 (Atoms, BA-1, Omnivocal). The strip must not list all of them.
+- **Sound:** the user heard the test melody. Pigments through the Bose Bluetooth speaker at 44.1 kHz and 512 frames: 1,823 blocks, average 0.70 ms per block (6.1 % of the block), worst 1.55 ms (13.3 %), 0 failed blocks, 1 overload reported by the device.
+- **Not done in this report:** no plug-in window was opened, the Buffer menu was not used, and no plug-in was played through the Gryphon (the output was switched to the Bose before loading).
+- **Small faults of the test app seen in the report:** "Play test pattern" with nothing loaded is silent and does not say so; the line after "test pattern off." runs on without a break.
+
 ### Still open from the Mac
-- Load plug-ins and play them (time per block on the M4, the plug-in windows, the keys).
-- Buffer 128, 64 and the Gryphon's lowest (106 frames at 352.8 kHz).
+- The plug-in windows ("Open its window") and the keys.
+- A plug-in played through the Gryphon, at Buffer 128 and 64.
+- Kontakt 8, Serum 2, Phase Plant, Kick 3, Melodyne, Scaler 3, SubLabXL and a Steinberg instrument were scanned but not loaded yet.
 - The AMS-24.
