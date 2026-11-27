@@ -4691,3 +4691,32 @@ Fired by the scheduler with a note from the scheduling chat (15:35 UTC, read as 
 - A volume change from outside during the engine's own ramp is overwritten by the ramp's next step; the event at the end says where it ended.
 - Protect is always on (no switch): it changes no legal sample.
 - Dither stays a choice made at `open` (the engine does not know the source's bit depth yet); the settings page decides it in N2c.
+
+
+## 27 November 2026, v0.252: task DS-A3, clips without a title band (design round 2, lane A)
+
+First step of design round 2 (`docs/design-round-2.md` section 6, the lane order DS-A3, A4, P1, P2, T2, B1, B2, A1, then MD1, then A2 and T1), with the user's picks `A5 P4 B3 T3 | AC3 AW3 AG2 AP2 PN3 PV3 PS3 PK3 PG1 BR2 BP1 BM2 TT3 TB3 TM1 TC1 TS1 TL1`. For clips the detail **AC3** overrides A5's clip body: "no band: name on the body, 2 px colour edge". Edit script `tools/design-lab/ds/ds_a3.py` (every anchor asserted; written on v0.250, re-run on the fresh v0.251 file after the rebase), test `tools/ui-tests/taskDS_A3.py` (19 checks), screenshots `tools/design-lab/ds/shots_a3.py` (not committed; the script makes them again).
+
+### What changed
+- **Clips (AudioLab look)**: no coloured title band; a 2 px edge in the track colour along the top (whole device pixels), a one-device-pixel hairline in the track colour on the left (in place of the full outline and the white lit line), the name on the body in 600 11 px Inter in a lighter tone of the track colour (`shade(col,.45)`), the existing "31 notes · 8 bars" read-out and the MIDI mark kept, quieter (60 %), the body darker: the Clip opacity setting times 0.42 (default 36 % gives 15 %, as the pick page; the setting still works). Muted clips keep "muted · name" in grey. Selection stays LK's yellow outline. Drawn into the existing per-clip cache (`drawClipC`), so nothing new per frame.
+- **Glass engine list** (`gleBuild`): the same body alpha and a 2 px colour edge instead of the 14 px band, so what is seen through the glass panels matches.
+- **Kept**: `clipGeom` and its 14 px top zone (now the name zone), so clicking, dragging, fade and gain handles, envelopes, warp markers and every hit area behave as before. The other looks (Live, FL, Cubase, Logic, Bitwig and the rest under Settings, Appearance) keep their title bars: they imitate those programs. Helpers `dsAC3()`, `dsBody()`, `dsClipName()`, `dsClipEdge()` (functions, before `askChoice`).
+- **Not drawn**: the pick page's loop repeat marks (dashed, then dotted): the app has no clip looping, so there is nothing to mark. No overlap with lanes C and D (neither draws on clips).
+
+### Tested
+- `tools/ui-tests/taskDS_A3.py`, 19 of 19 (2194x1139 at 1.75x, Fractals, Dark and Light): helpers and factor, the 14 px zone kept, the edge in the track colour, no band (the name zone has the body tint), darker body, the opacity setting still changes the body, glass list with edges and no bands, FL style keeps its bar in drawing and glass list, a click on the name zone selects, dragging by it moves the clip, undo puts it back, a muted clip draws, no console errors.
+- `taskLK.py` 32/32 (before and after the rebase), `taskGS4.py` 42/42.
+- Screenshots Dark and Light at the user's size (whole window and the arrangement at 1 bar = 100 px with a selected and a muted clip), before and after, compared side by side with the pick page's AC3 drawing (`drawArr` with c:3): same dark body, top edge and coloured name; the app keeps the notes and bars read-out at the right.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured on this file): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; the same as the v0.249 entry.
+- Frame time (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, software renderer, 4 s windows, alternating; main-thread ms per frame):
+
+  | Scene | v0.250 run 1 | DS-A3 run 1 | v0.250 run 2 | DS-A3 run 2 |
+  |---|---|---|---|---|
+  | idle | 10.20 | 9.87 | 9.77 | 10.11 |
+  | scroll | 142.12 | 150.03 | 150.53 | 135.43 |
+  | play | 31.52 | 34.90 | 35.87 | 27.07 |
+
+  Within the run-to-run noise, not worse (one fill and one name per clip into the clip cache, fewer strokes than before).
+
+### What is left
+- Next run: **DS-A4** waveforms (AW3: lows, mids, highs in three muted bands, analysis cached per clip and zoom). Then DS-P1, DS-P2, DS-T2, DS-B1, DS-B2, DS-A1 (with GL1 if the lines picks are in), then MD1, then DS-A2 and DS-T1.

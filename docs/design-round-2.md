@@ -134,7 +134,7 @@ Small and visible first, the shared grid before the things drawn on it, the brow
 
 1. **DR2-A1, grid and ruler** (AG, and the grid strengths of P): one shared function for bar/beat/sixteenth strengths used by the arrangement and the piano roll, ruler ticks, the grid value; works with X4's zoom levels if that has landed.
 2. **DR2-A2, playhead and selection** (AP): cap, flag with position and time, selection size at rest. After MD1 (time formatting, caliper style).
-3. **DR2-A3, clips** (AC): band height, body tint, length read-out, loop repeat marks; cached text per clip.
+3. **DR2-A3, clips** (AC): band height, body tint, length read-out, loop repeat marks; cached text per clip. **Done (task DS-A3), v0.252**: AC3, no band (name on the body, 2 px colour edge, darker body); loop repeat marks not drawn, the app has no clip looping.
 4. **DR2-A4, waveforms** (AW): peak and loudness body or outline, cached per clip and zoom level; the three-band analysis only if AW3 or A5 is picked.
 5. **DR2-P1, piano roll rows and keys** (PS, PK): scale rows, root line, out-of-scale ring, octave names, Hz on keys; chord names (PS3) as a separate step if picked.
 6. **DR2-P2, notes and velocity** (PN, PV, PG): note shape, velocity display, ghost outlines, note read-out.
