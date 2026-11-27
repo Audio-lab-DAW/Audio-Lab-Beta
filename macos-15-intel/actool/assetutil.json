@@ -27,7 +27,7 @@
     "PlatformVersion" : "26.0",
     "SchemaVersion" : 2,
     "StorageVersion" : 17,
-    "Timestamp" : 1795747491
+    "Timestamp" : 1795747735
   },
   {
     "AssetType" : "Color",
@@ -62,36 +62,6 @@
     "State" : "Normal"
   },
   {
-    "AssetType" : "Color",
-    "Color components" : [
-      0.19200000166893005,
-      1
-    ],
-    "Colorspace" : "gray gamma 22",
-    "Name" : "AppIcon_Assets\/Color-3",
-    "NameIdentifier" : 34310,
-    "Presentation State" : "Active",
-    "Scale" : 1,
-    "SHA1Digest" : "2F1E71EB245D10D20984505DF38A82DADCD8EDC2E56CFE7E9D9E5F6D38741B48",
-    "SizeOnDisk" : 244,
-    "State" : "Normal"
-  },
-  {
-    "AssetType" : "Color",
-    "Color components" : [
-      0.078000001609325409,
-      1
-    ],
-    "Colorspace" : "gray gamma 22",
-    "Name" : "AppIcon_Assets\/Color-4",
-    "NameIdentifier" : 4711,
-    "Presentation State" : "Active",
-    "Scale" : 1,
-    "SHA1Digest" : "E4437377A37EF87A8310402386E1C0745E294580077FA1A24003446BA441BAAA",
-    "SizeOnDisk" : 244,
-    "State" : "Normal"
-  },
-  {
     "AssetType" : "Icon Image",
     "BitsPerComponent" : 8,
     "ColorModel" : "RGB",
@@ -105,9 +75,9 @@
     "PixelHeight" : 32,
     "PixelWidth" : 32,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon16x16_NSAppearanceNameSystem_49DEDD91-AC34-4CC8-8778-6971EB1D780C-45479-000003EBFF5238FF.png",
+    "RenditionName" : "AppIcon16x16_NSAppearanceNameSystem_C5CEF4C8-0B05-4465-BFF3-351514299B0B-2341-0000003755EAC638.png",
     "Scale" : 2,
-    "SHA1Digest" : "E23A59A28B224CDCCB72301C9489588B967FFC2C786D8561CFE9660934CC5778",
+    "SHA1Digest" : "1819F28F02ADF121E307493F95A65C7E0B92C85D38EFA71BD7F91A9CC20C8C10",
     "SizeOnDisk" : 330,
     "State" : "Normal"
   },
@@ -125,9 +95,9 @@
     "PixelHeight" : 64,
     "PixelWidth" : 64,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon32x32_NSAppearanceNameSystem_4C45D432-A21B-41F5-BF41-E27FB3E763D7-45479-000003EC820B6E35.png",
+    "RenditionName" : "AppIcon32x32_NSAppearanceNameSystem_2D838223-7009-4E4F-BA02-CFBED6CE7B4A-2341-00000037C8B17A3C.png",
     "Scale" : 2,
-    "SHA1Digest" : "8DE9E3AA842B2417B501FE8B1ACD68C2C97A0F5A351A34887F5F4A5C1EB4EC8F",
+    "SHA1Digest" : "1FBCF07974F97C08C9EAC70DB4DF0EAA75A9949902A7555935CB3238B3F89417",
     "SizeOnDisk" : 330,
     "State" : "Normal"
   },
@@ -145,9 +115,9 @@
     "PixelHeight" : 128,
     "PixelWidth" : 128,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon64x64_NSAppearanceNameSystem_FF6B9D1C-D0F4-47FF-9243-B9B29E475F67-45479-000003EC862AE70E.png",
+    "RenditionName" : "AppIcon64x64_NSAppearanceNameSystem_6330DD12-D808-4ABF-B2F3-5AC24F726C55-2341-00000037CB5760F9.png",
     "Scale" : 2,
-    "SHA1Digest" : "D41AD6E54EA03B3775CBFAF230AB181899063B96224C592470E79DF0DE2C5F1E",
+    "SHA1Digest" : "7E601A213F17A579966C7EEAC803C8DC73E5241CD24125EB06BF04EB28F814A9",
     "SizeOnDisk" : 330,
     "State" : "Normal"
   },
@@ -165,9 +135,9 @@
     "PixelHeight" : 256,
     "PixelWidth" : 256,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon128x128_NSAppearanceNameSystem_CBC1B066-58E2-4225-B7AE-39B0A983EEE6-45479-000003EC87925639.png",
+    "RenditionName" : "AppIcon128x128_NSAppearanceNameSystem_4C4E002D-8256-4838-8225-71069E8FA72A-2341-00000037CE076B06.png",
     "Scale" : 2,
-    "SHA1Digest" : "02E2199DD838FC165FBAFE559A3F745139D5FE0268E55F6AE451E28173C41DA9",
+    "SHA1Digest" : "B7718F4313E54D4074E6633AB2096E48CF43AEC174CFE64E5E21CECB84E5A574",
     "SizeOnDisk" : 53465,
     "State" : "Normal"
   },
@@ -185,9 +155,9 @@
     "PixelHeight" : 512,
     "PixelWidth" : 512,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon256x256_NSAppearanceNameSystem_FA6917AF-6DA2-4C2B-8119-3AABF1495FD4-45479-000003EC88C7C224.png",
+    "RenditionName" : "AppIcon256x256_NSAppearanceNameSystem_9CC573D7-2B64-472B-AF4E-7D4349FAFB1F-2341-00000037D0930CAC.png",
     "Scale" : 2,
-    "SHA1Digest" : "41AF3849692002B3657D024372D355D860E4FCA4014127248CF69B4046495ED8",
+    "SHA1Digest" : "3AFAD02F8A4F65DA985059D4FC5A8A1CDEBBA3A7F84A6F381139CC6AAC553CCB",
     "SizeOnDisk" : 164264,
     "State" : "Normal"
   },
@@ -205,9 +175,9 @@
     "PixelHeight" : 1024,
     "PixelWidth" : 1024,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon512x512_NSAppearanceNameSystem_1C9EE7C7-C2E1-477F-AD68-9F5E279D2B92-45479-000003EC8F2C948B.png",
+    "RenditionName" : "AppIcon512x512_NSAppearanceNameSystem_E319F255-4ADD-4E8F-823F-F11D72C1212B-2341-00000037D7A0ACA3.png",
     "Scale" : 2,
-    "SHA1Digest" : "2C43785C154C396EC00CF5846619DBA19C348C4B00974CBD43263E9CD7060D7A",
+    "SHA1Digest" : "2F14B6500BDDAA13DA4B9F9EE71F778DF74E4C8908713B5146D64CB7E33172F4",
     "SizeOnDisk" : 547357,
     "State" : "Normal"
   },
@@ -225,9 +195,9 @@
     "PixelHeight" : 1024,
     "PixelWidth" : 1024,
     "Presentation State" : "Active",
-    "RenditionName" : "AppIcon1024x1024_NSAppearanceNameSystem_91561106-7AC6-4FB9-A7E3-239628BFCCB9-45479-000003EC9EE0D6DF.png",
+    "RenditionName" : "AppIcon1024x1024_NSAppearanceNameSystem_6BBFF248-9EFE-498A-AE81-08AC679E1A23-2341-00000037EA130E06.png",
     "Scale" : 1,
-    "SHA1Digest" : "88B036DFEEED099A73FFB808CE58A6811E51A1288DAB9B06CA1708A268A419AB",
+    "SHA1Digest" : "1C1F17D63ED4D7D504CB794DD085A567DB138E763654E49492591FE151D175B1",
     "SizeOnDisk" : 547357,
     "State" : "Normal"
   },
@@ -295,7 +265,7 @@
     "NameIdentifier" : 6849,
     "Presentation State" : "Active",
     "Scale" : 1,
-    "SHA1Digest" : "EB37FFA91390BB36C14FABBD5C9CB9310B9A9F3725E1ACE57A0CFC6D80E43B1E",
+    "SHA1Digest" : "E9C9735BDA3ED358215BAA459B7673488689D337B49133C1F9634AB2D1349103",
     "SizeOnDisk" : 470,
     "State" : "Normal"
   },
@@ -352,16 +322,6 @@
     "Scale" : 1,
     "SHA1Digest" : "F08F648BB87297E5D38FB1A5974A19D9BCA5686314B6303984118DFAB6DC962F",
     "SizeOnDisk" : 353,
-    "State" : "Normal"
-  },
-  {
-    "AssetType" : "Unknown",
-    "Name" : "AppIcon_Assets\/Gradient-1",
-    "NameIdentifier" : 59377,
-    "Presentation State" : "Active",
-    "Scale" : 1,
-    "SHA1Digest" : "8474304F5A711613A0AB7502B1B9D48FBE437C384547F59EEE9FDC2559C10964",
-    "SizeOnDisk" : 306,
     "State" : "Normal"
   }
 ]
