@@ -21,8 +21,11 @@ LINE = ("- Task DS (design round 2, lane A): **step DS-T2 done**, v%s: the trans
         "the CPU as the last 10 seconds as a line (the highest load of every 250 ms, fixed 0 to 100 %% scale, red while there is a problem); "
         "a quiet status line in the middle of the top bar with the engine's audio format (44.1 kHz · 32-bit float) and the save state (saved n min ago with a green dot, unsaved changes amber, not saved to a file yet grey), hidden when tabs would touch it, `DS_HOOKS.status` the slot for X10's signal path (SC-K). "
         "Only the AudioLab look. Next: DS-B1 browser (B3, BR2, BP1).\n") % V
-edit('docs/device-backlog-2026-11-25.md', rep1(
-    "- Task DS (design round 2, lane A): step DS-T2 (meters, CPU and top bar: TM1, TC1, TS1) **in progress** (started 27 Nov, UTC evening; this line is replaced when it is released).\n", LINE))
+def _ws(s):
+    import re
+    m = re.search(r"- Task DS \(design round 2, lane A\): step DS-T2 \(meters, CPU and top bar: TM1, TC1, TS1\) \*\*[^\n]*\n", s)
+    assert m, 'claim line'; return s[:m.start()] + LINE + s[m.end():]
+edit('docs/device-backlog-2026-11-25.md', _ws)
 
 edit('desktop/update-notes.txt', lambda s: "Transport and top bar: the master meter has a dB scale with labels and reads in dBFS, the CPU shows the last 10 seconds as a line, and the top bar shows the audio format and whether the project is saved.\n" + s)
 
