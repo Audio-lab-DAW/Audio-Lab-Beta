@@ -12,6 +12,16 @@
 #include <cmath>
 #include <cstddef>
 
+// Which web engine the mixer matches: Chromium on 64-bit ARM (the Mac's Electron) fuses `a + b * g` in the panner;
+// on x86-64 it does not. -DAL_WEB_PAN_FUSED=0 or 1 overrides it (to compare against another machine's references).
+#ifndef AL_WEB_PAN_FUSED
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define AL_WEB_PAN_FUSED 1
+#else
+#define AL_WEB_PAN_FUSED 0
+#endif
+#endif
+
 namespace al {
 
 inline void gainFixed(float g, const float* in, float* out, size_t n) {
@@ -40,14 +50,28 @@ inline void panFixed(float pan, const float* inL, const float* inR, bool mono, f
     PanGains g = panGains(pan, mono, !sampleAccurate);
     if (sampleAccurate) {
         if (mono) { for (size_t i = 0; i < n; i++) { float x = inL[i]; outL[i] = (float)(x * g.l); outR[i] = (float)(x * g.r); } }
+#if AL_WEB_PAN_FUSED
+        else if (pan <= 0) { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = (float)std::fma((double)b, g.l, (double)a); outR[i] = (float)(b * g.r); } }
+        else { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = (float)(a * g.l); outR[i] = (float)std::fma((double)a, g.r, (double)b); } }
+#else
         else if (pan <= 0) { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = (float)(a + b * g.l); outR[i] = (float)(b * g.r); } }
         else { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = (float)(a * g.l); outR[i] = (float)(b + a * g.r); } }
+#endif
         return;
     }
     const float gl = (float)g.l, gr = (float)g.r;
     if (mono) { for (size_t i = 0; i < n; i++) { float x = inL[i]; outL[i] = x * gl; outR[i] = x * gr; } }
+#if AL_WEB_PAN_FUSED
+    // Chromium for arm64 is compiled with floating-point contraction on, so `a + b * g` in the panner's float path is one
+    // fused multiply-add there (the Mac's own web engine, native-ci run 46056395016: every bus scene differed from the
+    // second render quantum on, at about -138 dB, and only there). The native tree is built with contraction off, so
+    // the fused form is written out where the web engine it must match uses it.
+    else if (pan <= 0) { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = std::fmaf(b, gl, a); outR[i] = b * gr; } }
+    else { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = a * gl; outR[i] = std::fmaf(a, gr, b); } }
+#else
     else if (pan <= 0) { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = a + b * gl; outR[i] = b * gr; } }
     else { for (size_t i = 0; i < n; i++) { float a = inL[i], b = inR[i]; outL[i] = a * gl; outR[i] = b + a * gr; } }
+#endif
 }
 inline void addInto(const float* in, float* acc, size_t n) { for (size_t i = 0; i < n; i++) acc[i] += in[i]; }
 
