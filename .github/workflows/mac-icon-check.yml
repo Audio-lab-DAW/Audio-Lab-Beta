@@ -13,13 +13,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-26, macos-15-intel]
+        os: [macos-latest, macos-26, macos-15-intel]   # macos-latest added by task IC6
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - name: Compile the icon (actool)
         working-directory: desktop
         run: bash scripts/build-mac-icon.sh
+      - name: Read icon.icns the Mac way (task IC6)
+        continue-on-error: true
+        run: |
+          mkdir -p icon-proof && iconutil -c iconset desktop/build/icon.icns -o icon-proof/icon.iconset
+          for f in icon-proof/icon.iconset/*.png; do echo "$(basename "$f") $(sips -g pixelWidth -g pixelHeight "$f" | awk '/pixel/{printf "%s ", $2}')"; done
+          sw_vers; xcrun assetutil --info desktop/build/mac-icon/Assets.car | head -80
       - name: Draw the icon in every style
         run: bash tools/mac-icon/proof.sh "icon-proof/${{ matrix.os }}"
       - uses: actions/upload-artifact@v4

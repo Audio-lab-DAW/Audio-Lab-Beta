@@ -1,4 +1,20 @@
-# AudioLab Pro icon assets: J3 "Dipole Field" (task IC4, 27 November 2026)
+# AudioLab Pro icon assets: J3 "Dipole Field" with the S1 small icon (task IC6, 27 November 2026)
+
+Since IC6 (the user's round 4 picks, `docs/app-icon-round-4.md`): the default app icon stays **J3 in Orbit night (P2)** exactly as
+shipped in v0.270 (every picture at 96 px and up is byte for byte the v0.270 file); the small master is **S1 "Thin field"** of round 4
+(the W7 crop with IC4's thin rings on the pixel grid plus J9's dipole field as one hairline pair). Everything is drawn from code:
+`python3 tools/icon-lab/ic6/ship6.py` writes every file below (it reads `round3/icons3.js` for J3, J4, J6, J8, J10, `round4/icons4.js`
+for M3 and M5, and `ic6/small6.js` for the small pictures).
+
+| Size | Picture |
+|---|---|
+| 128 px and up | J3 (full detail); 96 px J3 at its bold level |
+| 64 px and below | **S1** (`tools/icon-lab/ic6/small6.js`): the user picked it for 32 px and below; 40 to 64 px stay on the small master as in IC4 because J3's own drawing there has the fat rings the user rejected. 16 pt and 32 pt at 2x are drawn for their point size (a hair heavier). |
+
+- Picker group "Dipole field" (12): Dipole Field (J3, default), **Dipole Field, Chart Paper** (J3 P8), Field Orbits (J4), **Field to the Edge** (M3 P2), **Field to the Edge, Chart Paper** (M3 P8), **Field Depth** (M5 P2), **Field Depth, Chart Paper** (M5 P8), Porthole Field (J6), Measured Field (J8, P2 and P8), Field Dial (J10, P2 and P8). New in IC6 in bold (`"added": "IC6"` in `icons.json`). Small versions at 16, 32, 48: the ring designs S1 (J6 in its porthole, J8 with its rulers), M3 and M5 an S1-style master of their own at 16 and 32 (orbits 1 to 1.3 px on the pixel grid, M3 with one hairline field pair to the edge) and their bold level at 48; J4 and J10 unchanged. 61 icons in all.
+- macOS 26: `mac-icon/AppIcon.icon` unchanged (J3 layer, fill #132044 for default, dark and tinted: Dark stays navy). `Assets.car` is compiled on the Mac runner (desktop build; or Actions › Mac icon check by hand).
+
+## IC4 (v0.270): J3 "Dipole Field"
 
 Since IC4 the app icon is **J3** from round 3 (`docs/app-icon-round-3.md`): the dipole field tilted 10 degrees round the yellow nucleus,
 with the thinner W7 rings at 90 % so the field shows through them, in **Orbit night** (P2: tile #132044 to #070910, rings #EAF1FF,

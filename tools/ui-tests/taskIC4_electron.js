@@ -28,7 +28,8 @@ async function start(ud, platform) {
   ok(['icp4', 'icp5', 'ic11', 'ic12', 'ic07', 'ic08', 'ic09', 'ic10', 'ic13', 'ic14'].every((t) => parts[t]), 'icon.icns has every size from 16 pt to 512 pt @2x (' + Object.keys(parts).join(' ') + ')');
   const want = { icp4: 16, icp5: 32, ic11: 32, ic12: 64, ic07: 128, ic13: 256, ic08: 256, ic14: 512, ic09: 512, ic10: 1024 };
   ok(Object.keys(want).every((t) => parts[t] && String(pngSize(parts[t])) === String([want[t], want[t]])), 'icon.icns: each entry has its own pixel size');
-  ok(parts.icp5 && parts.ic11 && parts.icp5.equals(parts.ic11), 'icon.icns: 32 px (32 pt and 16 pt @2x) is the small master drawn at 32');
+  // since IC6 the 16 pt @2x picture is drawn for its point size, so it no longer equals the 32 pt picture (taskIC6_electron.js checks it)
+  ok(parts.icp5 && parts.ic11 && String(pngSize(parts.icp5)) === '32,32' && String(pngSize(parts.ic11)) === '32,32', 'icon.icns: 32 px (32 pt and 16 pt @2x) from the small master');
   const ico = fs.readFileSync(path.join(DIR, 'build', 'icon.ico')), nI = ico.readUInt16LE(4), sizes = [];
   for (let k = 0; k < nI; k++) { const w = ico.readUInt8(6 + 16 * k) || 256, len = ico.readUInt32LE(6 + 16 * k + 8), off = ico.readUInt32LE(6 + 16 * k + 12); const s = pngSize(ico.slice(off, off + len)); sizes.push(w); if (!s || s[0] !== w) ok(false, 'icon.ico entry ' + w + ' is a ' + w + ' px PNG'); }
   ok(String(sizes) === '16,20,24,32,40,48,64,96,128,256', 'icon.ico has 10 sizes, each its own PNG: ' + sizes.join(' '));
@@ -37,8 +38,8 @@ async function start(ud, platform) {
   ok(web16.equals(icoEntry(16)) && web32.equals(icoEntry(32)), 'the website favicons at 16 and 32 are the small master, the same pictures as in icon.ico');
   const IJ = JSON.parse(fs.readFileSync(path.join(PK, 'icons.json'), 'utf8')), all = IJ.groups.flatMap((g) => g.icons);
   ok(IJ.default === 'dipole-field' && IJ.previous_default === 'ocean-yellow', 'icons.json: the default is dipole-field (J3), the one before was ocean-yellow');
-  ok(IJ.groups[0].key === 'dipole' && IJ.groups[0].icons.map((i) => i.id).join() === 'dipole-field,field-orbits,porthole-field,measured-field,measured-field-paper,field-dial,field-dial-paper', 'icons.json: the Dipole field group comes first with J3, J4, J6, J8, J8 paper, J10, J10 paper');
-  ok(all.length === 56 && new Set(all.map((i) => i.id)).size === 56, 'icons.json: 56 icons (49 kept + 7 new), every id once');
+  ok(IJ.groups[0].key === 'dipole' && ['dipole-field', 'field-orbits', 'porthole-field', 'measured-field', 'measured-field-paper', 'field-dial', 'field-dial-paper'].every((id) => IJ.groups[0].icons.some((i) => i.id === id)) && IJ.groups[0].icons[0].id === 'dipole-field', 'icons.json: the Dipole field group comes first with J3, J4, J6, J8, J8 paper, J10, J10 paper');
+  ok(all.length >= 56 && new Set(all.map((i) => i.id)).size === all.length, 'icons.json: at least 56 icons (49 kept + 7 of IC4; IC6 adds 5), every id once');
   let bad = [];
   for (const ic of all) {
     if (!fs.existsSync(path.join(PK, ic.file)) || !fs.existsSync(path.join(PK, 'thumb', ic.id + '.png'))) bad.push(ic.id);
@@ -67,7 +68,7 @@ async function start(ud, platform) {
       await t.page.evaluate(() => window.AudioLab.run("openSettings('colors')")); await sleep(400);
       await t.page.evaluate(() => document.getElementById('apicBox').scrollIntoView()); await sleep(2500);
       const st = await t.page.evaluate(() => ({ groups: [...document.querySelectorAll('#apicBox .apicg')].map((e) => e.textContent), tiles: document.querySelectorAll('#apicBox [data-apic]').length, on: [...document.querySelectorAll('#apicBox .apict.on')].map((b) => b.dataset.apic), def: [...document.querySelectorAll('#apicBox .apict em')].map((e) => e.closest('[data-apic]').dataset.apic), broken: [...document.querySelectorAll('#apicBox img')].filter((i) => i.complete && !i.naturalWidth).map((i) => i.src).slice(0, 5), first: [...document.querySelectorAll('#apicBox .apicgrid')][0] && [...document.querySelectorAll('#apicBox .apicgrid')][0].querySelectorAll('[data-apic]').length }));
-      ok(st.groups[0] === 'Dipole field' && st.first === 7 && st.tiles === 56, 'picker: Dipole field first with 7 icons, 56 in all (' + st.groups.slice(0, 3).join(', ') + ')');
+      ok(st.groups[0] === 'Dipole field' && st.first >= 7 && st.tiles === all.length, 'picker: Dipole field first with the 7 icons of IC4 (and those of IC6), every icon of icons.json shown (' + st.groups.slice(0, 3).join(', ') + ')');
       ok(st.on.join() === 'field-dial' && st.def.join() === 'dipole-field', 'picker: Field Dial marked in use, Dipole Field marked Default');
       ok(!st.broken.length, 'picker: every thumbnail loads' + (st.broken.length ? ': ' + st.broken.join(' ') : ''));
       if (SHOTS) {

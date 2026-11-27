@@ -17,6 +17,18 @@
      "design_code": "J3 P2"
     },
     {
+     "id": "dipole-field-paper",
+     "name": "Dipole Field, Chart Paper",
+     "file": "dipole-field-paper.png",
+     "small": {
+      "16": "small/dipole-field-paper-16.png",
+      "32": "small/dipole-field-paper-32.png",
+      "48": "small/dipole-field-paper-48.png"
+     },
+     "design_code": "J3 P8",
+     "added": "IC6"
+    },
+    {
      "id": "field-orbits",
      "name": "Field Orbits",
      "file": "field-orbits.png",
@@ -26,6 +38,54 @@
       "48": "small/field-orbits-48.png"
      },
      "design_code": "J4 P2"
+    },
+    {
+     "id": "field-edge",
+     "name": "Field to the Edge",
+     "file": "field-edge.png",
+     "small": {
+      "16": "small/field-edge-16.png",
+      "32": "small/field-edge-32.png",
+      "48": "small/field-edge-48.png"
+     },
+     "design_code": "M3 P2",
+     "added": "IC6"
+    },
+    {
+     "id": "field-edge-paper",
+     "name": "Field to the Edge, Chart Paper",
+     "file": "field-edge-paper.png",
+     "small": {
+      "16": "small/field-edge-paper-16.png",
+      "32": "small/field-edge-paper-32.png",
+      "48": "small/field-edge-paper-48.png"
+     },
+     "design_code": "M3 P8",
+     "added": "IC6"
+    },
+    {
+     "id": "field-depth",
+     "name": "Field Depth",
+     "file": "field-depth.png",
+     "small": {
+      "16": "small/field-depth-16.png",
+      "32": "small/field-depth-32.png",
+      "48": "small/field-depth-48.png"
+     },
+     "design_code": "M5 P2",
+     "added": "IC6"
+    },
+    {
+     "id": "field-depth-paper",
+     "name": "Field Depth, Chart Paper",
+     "file": "field-depth-paper.png",
+     "small": {
+      "16": "small/field-depth-paper-16.png",
+      "32": "small/field-depth-paper-32.png",
+      "48": "small/field-depth-paper-48.png"
+     },
+     "design_code": "M5 P8",
+     "added": "IC6"
     },
     {
      "id": "porthole-field",
