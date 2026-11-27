@@ -11,8 +11,8 @@ Written in step LT-0 (27 November 2026). `index.html`, `desktop/` and `native/` 
 | Step | Research id | Picks | What | Status |
 |---|---|---|---|---|
 | LT-0 | | | this plan | **done** (27 Nov) |
-| LT-1 | AE2-1 | L1, L2 | output check; playing buffer, Auto that comes back down | next |
-| LT-2 | AE2-2 | L4 | the played track skips delay compensation; recorded notes on the compensated clock | |
+| LT-1 | AE2-1 | L1, L2 | output check; playing buffer, Auto that comes back down | **done**, v0.289 (27 Nov): key to sound 41 to 22 ms median (armed Lead, idle); Play keeps the playing buffer (a restart costs 0.13 s) |
+| LT-2 | AE2-2 | L4 | the played track skips delay compensation; recorded notes on the compensated clock | next |
 | LT-3a | AE2-3 | L5 | desktop: notes read outside the page, posted into the worklet (the path, one instrument kind) | |
 | LT-3b | AE2-3 | L5 | desktop: every worklet instrument, drums, recording and the read-out; the Electron proof | |
 | LT-4 | AE2-5 | L8 | sleep idle tracks | |
