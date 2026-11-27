@@ -3436,3 +3436,32 @@ Started from the drawing code of the pick page of task D6 (`docs/science-look.md
 ### Release
 - v0.224: commit f2d766b on main (`index.html` was not touched by other sessions during the run).
 - v0.224. App copy synced, update note written ("New splash screen: five science drawings that change from start to start (moons in resonance, harmonograph, magnetic field, orbit chart, spectrogram), with the name and the loading bar in the drawing's colours. It stays about 1.5 seconds after loading; a click or a key closes it sooner."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-splash-science.md`.
+
+## 27 November 2026: task NB-N1 (native audio output and device control, as a helper)
+
+No app changes: `index.html` and `desktop/` were not touched, no version. Running list: `docs/native-mac-build.md`. Test app 0.2: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-2 .
+
+Started in the NM1 session after the user's tests on their Mac and their words "yes continue ... do it without my input". Logged under task NB's name so that NB goes on from N2.
+
+### Built
+- **`alengine`** (`native/engine/`): owns the audio output, driven by JSON lines: devices and formats, open with rate, buffer, format and exclusive use, move to another device while playing, volume and mute, status; changes from outside come as events (volume, rate, buffer, exclusive, devices, default output). Sound comes in through a local socket and goes to the device untouched; a ring corrects itself when it runs empty or too full and counts it. Integer formats that the system does not mix are written by the engine itself (16, 24, 32 bit).
+- **`native/bridge/engine-bridge.js`**: the desktop app's side as a plain Node module.
+- **Test app 0.2**: Rate menu, "Exclusive use of the device", "Device volume" both ways, a device list that follows plugging, a clear line when the test pattern has nothing to play.
+- Workflow `native-lab.yml`: engine checks, the hand-over test through the loop-back device, the Node bridge test, a picture of the app's main window.
+
+### Tested (build machine, virtual M1, run 45939789700)
+- Hand-over: 287,998 of 287,998 samples identical at the device, fed by a test program and fed by Node through the bridge. One earlier run had one gap of 1,456 samples in the Node test, together with one overload reported by the machine.
+- Open 48 to 73 ms, switch while playing 64 to 124 ms, rate 48 to 96 kHz in 124 ms and noticed by the engine, buffers 256, 64 and 32 accepted, volume set and read back, a change by another program reported at once, exclusive use keeps a second program out (error 35).
+- Arithmetic of the integer formats and of the ring: all checks pass on macOS and Linux.
+- Test app 0.2 built, started on the build machine, loaded Surge XT and played as before; the new row of controls is in place in the picture.
+
+### Not verified
+- No hand has clicked the new controls. No real DAC: the integer path never ran with sound, hot-plug was not seen, bit-perfect to hardware cannot be shown here.
+- Drift between two clocks over minutes (the test is 3 seconds); the smooth correction is not built.
+- Nothing is inside the app yet.
+
+### Assumptions
+JSON lines and a local socket instead of shared memory; "exact with rare corrections" before "always smooth"; exclusive use is released on a device change.
+
+### Next
+N2 (the engine under the app) needs `index.html` and `desktop/`; left for task NB in its turn, after the design chain, as the user ordered. For the user: try 0.2's second row with the Gryphon and paste the report.
