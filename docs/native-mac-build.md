@@ -147,6 +147,16 @@ What it shows:
 
 Next: task NL6 (below).
 
+### The user's seventh report (20:17 Brussels): Phase Plant sounds, and Pigments' knobs do reach the host
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-7.txt` (the same run continued).
+- **Phase Plant sounds**: 136 notes, sound in 2,314 of 3,438 blocks; `setComponentState` = not implemented (allowed). With the 0.4 host it was silent (report 5). Both of the user's main instruments now play in the host.
+- **Pigments' knob moves do arrive**: 938 moves, 19 gestures begun and ended, last "Wavetable 1 PM Amount = 0.37"; 465 parameter changes handed to the processor; 5 restarts because all values changed (presets loaded). The 0 moves in report 6 were drags outside knobs (preset browser). So NL6 item 1 is not a host fault; the poll check for unreported moves is still worth having. Phase Plant: 98 moves, 98 gestures, 12 restarts.
+- **Phase Plant peaked at +27.9 dBFS** inside the plug-in (output peak 1.000 after the app): the patch as the user left it was far over full scale. The app must protect the ears and the DAC: a plug-in output past 0 dBFS should be shown (a [warning] line and a red meter) and the master must never pass full scale (the engine already keeps bad samples and values past full scale from the DAC). NL6 or the next task: add the warning.
+- **Worst block 5.4 ms (47 %)** of 11.6 ms with Phase Plant and Pigments while their windows were in use (average 9 % and 6 %); no failed blocks, 1 overload (at the device switch). Log when the worst block happened (window opened, preset loaded, knob moved) so a spike can be tied to its cause.
+- **Mojibake again** in strings that come from the plug-in itself ("17.1‚ÄØms": Phase Plant's narrow no-break space): the ASCII clean-up does not reach parameter value texts. NL6: run every plug-in string through the same clean-up.
+- Empty lines between summaries still there (NL6 item 4).
+
 ## Stage N1: what was built (27 November 2026)
 
 - **`alengine`** (`native/engine/`, about 500 lines of C++ with the bridge): a native program that owns the audio output. The app starts it as a helper and talks to it in one JSON object per line.
