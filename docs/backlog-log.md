@@ -6223,3 +6223,20 @@ Step FT-F16a of `docs/features-build.md` (starred card F16 of `docs/research-fea
 
 ### Left
 - FT-F16b: triggered by notes of another track (ghost kick) or by audio, up to three bands (only the lows duck). The curve behind the waveform in the arrangement: lane A through `FT_HOOKS.volumeShaper`. Lane E may restyle the display, lane L may move the processor into the shared bundle. Next in lane C: **FT-F16b**.
+## 27 November 2026: task NL8 (VST3 test app 0.8: the output stays where the user put it, silence flags per block, the degree sign)
+
+No app changes: `index.html`, `desktop/`, `native/engine/` and `native/bridge/` were not touched, no version. Touched: `native/host/` (`live_tools.h`, `vst3_format.cpp`, `plugin_api.h`, `diag.cpp`, `cli.cpp`: `alvst3 nl8`), `native/testapp/` (the app, AL Strict Synth 0.8 with a 33-bus variant, Info.plist 0.8), `tools/native-lab/nl7/live_tools_test.cpp`, `tools/native-lab/READ-ME-FIRST.txt`, `.github/workflows/native-lab.yml`, `docs/native-mac-build.md`, this log. Ran in parallel with the other lanes.
+
+### From report 9 (test app 0.7) and report 8 (0.5)
+- After HALion 7's window opened the output went from the iFi Gryphon (held exclusively) to "Bose Mini II SoundLink (eqMac)". From the code and the log order: in 0.7 only the Output menu's action writes an `[output]` line with no line of its own before it (the list, rate and format paths all write one; the default-output, exclusive-use and format notifications were ignored), so the menu entry was chosen (a click, or a key while the menu had focus); 0.7 did not say which.
+- HALion 7's "blocks with a silence flag" (126,176 for 3,858 blocks) summed the 33 buses.
+- kHs Phase Distortion's "21¬inf": 0.5's Mac Roman decoding of the degree sign; 0.7's table already maps it.
+
+### Built
+See `docs/native-mac-build.md`, section "Test app 0.8". Every `[output]` line says why; a device chosen in the menu (or by turning on exclusive use) is kept by UID, never left unless it goes away, and taken back (with exclusive use) when it returns, also by a 4-per-second safety net; `[default]`, `[exclusive]` and `[format]` lines for changes from outside, which never move a chosen output; the Output menu takes no keyboard focus. Silence flags counted per block, with the main bus and the bus sum apart. The degree sign and µ ± × ∞ ² ³ (also as Mac Roman mojibake) cleaned; units trimmed.
+
+### Tested
+Mac runner (macos-latest, runs 46072090047 and 46074328660): device simulation with an aggregate test output (follow the default while nothing is chosen, stay when chosen, move away with a reason when unplugged, come back by UID) and BlackHole held exclusively while the default output changes: 7 of 7; `alvst3 nl8` 4 of 4; live_tools checks normal, ASan+UBSan, TSan; every `[output]` line has a reason. Linux: the host and the strict synth under ASan+UBSan, no errors. Pre-release `native-lab-8` "AudioLab VST3 test 0.8", ad hoc signed, not latest (latest still v0.270.0).
+
+### Not verified
+The Gryphon, HALion 7, kHs Phase Distortion; exclusive use taken again after a real replug (the aggregate test device refuses exclusive use).

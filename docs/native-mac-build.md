@@ -19,12 +19,12 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | R3 | Review fix NB-R3: the sound path out of the shell's main process | **done, proven with the real Electron shell on Linux** (task NB-R3): the page's sound goes to a small helper process (the feeder) that only writes it into the engine, with a bounded queue and back-pressure; a watchdog replaces a feeder or an engine that stops answering (3 s); with the main process blocked 50 or 250 ms every second every frame arrived bit for bit with no gap, where the old path made gaps; `alengine` 0.4 no longer stalls a source switch on a frozen sender. The Mac waits for D9 |
 | R2 | Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac | **done on Linux** (task NB-R2): the page must say its rate and the engine refuses any other; a device that changes rate goes silent, tells the page and resumes when the rate comes back; source switching without the 30 ms sleep (review C1, C2, C5); the engine now runs everywhere on a null device and is tested end to end on every push (24 checks, also under ASan, UBSan and TSan). The Mac build of this code waits for a Mac runner (D9) |
 | R1 | Review fix NB-R1: native CI on every push | **done on Linux** (task NB-R1): workflow `native-ci.yml` builds every native target normally and with AddressSanitizer + UndefinedBehaviorSanitizer, runs the engine's selftest, the ring under two real threads (also under ThreadSanitizer), the mixer's 10 scenes and all 240 device cases against the web engine (green: 240 of 240, sanitizers 240 of 240 at 128 frames, 239 of 240 at 7 as known), and 27 bridge checks against a stand-in engine. The Apple Silicon part waits for a Mac runner (D9) |
-| N4 | VST3 in the app | host layer and scanner exist from stage 0; **test app 0.7** (task NL7, pre-release `native-lab-7`) is the version the user tests next (0.6 was skipped): loud-output warning and safety limiter, slowest blocks tied to their cause, plug-in strings cleaned, the DAC's bit depth, unreported parameter changes. Phase Plant and Pigments both sound on the user's Mac (reports 6 and 7, test app 0.5); not in the app yet |
+| N4 | VST3 in the app | host layer and scanner exist from stage 0; **test app 0.8** (task NL8, pre-release `native-lab-8`) is the version to test next: the output stays where the user put it (every `[output]` line says why; a chosen device is left only when it goes away and taken back, with exclusive use, when it returns), silence flags counted per block, the degree sign and other symbols cleaned. 0.7 (task NL7) works on the user's Mac (report 9: eight plug-ins sound, Gryphon at 32-bit, no overs). Phase Plant, Pigments and HALion 7 sound in the host; not in the app yet |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
 
-Test app 0.7 (task NL7, below): https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-7. Set the Gryphon to 32-bit (Audio MIDI Setup, or the app's menu Device > Use the deepest format), play Phase Plant and Pigments ten seconds each, turn a few knobs, paste the report. Stages N2b to N3c change nothing you can hear or click yet.
+Test app 0.8 (task NL8, below): https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-8. Choose the Gryphon in the Output menu and tick Exclusive use, load HALion 7 and kHs Phase Distortion, open their windows, play ten seconds each, paste the report. Stages N2b to N3c change nothing you can hear or click yet.
 
 ## What you could try with test app 0.2 (stage N1)
 
@@ -179,6 +179,47 @@ The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-7.txt` (the
 - Empty lines between summaries still there (NL6 item 4).
 
 **The user's decision (20:20 Brussels): skip test app 0.6 for testing.** NL6 finishes and publishes as planned, but the user only tests the next version: task NL7 builds test app 0.7 on top of NL6 with the three findings above (the warning past 0 dBFS with a red meter, the worst block tied to its cause, plug-in strings cleaned) plus anything from NL6's list not finished, and that is the version the user is given.
+
+## Test app 0.8 (task NL8, 27 November 2026): built on 0.7 with the three things from report 9
+
+Code: `native/testapp/main.mm` (the output), `native/host/vst3_format.cpp`, `plugin_api.h`, `diag.cpp` (silence flags), `native/host/live_tools.h` (symbols), `native/host/cli.cpp` (`alvst3 nl8`), `native/testapp/strictsynth/` (AL Strict Synth 0.8), `tools/native-lab/nl7/live_tools_test.cpp`, `.github/workflows/native-lab.yml`. Everything else as in 0.7.
+
+### 1. Why the output left the Gryphon in report 9 (line 481), from the code and the log order
+In 0.7 an `[output]` line is written only by `startDevice`, and every path into it except one writes its own line first: the device list (`[devices] the list changed` / `the device in use is gone`), a rate change from outside (`[rate] ... from outside this app`), the Rate menu (`[rate] asked for`), Device > Use the deepest format (`[format] ... as you chose`). 0.7 did not act on the default-output, exclusive-use or format notifications at all (they reached `outside:` and fell through), so neither eqMac making itself the default nor HALion's engine could move it. Report 9 has no such line before line 481, and no `[devices]` line anywhere in that stretch. The one path without a line of its own is the **Output menu's action** (`deviceChanged:`): the Bose (eqMac) entry was chosen in the menu, by a click or by a key while the menu had keyboard focus. 0.7 did not record which, and it gave the Gryphon's exclusive use back without a line. So the user (or a stray key) chose it; the app did not move by itself, but 0.7 could not prove it.
+
+### 1. What 0.8 does
+- **Every `[output]` line ends with `why: ...`**: "chosen in the Output menu with the mouse" / "with the keyboard (key code N)", "the system's default output, at the start", "the device in use (X) went away; the system's default output; the app goes back to X, which you chose, when it returns", "the device you chose (X) is there again", "the system's default output changed to X (you have not chosen an output...)", "the rate you chose", "its rate was changed from outside this app", "Device > Use the deepest format". Choosing the device already in use says so and changes nothing.
+- **A chosen device is never left** unless it goes away. Choosing an output in the menu, or turning on exclusive use, picks it (kept by its UID, which survives a reconnect). The system's default output changing (`[default]` line), another program taking or releasing exclusive use (`[exclusive]` line) and format changes (`[format] ... the output stays on this device`) are logged and never move the output. Only while nothing is chosen does the app follow the default output.
+- **Back when it returns**: on a device-list change, and 4 times a second as a safety net (whatever moved the output), the app goes back to the chosen device as soon as it is there with a name and a rate, and takes exclusive use again if it was on (`[exclusive] ... taken again, as you had it on`). Giving exclusive use back when moving away is now logged too.
+- The Output menu no longer takes keyboard focus, so typed keys cannot change it.
+
+### 2. Silence flags per block
+`blocks with a silence flag set by the plug-in` now counts each block once whatever the number of buses, and splits it: "X of Y (on any of its 33 output buses; on the main bus: M, W of them although the main bus held sound; flags summed over all buses: S)". 0.7 printed S (HALion 7: 126,176 for 3,858 blocks).
+
+### 3. Symbols in plug-in texts
+`asciiClean` already mapped U+00B0 to " deg" in 0.7 (report 8's "21¬inf" came from 0.5, whose `stringWithFormat %s` read the UTF-8 bytes C2 B0 as Mac Roman "¬∞" and then turned ∞ into "inf"). 0.8 checks it, with micro, plus-minus, times, infinity, squared and cubed (u, +/-, x, inf, 2, 3), and also repairs these symbols when they arrive already turned into Mac Roman letters ("¬∞" -> " deg", "¬µ", "¬±", "√ó", "‚àû", "¬≤", "¬≥", and U+202F, U+2212, U+00A0 likewise). A unit of "°" becomes "deg".
+
+**AL Strict Synth 0.8** (test instrument, not shipped) adds "Spread" (unit °, value "21°"), "Symbols" (value text with µ ± × ∞ ² ³ °, and at 1.0 the same as Mac Roman mojibake) and a second instrument in the same bundle, **"AL Strict Synth 33 outs"**: 33 stereo output buses like HALion 7 (all main, all off until the host turns them on), silence flags on every bus it leaves silent, and a deliberately wrong flag on the main bus every 50th block.
+
+### Tested
+Build machine: GitHub's `macos-latest` runner, run 46072090047 on commit 69cf461, then the published build, run 46074328660 on commit f736ba2 (the same app plus one more device check).
+- **Device simulation in the app** (`--devsim`, report `c-devsim`): the self-test makes a test output (an aggregate device around the runner's own, with a fixed UID), and: made it the system's default while nothing was chosen, the app followed and said why; default back, followed back; chose it in the Output menu (the self-test standing in for a click); changed the system's default to another output (Null Audio Device) and back: `[default] ... this app stays on AL test output (NL8), which you chose`, no move; destroyed it as if unplugged: `[devices] ... went away`, `[output] Apple Virtual Sound Device ... why: the device in use (AL test output (NL8)) went away; the system's default output; the app goes back to AL test output (NL8), which you chose, when it returns`; made it again with the same UID: `why: the device you chose (AL test output (NL8)) is there again`. **6 of 6 checks passed.** The aggregate refuses exclusive use ("who?"), so the retake of exclusive use after a return was not provable here. The release run adds a check on BlackHole: chosen with exclusive use, the system's default output changed three times (once to the held device itself): the app stayed and kept exclusive use. **7 of 7 checks passed** there.
+- Pre-release `native-lab-8` "AudioLab VST3 test 0.8" (run 46074328660), ad hoc signed, not latest. The latest release afterwards is still v0.270.0, as before this task.
+- Every `[output]` line in all six app runs has a reason (0 without).
+- `alvst3 nl8` (Mac and Linux): Spread "21 deg", unit "deg"; Symbols "us +/-3 x2 inf m2 m3 21 deg", also from the mojibake text; the 33-bus instrument: 400 blocks, a flag in 400 of them, on the main bus in 47 (the 40 silent ones at the start and 7 wrong flags while it held sound), 12,847 bus-flags summed. In the app (`c-strict33`): "2119 of 2119 (on any of its 33 output buses; on the main bus: 768, 27 of them although the main bus held sound; flags summed over all buses: 68576)".
+- `tools/native-lab/nl7` (live_tools.h, 19 checks with the 6 new text checks): all passed normally, under ASan+UBSan and under TSan, on the Mac and on Linux.
+- Linux here: `alvst3 nl8`, `alvst3 nl7`, `alvst3 diag` on AL Strict Synth 33 outs (48 and 44.1 kHz) and mda JX10, built with AddressSanitizer + UndefinedBehaviorSanitizer: no errors.
+- Surge XT, mda JX10, AL Strict Synth (loud and sneaky modes) as in 0.7.
+
+### Not verified
+The Gryphon, HALion 7 and kHs Phase Distortion themselves. Taking exclusive use again after a real unplug and replug (the test device refuses exclusive use). A real Bluetooth reconnect coming back.
+
+### What to try (0.8)
+**AudioLab VST3 test 0.8**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-8 (a pre-release; Open Anyway as before).
+1. Choose the Gryphon in the Output menu and tick "Exclusive use of the device".
+2. Load HALion 7, Open its window, play the pattern ten seconds, stop.
+3. Load kHs Phase Distortion, Open its window, turn Spread, play ten seconds, stop.
+4. Paste the report. Every `[output]` line says why; the Gryphon should stay all along. The `[diag]` silence line now reads "X of Y blocks".
 
 ## Test app 0.7 (task NL7, 27 November 2026): built on 0.5 with everything from reports 6 and 7
 
