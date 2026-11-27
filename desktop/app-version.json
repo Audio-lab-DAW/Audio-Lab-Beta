@@ -1,7 +1,7 @@
 {
-  "version": "0.236",
-  "sha256": "27c6fd192cc4510f615694ab71f1a7779f01e7f7a78fe55292308eace1a4002e",
-  "size": 6030161,
+  "version": "0.237",
+  "sha256": "95aef405d1e72c4d521e77e8d51b8743747a87db01a8bf40488c6d892ba1a91c",
+  "size": 6044070,
   "minShell": "0.147.0",
-  "notes": "MIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings."
+  "notes": "Settings, step 3: the Mono and L↔R buttons on the master strip now light up when you change them in Settings; Settings shows all six ways to follow the playhead (Look ahead and Push at the edge too) and the 'Follow again 3 s' switch; the visualizer's own buttons and Settings stay in step.\nMIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings."
 }

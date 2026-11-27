@@ -4118,3 +4118,32 @@ Third step of the settings rebuild (`docs/settings-round-1.md`, S3, no dependenc
 ### What is left
 S4 (one settings table in the code that draws the rows; no visible change) next, then S5 to S19. Performance and the Glass block stay with the glass chain (G4).
 
+
+
+## 27 November 2026, v0.237: task NI-2a, kick and bass tuning lab part 1: the analysis (lane D, idea I2)
+
+No visible change yet: this step is the analysis; the ruler view with the two fixes is NI-2b. Shared with lane C: FT-F18 builds on `NI_HOOKS.kickBass` and adds only what I2 does not have (low-band correlation, phase rotation, shorten tail). Edit script `tools/feature-lab/ni/ni_2a.py` (anchored, re-run after the rebases onto v0.235 and lane B's v0.236), test `tools/ui-tests/taskNI_2a.py` (56 checks, all pass).
+
+### Built
+- **`NI_kickBass(o)`** (also `NI.kickBass`, `NI_HOOKS.kickBass`): o = {t (song beat, default the playhead), kick, bass (track ids, default found), sr}. Finds the kick (Kick designer, a drum machine playing a kick pad, or a track named Kick or BD) and the bass (named Bass, Sub or 808, a Bass preset, notes mostly under E3; never a drum track). Takes the bar under the playhead (or the first bar the kick plays, if it is silent there).
+- **The kick, from its settings** (exact): Kick designer instruments (with key tracking) and drum machine pads (Kick designer pad, kit kick, with the pad's Tune and Decay), using the same pitch formula as `kickRender`: the falling curve every 2 ms with its level, start and end frequency, the end note, the life in ms. `NI.kickModel(track, note)` gives this without any render.
+- **The kick, measured** (audio kick, sampler, anything else): that one track rendered offline for the bar (`renderMixChunked` with `only`), low-passed and taken down to about 12 kHz, hits found from the level, YIN every 5 ms on the hit that rings longest; the end note is the median of the tail, given as a range (10th to 90th percentile), at least 40 cents each side under 40 Hz and marked `low` there, as the research asked.
+- **Bass notes of the bar** (MIDI clips): note, frequency, in key or not, and against the kick's end: the interval folded to the nearest octave, the **beat rate** (between the kick's octave harmonic and the bass, or the reverse when the bass is lower), and the state: tuned (under 30 cents), clash (0.3 to 2.5 semitones, the beating range), apart.
+- **Overlap** for the rolling-bass strip: each kick hit of the bar with the bass notes sounding during the kick's life and the gap in ms to the next bass note.
+- **The key** (`NI_key`): lane C's project key when `FT_HOOKS.projectKey()` exists (FT-F11), else the piano roll's scale and root (`S.prKey`). **"Tune the kick to the root"**: the root note nearest to where the kick settles and the semitones to get there (NI-2b's fix).
+- The result in words ("The kick settles on F♯1 (46.2 Hz, Kick designer settings). Key: F♯ minor. Bar 3 bass: F♯1 in tune with the kick; G1 beating at 2.8 Hz; ..."). Cached per kick track, bass track, bar, key and tempo map; thrown away if the song changes during a render; refused during an export.
+
+### Checked
+- Synthetic audio kicks (sweep from 260 Hz, drive, 380 ms) ending at 49.0, 41.2, 56.3, 36.7 and 32.7 Hz: found within 1.8, 4.6, 3.2, 6.9 and 7.6 cents; the range holds the true note every time; the two under 40 Hz flagged; the four hits of the bar found on the beats.
+- Kick designer at tune 30, 26 and 34.5: read exactly from its settings, and its own render measured with the audio path agrees within 7.8, 13.8 and 10.1 cents (the drive and the short tail pull the measurement slightly sharp). Key tracking: note 48 reads 12 semitones up. Drum machine: the kit kick with pad tune -2 and a Kick designer pad with tune +1 read right.
+- A song with Kick (F♯1), a Lead and a Bass: the Bass (not the Lead) found; bar 3's six bass notes and none from bar 4; every interval, beat rate and state equal to a direct calculation (G1 beating at 2.75 Hz, G2 at 5.51 Hz against the kick's octave, F♯1 and F♯2 in tune, C♯2 and B1 apart); key F♯ minor from the piano roll, G out of key; tune to root 0 semitones, and A1 +3 in A minor; gaps 125 ms; the kick's 320 ms life overlaps the notes at 8.25 and 8.5 only. The analysis leaves the project unchanged (saved JSON equal), the second call comes from the cache, an edit gives a new result; a stubbed lane C project key is used.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums. No audio code was touched: the block makes no audio nodes.
+- After the rebase onto lane C's v0.235 (and again on lane B's v0.236; lane B's `taskST_S3.py` 60 of 62, the two misses its own check that the version is 0.236): `taskNI_2a.py` 56 of 56, `taskNI_1a.py` and `taskNI_1b.py` 36 of 36 each, lane C's `taskFT_C1b.py` 29 of 29 (once, run beside another test, one feedback-timing check missed; alone it passes). No console errors. Nothing visible changed, so no screenshots this step.
+
+### Limits
+- An audio bass (a bass recorded or bounced to audio) is not read yet: its notes would need pitch tracking per note; the result says so. Notes are read as written; a transposing device after the instrument is not followed.
+- Measured kicks: a kick with a lot of drive or a very short tail reads up to about 15 cents sharp; under 40 Hz it is shown as a range. Psytrance kicks that never settle on one note show a wide range; that is honest, not a fault.
+- What only the ears can judge: whether "in tune" by this reading also sounds right on the user's kicks; to try in NI-2b.
+
+### Left
+NI-2b: the view (note ruler C0 to C3 with the key lit, the kick's falling curve with its end note, bass notes as bars, the clash glow with the beat rate, the rolling-bass gap strip), the fixes "tune kick to root" and "bass down an octave" (one undo step each), the command `ni.kickBass`, `NI_HOOKS.kickBassView` for FT-F18's rows. Then NI-3.
