@@ -279,7 +279,19 @@ What was built (`tools/native-lab/ui-bench/`):
   - at 3840x2160 off screen, every frame waited for (what a frame costs);
   - in a 1600x1000 window paced by the display (what the screen gets).
 
-**Status:** the workflow run (Actions, "UI bench (task RN4)", run 1) was still queued for the macOS runner when this was committed. The numbers are added here when it finishes.
+**Status: no numbers yet.**
+- The workflow run (Actions, "UI bench (task RN4)", run 46003825128) waited in the queue for a macOS runner for 15 minutes and was then **cancelled before it started**, at 13:18 UTC. A Native engine run (task NB) was cancelled the same way.
+- This task did not start it again, so as not to compete with the engine's Mac runs.
+- The web half was checked on the cloud machine; it runs with no errors and draws about 11,000 rectangles a frame. That machine has no graphics card, so its times say nothing.
+- To get the numbers:
+  - **Runner:** start the workflow by hand (a few minutes; results on the branch `ui-bench-results`).
+  - **Your Mac** (task NU1), which is worth more:
+    - `swiftc -O tools/native-lab/ui-bench/metal/main.swift -o metalbench && ./metalbench 10`
+    - then `tools/native-lab/ui-bench/web/bench.html?run=10` in Chrome.
+- **Reading guide for when the numbers come.** Look at the frame time at 3840x2160 for each way of drawing, against 4.17 ms (240 Hz):
+  - If WebGL2 is close to Metal, option W holds and the arrangement's problem is Canvas 2D, not Electron.
+  - If Metal is several times faster than WebGL2, gate G leans to N.
+  - What to expect [guess]: Canvas 2D will be the slowest by far, and WebGL2 and Metal within a small factor of each other, because both are one instanced draw. In that case most of the difference is in the CPU time to build the scene (JavaScript against Swift) and in the compositor's extra stage.
 
 ---
 
