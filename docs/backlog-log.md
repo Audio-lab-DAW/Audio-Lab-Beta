@@ -3759,3 +3759,44 @@ Nothing by hand. The Bluetooth warning never ran (no Bluetooth device on the bui
 
 ### Next
 The user: search for Phase Plant, load it, turn knobs in its window, play the pattern, paste the report; and Pigments again at 44.1 kHz or more.
+
+## 27 November 2026, v0.229: the About card in the menu gets the fine atom and the splash drawings (task AB2)
+> "The new splash screen looks really good. Let's make the AudioLab about button that's under output and export. That has like the older nucleus atom. Let's update that. Make it look like the splash screen. So it looks really good. And I like the new animated atom on top. Let's use that, all the colors and the same style. And also have the variations as well randomly, just like the splash screen." (with two screenshots)
+
+The card is the one at the bottom of the Settings side menu, under Output, Project file and Export audio; a click opens About. No other task had work in progress on `index.html` (GS3 released as v0.228 before this run).
+
+### Built
+- **The atom**: the old nucleus (`paintAtom` on `#navAtomC`, the ball of coloured spheres with the cloud of purple dashes) is no longer painted on the card. The same canvas now shows the fine atom of the About window, drawn by `FATOM.canvas` (the same code, not a copy), at the card's atom size (132 points at window heights of 822 and more, smaller below, as before), at the device pixel ratio and the app's zoom up to 3. Its own colours (field-line blue, cyan, the warm electron and protons) as in About.
+- **The blurred coloured balls are gone** (the `.bubc` canvas is replaced; `bubPaint` finds nothing to paint).
+- **Behind it, a small splash drawing** on one canvas (`.nab`): moons in resonance, harmonograph, dipole field, orbit chart or spectrogram, drawn by the splash's own code (`SPLBG.FN`, now shared). Centred on the atom's nucleus; the line drawings are 1.3 to 1.5 times the card's width (cut by its edges) with lines at 0.8 points, at 62 to 80 % strength; the spectrogram at 42 % fills the card down to the name, its top rows fade into the card. Everything fades out above the name, so nothing of the drawing is under the name or the version (the strongest pixel there at most 12 of 255, checked in all 20 cases). No text: the labels that ride on the moons and on H1 to H3 would be 2 to 3 points high here and are dropped.
+- **Chance**: chosen each time Settings opens (closed before), with the splash's weights and its never-twice-in-a-row rule, by the splash's own `SPLBG.pick`, which now takes its memory key: the card remembers its last drawing in `localStorage` `audiolab-menu-last`, the splash keeps `audiolab-splash-last` (so the two do not push each other around).
+- **Colours as on the splash**: the card's ground (`g`, `bg`, `e`), "Audio" (`ink`), the "Lab" gradient (`a` to `b`), the PRO pill (`p`, ring `a`) and the version (`n`) take the drawing's palette (`SPLBG.PAL`); the hover outline takes `a`.
+- Tooltip ("AudioLab Pro") and the click to About unchanged.
+- Code: block "v0.229 (task AB2)" before `askChoice` (`AB2`, a new `setLoop` that no longer paints the old nucleus, `openSettings` wrapped once more); CSS before `.dacv`; in `SPLBG` `pick(lastKey, testKey)` and `FN`, `BW` in what it returns. Edit script `tools/edits/taskAB2.py` with `taskAB2_block.js` and `taskAB2_css.txt`, every replacement asserted unique.
+- Test hook: `AB2.force('moons'|'harm'|'dipole'|'chart'|'spec'|null)` or `localStorage` `audiolab-menu-test`; counters `AB2.n` (pictures, atoms, openings per drawing).
+
+### Cost
+- Two canvases, the atom's and one for the drawing (the spectrogram also keeps its own small 220-point picture, as on the splash). At most 30 pictures a second (both canvases in the same step), only while Settings is open, the card is in view (an IntersectionObserver) and the window is in front; frames are asked for through the app's frame gate, so the background freeze (task AO) holds them. Sizes are read only when something changed (ResizeObserver), no layout reads per frame.
+- **Light level**: the drawing is one still picture at 72 % of its strength; the atom keeps moving at 15 pictures a second (the logos keep moving in the lighter looks since task AO, whose test checks it). **Reduce motion**: both still, no frames.
+- Time per picture (drawing and atom together) at device pixel ratio 2 on the cloud machine (software drawing): moons 1.1 ms, harmonograph 1.8, dipole 1.1, orbit chart 1.5, spectrogram 1.2. The old nucleus took 3.7 to 4.3 ms a picture at up to 60 a second (v0.218 entry), plus the blurred balls.
+
+### Tested (`tools/ui-tests/taskAB2.py`, headless Chromium, 207 checks, all pass)
+- Each of the five forced, at device pixel ratio 1 and 2, moving and at the Light level (20 cards): the forced drawing is shown; two canvases and no blurred balls; both at the device pixel ratio (drawing 161 x 190 points as 161 x 190 or 322 x 380 pixels, atom 132 points as 132 or 264 pixels); "Audio", PRO, its ring and the version in the drawing's colours and "Lab" in its gradient; nothing of the drawing under the name and the version; atom, name and version in order inside the card; the version and the tooltip. Screenshots of all 20 looked at, and the atom zoomed in at pixel ratio 2: dots and hairline orbits sharp, the drawing behind it fine and quiet, the name clear.
+- The old nucleus is never painted on the card (counted on `paintAtom`).
+- **Frames counted**: open and moving 27 to 28 pictures a second here (never above 30), the atom with each; closed, nothing drawn (also after 30 quick openings in a row) and no drawing kept; frame gate shut, nothing; open again, it runs; card pushed out of view inside the menu, nothing; back in view, it runs. Light level: the drawing not drawn again, the atom 8 to 16 a second. Reduce motion: one still picture.
+- **Random choice**: 60,000 picks, never the same twice in a row, shares 22.6 to 23.0 % for the four line drawings and 9.0 to 9.3 % for the spectrogram (expected 22.7 and 9.1); 70 real openings of Settings: never the same twice, all five seen. The splash's memory is untouched by the card.
+- A click on the card opens About.
+- No console errors in any of it.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB, Bass -35.48685 dB with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums as before. No audio code was touched.
+- Regression, each run alone: `taskSP1.py` 149 of 149, `taskAB1.py` 192 of 192, `taskGS3.py` 40 of 40 (its Settings logo check now also counts the card's own atom; 24 a second here), `taskAO.py` quick all pass (the Settings logo moves at the Lighter level), `play.py` and `overview.py` pass. Run side by side with another test, SP1 missed once on its in-app splash timing (1481 ms against 1400) and AB1 once on its 40 openings; both pass alone.
+
+### Not verified
+- The user's Mac: retina, 120 Hz, a real graphics card; how fine the atom and the drawing read in the 163-point card there.
+- The desktop app (Electron) was not started; the page is the same file and no desktop shell file changed.
+
+### Left
+- `paintAtom`, `AT.big` and `bubPaint` are still in the file (the settings button's logo in the top bar uses `paintAtom`); the card no longer uses them.
+- In windows lower than 822 points the card's atom is smaller, below 690 points it is hidden, as before (the card keeps its size rule); the drawing and the name still show.
+
+### Release
+- v0.229 on main. App copy synced, update note written ("The About card in the Settings menu now has the new fine atom and, behind it, a small version of one of the five splash drawings, a different one each time Settings opens; the name and the version take the drawing's colours, as on the splash."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-about-card.md`.

@@ -1,7 +1,7 @@
 {
-  "version": "0.228",
-  "sha256": "414966de7a38a8cc154d5e4cc3fb0c7e566427e3f43393e2090f6c37a1b58b31",
-  "size": 5959534,
+  "version": "0.229",
+  "sha256": "e3afb68dccec594b84a82f03e484676ef90b241549c4cc23aa12468af0a95a02",
+  "size": 5968094,
   "minShell": "0.147.0",
-  "notes": "Glass step 3: the old glass code is gone, an idle AudioLab no longer redraws the whole window on every screen frame, and Settings, Performance has a frame-rate read-out you can switch on to show the frames per second and the slowest frame of the last few seconds. Please switch it on and tell us what you see on your Mac."
+  "notes": "The About card in the Settings menu now has the new fine atom and, behind it, a small version of one of the five splash drawings, a different one each time Settings opens; the name and the version take the drawing's colours, as on the splash."
 }

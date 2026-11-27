@@ -100,7 +100,7 @@ with sync_playwright() as p:
     moving = len(set(lv)) > 2 and R("document.getElementById('mtr').clientWidth>2")   # in some layouts the top bar has no room for it (then it is not drawn at all)
     ok((n_play > 50) if moving else True, 'it still moves while the song plays, where it is shown (%d drawings in 2 s; levels seen: %s; width %s)' % (n_play, sorted(set(lv))[:6], R("document.getElementById('mtr').clientWidth")), n_play)
     R("window.__pa=0;{const o=paintAtom;paintAtom=function(c){if(c&&c.id==='navAtomC')__pa++;return o.apply(this,arguments)}}")
-    R("openSettings('general')"); pg.wait_for_timeout(1000); R("__pa=0;window.__fr=FRN"); t0 = time.time(); pg.wait_for_timeout(3000); dt = time.time() - t0; pa = R("__pa") / dt; fr = R("FRN-__fr") / dt
+    R("openSettings('general')"); pg.wait_for_timeout(1000); R("__pa=0;window.__ab2=typeof AB2!=='undefined'?AB2.n.atom:0;window.__fr=FRN"); t0 = time.time(); pg.wait_for_timeout(3000); dt = time.time() - t0; pa = R("__pa+(typeof AB2!=='undefined'?AB2.n.atom-__ab2:0)") / dt; fr = R("FRN-__fr") / dt   # from v0.229 (task AB2) the card draws the fine atom itself, at most 30 a second
     ok(0 < pa <= 62 and (fr < 70 or pa < fr * .9), 'the logo in Settings still moves, at most 60 pictures a second (%.1f a second at %.1f frames a second here)' % (pa, fr), pa)
     R("closeSet()"); pg.wait_for_timeout(500)
     s = json.loads(R("JSON.stringify({ls:!!document.querySelector('#bCap.ls'),an:document.getAnimations().filter(a=>a.playState==='running').map(a=>[a.animationName,Object.keys((a.effect.getKeyframes()[0])||{}).filter(k=>!/offset|easing|composite/.test(k))])})"))
