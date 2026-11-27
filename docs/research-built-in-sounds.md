@@ -215,4 +215,6 @@ All links are in section 4. Main ones: Zavalishin (VA filter design), Huovilaine
 
 ## The user's picks
 
-(to be filled in when the user answers)
+27 November 2026, 21:13 Brussels: `AE4 picks: B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24 B25 B26 B27 B28 B29 B30 B31 B32 B33 B34 B35 B36 B37 N1 N2 N3 N4 N5 N6`: everything, all 37 improvements and all six new devices.
+
+Who builds it: a new lane L, task **SND** (the worklet DSP of instruments and effects, prefix `snd`), one step per run in the order of section 7 (SND-0 shared DSP kit first, then SND-1 to SND-19 with the small ones folded in). Every change that alters the sound is a v2 engine mode or a new device: old projects keep their v1 sound, exports bit-identical. Lane E draws inside device displays, lane I owns the device frame; lane K (MX) owns sidechain routing (the Compressor v2's sidechain input uses MX's source menu, AE3 X1). Task AE1 (sound quality: oversampling policy, resampling, dither) may add engine-wide rules: SND follows them when they are picked. Task NB ports each new plain-arithmetic core to the native engine bit for bit.
