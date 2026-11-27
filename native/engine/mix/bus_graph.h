@@ -101,7 +101,7 @@ struct BusGraph {
                 } else { bool none; mono = sumInputs(nd.in, L.data(), R.data(), sL.data(), sR.data(), Q, none); }
                 if (nd.chain && nd.chain->size()) {
                     bool anyOn = false; for (size_t k = 0; k < nd.chain->size(); k++) anyOn |= nd.chain->slot(k).on;
-                    if (anyOn) { nd.chain->process(L.data(), R.data(), Q); mono = false; }   // a worklet device gives two channels
+                    if (anyOn) nd.chain->process(L.data(), R.data(), Q, &mono);   // a worklet device gives two channels, the Pro EQ keeps one
                 }
                 if (nd.delay > 0) {              // an exact whole-sample delay (DelayNode at d/sr, measured)
                     const size_t D = (size_t)nd.delay;

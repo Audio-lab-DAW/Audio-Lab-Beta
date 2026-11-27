@@ -62,15 +62,22 @@ public:
     size_t size() const { return slots_.size(); }
     RenderContext& ctx() { return ctx_; }
     ChainSlot& slot(size_t i) { return slots_[i]; }
-    // One block in place (n <= kMaxBlock).
-    void process(float* L, float* R, int n) {
+    // One block in place (n <= kMaxBlock). mono (optional): in, whether the block has one channel (L, with R a
+    // copy); out, whether it still has one. A worklet device always gives two channels; a browser-node device (the
+    // Pro EQ) keeps one channel one, as the web engine's nodes do.
+    void process(float* L, float* R, int n, bool* mono = nullptr) {
         WebFloatState fp;
         float tL[kMaxBlock], tR[kMaxBlock];
+        bool m = mono && *mono;
         for (auto& s : slots_) {
             if (!s.on) continue;
+            Processor& pr = s.dev->proc();
+            pr.monoIn = m;
             s.dev->process(L, R, tL, tR, n);
+            m = pr.worklet() ? false : pr.monoOut;
             for (int i = 0; i < n; i++) { L[i] = tL[i]; R[i] = tR[i]; }
         }
+        if (mono) *mono = m;
     }
 
 private:

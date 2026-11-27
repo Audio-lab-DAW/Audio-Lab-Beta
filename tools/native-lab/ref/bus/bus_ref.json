@@ -1,5 +1,5 @@
 {
- "app": "0.263",
+ "app": "0.266",
  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
  "sr": 48000,
  "frames": 24000,
@@ -255,6 +255,48 @@
    "peak": 0.9660508632659912,
    "webRendersTwiceSame": false,
    "webSamplesDifferingBetweenTwoRenders": 26328
+  },
+  "eqbus": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "m",
+    "ms",
+    "r"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "m": 0,
+    "ms": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 47506
+  },
+  "eqbus128": {
+   "quantum": 128,
+   "built": [
+    "g",
+    "a",
+    "m",
+    "ms",
+    "r"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "m": 0,
+    "ms": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 0.9660508632659912,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 47437
   }
  }
 }

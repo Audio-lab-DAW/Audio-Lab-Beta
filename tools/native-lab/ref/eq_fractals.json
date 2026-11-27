@@ -1,0 +1,2180 @@
+{
+ "about": "The Pro EQ settings of the built-in song Fractals (app v0.266, 27 Nov 2026): every distinct one of its 35 EQs (task NB-N3e). make_ref_core.py renders each as a case eq-frx-<n>.",
+ "eqs": [
+  {
+   "track": "Kick",
+   "i": 0,
+   "p": {
+    "out": 4.3,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Bass",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Bass",
+   "i": 1,
+   "p": {
+    "out": 0.7,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Clap",
+   "i": 0,
+   "p": {
+    "out": -0.3,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Snare",
+   "i": 0,
+   "p": {
+    "out": -3.2,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Hat",
+   "i": 0,
+   "p": {
+    "out": -4.4,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Open hat",
+   "i": 0,
+   "p": {
+    "out": -2.8,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Percussion",
+   "i": 0,
+   "p": {
+    "out": -8,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Shaker",
+   "i": 0,
+   "p": {
+    "out": -12,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Toms",
+   "i": 0,
+   "p": {
+    "out": -6.5,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Crash",
+   "i": 0,
+   "p": {
+    "out": 11.3,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Snare roll",
+   "i": 0,
+   "p": {
+    "out": -7.8,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 250,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead",
+   "i": 1,
+   "p": {
+    "out": -4.9,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead low",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 150,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 3000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead low",
+   "i": 1,
+   "p": {
+    "out": -6.7,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead high",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 1000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Lead high",
+   "i": 1,
+   "p": {
+    "out": -11.8,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Hook left",
+   "i": 1,
+   "p": {
+    "out": -9.1,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Hook right",
+   "i": 1,
+   "p": {
+    "out": -9.2,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Arp",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 300,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Arp",
+   "i": 1,
+   "p": {
+    "out": -1.7,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Acid",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 150,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Pad",
+   "i": 0,
+   "p": {
+    "out": 0,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 200,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Pad",
+   "i": 1,
+   "p": {
+    "out": -5.6,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Riser",
+   "i": 0,
+   "p": {
+    "out": 3.8,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Impact",
+   "i": 0,
+   "p": {
+    "out": 1.4,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Blip",
+   "i": 0,
+   "p": {
+    "out": -3.4,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  },
+  {
+   "track": "Wind",
+   "i": 0,
+   "p": {
+    "out": 9.9,
+    "bands": [
+     {
+      "t": "highpass",
+      "f": 30,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     },
+     {
+      "t": "lowshelf",
+      "f": 120,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 400,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 1500,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "peaking",
+      "f": 5000,
+      "g": 0,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 10000,
+      "g": 0,
+      "q": 0.7,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "lowpass",
+      "f": 18000,
+      "g": 0,
+      "q": 0.7,
+      "on": false,
+      "sl": 24,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "off",
+    "auto": false
+   }
+  }
+ ]
+}

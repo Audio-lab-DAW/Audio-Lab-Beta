@@ -1,0 +1,289 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "master": 0.8,
+ "masterFx": [
+  {
+   "type": "eq",
+   "p": {
+    "out": -0.5,
+    "bands": [
+     {
+      "t": "lowshelf",
+      "f": 60,
+      "g": 2,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     },
+     {
+      "t": "highshelf",
+      "f": 12000,
+      "g": -1.5,
+      "q": 1,
+      "on": true,
+      "sl": 12,
+      "pl": "st"
+     }
+    ],
+    "gs": 100,
+    "an": "post",
+    "auto": false
+   },
+   "lat": 0
+  },
+  {
+   "type": "limit",
+   "p": {
+    "gain": 3,
+    "ceil": -0.3,
+    "rel": 150,
+    "look": 3,
+    "out": 0,
+    "style": "transparent",
+    "tp": true
+   },
+   "lat": 144
+  }
+ ],
+ "nodes": [
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.1,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 0,
+      "bands": [
+       {
+        "t": "highpass",
+        "f": 200,
+        "g": 0,
+        "q": 0.7,
+        "on": true,
+        "sl": 24,
+        "pl": "s"
+       },
+       {
+        "t": "peaking",
+        "f": 2000,
+        "g": 4,
+        "q": 1.2,
+        "on": true,
+        "sl": 12,
+        "pl": "m"
+       },
+       {
+        "t": "lowshelf",
+        "f": 100,
+        "g": 3,
+        "q": 1,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "a",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.7,
+   "pan": -0.3,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 0,
+      "bands": [
+       {
+        "t": "peaking",
+        "f": 120,
+        "g": 4.5,
+        "q": 0.8,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       },
+       {
+        "t": "peaking",
+        "f": 900,
+        "g": -6,
+        "q": 2.5,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       },
+       {
+        "t": "peaking",
+        "f": 3200,
+        "g": 3,
+        "q": 0.4,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "m",
+   "kind": "audio",
+   "in": "in_mono_a.wav",
+   "vol": 0.8,
+   "pan": 0.4,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 1.5,
+      "bands": [
+       {
+        "t": "highpass",
+        "f": 80,
+        "g": 0,
+        "q": 0.7,
+        "on": true,
+        "sl": 24,
+        "pl": "st"
+       },
+       {
+        "t": "lowpass",
+        "f": 7000,
+        "g": 0,
+        "q": 1.2,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "ms",
+   "kind": "audio",
+   "in": "in_mono_b.wav",
+   "vol": 0.6,
+   "pan": -0.2,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 2,
+      "bands": [
+       {
+        "t": "peaking",
+        "f": 5000,
+        "g": -8,
+        "q": 3,
+        "on": true,
+        "sl": 12,
+        "pl": "s"
+       },
+       {
+        "t": "highshelf",
+        "f": 9000,
+        "g": 5,
+        "q": 1,
+        "on": true,
+        "sl": 12,
+        "pl": "m"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": false
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "r",
+   "kind": "return",
+   "in": null,
+   "vol": 0.7,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 0,
+      "bands": [
+       {
+        "t": "tilt",
+        "f": 1200,
+        "g": 5,
+        "q": 1,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": true
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "g"
+   },
+   {
+    "from": "m"
+   },
+   {
+    "from": "ms"
+   },
+   {
+    "from": "r"
+   }
+  ],
+  "g": [
+   {
+    "from": "a"
+   }
+  ],
+  "r": [
+   {
+    "from": "m",
+    "send": 0.4
+   }
+  ]
+ }
+}

@@ -205,7 +205,7 @@ jobs:
         run: |
           python3 -m pip install --quiet --break-system-packages playwright numpy > out/pip.txt 2>&1 || python3 -m pip install --quiet --user playwright numpy >> out/pip.txt 2>&1
           python3 -m playwright install chromium > out/playwright.txt 2>&1 || { tail -20 out/playwright.txt; exit 1; }
-      - name: "Every ported device and the mixer's buses against the web engine on the Mac, bit for bit (tasks NB-N3a, N3c, N3d)"
+      - name: "Every ported device and the mixer's buses against the web engine on the Mac, bit for bit (tasks NB-N3a, N3c, N3d, N3e)"
         if: steps.macchrome.outcome == 'success'
         run: |
           T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
@@ -217,7 +217,7 @@ jobs:
           python3 tools/native-lab/run_bus.py build/albus out/bus out/busref | tee out/bus.txt
           python3 tools/native-lab/make_mix_ref.py > out/mixref-mac.txt 2>&1   # N3b's scenes, the Mac's own references (overwrites ref/mix in this checkout only)
           python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix-macref | tail -1 | tee out/mix-macref.txt
-          grep -q '^240 of 240 cases bit for bit' out/core-compare.txt
+          grep -q '^\([0-9]*\) of \1 cases bit for bit' out/core-compare.txt   # every case (task NB-N3e added the Pro EQ: 289)
           grep -qx 'ALL IDENTICAL' out/bus.txt
           grep -qx 'ALL IDENTICAL' out/mix-macref.txt
       - name: ThreadSanitizer (clang) on the ring

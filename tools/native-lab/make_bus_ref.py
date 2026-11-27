@@ -14,7 +14,7 @@ mapping), which is what the native engine is given. Each scene is rendered twice
 connections into one bus, Chromium's own order of summing them changes between renders (N3b), so the web
 engine is not always the same bits as itself; the scene says so.
 
-    python3 tools/native-lab/make_bus_ref.py [outdir]       # default tools/native-lab/ref/bus
+    python3 tools/native-lab/make_bus_ref.py [outdir] [scene,scene]   # default tools/native-lab/ref/bus, every scene
 writes in_<name>.wav, scene_<name>.json (for albus), web_<name>.wav, bus_ref.json
 """
 import base64, json, os, struct, sys
@@ -36,7 +36,26 @@ INPUTS = {k: np.tile(v, (1, (N + v.shape[1] - 1) // v.shape[1]))[:, :N].astype(n
 
 def T(i, src=None, kind=None, vol=1.0, pan=0.0, grp=None, sends=None, fx=(), mute=False, solo=False):
     return {"id": i, "kind": kind or "audio", "src": src, "vol": vol, "pan": pan, "grp": grp, "sends": sends or {},
-            "fx": [({"type": f[0], "pre": f[1]} if isinstance(f, tuple) else {"type": f}) for f in fx], "mute": mute, "solo": solo}
+            "fx": [fxd(f) for f in fx], "mute": mute, "solo": solo}
+
+
+def fxd(f):  # ("type", "preset"), ("type", None, {settings merged in}) or "type"
+    if not isinstance(f, tuple): return {"type": f}
+    d = {"type": f[0]}
+    if f[1]: d["pre"] = f[1]
+    if len(f) > 2: d["extra"] = f[2]
+    return d
+
+
+# task NB-N3e: Pro EQ settings (see make_ref_core.py EXTRA["eq"])
+def _B(t, f, g=0, q=1, on=True, sl=12, pl="st"):
+    return dict(t=t, f=f, g=g, q=q, on=on, sl=sl, pl=pl)
+EQ_BELLS = {"bands": [_B("peaking", 120, 4.5, 0.8), _B("peaking", 900, -6, 2.5), _B("peaking", 3200, 3, 0.4)]}
+EQ_PASS = {"bands": [_B("highpass", 80, q=0.7, sl=24), _B("lowpass", 7000, q=1.2, sl=12)], "out": 1.5}
+EQ_MS = {"bands": [_B("highpass", 200, q=0.7, sl=24, pl="s"), _B("peaking", 2000, 4, 1.2, pl="m"), _B("lowshelf", 100, 3)]}
+EQ_SIDE = {"bands": [_B("peaking", 5000, -8, 3, pl="s"), _B("highshelf", 9000, 5, pl="m")], "out": 2}
+EQ_TILT = {"bands": [_B("tilt", 1200, 5)], "auto": True}
+EQ_SHELF = {"bands": [_B("lowshelf", 60, 2), _B("highshelf", 12000, -1.5)], "out": -0.5}
 
 
 # name: (quantum, master gain, master devices, tracks in project order)
@@ -66,6 +85,14 @@ SCENES = {
               T("rv", kind="return", vol=0.6, fx=[("imager", None)])]),
 }
 SCENES["song128"] = (128,) + SCENES["song"][1:]
+# task NB-N3e: the Pro EQ on the buses: stereo, a mono source kept mono through it, mid/side on a group and on a mono
+# source (its splitter gives silence on the right), a return with tilt and auto gain, the master's EQ before its limiter
+SCENES["eqbus"] = (512, 0.8, [("eq", None, EQ_SHELF), ("limit", "trans")],
+                   [T("g", kind="group", vol=0.9, pan=0.1, fx=[("eq", None, EQ_MS)]), T("a", "st_a", vol=0.7, pan=-0.3, grp="g", fx=[("eq", None, EQ_BELLS)]),
+                    T("m", "mono_a", vol=0.8, pan=0.4, fx=[("eq", None, EQ_PASS)], sends={"r": 0.4}),
+                    T("ms", "mono_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_SIDE)]),
+                    T("r", kind="return", vol=0.7, fx=[("eq", None, EQ_TILT)])])
+SCENES["eqbus128"] = (128,) + SCENES["eqbus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),
@@ -80,6 +107,7 @@ JS = r"""async ({sc, b64, N, SR}) => {
   await A.wlLoad(oc);
   const posted = {}, mk = (d, owner) => { const q = A.mkFx(d.type).p;
       if (d.pre) { const e = (A.FXPRE[d.type] || {})[d.pre]; if (!e) throw new Error('no preset ' + d.type + ' ' + d.pre); Object.assign(q, JSON.parse(JSON.stringify(e[1]))); q.pre = d.pre }
+      if (d.extra) Object.assign(q, JSON.parse(JSON.stringify(d.extra)));
       const x = A.mkFxNode(oc, d.type); x.set(q); (posted[owner] = posted[owner] || []).push({type: d.type, p: JSON.parse(JSON.stringify(x.sp ? x.sp(q) : q)), lat: A.fxLat({type: d.type, on: true, p: q}, SR)}); return x };
   // renderMix: the master
   const mst = oc.createGain(); mst.gain.value = sc.master; let out = mst;
@@ -133,9 +161,13 @@ def main():
     b64 = {k: base64.b64encode(np.ascontiguousarray(x).tobytes()).decode() for k, x in INPUTS.items()}
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
     al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat};1")
+    only = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else None   # some scenes only; the others' entries are kept
     info = {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N, "scenes": {}}
+    old = os.path.join(out, "bus_ref.json")
+    if only and os.path.exists(old): info["scenes"] = json.load(open(old)).get("scenes", {})
     for name, (Q, master, mfx, tracks) in SCENES.items():
-        sc = {"Q": Q, "master": master, "mfx": [({"type": f[0], "pre": f[1]} if f[1] else {"type": f[0]}) for f in mfx],
+        if only and name not in only: continue
+        sc = {"Q": Q, "master": master, "mfx": [fxd(f) for f in mfx],
               "tracks": [dict(t, src=({"name": t["src"], "ch": int(INPUTS[t["src"]].shape[0])} if t["src"] else None)) for t in tracks]}
         r = al.js(JS, {"sc": sc, "b64": b64, "N": N, "SR": SR}); r2 = al.js(JS, {"sc": sc, "b64": b64, "N": N, "SR": SR})
         y = np.frombuffer(base64.b64decode(r["out"]), dtype="<f4").reshape(2, N)

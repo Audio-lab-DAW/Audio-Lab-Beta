@@ -49,9 +49,17 @@ endif()
 add_library(al_jsmath INTERFACE)
 target_include_directories(al_jsmath INTERFACE third_party/llvm-libc third_party/llvm-libc/include)
 target_compile_definitions(al_jsmath INTERFACE LIBC_NAMESPACE=__llvm_libc_al)
+# Chromium's copy of fdlibm (task NB-N3e): the sin, cos and exp its BiquadFilterNode computes coefficients with.
+# Always -ffp-contract=off, also in the 'fused' control (it stands for the browser, not for the device code).
+add_library(al_fdlibm STATIC third_party/fdlibm/ieee754.cc)
+target_compile_options(al_fdlibm PRIVATE -ffp-contract=off)
+if(APPLE)
+  # Chromium on the Mac runs a biquad with fixed values through Accelerate's vDSP_deq22D; so does the engine there
+  target_link_libraries(al_fdlibm PUBLIC "-framework Accelerate")
+endif()
 add_executable(alrender engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender PRIVATE -ffp-contract=off)
-target_link_libraries(alrender PRIVATE al_jsmath)
+target_link_libraries(alrender PRIVATE al_jsmath al_fdlibm)
 add_executable(almathprobe engine/math_probe.cpp)
 target_compile_options(almathprobe PRIVATE -ffp-contract=off)
 target_link_libraries(almathprobe PRIVATE al_jsmath)
@@ -59,21 +67,23 @@ target_link_libraries(almathprobe PRIVATE al_jsmath)
 add_executable(alrender_sysmath engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_sysmath PRIVATE -ffp-contract=off)
 target_compile_definitions(alrender_sysmath PRIVATE AL_MATH_SYSTEM)
+target_link_libraries(alrender_sysmath PRIVATE al_fdlibm)
 # the control: fusing allowed, to show on each machine whether the rule matters for these devices
 add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
-target_link_libraries(alrender_fused PRIVATE al_jsmath)
+target_link_libraries(alrender_fused PRIVATE al_jsmath al_fdlibm)
 # ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
 # the mixer's buses with the core's devices: groups, sends, returns, delay compensation, the master's chain (task NB-N3d)
 add_executable(albus engine/mix/albus.cpp engine/core/devices.cpp)
 target_compile_options(albus PRIVATE -ffp-contract=off)
-target_link_libraries(albus PRIVATE al_jsmath)
+target_link_libraries(albus PRIVATE al_jsmath al_fdlibm)
 
 # the project document and its edit protocol (task NB-R7): the state the engine will own
 add_executable(aldoc engine/doc/aldoc.cpp)
 
 add_executable(almix engine/mix/almix.cpp)
 target_compile_options(almix PRIVATE -ffp-contract=off)   # the same bits as JavaScript and Chromium: no fused multiply-add
+target_link_libraries(almix PRIVATE al_fdlibm)   # the pan gains: fdlibm, as stereo_panner.cc
 
 # ---- tests B and C: need the VST 3 SDK ---------------------------------------------------------------
 if(VST3_SDK_ROOT)

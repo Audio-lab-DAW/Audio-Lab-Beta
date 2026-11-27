@@ -20,8 +20,32 @@
 #include <vector>
 #include "jsmath.h"
 #include "params.h"
+#if defined(__x86_64__) || defined(_M_X64)
+#include <xmmintrin.h>
+#endif
+#include <cstdint>
 
 namespace al {
+
+// The floating-point state Chromium renders its own audio nodes in (task NB-N3e): DenormalDisabler on the audio
+// thread, i.e. flush-to-zero and denormals-are-zero on x86 (MXCSR | 0x8040), FZ on ARM64 (FPCR bit 24). Measured:
+// without it the Pro EQ differed from the browser only where the test signal's tail falls under 1.2e-38. The
+// worklets' JavaScript runs with denormals kept (WebFloatState in graph.h, N3c), so each kind of device gets its own.
+struct NodeFloatState {
+#if defined(__x86_64__) || defined(_M_X64)
+    unsigned int saved;
+    NodeFloatState() { saved = _mm_getcsr(); _mm_setcsr((saved | 0x8040u) & ~0x6000u); }
+    ~NodeFloatState() { _mm_setcsr(saved); }
+#elif defined(__aarch64__)
+    uint64_t saved;
+    NodeFloatState() { __asm__ volatile("mrs %0, fpcr" : "=r"(saved)); uint64_t v = (saved | (1ull << 24)) & ~(3ull << 22); __asm__ volatile("msr fpcr, %0" : : "r"(v)); }
+    ~NodeFloatState() { __asm__ volatile("msr fpcr, %0" : : "r"(saved)); }
+#else
+    NodeFloatState() {}
+#endif
+    NodeFloatState(const NodeFloatState&) = delete;
+    NodeFloatState& operator=(const NodeFloatState&) = delete;
+};
 
 struct RenderContext {
     double sampleRate = 48000;
@@ -49,6 +73,10 @@ struct Processor {
     virtual std::vector<std::pair<std::string, double>> meters() const { return {}; }
     // A worklet whose dnGuard has run=true (the meter, tape stop) keeps running on silence.
     virtual bool runsOnSilence() const { return false; }
+    // A device the web engine builds from browser nodes (the Pro EQ, task NB-N3e), not an AudioWorklet: the
+    // worklet bundle's rules (silence, tiny values, the quantum grid) do not apply, and it keeps a mono input mono.
+    virtual bool worklet() const { return true; }
+    bool monoIn = false, monoOut = false;   // channel count in and out of this call (browser-node devices only)
     // Where the current call sits on the web engine's 128-frame grid (set by WorkletShell before each call):
     // currentTime in the worklet is winStart / sampleRate, and the call's first frame is frame winOff of it.
     double winStart = 0;
@@ -75,6 +103,7 @@ public:
     void set(const JValue& np) { p_->set(np); }
     // ctx.currentFrame must be the frame of L[0].
     void process(const float* L, const float* R, float* oL, float* oR, int n) {
+        if (!p_->worklet()) { p_->process(L, R, oL, oR, n); return; }
         int done = 0;
         while (done < n) {
             const double frame = ctx_.currentFrame + done;

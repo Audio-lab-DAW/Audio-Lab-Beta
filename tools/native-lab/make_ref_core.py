@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -45,11 +45,39 @@ EXTRA = {
     "tstop": {"x-hold-rev": {"hold": True, "fx": "rev"}, "x-hold-stutter": {"hold": True, "fx": "stutter"},
               "x-hold-half": {"hold": True, "fx": "half"}, "x-hold-double": {"hold": True, "fx": "double"}, "x-hold-tape": {"hold": True, "fx": "tape", "stop": 900}},
 }
+# task NB-N3e: the Pro EQ (browser nodes: Chromium's BiquadFilterNode and GainNode). Settings replace the bands.
+def B(t, f, g=0, q=1, on=True, sl=12, pl="st", **k):
+    return dict(t=t, f=f, g=g, q=q, on=on, sl=sl, pl=pl, **k)
+EXTRA["eq"] = {
+    "x-bells": {"bands": [B("peaking", 120, 4.5, 0.8), B("peaking", 900, -6, 2.5), B("peaking", 3200, 3, 0.4), B("peaking", 11000, -9, 6)]},
+    "x-shelves": {"bands": [B("lowshelf", 80, 6, 0.7), B("highshelf", 8000, -4.5, 0.7), B("lowshelf", 400, -12), B("highshelf", 2500, 9)], "out": -3.5},
+    "x-pass12": {"bands": [B("highpass", 60, q=0.7, sl=12), B("lowpass", 9000, q=0.7, sl=12)]},
+    "x-pass24": {"bands": [B("highpass", 35, q=0.7, sl=24), B("lowpass", 15000, q=1.4, sl=24)]},
+    "x-pass48": {"bands": [B("highpass", 150, q=2, sl=48), B("lowpass", 4000, q=0.3, sl=48)]},
+    "x-pass36-reso": {"bands": [B("highpass", 300, q=8, sl=36), B("lowpass", 6000, q=12, sl=36)]},
+    "x-notch-band": {"bands": [B("notch", 1000, q=4), B("bandpass", 2500, q=0.7), B("notch", 50, q=10)]},
+    "x-allpass": {"bands": [B("allpass", 700, q=0.5, sl=24)]},
+    "x-tilt": {"bands": [B("tilt", 1200, 5), B("tilt", 300, -3)]},
+    "x-ms": {"bands": [B("highpass", 200, q=0.7, sl=24, pl="s"), B("peaking", 2000, 4, 1.2, pl="m"), B("highshelf", 9000, 6, pl="s"), B("lowshelf", 100, 3, pl="st")]},
+    "x-ms-only-side": {"bands": [B("peaking", 5000, -8, 3, pl="s")], "out": 2},
+    "x-solo": {"bands": [B("peaking", 500, 6, 2), B("peaking", 3000, -6, 5, solo=True), B("highpass", 100, sl=24)]},
+    "x-gs": {"bands": [B("peaking", 250, 9, 1), B("highshelf", 6000, -6)], "gs": 35},
+    "x-auto": {"bands": [B("peaking", 250, 9, 1), B("highshelf", 6000, 6), B("lowshelf", 80, -4)], "auto": True},
+    "x-edges": {"bands": [B("peaking", 5, 6, 0.05), B("peaking", 30000, 6, 0.1), B("lowpass", 23990, q=0.7), B("highpass", 1, q=0.7), B("peaking", 1000, 0.00005)]},
+    "x-off": {"bands": [B("peaking", 1000, 12, 1, on=False), B("lowpass", 200, on=False)], "out": -6},
+    "x-extreme": {"bands": [B("peaking", 60, 24, 0.1), B("peaking", 60, -24, 30), B("lowshelf", 40, 24), B("highshelf", 15000, -24)], "out": -12},
+}
+_FRX = json.load(open(os.path.join(HERE, "ref", "eq_fractals.json")))["eqs"]
+for _i, _e in enumerate(_FRX):
+    EXTRA["eq"]["frx%02d" % _i] = _e["p"]
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
     "chain-space": [("fshift", None), ("chorus", None), ("imager", None), ("limit", "trans")],
     "chain-robot": [("vocoder", None), ("tstop", None), ("crush", "8bit")],
+    # task NB-N3e: the EQ between worklet devices, M/S into a limiter
+    "chain-eq-drums": [("gate", "kick"), ("eq", "x-bells"), ("trans", "punch"), ("eq", "x-pass24"), ("limit", "loud")],
+    "chain-eq-ms": [("eq", "x-ms"), ("imager", None), ("eq", "x-tilt"), ("limit", "trans")],
 }
 
 
@@ -137,10 +165,10 @@ def main():
         for k in presets[t]:
             jobs.append((t + "-" + k, [{"type": t, "pre": k}]))
         for k, e in EXTRA.get(t, {}).items():
-            jobs.append((t + "-" + k, [{"type": t, "extra": e}]))
+            jobs.append((t + "-" + k, [{"type": t, "extra": e}]))  # (x- extras and, for the EQ, frxNN: the song's own)
     for name, ch in CHAINS.items():
         if all(d in types for d, _ in ch):
-            jobs.append((name, [({"type": d, "pre": k} if k else {"type": d}) for d, k in ch]))
+            jobs.append((name, [({"type": d, "extra": EXTRA[d][k]} if k and k in EXTRA.get(d, {}) else {"type": d, "pre": k} if k else {"type": d}) for d, k in ch]))
     b64 = base64.b64encode(np.ascontiguousarray(x).tobytes()).decode()
     cases, info = [], {"quantum": Q, "app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
                        "input_sha256": hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest(), "cases": {}}
