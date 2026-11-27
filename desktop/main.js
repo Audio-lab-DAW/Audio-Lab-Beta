@@ -681,6 +681,7 @@ if (!gotLock) {
     createWindow();
     setupUpdater();
     try { require('./voice-ai').setup({ ipcMain, app }); } catch (e) { console.warn('AI voices', e); }  // task Z2: AI voices (desktop/voice-ai.js)
+    try { require('./native-engine').setup({ ipcMain, app }); } catch (e) { console.warn('native engine', e); }  // task NB-N2b: idle until the page asks (desktop/native-engine.js)
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
 

@@ -41,7 +41,8 @@
       "app/**/*",
       "package.json",
       "voice-ai.js",
-      "voice-ai-worker.js"
+      "voice-ai-worker.js",
+      "native-engine.js"
     ],
     "publish": [
       {

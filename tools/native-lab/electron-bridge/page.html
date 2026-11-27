@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><title>native engine bridge test</title>
+<body style="font:14px system-ui;background:#111;color:#ddd">AudioLab: the page's sound through the desktop shell to the native engine (task NB-N2b).
+<script src="../../../native/bridge/page-tap.js"></script>
+<script>
+// Uses only what the app's page will use: window.audiolabDesktop.nativeEngine (desktop/preload.js) and alNativeTap (page-tap.js).
+(async () => {
+  const q = new URLSearchParams(location.search), SECONDS = +q.get('seconds'), SR = +q.get('sr'), CLOCK = q.get('clock'), SIGNAL = q.get('signal');
+  const T = window.__t = { stage: 'start' };
+  try {
+    const N = window.audiolabDesktop && window.audiolabDesktop.nativeEngine;
+    if (!N) { T.error = 'no nativeEngine in the preload'; return; }
+    T.available = await N.available();
+    const st = await N.start(); T.start = st;
+    if (!st.ok) { T.error = 'start: ' + st.error; return; }
+    const events = T.events = []; N.on(e => { if (events.length < 100) events.push(e); });
+    const list = await N.cmd('devices');
+    const bh = (list.devices || []).find(d => d.name.includes('BlackHole'));
+    if (!bh) { T.error = 'no loop-back device'; return; }
+    const o = await N.cmd('open', { uid: bh.uid, rate: SR, buffer: 256 });
+    T.open = { ok: o.ok, rate: o.rate, buffer: o.buffer, notes: o.notes, error: o.error };
+    if (!o.ok) { T.error = 'open: ' + o.error; return; }
+    const s = await N.sound({ prefillMs: 100, highMs: 1000, clock: CLOCK });
+    T.sound = { ok: s.ok, error: s.error };
+    if (!s.ok) { T.error = 'sound: ' + s.error; return; }
+    T.deviceId = bh.id; T.stage = 'opened';
+    let tap = null;
+    window.__go = async () => {
+      const ctx = new AudioContext({ sampleRate: SR, latencyHint: 'interactive' });
+      const buf = ctx.createBuffer(2, SECONDS * SR, SR), L = buf.getChannelData(0), R = buf.getChannelData(1);
+      if (SIGNAL === 'noise') { let x = 0x2468ace1 >>> 0;
+        for (let i = 0; i < L.length; i++) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; L[i] = ((x >>> 8) / 16777216 * 2 - 1) * 0.25; x = (Math.imul(x, 1664525) + 1013904223) >>> 0; R[i] = ((x >>> 8) / 16777216 * 2 - 1) * 0.25; } }
+      else for (let i = 0; i < L.length; i++) L[i] = R[i] = 0.25 * Math.sin(2 * Math.PI * 997 * i / SR);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      tap = await alNativeTap(ctx, src); T.tapInfo = tap.info;
+      await ctx.resume();
+      src.start();                              // no time given: starts on a block boundary, so no sub-sample interpolation
+      T.stage = 'playing'; T.contextRate = ctx.sampleRate; T.baseLatency = ctx.baseLatency;
+      const t0 = performance.now(), c0 = ctx.currentTime;
+      setInterval(async () => {
+        T.status = await N.cmd('status'); T.contextSeconds = ctx.currentTime - c0; T.wallSeconds = (performance.now() - t0) / 1000;
+        if (T.stage === 'playing' && T.contextSeconds > SECONDS + 1.5) T.stage = 'finished';
+      }, 1000);
+    };
+    window.__end = async () => { if (tap) tap.detach(); await N.cmd('close'); await N.stop(); };
+  } catch (e) { T.error = String(e && e.stack || e); }
+})();
+</script>

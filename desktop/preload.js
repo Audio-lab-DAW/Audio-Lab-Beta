@@ -45,6 +45,18 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
     free: () => ipcRenderer.invoke('al:vai-free'),
     onProgress: (cb) => { const f = (e, d) => cb(d); ipcRenderer.on('al:vai-progress', f); return () => ipcRenderer.removeListener('al:vai-progress', f); }
   },
+  // task NB-N2b: the native engine (desktop/native-engine.js). Idle until the page calls start(). The sound goes
+  // through a MessageChannel from the page's AudioWorklet (native/bridge/page-tap.js): the page posts
+  // { alNativePort: true } with the port to its own window, and this preload hands it to the shell.
+  nativeEngine: process.platform === 'darwin' ? {
+    available: () => ipcRenderer.invoke('al:native-available'),
+    start: () => ipcRenderer.invoke('al:native-start'),
+    stop: () => ipcRenderer.invoke('al:native-stop'),
+    cmd: (name, o) => ipcRenderer.invoke('al:native-cmd', String(name), o || {}),
+    sound: (o) => ipcRenderer.invoke('al:native-sound', o || {}),
+    silence: () => ipcRenderer.invoke('al:native-silence'),
+    on: (cb) => { const f = (e, d) => cb(d); ipcRenderer.on('al:native-ev', f); return () => ipcRenderer.removeListener('al:native-ev', f); }
+  } : null,
   dac: process.platform === 'darwin' ? {
     list: () => ipcRenderer.invoke('al:dac-list'),
     get: (uid) => ipcRenderer.invoke('al:dac-get', uid),
@@ -52,4 +64,8 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
     info: () => ipcRenderer.invoke('al:dac-info'),
     rate: (uid, hz) => ipcRenderer.invoke('al:dac-rate', uid, hz)
   } : null
+});
+// task NB-N2b: the page's worklet port for the native engine (see nativeEngine above)
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.alNativePort === true && e.ports && e.ports[0]) ipcRenderer.postMessage('al:native-port', null, [e.ports[0]]);
 });

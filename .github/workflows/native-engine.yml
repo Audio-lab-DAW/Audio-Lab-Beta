@@ -1,0 +1,96 @@
+name: Native engine (task NB)
+
+# Stage checks of the native Mac build (task NB). Runs only when started by hand. Does not touch the desktop
+# build or the app. N2b: the clock follower, and the app's own bridge pieces (desktop/native-engine.js,
+# desktop/preload.js, native/bridge/page-tap.js) carrying a page's sound to the engine.
+on:
+  workflow_dispatch:
+    inputs:
+      follow_seconds:
+        description: 'Length of the follow-mode run in seconds'
+        type: string
+        default: '90'
+
+permissions:
+  contents: read
+
+jobs:
+  mac:
+    runs-on: macos-15          # Apple Silicon runner
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Machine
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; sw_vers; sysctl -n machdep.cpu.brand_string; clang --version | head -1; node --version; } | tee out/machine.txt
+
+      - name: Build the engine (no plug-in SDK needed)
+        run: |
+          cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
+          cmake --build build --target alengine alnative -j 4
+          file build/alengine
+
+      - name: 'Engine: checks that need no sound card (ring, formats, the clock follower)'
+        run: |
+          build/alengine selftest | tee out/selftest.json
+          python3 -c "import json;d=json.load(open('out/selftest.json'));print('\n'.join(d['measured'].split(', ')));exit(0 if d['ok'] else 1)"
+
+      - name: A loop-back device (BlackHole) and a tool to choose the default output
+        run: |
+          brew install --cask blackhole-2ch > out/blackhole.txt 2>&1 || tail -5 out/blackhole.txt
+          brew install switchaudio-osx > out/switchaudio.txt 2>&1 || tail -5 out/switchaudio.txt
+          sudo killall coreaudiod || true
+          sleep 5
+          SwitchAudioSource -a -t output | tee out/outputs.txt || true
+          SwitchAudioSource -c -t output | tee out/default-output.txt || true
+
+      - name: 'N1 regression: the engine hand-over through the loop-back device'
+        continue-on-error: true
+        run: |
+          python3 tools/native-lab/run_engine.py build/alengine build/alnative out/engine | tee out/engine.txt
+          rm -f out/engine/loopback.wav
+
+      - name: 'N2b, case A: the page plays into the same device as the engine (one clock), exact mode, noise, bit for bit'
+        continue-on-error: true
+        run: |
+          ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
+          SwitchAudioSource -t output -s "BlackHole 2ch" || true
+          AL_ENGINE="$PWD/build/alengine" desktop/node_modules/.bin/electron tools/native-lab/electron-bridge/main.js "$PWD/build/alnative" "$PWD/out/case-a" 30 exact noise 2>/dev/null | tail -1 | tee out/case-a.txt || true
+          python3 tools/native-lab/stream_compare.py out/case-a/sent.raw out/case-a/loopback.wav out/case-a/compare.json | tee -a out/case-a.txt || true
+          rm -f out/case-a/sent.raw out/case-a/loopback.wav
+
+      - name: 'N2b, case B: the page plays into another device (two clocks), follow mode, 997 Hz sine'
+        continue-on-error: true
+        run: |
+          ORIG="$(cat out/default-output.txt)"
+          if [ -n "$ORIG" ] && [ "$ORIG" != "BlackHole 2ch" ]; then SwitchAudioSource -t output -s "$ORIG"; else echo "the machine's default output was BlackHole itself; case B then runs on one clock" | tee out/case-b-note.txt; fi
+          SwitchAudioSource -c -t output | tee out/case-b-page-device.txt || true
+          AL_ENGINE="$PWD/build/alengine" desktop/node_modules/.bin/electron tools/native-lab/electron-bridge/main.js "$PWD/build/alnative" "$PWD/out/case-b" "${{ inputs.follow_seconds }}" follow sine 2>/dev/null | tail -1 | tee out/case-b.txt || true
+          python3 tools/native-lab/sine_check.py out/case-b/loopback.wav out/case-b/sine.json | tee -a out/case-b.txt || true
+          rm -f out/case-b/loopback.wav
+
+      - name: 'N2b, case C (the contrast): two clocks, exact mode, 997 Hz sine'
+        continue-on-error: true
+        run: |
+          AL_ENGINE="$PWD/build/alengine" desktop/node_modules/.bin/electron tools/native-lab/electron-bridge/main.js "$PWD/build/alnative" "$PWD/out/case-c" 60 exact sine 2>/dev/null | tail -1 | tee out/case-c.txt || true
+          python3 tools/native-lab/sine_check.py out/case-c/loopback.wav out/case-c/sine.json | tee -a out/case-c.txt || true
+          rm -f out/case-c/loopback.wav
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Native engine, task NB-N2b"
+            echo '```'; cat out/machine.txt; echo '```'
+            for f in out/selftest.json out/engine.txt out/case-a.txt out/case-b-page-device.txt out/case-b.txt out/case-c.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-3000 "$f"; echo '```'; }; done
+          } > out/RESULTS.md
+          cat out/RESULTS.md >> "$GITHUB_STEP_SUMMARY"
+          cat out/RESULTS.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-engine-results
+          path: out
