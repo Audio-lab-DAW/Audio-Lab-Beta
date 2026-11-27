@@ -23,7 +23,8 @@ Ocean blue tile `#1450A8`, white rings `#FFFFFF`, yellow nucleus and electron `#
 | icon.icns | desktop/build/icon.icns | Mac app icon (Apple grid: 824 px tile, 100 px margin) |
 | icon.ico | desktop/build/icon.ico | Windows app icon (16–256 px) |
 | icon.png | desktop/build/icon.png | 1024 px source used by electron-builder |
-| dock-icon.png | desktop/dock-icon.png | Mac Dock icon at runtime (main.js) |
+| dock-icon.png | desktop/dock-icon.png | Mac Dock icon at runtime (main.js) on macOS 15 and older |
+| mac-icon/AppIcon.icon | compiled to Assets.car at build time | Icon Composer icon for macOS 26: W7 on the blue in the Default AND the Dark icon style (task IC1, `docs/app-icon-mac-styles.md`). Regenerate with `mac-icon/make_icon.py`; compile with `desktop/scripts/build-mac-icon.sh` |
 | doc.icns / doc.ico | desktop/build/doc.* | `.audiolab` project file icon |
 | web-16/32/48/180/192/512.png | web app | favicons, apple-touch-icon, manifest |
 | mark-black / mark-white / mark-colour | branding | logo without the tile |

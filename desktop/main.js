@@ -127,11 +127,26 @@ function defaultIcon() {
   try { let im = nativeImage.createFromPath(path.join(__dirname, 'dock-icon.png')); if (!im.isEmpty()) { const s = im.getSize(), m = Math.round(s.width * 100 / 1024); return im.crop({ x: m, y: m, width: s.width - 2 * m, height: s.height - 2 * m }); } } catch (e) { /* fall through */ }
   return null;
 }
+// True on macOS 26 or later (Darwin 25+) when the app bundle holds the compiled Icon Composer icon.
+function macBundleIcon() {
+  try { return isMac && parseInt(require('os').release(), 10) >= 25 && fs.existsSync(path.join(process.resourcesPath || '', 'Assets.car')); } catch (e) { return false; }
+}
 function winIcon() { return !isMac && curIcon && curIcon !== (readIcons().default || 'ocean-yellow') ? iconImage(curIcon, true) : null; }
 function applyIcon(id, startup) {
   curIcon = id;
   try {
-    if (isMac) { if (app.dock) { const im = iconImage(id, false); if (im) app.dock.setIcon(im); } return; }
+    if (isMac) {
+      if (!app.dock) return;
+      // macOS 26 and later with the Icon Composer icon in the bundle (Assets.car, task IC1): the Dock draws the app's own icon, which is
+      // blue in every icon style. A picture set here is a flat bitmap the system may treat on its own, so the default sets none:
+      // nothing at the start, and null (back to the bundle icon) when coming back from another icon.
+      if (id === (readIcons().default || 'ocean-yellow') && macBundleIcon()) {
+        if (!startup) { try { app.dock.setIcon(null); } catch (e) { const im = iconImage(id, false); if (im) app.dock.setIcon(im); } }
+        return;
+      }
+      const im = iconImage(id, false); if (im) app.dock.setIcon(im);
+      return;
+    }
     // Windows and Linux: the default is the program's own icon (from icon.ico), so at start nothing needs doing.
     if (startup && id === (readIcons().default || 'ocean-yellow')) return;
     const im = (id === (readIcons().default || 'ocean-yellow') && defaultIcon()) || iconImage(id, true);
