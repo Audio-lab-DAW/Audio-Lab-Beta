@@ -2175,6 +2175,13 @@ body.lkm1{--ov-mo:0}
 #niClashPop .nicpr i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
 #niClashPop .nicpb{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#niClashPop .nicpb button{min-height:24px;padding:0 9px}
 .mxme .mxtg .mxbar{display:none}.mxme .mxtg canvas.inlh{display:block;width:100%;height:16px;margin-top:3px;border-radius:3px;background:#181a21}
+/* lane D (task NI-5b): handled clashes, the fixes in the clash card, the band button in the Ducker window */
+#mixWin svg.cabs .nicc.nidk{stroke-dasharray:3 5;opacity:.45}
+#niClashPop .nicpf{display:flex;flex-direction:column;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.1)}
+#niClashPop .nicpf button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;height:auto;min-height:28px;padding:4px 9px;text-align:left}
+#niClashPop .nicpf button small{color:var(--mut);font-size:var(--fs1);font-weight:var(--fw4)}
+#niClashPop .nicpf p{margin:0;font-size:var(--fs1)}
+.abxfo button.nibd,.agfo button.nibd{margin-left:6px;min-height:20px;padding:0 8px;font-size:var(--fs1)}.abxfo button.nibd.on,.agfo button.nibd.on{background:linear-gradient(#e86bff,#b148d0);color:#16061b;border-color:#5c1f6b}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6454,7 +6461,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.259',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.260',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17318,9 +17325,10 @@ function abxWLF(){
   sp(p){const P=this.P;Object.assign(P,p);const sr=sampleRate,nz=(v,d)=>typeof v==='number'&&isFinite(v)?v:d;
    this.amt=Math.max(0,Math.min(1,nz(P.amt,70)/100));this.thL=Math.pow(10,nz(P.th,-30)/20);this.gk=Math.pow(10,nz(P.gain,0)/20);this.atS=Math.max(1,nz(P.at,1)*sr/1000);this.hdS=Math.max(0,nz(P.hd,30)*sr/1000);
    this.rlS=Math.max(1,nz(P.rl,200)*sr/1000);this.pw=Math.pow(2,-nz(P.cv,0)/50);this.la=Math.max(0,Math.min(this.N-1,Math.round(nz(P.la,0)*sr/1000)));this.fo=P.fo|0;
-   const f=Math.min(sr*.45,Math.max(20,nz(P.ff,120)));this.fg=Math.tan(Math.PI*f/sr);this.fk=P.fo===2?.7:1.4;this.ls=P.ls?1:0;this.pkR=Math.exp(-1/(.01*sr))}
+   const f=Math.min(sr*.45,Math.max(20,nz(P.ff,120)));this.fg=Math.tan(Math.PI*f/sr);this.fk=P.fo===2?.7:1.4;this.ls=P.ls?1:0;this.pkR=Math.exp(-1/(.01*sr));/* NI-5b: duck only a band */this.bd=P.bd?1:0;this.bg=Math.tan(Math.PI*f/sr);this.bk=1/Math.max(.3,nz(P.bq,4.3));if(!this.bs)this.bs=new Float64Array(4)}
   process(ins,outs){const o=outs[0];if(!o||!o[0])return true;const oL=o[0],oR=o[1]||o[0],n=oL.length,m=ins[0]||[],k=ins[1]||[],mL=m[0],mR=m[1]||m[0],kL=k[0],kR=k[1]||k[0],N=this.N,la=this.la,bL=this.bL,bR=this.bR;
    let e=this.e,hc=this.hc,pk=this.pk,s1=this.s1,s2=this.s2,w=this.w,mk=this.mk,mg=this.mg;const gk=this.gk,fo=this.fo,g=this.fg,kk=this.fk,a1=1/(1+g*(g+kk)),a2=g*a1,a3=g*a2,amt=this.amt,pw=this.pw,thL=this.thL,atS=this.atS,hdS=this.hdS,rlS=this.rlS,pkR=this.pkR,ls=this.ls;
+   const bd=this.bd,bs=this.bs,bG=this.bg,bK=this.bk,bA1=1/(1+bG*(bG+bK)),bA2=bG*bA1,bA3=bG*bA2;
    for(let i=0;i<n;i++){let v=0,ax=0;
     if(kL){const xl=kL[i]*gk,xr=kR[i]*gk;if(fo){const v0=(xl+xr)*.5,v3=v0-s2,v1=a1*s1+a2*v3,v2=s2+a2*s1+a3*v3;s1=2*v1-s1;s2=2*v2-s2;v=fo===1?v2:fo===2?v1*kk:v0-kk*v1-v2;ax=v<0?-v:v}else{v=(xl+xr)*.5;const al=xl<0?-xl:xl,ar=xr<0?-xr:xr;ax=al>ar?al:ar}}
     pk=ax>pk?ax:pk*pkR;if(pk<1e-9)pk=0;
@@ -17328,7 +17336,7 @@ function abxWLF(){
     if(tr>e){e=Math.min(tr,e+1/atS);hc=hdS}else if(hc>0)hc--;else if(e>tr){e=Math.max(tr,e-1/rlS)}
     const gn=e>0?1-amt*Math.pow(e,pw):1;
     bL[w]=mL?mL[i]:0;bR[w]=mR?mR[i]:0;const r=(w-la+N)%N;w=(w+1)%N;
-    if(ls){oL[i]=v;oR[i]=v}else{oL[i]=bL[r]*gn;oR[i]=bR[r]*gn}
+    if(ls){oL[i]=v;oR[i]=v}else if(bd){const xl=bL[r],xr=bR[r],u=1-gn;let w3=xl-bs[1],w1=bA1*bs[0]+bA2*w3,w2=bs[1]+bA2*bs[0]+bA3*w3;bs[0]=2*w1-bs[0];bs[1]=2*w2-bs[1];oL[i]=xl-u*bK*w1;w3=xr-bs[3];w1=bA1*bs[2]+bA2*w3;w2=bs[3]+bA2*bs[2]+bA3*w3;bs[2]=2*w1-bs[2];bs[3]=2*w2-bs[3];oR[i]=xr-u*bK*w1}else{oL[i]=bL[r]*gn;oR[i]=bR[r]*gn}
     if(pk>mk)mk=pk;if(gn<mg)mg=gn}
    if(!kL){s1=0;s2=0}this.e=e;this.hc=hc;this.pk=pk;this.s1=s1;this.s2=s2;this.w=w;
    if(this.live){this.mt+=n;if(this.mt>=512){this.port.postMessage({k:mk,g:mg});mk=0;mg=1;this.mt=0}}this.mk=mk;this.mg=mg;return true}}
@@ -22170,7 +22178,7 @@ function NI_clTick(force){const C=NI.clash,w=document.getElementById('mixWin');i
   NI_clDraw()}
 /* the clash cables, as one group in the cable lane's SVG */
 function NI_clDraw(){const C=NI.clash,w=document.getElementById('mixWin');const G=CAB.G,sv=w&&w.querySelector('.mxs>svg.cabs');if(!sv||!G){C.drawn='';return}
-  const key=C.list.map(c=>c.a.id+c.b.id+c.m0+'-'+c.m1+':'+Math.round(c.s)).join('|')+'|'+(G.sy2??G.sy)+'|'+G.H+'|'+G.right;
+  const key=C.list.map(c=>c.a.id+c.b.id+c.m0+'-'+c.m1+':'+Math.round(c.s)+(c.duck?'d':'')).join('|')+'|'+(G.sy2??G.sy)+'|'+G.H+'|'+G.right;
   NI_clLegend();if(key===C.drawn&&sv.querySelector('.nicg'))return;C.drawn=key;
   let g=sv.querySelector('.nicg');if(!g){g=document.createElementNS(CABSVG,'g');g.setAttribute('class','nicg');
     g.addEventListener('pointerover',e=>{const p=e.target.closest('.nich');if(!p)return;g.classList.add('hov');const c=g.querySelector('.nicc[data-n="'+p.dataset.n+'"]');if(c)c.classList.add('hi')});
@@ -22184,8 +22192,8 @@ function NI_clDraw(){const C=NI.clash,w=document.getElementById('mixWin');const 
   /* the strongest clash hangs lowest, its label under its curve (over it in a short lane); a label that would cover another one is left to the tooltip */
   C.list.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B)return;const x1=A.cx+3,x2=B.cx-3;
     const rm=room>=34?room-12:room,sag=clamp(rm*(n>1?.55+.45*(n-i)/n:1),10,rm),d=cabPath(x1,sy,x2,sy,sag),wd=(1.4+4.6*clamp(c.s/36,0,1)).toFixed(2);
-    back+=`<path class="nicb" d="${d}" stroke-width="${(+wd+2.4).toFixed(2)}"/>`;front+=`<path class="nicc" data-n="${i}" d="${d}" stroke-width="${wd}"/>`;
-    const tx=`${c.a.name} vs ${c.b.name}, ${c.range}`,tw=cs2Tw(tx),ly=room>=34?sy+sag+3+ +wd/2+8:sy+sag-3-+wd/2,lx=clamp((x1+x2)/2-tw/2,4,Math.max(4,G.right-tw));
+    back+=`<path class="nicb" d="${d}" stroke-width="${(+wd+2.4).toFixed(2)}"/>`;front+=`<path class="nicc${c.duck?' nidk':''}" data-n="${i}" d="${d}" stroke-width="${wd}"/>`;
+    const tx=c.duck?`${c.b.name} ducks under ${c.a.name}, ${c.range}`:`${c.a.name} vs ${c.b.name}, ${c.range}`,tw=cs2Tw(tx),ly=room>=34?sy+sag+3+ +wd/2+8:sy+sag-3-+wd/2,lx=clamp((x1+x2)/2-tw/2,4,Math.max(4,G.right-tw));
     const free=y=>!occ.some(o=>Math.abs(o[2]-y)<11&&lx<o[1]+4&&lx+tw>o[0]-4),yy=[ly,ly-11,ly-22].find(y=>y>sy+14&&free(y));
     if(yy!=null){occ.push([lx,lx+tw,yy]);lab+=`<text class="nicl" x="${lx.toFixed(1)}" y="${yy.toFixed(1)}">${esc(tx)}</text>`}
     hit+=`<path class="nich" data-n="${i}" d="${d}"><title>${esc(NI_clWords(c))} Click for the numbers.</title></path>`});
@@ -22195,7 +22203,7 @@ function NI_clWords(c){return`${c.a.name} and ${c.b.name} both sit at ${c.range}
 function NI_clLegend(){const w=document.getElementById('mixWin'),lg=w&&w.querySelector('.cablg');if(!lg)return;let b=lg.querySelector('.niclb');
   if(!b){b=document.createElement('button');b.type='button';b.className='cl2 niclb';b.dataset.ni='clash';const em=lg.querySelector('em');lg.insertBefore(b,em||null);
     b.addEventListener('click',e=>{e.stopPropagation();mxsSet('niClash',mxsO().niClash?0:1);if(mxsO().niClash)NI_clRun();else NI_clStop();try{cabSoon()}catch(_){}})}
-  const on=!!mxsO().niClash,C=NI.clash,cnt=on?(C.meas&&!C.list.length?'…':String(C.list.length)):'',h=`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 2Q13 9 25 2" stroke="${NI_CL_COL}" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>Clashes${on?` <b>${cnt}</b>`:''}`;
+  const on=!!mxsO().niClash,C=NI.clash,cnt=on?(C.meas&&!C.list.length?'…':String(C.list.filter(c=>!c.duck).length)):'',h=`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 2Q13 9 25 2" stroke="${NI_CL_COL}" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>Clashes${on?` <b>${cnt}</b>`:''}`;
   if(b._h!==h){b._h=h;b.innerHTML=h}b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));
   /* the button takes its room from the hint at the end, so the legend keeps its width (the normal cables' labels keep their room) */
   const em=lg.querySelector('em');if(em&&em.offsetParent){em.style.maxWidth='';const nat=em.offsetWidth,bw=b.offsetWidth+10;em.style.maxWidth=Math.max(0,nat-bw)+'px';em.hidden=nat-bw<24}
@@ -22229,6 +22237,47 @@ setTimeout(()=>{const _m=meters;meters=function(){const r=_m.apply(this,argument
 {const _cu=NI.clipUI;NI.clipUI=function(e){const r=_cu.apply(this,arguments);try{NI_clipTip()}catch(_){}return r}}
 NI.clash.at=NI_clashAt;NI.clash.draw=NI_clDraw;NI.clash.pop=NI_clashPop;
 /* ===== end of lane D NI-5a ===== */
+/* ===== lane D (task NI-5b): I12 masking cables, part 2: the fixes =====
+   Two fixes from the clash card, each one undo step: duck the covered track under the louder one in that band only (the Ducker's new band
+   mode), or a 2 dB bell cut on the covered track's Pro EQ. A clash already handled by a band Ducker is drawn dimmed: the per-track measure
+   (NI-3) renders one track at a time and so does not hear ducking. */
+{const _s=abxSp;abxSp=function(p){const o=_s.apply(this,arguments);o.bd=p&&p.bd?1:0;o.bq=+(p&&p.bq)||4.3;return o}}
+/* centre and Q of a clash's band range */
+function NI_clBand(c){const a=NI_clEdges(c.m0)[0],b=NI_clEdges(c.m1)[1],fc=Math.sqrt(a*b),n=Math.pow(2,Math.log2(b/a));return{fa:a,fb:b,fc,q:Math.sqrt(n)/(n-1)}}
+/* a band Ducker on the covered track that this clash's louder track triggers, around this band */
+function NI_clDuckOf(c){const B=NI_clBand(c);for(const[t,s] of[[c.b,c.a],[c.a,c.b]])for(const f of t.fx||[])if(f.type==='duck'&&f.on&&f.p&&f.p.bd&&f.p.src===s.id&&f.p.ff>=B.fa*.8&&f.p.ff<=B.fb*1.25)return{t,f};return null}
+{const _at=NI_clashAt;NI_clashAt=function(){const R=_at.apply(this,arguments);for(const c of R.list){const d=NI_clDuckOf(c);c.duck=!!d;c.duckFx=d&&d.f.id}return R};NI.clash.at=NI_clashAt}
+const NI_fmtHz=f=>f>=1000?(Math.round(f/100)/10)+' kHz':Math.round(f)+' Hz';
+/* fix 1: duck the covered track under the louder one, in this band only */
+function NI_clFixDuck(c){const B=NI_clBand(c),a=c.a,b=c.b;if(!trkById(a.id)||!trkById(b.id))return null;pushUndo();const f=mkFx('duck');
+  Object.assign(f.p,{src:a.id,fo:'band',ff:Math.round(clamp(B.fc,30,8000)),bd:1,bq:+clamp(B.q/2,.5,6).toFixed(2),amt:50,th:Math.round(clamp(c.la-9,-60,-6))});b.fx.push(f);changed(true);
+  try{renderFx()}catch(e){}try{renderMixer()}catch(e){}try{cabSoon()}catch(e){}toast(`${b.name} now ducks under ${a.name} at ${c.range} only, about 6 dB while ${a.name} plays there.`);return f}
+/* fix 2: a 2 dB bell cut on the covered track's Pro EQ */
+function NI_clFixNotch(c){const B=NI_clBand(c),b=c.b;if(!trkById(b.id))return null;pushUndo();let f=(b.fx||[]).find(x=>x.type==='eq'&&x.on&&x.p&&Array.isArray(x.p.bands));
+  const lf=v=>Math.log2(Math.max(10,v)),free=f?f.p.bands.map((x,i)=>[x,i]).filter(([x])=>x.t==='peaking'&&(!x.on||eqIdle(x))):[];
+  if(!f||!free.length){f=mkFx('eq');b.fx.push(f);free.length=0;f.p.bands.forEach((x,i)=>{if(x.t==='peaking'&&(!x.on||eqIdle(x)))free.push([x,i])})}
+  free.sort((p,q)=>Math.abs(lf(p[0].f)-lf(B.fc))-Math.abs(lf(q[0].f)-lf(B.fc)));const[bd,bi]=free[0];Object.assign(bd,{t:'peaking',f:Math.round(B.fc),g:-2,q:+clamp(B.q,.3,12).toFixed(2),on:true});
+  changed(true);try{renderFx()}catch(e){}toast(`${b.name}: 2 dB less at ${NI_fmtHz(B.fc)} on its Pro EQ (band ${bi+1}).`);return{f,band:bi}}
+/* the fixes in the clash card */
+NI_HOOKS.clashPop=function(c,p){const B=NI_clBand(c),bx=p.querySelector('.nicpb'),box=document.createElement('div');box.className='nicpf';
+  if(c.duck){box.innerHTML=`<p>${esc(c.b.name)} already ducks under ${esc(c.a.name)} in this band. Measuring one track at a time cannot hear ducking, so this cable stays, dimmed.</p><button type="button" data-nf="open" title="Open the Ducker that handles this clash">Open the Ducker<small>Change how much and how fast ${esc(c.b.name)} ducks</small></button>`}
+  else box.innerHTML=`<button type="button" data-nf="duck" title="Add a Ducker to ${esc(c.b.name)} that lowers only ${esc(c.range)}, and only while ${esc(c.a.name)} plays there (about 6 dB). One undo step.">Duck ${esc(c.b.name)} under ${esc(c.a.name)} in this band<small>Only ${esc(c.range)}, only while ${esc(c.a.name)} plays</small></button>
+    <button type="button" data-nf="notch" title="Cut ${esc(c.b.name)} by 2 dB around ${NI_fmtHz(B.fc)} with a bell on its Pro EQ (a new Pro EQ if it has none). One undo step.">Notch ${esc(c.b.name)} by 2 dB at ${NI_fmtHz(B.fc)}<small>Always on, a small bell cut on its Pro EQ</small></button>`;
+  p.insertBefore(box,bx);box.addEventListener('click',e=>{const b=e.target.closest('[data-nf]');if(!b)return;e.stopPropagation();const k=b.dataset.nf;NI_clPopClose();
+    if(k==='duck')NI_clFixDuck(c);else if(k==='notch')NI_clFixNotch(c);else if(k==='open'&&c.duckFx)abxOpen(c.duckFx);
+    NI.clash.drawn='';setTimeout(()=>{try{NI_clTick(true)}catch(_){}},0)});
+  const r=p.getBoundingClientRect();if(r.bottom>innerHeight-4)p.style.top=Math.max(4,innerHeight-r.height-4)+'px'};
+/* the Ducker window: "Only this band" next to Listen to (Band) */
+NI_HOOKS.duckBandRow=function(el,t,f){const fo=el&&el.querySelector('.agfo,.abxfo');if(!fo)return;let b=fo.querySelector('.nibd');const show=(f.p.fo||'all')==='band'||!!f.p.bd;
+  if(!show){if(b)b.remove();return}if(!b){b=document.createElement('button');b.type='button';b.className='nibd';fo.appendChild(b)}
+  b.classList.toggle('on',!!f.p.bd);b.setAttribute('aria-pressed',String(!!f.p.bd));b.textContent='Only this band';
+  b.title=f.p.bd?`On: only the band around the focus frequency of ${t.name} is ducked, the rest stays. Click to duck all of it.`:`Off: all of ${t.name} is ducked. Click to duck only the band around the focus frequency.`;
+  b.onclick=e=>{e.stopPropagation();pushUndo();f.p.bd=!f.p.bd;if(!f.p.bq)f.p.bq=4.3;abxSet(t,f);changed(true);const W=ABXW.get(f.id);if(W)abxBuild(W);else NI_HOOKS.duckBandRow(el,t,f)}};
+/* the Ducker window's builder: today agBuild (which calls itself by name), before it abxBuild; both get the row */
+{const wrap=_b=>function(W){const r=_b.apply(this,arguments);try{const F=abxFind(W.fid);if(F)NI_HOOKS.duckBandRow(W.el,F.t,F.f)}catch(e){console.warn('NI duck band',e)}return r};
+ if(typeof agBuild==='function'){const same=abxBuild===agBuild;agBuild=wrap(agBuild);if(same)abxBuild=agBuild;else abxBuild=wrap(abxBuild)}else abxBuild=wrap(abxBuild)}
+NI.clash.fixDuck=NI_clFixDuck;NI.clash.fixNotch=NI_clFixNotch;NI.clash.band=NI_clBand;
+/* ===== end of lane D NI-5b ===== */
 /* ===== task LK (lane A): look tokens =====
    One object LOOK (and the CSS custom properties at the top of the style block, see the LK block before .dacv) holds the look values that the drawers read
    instead of literals, so later tasks (DS design round 2, MD1, SC, DV) change values here, not in the drawers. The user's DR3 picks (27 Nov):

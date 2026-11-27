@@ -5006,3 +5006,32 @@ Phase Plant and Pigments themselves (paid; Kilohearts' free plug-ins and Phase P
 
 ### Next
 The user: load Phase Plant and Pigments, play the pattern on the Gryphon at 44.1 kHz, paste the report (the [probe] conclusion line says which part of the host set-up they need, or that the host is not the cause).
+
+## 27 November 2026, v0.260: task NI-5b, masking cables part 2: the fixes (lane D, idea I12, NF5)
+
+Idea I12 is complete. Edit script `tools/feature-lab/ni/ni_5b.py` (anchored; needs NI-5a), test `tools/ui-tests/taskNI_5b.py` (22 checks, all pass). The step was claimed in the plan before it started. (This run's trigger still said NI-4 was the last release; the plan's rule is the next step not yet logged, so this run did NI-5b.)
+
+### Built
+- **Two fixes in the clash card**, each one undo step, for the covered (quieter) channel:
+  - **Duck it under the louder one in this band**: a Ducker on the covered track, triggered by the louder track, listening to that band (Listen to: Band, Focus at the band centre), ducking **only that band**, 50% (about 6 dB at the centre) while the louder one plays there; trigger level 9 dB under the louder track's band level.
+  - **Notch it by 2 dB**: a -2 dB bell at the band centre on the covered track's first Pro EQ (the unused bell band nearest in frequency; a new Pro EQ when it has none or no free bell), Q from the width of the clash range (1/3 octave: Q 4.3).
+- **The Ducker's band mode** (`p.bd`, width `p.bq` as Q): no existing device could duck a single band (the Ducker ducks all of a sound and its Focus only chooses what it listens to; the Pro EQ's dynamic bands react to their own track and work live only). In the Ducker's worklet the band mode computes `out = x - (1 - gain) * band(x)` with a zero-phase state-variable band-pass around the Focus frequency, so the centre is ducked by the full amount and the rest of the sound is untouched. Without `p.bd` the per-sample code is the old one. The band is twice as wide as the clash range, so its edges are ducked too.
+- **The Ducker window**: with Listen to "Band" (or the mode on), a button **Only this band** next to Hear it, one undo step (`NI_HOOKS.duckBandRow`; it wraps both the window's builder `agBuild` and `abxBuild`, as the window calls itself by name).
+- **A handled clash**: NI-3 measures one track at a time, so it cannot hear ducking. A clash whose covered track already ducks under the louder one in that band is drawn **dimmed and dashed**, labelled "Bass ducks under Kick, 95 to 120 Hz", and not counted in the legend; its card offers **Open the Ducker**. The notch is measured: the bass is measured again with its EQ and the clash gets weaker.
+
+### Checked
+- Test song: Kick 106 Hz (louder), Bass 100 Hz plus 1 kHz, Pad 3 kHz. One clash, Kick and Bass, 95 to 120 Hz; the card offers both fixes with tooltips.
+- **Notch**: one undo step; a bell at 107 Hz, -2 dB, Q 4.32 on the bass's Pro EQ; the bass measured again and the clash strength fell from 32.8 to 29.3; undo restores the bass's effects exactly.
+- **Duck**: one undo step; a Ducker on Bass, trigger Kick, Band at 107 Hz, Q 2.16, 50%. Rendered with the bass heard and the kick built as its trigger: **100 Hz down 5.1 dB, 1 kHz unchanged (-0.01 dB)**; with "Only this band" turned off in the window (one undo step) the 1 kHz drops 6 dB too, as a normal Ducker. The cable turns dimmed with "ducks under", the legend says 0, the card offers Open the Ducker, which opens the window with Only this band lit.
+- **Untouched tracks**: the Pad renders bit-identical through both fixes. **Existing Duckers**: a Ducker without the new fields renders the same as with the band mode off, and a song with a default Ducker (Listen to All, Lows, Band) renders with the same checksums on this build and on main v0.258 (efbd3caefccf, bd2652e678e3, e0073ca6571a).
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB. The Ducker's worklet changed only behind the new switch; no other audio code was touched.
+- Also: `taskNI_5a.py` 34 of 34, `taskNI_4.py` 31 of 31, `taskNI_1b.py` 36 of 36; the Ducker window tests `taskAB.py` and `taskAG.py` run clean (no failures, no console errors) on this build as on main; after the rebase onto lane E's v0.259 `taskNI_5b.py` 22 of 22, `taskNI_5a.py` 34 of 34 and `taskNI_1b.py` 36 of 36 again.
+- Screenshots looked at: the card with the two fixes, the mixer with a handled clash, the Ducker window with Only this band.
+
+### Limits
+- A ducked clash is shown as handled, not measured: NI-3 renders tracks one at a time without their sidechains (NI-3's limit). The band duck's effect was checked on a full render in the test.
+- The Ducker window's picture still shows the whole-sound duck curve; the band mode changes only what is ducked, and the button says so.
+- What only the user can judge: whether 6 dB of band ducking and a 2 dB notch are the right first moves on their mixes, and how the band duck sounds on a rolling bass under a kick (try it on a drop: Show clashes, click the Kick and Bass cable, Duck; then compare with Only this band off in the Ducker).
+
+### Left
+Group U, next: NI-6, the energy arc (I6) on the NI-3 cache.
