@@ -1,7 +1,7 @@
 {
-  "version": "0.233",
-  "sha256": "18d6d91d1ace78abbddfa5b318c1bae63a0fe328b143098a931bd14a303d9180",
-  "size": 5997960,
+  "version": "0.234",
+  "sha256": "1e0160895b30ebf1da0ed1dbe12d3f5bd1c5709cc4f3089bc2e08d1823e9ab2f",
+  "size": 6013535,
   "minShell": "0.147.0",
-  "notes": "MIDI controllers, step 1: AudioLab finds your MIDI devices when they are plugged in, MIDI learn works on notes and buttons too and in pinned device windows, knobs pick up the control instead of jumping, endless knobs are recognised, and a new Controllers window (menu) lists your devices and every mapping."
+  "notes": "New: \"Why is this clipping?\". When the mix goes over while it plays, a Clip button appears next to the mixer button: it shows where, which tracks made the peak, and one-click fixes (lower the loudest part, a limiter on the master, play the moment)."
 }

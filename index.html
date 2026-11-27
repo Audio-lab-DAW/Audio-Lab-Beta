@@ -2027,6 +2027,35 @@ body #bCap.ls .cpd{animation:cpl2 1.6s steps(12,jump-none) infinite}
 #setNav .navAtom.ab2c .wmL{background:linear-gradient(100deg,var(--spa,#4cc9f0),var(--spb,#6096ff));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 #setNav .navAtom.ab2c .wmP{border-color:var(--spa,#4cc9f0);color:var(--spp,#a8d8ff);-webkit-text-fill-color:var(--spp,#a8d8ff)}
 #setNav .navAtom.ab2c small{color:var(--spn,#77839f)}
+/* lane D (task NI-1b): the "Why is this clipping?" card. Instrument look: units on every read-out, equal-width digits, one colour per track on its bar */
+#niClip{width:330px;align-items:stretch;gap:8px;padding:10px 12px 12px;font-size:var(--fs2);z-index:60}
+#niClip[hidden]{display:none}
+#niClip .nich{display:flex;align-items:center;gap:6px}#niClip .nich b{font-size:var(--fs3);flex:1;white-space:nowrap}
+#niClip>select{min-height:22px;width:100%;font-size:var(--fs1);padding:0 4px}#niClip>select[hidden]{display:none}
+#niClip .nix{min-height:22px;width:24px;padding:0;display:grid;place-items:center}#niClip .nix svg{width:12px;height:12px}
+#niClip .nist{font-size:var(--fs1);color:var(--mut)}#niClip .nist:empty{display:none}
+#niClip .niw{margin:0;line-height:1.45;color:var(--ink)}
+#niClip .nird{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+#niClip .nird span{display:flex;flex-direction:column;gap:1px;padding:4px 6px;border-radius:6px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.07)}
+#niClip .nird small{font-size:var(--fs1);color:var(--mut)}#niClip .nird b{font:var(--fw6) var(--fs2) var(--ffu);font-variant-numeric:tabular-nums;color:#cfe6ff;white-space:nowrap}
+#niClip .nird b.ov{color:#ff6b6b}#niClip .nird b i{font-style:normal;font-weight:var(--fw4);color:var(--mut);margin-left:3px;font-size:var(--fs1)}
+#niClip .nibars{display:flex;flex-direction:column;gap:3px}#niClip .nibars:empty{display:none}
+#niClip .nibh{display:flex;justify-content:space-between;font-size:var(--fs1);color:var(--mut)}
+#niClip .nibr{display:grid;grid-template-columns:86px minmax(0,1fr) 42px;align-items:center;gap:6px;font-size:var(--fs1)}
+#niClip .nibr>span{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#d6d8de}
+#niClip .nibr>span i{width:7px;height:7px;border-radius:2px;flex:none;background:var(--c)}
+#niClip .nibr u{position:relative;height:10px;border-radius:2px;background:rgba(0,0,0,.35);text-decoration:none;overflow:hidden;
+  background-image:linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);background-size:25% 100%}
+#niClip .nibr u em{position:absolute;top:1px;bottom:1px;background:var(--c);border-radius:1px}
+#niClip .nibr u s{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55)}
+#niClip .nibr b{text-align:right;font-weight:var(--fw6);font-variant-numeric:tabular-nums;color:#e9eaf0}
+#niClip .nifix{display:flex;flex-wrap:wrap;gap:5px}#niClip .nifix button{min-height:24px;padding:0 9px;font-size:var(--fs1)}
+#niClip .nifix button.pri{background:linear-gradient(#ff7a7a,#d94848);border-color:#5e1414;color:#fff}
+#niClip .nifix button[hidden]{display:none}
+#niClip .ninote{font-size:var(--fs1);color:var(--mut);line-height:1.4}#niClip .ninote:empty{display:none}
+#niClipB{height:28px;min-height:28px;padding:0 8px;display:flex;align-items:center;gap:5px;font:var(--fw6) var(--fs1) var(--ffu);color:#ffd0b0}#niClipB[hidden]{display:none}
+#niClipB i{width:7px;height:7px;border-radius:50%;background:#ff6b3d;box-shadow:0 0 5px #ff6b3d}
+#peakBox.niev{position:relative}#peakBox.niev::after{content:'';position:absolute;left:4px;top:4px;width:5px;height:5px;border-radius:50%;background:#ff9a3c;box-shadow:0 0 4px #ff9a3c}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6297,7 +6326,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.233',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.234',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -21089,7 +21118,7 @@ function NI_preLim(db){if(UI.limiter===false||UI.bitPerfect)return{db,lim:false}
 function NI_clipSeen(src,db){if(!play.on)return;let lim=false,sat=false;if(src==='master'){const q=NI_preLim(db);db=q.db;lim=q.lim;sat=!!q.sat}if(!(db>0)&&!sat)return;const C=NI.clips,b=curDisp(),now=performance.now(),pj=PJ&&PJ.cur;
   for(let i=C.log.length-1;i>=0&&i>=C.log.length-12;i--){const e=C.log[i];if(e.src===src&&e.proj===pj&&now-e.w<1500&&Math.abs(b-e.lb)<2){if(db>e.db||(sat&&!e.sat)){e.db=db;e.t=b;e.sat=sat}e.lb=b;e.w=now;return}}
   const e={id:++C.n,src,t:b,lb:b,db,lim,sat,w:now,at:Date.now(),proj:pj};C.log.push(e);if(C.log.length>C.max)C.log.shift();C.last=e;
-  if(NI_HOOKS.clipEvent)try{NI_HOOKS.clipEvent(e)}catch(_){}}
+  if(NI.clipUI)try{NI.clipUI(e)}catch(_){}if(NI_HOOKS.clipEvent)try{NI_HOOKS.clipEvent(e)}catch(_){}}
 /* the open project's clip events, oldest first */
 function NI_clipLog(){const pj=PJ&&PJ.cur;return NI.clips.log.filter(e=>e.proj===pj)}
 function NI_clipClear(){const pj=PJ&&PJ.cur;NI.clips.log=NI.clips.log.filter(e=>e.proj!==pj);NI.clips.last=null}
@@ -21144,6 +21173,79 @@ function NI_clipWords(r){if(!r||r.peakDb==null)return'';const f=v=>(v>=0?'+':'')
   return head+(r.where?' at '+r.where.txt:'')+'. '+big+(neg.length?' Pulling the other way: '+neg.join(', ')+'.':'')+rest+` Inter-sample peak: ${f(r.tpDb)}.`}
 NI.clipExplain=NI_clipExplain;NI.clipLog=NI_clipLog;
 /* ===== end of lane D NI-1a ===== */
+/* ===== lane D (task NI-1b): I3 "Why is this clipping?", part 2: the card =====
+   Opens from the master peak read-out, the mixer's and the master pop's clip dots (when the song has clip events), a strip's peak read-out
+   (when that strip has events) and the command ni.clipExplain. Measures with NI_clipExplain (NI-1a, offline). Fixes are single undo steps. */
+NI.card={el:null,ev:null,r:null,tok:0};
+const NI_srcName=src=>src==='master'?'Master':((trkById(src)||{}).name||'a track');
+function NI_evLabel(e){const w=NI_bb(Math.round(e.t*2)/2),d=(e.db>=0?'+':'')+e.db.toFixed(1)+' dB';return`bar ${w.bar} · ${NI_srcName(e.src)} · ${e.sat?'at least '+d+', limiter':d}`}
+/* a small clip button next to the mixer button, shown only while the song has clip events (the peak read-out is hidden in the compact transport) */
+{const mb=$('#mBtn');if(mb&&!$('#niClipB')){mb.insertAdjacentHTML('afterend','<button id="niClipB" hidden title="The mix went over while it played (or the safety limiter was at its ceiling). Click to see why it clipped and how to fix it."><i></i>Clip</button>');$('#niClipB').onclick=e=>{if(!NI_clipLog().length){e.currentTarget.hidden=true;return}NI_clipCard(null,e.currentTarget)}}}
+NI.clipUI=e=>{const cb=$('#niClipB');if(cb)cb.hidden=false;if(e.src!=='master')return;const b=$('#peakBox');if(!b)return;b.classList.add('niev');b.dataset.niT=b.dataset.niT||b.title;b.title='The mix went over (or the safety limiter was at its ceiling) while it played. Click to see why. The orange dot stays until you clear it in that card.'};
+function NI_cardEl(){let W=NI.card.el;if(W&&W.isConnected)return W;W=document.createElement('div');W.id='niClip';W.className='pop';W.hidden=true;W.setAttribute('role','dialog');W.setAttribute('aria-label','Why is this clipping?');
+  W.innerHTML=`<div class="nich"><b>Why is this clipping?</b><button class="nix" data-ni="x" title="Close (Escape)" aria-label="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg></button></div><select data-ni="ev" title="The moments this song went over while it played (positions read live, to the nearest half beat), newest first. Pick one to measure it."></select>
+  <div class="nist" aria-live="polite"></div><p class="niw"></p>
+  <div class="nird"><span title="Where the highest sample of the mix is, in the song"><small>Where</small><b data-ni="at">–</b></span><span title="The highest sample of the mix, in dB relative to full scale (0 dBFS is the most a file can hold)"><small>Peak</small><b data-ni="pk">–</b></span><span title="The highest point between the samples (4x oversampled, like a true-peak meter). Players and converters can go over here even when the samples do not."><small>Inter-sample</small><b data-ni="tp">–</b></span></div>
+  <div class="nibars"></div><div class="ninote"></div>
+  <div class="nifix"><button class="pri" data-ni="low" hidden></button><button data-ni="lim" hidden title="Adds AudioLab's Limiter at the end of the master chain (Safety net: no gain, ceiling -1 dB, true peak), or turns it on if it is there. One undo step.">Limiter on the master</button><button data-ni="play" title="Loops the 2 bars around this moment and plays them, so you can hear it">Play the moment</button><button data-ni="clr" title="Forget the clip events of this song and reset the clip lights">Clear</button></div>`;
+  document.body.appendChild(W);NI.card.el=W;
+  W.addEventListener('click',ev=>{const b=ev.target.closest('[data-ni]');if(!b||b.tagName==='SELECT')return;const k=b.dataset.ni;
+    if(k==='x')NI_cardClose();else if(k==='low')NI_clipFixLower();else if(k==='lim')NI_clipFixLimiter();else if(k==='play')NI_clipPlay();else if(k==='clr')NI_clipClearAll()});
+  W.querySelector('[data-ni="ev"]').addEventListener('change',ev=>{const id=+ev.target.value,e=NI_clipLog().find(q=>q.id===id);if(e)NI_cardShow(e)});
+  return W}
+function NI_cardClose(){const W=NI.card.el;if(W)W.hidden=true;NI.card.tok++}
+function NI_cardPlace(anchor){const W=NI.card.el,z=ZOOM,vw=innerWidth/z,vh=innerHeight/z,Wd=W.offsetWidth,H=W.offsetHeight;let L,T;
+  if(anchor&&anchor.isConnected){const r=anchor.getBoundingClientRect();L=r.right/z-Wd;T=r.top/z-H-8;if(T<4)T=r.bottom/z+8}else{L=(vw-Wd)/2;T=(vh-H)/3}
+  W.style.left=clamp(L,4,vw-Wd-4)+'px';W.style.top=clamp(T,4,Math.max(4,vh-H-4))+'px'}
+/* open the card: for an event (default: the newest of the given source, else the newest of the song) */
+function NI_clipCard(e,anchor,src){const L=NI_clipLog();if(!e)e=[...L].reverse().find(q=>!src||q.src===src)||null;
+  if(!e){toast('No clips in this song yet. AudioLab notes them while the song plays.');return null}
+  const W=NI_cardEl();W.hidden=false;NI.card.anchor=anchor||NI.card.anchor||null;NI_cardShow(e);NI_cardPlace(NI.card.anchor);return W}
+async function NI_cardShow(e){const W=NI_cardEl(),C=NI.card,tok=++C.tok;C.ev=e;C.r=null;
+  const sel=W.querySelector('[data-ni="ev"]'),L=[...NI_clipLog()].reverse().slice(0,30);sel.innerHTML=L.map(q=>`<option value="${q.id}"${q.id===e.id?' selected':''}>${esc(NI_evLabel(q))}</option>`).join('');sel.hidden=L.length<2;
+  W.querySelector('.nist').textContent='Measuring this moment offline (the mix, then each track alone)…';W.querySelector('.niw').textContent='';W.querySelector('.nibars').innerHTML='';W.querySelector('.ninote').textContent='';
+  for(const k of['at','pk','tp']){const b=W.querySelector(`[data-ni="${k}"]`);b.textContent='–';b.classList.remove('ov')}for(const k of['low','lim'])W.querySelector(`[data-ni="${k}"]`).hidden=true;
+  const r=await NI_clipExplain(e);if(tok!==C.tok||W.hidden)return;C.r=r;NI_cardFill(r,e);NI_cardPlace(C.anchor)}
+function NI_cardFill(r,e){const W=NI.card.el,st=W.querySelector('.nist'),f1=v=>(v>=0?'+':'')+v.toFixed(1);
+  if(!r||r.busy||r.stale||r.error||r.empty){st.textContent=r?(r.why||('Could not measure: '+r.error)):'Nothing to measure.';return}
+  st.textContent='';const strip=e.src!=='master'&&r.strip;
+  const pl=strip&&r.strip.clips.length?' (playing: '+r.strip.clips.join(', ')+')':'';
+  W.querySelector('.niw').textContent=strip?(r.strip.pkDb>0?`${r.strip.name} goes over on its own here: its peak is ${f1(r.strip.pkDb)} dB${pl}. In the mix: `:`${r.strip.name}'s strip went over while it played. Measured here on its own: ${r.strip.pkDb==null?'not measurable alone':f1(r.strip.pkDb)+' dB'}${pl}. In the mix: `)+r.words:r.words;
+  const at=W.querySelector('[data-ni="at"]'),pk=W.querySelector('[data-ni="pk"]'),tp=W.querySelector('[data-ni="tp"]');
+  at.innerHTML=`${r.where.bar}.${r.where.beat}<i>bar.beat</i>`;pk.innerHTML=`${f1(r.peakDb)}<i>dBFS</i>`;tp.innerHTML=`${f1(r.tpDb)}<i>dBTP</i>`;pk.classList.toggle('ov',r.peakDb>0);tp.classList.toggle('ov',r.tpDb>0);
+  /* the bars: each track's signed part of the peak sample, zero line and quarter lines */
+  const rows=r.tracks.filter(q=>Math.abs(q.share)>=.005).slice(0,8);if(Math.abs(r.rest.share)>=.02)rows.push({name:'Sends, groups, master',color:'#8b8b97',share:r.rest.share,rest:1});
+  const lo=Math.min(0,...rows.map(q=>q.share)),hi=Math.max(1,...rows.map(q=>q.share)),X=v=>(v-lo)/(hi-lo)*100;
+  W.querySelector('.nibars').innerHTML=rows.length?`<div class="nibh" title="Each track's part of the highest sample. They add up to 100%. A negative part pulls the peak down (opposite phase)."><span>Share of the peak</span><span>${lo<0?Math.round(lo*100)+'% to ':''}${Math.round(hi*100)}%</span></div>`+rows.map(q=>{const a=X(Math.min(0,q.share)),b=X(Math.max(0,q.share));
+    return`<div class="nibr" style="--c:${q.color||'#8b8b97'}" title="${esc(q.name)}: ${Math.round(q.share*100)}% of the peak sample${q.rest?' (what sends, groups and master effects add)':q.pkDb!=null?', its own peak here '+f1(q.pkDb)+' dBFS':''}"><span><i></i>${esc(q.name)}</span><u><s style="left:${X(0)}%"></s><em style="left:${a}%;width:${Math.max(.6,b-a)}%"></em></u><b>${Math.round(q.share*100)}%</b></div>`}).join(''):'';
+  const notes=[];if(e.lim)notes.push(e.sat?'Heard live through the safety limiter, which was at its ceiling here. The measurement is of the mix before it.':'Heard live through the safety limiter. The measurement is of the mix before it.');
+  if(!r.clip&&!strip)notes.push(r.tpDb>0?'The samples stay under 0 dBFS, but the inter-sample peak does not: a limiter with true peak catches that.':'An export of this moment is not over 0 dBFS.');
+  if(r.masterFx)notes.push('The master has effects, so shares are measured after them (each track alone through the master chain).');
+  W.querySelector('.ninote').textContent=notes.join(' ');
+  const lw=NI_lowerFor(r,e),lb=W.querySelector('[data-ni="low"]');lb.hidden=!lw;if(lw){lb.textContent=`Lower ${lw.name} by ${lw.db.toFixed(1)} dB`;lb.title=strip?`Turns ${lw.name}'s volume down so it stays under 0 dB on its own. One undo step.`:`Turns ${lw.name}'s volume down so this peak lands at -0.5 dBFS (it has the biggest share). One undo step. The card measures again afterwards.`}
+  const ml=(S.mfx||[]).find(f=>f.type==='limit');W.querySelector('[data-ni="lim"]').hidden=!((r.clip||r.tpDb>0)&&!(ml&&ml.on));
+  W.querySelector('[data-ni="lim"]').textContent=ml?'Turn the master limiter on':'Limiter on the master'}
+/* which track to lower and by how much: so the peak sample lands at -0.5 dBFS, at least the overshoot plus 0.5 dB (a strip: its own overshoot plus 0.5 dB) */
+function NI_lowerFor(r,e){if(!r)return null;
+  if(e&&e.src!=='master'&&r.strip&&r.strip.pkDb>0){const t=trkById(r.strip.id);return t?{id:t.id,name:t.name,db:Math.ceil((r.strip.pkDb+.5)*10)/10}:null}
+  if(!r.clip)return null;const top=r.tracks[0];if(!top||!(top.share>0))return null;const T=Math.pow(10,-.5/20),m=r.peak,v=top.share*m;
+  let g=1-(m-T)/v;g=Math.max(.03,Math.min(1,g));const need=-20*Math.log10(g),db=Math.ceil(Math.max(need,r.overDb+.5)*10)/10;return{id:top.id,name:top.name,db}}
+function NI_clipFixLower(){const C=NI.card,lw=NI_lowerFor(C.r,C.ev);if(!lw)return;const t=trkById(lw.id);if(!t)return;
+  pushUndo();t.vol=t.vol*Math.pow(10,-lw.db/20);changed(true);toast(`${t.name} is ${lw.db.toFixed(1)} dB lower. Undo puts it back. Measuring again…`);NI_cardShow(C.ev)}
+function NI_clipFixLimiter(){pushUndo();S.mfx=S.mfx||[];let f=S.mfx.find(q=>q.type==='limit');
+  if(f)f.on=true;else{f=mkFx('limit');Object.assign(f.p,{gain:0,ceil:-1,rel:200,look:5,out:0,style:'transparent',tp:true});f.on=true;S.mfx.push(f)}
+  changed(true);try{routeMaster()}catch(_){}toast('A limiter (ceiling -1 dB, true peak) is on the master now. Undo takes it away. Measuring again…');NI_cardShow(NI.card.ev)}
+function NI_clipPlay(){const r=NI.card.r,e=NI.card.ev;const t=r&&r.t!=null?r.t:e&&e.t;if(t==null)return;const P=barPos(Math.max(0,t)+2e-3);let a=P.start-P.len,b=P.start+P.len;if(a<0){a=0;b=2*P.len}
+  if(play.on)stop();S.loopRange={a,b};S.loop=true;pos=a;syncTransportUI();dirty=true;start();const w=NI_bb(a);toast(`Looping bars ${w.bar} to ${w.bar+1}. The loop button turns it off.`)}
+function NI_clipClearAll(){NI_clipClear();{const cb=$('#niClipB');if(cb)cb.hidden=true}const b=$('#peakBox');if(b){b.classList.remove('niev');if(b.dataset.niT){b.title=b.dataset.niT;delete b.dataset.niT}b.click()}
+  try{const h=MXH.get('master');if(h)h.max=-90}catch(_){}try{for(const h of MXH.values())h.pkm=0}catch(_){}NI_cardClose();toast('Clip events of this song cleared.')}
+/* where it opens from: the master peak read-out and clip dots, a strip's peak read-out */
+document.addEventListener('click',ev=>{const t=ev.target;if(!t||!t.closest)return;let a,src='master';
+  if(!(a=t.closest('#peakBox,#mxClip,#mpClip'))){a=t.closest('.mxpkr');if(!a||ev.shiftKey)return;src=a.dataset.pk}
+  if(!NI_clipLog().some(q=>q.src===src))return;const anc=a;setTimeout(()=>NI_clipCard(null,anc,src),0)},true);
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&NI.card.el&&!NI.card.el.hidden){NI_cardClose();ev.stopPropagation()}},true);
+document.addEventListener('pointerdown',ev=>{const W=NI.card.el;if(!W||W.hidden)return;if(W.contains(ev.target)||ev.target.closest('#peakBox,#mxClip,#mpClip,.mxpkr,#toast,#niClipB'))return;NI_cardClose()},true);
+/* ===== end of lane D NI-1b ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -21517,6 +21619,7 @@ const SCA=[
  {id:'midiexp',g:'project',l:'Export MIDI (selected clip, or the whole song)',d:'Mod+Shift+E',ic:'M3 4h14v12H3zM7 4v7M11 4v7M15 4v7',run:()=>{const f=selC&&findClip(selC);if(f&&f.c.notes)midiExport('clip',f.t,f.c);else midiExport('song')}},
  {id:'group',g:'edit',l:'Group the selected tracks',d:'Mod+G',ic:'M2 6h6l2 2h8v8H2z',run:()=>{const sel=[...TSEL].map(trkById).filter(Boolean);const t=trkById(selT);groupTracks(sel.length?sel:t?[t]:[])}},
  {id:'ungroup',g:'edit',l:'Ungroup',d:'Mod+Shift+G',ic:'M2 6h6l2 2h8v8H2zM6 12h8',run:()=>{const t=trkById(selT);ungroup(t&&t.kind==='group'?t:grpOf(t))}},
+ {id:'ni.clipExplain',g:'view',l:'Why is this clipping? (explain the last clip)',d:'',ic:'M3 15l4-8 3 5 2-3 5 6M3 4h14',run:()=>NI_clipCard()},
  {id:'tour',g:'help',l:'Guided tour',d:'F1',nat:1,ic:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM8 8a2 2 0 1 1 3 1.7c-.7.4-1 .9-1 1.6M10 14v.5',run:()=>{if(typeof tutSet==='function')tutSet(true)}}
 ];
 const SCM=new Map(SCA.map(a=>[a.id,a]));

@@ -4013,3 +4013,25 @@ Step FT-C1a of `docs/features-build.md` (the user's pick: MIDI controller suppor
 ### Left
 - FT-C1b: the full mappings page (learn from the list, range and sensitivity, filter by device, the last-message read-out, takeover and scope defaults). Feedback follows changes the screen draws; a control moved by automation while its device is not shown sends nothing until it is drawn (to be checked in C1b). Mappings to controls of a device that was never opened since AudioLab started wait until it is (the control is registered when drawn), as before.
 - Next: FT-C1b, the mappings page.
+
+
+## 27 November 2026, v0.234: task NI-1b, "Why is this clipping?" part 2: the card (lane D, idea I3)
+
+Edit script `tools/feature-lab/ni/ni_1b.py` (anchored; needs NI-1a; re-run after the rebase onto v0.233), test `tools/ui-tests/taskNI_1b.py` (36 checks, all pass; `taskNI_1a.py` 36 of 36 again).
+
+### Built
+- **Where it opens.** In the compact transport the master peak read-out is hidden, so a small **Clip** button (orange dot) appears next to the mixer button while the song has clip events, and hides again when they are cleared. The card also opens from the master peak read-out (which gets an orange dot), the mixer's master clip dot, the master pop's clip dot (when the song has master events), a strip's peak read-out in the mixer (when that strip has events), and the command **`ni.clipExplain`** "Why is this clipping? (explain the last clip)" in the commands list. Without events the old clicks work as before (reset).
+- **The card** (`#niClip`, a `.pop`, so the glass engine draws it; dark and the Light level): a list of the song's clip events (newest first, positions to the nearest half beat), "Measuring this moment offline…" while `NI_clipExplain` runs, the chain in words, three read-outs with units (Where bar.beat, Peak dBFS, Inter-sample dBTP, red when over), a signed bar per track (its colour, zero line and quarter lines, sends, groups and master effects as a grey bar when they add 2% or more), notes (heard through the safety limiter; master effects; samples under 0 dBFS but inter-sample peak over). A strip event also gives the strip's own level and the clips playing.
+- **Fixes**, each one undo step, and the card measures again afterwards: **Lower <top track> by X dB** (so the peak sample lands at -0.5 dBFS, at least the overshoot plus 0.5 dB as the research proposed; the research's rule alone was not enough when the top track has 67% of the peak, so the needed amount is computed from its share); for a strip event, that strip by its own overshoot plus 0.5 dB. **Limiter on the master** (AudioLab's Limiter at the end of the master chain, Safety net settings: no gain, ceiling -1 dB, true peak; or turns an existing one on). **Play the moment** (loops the bar before and the bar of the peak and plays). **Clear** (forgets the song's events, resets the clip lights).
+- Escape or a click outside closes it. Nothing is drawn per frame; no audio nodes.
+
+### Checked
+- Test project from known signals (Kick + Bass + inverted copy, clipping at bar 9), played live with the limiter off and on: the Clip button and the dot appear; the card names bar 9 (9.1), "Kick + Bass add up here: +1.6 dB over 0 dBFS", +1.6 dBFS and +2.3 dBTP, bars Kick 67%, Bass 42%, Anti -8%; Lower Kick by 3.4 dB is one undo step, changes only Kick's volume and the re-render says "No clip here: the peak is -0.5 dB"; Undo puts it back; the master limiter is one undo step and the re-render peaks at -1.0 dBFS; Undo removes it; Play the moment loops beats 28 to 36 and plays; the command and the mixer's master dot open it; a strip event shows the strip's level; Escape closes; every control has a tooltip; no em dashes; no redraws while open; Clear works and the old reset click is unchanged. Screenshots of the card (normal and Light level) and the Clip button looked at.
+- Fractals levels unchanged (measured): Kick -19.05560 dB, Bass -35.48685 dB (master -10 dB), -9.75669 and -25.48699 dB at 0 dB, same hashes. Lane C's `taskFT_C1a.py` passes on this file. No console errors.
+
+### For the user to try
+Play a loud part of a song with the safety limiter on: if the limiter hits its ceiling, the orange **Clip** button appears next to the mixer button. Click it and check that the tracks it names are the ones you would have guessed, and whether "Lower ... by X dB" sounds right. After lowering the top track the inter-sample peak can still be a little over 0 dB; the master limiter (true peak) catches that.
+
+### Left
+Task I3 done. Next: NI-2a, the kick and bass analysis (shared with lane C's FT-F18).
+

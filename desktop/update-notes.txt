@@ -1,1 +1,1 @@
-MIDI controllers, step 1: AudioLab finds your MIDI devices when they are plugged in, MIDI learn works on notes and buttons too and in pinned device windows, knobs pick up the control instead of jumping, endless knobs are recognised, and a new Controllers window (menu) lists your devices and every mapping.
+New: "Why is this clipping?". When the mix goes over while it plays, a Clip button appears next to the mixer button: it shows where, which tracks made the peak, and one-click fixes (lower the loudest part, a limiter on the master, play the moment).
