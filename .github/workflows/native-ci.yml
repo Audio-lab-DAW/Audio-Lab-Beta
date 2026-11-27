@@ -10,13 +10,18 @@ name: Native CI (task NB)
 #   (linux also runs the engine on the null device end to end: the rate contract, the hand-over bit for bit, a
 #   device that changes rate while sound plays, 300 source switches under load; task NB-R2)
 #   node:   syntax of every bridge file, and the shell's side of the bridge against a stand-in engine
-#           (crash recovery, gave-up, a hung engine, the worklet port, what the page may send)
+#           (crash recovery, gave-up, a hung engine, the worklet port, what the page may send; since NB-R3 the
+#           feeder process, its bounded queue, and the watchdog for a frozen feeder and a hung engine)
+#   electron: the real Electron shell, the real feeder and the real engine on the null device (task NB-R3, review
+#           A8): the main process blocked 50 and 250 ms every second, and spinning 50 ms, with every frame bit for
+#           bit and no gap; the old path for comparison; a frozen feeder replaced by the watchdog
 on:
   push:
     branches: [main]
     paths:
       - 'native/**'
       - 'desktop/native-engine.js'
+      - 'desktop/native-feeder.js'
       - 'desktop/preload.js'
       - 'tools/native-lab/**'
       - '.github/workflows/native-ci.yml'
@@ -145,7 +150,7 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax of every bridge file
-        run: for f in desktop/native-engine.js desktop/preload.js native/bridge/*.js tools/native-lab/*.js tools/native-lab/bridge-unit/*.js; do node --check "$f" || exit 1; echo "ok $f"; done
+        run: for f in desktop/native-engine.js desktop/native-feeder.js desktop/preload.js native/bridge/*.js tools/native-lab/*.js tools/native-lab/bridge-unit/*.js; do node --check "$f" || exit 1; echo "ok $f"; done
       - name: The shell's side of the bridge against a stand-in engine
         run: node tools/native-lab/bridge-unit/bridge_unit.js | tee bridge-unit.txt
       - name: Summary
@@ -188,4 +193,38 @@ jobs:
         with:
           name: native-ci-mac
           path: out
+          retention-days: 14
+
+  electron:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the engine (null device off the Mac)
+        run: |
+          cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > cmake.txt 2>&1 || { tail -30 cmake.txt; exit 1; }
+          cmake --build build --target alengine -j 4 2>&1 | grep -E ' error|Built target' || true
+          test -x build/alengine
+      - name: Electron, the version the desktop app uses (desktop/package-lock.json)
+        run: |
+          V=$(node -e "console.log(require('./desktop/package-lock.json').packages['node_modules/electron'].version)")
+          echo "electron $V"
+          mkdir -p "$RUNNER_TEMP/el" && cd "$RUNNER_TEMP/el" && npm init -y > /dev/null && npm install --no-audit --no-fund "electron@$V" > npm.txt 2>&1 || { tail -20 npm.txt; exit 1; }
+          sudo apt-get install -y -qq xvfb > /dev/null 2>&1 || true
+      - name: 'The sound path out of the main process (task NB-R3): main blocked or busy, frozen feeder, the old path for comparison'
+        run: |
+          xvfb-run -a python3 tools/native-lab/feeder_test.py "$RUNNER_TEMP/el/node_modules/electron/dist/electron" build/alengine out-feeder | tee feeder-test.txt
+          { echo '```'; cat feeder-test.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-ci-electron
+          path: |
+            feeder-test.txt
+            out-feeder/*/feeder.json
+            out-feeder/*/electron-stderr.txt
+            out-feeder/summary.json
           retention-days: 14

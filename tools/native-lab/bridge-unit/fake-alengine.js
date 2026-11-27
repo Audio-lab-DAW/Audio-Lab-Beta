@@ -4,6 +4,8 @@
 // machine, with no sound card. It keeps a log of every command it got in FAKE_LOG (one JSON line each).
 //   FAKE_DIE_AFTER_READY=1  exits right after saying ready (a crashing engine)
 //   FAKE_SILENT=1           never says ready (a hung engine)
+//   FAKE_HANG_AFTER_MS=n    stops answering n ms after it started, but stays alive (task NB-R3: the watchdog's case)
+//   FAKE_PAUSE_READ=1       takes the sound connection but never reads from it (task NB-R3: back-pressure)
 'use strict';
 const fs = require('fs');
 const net = require('net');
@@ -16,12 +18,14 @@ if (process.env.FAKE_SILENT !== '1') say({ ev: 'ready', pid: process.pid, versio
 if (process.env.FAKE_DIE_AFTER_READY === '1') setTimeout(() => process.exit(3), 50);
 log({ started: true });
 
+const HANG_AT = process.env.FAKE_HANG_AFTER_MS ? Date.now() + Number(process.env.FAKE_HANG_AFTER_MS) : 0;
 let buf = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => {
   buf += chunk; let i;
   while ((i = buf.indexOf('\n')) >= 0) {
     const line = buf.slice(0, i); buf = buf.slice(i + 1);
+    if (HANG_AT && Date.now() >= HANG_AT) continue;
     let m; try { m = JSON.parse(line); } catch (e) { say({ re: '?', ok: false, error: 'not a JSON object' }); continue; }
     log({ cmd: m });
     const re = m.cmd;
@@ -38,7 +42,7 @@ process.stdin.on('data', chunk => {
         if (m.type === 'socket' && m.pageRate !== rate) { say({ re, ok: false, error: 'pageRate ' + m.pageRate + ' is not the device rate ' + rate, pageRate: m.pageRate, deviceRate: rate }); break; }
         if (m.type === 'socket') {
           sockPath = m.path; try { fs.unlinkSync(sockPath); } catch (e) { /* none */ }
-          server = net.createServer(c => { c.on('data', d => { bytes += d.length; frames = Math.floor(bytes / 8); }); });
+          server = net.createServer(c => { if (process.env.FAKE_PAUSE_READ === '1') { c.pause(); return; } c.on('data', d => { bytes += d.length; frames = Math.floor(bytes / 8); }); });
           server.listen(sockPath, () => say({ re, ok: true, type: 'socket', path: sockPath, clock: m.clock }));
         } else say({ re, ok: true, type: m.type });
         break;

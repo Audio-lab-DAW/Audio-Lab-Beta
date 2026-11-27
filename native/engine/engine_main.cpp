@@ -115,6 +115,7 @@ struct Eng {
     Wav file; std::atomic<size_t> filePos{0};
     Ring ring;
     int listenFd = -1; std::thread sockThread; std::atomic<bool> sockRun{false}; std::atomic<uint64_t> sockFrames{0}; std::atomic<bool> sockClient{false};
+    std::mutex clientLock; int clientFd = -1;   // task NB-R3: the connected sender, so stopSocket can end a read that would never return
     std::string sockPath;
     std::atomic<float> peak{0};
 };
@@ -152,6 +153,8 @@ static void quiesce() {
 static void stopSocket() {
     E.sockRun = false;
     if (E.listenFd >= 0) { shutdown(E.listenFd, SHUT_RDWR); close(E.listenFd); E.listenFd = -1; }
+    // a sender that stopped sending (frozen, hung) would keep the socket thread in read() and this join waiting
+    { std::lock_guard<std::mutex> g(E.clientLock); if (E.clientFd >= 0) shutdown(E.clientFd, SHUT_RDWR); }
     if (E.sockThread.joinable()) E.sockThread.join();
     if (!E.sockPath.empty()) unlink(E.sockPath.c_str());
 }
@@ -170,6 +173,7 @@ static bool startSocket(const std::string& path, std::string& err) {
         while (E.sockRun.load()) {
             int c = accept(fd, nullptr, nullptr);
             if (c < 0) break;
+            { std::lock_guard<std::mutex> g(E.clientLock); if (!E.sockRun.load()) { close(c); break; } E.clientFd = c; }
             E.sockClient = true; carry = 0;
             say("{\"ev\":\"sound-connected\"}");
             while (E.sockRun.load()) {
@@ -186,7 +190,8 @@ static bool startSocket(const std::string& path, std::string& err) {
                 carry = have - frames * 8;
                 if (carry) memmove(buf.data(), buf.data() + frames * 8, carry);
             }
-            close(c); E.sockClient = false;
+            { std::lock_guard<std::mutex> g(E.clientLock); E.clientFd = -1; close(c); }
+            E.sockClient = false;
             say("{\"ev\":\"sound-disconnected\"}");
         }
     });
@@ -282,7 +287,7 @@ static int run() {
 #else
     const char* backend = "null";
 #endif
-    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.3\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"pid\":" + std::to_string((int)getpid()) + "}");
+    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.4\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"pid\":" + std::to_string((int)getpid()) + "}");
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;

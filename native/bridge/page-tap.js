@@ -24,16 +24,25 @@ async function alNativeTap(ctx, src) {
   const url = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
   try { await ctx.audioWorklet.addModule(url); } finally { URL.revokeObjectURL(url); }
   const node = new AudioWorkletNode(ctx, 'al-native-tap', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: 'explicit', channelInterpretation: 'speakers' });
-  const ch = new MessageChannel();
-  const info = {};
-  try { node.port.postMessage({ port: ch.port1 }, [ch.port1]); info.path = 'worklet thread straight to the shell'; }
-  catch (e) { info.path = 'through the page thread (' + e.message + ')'; node.port.onmessage = m => ch.port1.postMessage(m.data); node.port.postMessage({ fallback: true }); }
-  window.postMessage({ alNativePort: true }, '*', [ch.port2]);
+  let ch = null;
+  const info = { reconnects: 0 };
+  // a new channel: one end into the worklet, the other to the shell (again after the shell's feeder restarted, task NB-R3)
+  const connect = () => {
+    ch = new MessageChannel();
+    if (info.path !== undefined && info.path.indexOf('through the page thread') === 0) { const c = ch; node.port.onmessage = m => c.port1.postMessage(m.data); }
+    else {
+      try { node.port.postMessage({ port: ch.port1 }, [ch.port1]); info.path = 'worklet thread straight to the shell'; }
+      catch (e) { info.path = 'through the page thread (' + e.message + ')'; const c = ch; node.port.onmessage = m => c.port1.postMessage(m.data); node.port.postMessage({ fallback: true }); }
+    }
+    window.postMessage({ alNativePort: true }, '*', [ch.port2]);
+  };
+  connect();
   if (src) src.connect(node);
   node.connect(ctx.destination);
   return {
     node, info,
     pause(on) { node.port.postMessage({ on: !on }); },
+    reconnect() { info.reconnects++; connect(); },
     detach() { try { if (src) src.disconnect(node); } catch (e) { /* not connected */ } try { node.disconnect(); } catch (e) { /* ignore */ } node.port.postMessage({ on: false }); try { ch.port2.close(); } catch (e) { /* moved */ } }
   };
 }
@@ -44,8 +53,13 @@ async function alNativeTap(ctx, src) {
 // changes rate while sound plays it goes silent and sends { ev: 'rate', value, soundPaused: true }.
 //   const ctx = alNativeContext(status.rate);                 // status from nativeEngine.cmd('status')
 //   const stop = alNativeWatchRate(nativeEngine, async rate => { /* make the context again at rate, tap it, sound({ pageRate: rate }) */ });
+// task NB-R3: the shell's sound feeder was started again (it stopped answering, or stopped): give it a new port.
+//   const stop = alNativeWatchFeeder(nativeEngine, tap);
+function alNativeWatchFeeder(nativeEngine, tap) {
+  return nativeEngine.on(e => { if (e && e.ev === 'feeder-restarted' && e.needPort && tap) tap.reconnect(); });
+}
 function alNativeContext(rate, latencyHint) { return new AudioContext({ sampleRate: rate, latencyHint: latencyHint || 'interactive' }); }
 function alNativeWatchRate(nativeEngine, onNewRate) {
   return nativeEngine.on(e => { if (e && e.ev === 'rate' && e.soundPaused) onNewRate(e.value, e); });
 }
-if (typeof module !== 'undefined') module.exports = { alNativeTap, alNativeContext, alNativeWatchRate };
+if (typeof module !== 'undefined') module.exports = { alNativeTap, alNativeContext, alNativeWatchRate, alNativeWatchFeeder };

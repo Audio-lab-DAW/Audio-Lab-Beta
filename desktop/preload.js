@@ -48,7 +48,8 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
   // task NB-N2b: the native engine (desktop/native-engine.js). Idle until the page calls start(). The sound goes
   // through a MessageChannel from the page's AudioWorklet (native/bridge/page-tap.js): the page posts
   // { alNativePort: true } with the port to its own window, and this preload hands it to the shell.
-  nativeEngine: process.platform === 'darwin' ? {
+  // AL_ENGINE_TEST=1: off the Mac too, for the engine on the null device in tests (task NB-R3)
+  nativeEngine: (process.platform === 'darwin' || (process.env && process.env.AL_ENGINE_TEST === '1')) ? {
     available: () => ipcRenderer.invoke('al:native-available'),
     start: () => ipcRenderer.invoke('al:native-start'),
     stop: () => ipcRenderer.invoke('al:native-stop'),

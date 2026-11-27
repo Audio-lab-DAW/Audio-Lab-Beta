@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><title>native engine feeder test</title>
+<body style="font:14px system-ui;background:#111;color:#ddd">AudioLab: the page's sound through the shell's feeder to the native engine (task NB-R3).
+<script src="../../../native/bridge/page-tap.js"></script>
+<script>
+// Uses only what the app's page will use: window.audiolabDesktop.nativeEngine (desktop/preload.js) and page-tap.js.
+(async () => {
+  const q = new URLSearchParams(location.search), SECONDS = +q.get('seconds'), SR = +q.get('sr');
+  const T = window.__t = { stage: 'start' };
+  try {
+    const N = window.audiolabDesktop && window.audiolabDesktop.nativeEngine;
+    if (!N) { T.error = 'no nativeEngine in the preload'; return; }
+    T.available = await N.available();
+    const st = await N.start(); T.start = st;
+    if (!st.ok) { T.error = 'start: ' + st.error; return; }
+    const events = T.events = []; N.on(e => { if (events.length < 200) events.push(e); });
+    const list = await N.cmd('devices');
+    const dev = (list.devices || []).find(d => d.uid === 'al-null-1');
+    if (!dev) { T.error = 'no null device'; return; }
+    const o = await N.cmd('open', { uid: dev.uid, rate: SR, buffer: 128 });
+    T.open = { ok: o.ok, rate: o.rate, buffer: o.buffer, error: o.error };
+    if (!o.ok) { T.error = 'open: ' + o.error; return; }
+    // the shell's defaults: prefill 30 ms, high 120 ms, exact
+    const s = await N.sound({ clock: 'exact', pageRate: SR });
+    T.sound = { ok: s.ok, error: s.error, feeder: s.feeder, queueFrames: s.queueFrames };
+    if (!s.ok) { T.error = 'sound: ' + s.error; return; }
+    T.stage = 'opened';
+    let tap = null;
+    window.__go = async () => {
+      const ctx = new AudioContext({ sampleRate: SR, latencyHint: 'interactive' });
+      const buf = ctx.createBuffer(2, SECONDS * SR, SR), L = buf.getChannelData(0), R = buf.getChannelData(1);
+      let x = 0x2468ace1 >>> 0;
+      for (let i = 0; i < L.length; i++) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; L[i] = ((x >>> 8) / 16777216 * 2 - 1) * 0.25; x = (Math.imul(x, 1664525) + 1013904223) >>> 0; R[i] = ((x >>> 8) / 16777216 * 2 - 1) * 0.25; }
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      tap = await alNativeTap(ctx, src); T.tapInfo = tap.info;
+      alNativeWatchFeeder(N, tap);
+      await ctx.resume();
+      src.start();
+      T.stage = 'playing'; T.contextRate = ctx.sampleRate;
+      const t0 = performance.now(), c0 = ctx.currentTime;
+      setInterval(async () => {
+        T.status = await N.cmd('status'); T.contextSeconds = ctx.currentTime - c0; T.wallSeconds = (performance.now() - t0) / 1000;
+        if (T.stage === 'playing' && T.contextSeconds > SECONDS + 1.5) T.stage = 'finished';
+      }, 1000);
+    };
+    window.__end = async () => { if (tap) tap.detach(); await N.cmd('close'); await N.stop(); };
+  } catch (e) { T.error = String(e && e.stack || e); }
+})();
+</script>

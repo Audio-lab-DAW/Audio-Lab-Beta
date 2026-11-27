@@ -12,7 +12,8 @@ Checks:
   a new source at the new rate plays again;
   device volume both ways, unplugging, exclusive use held by someone else;
   source switching under load (review C1): 300 switches between socket, tone, file and silence while a sender writes,
-    and clock-mode flips: the engine answers every command and does not hang.
+    and clock-mode flips: the engine answers every command and does not hang;
+  a sender that stopped sending and never closes (a frozen feeder, task NB-R3) does not hold a source switch.
 """
 import json, os, socket, struct, subprocess, sys, tempfile, threading, time, math
 
@@ -205,6 +206,17 @@ for k in range(300):
 took = time.time() - t0
 st = e.cmd(cmd="status")
 check(bad == 0 and st.get("open") is True, "300 source switches under load in %.1f s: every one answered, the engine alive" % took, {"failed": bad})
+
+# ---- a sender that stopped sending does not hold a source switch (task NB-R3: a frozen feeder process) -------------------
+r = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, clock="exact", prefillMs=30, highMs=120)
+frozen = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM); frozen.connect(sock); frozen.sendall(b"\0" * 8 * 480)
+time.sleep(0.2)   # connected, sent a little, then nothing more and never closes (as a SIGSTOPped feeder)
+t1 = time.time(); r2 = e.cmd(cmd="source", type="socket", path=sock + "2", pageRate=48000, clock="exact", prefillMs=30, highMs=120, timeout=5); took1 = time.time() - t1
+check(r.get("ok") and r2.get("ok") and took1 < 0.5, "a sender that stopped sending (and never closes) does not hold a source switch (%.0f ms)" % (took1 * 1000), {"took": took1, "r2": r2})
+fresh = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM); fresh.connect(sock + "2"); fresh.sendall(b"\0" * 8 * 4800); time.sleep(0.3)
+st = e.cmd(cmd="status")
+check(st.get("ring", {}).get("connected") is True, "the new sender is connected and stays connected", st.get("ring"))
+frozen.close(); fresh.close(); e.cmd(cmd="source", type="silence")
 
 q = e.cmd(cmd="quit")
 try: e.p.wait(5)

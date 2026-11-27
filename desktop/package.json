@@ -42,7 +42,8 @@
       "package.json",
       "voice-ai.js",
       "voice-ai-worker.js",
-      "native-engine.js"
+      "native-engine.js",
+      "native-feeder.js"
     ],
     "publish": [
       {

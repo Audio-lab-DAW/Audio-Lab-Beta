@@ -71,12 +71,15 @@ class EngineBridge extends EventEmitter {
   clock(mode) { return this.send({ cmd: 'clock', mode }); }
 
   // Opens the way for sound: the engine listens on a socket, this side connects.
-  async startSound(o = {}) {
+  // With { connect: false } (task NB-R3) only the engine's side is opened and the answer carries `path`: another
+  // process (the shell's feeder, desktop/native-feeder.js) connects to it, so the sound never passes this process.
+  async startSound(o = {}, how = {}) {
     this.stopSound();
     const p = path.join(os.tmpdir(), 'audiolab-engine-' + process.pid + '-' + Date.now() + '.sock');
     // task NB-R2: pageRate is the rate the page's AudioContext renders at; the engine refuses it unless it is the device's
     const r = await this.send({ cmd: 'source', type: 'socket', path: p, prefillMs: o.prefillMs || 30, highMs: o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: +o.limitPpm || 2000, pageRate: +o.pageRate || 0 });
     if (!r.ok) return r;
+    if (how.connect === false) { this.fed = 0; return Object.assign({}, r, { path: p }); }
     await new Promise((resolve, reject) => { this.sock = net.connect(p, resolve); this.sock.on('error', reject); });
     this.sock.on('error', () => {});
     this.fed = 0;
