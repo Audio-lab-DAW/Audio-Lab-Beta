@@ -1,1 +1,1 @@
-New About window: Earth with its radiation belts drawn in code behind the text, one of two pictures at random each time it opens, a finer animated atom as the logo, and the features as a quiet spec list in the colours of the picture.
+One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown.

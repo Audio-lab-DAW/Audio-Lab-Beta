@@ -3532,3 +3532,61 @@ Started from the drawing code of the pick page of task SR7 (`docs/about-round-2.
 - Fault found from the report: after a device was plugged in, the app could set the plug-in up at the rate the device had for a moment (44.1 kHz) while it ran at 48 or 192 kHz. Fixed in 0.3 (the device is asked again when it is opened). Release `native-lab-3`.
 - The Zoom AMS-24 is still not seen by macOS in any report: not an app matter.
 - Later the same day, test app 0.3 on the user's Mac: the Zoom AMS-24 appeared ("ZOOM AMS-24 Driver") and played at 44.1, 48 and 88.2 kHz down to 64 frames with exclusive use, 0 failed blocks; plugging out and in was followed twice; the stale-rate fix is confirmed. Both of the user's devices now work with the native layer.
+
+## 27 November 2026, v0.226: one type scale, Inter at 11, 12, 13 and 15 px (task D3)
+> Task D3 of the approved plan `docs/glass-engine-plan.md`, section 3, and the user's pick C1 in `docs/design-language-research.md` (sections 2 and 9): "Inter strict scale (11/12/13/15, three weights, equal-width digits, mono only for time)". Kept on purpose: today's colours, buttons, icons, layout, glass and the sideways device titles (picks A0, B0, E0, H0).
+
+Started after "task GS1" was in this log; no "task D3" entry existed. No other task had work in progress on `index.html` (main moved only by two docs commits of task NB-N1 during the run).
+
+### What changed
+- **Tokens, defined once** (new CSS before `.dacv{display:flex;`): `--fs1` 11 px, `--fs2` 12 px, `--fs3` 13 px, `--fs4` 15 px; `--fw4` 400, `--fw5` 500, `--fw6` 600; `--ffu` Inter (with the system font behind it), `--fft` mono. Every font size, weight and family in the app's CSS (the style blocks, CSS kept in JS strings, `style=""` attributes) now refers to these tokens. Nothing was typed by hand: `tools/edits/taskD3.py` rewrote 842 sizes, 333 weights and 224 families by rule.
+- **Equal-width digits everywhere**: one rule for every element. Shorthands marked important got the digit style added beside them, since such a shorthand would switch it off again.
+- **Mono only where time is shown**: bar and beat position, the loop ends, the time code, the playhead flag, the clock of the time machine, work time and project time, the small position in the transport preview. 65 other mono settings (dB values, percentages, tempo, LUFS, frequencies, version numbers, key caps, the About spec lines) are Inter with equal-width digits now.
+- **Sentence case instead of capital labels** (56 rules): C1 has no capital section labels (they belong to C0), and capitals at 11 px would have been up to a third wider than the 8 to 10 px ones. "TRACKS", "CONTROLS", "PAN", "SENDS", "SETTINGS" and so on read "Tracks", "Controls", "Pan", "Sends", "Settings"; the tracking that went with the capitals is gone too. Two labels were written in lower case and now start with a capital ("Peak" in the mixer and in the big meter).
+- **Rows stay where they were**: a new size changes the height of a line wherever the line height is a multiple of the size. A probe run measured the line height every piece of text had before, and 226 font settings got that line height written beside them (`tools/edits/taskD3_pins.json`, made by `tools/ui-tests/taskD3_pins.py`).
+- **Knob and slider names are shown whole**: a name wider than its knob hangs over evenly on both sides instead of ending in three dots ("Max reduction", "Look-ahead", "Orbit speed").
+- **The font request** asks for the medium weight too (`wght@400;500;600;800`). Checked at Google: all weights come from the same seven variable files as before, so no new font file is loaded. 800 stays for the wordmark.
+- A few hand-written rules where the measurement showed a problem: the drum pad note names and the meter option sub-lines (two lines of text on top of each other), the small tool rows of the devices (5 px instead of 8 px between the parts), the bar slider names (medium weight, slightly tighter), two level sliders side by side (5 px more between them so "Makeup" and "Threshold" do not touch), the master's stereo scale and the tempo field (they keep their row heights), the return badge in the mixer.
+- No JavaScript was added. No audio code was touched.
+
+### The mapping (old size > step, number of settings)
+| Step | Old sizes |
+|---|---|
+| 11 px (`--fs1`), 630 | 6 (1), 6.5 (2), 7 (4), 7.5 (7), 8 (29), 8.5 (15), 9 (51), 9.5 (61), 10 (114), 10.5 (93), 11 (192), 11.5 (61) |
+| 12 px (`--fs2`), 134 | 12 (105), 12.5 (29) |
+| 13 px (`--fs3`), 57 | 13 (42), 13.5 (2), 14 (13) |
+| 15 px (`--fs4`), 21 | 14.5 (1), 15 (8), 16 (6), 18 (4), 34 (2) |
+
+Nearest step; a tie (11.5, 12.5, 14) goes to the smaller step, so that less text grows. Weights: 400 > 400 (14); 500 and 550 > 500 (33); 600, 650, 700, 800, 900 > 600 (286). `<b>` inside semibold text was 900 before (the browser's "bolder"); `b`, `strong`, `th` and headings are 600 now. Families: Inter 151 unchanged, mono 8 kept for time, mono 65 to Inter.
+
+### Kept outside the scale, on purpose
+- The logo wordmark ("AudioLab PRO", weights 300 and 800, its own sizes) and the splash screen (a picture that scales as a whole).
+- Glyphs used as icons: carets, spinner arrows, hearts and stars, track pictures and emoji, the "Aa" sample card (pick H0: icons stay).
+- The enlarged track header in Customise track controls (a 135 % preview of the real header).
+- **Text drawn inside pictures**: 155 canvas font settings (6 to 22 px; clip names, rulers, graph scales, device displays) and about 20 SVG texts keep their sizes. Only their weights above 600 went to 600 (21 settings). Raising 8 and 9 px scale marks to 11 px would collide inside the graphs; this needs a pass device by device and fits task D4 (display-first devices).
+- The on-screen keyboard picture in the shortcuts overlay (sizes follow the window width).
+
+### Tested (`tools/ui-tests/taskD3.py` and `taskD3_compare.py`, headless Chromium, the installed Inter 4)
+- **Scale check, every rendered text**: 1280 x 720 dark, 144 screens (main window, devices of eight tracks and the master, all 74 instruments and effects one by one, mixer, every Settings page scrolled through, About with both pictures and the full list, 24 popups), 67,935 pieces of text: none off the scale, every number with equal-width digits, mono only in the time readouts. 1920 x 1080 dark, 1280 x 720 Light and 1920 x 1080 Light (63 to 70 screens each, about 33,000 to 36,000 texts each; these three were run on the build just before the last small rule fixes): the same. Not counted: 7,496 icon glyphs and wordmark parts, and the 8 texts of the enlarged preview.
+- **Text cut off or overlapping**: no text is newly cut off by its box and no two texts newly overlap, apart from what a scroll position explains (a tab or a line half scrolled out at the edge of a strip or page). At 11 px, 28 knob names would have ended in three dots; with the overhang none do.
+- **Hit targets**, 60,004 compared at 1280 x 720 dark (the same control counts once per screen): 83 % identical in place and size. Height changed on 537 (0.9 %): knob cells in the browser previews 1.3 px lower, the look cards and meter option buttons in Settings 2 to 4 px taller, a few selects 2 px. Width changed on 6,372 (10.6 %): buttons, tabs and selects whose width follows their label; nearly half of them under 2 px, 98 % under 8 px, the largest 39 px (a select in a device). The track tabs above the devices are 1 to 4 px wider each; in the transport the time code is 3 px wider, the master level 5 px narrower, the CPU box 2.5 px wider. 774 moved up or down without changing size, nearly all in Settings pages, browsers and dialogs where text flows.
+- **Layout changes found**: in 3 of 74 devices (Tape stop, Chorus, Shaper) the small tool row now takes two rows, which makes their sliders 22 px shorter. In Settings > Interface a theme card text and the idle line under the big meter take one more line; the time machine's detail line too.
+- **Screenshots** before and after of the transport, arrangement, mixer, devices panel, Settings, About and popups, dark and Light, looked at side by side (main window, mixer, drum kit, Orbit, compressor, browser, context menu, About, Settings Interface and Performance).
+- **No console errors** in any run.
+- **CPU**: frame time while playing 17.2 to 18.4 ms before, 17.7 to 19.8 ms after over six runs each (headless, software drawing; the spread between runs is as large as the difference). Main thread time over 20 s of playback, three runs each: 15.37 s before, 15.19 s after; style 0.53 s and 0.54 s. No difference beyond the noise.
+- **Fractals levels unchanged**: solo Kick -19.05560 dB, Bass -35.48685 dB, beats 64 to 96, with the master at -10 dB (that is -9.75669 and -25.48699 dB at 0 dB).
+- Regression: `taskAB1.py` 192 of 192, `taskD1.py` and `taskD2.py` all pass, `taskSP1.py` (see Release), `glass_gs1.py` 64 of 65 (the one failure is its own check that the version is 0.223), `play.py`, `fxlevels.py`, `overview.py`, `ifd.py` without errors.
+
+### Not verified
+- The user's Mac: real Inter from Google next to the system fonts, retina, and the real mono (SF Mono or Menlo; the test machine has another mono, so the kept line heights of the mono readouts can be 1 px off there).
+- The desktop app (Electron) was not started; the page is the same file and no desktop shell file changed.
+- States the test does not open: recording, the tutorial steps, export in progress, the audio to MIDI window, device pages behind tabs, the compact and pop-out mixer views, zoom levels other than 100 %, the other themes. Text there follows the same tokens, but nobody looked.
+
+### Left
+- Text inside canvases and SVG pictures is not on the scale (see above).
+- Large readouts are 15 px now (the frames a second figure in Settings was 34 px, the loudness figures 18 px). If one of them should stay large, it needs its own exception.
+- About lost its spaced capital lines and mono values to the rule; if the science look wants them back, that is one exception to write down.
+
+### Release
+- v0.226 on main. App copy synced (`node desktop/scripts/sync-app.js`), update note written ("One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown."), no desktop build. `taskSP1.py`: 147 of 149 while other tests ran beside it (two timing checks), 149 of 149 run alone.
+- Edit script `tools/edits/taskD3.py` with `taskD3_css.txt` and `taskD3_pins.json`; tests `tools/ui-tests/taskD3.py`, `taskD3_census.js`, `taskD3_compare.py`, `taskD3_probe.js`, `taskD3_pins.py`.

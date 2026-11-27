@@ -1,0 +1,31 @@
+/* v0.226 (task D3): the type scale C1. Four sizes, three weights, two families, all defined here and nowhere else.
+   Every font size, weight and family in the CSS of the app refers to these tokens (tools/edits/taskD3.py put them in by rule, the mapping is in docs/backlog-log.md).
+   --fs1 11 px: labels, values, small buttons. --fs2 12 px: body text of dense panels, names. --fs3 13 px: the app's base size, menus, text in windows. --fs4 15 px: titles and large readouts.
+   --fw4 400 text, --fw5 500 medium, --fw6 600 names, values and titles. --ffu Inter for everything, --fft mono only where time is shown (bar position, time code, clocks).
+   Digits have equal width everywhere (tabular), so numbers do not jitter while they change. Kept outside the scale: the logo wordmark, the splash, glyphs used as icons, text drawn inside pictures. */
+:root{--fs1:11px;--fs2:12px;--fs3:13px;--fs4:15px;--fw4:400;--fw5:500;--fw6:600;--ffu:Inter,system-ui,sans-serif;--fft:ui-monospace,SFMono-Regular,Menlo,monospace}
+*,*::before,*::after{font-variant-numeric:tabular-nums!important}
+:where(b,strong,th,h1,h2,h3,h4,h5,h6,optgroup){font-weight:var(--fw6)}
+:where(small,sub,sup,h5,h6){font-size:var(--fs1)}
+:where(h1,h2,h3,h4){font-size:var(--fs4)}
+:where(kbd,code,samp,pre,textarea){font-family:var(--ffu)}
+:where(textarea){font-size:var(--fs3)}
+.t-time{font-family:var(--fft)}
+.lcd.tempo,.lcd.tempo input,.mbpm,#tmw .tmsl .tmflt{font-family:var(--ffu)}
+/* knob and slider names are shown whole: a name wider than its knob hangs over evenly on both sides instead of ending in three dots */
+.kn>span,.vb>.vl{max-width:none!important;overflow:visible!important;text-overflow:clip!important}
+/* two lines of text that sit on top of each other keep enough room for 11 px */
+.pad small,#mtrSet .mvl button small{line-height:12px}
+/* the small tool rows of the devices: a little less air between the parts, so that most of them still fit on one row with 11 px text */
+#fxin .dev .ndtb{column-gap:5px}
+#fxin .dev .ndtb label{gap:3px}
+.evsh button span{white-space:nowrap;letter-spacing:-.02em}
+/* names inside the bar sliders sit under their value: slightly lighter and tighter so that the longest ones do not run into the number */
+.pars .hb .hl{font-weight:var(--fw5);letter-spacing:-.02em}
+#mixWin .w9rb{gap:2px;padding:0 3px}
+/* the scale under the master's stereo meter keeps its 7 px row, so that the faders keep their length */
+#mixWin .mxme .mxsc{line-height:7px}
+/* two level sliders side by side: 5 px more between them, so that their names (Makeup, Threshold) do not touch */
+.pg-lv .vb+.vb{margin-left:5px}
+/* the tempo field keeps its 13 px row now that it is no longer mono */
+.lcd.tempo input{line-height:13px}
