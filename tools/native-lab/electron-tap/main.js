@@ -12,13 +12,13 @@ const { EngineBridge } = require('../../../native/bridge/engine-bridge');
 
 const args = process.argv.slice(process.argv.findIndex(a => a.endsWith('main.js')) + 1);
 const [exe, alnative, out] = args;
-const SECONDS = Number(args[3] || 20), SR = 48000;
+const SECONDS = Number(args[3] || 20), SR = 48000, MODE = args[4] || 'none';
 fs.mkdirSync(out, { recursive: true });
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const R = { seconds: SECONDS, electron: process.versions.electron, chrome: process.versions.chrome, fills: [] };
+const R = { seconds: SECONDS, mode: MODE, electron: process.versions.electron, chrome: process.versions.chrome, fills: [] };
 const done = code => { fs.writeFileSync(path.join(out, 'tap.json'), JSON.stringify(R, null, 1)); console.log(JSON.stringify(R)); app.exit(code); };
 
 // the same numbers the worklet makes, so the test knows what was sent
@@ -60,7 +60,7 @@ app.whenReady().then(async () => {
     const recDone = new Promise(r => rec.on('exit', r));
     await sleep(700);
     const win = new BrowserWindow({ width: 500, height: 300, show: true, webPreferences: { preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false } });
-    await win.loadFile(path.join(__dirname, 'page.html'), { query: { seconds: String(SECONDS), sr: String(SR) } });
+    await win.loadFile(path.join(__dirname, 'page.html'), { query: { seconds: String(SECONDS), sr: String(SR), mode: MODE } });
     for (let s = 0; s < SECONDS * 2 + 4 && frames < SECONDS * SR; s++) { await sleep(1000); const st = await eng.status(); R.fills.push(st.ring ? st.ring.fill : -1); R.lastStatus = { ring: st.ring, overloads: st.overloads }; }
     await recDone;
     R.blocks = blocks; R.framesFromPage = frames; R.worstGapBetweenBlocksMs = worstGapMs;

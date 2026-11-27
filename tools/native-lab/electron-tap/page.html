@@ -5,8 +5,11 @@
   const q = new URLSearchParams(location.search), SECONDS = +q.get('seconds'), SR = +q.get('sr');
   const info = { asked: SR };
   let ctx;
-  try { ctx = new AudioContext({ sampleRate: SR, sinkId: { type: 'none' }, latencyHint: 'interactive' }); info.silentOutput = 'sinkId none'; }
-  catch (e) { ctx = new AudioContext({ sampleRate: SR }); info.silentOutput = 'not available: ' + e.message; }
+  if (q.get('mode') === 'device') { ctx = new AudioContext({ sampleRate: SR, latencyHint: 'interactive' }); info.silentOutput = 'plays silence into the default device, which gives the clock'; }
+  else {
+    try { ctx = new AudioContext({ sampleRate: SR, sinkId: { type: 'none' }, latencyHint: 'interactive' }); info.silentOutput = 'no output device at all (sinkId none)'; }
+    catch (e) { ctx = new AudioContext({ sampleRate: SR }); info.silentOutput = 'not available: ' + e.message; }
+  }
   info.rate = ctx.sampleRate;
   const src = `class Tap extends AudioWorkletProcessor {
     constructor(o) { super(); this.st = 0x2468ace1 >>> 0; this.left = o.processorOptions.frames; this.out = null; this.via = 'none';
@@ -19,7 +22,7 @@
         this.st = (Math.imul(this.st, 1664525) + 1013904223) >>> 0; f[2 * k + 1] = ((this.st >>> 8) / 16777216 * 2 - 1) * 0.25;
       }
       this.left -= n;
-      this.out.postMessage(f.buffer, [f.buffer]);
+      this.out.postMessage(f);
       return true;
     } }
   registerProcessor('tap', Tap);`;
@@ -31,7 +34,7 @@
   try { node.port.postMessage({ port: ch.port1 }, [ch.port1]); info.path = 'worklet thread straight to the main process'; }
   catch (e) {            // the port could not be moved into the worklet: go through the page thread instead
     info.path = 'through the page thread (' + e.message + ')';
-    node.port.onmessage = m => ch.port1.postMessage(m.data, [m.data]);
+    node.port.onmessage = m => ch.port1.postMessage(m.data);
     node.port.postMessage({ fallback: true });
   }
   await ctx.resume();
