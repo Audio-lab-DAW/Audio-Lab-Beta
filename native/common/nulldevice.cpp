@@ -118,13 +118,29 @@ bool setHog(uint32_t dev, bool take, int& ownerPid, std::string& err) {
 }
 std::vector<PhysFormat> listPhysicalFormats(uint32_t dev) {
     std::lock_guard<std::mutex> g(gLock); std::vector<PhysFormat> v; NullDev* d = find(dev); if (!d) return v;
-    for (double r : d->rates) { v.push_back({ r, 32, 2, true, true }); v.push_back({ r, 24, 2, false, false }); v.push_back({ r, 16, 2, false, false }); }
+    // task NB-N1c: like the Gryphon, integer formats the system mixes (16 and 24 bits) as well as ones it does not
+    for (double r : d->rates) { v.push_back({ r, 32, 2, true, true }); v.push_back({ r, 24, 2, false, false }); v.push_back({ r, 16, 2, false, false });
+                                v.push_back({ r, 24, 2, false, true }); v.push_back({ r, 16, 2, false, true }); }
     return v;
 }
 bool setPhysicalFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err) {
     std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d) { err = "no such device"; return false; }
     if (bits != 32 && bits != 24 && bits != 16) { err = "32-bit float, 24-bit or 16-bit integer"; now = infoOf(*d).physicalFormat; return false; }
     d->bits = bits; d->isFloat = bits == 32; d->mixable = mixable; d->rate = rate > 0 ? rate : d->rate; now = infoOf(*d).physicalFormat; return true;
+}
+int deepestIntegerBits(uint32_t dev, double rate, bool mixable) {
+    int best = 0;
+    for (auto& f : listPhysicalFormats(dev)) if (!f.isFloat && f.mixable == mixable && f.rate == rate && f.bits > best) best = f.bits;
+    return best;
+}
+bool setIntegerFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err) {
+    if (bits != 24 && bits != 16) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); err = "the device does not offer " + std::to_string(bits) + "-bit integer at this rate"; if (d) now = infoOf(*d).physicalFormat; return false; }
+    bool ok; { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d) { err = "no such device"; return false; }
+      bool rateOk = false; for (double r : d->rates) if (r == rate) rateOk = true;
+      if (!rateOk) { err = "the device does not offer " + jnum(rate) + " Hz"; now = infoOf(*d).physicalFormat; return false; }
+      ok = true; d->bits = bits; d->isFloat = false; d->mixable = mixable; d->rate = rate; now = infoOf(*d).physicalFormat; }
+    post("format", dev);   // as the HAL tells a listener: the stream starts again in the new layout
+    return ok;
 }
 bool getVolume(uint32_t dev, double& v) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d || !d->volume) return false; v = d->vol; return true; }
 bool setVolume(uint32_t dev, double v, std::string& err) {

@@ -79,8 +79,12 @@ jobs:
           build-asan/alringstress 3 | tee out/ringstress-asan.json
       - name: 'The engine on the null device, end to end (rate contract, hand-over bit for bit, source switching; Release and sanitizers)'
         run: |
+          set -o pipefail   # a failed check fails the step (tee alone hid the test's exit code)
           python3 tools/native-lab/engine_null_test.py build/alengine out/null | tee out/engine-null.txt
           python3 tools/native-lab/engine_null_test.py build-asan/alengine out/null-asan | tee out/engine-null-asan.txt
+          # task NB-N1c: the deepest integer format on the wire ("bits":"deepest"), kept after a rate change
+          python3 tools/native-lab/engine_deepest_test.py build/alengine | tee out/engine-deepest.txt
+          python3 tools/native-lab/engine_deepest_test.py build-asan/alengine | tee out/engine-deepest-asan.txt
       - name: 'The mixer against the web engine (10 scenes, Release and sanitizers)'
         run: |
           python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix | tail -1 | tee out/mix.txt
@@ -121,7 +125,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/bus.txt out/bus-asan.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/engine-deepest.txt out/engine-deepest-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/bus.txt out/bus-asan.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -145,7 +149,9 @@ jobs:
         run: |
           cmake -S native -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-fsanitize=thread" -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" > cmake-tsan.txt 2>&1 || { tail -30 cmake-tsan.txt; exit 1; }
           cmake --build build-tsan --target alengine -j 4 2>&1 | grep -E ' error' || true
+          set -o pipefail
           python3 tools/native-lab/engine_null_test.py build-tsan/alengine out-tsan | tee engine-null-tsan.txt
+          TSAN_OPTIONS=halt_on_error=1 python3 tools/native-lab/engine_deepest_test.py build-tsan/alengine | tee -a engine-null-tsan.txt
           { echo '```'; cat engine-null-tsan.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: failure()

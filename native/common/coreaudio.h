@@ -44,6 +44,11 @@ struct PhysFormat { double rate = 0; int bits = 0, channels = 0; bool isFloat = 
 std::vector<PhysFormat> listPhysicalFormats(uint32_t dev);
 // Picks the device's own format: rate, bit depth, and whether the system may mix other sound into it.
 bool setPhysicalFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err);
+// task NB-N1c (the user's reports 6 and 7: the iFi Gryphon ran 16-bit integer on the wire): the deepest integer format the
+// device offers at a rate, mixed by the system (mixable) or not; 0 when it has none. setIntegerFormat sets exactly that
+// integer format (never a float one of the same width, which setPhysicalFormat could pick at 32 bits).
+int deepestIntegerBits(uint32_t dev, double rate, bool mixable);
+bool setIntegerFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err);
 bool getVolume(uint32_t dev, double& v);
 bool setVolume(uint32_t dev, double v, std::string& err);
 bool getMute(uint32_t dev, bool& m);

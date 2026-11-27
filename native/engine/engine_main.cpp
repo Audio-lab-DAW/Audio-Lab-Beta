@@ -3,6 +3,7 @@
 // app (or a test) can run it as a helper:
 //   {"cmd":"devices"}                                    every device with rates, buffer range, volume, formats
 //   {"cmd":"open","uid":"...","rate":96000,"buffer":64,"exclusive":true,"bits":24,"integer":false}
+//      "bits":"deepest": the deepest integer format the device offers at its rate, kept after rate changes (task NB-N1c)
 //   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":40,"highMs":120,"clock":"exact"|"follow",
 //    "pageRate":48000}   (task NB-R2: a socket source must say its rate; refused unless it equals the device's)
 //   {"cmd":"clock","mode":"exact"|"follow"}   (task NB-N2b: follow the sender's clock smoothly, see follow.h)
@@ -185,6 +186,9 @@ struct Eng {
     std::mutex devLock;                      // open, close and the format restart
     // task NB-R4b: the system's listener only asks for a restart; this thread does it (the listener never waits on a lock)
     std::thread fmtThread; std::mutex fmtM; std::condition_variable fmtCv; bool fmtReq = false, fmtRun = false; std::atomic<uint64_t> fmtAsked{0};
+    // task NB-N1c: "bits":"deepest" keeps the deepest integer format the device offers at whatever rate it runs (again
+    // after a rate change from outside); deepBits is that depth at the current rate, for the settings page's warning
+    std::atomic<bool> wantDeepest{false}, deepMixable{true}; std::atomic<int> deepBits{0}; bool deepReq = false;
     std::thread rampThread; std::atomic<bool> ramping{false}, rampStop{false};
     std::map<uint32_t, double> ceiling;      // per device: the loudest level it has had (command thread only)
     std::mutex ceilLock;
@@ -304,6 +308,7 @@ static std::string statusJson() {
     double vol = -1; getVolume(E.dev, vol); bool mute = false; getMute(E.dev, mute);
     std::string s = std::string("\"open\":") + tf(E.isOpen.load()) + ",\"device\":" + jstr(d.name) + ",\"uid\":" + jstr(d.uid) + ",\"rate\":" + jnum(d.rate) + ",\"buffer\":" + std::to_string(d.buffer) +
         ",\"exclusive\":" + tf(d.hogPid == (int)getpid()) + ",\"exclusiveOwner\":" + std::to_string(d.hogPid) + ",\"onTheWire\":" + jstr(d.physicalFormat) + ",\"handedToUs\":" + jstr(E.stream.formatText) +
+        ",\"deepestIntegerBits\":" + std::to_string(E.deepBits.load()) + ",\"keepsDeepest\":" + tf(E.wantDeepest.load()) +
         ",\"volume\":" + jnum(vol) + ",\"mute\":" + tf(mute) + ",\"latencyFrames\":" + std::to_string(d.latency + d.safetyOffset + d.streamLatency + d.buffer) +
         // task NB-R4 (review C8): the figure above is the device's part only; sound from the page also waits in the ring
         ",\"deviceLatencyFrames\":" + std::to_string(d.latency + d.safetyOffset + d.streamLatency + d.buffer) +
@@ -334,12 +339,25 @@ static void resetCounters() {
     E.stream.callbacks = 0; E.stream.framesTotal = 0; E.stream.overloads = 0; E.stream.minFrames = 0xffffffffu; E.stream.maxFrames = 0; E.stream.worstNs = 0; E.stream.sumNs = 0; E.peak = 0;
     E.worstGapUs = 0; E.ring.fillMinResetReq = true;   // task NB-R5
 }
+// task NB-N1c: the user's reports 6 and 7 found the iFi Gryphon at 16-bit integer on the wire (set so in Audio MIDI
+// Setup): macOS turned the float mix into 16 bits before the DAC. With "bits":"deepest" the engine sets the deepest
+// integer format the device offers at the rate it runs, mixed by the system or (with "integer":true) not, and keeps it
+// after a rate change. Returns the notes for the answer. Called with the device lock held.
+static std::string applyDeepest(uint32_t dev) {
+    double r = deviceInfo(dev).rate; bool mix = E.deepMixable.load();
+    int b = deepestIntegerBits(dev, r, mix);
+    if (b <= 0) return "no " + std::string(mix ? "" : "unmixed ") + "integer format at " + jnum(r) + " Hz, the device runs " + deviceInfo(dev).physicalFormat + "; ";
+    std::string now, e;
+    if (!setIntegerFormat(dev, r, b, mix, now, e)) return std::to_string(b) + "-bit integer not set, the device runs " + now + (e.empty() ? "" : " (" + e + ")") + "; ";
+    return "";
+}
 static std::string openDevice(const Msg& m) {
     auto t0 = std::chrono::steady_clock::now();
     uint32_t want = 0; std::string bad; double x = 0;
     if (m.has("id") && !m.has("uid") && !numArg(m, "id", 1, 4294967295.0, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
     if (m.has("buffer") && !numArg(m, "buffer", 1, 65536, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
-    if (m.has("bits") && !numArg(m, "bits", 8, 32, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
+    const bool deepest = m.str("bits") == "deepest" || m.flag("deepest", false);   // task NB-N1c
+    if (m.has("bits") && !deepest && !numArg(m, "bits", 8, 32, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
     if (m.has("rate") && !numArg(m, "rate", 0, 10000000, false, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
     std::lock_guard<std::mutex> dl(E.devLock);
     if (m.has("uid")) want = deviceByUid(m.str("uid"));
@@ -355,10 +373,13 @@ static std::string openDevice(const Msg& m) {
     if (m.flag("exclusive") && !E.hog) { int owner = -1; std::string e; bool ok = setHog(want, true, owner, e); E.hog = ok; if (!ok) notes += "exclusive use not taken (" + (e.empty() ? "held by process " + std::to_string(owner) : e) + "); "; }
     double rate = m.num("rate", 0);
     if (rate > 0 && rate != before.rate) { double now = 0; std::string e; if (!setDeviceRate(want, rate, now, e)) notes += "rate not set, the device runs " + jnum(now) + " Hz" + (e.empty() ? "" : " (" + e + ")") + "; "; }
-    if (m.has("bits")) {
+    E.wantDeepest = deepest; E.deepMixable = !m.flag("integer");
+    if (deepest) notes += applyDeepest(want);
+    else if (m.has("bits")) {
         double r2 = deviceInfo(want).rate; std::string now, e;
         if (!setPhysicalFormat(want, r2, (int)m.num("bits"), !m.flag("integer"), now, e)) notes += "format not set, the device runs " + now + (e.empty() ? "" : " (" + e + ")") + "; ";
     }
+    E.deepBits = deepestIntegerBits(want, deviceInfo(want).rate, E.deepMixable.load());
     if (m.has("buffer")) { uint32_t now = 0; std::string e; if (!setDeviceBuffer(want, (uint32_t)m.num("buffer"), now, e)) notes += "buffer not set, the device runs " + std::to_string(now) + " frames; "; }
     E.rate = deviceInfo(want).rate;
     if (E.source.load() == 3) E.rateOk = E.pageRate.load() == E.rate.load();   // another device or rate: the contract is checked again
@@ -378,9 +399,18 @@ static std::string openDevice(const Msg& m) {
 static void formatWorker() {
     std::unique_lock<std::mutex> lk(E.fmtM);
     for (;;) {
-        E.fmtCv.wait(lk, [] { return !E.fmtRun || E.fmtReq; });
+        E.fmtCv.wait(lk, [] { return !E.fmtRun || E.fmtReq || E.deepReq; });
         if (!E.fmtRun) break;
+        const bool deep = E.deepReq; E.deepReq = false;
         E.fmtReq = false; lk.unlock();
+        if (deep) {   // task NB-N1c: the rate changed from outside; the deepest integer format at the new rate
+            std::lock_guard<std::mutex> g(E.devLock);
+            if (E.dev && E.wantDeepest.load()) {
+                std::string n = applyDeepest(E.dev);
+                E.deepBits = deepestIntegerBits(E.dev, deviceInfo(E.dev).rate, E.deepMixable.load());
+                say("{\"ev\":\"deepest\",\"onTheWire\":" + jstr(deviceInfo(E.dev).physicalFormat) + ",\"notes\":" + jstr(n) + "}");
+            }
+        }
         {
             std::lock_guard<std::mutex> g(E.devLock);
             if (E.isOpen) {
@@ -416,6 +446,8 @@ static void onWatch(void*, const char* what, uint32_t dev) {
         // old rate the device plays silence; the page is told to make its context again at the new rate and send
         // "source" again. If the device comes back to the page's rate, sound resumes by itself.
         DeviceInfo d = deviceInfo(E.dev); E.rate = d.rate;
+        if (E.wantDeepest.load()) { { std::lock_guard<std::mutex> g(E.fmtM); E.deepReq = true; } E.fmtCv.notify_one(); }   // task NB-N1c, not on this thread
+        else E.deepBits = deepestIntegerBits(E.dev, d.rate, E.deepMixable.load());
         bool sock = E.source.load() == 3; double pr = E.pageRate.load(); bool ok = !sock || pr == d.rate; bool was = E.rateOk.exchange(ok);
         say("{\"ev\":\"rate\",\"value\":" + jnum(d.rate) + (sock ? ",\"pageRate\":" + jnum(pr) + ",\"soundPaused\":" + tf(!ok) + ",\"resumed\":" + tf(ok && !was) : std::string()) + "}");
     }

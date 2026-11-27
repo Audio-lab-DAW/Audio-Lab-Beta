@@ -358,6 +358,42 @@ bool setPhysicalFormat(uint32_t dev, double rate, int bits, bool mixable, std::s
     now = fmtName(c);
     return e == noErr && c.mSampleRate == rate && (int)c.mBitsPerChannel == bits && ((c.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0) == mixable;
 }
+// task NB-N1c: integer formats only, a format with a rate range counts when the rate is inside it
+static bool intFmtMatches(const AudioStreamRangedDescription& r, double rate, bool mixable) {
+    const AudioStreamBasicDescription& f = r.mFormat;
+    if (f.mFormatID != kAudioFormatLinearPCM || (f.mFormatFlags & kAudioFormatFlagIsFloat)) return false;
+    if (((f.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0) != mixable) return false;
+    return f.mSampleRate == rate || (f.mSampleRate == 0 && rate >= r.mSampleRateRange.mMinimum && rate <= r.mSampleRateRange.mMaximum);
+}
+int deepestIntegerBits(uint32_t dev, double rate, bool mixable) {
+    AudioStreamID st = firstOutStream(dev); if (!st) return 0;
+    auto fb = getBytes(st, addr(kAudioStreamPropertyAvailablePhysicalFormats));
+    const AudioStreamRangedDescription* r = (const AudioStreamRangedDescription*)fb.data();
+    int best = 0;
+    for (size_t i = 0; i < fb.size() / sizeof(AudioStreamRangedDescription); i++)
+        if (intFmtMatches(r[i], rate, mixable) && (int)r[i].mFormat.mBitsPerChannel > best) best = (int)r[i].mFormat.mBitsPerChannel;
+    return best;
+}
+bool setIntegerFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err) {
+    AudioStreamID st = firstOutStream(dev);
+    if (!st) { err = "the device has no output stream"; return false; }
+    auto fb = getBytes(st, addr(kAudioStreamPropertyAvailablePhysicalFormats));
+    const AudioStreamRangedDescription* r = (const AudioStreamRangedDescription*)fb.data();
+    const AudioStreamBasicDescription* pick = nullptr;
+    // of the matching ones, the widest container (24 bits packed in 3 bytes or in 4: the device's own first choice)
+    for (size_t i = 0; i < fb.size() / sizeof(AudioStreamRangedDescription); i++)
+        if (intFmtMatches(r[i], rate, mixable) && (int)r[i].mFormat.mBitsPerChannel == bits) { pick = &r[i].mFormat; break; }
+    AudioObjectPropertyAddress a = addr(kAudioStreamPropertyPhysicalFormat);
+    AudioStreamBasicDescription c = {};
+    if (!pick) { err = "the device does not offer " + std::to_string(bits) + "-bit integer at this rate"; if (get(st, a, c)) now = fmtName(c); return false; }
+    AudioStreamBasicDescription want = *pick; want.mSampleRate = rate;
+    OSStatus e = AudioObjectSetPropertyData(st, &a, 0, nullptr, sizeof want, &want);
+    if (e != noErr) err = "error " + osErr(e);
+    auto okNow = [&] { return c.mSampleRate == rate && (int)c.mBitsPerChannel == bits && !(c.mFormatFlags & kAudioFormatFlagIsFloat) && ((c.mFormatFlags & kAudioFormatFlagIsNonMixable) == 0) == mixable; };
+    for (int i = 0; i < 40; i++) { get(st, a, c); if (okNow()) break; usleep(50000); }
+    now = fmtName(c);
+    return e == noErr && okNow();
+}
 static UInt32 volumeElement(uint32_t dev, bool& found) {
     const AudioObjectPropertyScope O = kAudioObjectPropertyScopeOutput;
     found = true;
