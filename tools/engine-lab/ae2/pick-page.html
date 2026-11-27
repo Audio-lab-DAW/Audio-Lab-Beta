@@ -1,0 +1,370 @@
+<title>AudioLab performance and playing latency</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column in AudioLab's own dark look (single theme, as the earlier pick pages). The chain to scale first, the tester you can play, the options grouped with their before/after bars, the measurements, then the picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--warn:#f5c84c;--bad:#ff6b6b;--disp:#050507;
+ --s1:#8b8f9c;--s2:#ff9a3c;--s3:#b583ff;--s4:#ff6b6b;--s5:#4c8dff;--s6:#3ecf8e;
+ --f:Inter,system-ui,sans-serif;--fm:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);margin:0;padding-block:28px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 28px/1.15 var(--f);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--f);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0}
+p{margin:0;max-width:74ch}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+a{color:var(--blue)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:6px 12px;font-weight:500;font-size:12px;white-space:nowrap}
+.btn:hover{border-color:#3a3a45}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+section{display:flex;flex-direction:column;gap:16px}
+.head{display:flex;flex-direction:column;gap:6px}
+header.top{display:flex;flex-direction:column;gap:14px}
+
+/* headline numbers */
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.nums>div{background:var(--pn);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.nums .big{font:600 26px/1.1 var(--f);font-variant-numeric:tabular-nums}
+.nums .l{font:500 11px var(--fm);color:var(--mut)}
+.nums .bad{color:var(--bad)} .nums .ok{color:var(--acc)} .nums .w{color:var(--warn)}
+
+/* chain to scale */
+.chain{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:16px;display:flex;flex-direction:column;gap:12px}
+.crow{display:grid;grid-template-columns:220px minmax(0,1fr) 70px;gap:12px;align-items:center}
+.crow .nm{display:flex;flex-direction:column;min-width:0}
+.crow .nm b{font-weight:600}
+.crow .nm i{font-style:normal;color:var(--mut);font-size:12px}
+.crow .tot{font:600 15px var(--fm);text-align:right;font-variant-numeric:tabular-nums}
+.bar{position:relative;height:24px;background:var(--disp);border-radius:4px;display:flex;overflow:hidden}
+.seg{height:100%;display:flex;align-items:center;justify-content:center;font:500 10px var(--fm);color:#0a0a0c;white-space:nowrap;overflow:hidden;border-right:1px solid var(--disp)}
+.seg.sp{background:repeating-linear-gradient(45deg,var(--s4) 0 6px,#a03a3a 6px 12px)}
+.over{position:absolute;right:6px;top:4px;font:500 11px var(--fm);color:#fff}
+.axis{display:grid;grid-template-columns:220px minmax(0,1fr) 70px;gap:12px}
+.axis div{position:relative;height:16px}
+.axis span{position:absolute;top:0;font:400 11px var(--fm);color:var(--mut);transform:translateX(-50%)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--mut)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* tester */
+.tester{border:1px solid var(--ln);border-radius:10px;background:var(--pn);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);overflow:hidden}
+.tester .ctl{padding:16px;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--ln);min-width:0}
+.tester .out{padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.field>.lb{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.seg-btns{display:flex;flex-wrap:wrap;gap:4px}
+.seg-btns button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:5px 9px;font:500 12px var(--fm)}
+.seg-btns button[aria-pressed="true"]{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 22%,var(--pn2))}
+.pads{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.pad{aspect-ratio:1;max-width:100%;border-radius:8px;background:var(--pn2);border:1px solid var(--ln);display:flex;align-items:flex-end;justify-content:flex-start;padding:5px;font:500 11px var(--fm);color:var(--mut);user-select:none;touch-action:manipulation}
+.pad.hit{background:var(--acc);color:#0a0a0c;border-color:var(--acc)}
+.readout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:8px;overflow:hidden}
+.readout div{background:var(--disp);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.readout b{font:600 20px/1.1 var(--fm);font-variant-numeric:tabular-nums}
+.readout i{font-style:normal;color:var(--mut);font-size:11px}
+.hist{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow:auto}
+.hrow{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:center;font:400 11px var(--fm);color:var(--mut)}
+.hrow .bar{height:14px}
+.note{border-left:2px solid var(--warn);padding:2px 0 2px 10px;color:var(--mut);font-size:12px}
+
+/* options */
+.group{display:flex;flex-direction:column;gap:10px}
+.group>.gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.opt{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.opt.rec{border-color:color-mix(in srgb,var(--acc) 55%,var(--ln))}
+.opt .top{display:flex;align-items:baseline;gap:10px}
+.opt .id{font:600 12px var(--fm);color:var(--acc);flex:none}
+.opt .stars{margin-left:auto;font:500 12px var(--fm);color:var(--warn);flex:none;letter-spacing:1px}
+.opt .stars.no{color:var(--mut)}
+.opt dl{margin:0;display:grid;grid-template-columns:76px minmax(0,1fr);gap:4px 10px;font-size:12px}
+.opt dt{color:var(--mut)}
+.opt dd{margin:0}
+.where{display:inline-flex;gap:4px;flex-wrap:wrap}
+.chip{font:500 10px var(--fm);border:1px solid var(--ln);border-radius:20px;padding:1px 7px;color:var(--mut)}
+.chip.web{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 50%,var(--ln))}
+.chip.nat{color:var(--s3);border-color:color-mix(in srgb,var(--s3) 50%,var(--ln))}
+.ba{display:flex;flex-direction:column;gap:3px}
+.ba .r{display:grid;grid-template-columns:44px minmax(0,1fr) 54px;gap:8px;align-items:center;font:400 11px var(--fm);color:var(--mut)}
+.ba .t{height:10px;background:var(--disp);border-radius:3px;position:relative;overflow:hidden}
+.ba .t i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.ba .r span:last-child{text-align:right;color:var(--ink)}
+.choose{display:flex;gap:4px;flex-wrap:wrap}
+.choose button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:4px 10px;font-size:12px}
+.choose button[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,var(--pn2))}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--pn)}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--ln);white-space:nowrap}
+th{font-weight:500;color:var(--mut);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+td.n{font-family:var(--fm);font-variant-numeric:tabular-nums;text-align:right}
+tr:last-child td{border-bottom:0}
+.cost{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px}
+.cost .r{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:8px;align-items:center;font-size:12px}
+.cost .r span:last-child{font:400 11px var(--fm);text-align:right}
+.cost .t{height:10px;background:var(--disp);border-radius:3px;position:relative;overflow:hidden}
+.cost .t i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:3px}
+.cost .t i.f{background:#2b2b34}
+.src{font-size:12px;color:var(--mut)}
+.src li a{word-break:break-word}
+
+/* picks bar */
+.picks{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--ln);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5}
+.picks>div{max-width:1180px;margin:0 auto;display:flex;gap:8px;align-items:center}
+.picks output{flex:1;min-width:0;font:400 12px var(--fm);background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:7px 10px;overflow-x:auto;white-space:nowrap;display:block}
+textarea.free{width:100%;min-height:52px;background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:8px 10px;resize:vertical}
+
+@media (max-width:860px){
+ .nums{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tester{grid-template-columns:minmax(0,1fr)} .tester .ctl{border-right:0;border-bottom:1px solid var(--ln)}
+ .opts{grid-template-columns:minmax(0,1fr)} .cost{grid-template-columns:minmax(0,1fr)}
+ .crow,.axis{grid-template-columns:minmax(0,1fr) 60px} .crow .nm{grid-column:1/-1} .axis div:first-child{display:none}
+ .pads{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+ <span class="eyebrow">Task AE2 · engine research · 27 November 2026</span>
+ <h1>AudioLab performance and playing latency</h1>
+ <p>You asked about the delay between pressing a key or a Push 1 pad and hearing it, and about big psytrance projects. This page measures today's chain, shows where the milliseconds go, lets you play a tester at different buffer settings, and lists 17 options to pick from. Full write-up: <code>docs/research-engine-performance.md</code>.</p>
+ <div class="nums">
+  <div><span class="l">Today, idle (Gryphon, Auto)</span><span class="big w">≈ 30 ms</span><span class="mut sm">key or pad to sound</span></div>
+  <div><span class="l">Today, while the song plays</span><span class="big bad">≈ 40 ms</span><span class="mut sm">spikes past 100 ms</span></div>
+  <div><span class="l">Web engine with L1 to L5</span><span class="big ok">≈ 14 ms</span><span class="mut sm">steady, estimated</span></div>
+  <div><span class="l">Native live path</span><span class="big ok">≈ 3 ms</span><span class="mut sm">32 frames, calculated</span></div>
+ </div>
+</header>
+
+<section>
+ <div class="head"><span class="eyebrow">Where the milliseconds go</span><h2>A key press, today and after</h2>
+  <p class="mut">Drawn to scale, 0 to 60 ms. Main-thread, start and delay-compensation parts are measured on the build machine; the device part on your Mac is estimated from a published Chrome 153 loop-back on an M4 and the Gryphon's reported 14 + 14 frames.</p></div>
+ <div class="chain" id="chain"></div>
+ <div class="legend" id="legend"></div>
+ <p class="note">Through the Mac's default output in your reports (Bose via eqMac at 16 kHz) the device part alone is 82 ms plus the Bluetooth link, usually 100 to 200 ms more. Check Settings › Audio when you play.</p>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Live demo</span><h2>Play it: a key-to-sound tester</h2>
+  <p class="mut">Click Start, then play the keys <span class="mono">A S D F G H J K</span>, tap the pads, or play a MIDI controller (Push 1 works in Chrome if this page may use MIDI). Each hit shows how long the browser took from your event to the moment it says the sound leaves the speaker. Change the buffer and add the delays AudioLab has today to feel them.</p></div>
+ <div class="tester">
+  <div class="ctl">
+   <div class="field"><span class="lb">Buffer (latencyHint)</span><div class="seg-btns" id="tBuf"></div></div>
+   <div class="field"><span class="lb">Render block (renderSizeHint, Chrome 147+)</span><div class="seg-btns" id="tRq"></div></div>
+   <div class="field"><span class="lb">Busy screen (long tasks like a playing arrangement)</span><div class="seg-btns" id="tBusy"></div></div>
+   <div class="field"><span class="lb">Add a delay you can feel</span><div class="seg-btns" id="tAdd"></div></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" id="tStart" type="button">Start sound</button><button class="btn" id="tClear" type="button">Clear</button></div>
+   <p class="mut sm" id="tInfo">Not started. Sound starts only after a click.</p>
+  </div>
+  <div class="out">
+   <div class="pads" id="tPads"></div>
+   <div class="readout">
+    <div><i>last hit</i><b id="rLast">–</b><i id="rLastD">event to speaker</i></div>
+    <div><i>median</i><b id="rMed">–</b><i id="rN">0 hits</i></div>
+    <div><i>browser reports</i><b id="rBase">–</b><i id="rBaseD">base + output latency</i></div>
+   </div>
+   <div class="legend"><span><i style="background:var(--s2)"></i>event waits for the page</span><span><i style="background:var(--s3)"></i>wait for the next render block</span><span><i style="background:var(--s5)"></i>browser buffers and device</span><span><i style="background:var(--s4)"></i>added delay</span></div>
+   <div class="hist" id="tHist"><p class="mut sm">Hits appear here.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="optsec">
+ <div class="head"><span class="eyebrow">Options</span><h2>Seventeen ways to cut it, in four groups</h2>
+  <p class="mut">For each: <b>Now</b> (do it next), <b>Later</b>, or <b>No</b>. ★ marks what this research recommends. The small bars show a key press before and after, or the CPU effect.</p></div>
+ <div id="groups"></div>
+ <div class="field"><label for="fNote">Anything else (optional)</label><textarea class="free" id="fNote" placeholder="For example: I mostly play through the Gryphon; the Push 1 is the main controller"></textarea></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Measured on the build machine</span><h2>CPU per track and where a big project runs out</h2>
+  <p class="mut">Fractals remake, bars 161 to 168 (the Peak), rendered in one context, so one core. Each solo render includes the master chain (about 15 to 17 ms per second, grey). The build machine is a 2-core cloud Xeon; an M4 performance core is estimated two to three times faster.</p></div>
+ <div class="cost" id="cost"></div>
+ <div class="tw"><table>
+  <thead><tr><th>Project</th><th>Tracks</th><th>One core, offline</th><th>Live Auto 256: load avg</th><th>peak</th><th>dropouts in 9.5 s</th><th>Live 512: load avg</th><th>dropouts</th></tr></thead>
+  <tbody>
+   <tr><td>Fractals x1</td><td class="n">30</td><td class="n">20.5 %</td><td class="n">39 %</td><td class="n">95 %</td><td class="n">6</td><td class="n">30 %</td><td class="n">0</td></tr>
+   <tr><td>Fractals x2</td><td class="n">60</td><td class="n">39.5 %</td><td class="n">70 %</td><td class="n">107 %</td><td class="n">20</td><td class="n">59 %</td><td class="n">5</td></tr>
+   <tr><td>Fractals x4</td><td class="n">120</td><td class="n">102 %</td><td class="n">132 %</td><td class="n">150 %</td><td class="n">894</td><td class="n">110 %</td><td class="n">856</td></tr>
+  </tbody></table></div>
+ <div class="tw"><table>
+  <thead><tr><th>Key to sound, build machine</th><th>Buffer (block)</th><th>Main thread median</th><th>worst</th><th>Start + block</th><th>Browser ahead</th><th>Total median</th><th>worst</th></tr></thead>
+  <tbody>
+   <tr><td>idle, Lead</td><td>128 (128)</td><td class="n">5.8</td><td class="n">31</td><td class="n">3.0</td><td class="n">9.1</td><td class="n">17.4</td><td class="n">43</td></tr>
+   <tr><td>idle, Lead</td><td>Auto 256 (128)</td><td class="n">5.6</td><td class="n">8.8</td><td class="n">2.0</td><td class="n">32.8</td><td class="n">43.1</td><td class="n">47</td></tr>
+   <tr><td>idle, Lead</td><td>512 (256)</td><td class="n">5.1</td><td class="n">27</td><td class="n">2.0</td><td class="n">41.6</td><td class="n">47.0</td><td class="n">72</td></tr>
+   <tr><td>idle, Lead</td><td>1,024 (512)</td><td class="n">4.9</td><td class="n">270</td><td class="n">2.0</td><td class="n">77.6</td><td class="n">86.1</td><td class="n">359</td></tr>
+   <tr><td>idle, Kick (built-in nodes)</td><td>128 (128)</td><td class="n">4.1</td><td class="n">13</td><td class="n">0</td><td class="n">9.6</td><td class="n">15.1</td><td class="n">25</td></tr>
+   <tr><td>song playing</td><td>128 (128)</td><td class="n">2.5</td><td class="n">45</td><td class="n">2.0</td><td class="n">9.8</td><td class="n">14.3</td><td class="n">58</td></tr>
+   <tr><td>song playing</td><td>Auto 256 (128)</td><td class="n">25.4</td><td class="n">119</td><td class="n">2.0</td><td class="n">33.7</td><td class="n">62.7</td><td class="n">158</td></tr>
+  </tbody></table></div>
+ <p class="mut sm">All in ms. "Browser ahead" on Linux is Chromium's buffers plus a fake output device (it reports 8 ms at 128 and 32 ms at 256); on a Mac that part is smaller. Delay compensation (6 ms in Fractals, 52 ms with one resonance suppressor) comes on top. Scripts: <code>tools/engine-lab/ae2/</code>.</p>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">How other DAWs do it</span><h2>Two paths: what you play, and everything else ahead</h2></div>
+ <div class="tw"><table>
+  <thead><tr><th>DAW</th><th>Played track</th><th>Everything else</th></tr></thead>
+  <tbody>
+   <tr><td>Cubase (ASIO-Guard)</td><td>armed or monitored: real-time path</td><td>computed 23 to 280 ms ahead</td></tr>
+   <tr><td>Logic</td><td>selected instrument track: "live"</td><td>"playback" tracks ahead, process buffer Large</td></tr>
+   <tr><td>Studio One (dual buffer)</td><td>device block, only devices under 3 ms</td><td>process block (Dropout Protection)</td></tr>
+   <tr><td>REAPER</td><td>monitored input: synchronous</td><td>anticipative FX, ahead, out of order</td></tr>
+   <tr><td>Ableton Live</td><td>can skip delay compensation while monitoring</td><td>one buffer; chains in parallel, critical path</td></tr>
+   <tr><td>FL Studio</td><td>one buffer (128 on Apple Silicon)</td><td>Smart disable sleeps idle plug-ins; multithreaded mixer</td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Sources</span><h2>Where the facts come from</h2></div>
+ <ul class="src">
+  <li><a href="https://www.steinberg.help/r/details-on-asio-guard-in-cubase-and-nuendo" target="_blank" rel="noopener">Steinberg: ASIO-Guard</a>, <a href="https://helpcenter.steinberg.de/hc/en-us/articles/206103564" target="_blank" rel="noopener">levels</a></li>
+  <li><a href="https://support.apple.com/HT205975" target="_blank" rel="noopener">Apple: Logic multithreading</a>, <a href="https://support.apple.com/en-us/HT203930" target="_blank" rel="noopener">avoid overloads</a></li>
+  <li><a href="https://www.soundonsound.com/techniques/studio-one-buffers-low-latency" target="_blank" rel="noopener">Sound On Sound: Studio One buffers</a>, <a href="https://support.presonus.com/hc/en-us/articles/360045431251-Studio-One-5-Audio-Dropout-Protection-and-Low-Latency-Monitoring-FAQ" target="_blank" rel="noopener">PreSonus FAQ</a></li>
+  <li><a href="https://www.soundonsound.com/techniques/running-multiple-plug-ins" target="_blank" rel="noopener">Sound On Sound: REAPER anticipative FX</a></li>
+  <li><a href="https://help.ableton.com/hc/en-us/articles/209072249" target="_blank" rel="noopener">Ableton: reduced latency when monitoring</a>, <a href="https://help.ableton.com/hc/en-us/articles/360010545559" target="_blank" rel="noopener">how latency works</a>, <a href="https://help.ableton.com/hc/en-us/articles/209067649" target="_blank" rel="noopener">multicore</a></li>
+  <li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_audio.htm" target="_blank" rel="noopener">Image-Line: FL Studio audio settings</a></li>
+  <li><a href="https://dev.classmethod.jp/en/articles/chrome-153-webaudio-render-size-hint-latency/" target="_blank" rel="noopener">classmethod: Chrome 153 renderSizeHint loop-back on an M4</a></li>
+  <li><a href="https://groups.google.com/a/chromium.org/g/platform-architecture-dev/c/sxpZizgpDFM" target="_blank" rel="noopener">Chromium: AudioWorklet thread model (one real-time thread for all contexts)</a></li>
+  <li><a href="https://www.w3.org/2025/11/TPAC/demo-audio-wg-update.html" target="_blank" rel="noopener">W3C TPAC 2025: render quantum, output buffer bypass</a></li>
+  <li><a href="https://w3.org/2021/03/media-production-workshop/talks/ulf-hammarqvist-audio-latency.html" target="_blank" rel="noopener">W3C workshop: browser DAW latency</a></li>
+  <li><a href="https://www.rtings.com/headphones/learn/research/latency" target="_blank" rel="noopener">RTINGS: Bluetooth latency tests</a></li>
+  <li>AudioLab: <code>docs/research-native-mac.md</code>, <code>docs/native-mac-picks.md</code> (your M4 reports), <code>docs/native-mac-build.md</code></li>
+ </ul>
+</section>
+</div>
+
+<div class="picks"><div><output id="pkLine" aria-label="Your picks line"></output><button class="btn" id="pkStar" type="button">Use the starred picks</button><button class="btn pri" id="pkCopy" type="button">Copy</button></div></div>
+
+<script>
+(function(){
+var C={pad:'var(--s1)',main:'var(--s2)',start:'var(--s3)',pdc:'var(--s4)',out:'var(--s5)'};
+var NAMES={pad:'pad or key reaches the app',main:'waits on the page (main thread)',start:'app start offset + next block',pdc:'delay compensation',out:'browser buffers + device'};
+var ROWS=[
+ {n:'Today, idle',i:'Gryphon, Auto 256, Fractals',s:[['pad',1],['main',5],['start',2],['pdc',6],['out',16]]},
+ {n:'Today, song playing',i:'median; spikes past 100 ms',s:[['pad',1],['main',15],['start',2],['pdc',6],['out',16]]},
+ {n:'Today + a resonance suppressor',i:'any pitch or resonance device',s:[['pad',1],['main',5],['start',2],['pdc',52],['out',16]],cap:true},
+ {n:'Today via eqMac and Bluetooth',i:'the default output in your reports',s:[['pad',1],['main',5],['start',2],['pdc',6],['out',250]],cap:true},
+ {n:'Web engine, L1 to L5',i:'128 buffer, 64 block, estimated',s:[['pad',1],['main',1],['start',0.7],['out',11.5]]},
+ {n:'Native live path',i:'32 frames on the Gryphon',s:[['pad',1],['start',0.67],['out',1.25]]}
+];
+var MAX=60;
+function chain(){
+ var h='';
+ ROWS.forEach(function(r){var tot=r.s.reduce(function(a,x){return a+x[1]},0),acc=0,seg='';
+  r.s.forEach(function(x){var w=Math.max(0,Math.min(x[1],MAX-acc));acc+=x[1];if(w<=0)return;seg+='<div class="seg" title="'+NAMES[x[0]]+': '+x[1]+' ms" style="width:'+(w/MAX*100)+'%;background:'+C[x[0]]+'">'+(w>=4?x[1]:'')+'</div>'});
+  h+='<div class="crow"><div class="nm"><b>'+r.n+'</b><i>'+r.i+'</i></div><div class="bar">'+seg+(tot>MAX?'<span class="over">→ '+Math.round(tot)+' ms</span>':'')+'</div><div class="tot">'+(tot<10?tot.toFixed(1):Math.round(tot))+' ms</div></div>'});
+ var ax='<div class="axis"><div></div><div>';for(var t=0;t<=MAX;t+=10)ax+='<span style="left:'+(t/MAX*100)+'%">'+t+'</span>';ax+='</div><div></div></div>';
+ document.getElementById('chain').innerHTML=h+ax;
+ document.getElementById('legend').innerHTML=Object.keys(NAMES).map(function(k){return '<span><i style="background:'+C[k]+'"></i>'+NAMES[k]+'</span>'}).join('');
+}
+chain();
+
+/* cost per track */
+var COST=[['Impact','sfx',62.0],['Blip','sfx',60.4],['Hook right','plant + delay',56.2],['Downlifter','sfx',55.4],['Acid','acid',49.9],['Hook left','plant + delay',45.8],['Lead high','plant + delay',39.6],['Open hat','drum',38.4],['Bass','plant + sidechain',36.8],['Hat','drum',36.3],['Kick','drum',35.7],['Percussion','drum',35.6],['Snare','drum',34.8],['Lead','plant + delay',33.8],['Arp','plant + delay',33.6],['Clap','drum',33.1],['Crash','drum',30.1],['Toms','drum',27.1],['Riser','sfx',23.8],['Reverse crash','sfx',23.6],['Wind','sfx',23.3],['Lead low','plant',21.8],['Pad','plant',20.4],['Shaker','drum',19.9],['Snare roll','drum',17.1]];
+document.getElementById('cost').innerHTML=COST.map(function(c){return '<div class="r"><span title="'+c[1]+'">'+c[0]+'</span><div class="t"><i style="width:'+(c[2]/65*100)+'%"></i><i class="f" style="width:'+(16/65*100)+'%"></i></div><span>'+c[2].toFixed(0)+'</span></div>'}).join('')+'<p class="mut sm" style="grid-column:1/-1">ms of one build-machine core per second of sound.</p>';
+
+/* options: [id, group, title, what, gain, risk, where[], feel, stars, before, after, unit] */
+var G=[['play','Playing latency','The delay between the pad and the sound, in the web engine you have now.'],['cpu','Big projects and CPU','Keeping a 120-track song playing without raising the buffer.'],['multi','Multicore (native engine)','What only the native engine can do with the M4\'s four performance cores.'],['live','The live track and render-ahead (native)','How the played track stays at 32 frames while everything else is computed ahead.']];
+var O=[
+ ['L1','play','Output check','Warn when the output is Bluetooth, a virtual device (eqMac, Background Music, BlackHole) or in call mode at 16 kHz; one button to play through the Gryphon or the AMS-24.','82 ms (eqMac) plus 100 to 200+ ms (Bluetooth)','none',['web','nat'],'Pads answer instead of echoing.',5,250,16,'ms','Lane B (audio devices), lane F (notice)'],
+ ['L2','play','A playing buffer','Auto comes back down after a clean minute; while a track is armed or the keyboard is on (and stopped), 128 frames with a 64-frame render block; the larger buffer for mixing.','3 to 5 ms against Auto 256; up to 70 ms against the 1,024 trap','dropouts in heavy songs (pairs with L8, L9)',['web'],'The same key feels tight in a big song.',4,86,17,'ms','Lane B'],
+ ['L3','play','Start played notes at once','Drop the +2 ms start offset for worklet voices (drum voices already start at once).','2 ms','the voice must start inside a block',['web'],'Barely felt alone; adds up with the rest.',3,2,0,'ms','Voice engine owner (lane C proposed)'],
+ ['L4','play','The played track skips delay compensation','Like Ableton\'s "reduced latency when monitoring": the armed track is not delayed to line up with the others; recorded notes are placed by the compensated clock.','6 ms in Fractals; 52 ms with a resonance suppressor or pitch device anywhere','the played note runs early against a compensated track while you play',['web','nat'],'A mixing device never makes the keys sluggish again.',5,52,0,'ms','Lane C'],
+ ['L5','play','Notes that skip the main thread','In the desktop app, MIDI (the Push 1) is read in the shell\'s main process, later the native engine, and posted with its timestamp straight into the audio worklet.','median 2.5 to 25 ms, worst 45 to 270 ms → about 1 ms','medium: a MIDI module in the shell; drums on built-in nodes need a worklet path',['web'],'Pads stay tight while the screen is busy.',4,25,1,'ms','Lane C with NB (desktop)'],
+ ['L6','play','A lighter main thread while playing','Break up long tasks, draw less while a key is held, put input first. Measured: 51 long tasks, 3.5 s busy in 9.5 s of playing Fractals.','the spikes (120 to 280 ms long tasks)','low; drawing lanes must agree',['web'],'Fewer late notes in a full arrangement.',3,120,40,'ms','Lanes A and E'],
+ ['L7','play','Steady timing','Place each note at its event time plus a fixed offset instead of as soon as possible.','jitter of a block plus the main thread → under 0.1 ms, for a fixed 3 ms','low',['web','nat'],'Drums feel even; latency a little higher but constant.',2,6,0.1,'ms jitter','Lane C'],
+ ['L8','cpu','Sleep idle tracks','Like FL Studio\'s Smart disable: a track with no notes in the next bars and a silent tail stops computing.','estimated 20 to 40 % in sparse sections; sfx tracks cost 55 to 62 ms per second','tails cut if silence is judged wrong',['web','nat'],'Fewer dropouts in the drops.',4,100,70,'% CPU','Engine owner (new lane or NB)'],
+ ['L9','cpu','Render ahead in the web engine','A coarse ASIO-Guard: tracks that are not armed are rendered in the background on other cores into a window ahead of the playhead and played as audio; the armed track and the master stay live.','live thread from about 100 % (Fractals x4) to the armed track plus the master','high: edits, automation and tempo re-render; memory per window',['web'],'Big songs play at the playing buffer.',4,100,15,'% CPU','New task series RA'],
+ ['L10','cpu','Several AudioContexts for more cores','Split the song over several contexts.','none: Chrome runs every real-time context of a page on one thread','wasted work',['web'],'Nothing changes.',0,100,100,'% CPU','–'],
+ ['L11','cpu','Cost per track shown','Milliseconds per second of sound per track in the mixer, from a short background render (this task\'s method).','finds the heavy track','low',['web'],'You see what to freeze.',3,0,0,'','Lane E'],
+ ['L12','multi','Parallel graph on the performance cores','Real-time workers joined to the device\'s audio workgroup, inputs-done order, the critical path shown (NR1, NR3).','4 performance cores instead of one','medium; threads that do not join land on slow cores',['nat'],'Fractals x4 fits at small buffers (estimated).',5,100,30,'% of a core','NB'],
+ ['L13','multi','MIDI in the engine','CoreMIDI read by the engine, each note placed at its sample; Push 1 to sound about 2 to 3 ms at 32 frames.','10 to 30 ms against the web path','low',['nat'],'Like playing hardware.',5,30,3,'ms','NB'],
+ ['L14','multi','Never play through the bridge','The N2 bridge adds a 40 ms ring; keep the web output for playing until the native engine makes the played track itself.','avoids +40 ms','none (a rule)',['nat'],'No surprise when the native engine is switched on.',5,70,30,'ms','NB'],
+ ['L15','live','Two paths','The live set (armed or selected track, what it feeds, the master) at 32 to 64 frames; everything else 23 to 35 ms ahead on the workers; the same samples either way.','low latency and big projects together','high: the core design of stage N3',['nat'],'The pad is instant while 120 tracks play.',5,30,3,'ms','NB (N3, NR4)'],
+ ['L16','live','Live path rules','Only devices under 3 ms on the live path while playing (Studio One); a look-ahead device on the played track is marked and can be bypassed while recording; a send from the live track keeps its reverb live.','keeps the live path at the device buffer','low',['nat'],'Playing through a limiter stays fast.',4,16,3,'ms','NB'],
+ ['L17','live','"Live" marker and an honest read-out','The track that runs live is marked; Settings shows key to sound (buffer, device, compensation, measured loop-back) and can measure it with a cable.','trust in the number','low',['web','nat'],'You know what you will hear before you play.',4,0,0,'','Lane B and NB']
+];
+function stars(n){return n?('★★★★★'.slice(0,n)+'<span style="opacity:.25">'+'★★★★★'.slice(0,5-n)+'</span>'):'not recommended'}
+var st={},KEY='ae2-picks';
+try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){st={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function rec(o){return o[8]>=4?'a':o[8]===3?'b':'c'}
+document.getElementById('groups').innerHTML=G.map(function(g){
+ return '<div class="group"><div class="gh"><h3>'+g[1]+'</h3><span class="mut sm">'+g[2]+'</span></div><div class="opts">'+O.filter(function(o){return o[1]===g[0]}).map(function(o){
+  var ba='';
+  if(o[9]||o[10]){var mx=Math.max(o[9],o[10],1);ba='<div class="ba"><div class="r"><span>before</span><div class="t"><i style="width:'+(o[9]/mx*100)+'%;background:var(--s4)"></i></div><span>'+o[9]+' '+o[11]+'</span></div><div class="r"><span>after</span><div class="t"><i style="width:'+(Math.max(o[10],mx*.01)/mx*100)+'%;background:var(--acc)"></i></div><span>'+o[10]+' '+o[11]+'</span></div></div>'}
+  return '<div class="opt'+(o[8]>=4?' rec':'')+'"><div class="top"><span class="id">'+o[0]+'</span><h3>'+o[2]+'</h3><span class="stars'+(o[8]?'':' no')+'">'+stars(o[8])+'</span></div><p>'+o[3]+'</p>'+ba+
+   '<dl><dt>Gain</dt><dd>'+o[4]+'</dd><dt>Risk</dt><dd>'+o[5]+'</dd><dt>Engine</dt><dd><span class="where">'+o[6].map(function(w){return '<span class="chip '+w+'">'+(w==='web'?'web engine now':'native engine')+'</span>'}).join('')+'</span></dd><dt>Who</dt><dd>'+o[12]+'</dd><dt>Feels</dt><dd>'+o[7]+'</dd></dl>'+
+   '<div class="choose" data-id="'+o[0]+'">'+[['a','Now'],['b','Later'],['c','No']].map(function(k){return '<button type="button" id="c_'+o[0]+k[0]+'" data-k="'+k[0]+'" aria-pressed="false">'+(rec(o)===k[0]?'★ ':'')+k[1]+'</button>'}).join('')+'</div></div>'}).join('')+'</div></div>'}).join('');
+function line(){var p=O.map(function(o){return o[0]+(st[o[0]]||'?')}).join(' ');var n=(st.note||'').trim().replace(/\s+/g,' ');return 'AE2 picks: '+p+(n?' | note: '+n:'')}
+function paint(){O.forEach(function(o){['a','b','c'].forEach(function(k){document.getElementById('c_'+o[0]+k).setAttribute('aria-pressed',st[o[0]]===k?'true':'false')})});document.getElementById('pkLine').textContent=line()}
+document.getElementById('groups').addEventListener('click',function(e){var b=e.target.closest('.choose button');if(!b)return;st[b.parentNode.dataset.id]=b.dataset.k;save();paint()});
+var fn=document.getElementById('fNote');fn.value=st.note||'';fn.addEventListener('input',function(){st.note=fn.value;save();document.getElementById('pkLine').textContent=line()});
+document.getElementById('pkStar').addEventListener('click',function(){O.forEach(function(o){st[o[0]]=rec(o)});save();paint()});
+document.getElementById('pkCopy').addEventListener('click',function(){var t=line(),b=this,done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+ var fall=function(){var r=document.createRange();r.selectNodeContents(document.getElementById('pkLine'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Copy on your keyboard';setTimeout(function(){b.textContent='Copy'},2600)};
+ try{navigator.clipboard.writeText(t).then(done,fall)}catch(e){fall()}});
+paint();
+
+/* ---- the tester ---- */
+var T={buf:'interactive',rq:128,busy:0,add:0,ctx:null,hits:[],busyT:null};
+var BUF=[['interactive','interactive'],[64,'64'],[128,'128'],[256,'256 (Auto today)'],[512,'512'],[1024,'1,024'],['playback','playback']];
+var RQ=[[64,'64'],[128,'128'],[256,'256']];
+var BUSY=[[0,'off'],[1,'like Fractals playing'],[2,'like Fractals x2']];
+var ADD=[[0,'none'],[6,'+6 ms delay comp.'],[16,'+16 ms ≈ the app today'],[52,'+52 ms with a resonance suppressor'],[70,'+70 ms the 1,024 trap'],[250,'+250 ms eqMac + Bluetooth']];
+function segs(id,list,key,restart){var el=document.getElementById(id);el.innerHTML=list.map(function(x,i){return '<button type="button" id="'+id+i+'" aria-pressed="'+(T[key]===x[0])+'">'+x[1]+'</button>'}).join('');
+ el.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var i=+b.id.slice(id.length);T[key]=list[i][0];[].forEach.call(el.children,function(c,j){c.setAttribute('aria-pressed',j===i)});if(restart&&T.ctx)startCtx();if(key==='busy')busy();if(key==='add'&&T.ctx)T.dl.delayTime.value=T.add/1000})}
+segs('tBuf',BUF,'buf',true);segs('tRq',RQ,'rq',true);segs('tBusy',BUSY,'busy');segs('tAdd',ADD,'add');
+var KEYS=['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK'],LBL='ASDFGHJK',NOTES=[57,60,62,64,67,69,72,74];
+var padsEl=document.getElementById('tPads');padsEl.innerHTML=KEYS.map(function(k,i){return '<div class="pad" id="pad'+i+'" role="button" tabindex="0" aria-label="pad '+LBL[i]+'">'+LBL[i]+'</div>'}).join('');
+function startCtx(){
+ try{if(T.ctx)T.ctx.close()}catch(e){}
+ var AC=window.AudioContext||window.webkitAudioContext;var o={latencyHint:typeof T.buf==='number'?T.buf/48000:T.buf};if(T.rq!==128)o.renderSizeHint=T.rq;
+ var c;try{c=new AC(o)}catch(e){try{c=new AC({latencyHint:o.latencyHint})}catch(e2){document.getElementById('tInfo').textContent='This browser could not start sound: '+e2.message;return}}
+ T.ctx=c;T.dl=c.createDelay(1);T.dl.delayTime.value=T.add/1000;T.mg=c.createGain();T.mg.gain.value=.5;T.dl.connect(T.mg);T.mg.connect(c.destination);
+ c.resume();setTimeout(info,300);
+}
+function info(){var c=T.ctx;if(!c)return;var rq=c.renderQuantumSize||128,b=(c.baseLatency||0)*1000,ol=(c.outputLatency||0)*1000;
+ document.getElementById('tInfo').textContent='Running at '+c.sampleRate+' Hz, render block '+rq+' frames ('+(rq/c.sampleRate*1000).toFixed(2)+' ms)'+(T.rq!==128&&rq===128?'; this browser ignores the render block hint':'')+'.';
+ document.getElementById('rBase').textContent=(b+ol).toFixed(1)+' ms';document.getElementById('rBaseD').textContent='base '+b.toFixed(1)+' + output '+(ol?ol.toFixed(1):'not reported')}
+document.getElementById('tStart').addEventListener('click',function(){startCtx();this.textContent='Restart sound'});
+document.getElementById('tClear').addEventListener('click',function(){T.hits=[];draw()});
+function hit(i,evTs,vel){
+ var c=T.ctx;if(!c){startCtx();c=T.ctx;if(!c)return}
+ var h=performance.now(),now=c.currentTime,ots=c.getOutputTimestamp?c.getOutputTimestamp():null;
+ var o=c.createOscillator(),g=c.createGain(),f=440*Math.pow(2,(NOTES[i]-69)/12);o.type='sawtooth';o.frequency.value=f;
+ var lp=c.createBiquadFilter();lp.frequency.value=2400;g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(.25*(vel||1),now+.002);g.gain.exponentialRampToValueAtTime(.001,now+.35);
+ o.connect(lp);lp.connect(g);g.connect(T.dl);o.start(now);o.stop(now+.4);
+ var p=document.getElementById('pad'+i);p.classList.add('hit');setTimeout(function(){p.classList.remove('hit')},120);
+ var main=Math.max(0,h-evTs),rq=(c.renderQuantumSize||128)/c.sampleRate*1000,out;
+ if(ots&&ots.performanceTime>0){out=ots.performanceTime+(now-ots.contextTime)*1000-h}else{out=((c.baseLatency||0)+(c.outputLatency||0))*1000}
+ var blk=Math.min(rq,Math.max(0,rq/2));
+ var r={main:main,blk:blk,out:Math.max(0,out),add:T.add};r.tot=r.main+r.out+r.add;T.hits.unshift(r);if(T.hits.length>40)T.hits.pop();draw();
+}
+function draw(){var hs=T.hits,el=document.getElementById('tHist');
+ if(!hs.length){el.innerHTML='<p class="mut sm">Hits appear here.</p>';document.getElementById('rLast').textContent='–';document.getElementById('rMed').textContent='–';document.getElementById('rN').textContent='0 hits';return}
+ var s=hs.map(function(x){return x.tot}).slice().sort(function(a,b){return a-b}),med=s[Math.floor(s.length/2)];
+ document.getElementById('rLast').textContent=hs[0].tot.toFixed(1)+' ms';document.getElementById('rLastD').textContent='page '+hs[0].main.toFixed(1)+' · out '+hs[0].out.toFixed(1)+(hs[0].add?' · +'+hs[0].add:'');
+ document.getElementById('rMed').textContent=med.toFixed(1)+' ms';document.getElementById('rN').textContent=hs.length+' hits';
+ var mx=Math.max(60,s[s.length-1]);
+ el.innerHTML=hs.map(function(x){function sg(v,c){return v>0?'<div class="seg" style="width:'+(v/mx*100)+'%;background:'+c+'"></div>':''}
+  return '<div class="hrow"><span>'+x.tot.toFixed(1)+'</span><div class="bar">'+sg(x.main,'var(--s2)')+sg(x.out,'var(--s5)')+sg(x.add,'var(--s4)')+'</div></div>'}).join('');
+}
+document.addEventListener('keydown',function(e){if(e.repeat||e.metaKey||e.ctrlKey||e.altKey)return;if(/INPUT|TEXTAREA/.test(e.target.tagName))return;var i=KEYS.indexOf(e.code);if(i<0)return;e.preventDefault();hit(i,e.timeStamp,1)});
+padsEl.addEventListener('pointerdown',function(e){var p=e.target.closest('.pad');if(!p)return;e.preventDefault();hit(+p.id.slice(3),e.timeStamp,1)});
+/* MIDI, where the page may use it */
+try{if(navigator.requestMIDIAccess)navigator.requestMIDIAccess().then(function(A){var n=0;A.inputs.forEach(function(inp){n++;inp.onmidimessage=function(m){var d=m.data;if((d[0]&0xf0)===0x90&&d[2]>0)hit(d[1]%8,m.timeStamp,d[2]/127)}});if(n)document.getElementById('tInfo').textContent+=' MIDI: '+n+' input(s) listening.'},function(){})}catch(e){}
+/* busy screen: long tasks like those measured while Fractals plays (51 in 9.5 s, up to 120 ms; x2: 75, up to 211 ms) */
+function busy(){clearTimeout(T.busyT);if(!T.busy)return;(function loop(){var big=T.busy===2,ms=30+Math.random()*(big?180:90),t=performance.now();while(performance.now()-t<ms){}T.busyT=setTimeout(loop,big?60+Math.random()*80:120+Math.random()*120)})()}
+})();
+</script>

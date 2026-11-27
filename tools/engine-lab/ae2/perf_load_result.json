@@ -1,0 +1,307 @@
+{
+ "per_track": [
+  {
+   "track": "Kick",
+   "preset": "kick",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 35.7
+  },
+  {
+   "track": "Bass",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "side",
+    "eq"
+   ],
+   "ms_per_s": 36.8
+  },
+  {
+   "track": "Clap",
+   "preset": "zclap",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 33.1
+  },
+  {
+   "track": "Snare",
+   "preset": "zsnare",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 34.8
+  },
+  {
+   "track": "Hat",
+   "preset": "zhat",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 36.3
+  },
+  {
+   "track": "Open hat",
+   "preset": "zhat",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 38.4
+  },
+  {
+   "track": "Percussion",
+   "preset": "ztom",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 35.6
+  },
+  {
+   "track": "Shaker",
+   "preset": "zhat",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 19.9
+  },
+  {
+   "track": "Toms",
+   "preset": "ztom",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 27.1
+  },
+  {
+   "track": "Crash",
+   "preset": "drums",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 30.1
+  },
+  {
+   "track": "Snare roll",
+   "preset": "zsnare",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 17.1
+  },
+  {
+   "track": "Lead",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "tdelay",
+    "eq"
+   ],
+   "ms_per_s": 33.8
+  },
+  {
+   "track": "Lead low",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "eq"
+   ],
+   "ms_per_s": 21.8
+  },
+  {
+   "track": "Lead high",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "tdelay",
+    "eq"
+   ],
+   "ms_per_s": 39.6
+  },
+  {
+   "track": "Hook left",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "tdelay",
+    "eq"
+   ],
+   "ms_per_s": 45.8
+  },
+  {
+   "track": "Hook right",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "tdelay",
+    "eq"
+   ],
+   "ms_per_s": 56.2
+  },
+  {
+   "track": "Arp",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "tdelay",
+    "eq"
+   ],
+   "ms_per_s": 33.6
+  },
+  {
+   "track": "Acid",
+   "preset": "acid",
+   "fx": [
+    "eq",
+    "eq"
+   ],
+   "ms_per_s": 49.9
+  },
+  {
+   "track": "Pad",
+   "preset": "plant",
+   "fx": [
+    "eq",
+    "eq"
+   ],
+   "ms_per_s": 20.4
+  },
+  {
+   "track": "Riser",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 23.8
+  },
+  {
+   "track": "Reverse crash",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 23.6
+  },
+  {
+   "track": "Impact",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 62.0
+  },
+  {
+   "track": "Downlifter",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 55.4
+  },
+  {
+   "track": "Blip",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 60.4
+  },
+  {
+   "track": "Wind",
+   "preset": "sfx",
+   "fx": [
+    "eq"
+   ],
+   "ms_per_s": 23.3
+  }
+ ],
+ "song": [
+  {
+   "copies": 1,
+   "tracks": 30,
+   "ms_per_s": 205.4,
+   "core_share": 0.205
+  },
+  {
+   "copies": 2,
+   "tracks": 60,
+   "ms_per_s": 394.8,
+   "core_share": 0.395
+  },
+  {
+   "copies": 4,
+   "tracks": 120,
+   "ms_per_s": 1024.6,
+   "core_share": 1.025
+  }
+ ],
+ "live": [
+  {
+   "buf": -1,
+   "rq": 128,
+   "load_avg": 0.386,
+   "load_peak": 0.947,
+   "dropouts": 6,
+   "longtasks": 51,
+   "longtask_ms": 3534,
+   "longtask_max": 120,
+   "copies": 1
+  },
+  {
+   "buf": 512,
+   "rq": 256,
+   "load_avg": 0.303,
+   "load_peak": 0.718,
+   "dropouts": 0,
+   "longtasks": 32,
+   "longtask_ms": 2107,
+   "longtask_max": 109,
+   "copies": 1
+  },
+  {
+   "buf": -1,
+   "rq": 128,
+   "load_avg": 0.695,
+   "load_peak": 1.069,
+   "dropouts": 20,
+   "longtasks": 75,
+   "longtask_ms": 6250,
+   "longtask_max": 211,
+   "copies": 2
+  },
+  {
+   "buf": 512,
+   "rq": 256,
+   "load_avg": 0.586,
+   "load_peak": 0.995,
+   "dropouts": 5,
+   "longtasks": 68,
+   "longtask_ms": 5727,
+   "longtask_max": 228,
+   "copies": 2
+  },
+  {
+   "buf": -1,
+   "rq": 128,
+   "load_avg": 1.316,
+   "load_peak": 1.5,
+   "dropouts": 894,
+   "longtasks": 67,
+   "longtask_ms": 6928,
+   "longtask_max": 282,
+   "copies": 4
+  },
+  {
+   "buf": 512,
+   "rq": 256,
+   "load_avg": 1.1,
+   "load_peak": 0,
+   "dropouts": 856,
+   "longtasks": 78,
+   "longtask_ms": 7974,
+   "longtask_max": 278,
+   "copies": 4
+  }
+ ]
+}
