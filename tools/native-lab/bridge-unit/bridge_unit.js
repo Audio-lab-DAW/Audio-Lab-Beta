@@ -220,6 +220,30 @@ function makeShell(utilityProcess) {
     await S.call('al:native-stop');
   }
 
+  // 9. task NB-R4 (review A10, C11): the protocol number, request numbers, a late answer
+  {
+    const { EngineBridge } = require(path.join(ROOT, 'native', 'bridge', 'engine-bridge.js'));
+    process.env.FAKE_PROTOCOL = '2';
+    const b = new EngineBridge(FAKE); let err = null;
+    try { await b.start(); } catch (e) { err = e; }
+    const pid = logLines().filter(l => l.started).pop().pid;
+    check(err && /protocol 2, this app speaks 1/.test(err.message), 'an engine that speaks another protocol is refused', err && err.message);
+    check(await until(() => !alive(pid), 3000), 'and it is not left running');
+    delete process.env.FAKE_PROTOCOL;
+    process.env.FAKE_SLOW_FIRST_STATUS_MS = '600';
+    const c = new EngineBridge(FAKE); await c.start();
+    const first = await c.send({ cmd: 'status' }, 200);
+    const second = await c.send({ cmd: 'status' }, 2000);
+    await sleep(700);
+    const third = await c.send({ cmd: 'status' }, 2000);
+    check(first.error === 'no answer' && second.ok && !second.late && third.ok && !third.late, 'a late answer is never taken for the answer to a later command of the same name', [first, second, third]);
+    const cmds = logLines().filter(l => l.pid === c.pid && l.cmd).map(l => l.cmd.req);
+    check(cmds.length >= 3 && new Set(cmds).size === cmds.length && cmds.every(r => Number.isInteger(r)), 'every command carries its own request number', cmds);
+    delete process.env.FAKE_SLOW_FIRST_STATUS_MS;
+    await c.stop();
+    check(await until(() => !alive(c.pid), 4000), 'stop ends the engine');
+  }
+
   try { fs.unlinkSync(LOG); } catch (e) { /* none */ }
   console.log(JSON.stringify({ re: 'bridge_unit', ok: fail === 0, passed: pass, failed: fail }));
   process.exit(fail ? 1 : 0);

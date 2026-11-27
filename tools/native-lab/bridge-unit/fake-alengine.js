@@ -5,16 +5,19 @@
 //   FAKE_DIE_AFTER_READY=1  exits right after saying ready (a crashing engine)
 //   FAKE_SILENT=1           never says ready (a hung engine)
 //   FAKE_HANG_AFTER_MS=n    stops answering n ms after it started, but stays alive (task NB-R3: the watchdog's case)
+//   FAKE_SLOW_FIRST_STATUS_MS=n  answers the first status n ms late (task NB-R4: a late answer must not be taken for the next one)
+//   FAKE_PROTOCOL=n         says protocol n in ready (task NB-R4)
 //   FAKE_PAUSE_READ=1       takes the sound connection but never reads from it (task NB-R3: back-pressure)
 'use strict';
 const fs = require('fs');
 const net = require('net');
 const LOG = process.env.FAKE_LOG || '';
 const log = o => { if (LOG) fs.appendFileSync(LOG, JSON.stringify(Object.assign({ pid: process.pid }, o)) + '\n'); };
-const say = o => process.stdout.write(JSON.stringify(o) + '\n');
+let curReq, slowDone = false;   // task NB-R4: answers carry the command's request number
+const say = o => process.stdout.write(JSON.stringify(o.re !== undefined && curReq !== undefined ? Object.assign({ req: curReq }, o) : o) + '\n');
 
 let rate = 48000, dev = null, volume = 0.5, mute = false, server = null, frames = 0, bytes = 0, sockPath = '';
-if (process.env.FAKE_SILENT !== '1') say({ ev: 'ready', pid: process.pid, version: 'fake' });
+if (process.env.FAKE_SILENT !== '1') say({ ev: 'ready', pid: process.pid, version: 'fake', protocol: process.env.FAKE_PROTOCOL !== undefined ? Number(process.env.FAKE_PROTOCOL) : 1 });
 if (process.env.FAKE_DIE_AFTER_READY === '1') setTimeout(() => process.exit(3), 50);
 log({ started: true });
 
@@ -28,6 +31,7 @@ process.stdin.on('data', chunk => {
     if (HANG_AT && Date.now() >= HANG_AT) continue;
     let m; try { m = JSON.parse(line); } catch (e) { say({ re: '?', ok: false, error: 'not a JSON object' }); continue; }
     log({ cmd: m });
+    curReq = m.req;
     const re = m.cmd;
     switch (m.cmd) {
       case 'devices': say({ re, defaultOutput: 1, devices: [{ id: 1, uid: 'fake-dac', name: 'Fake DAC', rates: [44100, 48000, 96000] }] }); break;
@@ -36,14 +40,16 @@ process.stdin.on('data', chunk => {
       case 'volume': volume = +m.value; say({ re, ok: true, value: volume }); break;
       case 'mute': mute = !!m.on; say({ re, ok: true, mute }); break;
       case 'clock': say({ re, ok: m.mode === 'exact' || m.mode === 'follow', mode: m.mode }); break;
-      case 'status': say({ re, ok: true, device: dev, volume, mute, socketFrames: frames, socketBytes: bytes }); break;
+      case 'status':
+        if (process.env.FAKE_SLOW_FIRST_STATUS_MS && !slowDone) { slowDone = true; const rq = m.req, ans = { re, req: rq, ok: true, late: true }; setTimeout(() => process.stdout.write(JSON.stringify(ans) + '\n'), Number(process.env.FAKE_SLOW_FIRST_STATUS_MS)); break; }
+        say({ re, ok: true, device: dev, volume, mute, socketFrames: frames, socketBytes: bytes }); break;
       case 'source':
         if (server) { server.close(); server = null; }
         if (m.type === 'socket' && m.pageRate !== rate) { say({ re, ok: false, error: 'pageRate ' + m.pageRate + ' is not the device rate ' + rate, pageRate: m.pageRate, deviceRate: rate }); break; }
         if (m.type === 'socket') {
           sockPath = m.path; try { fs.unlinkSync(sockPath); } catch (e) { /* none */ }
           server = net.createServer(c => { if (process.env.FAKE_PAUSE_READ === '1') { c.pause(); return; } c.on('data', d => { bytes += d.length; frames = Math.floor(bytes / 8); }); });
-          server.listen(sockPath, () => say({ re, ok: true, type: 'socket', path: sockPath, clock: m.clock }));
+          const rq = m.req; server.listen(sockPath, () => process.stdout.write(JSON.stringify({ re, req: rq, ok: true, type: 'socket', path: sockPath, clock: m.clock }) + '\n'));
         } else say({ re, ok: true, type: m.type });
         break;
       case 'quit': say({ re, ok: true }); setTimeout(() => process.exit(0), 10); break;

@@ -11,7 +11,11 @@
 //     pageRate (task NB-R2): the page's AudioContext rate; refused unless it equals the device's rate
 //   eng.feed(float32StereoInterleaved);            // as it arrives from the page
 //   eng.on('volume', e => ...); eng.on('devices', e => ...); eng.on('rate', e => ...);
+// Protocol (task NB-R4, review A10): the engine's 'ready' must say protocol PROTOCOL; every command carries a request
+// number ('req') and its answer is matched by that number, so an answer that comes late can never be taken for the
+// answer to a later command of the same name.
 'use strict';
+const PROTOCOL = 1;
 const { spawn } = require('child_process');
 const net = require('net');
 const os = require('os');
@@ -19,7 +23,7 @@ const path = require('path');
 const { EventEmitter } = require('events');
 
 class EngineBridge extends EventEmitter {
-  constructor(exe) { super(); this.exe = exe; this.proc = null; this.waiting = []; this.sock = null; this.buf = ''; this.pid = 0; this.fed = 0; }
+  constructor(exe) { super(); this.exe = exe; this.proc = null; this.waiting = []; this.sock = null; this.buf = ''; this.pid = 0; this.fed = 0; this.seq = 0; this.protocol = 0; }
 
   start() {
     return new Promise((resolve, reject) => {
@@ -35,11 +39,21 @@ class EngineBridge extends EventEmitter {
           const line = this.buf.slice(0, i); this.buf = this.buf.slice(i + 1);
           let m; try { m = JSON.parse(line); } catch (e) { continue; }
           if (m.ev) {
-            if (m.ev === 'ready') { this.pid = m.pid; if (!done) { done = true; clearTimeout(timer); resolve(m); } }
+            if (m.ev === 'ready') {
+              this.pid = m.pid; this.protocol = +m.protocol || 0;
+              if (!done) {
+                done = true; clearTimeout(timer);
+                if (this.protocol !== PROTOCOL) {   // an engine from another version of the app: do not talk to it
+                  const p = this.proc; try { p.kill('SIGKILL'); } catch (e) { /* gone */ }
+                  reject(new Error('the engine speaks protocol ' + (m.protocol === undefined ? 'none' : m.protocol) + ', this app speaks ' + PROTOCOL)); return;
+                }
+                resolve(m);
+              }
+            }
             this.emit(m.ev, m);
           } else if (m.re !== undefined) {
-            const k = this.waiting.findIndex(w => w.cmd === m.re);
-            if (k >= 0) this.waiting.splice(k, 1)[0].resolve(m);
+            const k = m.req !== undefined ? this.waiting.findIndex(w => w.req === m.req) : -1;   // late answers to a timed-out request find nobody
+            if (k >= 0) { const w = this.waiting.splice(k, 1)[0]; delete m.req; w.resolve(m); }
           }
         }
       });
@@ -52,17 +66,20 @@ class EngineBridge extends EventEmitter {
   send(obj, timeoutMs = 15000) {
     return new Promise(resolve => {
       if (!this.proc) return resolve({ ok: false, error: 'the engine is not running' });
-      const w = { cmd: obj.cmd, resolve };
+      const req = ++this.seq;
+      const w = { cmd: obj.cmd, req, resolve };
       this.waiting.push(w);
       setTimeout(() => { const k = this.waiting.indexOf(w); if (k >= 0) { this.waiting.splice(k, 1); resolve({ ok: false, error: 'no answer' }); } }, timeoutMs);
-      this.proc.stdin.write(JSON.stringify(obj) + '\n');
+      this.proc.stdin.write(JSON.stringify(Object.assign({}, obj, { req })) + '\n');
     });
   }
   devices() { return this.send({ cmd: 'devices' }); }
   formats(o = {}) { return this.send(Object.assign({ cmd: 'formats' }, o)); }
   open(o = {}) { return this.send(Object.assign({ cmd: 'open' }, o)); }
   close() { return this.send({ cmd: 'close' }); }
-  volume(value) { return this.send({ cmd: 'volume', value }); }
+  // task NB-R4: the engine ramps the device volume; above the loudest level the device has had it answers
+  // { ok: false, needsConfirm: true, ceiling }: ask the user, then call again with confirm true
+  volume(value, confirm) { return this.send({ cmd: 'volume', value, confirm: !!confirm }); }
   mute(on) { return this.send({ cmd: 'mute', on: !!on }); }
   status() { return this.send({ cmd: 'status' }); }
   tone() { return this.send({ cmd: 'source', type: 'tone' }); }
@@ -98,7 +115,10 @@ class EngineBridge extends EventEmitter {
     if (!this.proc) return;
     const p = this.proc;
     await this.send({ cmd: 'quit' }, 3000);
-    setTimeout(() => { try { p.kill(); } catch (e) {} }, 1500);
+    // review C11: a polite signal after 1.5 s, and if even that is ignored, SIGKILL after 3 s
+    let gone = false; p.once('exit', () => { gone = true; });
+    setTimeout(() => { if (!gone) try { p.kill(); } catch (e) {} }, 1500);
+    setTimeout(() => { if (!gone) try { p.kill('SIGKILL'); } catch (e) {} }, 3000);
   }
 }
 

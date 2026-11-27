@@ -1,5 +1,6 @@
 // Reads one flat JSON object per line: {"cmd":"open","rate":48000,"exclusive":true}. Task NB-N1.
 #pragma once
+#include <cstdint>
 #include <cstdlib>
 #include <map>
 #include <string>
@@ -19,7 +20,20 @@ inline bool parseMsg(const std::string& s, Msg& m) {
         if (i >= n || s[i] != '"') return false;
         i++; out.clear();
         while (i < n && s[i] != '"') {
-            if (s[i] == '\\' && i + 1 < n) { i++; char c = s[i]; out += c == 'n' ? '\n' : c == 't' ? '\t' : c; }
+            if (s[i] == '\\' && i + 1 < n) {
+                i++; char c = s[i];
+                if (c == 'u') {   // task NB-R4 (review C10): \uXXXX to UTF-8, surrogate pairs joined
+                    auto hex4 = [&](size_t at, uint32_t& v) { if (at + 4 > n) return false; v = 0; for (size_t k = at; k < at + 4; k++) { char h = s[k]; v <<= 4; if (h >= '0' && h <= '9') v |= (uint32_t)(h - '0'); else if (h >= 'a' && h <= 'f') v |= (uint32_t)(h - 'a' + 10); else if (h >= 'A' && h <= 'F') v |= (uint32_t)(h - 'A' + 10); else return false; } return true; };
+                    uint32_t cp; if (!hex4(i + 1, cp)) return false; i += 4;
+                    if (cp >= 0xD800 && cp < 0xDC00) { uint32_t lo; if (i + 2 < n && s[i + 1] == '\\' && s[i + 2] == 'u' && hex4(i + 3, lo) && lo >= 0xDC00 && lo < 0xE000) { cp = 0x10000 + ((cp - 0xD800) << 10) + (lo - 0xDC00); i += 6; } else cp = 0xFFFD; }
+                    else if (cp >= 0xDC00 && cp < 0xE000) cp = 0xFFFD;
+                    if (cp < 0x80) out += (char)cp;
+                    else if (cp < 0x800) { out += (char)(0xC0 | (cp >> 6)); out += (char)(0x80 | (cp & 0x3F)); }
+                    else if (cp < 0x10000) { out += (char)(0xE0 | (cp >> 12)); out += (char)(0x80 | ((cp >> 6) & 0x3F)); out += (char)(0x80 | (cp & 0x3F)); }
+                    else { out += (char)(0xF0 | (cp >> 18)); out += (char)(0x80 | ((cp >> 12) & 0x3F)); out += (char)(0x80 | ((cp >> 6) & 0x3F)); out += (char)(0x80 | (cp & 0x3F)); }
+                }
+                else out += c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c == 'b' ? '\b' : c == 'f' ? '\f' : c;
+            }
             else out += s[i];
             i++;
         }

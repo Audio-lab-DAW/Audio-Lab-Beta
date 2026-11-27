@@ -6,7 +6,9 @@
 //   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120,"clock":"exact"|"follow",
 //    "pageRate":48000}   (task NB-R2: a socket source must say its rate; refused unless it equals the device's)
 //   {"cmd":"clock","mode":"exact"|"follow"}   (task NB-N2b: follow the sender's clock smoothly, see follow.h)
-//   {"cmd":"volume","value":0.5}   {"cmd":"mute","on":true}   {"cmd":"status"}   {"cmd":"close"}   {"cmd":"quit"}
+//   {"cmd":"volume","value":0.5,"confirm":false}   {"cmd":"mute","on":true}   {"cmd":"status"}   {"cmd":"close"}   {"cmd":"quit"}
+// Protocol 1 (task NB-R4): "ready" says "protocol":1; a command may carry "req":<number>, its answer carries the same.
+// The device volume moves in a ramp, and above the loudest level the device has had it needs "confirm":true.
 // Things that change outside the program arrive as {"ev":"volume","value":0.4}, {"ev":"devices"}, ...
 // Sound reaches it through a local socket as plain 32-bit float stereo at the device's rate and is handed to
 // the device untouched (see ring.h).
@@ -20,6 +22,7 @@
 #include <cmath>
 #include <cstdio>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -95,6 +98,7 @@ static int selftest() {
       check(ok, "follower keeps up with a sender whose clock is off");
     }
     { Msg m; check(parseMsg("{\"cmd\":\"open\",\"rate\":96000,\"exclusive\":true,\"uid\":\"a b\\\"c\"}", m) && m.str("cmd") == "open" && m.num("rate") == 96000 && m.flag("exclusive") && m.str("uid") == "a b\"c", "message reader"); }
+    { Msg m; check(parseMsg("{\"uid\":\"caf\\u00e9 \\ud83d\\ude00\\n\"}", m) && m.str("uid") == "caf\xc3\xa9 \xf0\x9f\x98\x80\n", "message reader: \\u escapes to UTF-8 (task NB-R4)"); }
     say(std::string("{\"re\":\"selftest\",\"ok\":") + tf(bad == 0) + ",\"failed\":" + std::to_string(bad) + ",\"notes\":" + jstr(notes) + ",\"measured\":" + jstr(notesInfo) + "}");
     return bad ? 1 : 0;
 }
@@ -118,6 +122,13 @@ struct Eng {
     std::mutex clientLock; int clientFd = -1;   // task NB-R3: the connected sender, so stopSocket can end a read that would never return
     std::string sockPath;
     std::atomic<float> peak{0};
+    // task NB-R4: output protection (C6), the stream restarted on a format change (C7), the device volume's ramp and ceiling
+    std::atomic<uint64_t> nonFinite{0}, clipped{0}, formatRestarts{0};
+    std::mutex devLock;                      // open, close and the format restart
+    std::thread fmtThread;
+    std::thread rampThread; std::atomic<bool> ramping{false}, rampStop{false};
+    std::map<uint32_t, double> ceiling;      // per device: the loudest level it has had (command thread only)
+    std::mutex ceilLock;
 };
 static Eng E;
 
@@ -137,6 +148,12 @@ static void render(void*, float** out, int, int frames) {
         E.mismatchFrames += E.ring.drain();
         memset(out[0], 0, sizeof(float) * frames); memset(out[1], 0, sizeof(float) * frames);
     } else { memset(out[0], 0, sizeof(float) * frames); memset(out[1], 0, sizeof(float) * frames); }
+    // task NB-R4 (review C6): NaN and infinity become silence, anything past full scale is held at full scale. Every legal
+    // sample (-1 to 1, and -0) passes untouched, so this costs nothing in bit-perfect terms.
+    uint32_t nf = 0, cl = 0;
+    for (int c = 0; c < 2; c++) { float* o = out[c]; for (int i = 0; i < frames; i++) { float x = o[i]; if (!std::isfinite(x)) { o[i] = 0.f; nf++; } else if (x > 1.f) { o[i] = 1.f; cl++; } else if (x < -1.f) { o[i] = -1.f; cl++; } } }
+    if (nf) E.nonFinite += nf;
+    if (cl) E.clipped += cl;
     float pk = E.peak.load();
     for (int i = 0; i < frames; i++) { float a = std::fabs(out[0][i]), b = std::fabs(out[1][i]); if (a > pk) pk = a; if (b > pk) pk = b; }
     E.peak.store(pk);
@@ -204,6 +221,20 @@ static std::string formatsJson(uint32_t dev) {
     for (size_t i = 0; i < v.size(); i++) s += std::string(i ? "," : "") + "{\"rate\":" + jnum(v[i].rate) + ",\"bits\":" + std::to_string(v[i].bits) + ",\"float\":" + tf(v[i].isFloat) + ",\"mixable\":" + tf(v[i].mixable) + ",\"channels\":" + std::to_string(v[i].channels) + "}";
     return s + "]";
 }
+static double ceilingOf(uint32_t dev) { std::lock_guard<std::mutex> g(E.ceilLock); auto it = E.ceiling.find(dev); return it == E.ceiling.end() ? -1 : it->second; }
+static void raiseCeiling(uint32_t dev, double v) { if (!(v >= 0)) return; std::lock_guard<std::mutex> g(E.ceilLock); auto it = E.ceiling.find(dev); if (it == E.ceiling.end() || v > it->second) E.ceiling[dev] = v; }
+static void stopRamp() { E.rampStop = true; if (E.rampThread.joinable()) E.rampThread.join(); E.rampStop = false; E.ramping = false; }
+
+// task NB-R4 (review C10): a number from the page is used only when it is a plain finite number in range
+static bool numArg(const Msg& m, const char* k, double lo, double hi, bool whole, double& out, std::string& err) {
+    std::string raw = m.str(k); char* end = nullptr;
+    double v = raw.empty() ? NAN : strtod(raw.c_str(), &end);
+    if (raw.empty() || (end && *end) || !std::isfinite(v) || v < lo || v > hi || (whole && v != std::floor(v))) {
+        err = std::string(k) + " must be " + (whole ? "a whole number" : "a number") + " from " + jnum(lo) + " to " + jnum(hi) + " (got " + (raw.empty() ? "nothing" : raw) + ")";
+        return false;
+    }
+    out = v; return true;
+}
 static std::string statusJson() {
     DeviceInfo d = E.dev ? deviceInfo(E.dev) : DeviceInfo();
     uint64_t cb = E.stream.callbacks.load();
@@ -211,6 +242,12 @@ static std::string statusJson() {
     std::string s = std::string("\"open\":") + tf(E.isOpen) + ",\"device\":" + jstr(d.name) + ",\"uid\":" + jstr(d.uid) + ",\"rate\":" + jnum(d.rate) + ",\"buffer\":" + std::to_string(d.buffer) +
         ",\"exclusive\":" + tf(d.hogPid == (int)getpid()) + ",\"exclusiveOwner\":" + std::to_string(d.hogPid) + ",\"onTheWire\":" + jstr(d.physicalFormat) + ",\"handedToUs\":" + jstr(E.stream.formatText) +
         ",\"volume\":" + jnum(vol) + ",\"mute\":" + tf(mute) + ",\"latencyFrames\":" + std::to_string(d.latency + d.safetyOffset + d.streamLatency + d.buffer) +
+        // task NB-R4 (review C8): the figure above is the device's part only; sound from the page also waits in the ring
+        ",\"deviceLatencyFrames\":" + std::to_string(d.latency + d.safetyOffset + d.streamLatency + d.buffer) +
+        ",\"ringLatencyFrames\":" + std::to_string(E.source.load() == 3 && E.ring.frames ? E.ring.fill() : 0) +
+        ",\"latencyNote\":" + jstr("device part (buffer, device, safety and stream latency) plus, for sound from the page, the ring; the page's own output buffering is not included") +
+        ",\"protect\":{\"nonFinite\":" + std::to_string(E.nonFinite.load()) + ",\"clipped\":" + std::to_string(E.clipped.load()) + "}" +
+        ",\"dither\":" + tf(E.stream.dither16) + ",\"formatRestarts\":" + std::to_string(E.formatRestarts.load()) + ",\"volumeCeiling\":" + jnum(ceilingOf(E.dev)) + ",\"ramping\":" + tf(E.ramping.load()) +
         ",\"callbacks\":" + std::to_string(cb) + ",\"framesPerCallbackMin\":" + std::to_string(cb ? E.stream.minFrames.load() : 0) + ",\"framesPerCallbackMax\":" + std::to_string(E.stream.maxFrames.load()) +
         ",\"overloads\":" + std::to_string(E.stream.overloads.load()) + ",\"renderAvgMicroseconds\":" + jnum(cb ? E.stream.sumNs.load() / 1000.0 / cb : 0) + ",\"renderWorstMicroseconds\":" + jnum(E.stream.worstNs.load() / 1000.0) +
         ",\"source\":" + std::to_string(E.source.load()) + ",\"peak\":" + jnum(E.peak.load()) +
@@ -221,7 +258,9 @@ static std::string statusJson() {
     return s;
 }
 
-static void closeDevice(bool releaseHog) {
+static void closeDeviceLocked(bool releaseHog);
+static void closeDevice(bool releaseHog) { std::lock_guard<std::mutex> g(E.devLock); closeDeviceLocked(releaseHog); }
+static void closeDeviceLocked(bool releaseHog) {
     if (E.isOpen) { E.stream.stop(); E.isOpen = false; }
     if (releaseHog && E.hog && E.dev) { int o; std::string e; setHog(E.dev, false, o, e); E.hog = false; }
 }
@@ -230,13 +269,19 @@ static void resetCounters() {
 }
 static std::string openDevice(const Msg& m) {
     auto t0 = std::chrono::steady_clock::now();
-    uint32_t want = 0;
+    uint32_t want = 0; std::string bad; double x = 0;
+    if (m.has("id") && !m.has("uid") && !numArg(m, "id", 1, 4294967295.0, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
+    if (m.has("buffer") && !numArg(m, "buffer", 1, 65536, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
+    if (m.has("bits") && !numArg(m, "bits", 8, 32, true, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
+    if (m.has("rate") && !numArg(m, "rate", 0, 10000000, false, x, bad)) return "\"ok\":false,\"error\":" + jstr(bad);
+    std::lock_guard<std::mutex> dl(E.devLock);
     if (m.has("uid")) want = deviceByUid(m.str("uid"));
     else if (m.has("id")) want = (uint32_t)m.num("id");
     else want = defaultOutputDevice();
     if (!want) return "\"ok\":false,\"error\":\"no such device\"";
     std::string notes, err;
-    closeDevice(want != E.dev || !m.flag("exclusive"));
+    if (want != E.dev) stopRamp();
+    closeDeviceLocked(want != E.dev || !m.flag("exclusive"));
     E.dev = want; E.fallback = m.flag("fallback", true);
     DeviceInfo before = deviceInfo(want);
     if (before.outChannels < 1) return "\"ok\":false,\"error\":\"this device has no outputs\"";
@@ -251,6 +296,9 @@ static std::string openDevice(const Msg& m) {
     E.rate = deviceInfo(want).rate;
     if (E.source.load() == 3) E.rateOk = E.pageRate.load() == E.rate.load();   // another device or rate: the contract is checked again
     resetCounters();
+    { double v0 = -1; if (getVolume(want, v0)) { std::lock_guard<std::mutex> g(E.ceilLock); if (!E.ceiling.count(want)) E.ceiling[want] = v0; } }
+    E.stream.dither16 = m.flag("dither", false);   // task NB-R4 (review C7): off unless asked for
+    E.nonFinite = 0; E.clipped = 0;
     bool ok = E.stream.start(want, render, nullptr, err);
     E.isOpen = ok;
     E.watcher.watchDevice(want);
@@ -260,7 +308,26 @@ static std::string openDevice(const Msg& m) {
 
 static void onWatch(void*, const char* what, uint32_t dev) {
     std::string w = what;
-    if (w == "volume" || w == "mute") { double v = -1; getVolume(E.dev, v); bool mu = false; getMute(E.dev, mu); say("{\"ev\":\"volume\",\"value\":" + jnum(v) + ",\"mute\":" + tf(mu) + "}"); }
+    if (w == "volume" || w == "mute") {
+        if (E.ramping.load()) return;   // task NB-R4: the ramp's own steps; one event comes when it ends
+        double v = -1; getVolume(E.dev, v); bool mu = false; getMute(E.dev, mu);
+        raiseCeiling(E.dev, v);         // a level set outside the engine (the user in Audio MIDI Setup, the DAC's knob reported back)
+        say("{\"ev\":\"volume\",\"value\":" + jnum(v) + ",\"mute\":" + tf(mu) + "}");
+    }
+    else if (w == "format") {
+        // task NB-R4 (review C7): another program, Audio MIDI Setup or a re-plug changed the format: start the stream
+        // again so it writes the new layout (never the old bytes into a new format). Not on the listener's thread.
+        if (E.fmtThread.joinable()) E.fmtThread.join();
+        E.fmtThread = std::thread([] {
+            std::lock_guard<std::mutex> g(E.devLock);
+            if (!E.isOpen) return;
+            std::string now = virtualFormatText(E.dev);
+            if (now == E.stream.formatText) { say("{\"ev\":\"format\",\"handedToUs\":" + jstr(now) + ",\"restarted\":false}"); return; }
+            bool d16 = E.stream.dither16; E.stream.stop(); E.stream.dither16 = d16;
+            std::string err; bool ok = E.stream.start(E.dev, render, nullptr, err); E.isOpen = ok; E.formatRestarts++;
+            say("{\"ev\":\"format\",\"handedToUs\":" + jstr(E.stream.formatText) + ",\"restarted\":" + tf(ok) + ",\"error\":" + jstr(err) + "}");
+        });
+    }
     else if (w == "rate") {
         // task NB-R2: the device changed rate (the user, Audio MIDI Setup, another program). While the page sends at the
         // old rate the device plays silence; the page is told to make its context again at the new rate and send
@@ -287,18 +354,53 @@ static int run() {
 #else
     const char* backend = "null";
 #endif
-    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.4\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"pid\":" + std::to_string((int)getpid()) + "}");
+    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.5\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"protocol\":1,\"pid\":" + std::to_string((int)getpid()) + "}");
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
         Msg m;
-        if (!parseMsg(line, m)) { say("{\"re\":\"?\",\"ok\":false,\"error\":\"not a JSON object\"}"); continue; }
-        std::string c = m.str("cmd"), re = "{\"re\":" + jstr(c) + ",";
+        // task NB-R4 (review A10): "req" comes back in the answer, so a caller matches answers by number, not by name
+        if (!parseMsg(line, m)) {
+            std::string rq; size_t k = line.find("\"req\":");
+            if (k != std::string::npos) { char* e = nullptr; double v = strtod(line.c_str() + k + 6, &e); if (e != line.c_str() + k + 6 && std::isfinite(v)) rq = ",\"req\":" + jnum(v); }
+            say("{\"re\":\"?\"" + rq + ",\"ok\":false,\"error\":\"not a JSON object\"}"); continue;
+        }
+        std::string c = m.str("cmd"), rq;
+        { double v = 0; std::string e; if (m.has("req") && numArg(m, "req", -9007199254740991.0, 9007199254740991.0, false, v, e)) rq = ",\"req\":" + jnum(v); }
+        std::string re = "{\"re\":" + jstr(c) + rq + ",";
         if (c == "devices") say(re + "\"defaultOutput\":" + std::to_string(defaultOutputDevice()) + ",\"devices\":" + devicesJson(listDevices()) + "}");
-        else if (c == "formats") { uint32_t d = m.has("uid") ? deviceByUid(m.str("uid")) : m.has("id") ? (uint32_t)m.num("id") : E.dev.load(); say(re + "\"formats\":" + formatsJson(d) + "}"); }
+        else if (c == "formats") { double x = 0; std::string e; if (m.has("id") && !m.has("uid") && !numArg(m, "id", 1, 4294967295.0, true, x, e)) { say(re + "\"ok\":false,\"error\":" + jstr(e) + "}"); continue; }
+            uint32_t d = m.has("uid") ? deviceByUid(m.str("uid")) : m.has("id") ? (uint32_t)x : E.dev.load(); say(re + "\"formats\":" + formatsJson(d) + "}"); }
         else if (c == "open") say(re + openDevice(m) + "}");
         else if (c == "close") { closeDevice(true); say(re + "\"ok\":true}"); }
-        else if (c == "volume") { std::string e; bool ok = setVolume(E.dev, m.num("value"), e); double v = -1; getVolume(E.dev, v); say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(e) + ",\"value\":" + jnum(v) + "}"); }
+        else if (c == "volume") {
+            // task NB-R4 (review C6): a ramp, never a jump; louder than the device has been only with "confirm":true
+            double want = 0, cur = -1; std::string e; uint32_t dev = E.dev.load();
+            if (!numArg(m, "value", 0, 1, false, want, e)) { getVolume(dev, cur); say(re + "\"ok\":false,\"error\":" + jstr(e) + ",\"value\":" + jnum(cur) + "}"); continue; }
+            if (!getVolume(dev, cur)) { bool ok = setVolume(dev, want, e); say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(e) + ",\"value\":-1}"); continue; }
+            double ceil = ceilingOf(dev); if (ceil < 0) { raiseCeiling(dev, cur); ceil = ceilingOf(dev); }
+            if (want > ceil + 1e-6 && !m.flag("confirm")) {
+                say(re + "\"ok\":false,\"needsConfirm\":true,\"ceiling\":" + jnum(ceil) + ",\"value\":" + jnum(cur) + ",\"error\":" + jstr("louder than this device has been (" + jnum(ceil) + "): ask the user, then send it again with confirm") + "}");
+                continue;
+            }
+            if (m.flag("confirm")) raiseCeiling(dev, want);
+            stopRamp(); E.ramping = true;
+            E.rampThread = std::thread([dev, cur, want] {
+                double x = cur; const double step = 0.02;
+                while (!E.rampStop.load()) {
+                    if (std::fabs(want - x) <= step) x = want; else x += want > x ? step : -step;
+                    std::string er; setVolume(dev, x, er);
+                    if (x == want) break;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));   // the last step's own event passes while ramping is still set
+                E.ramping = false;
+                double v = -1; getVolume(dev, v); bool mu = false; getMute(dev, mu);
+                say("{\"ev\":\"volume\",\"value\":" + jnum(v) + ",\"mute\":" + tf(mu) + ",\"ramped\":true}");
+            });
+            int steps = (int)std::ceil(std::fabs(want - cur) / 0.02);
+            say(re + "\"ok\":true,\"error\":\"\",\"value\":" + jnum(cur) + ",\"target\":" + jnum(want) + ",\"ramping\":true,\"rampMilliseconds\":" + std::to_string(steps * 5) + ",\"ceiling\":" + jnum(ceilingOf(dev)) + "}");
+        }
         else if (c == "mute") { bool ok = setMute(E.dev, m.flag("on")); bool mu = false; getMute(E.dev, mu); say(re + "\"ok\":" + tf(ok) + ",\"mute\":" + tf(mu) + "}"); }
         else if (c == "source") {
             // task NB-R2: every switch stops the socket's thread first and waits for the device's thread to leave
@@ -308,15 +410,21 @@ static int run() {
             else if (t == "file") { Wav w; ok = wavRead(m.str("path"), w, err) && w.ch == 2; if (ok) { stopSocket(); quiesce(); E.file = w; E.filePos = 0; E.source = 2; } else if (err.empty()) err = "needs a stereo 32-bit float WAV"; }
             else if (t == "socket") {
                 double dr = E.rate.load(); if (!(dr > 0)) dr = 48000;
-                double pr = m.num("pageRate", 0);
+                double pr = m.num("pageRate", 0), pf = 30, hm = 120, lp = 2000; std::string be;
+                // task NB-R4 (review C10): the ring's sizes come from these, so they are checked first (the ring holds 2 s)
+                if (m.has("prefillMs") && !numArg(m, "prefillMs", 1, 1000, false, pf, be)) { ok = false; err = be; }
+                if (ok && m.has("highMs") && !numArg(m, "highMs", 2, 1900, false, hm, be)) { ok = false; err = be; }
+                if (ok && hm <= pf) { ok = false; err = "highMs must be above prefillMs"; }
+                if (ok && m.has("limitPpm") && !numArg(m, "limitPpm", 0, 20000, false, lp, be)) { ok = false; err = be; }
+                if (!ok) { say(re + "\"ok\":false,\"error\":" + jstr(err) + ",\"type\":\"socket\"}"); continue; }
                 if (!(pr > 0)) { ok = false; err = "the page's sample rate is missing (pageRate); the device runs " + jnum(dr) + " Hz"; }
                 else if (pr != dr) { ok = false; err = "the page renders at " + jnum(pr) + " Hz but the device runs " + jnum(dr) + " Hz: make the page's AudioContext at " + jnum(dr) + " Hz"; }
                 extra = ",\"pageRate\":" + jnum(pr) + ",\"deviceRate\":" + jnum(dr);
                 if (ok) {
                     stopSocket(); quiesce();
-                    E.ring.init((size_t)(dr * 2), (size_t)(dr * m.num("prefillMs", 30) / 1000), (size_t)(dr * m.num("highMs", 120) / 1000));
+                    E.ring.init((size_t)(dr * 2), (size_t)(dr * pf / 1000), (size_t)(dr * hm / 1000));
                     E.ring.rate = dr; E.ring.follow = m.str("clock") == "follow";   // task NB-N2b: "exact" (default) or "follow"
-                    E.ring.steer.limit = m.num("limitPpm", 2000) / 1e6;
+                    E.ring.steer.limit = lp / 1e6;
                     E.pageRate = pr; E.rateOk = true; E.mismatchFrames = 0;
                     ok = startSocket(m.str("path"), err);
                     if (ok) E.source = 3;
@@ -330,15 +438,18 @@ static int run() {
         else if (c == "selftest") selftest();
 #ifndef __APPLE__
         // the null device only: change a pretend device as another program would ({"change":"rate","value":96000})
-        else if (c == "null") { std::string e = nullExternal(m.str("change"), m.num("value", 0), m.has("id") ? (uint32_t)m.num("id") : E.dev.load()); say(re + "\"ok\":" + tf(e.empty()) + ",\"error\":" + jstr(e) + "}"); }
+        else if (c == "null") { double x = 0; std::string e; if (m.has("id") && !numArg(m, "id", 1, 4294967295.0, true, x, e)) { say(re + "\"ok\":false,\"error\":" + jstr(e) + "}"); continue; }
+            e = nullExternal(m.str("change"), m.num("value", 0), m.has("id") ? (uint32_t)x : E.dev.load()); say(re + "\"ok\":" + tf(e.empty()) + ",\"error\":" + jstr(e) + "}"); }
 #endif
         else if (c == "quit") { say(re + "\"ok\":true}"); break; }
         else say(re + "\"ok\":false,\"error\":\"unknown command\"}");
     }
     E.source = 0;
+    stopRamp();
     stopSocket();
-    closeDevice(true);
     E.watcher.stop();
+    if (E.fmtThread.joinable()) E.fmtThread.join();
+    closeDevice(true);
     return 0;
 }
 

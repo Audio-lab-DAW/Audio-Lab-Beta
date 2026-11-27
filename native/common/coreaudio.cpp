@@ -417,6 +417,7 @@ static OSStatus watchProc(AudioObjectID obj, UInt32 n, const AudioObjectProperty
             case kAudioDevicePropertyDeviceIsAlive: what = "alive"; break;
             case kAudioDevicePropertyHogMode: what = "exclusive"; break;
             case kAudioDevicePropertyBufferFrameSize: what = "buffer"; break;
+            case kAudioStreamPropertyVirtualFormat: case kAudioStreamPropertyPhysicalFormat: what = "format"; break;   // task NB-R4 (C7)
             default: break;
         }
         if (what && w->fn) w->fn(w->user, what, obj == kAudioObjectSystemObject ? 0 : (uint32_t)obj);
@@ -441,9 +442,17 @@ void Watcher::start(WatchFn f, void* u) {
 }
 void Watcher::watchDevice(uint32_t d) {
     std::vector<AudioObjectPropertyAddress> v; deviceWatchAddrs(v);
+    // task NB-R4 (review C7): the format lives on the device's first output stream, not on the device
+    AudioObjectPropertyAddress sf[2] = { addr(kAudioStreamPropertyVirtualFormat), addr(kAudioStreamPropertyPhysicalFormat) };
     if (dev) for (auto& a : v) if (AudioObjectHasProperty(dev, &a)) AudioObjectRemovePropertyListener(dev, &a, watchProc, this);
-    dev = d;
+    if (stream) for (auto& a : sf) if (AudioObjectHasProperty(stream, &a)) AudioObjectRemovePropertyListener(stream, &a, watchProc, this);
+    dev = d; stream = 0;
     if (dev) for (auto& a : v) if (AudioObjectHasProperty(dev, &a)) AudioObjectAddPropertyListener(dev, &a, watchProc, this);
+    if (dev) {
+        auto sb = getBytes(dev, addr(kAudioDevicePropertyStreams, kAudioObjectPropertyScopeOutput));
+        if (sb.size() >= sizeof(AudioStreamID)) stream = *(const AudioStreamID*)sb.data();
+        if (stream) for (auto& a : sf) if (AudioObjectHasProperty(stream, &a)) AudioObjectAddPropertyListener(stream, &a, watchProc, this);
+    }
 }
 void Watcher::stop() {
     watchDevice(0);

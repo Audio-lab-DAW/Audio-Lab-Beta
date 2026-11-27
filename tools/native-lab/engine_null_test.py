@@ -13,7 +13,12 @@ Checks:
   device volume both ways, unplugging, exclusive use held by someone else;
   source switching under load (review C1): 300 switches between socket, tone, file and silence while a sender writes,
     and clock-mode flips: the engine answers every command and does not hang;
-  a sender that stopped sending and never closes (a frozen feeder, task NB-R3) does not hold a source switch.
+  a sender that stopped sending and never closes (a frozen feeder, task NB-R3) does not hold a source switch;
+  task NB-R4 (review C6 to C10, A10): protocol 1 and request numbers (also on a parse error); bad numbers refused
+  without harm; the device volume ramps and needs a confirmation above the loudest level the device has had; NaN,
+  infinity and samples past full scale never reach the device (counted), legal samples untouched; dither off by
+  default; a format change from outside restarts the stream, and 24-bit samples go through the integer path bit
+  for bit; a broken WAV file is refused cleanly.
 """
 import json, os, socket, struct, subprocess, sys, tempfile, threading, time, math
 
@@ -107,6 +112,7 @@ if os.path.exists(REC): os.remove(REC)
 e = Engine()
 ready = e.wait_event("ready", 5)
 check(ready and ready.get("rateContract"), "the engine starts on the null device and says it keeps the rate contract", ready)
+check(ready and ready.get("protocol") == 1, "ready says protocol 1 (task NB-R4)", ready)
 o = e.cmd(cmd="open", uid="al-null-1", rate=48000, buffer=128)
 check(o.get("ok") and o.get("rate") == 48000, "open the null output at 48 kHz, 128 frames", o)
 sock = os.path.join(tempfile.gettempdir(), "al-null-%d.sock" % os.getpid())
@@ -164,7 +170,9 @@ check(st.get("ring", {}).get("received") == 96000 and st.get("rateOk") is True, 
 # ---- device volume both ways, exclusive use, unplugging ------------------------------------------------------------
 n2 = len(e.events)
 v = e.cmd(cmd="volume", value=0.25)
-check(v.get("ok") and abs(v.get("value", 0) - 0.25) < 1e-9, "volume set and read back", v)
+evr = e.wait_event("volume", 3, n2, lambda x: x.get("ramped"))
+check(v.get("ok") and v.get("target") == 0.25 and evr and abs(evr.get("value", 0) - 0.25) < 1e-9, "volume set (in a ramp) and read back", [v, evr])
+n2 = len(e.events)
 e.cmd(cmd="null", change="volume", value=0.75)
 ev = e.wait_event("volume", 3, n2, lambda x: abs(x.get("value", 0) - 0.75) < 1e-9)
 check(ev is not None, "volume changed outside the engine: the engine tells at once", ev)
@@ -218,6 +226,81 @@ st = e.cmd(cmd="status")
 check(st.get("ring", {}).get("connected") is True, "the new sender is connected and stays connected", st.get("ring"))
 frozen.close(); fresh.close(); e.cmd(cmd="source", type="silence")
 
+# ---- task NB-R4: hardening (review C6, C7, C8, C10, A10) ---------------------------------------------------------------
+o = e.cmd(cmd="open", uid="al-null-1", rate=48000, buffer=128)
+st = e.cmd(cmd="status", req=41)
+check(st.get("req") == 41 and st.get("open") is True, "a request number comes back in the answer", st.get("req"))
+check(st.get("dither") is False and "deviceLatencyFrames" in st and "ringLatencyFrames" in st and "latencyNote" in st, "dither off by default; latency given as the device's part and the ring's part", {k: st.get(k) for k in ("dither", "deviceLatencyFrames", "ringLatencyFrames")})
+with e.cv: na = len(e.answers)
+e.p.stdin.write('{"cmd":"status","req":77,,}\n'); e.p.stdin.flush(); time.sleep(0.3)
+with e.cv: bad = [a for a in e.answers[na:] if a.get("re") == "?"]
+check(bad and bad[0].get("req") == 77 and bad[0].get("ok") is False, "a line that is not JSON is answered with its request number, not left waiting", bad)
+for a in bad: e.answers.remove(a)
+refused = []
+for kw in ({"buffer": -5}, {"buffer": 1e12}, {"buffer": 3.5}, {"buffer": "abc"}, {"bits": 99}, {"rate": -48000}, {"id": -1}):
+    r = e.cmd(cmd="open", **(kw if "id" in kw else dict(kw, uid="al-null-1")))
+    refused.append(not r.get("ok") and list(kw)[0] in r.get("error", ""))
+st = e.cmd(cmd="status")
+check(all(refused) and st.get("open") is True and st.get("rate") == 48000, "bad numbers (negative, huge, fractions, text, out of range) are refused by name; the device keeps running", refused)
+r1 = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, prefillMs=1e9)
+r2 = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, prefillMs=100, highMs=50)
+v1 = e.cmd(cmd="volume", value=float("nan")); v2 = e.cmd(cmd="volume", value=2)
+check(not r1.get("ok") and not r2.get("ok") and not v1.get("ok") and not v2.get("ok"), "a ring size out of range, a ring with its top below its prefill, a volume of NaN or 2: refused", [r1.get("error"), r2.get("error"), v1.get("error"), v2.get("error")])
+# the volume: ramp and ceiling (the device has been at 0.75, set outside the engine above)
+ceil0 = e.cmd(cmd="status").get("volumeCeiling")
+v = e.cmd(cmd="volume", value=0.9)
+check(not v.get("ok") and v.get("needsConfirm") and abs(v.get("ceiling", 0) - 0.75) < 1e-9, "louder than the device has been (0.75): refused until confirmed", v)
+n5 = len(e.events)
+t5 = time.time(); v = e.cmd(cmd="volume", value=0.9, confirm=True); mid = e.cmd(cmd="status").get("volume")
+evr = e.wait_event("volume", 3, n5, lambda x: x.get("ramped")); took5 = time.time() - t5
+steps = [x for x in e.events[n5:] if x.get("ev") == "volume" and not x.get("ramped")]
+check(v.get("ok") and v.get("ramping") and evr and abs(evr["value"] - 0.9) < 1e-9, "confirmed: the volume goes to 0.9 in a ramp (%d ms)" % (took5 * 1000), [v, evr])
+check(mid is not None and mid < 0.9, "half way through the ramp the device is not yet at 0.9 (%.2f)" % (mid or -1), mid)
+check(len(steps) == 0, "the ramp's own steps do not flood the page with events (one event at the end)", len(steps))
+v = e.cmd(cmd="volume", value=0.95)
+check(not v.get("ok") and v.get("needsConfirm") and abs(v.get("ceiling", 0) - 0.9) < 1e-9, "the confirmed level is the new ceiling (0.95 needs a confirmation again)", v)
+v = e.cmd(cmd="volume", value=0.2); evr = e.wait_event("volume", 3, len(e.events) - 0, lambda x: x.get("ramped") and abs(x.get("value", 0) - 0.2) < 1e-9)
+check(v.get("ok"), "quieter needs no confirmation", v)
+# output protection
+r = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, prefillMs=30, highMs=120)
+special = [float("nan"), float("inf"), float("-inf"), 2.0, -3.0, 1.0, -1.0, -0.0, 0.5, 1e30]
+def blocksP(total):
+    for k in range(total // 128):
+        fr = [0.25, -0.25] * 128
+        if k == 20: fr[:len(special)] = special
+        yield struct.pack("<%df" % len(fr), *fr)
+stP = threading.Event(); thP = threading.Thread(target=sender, args=(sock, blocksP(48000), 48000, stP, [])); thP.start(); thP.join(); time.sleep(0.4)
+st = e.cmd(cmd="status")
+pr = st.get("protect", {})
+check(pr.get("nonFinite") == 3 and pr.get("clipped") == 3 and st.get("peak", 9) <= 1.0, "NaN and infinity never reach the device (3 counted), samples past full scale held at full scale (3 counted), peak at most 1.0", {"protect": pr, "peak": st.get("peak")})
+# a format change from outside: the stream starts again in the new format; 24-bit samples pass the integer path bit for bit
+r = e.cmd(cmd="source", type="silence")
+n6 = len(e.events)
+x = e.cmd(cmd="null", change="format", value=24, id=1)
+ev = e.wait_event("format", 3, n6)
+st = e.cmd(cmd="status")
+check(x.get("ok") and ev and ev.get("restarted") is True and "24-bit integer" in ev.get("handedToUs", "") and st.get("formatRestarts") == 1, "another program sets 24-bit integer: the engine restarts its stream in that format", ev)
+r = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, prefillMs=60, highMs=600)
+sent24 = []
+def blocks24(total):
+    for b in range(0, total, 128):
+        fr = []
+        for i in range(b, b + 128):
+            v = ((i * 977) % 8388607 - 4194303) / 8388608.0   # exact 24-bit values
+            fr += [v, -v]
+        yield struct.pack("<%df" % len(fr), *fr)
+st24 = threading.Event()
+th24 = threading.Thread(target=sender, args=(sock, blocks24(48000), 48000, st24, sent24)); th24.start(); th24.join(); time.sleep(0.4)
+e.cmd(cmd="source", type="silence")
+d16 = e.cmd(cmd="open", uid="al-null-1", rate=48000, dither=True); st = e.cmd(cmd="status")
+check(st.get("dither") is True, "dither only when asked for", st.get("dither"))
+e.cmd(cmd="null", change="format", value=32, id=1)
+# a broken WAV file (format chunk longer than the file) is refused, nothing read past the end
+bw = os.path.join(out, "broken.wav")
+open(bw, "wb").write(b"RIFF" + struct.pack("<I", 30) + b"WAVEfmt " + struct.pack("<I", 1000) + b"\x03\x00\x02\x00")
+r = e.cmd(cmd="source", type="file", path=bw)
+check(not r.get("ok") and e.cmd(cmd="status").get("open") is True, "a broken WAV file is refused, the engine keeps running", r)
+
 q = e.cmd(cmd="quit")
 try: e.p.wait(5)
 except subprocess.TimeoutExpired: e.p.kill()
@@ -242,6 +325,16 @@ if os.path.exists(REC):
     check(same == len(want), "the first 2 s came out of the device bit for bit (%d of %d samples)" % (same, len(want)), {"pos": pos})
 else:
     check(False, "the null device wrote a recording")
+# task NB-R4: the stream that ran 24-bit integer wrote its own recording (path.N.wav); the 1 s sent must be in it bit for bit
+want24 = struct.unpack("<%df" % (len(b"".join(sent24)) // 4), b"".join(sent24))
+found = -1
+for f in sorted(x for x in os.listdir(out) if x.startswith("null_record.wav.")):
+    sr, rec = wav_floats(os.path.join(out, f))
+    try: pos = rec.index(want24[0])
+    except ValueError: continue
+    if rec[pos:pos + len(want24)] == want24: found = len(want24); break
+    found = max(found, sum(1 for a, b in zip(rec[pos:pos + len(want24)], want24) if a == b))
+check(found == len(want24), "24-bit samples through the integer path (the engine writes the DAC's bytes) come out bit for bit (%d of %d)" % (max(found, 0), len(want24)))
 
 ok = all(r[0] for r in results)
 print(json.dumps({"re": "engine_null_test", "ok": ok, "passed": sum(r[0] for r in results), "failed": sum(not r[0] for r in results)}))

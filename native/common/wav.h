@@ -24,7 +24,9 @@ inline bool wavRead(const std::string& path, Wav& w, std::string& err) {
     size_t p = 12; uint16_t fmt = 0, bits = 0;
     while (p + 8 <= b.size()) {
         uint32_t len; memcpy(&len, &b[p + 4], 4);
+        if ((size_t)len > b.size() - p - 8 && memcmp(&b[p], "data", 4)) break;   // task NB-R4 (review C10): a chunk that runs past the end
         if (!memcmp(&b[p], "fmt ", 4)) {
+            if (len < 16) { err = "the WAV file's format chunk is too short"; return false; }
             uint16_t ch; uint32_t sr; memcpy(&fmt, &b[p + 8], 2); memcpy(&ch, &b[p + 10], 2); memcpy(&sr, &b[p + 12], 4); memcpy(&bits, &b[p + 22], 2);
             w.ch = ch; w.sr = (int)sr;
         } else if (!memcmp(&b[p], "data", 4)) {

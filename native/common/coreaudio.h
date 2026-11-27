@@ -56,7 +56,7 @@ std::string virtualFormatText(uint32_t dev);
 // changes, someone turns the device's volume, the rate changes. The callback runs on a system thread.
 typedef void (*WatchFn)(void* user, const char* what, uint32_t dev);
 struct Watcher {
-    WatchFn fn = nullptr; void* user = nullptr; uint32_t dev = 0; bool system = false;
+    WatchFn fn = nullptr; void* user = nullptr; uint32_t dev = 0, stream = 0; bool system = false;   // stream: its format is watched too ("format", task NB-R4)
     void start(WatchFn f, void* u);
     void watchDevice(uint32_t d);
     void stop();
@@ -79,7 +79,7 @@ struct OutputStream {
     // the format the system hands this program for the device: float when the system mixes, the device's own
     // integer format when it does not
     bool vFloat = true, vAlignedHigh = true, vBigEndian = false; int vBits = 32, vBytes = 4;
-    bool dither16 = true; uint32_t ditherState = 0x1234abcdu;
+    bool dither16 = false; uint32_t ditherState = 0x1234abcdu;   // task NB-R4 (review C7): off, so 16-bit material reaches a 16-bit DAC bit for bit
     std::string formatText;
     bool start(uint32_t device, RenderFn f, void* u, std::string& err);
     void stop();

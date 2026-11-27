@@ -14,6 +14,7 @@
 #include "json.h"
 #include "nulldevice.h"
 #include "wav.h"
+#include "../engine/sample_convert.h"
 #include <chrono>
 #include <condition_variable>
 #include <cstdlib>
@@ -117,12 +118,12 @@ bool setHog(uint32_t dev, bool take, int& ownerPid, std::string& err) {
 }
 std::vector<PhysFormat> listPhysicalFormats(uint32_t dev) {
     std::lock_guard<std::mutex> g(gLock); std::vector<PhysFormat> v; NullDev* d = find(dev); if (!d) return v;
-    for (double r : d->rates) { v.push_back({ r, 32, 2, true, true }); v.push_back({ r, 24, 2, false, false }); }
+    for (double r : d->rates) { v.push_back({ r, 32, 2, true, true }); v.push_back({ r, 24, 2, false, false }); v.push_back({ r, 16, 2, false, false }); }
     return v;
 }
 bool setPhysicalFormat(uint32_t dev, double rate, int bits, bool mixable, std::string& now, std::string& err) {
     std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d) { err = "no such device"; return false; }
-    if (bits != 32 && bits != 24) { err = "32-bit float or 24-bit integer"; now = infoOf(*d).physicalFormat; return false; }
+    if (bits != 32 && bits != 24 && bits != 16) { err = "32-bit float, 24-bit or 16-bit integer"; now = infoOf(*d).physicalFormat; return false; }
     d->bits = bits; d->isFloat = bits == 32; d->mixable = mixable; d->rate = rate > 0 ? rate : d->rate; now = infoOf(*d).physicalFormat; return true;
 }
 bool getVolume(uint32_t dev, double& v) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d || !d->volume) return false; v = d->vol; return true; }
@@ -134,7 +135,9 @@ bool setVolume(uint32_t dev, double v, std::string& err) {
 }
 bool getMute(uint32_t dev, bool& m) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d || !d->volume) return false; m = d->mute; return true; }
 bool setMute(uint32_t dev, bool m) { { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d || !d->volume) return false; d->mute = m; } post("mute", dev); return true; }
-std::string virtualFormatText(uint32_t dev) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); return d ? "32-bit float, 2 ch, " + jnum(d->rate) + " Hz (null device)" : ""; }
+// an integer format the system does not mix is handed to the program as it is (as Core Audio does); otherwise float
+static bool nullInt(const NullDev& d) { return !d.isFloat && !d.mixable; }
+std::string virtualFormatText(uint32_t dev) { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(dev); if (!d) return ""; return (nullInt(*d) ? std::to_string(d->bits) + "-bit integer" : std::string("32-bit float")) + ", 2 ch, " + jnum(d->rate) + " Hz (null device)"; }
 bool recordInput(uint32_t, double, std::vector<float>&, double&, std::string& err) { err = "the null device has no inputs"; return false; }
 
 void Watcher::start(WatchFn f, void* u) {
@@ -174,7 +177,9 @@ bool OutputStream::start(uint32_t device, RenderFn f, void* u, std::string& err)
     stop();
     { std::lock_guard<std::mutex> g(gLock); if (!find(device)) { err = "no such device"; return false; } }
     dev = device; fn = f; user = u;
-    vFloat = true; vBits = 32; vBytes = 4; formatText = virtualFormatText(device);
+    { std::lock_guard<std::mutex> g(gLock); NullDev* d = find(device); bool in = d && nullInt(*d);
+      vFloat = !in; vBits = in ? d->bits : 32; vBytes = in ? (d->bits == 16 ? 2 : 4) : 4; vAlignedHigh = true; vBigEndian = false; }
+    formatText = virtualFormatText(device);
     std::lock_guard<std::mutex> g(gStreamLock);
     StreamRun* r = runOf(this); if (!r) { gStreams.emplace_back(this, std::unique_ptr<StreamRun>(new StreamRun())); r = gStreams.back().second.get(); }
     const char* rp = getenv("AL_NULL_RECORD");
@@ -195,6 +200,18 @@ bool OutputStream::start(uint32_t device, RenderFn f, void* u, std::string& err)
             if (ns > self->worstNs.load()) self->worstNs = ns;
             if (n < self->minFrames.load()) self->minFrames = n;
             if (n > self->maxFrames.load()) self->maxFrames = n;
+            if (!self->vFloat) {   // task NB-R4: an integer format: the bytes are written as for the DAC, the recording is what they decode to
+                SampleFormat sf; sf.isFloat = false; sf.bits = self->vBits; sf.bytes = self->vBytes; sf.alignedHigh = true;
+                Dither dth; dth.s = self->ditherState; std::vector<uint8_t> by((size_t)n * sf.bytes * 2);
+                for (int c = 0; c < 2; c++) writeChannel(out[c], (int)n, by.data() + c * sf.bytes, sf.bytes * 2, sf, (sf.bits <= 16 && self->dither16) ? &dth : nullptr);
+                self->ditherState = dth.s;
+                double sc = (double)((int64_t)1 << (sf.bits - 1));
+                for (uint32_t i = 0; i < n; i++) for (int c = 0; c < 2; c++) {
+                    uint32_t u = 0; const uint8_t* p = by.data() + ((size_t)i * 2 + c) * sf.bytes; for (int b = 0; b < sf.bytes; b++) u |= (uint32_t)p[b] << (8 * b);
+                    int32_t s = (int32_t)u >> (sf.bytes * 8 - sf.bits);   // aligned high: the sign comes down with the value
+                    out[c][i] = (float)((double)s / sc);
+                }
+            }
             if (r->recording) { r->rec.sr = (int)rate; for (uint32_t i = 0; i < n; i++) { r->rec.data.push_back(L[i]); r->rec.data.push_back(R[i]); } }
             next += std::chrono::nanoseconds((int64_t)(1e9 * n / rate));
             auto now = clk::now();
@@ -229,6 +246,8 @@ std::string nullExternal(const std::string& what, double value, uint32_t dev) {
       else if (what == "unplug") { d->present = false; if (d->hogPid != -1) d->hogPid = -1; ev = "devices"; }
       else if (what == "plug") { d->present = true; ev = "devices"; }
       else if (what == "hog") { d->hogPid = (int)value; ev = "exclusive"; }
+      // task NB-R4: another program changes the device's format (32 float and mixable, or 24 or 16 integer and not mixable)
+      else if (what == "format") { int b = (int)value; if (b != 32 && b != 24 && b != 16) return "32, 24 or 16"; d->bits = b; d->isFloat = b == 32; d->mixable = b == 32; ev = "format"; }
       else return "unknown change"; }
     post(ev.c_str(), dev);
     return "";
