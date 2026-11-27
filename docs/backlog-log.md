@@ -6116,3 +6116,9 @@ Row DL12 of docs/extensions-plan.md 9.7 (9.6 e, the sandbox of user scripts). In
 
 ### What is left (task XT, in this order)
 DL3 advanced settings list and DL4 safe mode (both need ST-S4, which is logged); DL5 rules engine with the right-click "Advanced" entries, DL6, DL7 (control ids part 2), DL8; then XT-EX2 to XT-EX10 (theme files, device format and checker, user device frame and My devices, the safety stage before any user device sounds, script devices); then DL9, DL10 with the Workshop window, DL11, DL13 (scripts, run once, on `xtSandboxRun`), DL14, DL15, the Assistant tools, the import card, script instruments.
+
+## 27 November 2026, 22:00 UTC: task XT, a release-freeze breach (lane H), no step this run
+- The release gate froze `index.html` on main at 21:47:36 UTC on v0.289 (`desktop/release-freeze.json`, commit 7bf95e2). Two releases were pushed during the freeze: v0.290 (task IN-V, lane E, 21:49) and **v0.291 (task XT-DL12, this lane, 21:57)**. The XT-DL12 run checked for wip commits but not for the freeze file before its push; it should have waited.
+- Effect: the gate that is running tests v0.289, and main no longer holds that build, so it cannot promote when it finishes. Installed apps are not affected (they keep the promoted build). The gate needs another run after the freeze lifts; the scheduling chat decides when.
+- Not reverted: removing only v0.291 would not give main back v0.289 (v0.290 sits on top), and reverting lane E's release is not this lane's to do.
+- This run (fired 21:58) did not start DL3: it changes `index.html`, and the freeze is still on. From now on every XT run checks `desktop/release-freeze.json` on a fresh `git pull` right before pushing, as CLAUDE.md says.
