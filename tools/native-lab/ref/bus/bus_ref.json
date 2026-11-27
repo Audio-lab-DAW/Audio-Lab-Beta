@@ -385,6 +385,48 @@
    "peak": 0.9579769968986511,
    "webRendersTwiceSame": false,
    "webSamplesDifferingBetweenTwoRenders": 22694
+  },
+  "clipbus": {
+   "quantum": 512,
+   "built": [
+    "g",
+    "a",
+    "m",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "m": 64,
+    "b": 192,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.2029932737350464,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 45968
+  },
+  "clipbus128": {
+   "quantum": 128,
+   "built": [
+    "g",
+    "a",
+    "m",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "g": 0,
+    "a": 0,
+    "m": 64,
+    "b": 192,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.203040599822998,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
   }
  }
 }

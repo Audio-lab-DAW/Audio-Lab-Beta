@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side", "clip", "drive"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -96,6 +96,20 @@ EXTRA["side"] = {
     "x-punch": {"depth": 50, "shape": 30, "punch": 60}, "x-sustain": {"depth": 50, "shape": 30, "sustain": 70},
     "x-neg": {"depth": 60, "shape": 30, "punch": -50, "sustain": -40},
 }
+# task NB-N3g: the Soft Clipper and the Drive (Chromium's WaveShaperNode oversampled 4x, 2x or not, its DelayNode, a
+# highpass biquad, GainNodes): Fractals' master clipper, every shape, each oversampling, asymmetry, part-wet mixes
+def CL(**k):
+    d = dict(gain=6, thr=-4, ceil=-1, bias=0, mix=100, out=0, shape="tanh", os="4x"); d.update(k); return d
+EXTRA["clip"] = {
+    "frx-master": CL(),
+    "x-cubic": CL(shape="cubic", gain=9), "x-sine": CL(shape="sine", thr=-10, ceil=-.5), "x-atan": CL(shape="atan", bias=28, mix=50),
+    "x-hard": CL(shape="hard", gain=12, thr=-12), "x-fold": CL(shape="fold", gain=18, thr=-20, ceil=-3, mix=45, out=-1),
+    "x-2x": CL(os="2x", gain=10, bias=-20), "x-none": CL(os="none", gain=10, mix=70), "x-mix-half": CL(mix=50, out=3),
+    "x-dry": CL(mix=0, gain=3), "x-bias-max": CL(bias=50, shape="tanh", gain=8, mix=80), "x-bias-min": CL(bias=-50, shape="cubic"),
+    "x-extreme": CL(gain=24, thr=-24, ceil=-12, out=12),
+}
+EXTRA["drive"] = {"x-zero": {"drive": 0, "mix": 100}, "x-full": {"drive": 100, "mix": 100}, "x-half-mix": {"drive": 60, "mix": 50},
+                  "x-dry": {"drive": 80, "mix": 0}, "x-odd": {"drive": 33.3, "mix": 77.7}}
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
@@ -110,6 +124,9 @@ CHAINS = {
     # task NB-N3g: Fractals' Bass chain (EQ, sidechain pump) and the pump between worklet devices
     "chain-side-bass": [("eq", "frx01"), ("side", "frx-bass")],
     "chain-side-mix": [("chorus", None), ("side", "x-8th"), ("limit", "trans")],
+    # task NB-N3g: Fractals' master (compressor, then the clipper), and the shapers between worklet devices and an EQ
+    "chain-frx-master": [("comp", "frx-master"), ("clip", "frx-master")],
+    "chain-shape": [("drive", "x-half-mix"), ("eq", "x-bells"), ("clip", "x-2x"), ("limit", "loud")],
 }
 
 

@@ -79,6 +79,10 @@ struct Processor {
     // A device the web engine builds from browser nodes (the Pro EQ, task NB-N3e), not an AudioWorklet: the
     // worklet bundle's rules (silence, tiny values, the quantum grid) do not apply, and it keeps a mono input mono.
     virtual bool worklet() const { return true; }
+    // Frames the device's output is late beyond what the web engine's node is, because the engine's calls are off the
+    // browser's grid (task NB-N3g, dev_shape.h); maxAddedLatency: the most it can be (known before the first call).
+    virtual int addedLatency() const { return 0; }
+    virtual int maxAddedLatency() const { return 0; }
     bool monoIn = false, monoOut = false;   // channel count in and out of this call (browser-node devices only)
     // Where the current call sits on the web engine's 128-frame grid (set by WorkletShell before each call):
     // currentTime in the worklet is winStart / sampleRate, and the call's first frame is frame winOff of it.

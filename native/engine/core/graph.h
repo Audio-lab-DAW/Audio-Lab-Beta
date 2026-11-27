@@ -93,16 +93,24 @@ inline void renderChain(Chain& ch, const std::vector<float>& inL, const std::vec
     const size_t N = inL.size();
     if (block < 1) block = 1;
     if (block > kMaxBlock) block = kMaxBlock;
-    outL.assign(N, 0); outR.assign(N, 0);
+    // A device whose calls are off the browser's grid gives the browser's output some frames later (task NB-N3g,
+    // addedLatency): render that much further and drop it from the start, as delay compensation would.
+    size_t pad = 0;
+    for (size_t k = 0; k < ch.size(); k++) pad += (size_t)ch.slot(k).dev->proc().maxAddedLatency();
+    const size_t T = N + pad;
+    std::vector<float> rL(T, 0), rR(T, 0);
     std::vector<float> Lv(block), Rv(block);
     float* L = Lv.data(); float* R = Rv.data();
-    for (size_t pos = 0; pos < N; pos += block) {
-        const size_t m = std::min((size_t)block, N - pos);
-        for (size_t i = 0; i < (size_t)block; i++) { L[i] = i < m ? inL[pos + i] : 0.f; R[i] = i < m ? inR[pos + i] : 0.f; }
+    for (size_t pos = 0; pos < T; pos += block) {
+        const size_t m = std::min((size_t)block, T - pos);
+        for (size_t i = 0; i < (size_t)block; i++) { const size_t j = pos + i; L[i] = j < N ? inL[j] : 0.f; R[i] = j < N ? inR[j] : 0.f; }
         ch.ctx().currentFrame = (double)pos;
         ch.process(L, R, block);
-        for (size_t i = 0; i < m; i++) { outL[pos + i] = L[i]; outR[pos + i] = R[i]; }
+        for (size_t i = 0; i < m; i++) { rL[pos + i] = L[i]; rR[pos + i] = R[i]; }
     }
+    size_t D = 0;
+    for (size_t k = 0; k < ch.size(); k++) D += (size_t)ch.slot(k).dev->proc().addedLatency();
+    outL.assign(rL.begin() + D, rL.begin() + D + N); outR.assign(rR.begin() + D, rR.begin() + D + N);
 }
 
 }  // namespace al

@@ -116,6 +116,18 @@ SCENES["sidebus"] = (512, 0.8, [("comp", None, CP_MASTER), ("limit", "trans")],
                       T("mu", kind="group", vol=0.8, fx=[("side", None, SD_MUSIC)]), T("a", "st_a", vol=0.6, pan=-0.3, grp="mu"),
                       T("fx", kind="group", vol=0.7, fx=[("side", None, SD_FX)]), T("m", "mono_b", vol=0.5, pan=0.4, grp="fx", fx=[("side", None, {"depth": 60, "shape": 30, "sync": "1/8"})])])
 SCENES["sidebus128"] = (128,) + SCENES["sidebus"][1:]
+# task NB-N3g: Fractals' master (compressor, then the Soft Clipper oversampled 4x), the Drive on a group, the clipper at
+# 2x on a mono source (kept mono through it), a part-wet clipper without oversampling on a return; their 192 and 128
+# frames of latency compensated on the other tracks
+CL_FRX = {"gain": 6, "thr": -4, "ceil": -1, "bias": 0, "mix": 100, "out": 0, "shape": "tanh", "os": "4x"}
+CL_2X = {"gain": 10, "thr": -8, "ceil": -1, "bias": 15, "mix": 80, "out": 0, "shape": "cubic", "os": "2x"}
+CL_NONE = {"gain": 8, "thr": -12, "ceil": -2, "bias": 0, "mix": 50, "out": 2, "shape": "sine", "os": "none"}
+SCENES["clipbus"] = (512, 0.9, [("comp", None, CP_MASTER), ("clip", None, CL_FRX)],
+                     [T("g", kind="group", vol=0.9, pan=0.1, fx=[("drive", None, {"drive": 45, "mix": 70})]), T("a", "st_a", vol=0.7, pan=-0.3, grp="g"),
+                      T("m", "mono_a", vol=0.8, pan=0.4, fx=[("clip", None, CL_2X)], sends={"r": 0.4}),
+                      T("b", "st_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_BELLS)]),
+                      T("r", kind="return", vol=0.7, fx=[("clip", None, CL_NONE)])])
+SCENES["clipbus128"] = (128,) + SCENES["clipbus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),

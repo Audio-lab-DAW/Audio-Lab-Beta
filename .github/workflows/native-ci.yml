@@ -53,7 +53,7 @@ jobs:
       - name: Machine
         run: |
           mkdir -p out
-          { echo "arch: $(uname -m)"; uname -a; c++ --version | head -1; python3 --version; } | tee out/machine.txt
+          { echo "arch: $(uname -m)"; uname -a; c++ --version | head -1; python3 --version; cargo --version; } | tee out/machine.txt   # cargo: Chromium's FFT (task NB-N3g)
       - name: Release build (every native target without the plug-in SDK)
         run: |
           cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
@@ -132,6 +132,8 @@ jobs:
           run build 128 out/core
           run build-asan 128 out/core-asan
           run build-asan 7 out/core-asan-7
+          run build 33 out/core-33   # task NB-N3g: calls off the browser's grid (the shapers hold one sub-block, compensated)
+          build/alrender list | grep -q '"clip"'   # the shapers were built (cargo was found)
           grep -q '^build at 128 frames: \([0-9]*\) of \1 cases' out/core-compare.txt
           grep -q '^build-asan at 128 frames: \([0-9]*\) of \1 cases' out/core-compare.txt
       - name: Summary
@@ -198,7 +200,7 @@ jobs:
       - name: Machine
         run: |
           mkdir -p out
-          { echo "arch: $(uname -m)"; sw_vers; clang --version | head -1; node --version; } | tee out/machine.txt
+          { echo "arch: $(uname -m)"; sw_vers; clang --version | head -1; node --version; cargo --version; } | tee out/machine.txt
       - name: Build every native target without the plug-in SDK (arm64)
         run: |
           cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
@@ -240,8 +242,9 @@ jobs:
           build/alnodes out/nodes/cases.json out/nodes/native > /dev/null
           python3 tools/native-lab/compare_nodes.py out/nodes > out/nodes-compare-all.txt || true
           { grep -v ' bit for bit$' out/nodes-compare-all.txt | head -20; tail -1 out/nodes-compare-all.txt; } | tee out/nodes-compare.txt
-          grep -q '^\([0-9]*\) of \1 cases bit for bit' out/core-compare.txt   # every case (task NB-N3e added the Pro EQ: 289)
+          grep -q '^\([0-9]*\) of \1 cases bit for bit' out/core-compare.txt   # every case (task NB-N3e added the Pro EQ: 289; N3g the Soft Clipper and the Drive)
           grep -q '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt
+          build/alrender list | grep -q '"clip"'   # the shapers were built (cargo was found)
           grep -qx 'ALL IDENTICAL' out/bus.txt
           grep -qx 'ALL IDENTICAL' out/mix-macref.txt
       - name: ThreadSanitizer (clang) on the ring
