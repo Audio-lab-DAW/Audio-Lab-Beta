@@ -81,8 +81,15 @@ struct BusGraph {
             cl = tmpL; cr = tmpR;
         };
         if (in.size() == 1) { const float *cl, *cr; connOut(in[0], cl, cr); for (int i = 0; i < Q; i++) { L[i] = cl[i]; R[i] = cr[i]; } return false; }
-        for (int i = 0; i < Q; i++) L[i] = R[i] = 0.f;
-        for (auto& c : in) { const float *cl, *cr; connOut(c, cl, cr); addInto(cl, L, Q); addInto(cr, R, Q); }
+        // AudioNodeInput::SumAllConnections: the summing bus is zeroed (flagged silent), the first connection is copied
+        // into it (AudioChannel::SumFrom on a silent channel), the others added with Vadd. Copying, not 0 + x, keeps a
+        // -0 (task NB-N3e: on the Mac the EQ's mid/side merger gave -0 + -0 where 0 + -0 + -0 is +0)
+        bool first = true;
+        for (auto& c : in) {
+            const float *cl, *cr; connOut(c, cl, cr);
+            if (first) { for (int i = 0; i < Q; i++) { L[i] = cl[i]; R[i] = cr[i]; } first = false; }
+            else { addInto(cl, L, Q); addInto(cr, R, Q); }
+        }
         return false;   // every node's output (a pan) is stereo
     }
 

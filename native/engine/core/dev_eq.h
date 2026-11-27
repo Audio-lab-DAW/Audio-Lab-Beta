@@ -170,16 +170,18 @@ struct ProEQ : Processor {
         } else {
             float *m = buf_[0].data(), *s = buf_[1].data(), *nr = buf_[2].data();
             // splitter: channel 1 of a mono input is silence
-            for (int i = 0; i < n; i++) { float l = L[i], r = monoIn ? 0.f : R[i]; nr[i] = r; m[i] = 0.f + l; m[i] += r; }
+            // an input with two connections: the first copied, the second added (AudioChannel::SumFrom); a mono
+            // input's splitter output 1 is silent and skipped
+            for (int i = 0; i < n; i++) { float l = L[i], r = monoIn ? 0.f : R[i]; nr[i] = r; m[i] = l; if (!monoIn) m[i] += r; }
             gainFixed(.5f, m, m, n);
             gainFixed(-1.f, nr, nr, n);
-            for (int i = 0; i < n; i++) { s[i] = 0.f + L[i]; s[i] += nr[i]; }
+            for (int i = 0; i < n; i++) { s[i] = L[i]; if (!monoIn) s[i] += nr[i]; }
             gainFixed(.5f, s, s, n);
             float *mo = buf_[3].data(), *so = buf_[4].data();
             const float* im[1] = {m}; float* om[1] = {mo}; runChain('m', im, om, 1, n);
             const float* is[1] = {s}; float* os[1] = {so}; runChain('s', is, os, 1, n);
             gainFixed(-1.f, so, nr, n);   // nS
-            for (int i = 0; i < n; i++) { float a = 0.f + mo[i]; a += so[i]; float b = 0.f + mo[i]; b += nr[i]; oL[i] = a; oR[i] = b; }
+            for (int i = 0; i < n; i++) { float a = mo[i]; a += so[i]; float b = mo[i]; b += nr[i]; oL[i] = a; oR[i] = b; }
             monoOut = false;
         }
         // GainNode at exactly 1 copies (measured: tiny values pass it untouched, where a multiply under the

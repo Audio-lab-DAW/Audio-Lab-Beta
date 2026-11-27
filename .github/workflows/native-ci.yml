@@ -212,7 +212,8 @@ jobs:
           python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
           mkdir -p out/core/native
           build/alrender cases out/core/cases.json out/core/in.wav out/core/native 128 > out/core/native.jsonl
-          python3 tools/native-lab/compare_core.py out/core | tail -3 | tee out/core-compare.txt
+          python3 tools/native-lab/compare_core.py out/core > out/core-compare-all.txt || true
+          { grep -v ' bit for bit$' out/core-compare-all.txt | head -20; tail -1 out/core-compare-all.txt; } | tee out/core-compare.txt   # the cases that differ, then the count
           python3 tools/native-lab/make_bus_ref.py out/busref | tail -3
           python3 tools/native-lab/run_bus.py build/albus out/bus out/busref | tee out/bus.txt
           python3 tools/native-lab/make_mix_ref.py > out/mixref-mac.txt 2>&1   # N3b's scenes, the Mac's own references (overwrites ref/mix in this checkout only)
