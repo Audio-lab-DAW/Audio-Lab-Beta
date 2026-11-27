@@ -1,0 +1,143 @@
+[
+ {
+  "label": "before (v0.289)",
+  "version": "0.289",
+  "A": {
+   "target_ms": 6.01,
+   "lead_ms": 6.01,
+   "reson_target_ms": 52.45,
+   "reson_lead_ms": 52.45,
+   "reson_lead_disarmed_ms": 52.45
+  },
+  "B": {
+   "n": 10,
+   "key_to_track_input_ms": {
+    "med": 40.2,
+    "min": 33.4,
+    "max": 56.9
+   },
+   "key_to_after_compensation_ms": {
+    "med": 92.67,
+    "min": 85.87,
+    "max": 109.38
+   },
+   "compensation_on_the_played_note_ms": {
+    "med": 52.47,
+    "min": 52.47,
+    "max": 52.47
+   }
+  },
+  "C": {
+   "n": 10,
+   "err_ms": [
+    14.92,
+    24.69,
+    -24.93,
+    7.69,
+    32.17,
+    27.86,
+    26.25,
+    8.47,
+    10.9,
+    21.89
+   ],
+   "target_ms": 52.45,
+   "median_ms": 18.41,
+   "worst_abs_ms": 32.17
+  }
+ },
+ {
+  "label": "after (LT-2)",
+  "version": "0.289",
+  "A": {
+   "target_ms": 6.01,
+   "lead_ms": 0,
+   "reson_target_ms": 52.45,
+   "reson_lead_ms": 0,
+   "reson_lead_disarmed_ms": 52.45
+  },
+  "B": {
+   "n": 10,
+   "key_to_track_input_ms": {
+    "med": 40.65,
+    "min": 37.69,
+    "max": 50.13
+   },
+   "key_to_after_compensation_ms": {
+    "med": 40.68,
+    "min": 37.71,
+    "max": 50.16
+   },
+   "compensation_on_the_played_note_ms": {
+    "med": 0.02,
+    "min": -1.84,
+    "max": 0.02
+   }
+  },
+  "C": {
+   "n": 10,
+   "err_ms": [
+    -0.0,
+    0,
+    0,
+    0,
+    0,
+    -0.0,
+    0,
+    0.1,
+    0,
+    0
+   ],
+   "target_ms": 52.45,
+   "median_ms": 0.0,
+   "worst_abs_ms": 0.1
+  }
+ },
+ {
+  "label": "after (LT-2) run 2",
+  "version": "0.289",
+  "A": {
+   "target_ms": 6.01,
+   "lead_ms": 0,
+   "reson_target_ms": 52.45,
+   "reson_lead_ms": 0,
+   "reson_lead_disarmed_ms": 52.45
+  },
+  "B": {
+   "n": 10,
+   "key_to_track_input_ms": {
+    "med": 46.08,
+    "min": 38.13,
+    "max": 63.91
+   },
+   "key_to_after_compensation_ms": {
+    "med": 45.58,
+    "min": 38.15,
+    "max": 63.93
+   },
+   "compensation_on_the_played_note_ms": {
+    "med": 0.02,
+    "min": -2.06,
+    "max": 0.02
+   }
+  },
+  "C": {
+   "n": 10,
+   "err_ms": [
+    0,
+    0,
+    0.1,
+    0,
+    -0.0,
+    0.1,
+    0,
+    0.1,
+    0,
+    0.1
+   ],
+   "target_ms": 52.45,
+   "median_ms": 0.0,
+   "worst_abs_ms": 0.1
+  }
+ }
+]
