@@ -7,7 +7,7 @@
 //   await eng.start();
 //   const list = await eng.devices();
 //   await eng.open({ uid, rate: 96000, buffer: 64, exclusive: true });
-//   await eng.startSound({ prefillMs: 30, highMs: 120 });
+//   await eng.startSound({ prefillMs: 30, highMs: 120, clock: 'exact' });   // or clock: 'follow' (task NB-N2b)
 //   eng.feed(float32StereoInterleaved);            // as it arrives from the page
 //   eng.on('volume', e => ...); eng.on('devices', e => ...); eng.on('rate', e => ...);
 'use strict';
@@ -64,12 +64,14 @@ class EngineBridge extends EventEmitter {
   status() { return this.send({ cmd: 'status' }); }
   tone() { return this.send({ cmd: 'source', type: 'tone' }); }
   silence() { return this.send({ cmd: 'source', type: 'silence' }); }
+  // task NB-N2b: 'exact' hands every sample over untouched (rare corrections), 'follow' steers smoothly to the sender's clock
+  clock(mode) { return this.send({ cmd: 'clock', mode }); }
 
   // Opens the way for sound: the engine listens on a socket, this side connects.
   async startSound(o = {}) {
     this.stopSound();
     const p = path.join(os.tmpdir(), 'audiolab-engine-' + process.pid + '-' + Date.now() + '.sock');
-    const r = await this.send({ cmd: 'source', type: 'socket', path: p, prefillMs: o.prefillMs || 30, highMs: o.highMs || 120 });
+    const r = await this.send({ cmd: 'source', type: 'socket', path: p, prefillMs: o.prefillMs || 30, highMs: o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: +o.limitPpm || 2000 });
     if (!r.ok) return r;
     await new Promise((resolve, reject) => { this.sock = net.connect(p, resolve); this.sock.on('error', reject); });
     this.sock.on('error', () => {});

@@ -3,7 +3,8 @@
 // app (or a test) can run it as a helper:
 //   {"cmd":"devices"}                                    every device with rates, buffer range, volume, formats
 //   {"cmd":"open","uid":"...","rate":96000,"buffer":64,"exclusive":true,"bits":24,"integer":false}
-//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120}
+//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120,"clock":"exact"|"follow"}
+//   {"cmd":"clock","mode":"exact"|"follow"}   (task NB-N2b: follow the sender's clock smoothly, see follow.h)
 //   {"cmd":"volume","value":0.5}   {"cmd":"mute","on":true}   {"cmd":"status"}   {"cmd":"close"}   {"cmd":"quit"}
 // Things that change outside the program arrive as {"ev":"volume","value":0.4}, {"ev":"devices"}, ...
 // Sound reaches it through a local socket as plain 32-bit float stereo at the device's rate and is handed to
@@ -40,7 +41,7 @@ static const char* tf(bool b) { return b ? "true" : "false"; }
 
 // ---- checks that need no sound card (also run on Linux) ------------------------------------------------
 static int selftest() {
-    int bad = 0; std::string notes;
+    int bad = 0; std::string notes, notesInfo;
     auto check = [&](bool ok, const char* what) { if (!ok) { bad++; notes += std::string(notes.empty() ? "" : "; ") + what; } };
     // 24-bit: every 24-bit value survives float and back
     { SampleFormat f; f.isFloat = false; f.bits = 24; f.bytes = 3; uint8_t out[3]; bool ok = true;
@@ -62,8 +63,37 @@ static int selftest() {
       check(ok, "ring hands samples over in order");
       r.read(L.data(), R.data(), 256); check(r.underruns.load() == 1, "ring counts running empty");
       std::vector<float> big(6000 * 2, 1.f); r.write(big.data(), 6000); r.read(L.data(), R.data(), 256); check(r.skips.load() == 1 && r.fill() == 480 - 256, "ring drops back to its target when too full"); }
+    // task NB-N2b: the follower. (1) held at speed 1 it hands every sample over untouched; (2) between the samples it is clean;
+    // (3) against a sender whose clock is off by up to 1000 parts per million it never runs empty or drops, for 5 simulated minutes.
+    { Ring r; r.init(48000, 480, 24000); r.follow = true; r.rate = 48000; r.steer.fixed = true; r.steer.fixedU = 0;
+      std::vector<float> in(4000 * 2), L(256), R(256); for (size_t i = 0; i < in.size(); i++) in[i] = (float)std::sin(0.001 * (double)i * (double)i) * 0.7f;
+      r.write(in.data(), 4000); bool ok = true; size_t got = 0;
+      for (int k = 0; k < 10; k++) { r.read(L.data(), R.data(), 256); for (int i = 0; i < 256; i++, got++) if (L[i] != in[2 * got] || R[i] != in[2 * got + 1]) ok = false; }
+      check(ok && r.underruns.load() == 0, "follower at speed 1 is bit for bit"); }
+    for (double f : {997.0, 15000.0}) {
+      Ring r; r.init(96000, 480, 90000); r.follow = true; r.rate = 48000; r.steer.fixed = true; r.steer.fixedU = 100e-6;
+      size_t N = 60000; std::vector<float> in(N * 2); for (size_t i = 0; i < N; i++) in[2 * i] = in[2 * i + 1] = (float)(0.5 * std::sin(2 * M_PI * f * (double)i / 48000));
+      r.write(in.data(), N); std::vector<float> L(48000), R(48000); r.read(L.data(), R.data(), 48000);
+      double worst = 0; for (size_t i = 100; i < 48000; i++) { double want = 0.5 * std::sin(2 * M_PI * f * (double)i * (1 + 100e-6) / 48000); double e = std::fabs(L[i] - want); if (e > worst) worst = e; }
+      double db = 20 * std::log10(worst / 0.5 + 1e-30);
+      notesInfo += std::string(notesInfo.empty() ? "" : ", ") + "follower error at " + jnum(f) + " Hz " + jnum(std::round(db * 10) / 10) + " dB";
+      check(db < (f < 5000 ? -110 : -80), f < 5000 ? "follower is clean at 997 Hz (error below -110 dB)" : "follower is clean at 15 kHz (error below -80 dB)");
+    }
+    for (double d : {250e-6, -250e-6, 1000e-6, -1000e-6}) {
+      const double SR = 48000; Ring r; r.init((size_t)SR * 2, (size_t)(SR * 0.05), (size_t)(SR * 0.5)); r.follow = true; r.rate = SR;
+      std::vector<float> blk(128 * 2), L(256), R(256); double tp = 0, tc = 0, ph = 0; size_t fmin = (size_t)-1, fmax = 0; double sumPpm = 0; int nPpm = 0;
+      const double total = 300;
+      while (tc < total) {
+        if (tp <= tc) { for (int i = 0; i < 128; i++) { float v = (float)(0.3 * std::sin(ph)); ph += 2 * M_PI * 440 / SR; blk[2 * i] = blk[2 * i + 1] = v; } r.write(blk.data(), 128); tp += 128 / (SR * (1 + d)); }
+        else { r.read(L.data(), R.data(), 256); tc += 256 / SR; if (tc > 120) { size_t fl = r.fill(); if (fl < fmin) fmin = fl; if (fl > fmax) fmax = fl; } if (tc > total - 60) { sumPpm += r.ppmMilli.load() / 1000.0; nPpm++; } }
+      }
+      double endPpm = nPpm ? sumPpm / nPpm : 0;
+      bool ok = r.underruns.load() == 0 && r.skips.load() == 0 && std::fabs(endPpm - d * 1e6) < 10 + 0.025 * std::fabs(d * 1e6) && fmin + 960 > r.target && fmax < r.target + 960;
+      notesInfo += ", sender off by " + jnum(d * 1e6) + " ppm: steered to " + jnum(std::round(endPpm * 10) / 10) + " ppm (mean of the last minute), fill " + std::to_string(fmin) + " to " + std::to_string(fmax) + " frames after two minutes (target " + std::to_string(r.target) + "), ran empty " + std::to_string(r.underruns.load()) + ", dropped " + std::to_string(r.skips.load());
+      check(ok, "follower keeps up with a sender whose clock is off");
+    }
     { Msg m; check(parseMsg("{\"cmd\":\"open\",\"rate\":96000,\"exclusive\":true,\"uid\":\"a b\\\"c\"}", m) && m.str("cmd") == "open" && m.num("rate") == 96000 && m.flag("exclusive") && m.str("uid") == "a b\"c", "message reader"); }
-    say(std::string("{\"re\":\"selftest\",\"ok\":") + tf(bad == 0) + ",\"failed\":" + std::to_string(bad) + ",\"notes\":" + jstr(notes) + "}");
+    say(std::string("{\"re\":\"selftest\",\"ok\":") + tf(bad == 0) + ",\"failed\":" + std::to_string(bad) + ",\"notes\":" + jstr(notes) + ",\"measured\":" + jstr(notesInfo) + "}");
     return bad ? 1 : 0;
 }
 
@@ -159,7 +189,8 @@ static std::string statusJson() {
         ",\"overloads\":" + std::to_string(E.stream.overloads.load()) + ",\"renderAvgMicroseconds\":" + jnum(cb ? E.stream.sumNs.load() / 1000.0 / cb : 0) + ",\"renderWorstMicroseconds\":" + jnum(E.stream.worstNs.load() / 1000.0) +
         ",\"source\":" + std::to_string(E.source.load()) + ",\"peak\":" + jnum(E.peak.load()) +
         ",\"ring\":{\"fill\":" + std::to_string(E.ring.frames ? E.ring.fill() : 0) + ",\"received\":" + std::to_string(E.sockFrames.load()) + ",\"ranEmpty\":" + std::to_string(E.ring.underruns.load()) +
-        ",\"droppedTimes\":" + std::to_string(E.ring.skips.load()) + ",\"droppedFrames\":" + std::to_string(E.ring.skippedFrames.load()) + ",\"silentFrames\":" + std::to_string(E.ring.silentFrames.load()) + ",\"connected\":" + tf(E.sockClient.load()) + "}";
+        ",\"droppedTimes\":" + std::to_string(E.ring.skips.load()) + ",\"droppedFrames\":" + std::to_string(E.ring.skippedFrames.load()) + ",\"silentFrames\":" + std::to_string(E.ring.silentFrames.load()) + ",\"connected\":" + tf(E.sockClient.load()) +
+        ",\"clock\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + ",\"ppm\":" + jnum(E.ring.ppmMilli.load() / 1000.0) + ",\"ppmMin\":" + jnum(E.ring.ppmMinMilli.load() / 1000.0) + ",\"ppmMax\":" + jnum(E.ring.ppmMaxMilli.load() / 1000.0) + "}";
     return s;
 }
 
@@ -215,7 +246,7 @@ static void onWatch(void*, const char* what, uint32_t dev) {
 
 static int run() {
     E.watcher.start(onWatch, nullptr);
-    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.1\",\"pid\":" + std::to_string((int)getpid()) + "}");
+    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.2\",\"pid\":" + std::to_string((int)getpid()) + "}");
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
@@ -236,11 +267,14 @@ static int run() {
                 E.source = 0; std::this_thread::sleep_for(std::chrono::milliseconds(30));
                 double r = E.rate > 0 ? E.rate : 48000;
                 E.ring.init((size_t)(r * 2), (size_t)(r * m.num("prefillMs", 30) / 1000), (size_t)(r * m.num("highMs", 120) / 1000));
+                E.ring.rate = r; E.ring.follow = m.str("clock") == "follow";   // task NB-N2b: "exact" (default) or "follow"
+                E.ring.steer.limit = m.num("limitPpm", 2000) / 1e6;
                 ok = startSocket(m.str("path"), err);
                 if (ok) E.source = 3;
             } else { E.source = 0; }
             say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(err) + ",\"type\":" + jstr(t) + "}");
         }
+        else if (c == "clock") { std::string mo = m.str("mode"); bool ok = mo == "follow" || mo == "exact"; if (ok) { E.ring.steer.reset(); E.ring.follow = mo == "follow"; } say(re + "\"ok\":" + tf(ok) + ",\"mode\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + "}"); }
         else if (c == "status") say(re + statusJson() + "}");
         else if (c == "reset") { resetCounters(); say(re + "\"ok\":true}"); }
         else if (c == "selftest") selftest();
