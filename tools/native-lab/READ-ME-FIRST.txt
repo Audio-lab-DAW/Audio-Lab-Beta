@@ -1,0 +1,34 @@
+AudioLab VST3 test (task NM1)
+
+This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
+find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.
+For Apple Silicon Macs (M1 and later), macOS 12 or later.
+
+HOW TO OPEN IT (it is not signed with an Apple Developer account, so macOS asks once)
+1. Download AudioLab-VST3-test-mac-arm64.zip and double-click it. You get "AudioLab VST3 test".
+2. Double-click the app. macOS says it cannot check it. Click Done (not Move to Bin).
+3. Open System Settings > Privacy & Security, scroll down to Security.
+   There is a line about "AudioLab VST3 test". Click Open Anyway, then Open Anyway again, and enter your password.
+   (The button is there for about an hour after step 2.)
+4. From now on it opens normally.
+If the button does not appear, open Terminal and paste this line, with the path of the app at the end:
+   xattr -dr com.apple.quarantine "/path/to/AudioLab VST3 test.app"
+
+WHAT TO DO
+1. The list shows every VST3 plug-in found in /Library/Audio/Plug-Ins/VST3 and in your own
+   Library/Audio/Plug-Ins/VST3. Lines that start with PROBLEM could not be read; the reason is next to them.
+2. Pick your output at the top left (iFi Gryphon, Zoom AMS-24, ...). Try the Buffer menu: 64 or 32.
+3. Click a plug-in, then Load. Then "Open its window". Then "Play test pattern", or play the keys
+   A W S E D F T G Y H U J K (click the main window first). Sound comes out at half level.
+4. Try several plug-ins: an instrument, an effect (the pattern is then a plucked sound that runs through it),
+   the ones you use most, and anything old.
+5. Click "Copy report" and paste it back into the chat (or send the file
+   AudioLab-VST3-test-report.txt from your Desktop).
+
+WHAT THE REPORT HOLDS
+Your Mac model and macOS version, every audio device with its sample rates, buffer range and whether it has a
+volume the computer can set, every plug-in found or failed and why, what loaded, the time each plug-in takes
+per block, and the buffer size. Nothing is sent anywhere; the file stays on your Desktop.
+
+If you have no VST3 plug-ins yet: Surge XT is free (surge-synthesizer.github.io) and installs an instrument
+and an effect.
