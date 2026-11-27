@@ -148,6 +148,15 @@ What it shows:
 
 Next: task NL6 (below).
 
+### The user's eighth report (22:25 Brussels, still test app 0.5)
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-8.txt`. Still 0.5 (the user had not opened 0.7 yet).
+- **Effects work**: kHs Phase Distortion, kHs Phaser (Kilohearts, single component) and theFlangerPhaser (Thenatan, a separate controller connected through IConnectionPoint, 1 message delivered) all processed the test sound, and their knob moves reached the host. kHs Phaser cost 0.06 ms per 11.6 ms block.
+- **Phase Plant** loaded again and played at -0.3 dBFS this time (its own lane gains turned), 55 and 56 notes.
+- **Exclusive use** of the output was taken and held by the app (process 41016).
+- **A new string problem**: kHs Phase Distortion's Spread shows "21¬inf": a degree sign (U+00B0) read as Mac Roman ("¬∞") and then the ∞ turned into "inf" by 0.5's clean-up. The next test app must map ° to " deg" (and check other symbols: µ, ±, ×, ∞) before anything else, in plug-in strings too (0.7 cleans plug-in strings; check it handles U+00B0).
+- Still one device overload per run, at the device switch.
+
 ### The user's seventh report (20:17 Brussels): Phase Plant sounds, and Pigments' knobs do reach the host
 
 The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-7.txt` (the same run continued).
