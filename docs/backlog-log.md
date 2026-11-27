@@ -3292,3 +3292,7 @@ The app's own work per frame (`FPS.js`, same machine, Fractals song): playing wi
 - Floating windows, sheets and menus still use `backdrop-filter` and the SVG lens (task GS2). The device panel over the full-screen piano roll is solid until then.
 - A real driver context loss (sleep and wake, GPU restart) and real Windows drivers.
 - The rectangle picture leaves out waveforms, notes, grid, ruler and automation lanes on purpose. If something is visibly missing under the glass on the Mac, it is added as more rectangles in `gleBuild`.
+
+### Release
+- v0.223: commit b09d9c8 on main (rebased three times during the run: engine 2.1.0, 2.2.0 and 2.3.0 arrived from tasks G2c, G2d and G2e, and the app was rebuilt and tested again with each; `index.html` was not touched by other sessions). The engine method for the app is commit 868484a.
+- v0.223. App copy synced, update note written ("The docked panels (track headers, transport bar, devices) are now drawn by the new glass engine: Glass, Light or Solid in Settings, Performance. Please tell us the frame rate you see on your Mac."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-glass-step-1.md`. Next in the chain: the user's frame-rate check on the Mac, then GS2 (floating windows, sheets, menus).
