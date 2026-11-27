@@ -1,0 +1,411 @@
+<title>AudioLab mixing: workflow and clarity</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: the same studio rack as the earlier pick pages (RF1, RF2). Sticky group chips, cards in an auto grid, a picks bar fixed to the bottom. Dark-first like AudioLab.
+   Live cards (X2, X15, X16) synthesize a 145 BPM kick and rolling bass in JavaScript; the picture and the sound come from the same samples. */
+:root{
+  --bg:#0d0f14; --panel:#151922; --panel2:#1b202b; --line:#262c39; --fg:#e7eaf0; --dim:#9aa3b5; --faint:#6b7488;
+  --accent:#4cc9f0; --star:#f5c84c; --part:#ff9a3c; --no:#ff5d73; --ok:#3ecf8e; --sel:rgba(76,201,240,.13); --vio:#b392f0;
+  --display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; --body:'Inter',ui-sans-serif,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); --vio:#7a4fd0; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); --vio:#7a4fd0; color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--body);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 150px}
+header h1{font:700 clamp(26px,4vw,38px)/1.1 var(--display);margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
+header h1 span{color:var(--accent)}
+.lede{color:var(--dim);max-width:72ch;margin:0 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--faint);font-size:12px;margin:14px 0 0}
+.legend b{color:var(--dim);font-weight:500}
+.known{margin:18px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;max-width:100%}
+.known summary{cursor:pointer;font:600 14px var(--display)}
+.known ul{margin:8px 0 0;padding-left:18px;color:var(--dim);font-size:13px;columns:2 340px;column-gap:28px}
+.known li{break-inside:avoid;margin:0 0 4px}
+.known b{color:var(--fg);font-weight:600}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;margin-top:18px;border-bottom:1px solid var(--line)}
+nav a,nav button{font:500 12px var(--body);color:var(--dim);text-decoration:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;cursor:pointer}
+nav a:hover,nav button:hover{color:var(--fg);border-color:var(--accent)}
+nav button[aria-pressed="true"]{color:var(--bg);background:var(--star);border-color:var(--star)}
+section{scroll-margin-top:64px}
+h2{font:600 19px var(--display);margin:30px 0 4px;display:flex;align-items:baseline;gap:10px}
+h2 small{font:500 12px var(--body);color:var(--faint)}
+.gnote{color:var(--dim);font-size:13px;margin:0 0 12px;max-width:84ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:12px}
+.card{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0;cursor:pointer;transition:border-color .15s,background .15s}
+.card:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.card.on{background:linear-gradient(var(--sel),var(--sel)),var(--panel);border-color:var(--accent)}
+.card.starred{box-shadow:inset 0 2px 0 var(--star)}
+.card.wide{grid-column:span 2}
+@media (max-width:800px){.card.wide{grid-column:auto}}
+.top{display:flex;align-items:flex-start;gap:10px}
+.top input{appearance:none;width:20px;height:20px;border:1.5px solid var(--faint);border-radius:5px;margin:2px 0 0;flex:none;cursor:pointer;display:grid;place-items:center;background:var(--panel2)}
+.top input:checked{background:var(--accent);border-color:var(--accent)}
+.top input:checked::after{content:"";width:10px;height:6px;border:2px solid var(--bg);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.top input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.id{font:500 12px var(--mono);color:var(--accent);margin-right:6px}
+.t{font:600 15.5px/1.3 var(--display);flex:1;min-width:0}
+.st{color:var(--star);font-size:15px;line-height:1;flex:none}
+.d{margin:0;color:var(--fg)}
+.why{margin:0;color:var(--dim);font-size:13px}
+.why b{color:var(--fg);font-weight:600}
+canvas.mock{width:100%;height:92px;display:block;border-radius:7px;background:var(--panel2);border:1px solid var(--line)}
+canvas.mock.live{height:150px;touch-action:none;cursor:default}
+canvas.mock.drag{cursor:ew-resize}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--dim);cursor:default}
+.ctl button{font:600 12px var(--body);border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:6px;padding:5px 10px;cursor:pointer}
+.ctl button.play{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.ctl button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.ctl button:focus-visible,.ctl input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ctl label{display:inline-flex;align-items:center;gap:6px}
+.ctl input[type=range]{width:120px;accent-color:var(--accent)}
+.ctl output{font:500 12px var(--mono);color:var(--fg);min-width:6ch;font-variant-numeric:tabular-nums}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11.5px;margin-top:auto}
+.pill{border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--dim)}
+.pill.new{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.pill.improves{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.pill.covered{color:var(--faint)}
+.val{display:inline-flex;gap:2px;align-items:center;margin-left:2px}
+.val i{width:7px;height:7px;border-radius:2px;background:var(--line)}
+.val i.f{background:var(--accent)}
+.has{font-size:11.5px;color:var(--faint);margin:0}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--panel) 94%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bar .in{max-width:1240px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.line{flex:1 1 320px;min-width:0;font:500 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+.bar input[type=text]{flex:1 1 200px;min-width:0;font:13px var(--body);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+.btn{font:600 13px var(--body);border:0;border-radius:7px;padding:9px 14px;cursor:pointer;background:var(--accent);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+.btn:focus-visible,.bar input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font:500 12px var(--body);color:var(--faint);white-space:nowrap}
+footer{margin-top:36px;color:var(--faint);font-size:12px;max-width:84ch}
+footer a{color:var(--accent)}
+@media (max-width:560px){.bar .in{gap:6px}.count{order:-1}}
+@media (prefers-reduced-motion: reduce){.card{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>AudioLab mixing: <span>workflow and clarity</span></h1>
+  <p class="lede">You named two pains in a big psytrance project: latency when playing, and mixing clarity (hearing and seeing what clashes, kick and bass, loudness). I read AudioLab's mixer code (v0.263) and the plans already running (the 40 feature cards, the 28 ideas and your meter picks), then looked at how Bitwig, Live, Cubase, Logic, Studio One, REAPER and FL Studio handle mixing, at clarity tools (Neutron, Pro-Q 4, Trackspacer, soothe2, REFERENCE, Metric AB) and at how psytrance producers lock kick and bass.</p>
+  <p class="lede">These 27 options cover what is not planned yet, and improve planned cards where the research shows how. Each one says whether it is <b>new</b>, <b>improves</b> a card or idea already being built, or is <b>covered</b>. X2, X15 and X16 play sound: press Play, then drag or switch.</p>
+  <div class="legend"><span><b>Label</b> new / improves card Fx or idea Ix / covered</span><span><b>Value</b> for a big psy project, 1 to 5</span><span><b>Effort</b> in tasks (one task is one session)</span><span><b>Lane</b> who would build it</span></div>
+  <details class="known">
+    <summary>Already in AudioLab or already planned (so not repeated here)</summary>
+    <ul>
+      <li><b>Today:</b> the Ducker takes any track as its trigger (audio rate, look-ahead, focus on a band), with cables between strips; the Sidechain effect pumps to the tempo.</li>
+      <li><b>Today:</b> delay compensation for tracks and groups (v0.146). Returns, sends and triggers are not compensated.</li>
+      <li><b>Today:</b> Freeze with or without effects (reversible), Bounce of a track or a clip, stems per track.</li>
+      <li><b>Today:</b> groups that nest, returns with post-fader sends, Mix A/B (fader, pan, mute, solo), the Time Machine.</li>
+      <li><b>Today:</b> LUFS M/S/I, LRA, true peak, correlation, the Meter device, master Mono and Swap, one reference song (not level-matched).</li>
+      <li><b>Planned cards (task FT):</b> F16 volume shaper, F18 kick and bass lab, F21 FX throws, F25 reference A/B with club check, F26 loudness export, F27 VCA, F29 mix snapshots, F37 CPU per track.</li>
+      <li><b>Planned ideas (task NI):</b> I1 frequency map, I2 kick and bass tuning lab, I3 clipping explainer, I4 mono-loss map, I6 energy arc, I12 masking cables, I13 level journey, I14 blind shoot-out, I15 listening lenses, I28 scene morph pad.</li>
+      <li><b>Meter picks (task IN):</b> L2 loudness history, S2 analyzer, O1 stereo field, O4 polar view, G1 G3 G4 gain reduction, E3 EQ curves.</li>
+    </ul>
+  </details>
+</header>
+<nav id="nav" aria-label="Groups"></nav>
+<main id="main"></main>
+<footer>Research, sources and proposed tasks: <code>docs/research-mixing.md</code> in the repository (task AE3). The live cards synthesize a 145 BPM kick (tail on F1, 43.65 Hz) and a rolling bass in F in the page itself; the clash meter uses third-octave band filters with a 10 ms envelope and counts a clash when both tracks are within 12 dB of each other and within 35 dB of the loudest band at the same moment. That rule is an estimate, like every masking measure (FabFilter and Hafezi and Reiss say the same of theirs).</footer>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <span class="count" id="count">0 picked</span>
+    <div class="line" id="line" aria-live="polite">AE3 picks: none yet</div>
+    <input type="text" id="note" placeholder="Note (optional)" aria-label="Note to add to the line">
+    <button class="btn" id="copy" type="button">Copy line</button>
+    <button class="btn ghost" id="allStar" type="button">Pick all ★</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+  </div>
+</div>
+
+<script>
+const G=[
+ ['A','Sidechain and ducking','Keeping the bass, reverbs and leads out of the kick\'s way. Today only the Ducker listens to another track.'],
+ ['B','Delay compensation and latency','Every path lined up, latency you can see, and playing without the lag of heavy devices. Needed anyway for VST3 in the native engine.'],
+ ['C','Freeze and bounce','Committing sounds in a 60-track project: say where the recording is taken from, keep a way back.'],
+ ['D','Routing view','Seeing and changing where every signal goes, so a big project stays readable.'],
+ ['E','Clarity and clashes','What fights, when, and in which band; kick and bass first.'],
+ ['F','Loudness and references','Comparing fairly with released psytrance and keeping headroom for the master.'],
+ ['G','Snapshots','Trying mix versions without losing today\'s work.']];
+// id, group, title, star, desc, why, kind, label, value, effort, lane, has, mock, wide
+const C=[
+ ['X1','A','Sidechain from anything',1,'Every device that reacts to level gets a Sidechain menu in its title: Compressor, Gate, Multiband, OTT, the EQ\'s dynamic bands, and VST3 plug-ins with a sidechain bus later. The menu lists every track with its tap point (after effects, after the fader) and, one level down, any device inside that track. Today only the Ducker has a source; the Compressor has no sidechain input.','Squeeze the bass with a real compressor keyed from the kick, gate a pad from the hats, open a filter from the snare, all without building sends.','new','New (reuses the Ducker\'s source picker and loop check)',5,'2','MX (new mixing-engine lane); badge in lane I\'s title strip','Bitwig (pre/post fader or any device), Logic (menu in the header), Live 12 (Pre FX / Post FX / Post Mixer), Cubase (several inputs per plug-in)','sc'],
+ ['X2','A','Ducking by shape, three triggers',1,'One ducking curve drawn on the beat, its hold and recovery shown in milliseconds and in 16ths at the song tempo. It fires from the tempo, from the notes of any track (the kick\'s MIDI: exact, no detector lag) or from the sound of any track. The curve sits over the bass waveform so you see the room it leaves. Drag the two handles, then play.','Producers prefer a drawn volume shape to a sidechain compressor for psy bass: hold 30 to 50 ms, recover over 60 to 80 ms. Over the waveform you see if the first 16th still rolls.','improves','Improves card F16 (FT-F16a/b): curve over the bass, ms and 16ths, note trigger first',5,'+0.5 in F16','C (ft)','Bitwig Note Sidechain and Audio Sidechain modulators, Kickstart 2 (sync, MIDI, audio), Cableguys MIDI retrigger, FL Peak Controller','duck',1],
+ ['X3','A','Spectral ducking',0,'A Spectral focus for the Ducker: 32 bands, and in each band the bass goes down only as much as the kick is present there, only while it sounds (the Trackspacer idea). The Ducker already focuses on all, lows, one band or highs.','Ducks the bass\'s 40 to 120 Hz under the kick but keeps its 300 Hz growl, so the roll keeps its bite. It is also the "duck in this band" fix the masking cables (I12) offer.','new','New (extends the Ducker\'s Focus; NI-5b\'s fix can call it)',4,'1–2','MX','Trackspacer (32 bands, inverse curve), soothe2 with sidechain, Sonible smart:comp spectral ducking, Pro-Q 4 dynamic bands on an external sidechain','spec'],
+ ['X4','A','Keep the reverbs off the kick',0,'One switch on each return: "Duck under the kick". It puts a Ducker tuned for tails (fast attack, recovery in one 16th) on the return, keyed from the kick track, and draws its cable. Today it takes a Ducker set up by hand per return.','Reverb and delay tails filling the moment the kick lands are a main reason a dense psy drop sounds washed out.','new','New',4,'1','C (ft)','Common practice in psy and techno guides (Myloops, Attack); no DAW makes it one click','ret'],
+ ['X5','B','Delay compensation everywhere',1,'Today AudioLab lines up tracks and groups, not returns, sends or sidechain triggers. This lines up every path: a send reaches its return in time with the dry sound, a Ducker\'s trigger is delayed like the track it ducks (or uses look-ahead), and a plug-in that changes its latency (VST3 in the native engine) is re-aligned without a click. Export and playback use the same numbers.','Kick and bass in KBBB sit a few ms apart. A 6 ms compressor on a return or a trigger path moves the roll; psy producers say they nudge the bass by hand in bounced audio because they do not trust compensation.','new','New (finishes today\'s compensation; the native plan needs it for VST3)',5,'2 + native','MX (web engine); NB (native engine)','FL Studio (inter-track routing and sidechains), Logic, Cubase; Live leaves returns fed back into tracks uncompensated','pdc'],
+ ['X6','B','Latency you can see',0,'Each device shows its delay in its title strip on hover (ms and samples), each strip shows its total, and the master shows the longest path and which device sets it. A device adding more than 10 ms gets an amber badge.','When playing feels late you find the 2048-sample pitch shifter in seconds instead of guessing.','new','New (sits next to F37 CPU per track)',3,'1','I (dv, title strip) and C','FL Studio (orange PDC icon, hover), Live (hover the device title)','lat'],
+ ['X7','B','Play through: low-latency monitoring',0,'While you play an armed instrument or record, devices on that track with more delay than a limit (3 ms by default) are skipped in what you hear, and listed by name; playback and the recording keep them. One button in the transport.','Your latency-when-playing pain, seen from the mixer: a look-ahead limiter or a linear-phase EQ on the lead no longer makes the keys late.','new','New (also belongs to the performance research: pick it in one place)',4,'1','MX','Logic Low Latency Mode (Limit slider), Studio One green Z (under 3 ms), Cubase Constrain Delay Compensation, Live Reduced Latency When Monitoring','llm'],
+ ['X8','C','Bounce with a tap point',1,'One bounce window for a clip, a selection, a track or a group, with the point it records from: before effects, after effects, after the fader, after the group, or after a chosen device. Tail until it falls under −90 dB, or fixed in bars. Replace in place or a new track; the original is kept hidden, so "Back to original" works even after saving. Today Freeze asks with or without effects and Bounce takes a whole track or a clip.','Committing a bass sound-design chain, a riser or a percussion group frees CPU in a 60-track project and makes the sound final, with a way back.','new','New (joins today\'s Freeze and Bounce in one window)',4,'1–2','C (ft); the window in lane F\'s dialog style','Bitwig (Pre-FX, Pre-Fader, Post-Fader, Custom), Cubase Render in Place (4 modes), Studio One Freeze to Audio Track (reversible), Logic Freeze (Source Only, Pre Fader)','tap'],
+ ['X9','C','Freeze up to here',0,'Right-click a device: "Freeze up to here". Devices above the line are printed; those below stay live, so the EQ and the final compressor stay adjustable. Today freeze keeps the chain live from the first sidechain device on; this lets you choose the point.','The heavy synth and distortion chain stops costing CPU while you keep shaping the bass\'s tone in the mix.','new','New (extends today\'s Freeze)',3,'1','C (ft)','REAPER (freeze up to a chosen FX)','frost'],
+ ['X10','C','Print a group with its returns',0,'Render a group as one stem with its share of the reverb and delay returns, and the master chain if wanted, for DJ stems, a live set or a remix pack. Stems today render each track alone, without its group or sends.','Psy labels and live sets ask for kick, bass, drums, leads and FX stems that sound like the mix.','new','New (hook for lane B\'s Export page)',3,'1','C (ft), hook for lane B','Cubase (Complete Signal Path), Live (group bounce after the mixer), REAPER stems','stem'],
+ ['X11','D','Routing map',1,'The whole song\'s signal flow on one screen: tracks on the left, groups in the middle, the master on the right; sends to returns as thinner lines with their level, sidechain links as amber dashes, the delay of each path as a small number. Click a node to select its strip, drag a line to re-route; loops are refused. Groups fold like in the mixer.','In a 60-track project you see at once where the bass goes, which returns are fed and what ducks what. The cable lane shows links between neighbouring strips; this shows all of them.','new','New',4,'2','C (ft)','REAPER Routing Matrix (a grid), FL mixer cables (one track at a time), Cubase routing editor; none shows sidechains in one flow map','map'],
+ ['X12','D','Pre or post, per send',0,'Each send knob gets a ring: blue before the fader, yellow after it. Today every send is after the fader and the pan, so a track faded out also loses its reverb.','Fade the dry lead out of a break and keep its reverb tail, a common psy transition; feed a sidechain bus that ignores the fader.','new','New',4,'1','MX','Bitwig (Pre, Post, Auto, blue and yellow rings), Cubase, Logic, Studio One, REAPER','prepost'],
+ ['X13','D','Output to any bus',0,'A strip\'s output can go to any group or return, or into another track to be resampled, from a menu on the strip. Today a track goes to its group or to the master only. Loops are refused with a reason.','Send all percussion to a "Perc glue" bus without regrouping the arrangement; resample the lead chain into an audio track to chop.','new','New',3,'1–2','MX','Cubase, Logic, Studio One, REAPER, FL Studio, Live, Bitwig','out'],
+ ['X14','D','VCA faders done right',0,'For card F27: a VCA moves its members\' level without moving their faders; its automation is relative and drawn as a grey line beside each member\'s volume lane; "Merge into tracks" folds it in and resets the VCA; VCAs can drive VCAs; mute and solo follow.','Ride the whole drop with one fader while every track keeps its own automation.','improves','Improves card F27 (FT-F27)',3,'+0 (in F27)','C (ft)','REAPER and Studio One (relative, no duplicate automation, merge), Cubase','vca'],
+ ['X15','E','Kick and bass lock',1,'One quarter note zoomed: the kick (blue), the bass (amber) and their sum (white) on one time axis, with the overlap in ms and whether the sum adds or cancels there. Polarity flip and a nudge in 0.1 ms steps, saved on the bass track. Move the nudge, flip the polarity, and play.','Psy producers line up the kick tail and the first bass note by zooming into bounced audio and nudging by hand (Bonedo, Psynews, Myloops). Here it is a reading, in the song, without a bounce.','improves','Improves card F18 (FT-F18a/b) and idea I2: adds the summed trace, polarity and nudge to their view',5,'+1 in F18','C (ft), analysis from lane D (NI-2a)','No DAW; Waves InPhase and MAutoAlign do it for microphone pairs','lock',1],
+ ['X16','E','Clash meter that knows the beat',1,'Clashes counted in time, not on average: for two tracks, per third-octave band, how often both are loud at the same moment (red bars hanging from the top, like Neutron\'s masking histogram). The faint fill is the plain average overlap, which flags any kick and bass. Switch the tail or the gap: the red bars move, the average barely does.','In KBBB psytrance kick and bass share 40 to 120 Hz but take turns. Counting only what sounds at the same time shows the real clash, and keeps the masking cables quiet when nothing fights.','improves','Improves idea I12 (NI-5a): time-gated clash measure, pair view on a cable click',5,'+1 in NI-5','D (ni)','iZotope Neutron masking meter (loudness loss per critical band), FabFilter Pro-Q 4 collisions ("an indication, not exact science"), MeldaProduction MMultiAnalyzer','clash'],
+ ['X17','E','Band listen',0,'On any spectrum (Spectrum device, analyser overlay, the mixer\'s spec view, the reference panel): hold Alt and drag across a band to hear only that band, on a track or the master. "Mud 150 to 300 Hz" and "Sub under 60 Hz" are one click.','Hearing the 200 Hz pile-up of pads and bass on its own tells you what to cut faster than any meter.','new','New (near I15\'s "sub only" lens, but any band)',3,'1','E (in) draws it; MX adds the filter','Metric AB (band filters), Pro-Q (band solo), Ozone','band'],
+ ['X18','E','High-pass hints',0,'A quiet badge on tracks that carry level where a psy mix does not want it: "Pad: −9 dB under 250 Hz while the kick plays. High-pass at 320 Hz?" One click adds the cut; nothing changes without a click. Starting points from producers: pads and FX 300 to 500 Hz, reverb returns 400 to 600 Hz.','Low end nobody needs from twenty pads and FX is the usual mud in a dense drop.','new','New (reads the NI-3 band cache)',4,'1','D (ni)','Neutron Mix Assistant and Sonible smart:EQ do it silently; a suggestion you accept was not found','hint'],
+ ['X19','E','Low end in mono',0,'A "Bass mono" switch with a frequency (50 to 500 Hz, 120 by default) on any track and the master, a correlation meter for the band under it, and a warning on the strip when the sides carry level there.','Club systems are mono in the sub. A wide bass layer that cancels in mono loses the drop on the dance floor.','improves','Improves idea I4 (NI-8): the fix next to the map',4,'1','MX (switch), E (meter)','Live Utility Bass Mono (50 to 500 Hz), Ozone Imager, REFERENCE phase detection','mono'],
+ ['X20','E','Fair compare',0,'Every device\'s bypass and A/B plays both sides at the same loudness (short-term LUFS matched over the last 3 s) and says how much louder the device made it. Always off in export.','Louder sounds better. Without matching you keep every compressor and exciter that only turned the level up.','new','New (I14 blind shoot-out matches Mix A/B only)',4,'1','C (ft), button in lane I\'s title strip','Ozone Gain Match, Logic Mastering Assistant Loudness Compensation, REFERENCE level match','fair'],
+ ['X21','F','Reference difference line',1,'For card F25: besides the overlaid spectra, one line of your mix minus the reference around 0 dB with a ±3 dB band, averaged over 3 s, 10 s or the loop; four band lights (low, low mid, high mid, high) green when in range; a low-end punch needle (crest factor under 120 Hz); and "loop the loudest 8 bars" found for both.','A difference line reads faster than two spectra on top of each other, and low-end dynamics is where psy mixes differ most from releases.','improves','Improves card F25 (FT-F25b)',5,'+1 in F25','C (ft), drawing by E (in)','REFERENCE (Level Line, punch dots), Tonal Balance Control (four bands, low-end crest meter), Metric AB','diff'],
+ ['X22','F','Your own psytrance target',0,'Drop five to ten released tracks you like: AudioLab averages their tonal balance, width per band and low-end punch into a target tunnel on the master and the reference panel. Commercial targets stop at EDM and techno.','A target from the records you play next to your own, not a generic EDM curve.','new','New (uses F25\'s slots)',3,'1','C (ft), analysis from D','Tonal Balance Control 3 (35 genres, no psytrance; captures your own targets), Ozone Master Assistant','target'],
+ ['X23','F','Gain staging check',0,'One card for the whole mix: each track\'s level into its bus, the master\'s headroom before its limiter (peaks near −6 dBFS while mixing), and how hard the limiter works (more than 3 dB means the mix is not done). Buttons: set clip gain so a track averages −18 dBFS; lower all faders together keeping the balance.','Hot tracks into a hot master make every later decision harder; psy guides say to finish the mix with headroom and limit 2 to 3 dB at most.','improves','Improves idea I13 (NI-7): from one channel to the whole mix',3,'1','D (ni)','Cubase Pre-Gain, Studio One clip gain curves; a whole-mix check was not found','stage'],
+ ['X24','F','Streaming preview',0,'Next to the loudness read-out: how much Spotify, Apple Music, YouTube, Tidal and others turn this mix down, and a button to hear it at that level against a reference turned down the same way.','A −6 LUFS drop ends up as loud as everyone else on streaming; hearing it stops over-limiting for its own sake.','new','New (next to F26 loudness export)',2,'1','C (ft)','MeterPlugs Loudness Penalty, Ozone','stream'],
+ ['X25','F','Loudness along the song',0,'Short-term loudness drawn under the arrangement, so the drops and breaks are visible, with your target band.','Shows whether the second drop really lands as hard as the first.','covered','Covered by idea I6 energy arc and meter pick L2; only the target band is new',2,'+0','D (ni)','Youlean history, Ozone','arc'],
+ ['X26','G','Mix scenes with partial recall',1,'For card F29: a scene stores the whole mixer: faders, pans, mutes, sends, inserts on or off and every device setting. Recall all or a part: levels, sends, inserts, or the selected tracks only; each recall is one undo step. Mix A/B today stores fader, pan, mute and solo only.','Keep a "big drop" and a "clean" version, or bring back last week\'s send levels without losing today\'s EQ.','improves','Improves card F29 (FT-F29)',4,'+0.5 in F29','C (ft)','Studio One Scenes (partial recall groups), Cubase MixConsole Snapshots (undo in History), REAPER SWS snapshots; Logic, Live, Bitwig and FL have none','scene'],
+ ['X27','G','Glide between scenes',0,'Turn two scenes into automation over 4, 8 or 16 bars: every fader, send and knob that differs moves along one curve you choose.','A break-to-drop mix change written in one move, then edited like any automation.','improves','Improves idea I28 (NI-20): whole-mixer scenes, written over bars',3,'1','C (ft)','Elektron Octatrack scenes; not found in a DAW','glide']];
+
+const $=s=>document.querySelector(s);
+const PK='ae3-picks';let picked=new Set();try{picked=new Set(JSON.parse(localStorage.getItem(PK)||'[]'))}catch(e){}
+let starOnly=false;
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+const CTL={
+ duck:`<div class="ctl"><button class="play" data-play="duck" type="button">Play</button><button data-tg="duck.on" aria-pressed="true" type="button">Ducking on</button><span id="duckRd"></span></div>`,
+ lock:`<div class="ctl"><button class="play" data-play="lock" type="button">Play</button><label>Nudge bass <input type="range" id="lkNudge" min="-8" max="16" step="0.1" value="0"><output id="lkNudgeO">0.0 ms</output></label><button data-tg="lock.pol" aria-pressed="false" type="button">Flip polarity</button><button data-tg="lock.short" aria-pressed="false" type="button">Short kick tail</button></div>`,
+ clash:`<div class="ctl"><button class="play" data-play="clash" type="button">Play</button><button data-tg="clash.short" aria-pressed="false" type="button">Short kick tail</button><button data-tg="clash.gap" aria-pressed="true" type="button">Bass leaves the kick's 16th</button></div>`};
+function render(){
+  const nav=$('#nav');nav.innerHTML=G.map(([k,n])=>`<a href="#g${k}">${n}</a>`).join('')+`<button type="button" id="starBtn" aria-pressed="${starOnly}">★ Starred only</button>`;
+  $('#starBtn').onclick=()=>{starOnly=!starOnly;render()};
+  $('#main').innerHTML=G.map(([k,n,note])=>{
+    const cs=C.filter(c=>c[1]===k&&(!starOnly||c[3]));if(!cs.length)return'';
+    return `<section id="g${k}"><h2>${n}<small>${cs.length} option${cs.length>1?'s':''}</small></h2><p class="gnote">${note}</p><div class="grid">${cs.map(card).join('')}</div></section>`}).join('');
+  document.querySelectorAll('.card').forEach(el=>{
+    const cb=el.querySelector('input[type=checkbox]');
+    el.addEventListener('click',e=>{if(e.target.closest('.ctl')||e.target.closest('canvas.live'))return;if(e.target!==cb){cb.checked=!cb.checked}toggle(el.dataset.id,cb.checked)});
+  });
+  wireCtl();mocks();upd();
+}
+function card(c){
+  const [id,,t,star,d,why,kind,label,val,eff,lane,has,mock,wide]=c;const on=picked.has(id);const live=!!CTL[mock];
+  return `<article class="card${on?' on':''}${star?' starred':''}${wide?' wide':''}" data-id="${id}">
+  <div class="top"><input type="checkbox" id="cb${id}" ${on?'checked':''} aria-label="Pick ${id} ${esc(t)}"><div class="t"><span class="id">${id}</span>${esc(t)}</div>${star?'<span class="st" title="Most valuable for your big psy project">★</span>':''}</div>
+  <p class="d">${esc(d)}</p>
+  <canvas class="mock${live?' live':''}" data-k="${mock}" ${live?'role="img" aria-label="Live mock-up"':'aria-hidden="true"'}></canvas>${CTL[mock]||''}
+  <p class="why"><b>Why for psy:</b> ${esc(why)}</p>
+  <p class="has">Elsewhere: ${esc(has)}</p>
+  <div class="meta"><span class="pill ${kind}">${esc(label)}</span><span class="pill">Value <span class="val">${[1,2,3,4,5].map(i=>`<i class="${i<=val?'f':''}"></i>`).join('')}</span></span><span class="pill">Effort: ${esc(eff)}${/^\d[–\d]*$/.test(eff)?(eff==='1'?' task':' tasks'):''}</span><span class="pill">Lane: ${esc(lane)}</span></div></article>`
+}
+function toggle(id,on){on?picked.add(id):picked.delete(id);const el=document.querySelector(`.card[data-id="${id}"]`);if(el)el.classList.toggle('on',on);try{localStorage.setItem(PK,JSON.stringify([...picked]))}catch(e){}upd()}
+function lineText(){const ids=C.map(c=>c[0]).filter(i=>picked.has(i));const n=$('#note').value.trim();return 'AE3 picks: '+(ids.length?ids.join(' '):'none')+(n?' | '+n:'')}
+function upd(){$('#count').textContent=picked.size+' picked';$('#line').textContent=lineText()}
+$('#note').addEventListener('input',upd);
+try{const n=localStorage.getItem('ae3-note');if(n)$('#note').value=n}catch(e){}
+$('#note').addEventListener('change',()=>{try{localStorage.setItem('ae3-note',$('#note').value)}catch(e){}});
+$('#copy').onclick=()=>{const t=lineText(),b=$('#copy');const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy line',1500)};
+  try{navigator.clipboard.writeText(t).then(done,()=>sel())}catch(e){sel()}
+  function sel(){const r=document.createRange();r.selectNodeContents($('#line'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Copy'}};
+$('#allStar').onclick=()=>{C.forEach(c=>{if(c[3])picked.add(c[0])});try{localStorage.setItem(PK,JSON.stringify([...picked]))}catch(e){}render()};
+$('#clear').onclick=()=>{picked.clear();try{localStorage.setItem(PK,'[]')}catch(e){}render()};
+
+/* ---------- synthesis: one beat at 145 BPM, kick and bass kept apart ---------- */
+const SR=44100,BPM=145,BEAT=60/BPM,N16=BEAT/4,NB=Math.round(BEAT*SR),F1=43.654;
+const ST={duck:{on:true,hold:40,rel:70,depth:.92},lock:{nudge:0,pol:false,short:false},clash:{short:false,gap:true}};
+function synth(o){
+  const n=NB,k=new Float32Array(n),b=new Float32Array(n);
+  let ph=0;const kl=Math.min(n,Math.round(o.klen*SR)),fe=o.klen-.014;
+  for(let i=0;i<kl;i++){const t=i/SR,f=o.kf+170*Math.exp(-t/.007)+55*Math.exp(-t/.02);ph+=2*Math.PI*f/SR;
+    let e=t<.0015?t/.0015:Math.exp(-t/o.tail);if(t>fe)e*=Math.max(0,1-(t-fe)/.014);k[i]=Math.sin(ph)*e*.9}
+  const nl=Math.round(N16*SR),tt=N16*.93;
+  for(const s of o.steps){const st=Math.round((s*N16+o.off/1000)*SR);
+    for(let j=0;j<nl;j++){const t=j/SR;let e=(t<.003?t/.003:1)*Math.exp(-t/o.bdec);if(t>tt)e*=Math.max(0,1-(t-tt)/(N16-tt));
+      let v=0;for(let h=1;h<=7;h++){const fh=h*o.bf;v+=Math.sin(2*Math.PI*fh*t)/h/Math.sqrt(1+Math.pow(fh/260,4))}
+      const ix=((st+j)%n+n)%n;b[ix]+=v*e*.62*(o.pol?-1:1)}}
+  if(o.duck)for(let i=0;i<n;i++)b[i]*=duckGain(i/SR,o.duck);
+  return{k,b};
+}
+function duckGain(t,d){const h=d.hold/1000,r=d.rel/1000;if(t<.002)return 1-d.depth*t/.002;if(t<h)return 1-d.depth;if(t<h+r){const p=(t-h)/r;return 1-d.depth*Math.pow(1-p,1.7)}return 1}
+const SIG={};
+function compute(id){
+  const s=ST[id];
+  if(id==='duck')SIG.duck=synth({kf:F1,tail:.07,klen:.15,steps:[0,1,2,3],off:0,pol:false,bdec:.3,bf:F1,duck:s.on?s:null});
+  if(id==='lock')SIG.lock=synth({kf:F1,tail:s.short?.045:.09,klen:s.short?.1:.2,steps:[1,2,3],off:s.nudge,pol:s.pol,bdec:.09,bf:F1});
+  if(id==='clash'){SIG.clash=synth({kf:F1,tail:s.short?.045:.09,klen:s.short?.1:.2,steps:s.gap?[1,2,3]:[0,1,2,3],off:0,pol:false,bdec:.12,bf:F1});SIG.clashA=clashAnalyse(SIG.clash)}
+  if(id==='lock')SIG.lockR=lockRead(SIG.lock,s);
+}
+/* third-octave band envelopes (RBJ band-pass, Q 4.32), 10 ms smoothing, read every 2 ms on the second pass */
+const BANDS=[25,31.5,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600];
+function bandEnv(x,fc){const w=2*Math.PI*fc/SR,al=Math.sin(w)/(2*4.32),a0=1+al,b0=al/a0,b2=-al/a0,a1=-2*Math.cos(w)/a0,a2=(1-al)/a0;
+  let x1=0,x2=0,y1=0,y2=0,env=0;const c=Math.exp(-1/(.01*SR)),step=Math.round(.002*SR),out=[];
+  for(let p=0;p<2;p++)for(let i=0;i<NB;i++){const xi=x[i],y=b0*xi+b2*x2-a1*y1-a2*y2;x2=x1;x1=xi;y2=y1;y1=y;env=c*env+(1-c)*y*y;if(p===1&&i%step===0)out.push(env)}
+  return out}
+function clashAnalyse(sig){
+  const K=BANDS.map(f=>bandEnv(sig.k,f)),B=BANDS.map(f=>bandEnv(sig.b,f));const db=v=>10*Math.log10(v+1e-12);
+  let M=-200;K.concat(B).forEach(a=>a.forEach(v=>{M=Math.max(M,db(v))}));
+  const nf=K[0].length,hist=[],ak=[],ab=[];
+  BANDS.forEach((f,j)=>{let c=0,sk=0,sb=0;for(let i=0;i<nf;i++){const kd=db(K[j][i]),bd=db(B[j][i]);sk+=K[j][i];sb+=B[j][i];if(kd>M-35&&bd>M-35&&Math.abs(kd-bd)<12)c++}
+    hist.push(c/nf);ak.push(db(sk/nf)-M);ab.push(db(sb/nf)-M)});
+  return{hist,ak,ab}}
+function lp2(x,fc){const c=Math.exp(-2*Math.PI*fc/SR),y=new Float32Array(x.length);let a=0,b=0;for(let p=0;p<2;p++)for(let i=0;i<x.length;i++){a=c*a+(1-c)*x[i];b=c*b+(1-c)*a;if(p)y[i]=b}return y}
+function lockRead(sig,s){const st=N16+s.nudge/1000,kl=s.short?.1:.2;
+  if(kl<=st)return{gap:(st-kl)*1000};const i0=Math.round(st*SR),i1=Math.round(kl*SR),K=lp2(sig.k,90),B=lp2(sig.b,90);let ek=0,eb=0,es=0;
+  for(let i=i0;i<i1;i++){const a=K[i],b=B[i];ek+=a*a;eb+=b*b;es+=(a+b)*(a+b)}
+  return{ov:(kl-st)*1000,db:10*Math.log10(es/(ek+eb+1e-12))}}
+['duck','lock','clash'].forEach(compute);
+
+/* ---------- audio ---------- */
+let AC=null,MG=null,cur=null;
+function startAudio(id,off){
+  try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.gain.value=.55;MG.connect(AC.destination)}AC.resume()}catch(e){return}
+  if(cur){try{cur.src.stop()}catch(e){}}
+  const {k,b}=SIG[id],buf=AC.createBuffer(1,NB*4,SR),d=buf.getChannelData(0);let pk=1e-6;
+  for(let i=0;i<NB;i++)pk=Math.max(pk,Math.abs(k[i]+b[i]));const g=.8/pk;
+  for(let i=0;i<NB*4;i++){const j=i%NB;d[i]=(k[j]+b[j])*g}
+  const src=AC.createBufferSource();src.buffer=buf;src.loop=true;src.connect(MG);src.start(0,off||0);
+  cur={id,src,t0:AC.currentTime-(off||0),dur:buf.duration};playLabels()}
+function stopAudio(){if(cur){try{cur.src.stop()}catch(e){}cur=null}playLabels()}
+function playLabels(){document.querySelectorAll('[data-play]').forEach(b=>{const on=cur&&cur.id===b.dataset.play;b.textContent=on?'Stop':'Play';b.setAttribute('aria-pressed',on?'true':'false')})}
+function refresh(id){compute(id);if(cur&&cur.id===id){const off=(AC.currentTime-cur.t0)%cur.dur;startAudio(id,off)}}
+function wireCtl(){
+  document.querySelectorAll('[data-play]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.play;cur&&cur.id===id?stopAudio():startAudio(id,0)});
+  document.querySelectorAll('[data-tg]').forEach(b=>{const [id,key]=b.dataset.tg.split('.');b.setAttribute('aria-pressed',String(!!ST[id][key]));
+    b.onclick=e=>{e.stopPropagation();ST[id][key]=!ST[id][key];b.setAttribute('aria-pressed',String(ST[id][key]));if(key==='on')b.textContent=ST[id][key]?'Ducking on':'Ducking off';refresh(id)}});
+  const nd=$('#lkNudge');if(nd){nd.value=ST.lock.nudge;const o=$('#lkNudgeO');o.textContent=(+ST.lock.nudge).toFixed(1)+' ms';
+    nd.oninput=e=>{ST.lock.nudge=+nd.value;o.textContent=(+nd.value).toFixed(1)+' ms';compute('lock')};nd.onchange=()=>refresh('lock')}
+  playLabels();
+}
+
+/* ---------- mocks ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+let live=[];
+function mocks(){
+  live=[...document.querySelectorAll('canvas.mock')].map(cv=>({cv,k:cv.dataset.k,vis:true}));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{const m=live.find(x=>x.cv===e.target);if(m)m.vis=e.isIntersecting}));
+  live.forEach(m=>{io.observe(m.cv);size(m);draw(m,0)});
+  const dm=live.find(m=>m.k==='duck');if(dm)dragDuck(dm);
+}
+function size(m){const r=m.cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);m.w=r.width;m.h=r.height;m.cv.width=Math.max(1,Math.round(r.width*d));m.cv.height=Math.max(1,Math.round(r.height*d));m.g=m.cv.getContext('2d');m.g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',()=>live.forEach(m=>{size(m);draw(m,performance.now()/1000)}));
+let last=0;function loop(ts){if(ts-last>33){last=ts;const t=RM?0:ts/1000;live.forEach(m=>{if(m.vis&&(!RM||CTL[m.k]))draw(m,t)})}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function playPos(id){if(!cur||cur.id!==id||!AC)return -1;return((AC.currentTime-cur.t0)%BEAT)/BEAT}
+function dragDuck(m){let which=null;const cv=m.cv;
+  const X=ms=>8+(m.w-16)*(ms/1000)/BEAT, ms=x=>Math.max(0,(x-8)/(m.w-16)*BEAT*1000);
+  const pos=e=>{const r=cv.getBoundingClientRect();return e.clientX-r.left};
+  cv.addEventListener('pointerdown',e=>{e.stopPropagation();const x=pos(e),s=ST.duck,a=X(s.hold),b=X(s.hold+s.rel);which=Math.abs(x-a)<Math.abs(x-b)?'h':'r';if(Math.min(Math.abs(x-a),Math.abs(x-b))>40){which=null;return}cv.setPointerCapture(e.pointerId)});
+  cv.addEventListener('pointermove',e=>{const x=pos(e),s=ST.duck,a=X(s.hold),b=X(s.hold+s.rel);cv.classList.toggle('drag',Math.min(Math.abs(x-a),Math.abs(x-b))<40);if(!which)return;
+    if(which==='h')ST.duck.hold=Math.round(Math.min(150,Math.max(5,ms(x))));else ST.duck.rel=Math.round(Math.min(300,Math.max(10,ms(x)-ST.duck.hold)));compute('duck');draw(m,0)});
+  const up=()=>{if(which){which=null;refresh('duck')}};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('click',e=>e.stopPropagation());
+}
+function draw(m,t){
+  const g=m.g,w=m.w,h=m.h;if(!g||!w)return;g.clearRect(0,0,w,h);
+  const A=css('--accent'),S=css('--star'),P=css('--part'),N=css('--no'),O=css('--ok'),D=css('--faint'),L=css('--line'),F=css('--fg'),DM=css('--dim'),V=css('--vio'),P2=css('--panel'),BG=css('--panel2');
+  g.lineWidth=1.5;g.font='10px Inter, sans-serif';g.textBaseline='alphabetic';
+  const txt=(s,x,y,c,al)=>{g.fillStyle=c||DM;g.textAlign=al||'left';g.fillText(s,x,y);g.textAlign='left'};
+  const box=(x,y,bw,bh,fill,stroke,r)=>{g.beginPath();g.roundRect?g.roundRect(x,y,bw,bh,r||4):g.rect(x,y,bw,bh);if(fill){g.fillStyle=fill;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=1;g.stroke()}};
+  const ln=(x1,y1,x2,y2,c,lw,dash)=>{g.strokeStyle=c;g.lineWidth=lw||1.5;g.setLineDash(dash||[]);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([])};
+  const beatP=(t/BEAT)%1;
+  const wave=(arr,x0,x1,t0,t1,yc,amp,col,lw)=>{g.strokeStyle=col;g.lineWidth=lw||1.2;g.beginPath();const n=Math.max(2,Math.round(x1-x0));
+    for(let i=0;i<=n;i++){const tt=t0+(t1-t0)*i/n,s0=Math.floor(tt*SR),s1=Math.floor((t0+(t1-t0)*(i+1)/n)*SR);let mx=0,mn=0;for(let j=s0;j<=Math.max(s0,s1)&&j<arr.length;j++){const v=arr[j];if(v>mx)mx=v;if(v<mn)mn=v}
+      const x=x0+i;if(s1-s0>2){g.moveTo(x,yc-mx*amp);g.lineTo(x,yc-mn*amp)}else{const v=arr[Math.min(arr.length-1,s0)]||0;i?g.lineTo(x,yc-v*amp):g.moveTo(x,yc-v*amp)}}g.stroke()};
+  switch(m.k){
+  case 'duck':{const s=ST.duck,sig=SIG.duck,x0=8,x1=w-8,yc=h*.52,amp=h*.3,X=ms=>x0+(x1-x0)*(ms/1000)/BEAT;
+    for(let i=0;i<=4;i++){const x=x0+(x1-x0)*i/4;ln(x,10,x,h-16,L,1);if(i<4)txt(['K','B','B','B'][i]+' · 1/16',x+3,h-5,D)}
+    wave(sig.k,x0,x1,0,BEAT,yc,amp,A+'88',1);wave(sig.b,x0,x1,0,BEAT,yc,amp,P,1.2);
+    g.strokeStyle=S;g.lineWidth=2;g.beginPath();for(let i=0;i<=200;i++){const tt=BEAT*i/200,gg=s.on?duckGain(tt,s):1,x=x0+(x1-x0)*i/200,y=12+(1-gg)*(h*.62);i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
+    if(s.on){[[X(s.hold),12+s.depth*h*.62],[X(s.hold+s.rel),12]].forEach(([x,y])=>{g.fillStyle=S;g.beginPath();g.arc(x,y,5,0,7);g.fill();g.strokeStyle=P2;g.lineWidth=1.5;g.stroke()})}
+    const pp=playPos('duck');if(pp>=0)ln(x0+(x1-x0)*pp,8,x0+(x1-x0)*pp,h-14,F,1);
+    const r=$('#duckRd');if(r)r.textContent=s.on?`hold ${s.hold} ms · recover ${s.rel} ms = ${((s.hold+s.rel)/1000/N16).toFixed(2)} of a 1/16 at 145 BPM`:'bass plays through the kick';
+    txt('drag the dots',x1,22,D,'right');break}
+  case 'lock':{const s=ST.lock,sig=SIG.lock,rd=SIG.lockR,T=.24,x0=8,x1=w-8,X=tt=>x0+(x1-x0)*tt/T,yc=h*.47,amp=h*.36;
+    for(let i=0;i<=2;i++){const x=X(i*N16);ln(x,8,x,h-18,L,1);txt(i?'1/16 '+(i+1):'kick',x+3,h-6,D)}
+    const st=N16+s.nudge/1000,kl=s.short?.1:.2;if(kl>st){g.fillStyle=(rd.db<0?N:O)+'22';g.fillRect(X(st),8,X(Math.min(T,kl))-X(st),h-26)}
+    wave(sig.k,x0,x1,0,T,yc,amp,A,1.2);wave(sig.b,x0,x1,0,T,yc,amp,P,1.2);
+    const sum=new Float32Array(Math.round(T*SR)+2);for(let i=0;i<sum.length&&i<NB;i++)sum[i]=sig.k[i]+sig.b[i];wave(sum,x0,x1,0,T,yc,amp*.5,F,1);
+    txt('kick',x1-118,18,A);txt('bass',x1-86,18,P);txt('sum ×0.5',x1-54,18,F);
+    txt(rd.gap!==undefined?`no overlap · gap ${rd.gap.toFixed(1)} ms`:`overlap ${rd.ov.toFixed(0)} ms · under 90 Hz the sum ${rd.db>=0?'adds':'cancels'} ${rd.db>=0?'+':''}${rd.db.toFixed(1)} dB`,x0+4,18,rd.gap!==undefined?O:(rd.db<-1?N:rd.db>1?O:S));
+    const pp=playPos('lock');if(pp>=0&&pp*BEAT<T)ln(X(pp*BEAT),8,X(pp*BEAT),h-18,F,1);break}
+  case 'clash':{const a=SIG.clashA,x0=34,x1=w-8,top=10,bot=h-18,fx=f=>x0+(x1-x0)*Math.log(f/20)/Math.log(2000/20),Y=dbv=>top+(bot-top)*Math.min(1,Math.max(0,-dbv/48));
+    [50,100,200,500,1000].forEach(f=>{ln(fx(f),top,fx(f),bot,L,1);txt(f>=1000?'1k':String(f),fx(f),h-6,D,'center')});
+    [0,-24,-48].forEach(d=>txt(d+' dB',2,Y(d)+3,D));
+    g.fillStyle=DM+'30';g.beginPath();BANDS.forEach((f,j)=>{const y=Y(Math.min(a.ak[j],a.ab[j]));j?g.lineTo(fx(f),y):g.moveTo(fx(f),y)});g.lineTo(fx(1600),bot);g.lineTo(fx(25),bot);g.closePath();g.fill();
+    const curve=(arr,col)=>{g.strokeStyle=col;g.lineWidth=1.6;g.beginPath();BANDS.forEach((f,j)=>{const y=Y(arr[j]);j?g.lineTo(fx(f),y):g.moveTo(fx(f),y)});g.stroke()};curve(a.ak,A);curve(a.ab,P);
+    let wi=0;BANDS.forEach((f,j)=>{const bw=Math.max(4,(fx(f*1.12)-fx(f/1.12))-2);g.fillStyle=N;g.globalAlpha=.85;g.fillRect(fx(f)-bw/2,top,bw,a.hist[j]*(bot-top)*.9);g.globalAlpha=1;if(a.hist[j]>a.hist[wi])wi=j});
+    txt('kick',x1-118,top+10,A);txt('bass',x1-88,top+10,P);txt('clash in time',x1-58,top+10,N);
+    txt(a.hist[wi]>.005?`worst: ${BANDS[wi]} Hz, both loud ${(a.hist[wi]*100).toFixed(0)}% of the beat`:'no band where both are loud at once',x0+4,bot-4,a.hist[wi]>.2?N:a.hist[wi]>.05?S:O);break}
+  case 'sc':{box(8,8,w-16,22,BG,L,5);txt('COMPRESSOR',16,23,F);txt('Sidechain ▸ Kick · after effects',w-16,23,A,'right');
+    const items=['Kick · after effects','Kick · after fader','Snare · after effects','Bass group · after fader','Kick ▸ inside: after Clipper'];const k=Math.floor(t/1.3)%items.length;
+    items.slice(0,4).forEach((s,i)=>{const y=36+i*13;if(i===k%4){g.fillStyle=A+'30';g.fillRect(w*.42,y-1,w*.58-16,13)}txt(s,w*.42+6,y+9,i===k%4?F:DM)});
+    const gr=Math.max(0,Math.sin(((t/BEAT)%1)*Math.PI*.9+Math.PI))*-1;g.fillStyle=N;g.fillRect(16,38,10,(1-Math.min(1,((t/BEAT)%1)*3))*40);txt('GR',14,h-6,D);
+    ln(34,58,w*.42-6,58,S,1.5,[4,3]);txt('◀',w*.42-12,62,S);break}
+  case 'spec':{const n=32,x0=8,bw=(w-16)/n,kp=Math.exp(-((t/BEAT)%1)/.06);for(let i=0;i<n;i++){const f=i/n,base=(1-f*.55)*(.75+.25*Math.sin(i*1.7)),kick=Math.exp(-Math.pow((i-3.5)/2.6,2)),cut=1-.85*kick*kp,hh=(h-26)*base*cut;
+      g.fillStyle=kick>.15?P:P+'99';g.fillRect(x0+i*bw+1,h-16-hh,bw-2,hh);if(kick>.15){g.fillStyle=A+'55';g.fillRect(x0+i*bw+1,h-16-(h-26)*kick*kp,bw-2,2)}}
+    txt('40',x0,h-4,D);txt('120 Hz',x0+bw*7,h-4,D);txt('300 Hz growl stays',x0+bw*13,h-4,D);txt('bass bands down only where the kick is',w-10,14,DM,'right');break}
+  case 'ret':{const x0=8,x1=w-8,yc=h*.55;for(let i=0;i<4;i++){const x=x0+(x1-x0)*i/4;ln(x,8,x,h-14,L,1);g.fillStyle=A;g.fillRect(x,h-14,3,6)}
+    g.fillStyle=V+'55';g.beginPath();g.moveTo(x0,yc);for(let i=0;i<=200;i++){const tt=i/200*4,ph=tt%1,dk=ph<.04?1-ph/.04*.85:ph<.3?.15+.85*(ph-.04)/.26:1,a=(h*.32)*(.7+.3*Math.sin(i*.9))*dk;g.lineTo(x0+(x1-x0)*i/200,yc-a)}
+    for(let i=200;i>=0;i--){const tt=i/200*4,ph=tt%1,dk=ph<.04?1-ph/.04*.85:ph<.3?.15+.85*(ph-.04)/.26:1,a=(h*.32)*(.7+.3*Math.cos(i*.7))*dk;g.lineTo(x0+(x1-x0)*i/200,yc+a*.6)}g.fill();
+    txt('Reverb return, ducked under each kick',x0+4,14,DM);txt('kick',x1,h-2,A,'right');break}
+  case 'pdc':{const rows=[['Bass','6.0 ms comp',0],['Return: Reverb','send delayed 6.0 ms',6],['Ducker trigger: Kick','delayed 6.0 ms',6],['Master','all aligned',0]];const al=(t%4)<2;
+    rows.forEach((r,i)=>{const y=10+i*19;txt(r[0],8,y+11,F);const x=w*.46+(al?0:(i===1||i===2?14:0));box(x,y,w*.3,14,i===3?O+'55':A+'44',null,3);ln(x,y,x,y+14,i===3?O:A,2);txt(r[1],w-8,y+11,DM,'right')});
+    ln(w*.46,6,w*.46,h-6,S,1,[3,3]);txt(al?'compensated':'today: return and trigger late',w*.46+4,h-2,al?O:N);break}
+  case 'lat':{const dv=[['EQ','0.0'],['Comp','6.0'],['Pitch','46.4'],['Limiter','5.0']];const bw=(w-24)/4;
+    dv.forEach((d,i)=>{const x=8+i*(bw+3),hot=+d[1]>10;box(x,14,bw,40,BG,hot?P:L,5);txt(d[0],x+6,30,F);box(x+6,36,bw-12,13,hot?P+'33':P2,null,3);txt(d[1]+' ms',x+bw/2,46,hot?P:DM,'center')});
+    txt('track total 57.4 ms · sets the delay: Pitch (2048 samples)',8,h-12,S);break}
+  case 'llm':{const x0=8,lim=w*.42;const dv=[['Synth',.2],['EQ',0],['Linear EQ',.9],['Limiter LA',.6],['Delay',0]];
+    dv.forEach((d,i)=>{const y=10+i*14,bw=Math.max(3,d[1]*(w-120));txt(d[0],x0,y+10,d[1]>.4?D:F);box(90,y+2,bw,9,d[1]>.4?D+'55':A+'88',null,2);if(d[1]>.4)txt('skipped while playing',w-8,y+10,P,'right')});
+    ln(90+.35*(w-120),6,90+.35*(w-120),h-8,S,1.5,[4,3]);txt('limit 3 ms',90+.35*(w-120)+4,h-4,S);break}
+  case 'tap':{const st=['clip','EQ','Saturator','Comp','fader','group','master'];const bw=(w-16)/st.length,k=Math.floor(t/1.4)%5,taps=[0,3,4,5,2],lab=['before effects','after effects','after the fader','after the group','after Saturator'];
+    st.forEach((s,i)=>{const x=8+i*bw;box(x+2,24,bw-4,24,BG,L,4);txt(s,x+bw/2,40,F,'center');if(i<st.length-1)txt('→',x+bw-1,40,D,'center')});
+    const tp=taps[k],tx=8+(tp+1)*bw-1;ln(tx,16,tx,56,S,2);g.fillStyle=S;g.beginPath();g.moveTo(tx-5,14);g.lineTo(tx+5,14);g.lineTo(tx,21);g.fill();
+    txt('record '+lab[k]+' · tail until −90 dB · original kept',8,h-10,DM);break}
+  case 'frost':{const st=['Osc','Distort','Formant','EQ','Comp'];const bw=(w-16)/st.length,cut=3;
+    st.forEach((s,i)=>{const x=8+i*bw,fz=i<cut;box(x+2,18,bw-4,30,fz?A+'26':BG,fz?A:L,4);txt((fz?'❄ ':'')+s,x+bw/2,37,fz?A:F,'center')});
+    const cx=8+cut*bw;ln(cx,10,cx,58,S,2,[4,3]);txt('frozen up to here',cx-6,h-8,A,'right');txt('still live',cx+6,h-8,O);break}
+  case 'stem':{const x0=8,x1=w-8;const lanes=[['Drums group',A],['+ its Reverb share',V],['= stem',S]];
+    lanes.forEach((l,i)=>{const y=14+i*24;txt(l[0],x0,y+4,F);g.strokeStyle=l[1];g.lineWidth=1;g.beginPath();for(let x=x0+110;x<x1;x+=2){const ph=((x-x0)/(x1-x0)*8)%1,a=(i===1?.35:i===2?.9:.8)*(i===1?(.5+.5*ph):Math.exp(-ph*5))*9;g.moveTo(x,y-a);g.lineTo(x,y+a)}g.stroke()});break}
+  case 'map':{const T=[['Kick',14],['Bass',30],['Lead',46],['Pad',62],['Hats',78]];const gx=w*.45,mx=w-34;
+    const nodes={};T.forEach(([n,y])=>{nodes[n]=[60,y];box(8,y-7,52,14,BG,L,3);txt(n,12,y+3,F)});
+    [['Drums',22,['Kick','Hats']],['Music',50,['Lead','Pad']]].forEach(([n,y,mem])=>{box(gx-24,y-8,48,16,BG,A,3);txt(n,gx,y+3,A,'center');mem.forEach(mn=>ln(60,nodes[mn][1],gx-24,y,A+'99',1.2));ln(gx+24,y,mx,h/2-6,A,1.6)});
+    ln(60,30,mx,h/2-6,A+'99',1.2);box(mx,h/2-16,28,20,BG,O,3);txt('Mst',mx+14,h/2-2,O,'center');
+    box(gx+44,h-20,46,14,BG,V,3);txt('Rev',gx+67,h-10,V,'center');ln(60,46,gx+44,h-13,V,1,[2,2]);ln(60,62,gx+44,h-13,V,1,[2,2]);
+    g.setLineDash([5,3]);g.strokeStyle=S;g.lineWidth=1.4;g.beginPath();g.moveTo(8,14);g.bezierCurveTo(-6,22,-6,26,8,30);g.stroke();g.setLineDash([]);txt('ducks',gx-58,h-4,S);
+    const p=(t*.6)%1;g.fillStyle=F;g.beginPath();g.arc(60+(gx-24-60)*p,14+(22-14)*p,2.5,0,7);g.fill();txt('6 ms',gx+30,18,D);break}
+  case 'prepost':{const fd=.5+.5*Math.sin(t*1.2);const x0=14;
+    box(x0,10,12,h-24,BG,L,3);g.fillStyle=A;g.fillRect(x0+1,10+(h-24)*(1-fd),10,(h-24)*fd);txt('fader',x0-6,h-4,D);
+    [['Reverb (pre)',A,1],['Delay (post)',S,fd]].forEach(([n,c,lv],i)=>{const cx=w*.42+i*w*.3,cy=h*.45;g.strokeStyle=L;g.lineWidth=5;g.beginPath();g.arc(cx,cy,16,.75*Math.PI,2.25*Math.PI);g.stroke();
+      g.strokeStyle=c;g.beginPath();g.arc(cx,cy,16,.75*Math.PI,(.75+1.5*lv*.8)*Math.PI);g.stroke();txt(n,cx,h-6,c,'center')});break}
+  case 'out':{box(8,14,90,22,BG,L,4);txt('Shaker',16,29,F);box(108,14,w-116,22,BG,A,4);txt('Output ▾  Perc glue (bus)',116,29,A);
+    ['Master','Perc glue (bus)','Drums group','Resample → Audio 12','Shaker (itself)'].forEach((s,i)=>{const y=44+i*10;if(i<4||1){txt(s,116,y+8,i===4?N:i===1?F:DM)}});txt('✕ loop',w-10,h-4,N,'right');break}
+  case 'vca':{const v=.5+.35*Math.sin(t*.9);box(10,10,14,h-24,BG,S,3);g.fillStyle=S;g.fillRect(11,10+(h-24)*(1-v),12,(h-24)*v);txt('VCA',6,h-4,S);
+    for(let i=0;i<4;i++){const x=48+i*((w-60)/4),lv=[.7,.55,.8,.6][i];box(x,10,10,h-24,BG,L,3);g.fillStyle=A+'88';g.fillRect(x+1,10+(h-24)*(1-lv),8,3);g.fillStyle=D;g.fillRect(x+1,10+(h-24)*(1-lv*v*1.3),8,2);txt('ch'+(i+1),x-2,h-4,D)}
+    txt('faders stay, grey = what you hear',w-8,12,DM,'right');break}
+  case 'band':{const x0=8,x1=w-8;g.strokeStyle=DM;g.lineWidth=1.4;g.beginPath();for(let i=0;i<=120;i++){const f=i/120,y=h*.25+h*.45*(f*.7+.08*Math.sin(i*.5))+(i<20?-8:0);i?g.lineTo(x0+(x1-x0)*f,y):g.moveTo(x0,y)}g.stroke();
+    const a=x0+(x1-x0)*.32,b=x0+(x1-x0)*.46;g.fillStyle=A+'30';g.fillRect(a,8,b-a,h-22);ln(a,8,a,h-14,A,1);ln(b,8,b,h-14,A,1);txt('listening 150–300 Hz',(a+b)/2,h-4,A,'center');txt('Alt-drag',x1,14,D,'right');break}
+  case 'hint':{const rows=[['Pad wide','−9 dB under 250 Hz','HP 320 Hz?'],['FX riser','−14 dB under 300 Hz','HP 400 Hz?'],['Return: Reverb','−11 dB under 400 Hz','HP 500 Hz?']];
+    rows.forEach((r,i)=>{const y=10+i*24;box(8,y,w-16,20,BG,L,4);txt(r[0],14,y+14,F);txt(r[1],w*.38,y+14,DM);box(w-86,y+3,72,14,i===Math.floor(t/1.5)%3?A:P2,A,7);txt(r[2],w-50,y+14,i===Math.floor(t/1.5)%3?BG:A,'center')});break}
+  case 'mono':{const c=.78+.15*Math.sin(t);txt('Bass mono under',8,18,F);box(110,8,56,16,BG,A,4);txt('120 Hz',138,20,A,'center');
+    txt('correlation < 120 Hz',8,44,DM);box(130,36,w-142,10,BG,L,3);const cx=130+(w-142)*(c+1)/2;g.fillStyle=O;g.fillRect(cx-2,34,4,14);txt('+'+c.toFixed(2),w-8,58,O,'right');
+    txt('⚠ Lead wide: sides carry −22 dB under 120 Hz',8,h-8,P);break}
+  case 'fair':{const on=(t%4)<2;txt(on?'device on':'bypass',8,16,F);const a=on?.86:.62;box(8,24,(w-16)*a,14,A+'88',null,3);box(8,44,(w-16)*.62,14,D+'66',null,3);txt('heard level',w-8,16,DM,'right');
+    txt(on?'+2.3 dB louder · matched to −8.1 LUFS-S for the compare':'matched compare: judge the sound, not the level',8,h-8,S);break}
+  case 'diff':{const x0=24,x1=w-8,yc=h*.45,sc=h*.08;g.fillStyle=O+'22';g.fillRect(x0,yc-3*sc,x1-x0,6*sc);ln(x0,yc,x1,yc,D,1);txt('0',8,yc+3,D);txt('+3',4,yc-3*sc+3,D);
+    g.strokeStyle=F;g.lineWidth=1.6;g.beginPath();for(let i=0;i<=120;i++){const f=i/120,d=2.2*Math.sin(f*6+t*.3)+(f<.15?4.2:0)-(f>.8?2:0);const y=yc-d*sc;i?g.lineTo(x0+(x1-x0)*f,y):g.moveTo(x0,y)}g.stroke();
+    ['low','low mid','high mid','high'].forEach((n,i)=>{const x=x0+(x1-x0)*(i+.5)/4,ok=i!==0;g.fillStyle=ok?O:P;g.beginPath();g.arc(x-22,h-9,4,0,7);g.fill();txt(n,x-14,h-5,ok?DM:P)});break}
+  case 'target':{const x0=8,x1=w-8;g.fillStyle=V+'33';g.beginPath();for(let i=0;i<=60;i++){const f=i/60;g.lineTo(x0+(x1-x0)*f,h*.3+h*.4*f-8)}for(let i=60;i>=0;i--){const f=i/60;g.lineTo(x0+(x1-x0)*f,h*.3+h*.4*f+10)}g.fill();
+    g.strokeStyle=F;g.lineWidth=1.5;g.beginPath();for(let i=0;i<=60;i++){const f=i/60,y=h*.3+h*.4*f+6*Math.sin(f*9+t*.4);i?g.lineTo(x0+(x1-x0)*f,y):g.moveTo(x0,y)}g.stroke();txt('your psy target, from 8 references',x0,14,V);txt('your mix',x1,h-6,F,'right');break}
+  case 'stage':{const rows=[['Kick','−9.8',0],['Bass','−4.1',1],['Lead','−12.0',0],['Master headroom','−1.2 dBFS',1]];
+    rows.forEach((r,i)=>{const y=8+i*17;txt(r[0],8,y+11,F);box(w*.45,y+2,w*.35,10,BG,L,2);const lv=r[2]?.9:.55;g.fillStyle=r[2]?P:O;g.fillRect(w*.45,y+2,w*.35*lv,10);txt(r[1],w-8,y+11,r[2]?P:DM,'right')});break}
+  case 'stream':{const sv=[['Spotify',-5.9],['Apple',-7.9],['YouTube',-5.9],['Tidal',-5.9],['Amazon',-5.9]];const bw=(w-16)/sv.length;
+    sv.forEach(([n,d],i)=>{const x=8+i*bw;box(x+3,12,bw-6,16,A+'55',null,3);box(x+3,12-d*2.2+16,bw-6,16,BG,A,3);txt(d.toFixed(1)+' dB',x+bw/2,h-18,P,'center');txt(n,x+bw/2,h-5,DM,'center')});break}
+  case 'arc':{const x0=8,x1=w-8;g.fillStyle=O+'22';g.fillRect(x0,h*.2,x1-x0,h*.14);g.strokeStyle=A;g.lineWidth=1.6;g.beginPath();
+    const sec=[.6,.7,.45,.25,.85,.9,.5];for(let i=0;i<=140;i++){const f=i/140,s=sec[Math.min(6,Math.floor(f*7))],y=h-14-(h-30)*s-3*Math.sin(i*.7);i?g.lineTo(x0+(x1-x0)*f,y):g.moveTo(x0,y)}g.stroke();
+    ['Intro','Build','Break','','Drop 1','Drop 2','Out'].forEach((n,i)=>txt(n,x0+(x1-x0)*(i+.1)/7,h-3,D));txt('covered by I6 and L2',x1,12,D,'right');break}
+  case 'scene':{['Big drop','Clean','Last week'].forEach((n,i)=>{const on=i===Math.floor(t/2)%3;box(8+i*((w-16)/3),8,(w-16)/3-6,20,on?A:BG,A,10);txt(n,8+i*((w-16)/3)+((w-16)/3-6)/2,22,on?BG:A,'center')});
+    ['Levels','Sends','Inserts','Selected only'].forEach((n,i)=>{const x=8+i*((w-16)/4),y=44,ck=i!==2;box(x,y,11,11,ck?A:BG,A,2);txt(n,x+16,y+10,F)});txt('recall = one undo step',8,h-6,DM);break}
+  case 'glide':{const x0=8,x1=w-8;for(let b=0;b<=8;b++){const x=x0+(x1-x0)*b/8;ln(x,8,x,h-14,L,1)}txt('Clean',x0,h-3,DM);txt('Big drop',x1,h-3,DM,'right');
+    [[.3,.8,A],[.7,.4,V],[.5,.9,S]].forEach(([a,b,c])=>{g.strokeStyle=c;g.lineWidth=1.6;g.beginPath();for(let i=0;i<=60;i++){const f=i/60,e=f*f*(3-2*f),y=10+(h-28)*(1-(a+(b-a)*e));i?g.lineTo(x0+(x1-x0)*f,y):g.moveTo(x0,y)}g.stroke()});
+    const p=(t/6)%1;ln(x0+(x1-x0)*p,8,x0+(x1-x0)*p,h-14,F,1);break}
+  }
+}
+render();
+</script>
