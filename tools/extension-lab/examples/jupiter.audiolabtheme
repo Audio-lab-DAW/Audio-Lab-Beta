@@ -1,0 +1,44 @@
+{
+  "format": "audiolab.theme",
+  "formatVersion": 1,
+  "id": "user.jupiter",
+  "name": "Jupiter",
+  "author": "you",
+  "mode": "dark",
+  "colors": {
+    "accent": "#ff9a3c",
+    "second": "#e0633a",
+    "tracks": [
+      "#ff9a3c",
+      "#f5c84c",
+      "#e0633a",
+      "#c9a27a"
+    ]
+  },
+  "background": {
+    "brightness": 34,
+    "tintHue": 24,
+    "tintAmount": 45
+  },
+  "glass": {
+    "level": "engine",
+    "blur": "regular",
+    "transparency": 60,
+    "edge": 70
+  },
+  "clips": {
+    "opacity": 48,
+    "grid": 40
+  },
+  "layout": {
+    "devicePanel": "tall",
+    "mixer": "right",
+    "trackHeight": "normal",
+    "show": {
+      "sections": true,
+      "visualizer": true,
+      "assistant": true,
+      "meters": true
+    }
+  }
+}

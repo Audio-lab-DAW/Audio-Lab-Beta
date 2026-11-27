@@ -1,0 +1,26 @@
+name Comb echo
+param time 1..400 = 180 ms log
+param feedback 0..95 = 60 %
+param damp 0..100 = 40 %
+param mix 0..100 = 40 %
+
+init:
+  w = 0; z0 = 0; z1 = 0;
+
+block:
+  len = floor(time / 1000 * sr);
+  fb = feedback / 100;
+  d = 1 - damp / 100 * 0.9;
+  m = mix / 100;
+
+sample:
+  // mem[] is the delay memory: about 2.7 seconds, left on even slots, right on odd
+  r0 = mem[(w - len) * 2];
+  r1 = mem[(w - len) * 2 + 1];
+  z0 = z0 + d * (r0 - z0);
+  z1 = z1 + d * (r1 - z1);
+  mem[w * 2] = in0 + z1 * fb;      // crossed: the echo bounces left and right
+  mem[w * 2 + 1] = in1 + z0 * fb;
+  w = (w + 1) % 65536;
+  out0 = in0 + m * r0;
+  out1 = in1 + m * r1;

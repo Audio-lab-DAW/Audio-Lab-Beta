@@ -1,0 +1,44 @@
+{
+  "format": "audiolab.theme",
+  "formatVersion": 1,
+  "id": "user.lab-bench",
+  "name": "Lab bench (bright, light on the computer)",
+  "author": "you",
+  "mode": "bright",
+  "colors": {
+    "accent": "#0f9d63",
+    "second": "#1c58c4",
+    "tracks": [
+      "#1c58c4",
+      "#0f9d63",
+      "#a87400",
+      "#b52e2e"
+    ]
+  },
+  "background": {
+    "brightness": 60,
+    "tintHue": 210,
+    "tintAmount": 12
+  },
+  "glass": {
+    "level": "solid",
+    "blur": "light",
+    "transparency": 0,
+    "edge": 20
+  },
+  "clips": {
+    "opacity": 80,
+    "grid": 55
+  },
+  "layout": {
+    "devicePanel": "small",
+    "mixer": "right",
+    "trackHeight": "compact",
+    "show": {
+      "sections": false,
+      "visualizer": false,
+      "assistant": true,
+      "meters": true
+    }
+  }
+}

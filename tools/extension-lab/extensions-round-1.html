@@ -1,0 +1,983 @@
+<title>AudioLab extensions, round 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column of four working prototypes in AudioLab's own dark look, each a "file on the left, result on the right" bench; picks at the end, picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--warn:#f5c84c;--bad:#ff6b6b;--disp:#050507;
+ --f:Inter,system-ui,sans-serif;--fm:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);padding-block:28px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 28px/1.15 var(--f);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--f);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0}
+p{margin:0;max-width:72ch}
+.mut{color:var(--mut)} .sm{font-size:12px} .xs{font-size:11px}
+.eyebrow{font:500 11px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+a{color:var(--blue)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:6px 12px;font-weight:500;font-size:12px}
+.btn:hover{border-color:#3a3a45}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.on{background:var(--acc);border-color:var(--acc);color:#04130c}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:transparent;border:1px solid var(--ln);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--mut)}
+.chip:hover,.chip.on{color:var(--ink);border-color:var(--blue)}
+header.top{display:flex;flex-direction:column;gap:14px}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.stages div{background:var(--pn);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stages b{font-weight:600} .stages i{font-style:normal;color:var(--mut);font-size:12px}
+.stages .n{font:500 11px var(--fm);color:var(--acc)}
+section.proto{display:flex;flex-direction:column;gap:14px}
+.phead{display:flex;flex-direction:column;gap:6px}
+.bench{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px;align-items:start}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lbl{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+textarea.code{width:100%;background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:10px 12px;font:12px/1.55 var(--fm);color:#d6d9e2;resize:vertical;tab-size:2;white-space:pre;overflow:auto}
+.status{font-size:12px;border-left:2px solid var(--acc);padding:2px 0 2px 10px;color:var(--mut);display:flex;flex-direction:column;gap:2px}
+.status.bad{border-color:var(--bad)} .status.warn{border-color:var(--warn)}
+.status b{color:var(--ink);font-weight:500}
+.status .e{color:var(--bad)} .status .w{color:var(--warn)}
+.ctl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 14px}
+.ctl label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--mut)}
+.ctl label.ck{flex-direction:row;align-items:center;gap:6px;font-size:12px;color:var(--ink)}
+.ctl input[type=range]{width:100%;accent-color:var(--blue)}
+.ctl select,.ctl input[type=color]{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:3px 6px;height:26px;width:100%}
+/* ---------- mock AudioLab (prototype 1) ---------- */
+.mock{--m-bg:#0b0c11;--m-pn:18,19,24;--m-a:.5;--m-blur:18px;--m-edge:.6;--m-ink:#ececf1;--m-mut:#8b8b97;--m-ln:#25252c;--m-acc:#3ecf8e;--m-blue:#4c8dff;--m-clip:.36;--m-grid:.07;--m-devh:150px;--m-th:34px;
+ position:relative;border:1px solid var(--ln);border-radius:10px;overflow:hidden;color:var(--m-ink);font-size:11px;background:
+ radial-gradient(60% 50% at 78% 30%,color-mix(in srgb,var(--m-blue) 38%,transparent),transparent 70%),
+ radial-gradient(40% 45% at 22% 72%,color-mix(in srgb,var(--m-acc) 26%,transparent),transparent 70%),var(--m-bg);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto}
+.mock .gl{background:rgba(var(--m-pn),var(--m-a));backdrop-filter:blur(var(--m-blur)) saturate(1.5);-webkit-backdrop-filter:blur(var(--m-blur)) saturate(1.5);box-shadow:inset 0 1px 0 rgba(255,255,255,calc(var(--m-edge)*.22))}
+.mock.solid .gl{backdrop-filter:none;-webkit-backdrop-filter:none}
+.m-tr{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--m-ln)}
+.m-logo{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--m-acc);position:relative}
+.m-logo::after{content:"";position:absolute;inset:4.5px;border-radius:50%;background:var(--m-acc)}
+.m-pill{border:1px solid var(--m-ln);border-radius:999px;padding:2px 9px;color:var(--m-mut);font-variant-numeric:tabular-nums}
+.m-play{width:22px;height:22px;border-radius:50%;background:var(--m-blue);display:grid;place-items:center}
+.m-play::after{content:"";border-left:7px solid #fff;border-block:4.5px solid transparent;margin-left:2px}
+.m-sp{flex:1}
+.m-arr{display:flex;flex-direction:column;min-width:0}
+.m-sec{display:flex;height:16px;border-bottom:1px solid var(--m-ln);padding-left:92px}
+.m-sec span{flex:1;padding:0 6px;font-size:10px;line-height:16px;color:#0a0a0c;font-weight:600}
+.m-row{display:flex;height:var(--m-th);border-bottom:1px solid var(--m-ln)}
+.m-hd{width:92px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-right:1px solid var(--m-ln)}
+.m-hd i{width:8px;height:8px;border-radius:2px;flex:none}
+.m-hd b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-hd u{margin-left:auto;width:4px;height:60%;border-radius:2px;background:linear-gradient(to top,var(--m-acc) 62%,rgba(255,255,255,.12) 62%);text-decoration:none}
+.mock.nometers .m-hd u,.mock.nometers .m-st u{display:none}
+.m-lane{flex:1;position:relative;background-image:linear-gradient(to right,rgba(255,255,255,var(--m-grid)) 1px,transparent 1px);background-size:12.5% 100%;min-width:0}
+.mock.bright .m-lane{background-image:linear-gradient(to right,rgba(0,0,0,var(--m-grid)) 1px,transparent 1px)}
+.m-clip{position:absolute;top:3px;bottom:3px;border-radius:4px;border:1px solid;overflow:hidden;padding:1px 5px;font-size:10px;white-space:nowrap}
+.m-mx{grid-row:2;grid-column:2;display:flex;border-left:1px solid var(--m-ln)}
+.m-st{width:34px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0;border-right:1px solid var(--m-ln)}
+.m-st em{font-style:normal;font-size:9px;color:var(--m-mut)}
+.m-st s{flex:1;width:5px;border-radius:3px;background:rgba(127,127,127,.25);position:relative;min-height:40px}
+.m-st s::after{content:"";position:absolute;left:-4px;right:-4px;height:5px;border-radius:2px;background:var(--m-ink);top:var(--y,30%)}
+.m-st u{width:3px;height:26px;border-radius:2px;background:linear-gradient(to top,var(--m-acc) var(--v,60%),rgba(127,127,127,.2) var(--v,60%))}
+.m-dev{grid-column:1/-1;height:var(--m-devh);border-top:1px solid var(--m-ln);display:flex;gap:8px;padding:8px}
+.m-d{flex:1;display:flex;border:1px solid var(--m-ln);border-radius:8px;overflow:hidden;min-width:0;background:#040405}
+.m-dt{width:20px;display:grid;place-items:center;border-right:1px solid var(--m-ln)}
+.m-dt span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;font-size:10px;letter-spacing:.04em;white-space:nowrap}
+.m-dd{flex:1;position:relative;min-width:0}
+.m-dd svg{position:absolute;inset:0;width:100%;height:100%}
+.m-dock{position:absolute;left:6px;right:6px;bottom:6px;border-radius:8px;display:flex;gap:10px;padding:4px 8px;justify-content:space-around;color:#ececf1}
+.m-kn{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9px;color:#b9bcc6}
+.m-kn i{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.18);border-top-color:var(--m-acc);border-right-color:var(--m-acc);transform:rotate(var(--r,20deg))}
+.m-vis{position:absolute;right:8px;top:6px;display:flex;gap:2px;align-items:flex-end;height:14px}
+.m-vis i{width:3px;background:var(--m-acc);border-radius:1px}
+.mock [data-show]{transition:opacity .15s}
+.swatch{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+.swatch span b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+/* ---------- device (display-first, DD1 glass dock) ---------- */
+.dev{display:flex;border:1px solid var(--ln);border-radius:10px;overflow:hidden;background:var(--pn);height:253px;min-width:0}
+.dvt{width:28px;flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0;border-right:1px solid var(--ln)}
+.dvt button{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--acc);background:var(--acc);padding:0}
+.dvt button[aria-pressed=false]{background:transparent;border-color:var(--mut)}
+.dvt span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;font-size:12px;letter-spacing:.03em;white-space:nowrap;overflow:hidden;flex:1}
+.dvt em{writing-mode:vertical-rl;transform:rotate(180deg);font-style:normal;font-size:9px;color:var(--blue);letter-spacing:.08em;text-transform:uppercase}
+.dvd{flex:1;position:relative;background:var(--disp);min-width:0}
+.dvd canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dvp{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:2px;border-radius:999px;padding:2px 4px;font-size:11px}
+.glass{background:rgba(30,32,40,.55);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(255,255,255,.06)}
+.dvp button{background:none;border:0;padding:0 6px;color:var(--mut)} .dvp b{font-weight:500;padding:0 4px}
+.dvr{position:absolute;top:8px;right:8px;border-radius:999px;padding:2px 10px;font-size:11px;color:var(--mut)}
+.dock{position:absolute;left:8px;right:8px;bottom:8px;border-radius:12px;display:flex;gap:4px;padding:6px 8px;overflow-x:auto;align-items:flex-end}
+.kn{flex:1 0 58px;display:flex;flex-direction:column;align-items:center;gap:0;cursor:ns-resize;touch-action:none;user-select:none;border-radius:8px;padding:2px}
+.kn svg{width:34px;height:34px}
+.kn b{font-weight:500;font-size:11px;white-space:nowrap}
+.kn i{font-style:normal;font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dock .more{flex:none;align-self:center;background:none;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:2px 9px;font-size:11px;color:var(--mut)}
+.tray{position:absolute;left:8px;right:8px;bottom:86px;border-radius:12px;display:flex;gap:4px;padding:6px 8px;overflow-x:auto}
+.rig{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rig .g{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.rig .g b{color:var(--ink);font-weight:500}
+.rig .g.hot b{color:var(--warn)}
+.rig select{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:4px 6px;font-size:12px}
+/* cpu meter */
+.cpu{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;font-size:12px}
+.cpu .bar{height:8px;border-radius:4px;background:var(--pn2);overflow:hidden;position:relative}
+.cpu .bar i{position:absolute;inset:0 auto 0 0;background:var(--acc);border-radius:4px;width:0;transition:width .2s}
+.cpu .bar i.hot{background:var(--warn)} .cpu .bar i.bad{background:var(--bad)}
+.cpu .bar::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--mut);opacity:.5}
+.cpu span:last-child{font-variant-numeric:tabular-nums;min-width:8ch;text-align:right}
+/* chat */
+.chat{border:1px solid var(--ln);border-radius:12px;background:var(--pn);display:flex;flex-direction:column;min-height:360px}
+.chat .h{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--ln)}
+.chat .h b{font-weight:600}
+.mockflag{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:#1a1300;background:var(--warn);border-radius:4px;padding:1px 6px}
+.msgs{flex:1;display:flex;flex-direction:column;gap:8px;padding:12px;overflow:auto;max-height:340px}
+.bub{max-width:88%;padding:7px 11px;border-radius:12px;font-size:13px}
+.bub.u{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.bub.a{align-self:flex-start;background:var(--pn2);border-bottom-left-radius:4px}
+.acts{display:flex;flex-direction:column;gap:2px;margin-top:5px;font-size:12px;color:var(--acc)}
+.chat form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--ln)}
+.chat input{flex:1;background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:7px 10px;min-width:0}
+.chat .q{padding:0 12px 10px}
+details.file{border:1px solid var(--ln);border-radius:8px;background:var(--pn)}
+details.file summary{padding:6px 10px;cursor:pointer;font-size:12px;color:var(--mut)}
+details.file pre{margin:0;padding:0 12px 10px;font:11px/1.5 var(--fm);overflow:auto;max-height:260px;color:#c9ccd6}
+/* stages + picks */
+.tbl{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:12px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--ln)}
+th{font-weight:500;color:var(--mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:var(--pn)}
+tr:last-child td{border-bottom:0}
+td b{font-weight:600}
+.card{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:14px;max-width:440px;display:flex;flex-direction:column;gap:10px}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+.card .row{display:flex;gap:8px;justify-content:flex-end}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:76ch}
+.qs{display:flex;flex-direction:column;gap:22px}
+.qq{display:flex;flex-direction:column;gap:8px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.opt{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:9px 11px}
+.opt:hover{border-color:#3a3a45}
+.opt[aria-checked=true]{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--pn))}
+.opt .k{font:500 12px var(--fm);color:var(--blue)}
+.opt .t{font-weight:600}
+.opt .d{font-size:12px;color:var(--mut)}
+.star{color:var(--warn)}
+.picks{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(18,18,22,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--ln);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picks div{max-width:1180px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.picks output{flex:1;min-width:200px;font:12px var(--fm);background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:6px 10px;user-select:all;overflow-x:auto;white-space:nowrap}
+@media (max-width:820px){.bench,.two{grid-template-columns:minmax(0,1fr)}.stages{grid-template-columns:minmax(0,1fr)}.m-mx{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+ <span class="eyebrow">AudioLab Pro · task EX1 · research and prototypes, nothing changed in the app</span>
+ <h1>AudioLab extensions, round 1</h1>
+ <p>Your question: can people customise the interface and build their own devices, somewhere inside the software, maybe through the chat box. Short answer: yes, in five small stages, and four of them already run on this page. Try each prototype, then choose at the bottom and paste the line.</p>
+ <div class="stages">
+  <div><span class="n">Stage 1</span><b>Themes and layouts</b><i>A small file of colours, glass and panel choices. Data only, cannot break anything.</i></div>
+  <div><span class="n">Stage 2</span><b>Devices from a description</b><i>Knobs, a display and a patch of AudioLab's own blocks. No code.</i></div>
+  <div><span class="n">Stage 3</span><b>Script device</b><i>A few lines of maths per sample, in a language that cannot hang or reach outside.</i></div>
+  <div><span class="n">Stage 4</span><b>Build by talking</b><i>The Assistant writes the files from stages 1 to 3 for you.</i></div>
+  <div><span class="n">Stage 5</span><b>Sharing</b><i>One file per theme or device, with a card that says what is inside.</i></div>
+ </div>
+</header>
+
+<!-- ================= P1 ================= -->
+<section class="proto" id="p1">
+ <div class="phead"><span class="eyebrow">Prototype 1 · Stage 1</span><h2>A theme is a small file</h2>
+ <p class="mut">Edit the text or use the controls: the mock AudioLab on the right restyles at once. The file only holds values. Colours are kept inside the design language: whatever accent you type, it is nudged until text and controls stay readable.</p></div>
+ <div class="chips" id="thEx"></div>
+ <div class="bench">
+  <div class="col">
+   <span class="lbl">my-theme.audiolabtheme</span>
+   <textarea class="code" id="thTxt" rows="22" spellcheck="false" aria-label="Theme file"></textarea>
+   <div class="status" id="thSt"></div>
+  </div>
+  <div class="col">
+   <span class="lbl">Mock AudioLab (not the real app)</span>
+   <div class="mock" id="mock"></div>
+   <div class="swatch" id="thSw"></div>
+   <div class="ctl" id="thCtl"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= P2 ================= -->
+<section class="proto" id="p2">
+ <div class="phead"><span class="eyebrow">Prototype 2 · Stage 2</span><h2>A device made from a description file</h2>
+ <p class="mut">The file lists the knobs (range, unit, start value), the blocks that make the sound and how they are wired, the display and which knobs sit in the dock. Change a range, rename a knob, add a block: the device rebuilds. The sound comes from ordinary Web Audio nodes here; in the app the blocks would be AudioLab's own effects.</p></div>
+ <div class="chips" id="dvEx"></div>
+ <div class="bench">
+  <div class="col">
+   <span class="lbl">my-device.audiolabdevice</span>
+   <textarea class="code" id="dvTxt" rows="26" spellcheck="false" aria-label="Device description file"></textarea>
+  </div>
+  <div class="col">
+   <div class="rig" data-rig="desc"></div>
+   <div id="dvHost"></div>
+   <div class="status" id="dvSt"></div>
+   <p class="sm mut">Drag a knob up or down; double-click resets it. The round button at the top left switches the device off. Block types in this round: gain, delay, filter, drive, pan, comp, reverb, lfo.</p>
+  </div>
+ </div>
+</section>
+
+<!-- ================= P3 ================= -->
+<section class="proto" id="p3">
+ <div class="phead"><span class="eyebrow">Prototype 3 · Stage 3</span><h2>A tiny script device with a CPU meter</h2>
+ <p class="mut">For sounds the blocks cannot make. The script runs once per sample inside an audio worklet. The language is deliberately small: numbers, maths, <code>if</code>, a fixed-count <code>loop</code> and a delay memory. It has no way to name anything outside itself and it cannot loop for ever, so a script can sound bad but cannot freeze the audio. Before a script goes live it is test-run off the audio thread and its cost is measured.</p></div>
+ <div class="chips" id="scEx"></div>
+ <div class="bench">
+  <div class="col">
+   <span class="lbl">my-script.audiolabdevice (script part)</span>
+   <textarea class="code" id="scTxt" rows="24" spellcheck="false" aria-label="Script"></textarea>
+  </div>
+  <div class="col">
+   <div class="rig" data-rig="script"></div>
+   <div id="scHost"></div>
+   <div class="cpu" id="scCpu">
+    <span class="mut">Work per sample</span><div class="bar"><i id="cOps"></i></div><span id="cOpsT">–</span>
+    <span class="mut">Test run</span><div class="bar"><i id="cPre"></i></div><span id="cPreT">–</span>
+    <span class="mut">Live</span><div class="bar"><i id="cLive"></i></div><span id="cLiveT">–</span>
+   </div>
+   <p class="xs mut">Bars show the share of one processor core; the mark is the refusal line (work per sample: 2000 steps; test run: 25%). "Live" is measured inside the audio thread while you listen.</p>
+   <div class="status" id="scSt"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= P4 ================= -->
+<section class="proto" id="p4">
+ <div class="phead"><span class="eyebrow">Prototype 4 · Stage 4</span><h2>The chat box builds a device from a sentence</h2>
+ <p class="mut">Type what you want. The helper writes a description file like the one in prototype 2, the device appears, and you can keep talking to change it. Everything it makes is a normal file you can open and edit.</p></div>
+ <div class="bench">
+  <div class="col">
+   <div class="chat">
+    <div class="h"><b>Assistant</b><span class="mockflag">Mock-up</span><span class="xs mut">no model connected: a rule-based helper that knows about 70 words</span></div>
+    <div class="msgs" id="chMsgs" aria-live="polite"></div>
+    <div class="q chips" id="chQ"></div>
+    <form id="chForm"><input id="chIn" placeholder="Describe a device…  (Enter to send)" aria-label="Message the assistant" autocomplete="off"><button class="btn pri" type="submit">Send</button></form>
+   </div>
+  </div>
+  <div class="col">
+   <div class="rig" data-rig="chat"></div>
+   <div id="chHost"></div>
+   <div class="rig"><button class="btn" id="chToEd">Open this file in prototype 2</button></div>
+   <details class="file"><summary>Show the file the helper wrote</summary><pre id="chFile">Nothing built yet.</pre></details>
+  </div>
+ </div>
+</section>
+
+<!-- ================= stages ================= -->
+<section class="proto" id="plan">
+ <div class="phead"><span class="eyebrow">The proposal</span><h2>Five stages, each small enough for one task</h2></div>
+ <div class="tbl"><table>
+  <tr><th>Stage</th><th>What you see in AudioLab</th><th>File</th><th>Main risk</th><th>Waits for the native engine</th></tr>
+  <tr><td><b>1 Themes and layouts</b></td><td>Settings gets "Save as theme file" and "Open theme file". A theme holds colours, glass presets, clip and grid look, track colours, panel sizes and which parts show.</td><td><code>.audiolabtheme</code><br>JSON, values only</td><td>Unreadable colours. Fixed by clamping every colour and checking contrast on load.</td><td>Nothing. Works today.</td></tr>
+  <tr><td><b>2 Description devices</b></td><td>"My devices" in the device browser. A device has your knobs, a display and a display-first layout, and is built from AudioLab's own effects wired together, like a rack with macro knobs.</td><td><code>.audiolabdevice</code><br>JSON: params, blocks, wires, display, layout, presets</td><td>Feedback loops that run away. Fixed by rules in the checker (a loop needs a delay, loop gain capped) and the safety limiter.</td><td>Putting VST plug-ins inside a rack.</td></tr>
+  <tr><td><b>3 Script devices</b></td><td>A code box in the device with a cost meter. Effects first, instruments (notes in) after.</td><td>The same file with a <code>script</code> part</td><td>Heavy or broken code on the audio thread. Fixed by the small language, the test run, the watchdog and the limiter.</td><td>Very heavy scripts (many voices, big FFTs), scripts compiled to native speed, more than one core.</td></tr>
+  <tr><td><b>4 Build by talking</b></td><td>The Assistant gets three new tools: make a theme, make a device, edit the open device. It shows the result, you tweak and save.</td><td>Writes the files above</td><td>A model writes nonsense. Fixed because every file goes through the same checker and test run before you hear it.</td><td>Nothing, but the full version needs a model connection (see question 4).</td></tr>
+  <tr><td><b>5 Sharing</b></td><td>Drag a file into AudioLab: a card shows the name, the author, what is inside and what it cannot do. Later, maybe a gallery.</td><td>The same files, with a checksum and an optional signature</td><td>Trusting a stranger's file. Fixed by the files being data and sandboxed script only: there is nothing to give permission for.</td><td>Sharing native plug-ins (never through this system).</td></tr>
+ </table></div>
+ <div class="two">
+  <div class="col"><h3>Safety rules that hold in every stage</h3>
+   <ol class="rules">
+    <li>User files never get the app's own powers: no file access, no network, no access to the project, no Node. Themes and descriptions are read as data. Scripts are compiled by AudioLab into code that can only touch its own numbers.</li>
+    <li>A host-owned safety stage sits after every user device: broken numbers become silence, the level is limited, and a device that blasts is muted. It cannot be removed by the file.</li>
+    <li>No script can loop for ever. Loops have a fixed count and the worst-case work per sample is worked out before it runs.</li>
+    <li>Every device is test-run off the audio thread first. Too heavy or too loud: it does not go live.</li>
+    <li>A watchdog in the audio thread bypasses a device that starts to overrun, and says so.</li>
+    <li>Imported files are size-capped and checked field by field; unknown fields are ignored, never run.</li>
+   </ol>
+  </div>
+  <div class="col"><h3>Stage 5 sketch: the import card</h3>
+   <div class="card">
+    <div><b>Wobble crusher</b> <span class="mut">· device · version 1.2.0</span><br><span class="sm mut">by Mira K. · unsigned file · made for AudioLab 0.23 or later</span></div>
+    <div class="sm"><b>Contains</b><ul><li>5 knobs, 2 presets, a spectrum display</li><li>A script: 38 steps per sample, test run 0.4% of one core</li></ul></div>
+    <div class="sm"><b>Cannot</b><ul><li>Read files, use the network or see your project</li><li>Play louder than the safety limit</li></ul></div>
+    <div class="row"><button class="btn" type="button">Cancel</button><button class="btn pri" type="button">Add to My devices</button></div>
+   </div>
+   <p class="xs mut">A static sketch. The card lists facts the app measured itself, not promises made by the file.</p>
+  </div>
+ </div>
+</section>
+
+<!-- ================= picks ================= -->
+<section class="proto" id="pick">
+ <div class="phead"><span class="eyebrow">Your choices</span><h2>Nine questions</h2><p class="mut">A <span class="star">★</span> marks the recommendation. Pick one per question, then copy the line from the bar at the bottom and paste it into the chat.</p></div>
+ <div class="qs" id="qs"></div>
+</section>
+</div>
+
+<div class="picks"><div><output id="pkLine" aria-label="Your picks line"></output><button class="btn" id="pkStar" type="button">Use the starred picks</button><button class="btn pri" id="pkCopy" type="button">Copy</button></div></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+const deb=(f,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>f(...a),ms)}};
+const blobURL=src=>URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
+
+/* =====================================================================
+   1. THEME FILES
+   ===================================================================== */
+const hex2rgb=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(String(h).trim());if(!m)return null;const n=parseInt(m[1],16);return[n>>16,(n>>8)&255,n&255]};
+const rgb2hex=r=>'#'+r.map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('');
+function rgb2hsl([r,g,b]){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let h=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}return[h,s,l]}
+function hsl2rgb([h,s,l]){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;const[r,g,b]=h<60?[c,x,0]:h<120?[x,c,0]:h<180?[0,c,x]:h<240?[0,x,c]:h<300?[x,0,c]:[c,0,x];return[(r+m)*255,(g+m)*255,(b+m)*255]}
+const lum=rgb=>{const[r,g,b]=rgb.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b};
+const contrast=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+
+const THEME_EX={
+ audiolab:{format:'audiolab.theme',formatVersion:1,id:'audiolab.default',name:'AudioLab',author:'AudioLab',mode:'dark',
+  colors:{accent:'#3ecf8e',second:'#4c8dff',tracks:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b']},
+  background:{brightness:40,tintHue:215,tintAmount:25},
+  glass:{level:'engine',blur:'light',transparency:50,edge:60},
+  clips:{opacity:36,grid:50},
+  layout:{devicePanel:'tall',mixer:'right',trackHeight:'normal',show:{sections:true,visualizer:true,assistant:true,meters:true}}},
+ jupiter:{format:'audiolab.theme',formatVersion:1,id:'user.jupiter',name:'Jupiter',author:'you',mode:'dark',
+  colors:{accent:'#ff9a3c',second:'#e0633a',tracks:['#ff9a3c','#f5c84c','#e0633a','#c9a27a']},
+  background:{brightness:34,tintHue:24,tintAmount:45},
+  glass:{level:'engine',blur:'regular',transparency:60,edge:70},
+  clips:{opacity:48,grid:40},
+  layout:{devicePanel:'tall',mixer:'right',trackHeight:'normal',show:{sections:true,visualizer:true,assistant:true,meters:true}}},
+ webb:{format:'audiolab.theme',formatVersion:1,id:'user.webb-gold',name:'Webb gold',author:'you',mode:'dark',
+  colors:{accent:'#f5c84c',second:'#b583ff',tracks:['#f5c84c','#b583ff','#4cc9f0','#ff7ac8']},
+  background:{brightness:22,tintHue:262,tintAmount:40},
+  glass:{level:'engine',blur:'heavy',transparency:70,edge:90},
+  clips:{opacity:30,grid:60},
+  layout:{devicePanel:'small',mixer:'hidden',trackHeight:'tall',show:{sections:true,visualizer:true,assistant:true,meters:true}}},
+ lab:{format:'audiolab.theme',formatVersion:1,id:'user.lab-bench',name:'Lab bench (bright, light on the computer)',author:'you',mode:'bright',
+  colors:{accent:'#0f9d63',second:'#1c58c4',tracks:['#1c58c4','#0f9d63','#a87400','#b52e2e']},
+  background:{brightness:60,tintHue:210,tintAmount:12},
+  glass:{level:'solid',blur:'light',transparency:0,edge:20},
+  clips:{opacity:80,grid:55},
+  layout:{devicePanel:'small',mixer:'right',trackHeight:'compact',show:{sections:false,visualizer:false,assistant:true,meters:true}}},
+ broken:{format:'audiolab.theme',formatVersion:1,id:'user.oops',name:'Badly chosen colours (watch the checker)',author:'you',mode:'dark',
+  colors:{accent:'#101014',second:'#fffffe',tracks:['#000000','red']},
+  background:{brightness:400,tintHue:120,tintAmount:100},
+  glass:{level:'liquid',blur:'light',transparency:150,edge:60},
+  clips:{opacity:36,grid:50},onLoad:"fetch('https://example.com')",
+  layout:{devicePanel:'tall',mixer:'right',trackHeight:'normal',show:{sections:true,visualizer:true,assistant:true,meters:true}}}
+};
+/* Reads a theme object as data. Returns a clean theme plus what was changed. Nothing in the file is ever run. */
+function normTheme(o){const W=[],E=[];
+ if(!o||typeof o!=='object'||Array.isArray(o))return{errs:['The file must be one object in curly brackets.'],warns:[],t:null};
+ if(o.format!=='audiolab.theme')E.push('"format" must be "audiolab.theme".');
+ if(o.formatVersion!==1)E.push('"formatVersion" must be 1 (this build reads version 1 only).');
+ const known={format:1,formatVersion:1,id:1,name:1,author:1,mode:1,colors:1,background:1,glass:1,clips:1,layout:1};
+ for(const k of Object.keys(o))if(!known[k])W.push(`"${k}" is not part of a theme and was ignored.`);
+ const num=(obj,k,d,lo,hi,path)=>{let v=obj&&obj[k];if(typeof v!=='number'||!isFinite(v)){if(v!==undefined)W.push(`${path}.${k} must be a number; used ${d}.`);return d}if(v<lo||v>hi){W.push(`${path}.${k} ${v} is outside ${lo} to ${hi}; used ${clamp(v,lo,hi)}.`);v=clamp(v,lo,hi)}return v};
+ const en=(obj,k,d,list,path)=>{const v=obj&&obj[k];if(list.includes(v))return v;if(v!==undefined)W.push(`${path}.${k} "${v}" is not one of ${list.join(', ')}; used ${d}.`);return d};
+ const str=(v,d,n)=>typeof v==='string'&&v.trim()?v.trim().slice(0,n):d;
+ const t={format:'audiolab.theme',formatVersion:1,id:str(o.id,'user.theme',60).replace(/[^a-z0-9._-]/gi,'-').toLowerCase(),name:str(o.name,'My theme',48),author:str(o.author,'',48)};
+ t.mode=en(o,'mode','dark',['dark','bright'],'theme');
+ const bg=o.background||{};t.background={brightness:num(bg,'brightness',40,0,100,'background'),tintHue:num(bg,'tintHue',215,0,360,'background'),tintAmount:num(bg,'tintAmount',25,0,100,'background')};
+ const B=t.background,dark=t.mode==='dark',L=dark?.03+B.brightness*.001:.84+B.brightness*.0012,S=B.tintAmount/100*(dark?.5:.35);
+ const pn=hsl2rgb([B.tintHue,S,dark?L+.04:Math.min(.99,L+.07)]),bgc=hsl2rgb([B.tintHue,S,L]);
+ const fixCol=(v,d,path)=>{let rgb=hex2rgb(v);if(!rgb){W.push(`${path} "${v}" is not a colour like #3ecf8e; used ${d}.`);rgb=hex2rgb(d)}let[h,s,l]=rgb2hsl(rgb);const s0=s,l0=l;l=dark?clamp(l,.5,.78):clamp(l,.28,.46);let out=hsl2rgb([h,s,l]),n=0;while(contrast(out,pn)<3&&n++<20){l+=dark?.02:-.02;out=hsl2rgb([h,s,clamp(l,0,1)])}
+  if(Math.abs(l-l0)>.012||Math.abs(s-s0)>.012)W.push(`${path} ${v} was nudged to ${rgb2hex(out)} so it stays readable on the panels.`);return rgb2hex(out)};
+ const c=o.colors||{};t.colors={accent:fixCol(c.accent??'#3ecf8e','#3ecf8e','colors.accent'),second:fixCol(c.second??'#4c8dff','#4c8dff','colors.second')};
+ let tr=Array.isArray(c.tracks)?c.tracks.slice(0,12):[];if(c.tracks&&!Array.isArray(c.tracks))W.push('colors.tracks must be a list of colours.');
+ t.colors.tracks=tr.map((v,i)=>fixCol(v,'#4c8dff',`colors.tracks[${i}]`));if(!t.colors.tracks.length)t.colors.tracks=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b'];
+ const g=o.glass||{};t.glass={level:en(g,'level','engine',['engine','blur','solid'],'glass'),blur:en(g,'blur','light',['light','regular','heavy'],'glass'),transparency:num(g,'transparency',50,0,100,'glass'),edge:num(g,'edge',60,0,100,'glass')};
+ const cl=o.clips||{};t.clips={opacity:num(cl,'opacity',36,10,100,'clips'),grid:num(cl,'grid',50,0,100,'clips')};
+ const ly=o.layout||{},sh=ly.show||{};t.layout={devicePanel:en(ly,'devicePanel','tall',['tall','small','hidden'],'layout'),mixer:en(ly,'mixer','right',['right','hidden'],'layout'),trackHeight:en(ly,'trackHeight','normal',['compact','normal','tall'],'layout'),show:{}};
+ for(const k of['sections','visualizer','assistant','meters'])t.layout.show[k]=sh[k]===undefined?true:!!sh[k];
+ for(const k of Object.keys(sh))if(!(k in t.layout.show))W.push(`layout.show.${k} is not a part that can be hidden; ignored.`);
+ const ink=dark?[236,236,241]:[22,22,27];
+ t._c={bg:bgc,pn,ink,mut:dark?[139,139,151]:[88,88,100],ln:hsl2rgb([B.tintHue,S,dark?L+.12:L-.14]),dark,cText:contrast(ink,pn),cAcc:contrast(hex2rgb(t.colors.accent),pn)};
+ return{t,warns:W,errs:E}}
+const stripPriv=t=>{const o=JSON.parse(JSON.stringify(t));delete o._c;return o};
+
+const MOCK_TRACKS=[['Kick','0,2,4,6'],['Psy Bass','0-4,4-8'],['Lead','2-4,6-8'],['Pad','0-8']];
+function buildMock(){const m=$('#mock');m.innerHTML=`<div class="m-tr gl"><span class="m-logo"></span><span class="m-play"></span><span class="m-pill">140 BPM</span><span class="m-pill">5 . 1 . 1</span><span class="m-sp"></span><span class="m-pill" data-show="assistant">Assistant</span></div>
+ <div class="m-arr"><div class="m-sec" data-show="sections"><span data-sc="0">Intro</span><span data-sc="1">Drop</span></div>${MOCK_TRACKS.map(([n,cl],i)=>`<div class="m-row"><div class="m-hd gl"><i data-tc="${i}"></i><b>${n}</b><u></u></div><div class="m-lane">${cl.split(',').map(s=>{const[a,b]=s.split('-').map(Number),e=b===undefined?a+.9:b;return`<div class="m-clip" data-tc="${i}" style="left:${a*12.5}%;width:${(e-a)*12.5-.6}%">${n}</div>`}).join('')}</div></div>`).join('')}</div>
+ <div class="m-mx gl">${['K','B','L','P'].map((n,i)=>`<div class="m-st"><em>${n}</em><s style="--y:${[22,30,42,36][i]}%"></s><u style="--v:${[78,66,48,40][i]}%"></u></div>`).join('')}</div>
+ <div class="m-dev gl"><div class="m-d"><div class="m-dt"><span>Pro EQ</span></div><div class="m-dd"><svg viewBox="0 0 300 100" preserveAspectRatio="none"><path d="M0 62 C40 62 50 30 80 34 S130 70 170 58 S230 20 300 44" fill="none" stroke="var(--m-acc)" stroke-width="1.6" vector-effect="non-scaling-stroke"/><path d="M0 62 C40 62 50 30 80 34 S130 70 170 58 S230 20 300 44 V100 H0Z" fill="var(--m-acc)" opacity=".12"/></svg><div class="m-vis" data-show="visualizer">${[6,11,14,9,12,5,8].map(h=>`<i style="height:${h}px"></i>`).join('')}</div><div class="m-dock gl">${['Freq','Gain','Q','Out'].map((n,i)=>`<span class="m-kn"><i style="--r:${[10,70,-30,40][i]}deg"></i>${n}</span>`).join('')}</div></div></div>
+ <div class="m-d"><div class="m-dt"><span>Echo delay</span></div><div class="m-dd"><svg viewBox="0 0 300 100" preserveAspectRatio="none">${[0,1,2,3,4,5].map(i=>`<rect x="${20+i*44}" y="${50-34*Math.pow(.66,i)}" width="5" height="${68*Math.pow(.66,i)}" fill="var(--m-blue)" opacity="${1-i*.13}"/>`).join('')}</svg><div class="m-dock gl">${['Time','Feedback','Mix'].map((n,i)=>`<span class="m-kn"><i style="--r:${[30,-10,60][i]}deg"></i>${n}</span>`).join('')}</div></div></div></div>`}
+function applyTheme(t){const m=$('#mock'),c=t._c,s=m.style,rgb=a=>a.map(Math.round).join(',');
+ s.setProperty('--m-bg',rgb2hex(c.bg));s.setProperty('--m-pn',rgb(c.pn));s.setProperty('--m-ink',rgb2hex(c.ink));s.setProperty('--m-mut',rgb2hex(c.mut));s.setProperty('--m-ln',rgb2hex(c.ln));
+ s.setProperty('--m-acc',t.colors.accent);s.setProperty('--m-blue',t.colors.second);
+ s.setProperty('--m-a',t.glass.level==='solid'?1:(1-t.glass.transparency/100*.62).toFixed(3));s.setProperty('--m-blur',{light:'10px',regular:'18px',heavy:'28px'}[t.glass.blur]);s.setProperty('--m-edge',(t.glass.edge/100).toFixed(2));
+ s.setProperty('--m-grid',(t.clips.grid/100*.16).toFixed(3));s.setProperty('--m-devh',{tall:'150px',small:'112px',hidden:'0px'}[t.layout.devicePanel]);s.setProperty('--m-th',{compact:'26px',normal:'34px',tall:'46px'}[t.layout.trackHeight]);
+ m.classList.toggle('solid',t.glass.level==='solid');m.classList.toggle('bright',!c.dark);m.classList.toggle('nometers',!t.layout.show.meters);
+ m.querySelector('.m-dev').hidden=t.layout.devicePanel==='hidden';m.querySelector('.m-mx').hidden=t.layout.mixer==='hidden';
+ for(const el of m.querySelectorAll('[data-show]'))el.hidden=!t.layout.show[el.dataset.show];
+ const tc=t.colors.tracks;for(const el of m.querySelectorAll('[data-tc]')){const col=tc[el.dataset.tc%tc.length];if(el.classList.contains('m-clip')){const r=hex2rgb(col);el.style.background=`rgba(${r},${t.clips.opacity/100})`;el.style.borderColor=col;el.style.color=t.clips.opacity>60?'#0a0a0c':rgb2hex(c.ink)}else el.style.background=col}
+ m.querySelectorAll('[data-sc]').forEach((el,i)=>el.style.background=i?t.colors.accent:t.colors.second)}
+const TH={obj:null,t:null};
+const TH_CTL=[['colors.accent','Accent','color'],['colors.second','Second colour','color'],['background.tintHue','Tint','range',0,360],['background.tintAmount','Tint amount','range',0,100],['background.brightness','Background','range',0,100],['glass.transparency','Transparency','range',0,100],
+ ['mode','Mode','select',['dark','bright']],['glass.level','Glass','select',['engine','blur','solid']],['glass.blur','Blur','select',['light','regular','heavy']],['layout.devicePanel','Device panel','select',['tall','small','hidden']],['layout.trackHeight','Track height','select',['compact','normal','tall']],['layout.mixer','Mixer','select',['right','hidden']],
+ ['layout.show.sections','Section lane','check'],['layout.show.visualizer','Visualizer','check'],['layout.show.assistant','Assistant button','check'],['layout.show.meters','Meters','check']];
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.');let a=o;for(const k of ks.slice(0,-1)){if(typeof a[k]!=='object'||!a[k])a[k]={};a=a[k]}a[ks.at(-1)]=v};
+function themeFromText(fromCtl){const st=$('#thSt');let o;try{o=JSON.parse($('#thTxt').value)}catch(e){st.className='status bad';st.innerHTML=`<b>Not applied.</b><span class="e">The text is not valid JSON: ${esc(e.message)}. The last good theme stays on.</span>`;return}
+ const r=normTheme(o);if(r.errs.length||!r.t){st.className='status bad';st.innerHTML='<b>Not applied.</b>'+r.errs.map(e=>`<span class="e">${esc(e)}</span>`).join('');return}
+ TH.obj=o;TH.t=r.t;applyTheme(r.t);st.className='status'+(r.warns.length?' warn':'');st.innerHTML=`<b>"${esc(r.t.name)}" applied.</b>`+(r.warns.length?r.warns.map(w=>`<span class="w">${esc(w)}</span>`).join(''):'<span>Every value is inside the design language.</span>');
+ $('#thSw').innerHTML=`<span>Text on panels <b>${r.t._c.cText.toFixed(1)} : 1</b></span><span>Accent on panels <b>${r.t._c.cAcc.toFixed(1)} : 1</b></span><span>Needed: 4.5 and 3</span>`;
+ if(!fromCtl)for(const el of $$('#thCtl [data-p]')){const v=getP(r.t,el.dataset.p);if(el.type==='checkbox')el.checked=!!v;else el.value=v}}
+function initTheme(){buildMock();
+ $('#thCtl').innerHTML=TH_CTL.map(([p,n,ty,a,b],i)=>ty==='check'?`<label class="ck"><input type="checkbox" id="thc${i}" data-p="${p}">${n}</label>`:ty==='select'?`<label>${n}<select id="thc${i}" data-p="${p}">${a.map(v=>`<option>${v}</option>`).join('')}</select></label>`:`<label>${n}<input type="${ty}" id="thc${i}" data-p="${p}"${ty==='range'?` min="${a}" max="${b}"`:''}></label>`).join('');
+ $('#thCtl').addEventListener('input',e=>{const el=e.target.closest('[data-p]');if(!el||!TH.obj)return;setP(TH.obj,el.dataset.p,el.type==='checkbox'?el.checked:el.type==='range'?+el.value:el.value);$('#thTxt').value=JSON.stringify(TH.obj,null,2);themeFromText(true)});
+ $('#thEx').innerHTML=Object.entries(THEME_EX).map(([k,v])=>`<button class="chip" data-ex="${k}">${esc(v.name)}</button>`).join('');
+ $('#thEx').onclick=e=>{const b=e.target.closest('[data-ex]');if(!b)return;loadTheme(THEME_EX[b.dataset.ex])};
+ $('#thTxt').addEventListener('input',deb(()=>themeFromText(false),250));loadTheme(THEME_EX.audiolab)}
+function loadTheme(o){$('#thTxt').value=JSON.stringify(o,null,2);themeFromText(false)}
+
+/* =====================================================================
+   2. ONE SMALL PARSER for expressions (device files) and scripts
+   ===================================================================== */
+function lex(src,line0){const out=[];let i=0,line=line0||1;const n=src.length;
+ while(i<n){const ch=src[i];if(ch==='\n'){line++;i++;continue}if(ch===' '||ch==='\t'||ch==='\r'){i++;continue}
+  if(ch==='/'&&src[i+1]==='/'){while(i<n&&src[i]!=='\n')i++;continue}
+  let m;if((m=/^(\d+\.?\d*(?:e[-+]?\d+)?|\.\d+)/i.exec(src.slice(i,i+32)))){out.push({t:'num',v:parseFloat(m[1]),line});i+=m[1].length;continue}
+  if((m=/^\$?[A-Za-z_]\w*/.exec(src.slice(i,i+64)))){out.push({t:'id',v:m[0].replace(/^\$/,''),line});i+=m[0].length;continue}
+  const two=src.slice(i,i+2);if(['<=','>=','==','!=','&&','||','..'].includes(two)){out.push({t:two,line});i+=2;continue}
+  if('+-*/%<>!=(){}[];,:'.includes(ch)){out.push({t:ch,line});i++;continue}
+  throw{line,msg:`unexpected character "${ch}"`}}
+ out.push({t:'end',line});return out}
+function Parser(toks){let p=0;const peek=()=>toks[p],next=()=>toks[p++],is=t=>toks[p].t===t,
+  eat=t=>{if(!is(t)){const k=toks[p];throw{line:k.line,msg:`expected "${t}" but found ${k.t==='end'?'the end':'"'+(k.v??k.t)+'"'}`}}return next()};
+ const bin=(sub,ops)=>()=>{let a=sub();while(ops.includes(peek().t)){const op=next().t;a={t:'bin',op,a,b:sub()}}return a};
+ const prim=()=>{const k=next();if(k.t==='num')return{t:'num',v:k.v};if(k.t==='('){const e=expr();eat(')');return e}
+   if(k.t==='id'){if(is('(')){next();const args=[];if(!is(')'))do args.push(expr());while(is(',')&&next());eat(')');return{t:'call',n:k.v,args,line:k.line}}
+     if(k.v==='mem'&&is('[')){next();const a=expr();eat(']');return{t:'mem',a}}return{t:'id',n:k.v,line:k.line}}
+   throw{line:k.line,msg:`unexpected ${k.t==='end'?'end':'"'+k.t+'"'}`}};
+ const un=()=>{if(is('-')){next();return{t:'un',op:'-',a:un()}}if(is('!')){next();return{t:'un',op:'!',a:un()}}return prim()};
+ const mul=bin(un,['*','/','%']),add=bin(mul,['+','-']),cmp=bin(add,['<','>','<=','>=','==','!=']),and=bin(cmp,['&&']),expr=bin(and,['||']);
+ return{peek,next,is,eat,expr}}
+const FN={sin:[1,Math.sin],cos:[1,Math.cos],tan:[1,Math.tan],tanh:[1,Math.tanh],atan:[1,Math.atan],abs:[1,Math.abs],sqrt:[1,Math.sqrt],exp:[1,Math.exp],log:[1,Math.log],floor:[1,Math.floor],ceil:[1,Math.ceil],round:[1,Math.round],sign:[1,Math.sign],
+ min:[2,Math.min],max:[2,Math.max],pow:[2,Math.pow],clamp:[3,(x,a,b)=>x<a?a:x>b?b:x],blend:[3,(a,b,t)=>a+(b-a)*t],db:[1,x=>Math.pow(10,x/20)],noise:[0,()=>Math.random()*2-1]};
+/* expression in a device file: "$time / 1000". Walks the tree; never uses eval. */
+function compileExpr(src,names){const P=Parser(lex(String(src)));const ast=P.expr();if(!P.is('end'))throw{msg:`unexpected "${P.peek().v??P.peek().t}"`};
+ const chk=a=>{if(a.t==='id'){if(a.n!=='pi'&&!names.includes(a.n))throw{msg:`unknown knob "$${a.n}"`}}else if(a.t==='call'){const f=FN[a.n];if(!f||a.n==='noise')throw{msg:`unknown function ${a.n}()`};if(a.args.length!==f[0])throw{msg:`${a.n}() takes ${f[0]} value${f[0]===1?'':'s'}`};a.args.forEach(chk)}else if(a.t==='mem')throw{msg:'mem[] only works in scripts'};else{a.a&&chk(a.a);a.b&&chk(a.b)}};chk(ast);
+ const ev=(a,v)=>{switch(a.t){case'num':return a.v;case'id':return a.n==='pi'?Math.PI:v[a.n];case'un':return a.op==='-'?-ev(a.a,v):(ev(a.a,v)===0?1:0);case'call':return FN[a.n][1](...a.args.map(x=>ev(x,v)));
+   case'bin':{const x=ev(a.a,v),y=ev(a.b,v);switch(a.op){case'+':return x+y;case'-':return x-y;case'*':return x*y;case'/':return x/y;case'%':return x%y;case'<':return+(x<y);case'>':return+(x>y);case'<=':return+(x<=y);case'>=':return+(x>=y);case'==':return+(x===y);case'!=':return+(x!==y);case'&&':return+(x!==0&&y!==0);default:return+(x!==0||y!==0)}}}};
+ return v=>ev(ast,v)}
+
+/* =====================================================================
+   3. AUDIO RIG: test sound -> device under test -> safety stage -> speakers
+   ===================================================================== */
+/* Host-owned safety stage. Runs after every user device; a device file cannot remove or configure it. */
+function guardModule(){class G extends AudioWorkletProcessor{constructor(){super();this.env=0;this.nan=0;this.hot=0;this.mute=0;this.trips=0;this.n=0;this.pin=0;this.gr=1}
+ process(ins,outs){const I=ins[0],O=outs[0],n=O[0].length,CEIL=.89,rel=Math.exp(-1/(.12*sampleRate));
+  for(let i=0;i<n;i++){let a=I[0]?I[0][i]:0,b=I[1]?I[1][i]:a;if(!(a===a)||!(b===b)||a>1e6||a<-1e6||b>1e6||b<-1e6){a=0;b=0;this.nan++}
+   const pk=Math.max(a<0?-a:a,b<0?-b:b);if(pk>this.pin)this.pin=pk;this.env=pk>this.env?pk:this.env*rel+pk*(1-rel);
+   if(pk>4){if(++this.hot>sampleRate*.05){this.mute=sampleRate*1.5|0;this.hot=0;this.trips++}}else if(this.hot>0)this.hot--;
+   let g=this.env>CEIL?CEIL/this.env:1;if(this.mute>0){this.mute--;g=0}if(g<this.gr)this.gr=g;
+   a*=g;b*=g;O[0][i]=a>CEIL?CEIL:a<-CEIL?-CEIL:a;if(O[1])O[1][i]=b>CEIL?CEIL:b<-CEIL?-CEIL:b}
+  this.n+=n;if(this.n>=sampleRate/12){this.port.postMessage({pin:this.pin,gr:this.gr,nan:this.nan,trips:this.trips,muted:this.mute>0});this.n=0;this.pin=0;this.gr=1}return true}}
+ registerProcessor('ext-guard',G)}
+const Rig={ctx:null,on:false,key:null,devs:{},src:'loop',timer:0,step:0,nextT:0,stat:{pin:0,gr:1,nan:0,trips:0},
+ async ensure(){if(!this.ctx){const c=this.ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});await c.audioWorklet.addModule(blobURL('('+guardModule.toString()+')()'));
+   this.bus=c.createGain();this.guard=new AudioWorkletNode(c,'ext-guard',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit'});this.master=c.createGain();this.master.gain.value=.7;this.guard.connect(this.master);this.master.connect(c.destination);
+   this.guard.port.onmessage=e=>{this.stat=e.data;drawRigs()};const nb=c.createBuffer(1,c.sampleRate,c.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;this.noise=nb}
+  if(this.ctx.state!=='running')await this.ctx.resume();return this.ctx},
+ route(){if(!this.ctx)return;try{this.bus.disconnect()}catch(e){}for(const k in this.devs){const d=this.devs[k];if(d)try{d.out.disconnect(this.guard)}catch(e){}}
+  const d=this.devs[this.key];if(d){this.bus.connect(d.in);d.out.connect(this.guard)}else this.bus.connect(this.guard)},
+ setDevice(key,dev){const old=this.devs[key];this.devs[key]=dev;if(this.key===key)this.route();if(old&&old!==dev&&old.dispose)setTimeout(()=>old.dispose(),60)},
+ async listen(key){if(this.on&&this.key===key){this.stop();return}await this.ensure();this.key=key;if(RIG_BUILD[key])await RIG_BUILD[key]();this.route();if(!this.on){this.on=true;this.step=0;this.nextT=this.ctx.currentTime+.06;this.timer=setInterval(()=>this.tick(),40)}drawRigs()},
+ stop(){this.on=false;clearInterval(this.timer);drawRigs()},
+ tick(){const c=this.ctx,spb=60/124/4;while(this.nextT<c.currentTime+.14){const s=this.step%32,t=this.nextT,m=this.src;
+   if(m==='noise'){if(s%8===0){const n=c.createBufferSource(),g=c.createGain();n.buffer=this.noise;g.gain.value=.12;n.connect(g);g.connect(this.bus);n.start(t);n.stop(t+spb*8)}}
+   else{if(m!=='pluck'){if(s%4===0)this.kick(t);if(s%4===2)this.hat(t,.5);if(s%32===30)this.hat(t,.9)}
+     if(m!=='drums'){const P=[0,-1,7,-1,3,-1,10,7,-1,0,-1,12,-1,7,3,-1,0,-1,7,-1,5,-1,10,7,-1,-2,-1,12,-1,8,5,-1][s];if(P>-1)this.pluck(t,110*Math.pow(2,(P+3)/12))}}
+   this.step++;this.nextT+=spb}},
+ kick(t){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(46,t+.11);g.gain.setValueAtTime(.8,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g);g.connect(this.bus);o.start(t);o.stop(t+.32)},
+ hat(t,v){const c=this.ctx,n=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();n.buffer=this.noise;f.type='highpass';f.frequency.value=7500;g.gain.setValueAtTime(.22*v,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);n.connect(f);f.connect(g);g.connect(this.bus);n.start(t,Math.random()*.5);n.stop(t+.06)},
+ pluck(t,hz){const c=this.ctx,o=c.createOscillator(),o2=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o2.type='square';o.frequency.value=hz;o2.frequency.value=hz*1.005;f.type='lowpass';f.Q.value=4;f.frequency.setValueAtTime(3800,t);f.frequency.exponentialRampToValueAtTime(350,t+.28);g.gain.setValueAtTime(.17,t);g.gain.exponentialRampToValueAtTime(.001,t+.36);o.connect(f);o2.connect(f);f.connect(g);g.connect(this.bus);o.start(t);o2.start(t);o.stop(t+.38);o2.stop(t+.38)}};
+const RIG_BUILD={};
+function initRigs(){for(const el of $$('[data-rig]')){const k=el.dataset.rig;el.innerHTML=`<button class="btn" data-listen="${k}" id="rl-${k}">▶ Listen</button><select aria-label="Test sound" id="rs-${k}"><option value="loop">Drums and pluck</option><option value="pluck">Pluck only</option><option value="drums">Drums only</option><option value="noise">Noise</option></select><span class="g" data-g></span>`;
+  el.querySelector('button').onclick=()=>Rig.listen(k).catch(e=>{el.querySelector('[data-g]').textContent='Audio could not start: '+e.message});el.querySelector('select').onchange=e=>{Rig.src=e.target.value;$$('[data-rig] select').forEach(s=>s.value=Rig.src)}}drawRigs()}
+function drawRigs(){const s=Rig.stat;for(const el of $$('[data-rig]')){const k=el.dataset.rig,act=Rig.on&&Rig.key===k,b=el.querySelector('button');b.textContent=act?'■ Stop':'▶ Listen';b.classList.toggle('on',act);const g=el.querySelector('[data-g]');
+  if(!act){g.className='g';g.textContent='Safety stage after the device: always on';continue}const gr=20*Math.log10(Math.max(s.gr,1e-4)),hot=gr<-.5||s.nan||s.trips;g.className='g'+(hot?' hot':'');
+  g.innerHTML=`Safety: limiter <b>${gr<-.05?gr.toFixed(1):'0.0'} dB</b> · bad numbers caught <b>${s.nan}</b> · auto-mutes <b>${s.trips}</b>${s.muted?' · <b>muted for a moment</b>':''}`}}
+
+/* =====================================================================
+   4. DEVICES FROM A DESCRIPTION FILE
+   ===================================================================== */
+const BLOCKS={gain:{gain:[0,4,1]},delay:{time:[0,2,.25]},filter:{freq:[20,20000,1000],q:[.1,20,.7],gain:[-24,24,0]},drive:{amount:[0,100,30]},pan:{pan:[-1,1,0]},comp:{threshold:[-60,0,-20],ratio:[1,20,4],attack:[.001,.5,.01],release:[.01,1,.15]},reverb:{size:[.2,6,2]},lfo:{rate:[.01,20,1],depth:[0,20000,1]}};
+const FILTER_MODES=['lowpass','highpass','bandpass','notch','peaking','lowshelf','highshelf','allpass'];
+const DEV_EX={
+ echo:{format:'audiolab.device',formatVersion:1,id:'user.warm-echo',name:'Warm echo',kind:'effect',author:'you',version:'1.0.0',
+  params:[{id:'time',name:'Time',min:40,max:1200,default:330,unit:'ms',curve:'log'},{id:'feedback',name:'Feedback',min:0,max:90,default:48,unit:'%'},{id:'tone',name:'Tone',min:300,max:12000,default:2600,unit:'Hz',curve:'log'},{id:'mix',name:'Mix',min:0,max:100,default:35,unit:'%'},{id:'drive',name:'Drive',min:0,max:100,default:25,unit:'%'}],
+  blocks:[{id:'d',type:'delay',time:'$time / 1000'},{id:'lp',type:'filter',mode:'lowpass',freq:'$tone'},{id:'sat',type:'drive',amount:'$drive'},{id:'fb',type:'gain',gain:'$feedback / 100'},{id:'wet',type:'gain',gain:'$mix / 100'}],
+  wires:[['in','d'],['d','lp'],['lp','sat'],['sat','fb'],['fb','d'],['sat','wet'],['wet','out'],['in','out']],
+  display:{type:'spectrum'},layout:{style:'dock',dock:['time','feedback','tone','mix'],more:['drive']},
+  presets:{slap:['Slapback',{time:95,feedback:10,tone:6000,mix:30,drive:10}],dub:['Dub',{time:375,feedback:72,tone:1400,mix:45,drive:55}]}},
+ phone:{format:'audiolab.device',formatVersion:1,id:'user.telephone',name:'Telephone',kind:'effect',author:'you',version:'1.0.0',
+  params:[{id:'centre',name:'Centre',min:400,max:3000,default:1200,unit:'Hz',curve:'log'},{id:'narrow',name:'Narrow',min:.5,max:8,default:2.2,unit:''},{id:'grit',name:'Grit',min:0,max:100,default:60,unit:'%'},{id:'level',name:'Level',min:-12,max:6,default:-3,unit:'dB'}],
+  blocks:[{id:'hp',type:'filter',mode:'highpass',freq:'$centre / 2.5'},{id:'bp',type:'filter',mode:'bandpass',freq:'$centre',q:'$narrow'},{id:'sat',type:'drive',amount:'$grit'},{id:'out1',type:'gain',gain:'db($level)'}],
+  wires:[['in','hp'],['hp','bp'],['bp','sat'],['sat','out1'],['out1','out']],
+  display:{type:'spectrum'},layout:{style:'dock',dock:['centre','narrow','grit','level']},presets:{}},
+ chorus:{format:'audiolab.device',formatVersion:1,id:'user.wobble-chorus',name:'Wobble chorus',kind:'effect',author:'you',version:'1.0.0',
+  params:[{id:'speed',name:'Speed',min:.05,max:6,default:.7,unit:'Hz',curve:'log'},{id:'depth',name:'Depth',min:0,max:100,default:55,unit:'%'},{id:'mix',name:'Mix',min:0,max:100,default:50,unit:'%'}],
+  blocks:[{id:'dl',type:'delay',time:.014},{id:'dr',type:'delay',time:.019},{id:'pl',type:'pan',pan:-.8},{id:'pr',type:'pan',pan:.8},{id:'l1',type:'lfo',rate:'$speed',depth:'$depth * 0.00006'},{id:'l2',type:'lfo',rate:'$speed * 1.31',depth:'$depth * 0.00006'},{id:'wet',type:'gain',gain:'$mix / 100'}],
+  wires:[['in','dl'],['in','dr'],['dl','pl'],['dr','pr'],['pl','wet'],['pr','wet'],['wet','out'],['in','out'],['l1','dl.time'],['l2','dr.time']],
+  display:{type:'scope'},layout:{style:'dock',dock:['speed','depth','mix']},presets:{}},
+ sweep:{format:'audiolab.device',formatVersion:1,id:'user.auto-sweep',name:'Auto sweep',kind:'effect',author:'you',version:'1.0.0',
+  params:[{id:'speed',name:'Speed',min:.05,max:8,default:.4,unit:'Hz',curve:'log'},{id:'centre',name:'Centre',min:200,max:5000,default:900,unit:'Hz',curve:'log'},{id:'range',name:'Range',min:0,max:100,default:70,unit:'%'},{id:'peak',name:'Peak',min:.5,max:14,default:6,unit:''}],
+  blocks:[{id:'f',type:'filter',mode:'lowpass',freq:'$centre',q:'$peak'},{id:'l',type:'lfo',rate:'$speed',depth:'$centre * $range / 115'}],
+  wires:[['in','f'],['f','out'],['l','f.freq']],
+  display:{type:'spectrum'},layout:{style:'dock',dock:['speed','centre','range','peak']},presets:{}},
+ bad:{format:'audiolab.device',formatVersion:1,id:'user.runaway',name:'Runaway loop (the checker steps in)',kind:'effect',author:'you',version:'1.0.0',
+  params:[{id:'boost',name:'Boost',min:0,max:400,default:300,unit:'%'}],
+  blocks:[{id:'d',type:'delay',time:.12},{id:'g',type:'gain',gain:'$boost / 100'},{id:'loud',type:'gain',gain:40}],
+  wires:[['in','d'],['d','g'],['g','d'],['g','loud'],['loud','out']],
+  display:{type:'scope'},layout:{style:'dock',dock:['boost']},presets:{}}
+};
+/* Checks a device file. Returns a clean description, errors (device not built) and warnings (built, with a correction). */
+function normDevice(o){const E=[],W=[];if(!o||typeof o!=='object'||Array.isArray(o))return{errs:['The file must be one object in curly brackets.'],warns:W};
+ if(o.format!=='audiolab.device')E.push('"format" must be "audiolab.device".');if(o.formatVersion!==1)E.push('"formatVersion" must be 1.');
+ const known={format:1,formatVersion:1,id:1,name:1,kind:1,author:1,version:1,params:1,blocks:1,wires:1,display:1,layout:1,presets:1,script:1};for(const k of Object.keys(o))if(!known[k])W.push(`"${k}" is not part of a device file and was ignored.`);
+ const d={format:'audiolab.device',formatVersion:1,id:String(o.id||'user.device').toLowerCase().replace(/[^a-z0-9._-]/g,'-').slice(0,60),name:String(o.name||'My device').slice(0,40),kind:'effect',author:String(o.author||'').slice(0,48),version:/^\d+\.\d+\.\d+$/.test(o.version)?o.version:'1.0.0',params:[],blocks:[],wires:[],presets:{}};
+ if(o.kind&&o.kind!=='effect')W.push('Only "effect" devices work in this round; instruments come with stage 3.');
+ if(!Array.isArray(o.params))E.push('"params" must be a list.');else{if(o.params.length>16)W.push('Only the first 16 knobs are used.');
+  for(const p of o.params.slice(0,16)){if(!p||!/^[a-z][a-z0-9_]*$/i.test(p.id||'')){E.push(`A knob needs an "id" made of letters and digits (found ${JSON.stringify(p&&p.id)}).`);continue}if(d.params.some(q=>q.id===p.id)){E.push(`Two knobs are called "${p.id}".`);continue}
+   let mn=+p.min,mx=+p.max;if(!isFinite(mn)||!isFinite(mx)||mx<=mn){E.push(`Knob "${p.id}": "max" must be larger than "min".`);continue}let cv=p.curve==='log'?'log':'lin';if(cv==='log'&&mn<=0){W.push(`Knob "${p.id}": a log curve needs min above 0; using a straight curve.`);cv='lin'}
+   let df=+p.default;if(!isFinite(df))df=mn;if(df<mn||df>mx){W.push(`Knob "${p.id}": default ${df} is outside ${mn} to ${mx}; moved inside.`);df=clamp(df,mn,mx)}
+   d.params.push({id:p.id,name:String(p.name||p.id).slice(0,14),min:mn,max:mx,default:df,unit:String(p.unit||'').slice(0,5),curve:cv})}}
+ const names=d.params.map(p=>p.id);
+ if(!Array.isArray(o.blocks))E.push('"blocks" must be a list.');else{if(o.blocks.length>24)E.push('A device can have at most 24 blocks.');
+  for(const b of o.blocks.slice(0,24)){if(!b||!/^[a-z][a-z0-9_]*$/i.test(b.id||'')||b.id==='in'||b.id==='out'){E.push(`A block needs its own "id" (found ${JSON.stringify(b&&b.id)}).`);continue}if(d.blocks.some(q=>q.id===b.id)){E.push(`Two blocks are called "${b.id}".`);continue}
+   const spec=BLOCKS[b.type];if(!spec){E.push(`Block "${b.id}": type "${b.type}" does not exist. Types: ${Object.keys(BLOCKS).join(', ')}.`);continue}const nb={id:b.id,type:b.type,props:{},fn:{}};
+   if(b.type==='filter'){nb.mode=FILTER_MODES.includes(b.mode)?b.mode:'lowpass';if(b.mode&&nb.mode!==b.mode)W.push(`Block "${b.id}": mode "${b.mode}" is unknown; using lowpass.`)}if(b.type==='lfo')nb.shape=['sine','triangle','square','sawtooth'].includes(b.shape)?b.shape:'sine';
+   for(const k of Object.keys(b))if(!['id','type','mode','shape'].includes(k)&&!spec[k])W.push(`Block "${b.id}": "${k}" is not a setting of ${b.type}; ignored.`);
+   for(const[k,[lo,hi,df]]of Object.entries(spec)){const v=b[k]===undefined?df:b[k];try{nb.fn[k]=typeof v==='number'?()=>v:compileExpr(v,names)}catch(e){E.push(`Block "${b.id}", ${k}: ${e.msg||e.message}.`);nb.fn[k]=()=>df}nb.props[k]=[lo,hi]}
+   d.blocks.push(nb)}}
+ const bm=Object.fromEntries(d.blocks.map(b=>[b.id,b]));
+ if(!Array.isArray(o.wires))E.push('"wires" must be a list of [from, to] pairs.');else{if(o.wires.length>64)E.push('A device can have at most 64 wires.');
+  for(const w of o.wires.slice(0,64)){if(!Array.isArray(w)||w.length!==2){E.push('Each wire is a pair like ["in", "d"].');continue}const[a,b]=w.map(String),[bt,bp]=b.split('.');
+   if(a!=='in'&&!bm[a]){E.push(`Wire from "${a}": no such block.`);continue}if(a==='out'){E.push('"out" cannot be the start of a wire.');continue}if(bt!=='out'&&!bm[bt]){E.push(`Wire to "${b}": no such block.`);continue}if(bt==='in'){E.push('"in" cannot be the end of a wire.');continue}
+   if(bp){const tb=bm[bt];if(!tb){E.push(`Wire to "${b}": "out" has no settings.`);continue}const ok={gain:['gain'],delay:['time'],filter:['freq','q','gain'],pan:['pan']}[tb.type]||[];if(!ok.includes(bp)){E.push(`Wire to "${b}": ${tb.type} has no "${bp}" to move.`);continue}if(a==='in'||bm[a].type!=='lfo')W.push(`Wire to "${b}": usually only an lfo moves a setting.`)}
+   else if(bm[bt]&&bm[bt].type==='lfo'){E.push(`Block "${bt}" is an lfo: nothing can be wired into it.`);continue}else if(a!=='in'&&bm[a].type==='lfo'){E.push(`The lfo "${a}" must go to a setting, like "${bt}.gain".`);continue}
+   d.wires.push([a,bt,bp||null])}}
+ /* feedback rule: every loop must pass through a delay, and gains inside a loop are capped */
+ const adj={};for(const[a,b,p]of d.wires)if(!p&&a!=='in'&&b!=='out')(adj[a]=adj[a]||[]).push(b);
+ const inLoop=new Set(),state={},stack=[];let noDelay=null;
+ const dfs=u=>{state[u]=1;stack.push(u);for(const v of adj[u]||[]){if(state[v]===1){const cyc=stack.slice(stack.indexOf(v));cyc.forEach(x=>inLoop.add(x));if(!cyc.some(x=>bm[x].type==='delay'))noDelay=cyc}else if(!state[v])dfs(v)}stack.pop();state[u]=2};
+ d.blocks.forEach(b=>{if(!state[b.id])dfs(b.id)});
+ if(noDelay)E.push(`The loop ${noDelay.join(' → ')} → ${noDelay[0]} has no delay in it. A feedback loop needs a delay block.`);
+ for(const id of inLoop){const b=bm[id];if(b.type==='gain'){b.props.gain=[0,.95];b.capped=true}}
+ if([...inLoop].some(id=>bm[id].capped))W.push('Gain inside a feedback loop is capped at 95% so the loop cannot run away.');
+ if(!d.wires.some(w=>w[1]==='out'))E.push('Nothing is wired to "out", so the device would be silent.');
+ const ds=o.display||{};d.display={type:['spectrum','scope'].includes(ds.type)?ds.type:'spectrum'};
+ const ly=o.layout||{},lst=a=>(Array.isArray(a)?a:[]).filter(x=>names.includes(x));d.layout={style:'dock',dock:lst(ly.dock).slice(0,8),more:lst(ly.more)};
+ if(!d.layout.dock.length)d.layout.dock=names.slice(0,6);for(const n of names)if(!d.layout.dock.includes(n)&&!d.layout.more.includes(n))d.layout.more.push(n);
+ if(o.presets&&typeof o.presets==='object')for(const[k,v]of Object.entries(o.presets).slice(0,32))if(Array.isArray(v)&&typeof v[1]==='object')d.presets[k]=[String(v[0]).slice(0,30),v[1]];
+ return{d,errs:E,warns:W}}
+function driveCurve(am){const k=1+am*.4,n=1024,c=new Float32Array(n),t=Math.tanh(k);for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(k*x)/t}return c}
+function reverbIR(c,sec){const n=Math.floor(c.sampleRate*sec),b=c.createBuffer(2,n,c.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)*.5}return b}
+/* shell shared by every user device: on/off, analyser for the display */
+function devShell(c){const i=c.createGain(),o=c.createGain(),dry=c.createGain(),wet=c.createGain(),an=c.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.75;dry.gain.value=0;i.connect(dry);dry.connect(o);wet.connect(o);o.connect(an);
+ return{in:i,out:o,userIn:i,userOut:wet,analyser:an,bypass(b){const t=c.currentTime;dry.gain.setTargetAtTime(b?1:0,t,.01);wet.gain.setTargetAtTime(b?0:1,t,.01)}}}
+function buildDevice(c,d,vals){const sh=devShell(c),N={},lfos=[],all=[];
+ for(const b of d.blocks){let n;switch(b.type){case'gain':n=c.createGain();break;case'delay':n=c.createDelay(2.05);break;case'filter':n=c.createBiquadFilter();n.type=b.mode;break;case'drive':n=c.createWaveShaper();n.oversample='2x';break;case'pan':n=c.createStereoPanner();break;case'comp':n=c.createDynamicsCompressor();break;case'reverb':n=c.createConvolver();break;
+   case'lfo':{const o=c.createOscillator(),g=c.createGain();o.type=b.shape;o.connect(g);o.start();n=g;n._osc=o;lfos.push(o);break}}N[b.id]=n;all.push(n)}
+ for(const[a,b,p]of d.wires){const src=a==='in'?sh.userIn:N[a];if(p){const tb=d.blocks.find(x=>x.id===b),ap={gain:{gain:'gain'},delay:{time:'delayTime'},filter:{freq:'frequency',q:'Q',gain:'gain'},pan:{pan:'pan'}}[tb.type][p];src.connect(N[b][ap])}else src.connect(b==='out'?sh.userOut:N[b])}
+ const last={};
+ const apply=(v,now)=>{const t=c.currentTime,set=(ap,x)=>now?ap.setValueAtTime(x,t):ap.setTargetAtTime(x,t,.02);
+  for(const b of d.blocks){const n=N[b.id],val=k=>{let x=b.fn[k](v);if(!isFinite(x))x=b.props[k][0];return clamp(x,b.props[k][0],b.props[k][1])};
+   switch(b.type){case'gain':set(n.gain,val('gain'));break;case'delay':set(n.delayTime,val('time'));break;case'filter':set(n.frequency,val('freq'));set(n.Q,val('q'));set(n.gain,val('gain'));break;case'pan':set(n.pan,val('pan'));break;
+    case'comp':set(n.threshold,val('threshold'));set(n.ratio,val('ratio'));set(n.attack,val('attack'));set(n.release,val('release'));break;
+    case'drive':{const a=Math.round(val('amount'));if(last[b.id]!==a){last[b.id]=a;n.curve=driveCurve(a)}break}
+    case'reverb':{const s=Math.round(val('size')*5)/5;if(last[b.id]!==s){last[b.id]=s;n.buffer=reverbIR(c,s)}break}
+    case'lfo':set(n._osc.frequency,val('rate'));set(n.gain,val('depth'));break}}};
+ apply(vals,true);
+ return Object.assign(sh,{set:apply,dispose(){for(const o of lfos)try{o.stop()}catch(e){}for(const n of all)try{n.disconnect()}catch(e){}try{sh.in.disconnect();sh.out.disconnect()}catch(e){}}})}
+
+/* ---------- knobs and the display-first device frame ---------- */
+const toN=(p,v)=>p.curve==='log'?Math.log(v/p.min)/Math.log(p.max/p.min):(v-p.min)/(p.max-p.min);
+const fromN=(p,n)=>p.curve==='log'?p.min*Math.pow(p.max/p.min,n):p.min+(p.max-p.min)*n;
+function fmt(p,v){if(p.unit==='Hz'&&v>=1000)return(v/1000).toFixed(v>=10000?1:2)+' kHz';const r=p.max-p.min,dp=Math.abs(v)>=100||r>=200?0:Math.abs(v)>=10||r>=20?1:2;return v.toFixed(dp)+(p.unit?(p.unit==='%'?'':' ')+p.unit:'')}
+function arc(n){const a0=-225,a=a0+270*n,pt=d=>{const r=d*Math.PI/180;return[20+14*Math.cos(r),20+14*Math.sin(r)]},[x0,y0]=pt(a0),[x1,y1]=pt(a);return`M${x0.toFixed(2)} ${y0.toFixed(2)}A14 14 0 ${a-a0>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`}
+function knob(p,get,set){const el=document.createElement('div');el.className='kn';el.tabIndex=0;el.setAttribute('role','slider');el.setAttribute('aria-label',p.name);
+ el.innerHTML=`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="${arc(1)}" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="3.2" stroke-linecap="round"/><path class="v" fill="none" stroke="var(--acc)" stroke-width="3.2" stroke-linecap="round"/></svg><b>${esc(p.name)}</b><i></i>`;
+ const draw=()=>{const v=get(),n=clamp(toN(p,v),0,1);el.querySelector('.v').setAttribute('d',arc(Math.max(n,.001)));el.querySelector('i').textContent=fmt(p,v);el.setAttribute('aria-valuenow',v.toFixed(3));el.setAttribute('aria-valuetext',fmt(p,v))};
+ const put=n=>{set(fromN(p,clamp(n,0,1)));draw()};let y0=0,n0=0;
+ el.addEventListener('pointerdown',e=>{y0=e.clientY;n0=toN(p,get());el.setPointerCapture(e.pointerId);e.preventDefault();el.focus()});
+ el.addEventListener('pointermove',e=>{if(el.hasPointerCapture(e.pointerId))put(n0+(y0-e.clientY)/(e.shiftKey?600:150))});
+ el.addEventListener('dblclick',()=>{set(p.default);draw()});
+ el.addEventListener('keydown',e=>{const s=e.key==='ArrowUp'||e.key==='ArrowRight'?1:e.key==='ArrowDown'||e.key==='ArrowLeft'?-1:0;if(s){e.preventDefault();put(toN(p,get())+s*.02)}});
+ el._draw=draw;draw();return el}
+const DISPLAYS=[];
+/* mounts a device frame. model: {name, params, dock, more, presets, display, tag}; api: {vals, onSet(id,v), onBypass(b), analyser()} */
+function mountDevice(host,m,api){host.innerHTML='';const el=document.createElement('div');el.className='dev';
+ const pk=Object.keys(m.presets||{});let pi=-1;
+ el.innerHTML=`<div class="dvt"><button type="button" aria-pressed="true" aria-label="Device on or off" title="Device on or off"></button><span>${esc(m.name)}</span><em>${esc(m.tag||'yours')}</em></div><div class="dvd"><canvas></canvas>${pk.length?`<div class="dvp glass"><button type="button" data-pv="-1" aria-label="Previous preset">◂</button><b>Start values</b><button type="button" data-pv="1" aria-label="Next preset">▸</button></div>`:''}<div class="dvr glass">${m.display.type==='scope'?'Scope':'Spectrum'} · output</div><div class="tray glass" hidden></div><div class="dock glass"></div></div>`;
+ const dock=el.querySelector('.dock'),tray=el.querySelector('.tray'),kn=[];
+ const add=(where,id)=>{const p=m.params.find(x=>x.id===id);if(!p)return;const k=knob(p,()=>api.vals[id],v=>{api.vals[id]=v;api.onSet(id,v)});kn.push(k);where.appendChild(k)};
+ m.dock.forEach(id=>add(dock,id));if(m.more&&m.more.length){m.more.forEach(id=>add(tray,id));const b=document.createElement('button');b.type='button';b.className='more';b.textContent='More';b.setAttribute('aria-expanded','false');b.onclick=()=>{tray.hidden=!tray.hidden;b.setAttribute('aria-expanded',String(!tray.hidden))};dock.appendChild(b)}
+ const onb=el.querySelector('.dvt button');onb.onclick=()=>{const on=onb.getAttribute('aria-pressed')!=='true';onb.setAttribute('aria-pressed',String(on));api.onBypass(!on)};
+ el.addEventListener('click',e=>{const b=e.target.closest('[data-pv]');if(!b)return;pi=(pi+ +b.dataset.pv+pk.length+1)%(pk.length+1);const pr=pi===pk.length?null:m.presets[pk[pi]];el.querySelector('.dvp b').textContent=pr?pr[0]:'Start values';
+  for(const p of m.params){const v=pr&&typeof pr[1][p.id]==='number'?clamp(pr[1][p.id],p.min,p.max):p.default;api.vals[p.id]=v;api.onSet(p.id,v)}kn.forEach(k=>k._draw())});
+ host.appendChild(el);const cv=el.querySelector('canvas');const rec={cv,type:m.display.type,an:api.analyser,key:api.key};const i=DISPLAYS.findIndex(d=>d.key===api.key);if(i>=0)DISPLAYS[i]=rec;else DISPLAYS.push(rec);drawDisplay(rec,true);return el}
+let fbuf=null,tbuf=null;
+function drawDisplay(r,idle){const cv=r.cv;if(!cv.isConnected)return;const w=cv.clientWidth,h=cv.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1);if(!w||!h)return;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+ const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);const top=30,bot=h-92,H=bot-top;g.font='10px Inter,system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.28)';g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;
+ const an=!idle&&r.an&&r.an();
+ if(r.type==='spectrum'){const fx=f=>Math.log(f/30)/Math.log(20000/30)*w;for(const f of[100,1000,10000]){const x=Math.round(fx(f))+.5;g.beginPath();g.moveTo(x,top-14);g.lineTo(x,bot);g.stroke();g.fillText(f>=1000?f/1000+' kHz':f+' Hz',x+4,top-4)}
+  for(const db of[-20,-40,-60]){const y=Math.round(top+(-db-10)/70*H)+.5;g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();g.fillText(db+' dB',4,y-3)}
+  if(an){if(!fbuf||fbuf.length!==an.frequencyBinCount)fbuf=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(fbuf);const sr=an.context.sampleRate;g.beginPath();g.moveTo(0,bot);for(let x=0;x<=w;x+=2){const f=30*Math.pow(20000/30,x/w),bi=Math.min(fbuf.length-1,Math.round(f/(sr/2)*fbuf.length)),db=fbuf[bi],y=top+clamp((-db-10)/70,0,1)*H;g.lineTo(x,y)}g.lineTo(w,bot);g.closePath();g.fillStyle='rgba(62,207,142,.16)';g.fill();g.strokeStyle='#3ecf8e';g.lineWidth=1.4;g.stroke()}}
+ else{const mid=top+H/2;g.beginPath();g.moveTo(0,Math.round(mid)+.5);g.lineTo(w,Math.round(mid)+.5);g.stroke();g.fillText('+1',4,top+8);g.fillText('−1',4,bot-2);
+  if(an){if(!tbuf||tbuf.length!==an.fftSize)tbuf=new Float32Array(an.fftSize);an.getFloatTimeDomainData(tbuf);g.beginPath();for(let x=0;x<=w;x++){const v=tbuf[Math.floor(x/w*(tbuf.length-1))];g.lineTo(x,mid-clamp(v,-1,1)*H/2)}g.strokeStyle='#4c8dff';g.lineWidth=1.4;g.stroke()}}
+ if(!an){g.fillStyle='rgba(255,255,255,.36)';g.font='12px Inter,system-ui,sans-serif';g.textAlign='center';g.fillText('Press Listen to see the output here',w/2,top+H/2-10);g.textAlign='left'}}
+function displayLoop(){for(const r of DISPLAYS)drawDisplay(r,!(Rig.on&&Rig.key===r.key));requestAnimationFrame(displayLoop)}
+
+/* ---------- prototype 2 wiring ---------- */
+const DV={d:null,vals:{},dev:null};
+function descToModel(d,tag){return{name:d.name,params:d.params,dock:d.layout.dock,more:d.layout.more,presets:d.presets,display:d.display,tag}}
+function makeDescHost(S,hostSel,key){return{load(d){S.d=d;const old=S.vals;S.vals={};for(const p of d.params)S.vals[p.id]=typeof old[p.id]==='number'?clamp(old[p.id],p.min,p.max):p.default;
+   mountDevice($(hostSel),descToModel(d,key==='chat'?'built by chat':'yours'),{key,vals:S.vals,onSet:()=>S.dev&&S.dev.set(S.vals),onBypass:b=>S.dev&&S.dev.bypass(b),analyser:()=>S.dev&&S.dev.analyser});
+   if(Rig.ctx){S.dev=buildDevice(Rig.ctx,d,S.vals);Rig.setDevice(key,S.dev)}},
+  build:async()=>{if(S.d&&!S.dev){S.dev=buildDevice(Rig.ctx,S.d,S.vals);Rig.setDevice(key,S.dev)}}}}
+const DVH=makeDescHost(DV,'#dvHost','desc');RIG_BUILD.desc=DVH.build;
+function deviceFromText(){const st=$('#dvSt');let o;try{o=JSON.parse($('#dvTxt').value)}catch(e){st.className='status bad';st.innerHTML=`<b>Not rebuilt.</b><span class="e">The text is not valid JSON: ${esc(e.message)}. The last good device keeps playing.</span>`;return}
+ const r=normDevice(o);if(r.errs.length){st.className='status bad';st.innerHTML='<b>Not rebuilt.</b>'+r.errs.map(e=>`<span class="e">${esc(e)}</span>`).join('')+'<span>The last good device keeps playing.</span>';return}
+ DV.dev=null;DVH.load(r.d);st.className='status'+(r.warns.length?' warn':'');st.innerHTML=`<b>"${esc(r.d.name)}" built:</b><span>${r.d.params.length} knob${r.d.params.length===1?'':'s'}, ${r.d.blocks.length} blocks, ${r.d.wires.length} wires, ${Object.keys(r.d.presets).length} presets.</span>`+r.warns.map(w=>`<span class="w">${esc(w)}</span>`).join('')}
+function initDevice(){$('#dvEx').innerHTML=Object.entries(DEV_EX).map(([k,v])=>`<button class="chip" data-ex="${k}">${esc(v.name)}</button>`).join('');
+ $('#dvEx').onclick=e=>{const b=e.target.closest('[data-ex]');if(b){DV.vals={};$('#dvTxt').value=fmtDev(DEV_EX[b.dataset.ex]);deviceFromText()}};
+ $('#dvTxt').addEventListener('input',deb(deviceFromText,350));$('#dvTxt').value=fmtDev(DEV_EX.echo);deviceFromText()}
+/* compact JSON: one knob, block or wire per line */
+function fmtDev(o){const L=a=>'[\n'+a.map(x=>'    '+JSON.stringify(x).replace(/,"/g,', "').replace(/":/g,'": ')).join(',\n')+'\n  ]';const out=[];
+ for(const[k,v]of Object.entries(o)){if(['params','blocks','wires'].includes(k))out.push(`  "${k}": ${L(v)}`);else if(k==='presets')out.push(`  "presets": {${Object.entries(v).map(([n,p])=>`\n    "${n}": ${JSON.stringify(p).replace(/,"/g,', "').replace(/":/g,'": ')}`).join(',')}${Object.keys(v).length?'\n  ':''}}`);else out.push(`  "${k}": ${JSON.stringify(v).replace(/,"/g,', "').replace(/":/g,'": ')}`)}
+ return'{\n'+out.join(',\n')+'\n}'}
+
+/* =====================================================================
+   5. SCRIPT DEVICE: a small language compiled by the host
+   ===================================================================== */
+const SC_EX={
+ clip:`name Soft clip and tone
+param drive 0..30 = 12 dB
+param tone 200..12000 = 4000 Hz log
+param mix 0..100 = 100 %
+
+init:
+  lp0 = 0; lp1 = 0;
+
+block:                 // runs once per block of 128 samples
+  g = db(drive);
+  k = 1 - exp(-2 * pi * tone / sr);
+  m = mix / 100;
+
+sample:                // runs for every sample
+  a = tanh(in0 * g) / max(1, g * 0.35);
+  b = tanh(in1 * g) / max(1, g * 0.35);
+  lp0 = lp0 + k * (a - lp0);
+  lp1 = lp1 + k * (b - lp1);
+  out0 = in0 + m * (lp0 - in0);
+  out1 = in1 + m * (lp1 - in1);
+`,
+ crush:`name Bit crusher
+param bits 2..16 = 6
+param hold 1..40 = 8 x
+param mix 0..100 = 100 %
+
+init:
+  n = 0; h0 = 0; h1 = 0;
+
+block:
+  steps = pow(2, floor(bits) - 1);
+  m = mix / 100;
+
+sample:
+  n = n + 1;
+  if (n >= floor(hold)) {        // keep one sample, repeat it
+    n = 0;
+    h0 = floor(in0 * steps + 0.5) / steps;
+    h1 = floor(in1 * steps + 0.5) / steps;
+  }
+  out0 = blend(in0, h0, m);
+  out1 = blend(in1, h1, m);
+`,
+ comb:`name Comb echo
+param time 1..400 = 180 ms log
+param feedback 0..95 = 60 %
+param damp 0..100 = 40 %
+param mix 0..100 = 40 %
+
+init:
+  w = 0; z0 = 0; z1 = 0;
+
+block:
+  len = floor(time / 1000 * sr);
+  fb = feedback / 100;
+  d = 1 - damp / 100 * 0.9;
+  m = mix / 100;
+
+sample:
+  // mem[] is the delay memory: about 2.7 seconds, left on even slots, right on odd
+  r0 = mem[(w - len) * 2];
+  r1 = mem[(w - len) * 2 + 1];
+  z0 = z0 + d * (r0 - z0);
+  z1 = z1 + d * (r1 - z1);
+  mem[w * 2] = in0 + z1 * fb;      // crossed: the echo bounces left and right
+  mem[w * 2 + 1] = in1 + z0 * fb;
+  w = (w + 1) % 65536;
+  out0 = in0 + m * r0;
+  out1 = in1 + m * r1;
+`,
+ phaser:`name Six-stage phaser (a loop)
+param rate 0.05..6 = 0.4 Hz log
+param depth 0..100 = 80 %
+param feedback 0..90 = 50 %
+
+init:
+  ph = 0; fbk = 0;
+  loop (6) { mem[i] = 0; i = i + 1; }
+
+block:
+  ph = ph + 2 * pi * rate * 128 / sr;
+  if (ph > 2 * pi) { ph = ph - 2 * pi; }
+  f = 900 + 700 * depth / 100 * sin(ph);
+  c = (tan(pi * f / sr) - 1) / (tan(pi * f / sr) + 1);
+
+sample:
+  x = (in0 + in1) * 0.5 + fbk * feedback / 100;
+  i = 0;
+  loop (6) {                     // six all-pass filters in a row
+    y = c * x + mem[i];
+    mem[i] = x - c * y;
+    x = y;
+    i = i + 1;
+  }
+  fbk = x;
+  out0 = in0 * 0.6 + x * 0.6;
+  out1 = in1 * 0.6 + x * 0.6;
+`,
+ heavy:`name Too heavy (refused before it runs)
+param amount 0..1 = 0.5
+
+sample:
+  x = in0;
+  loop (64) {
+    loop (64) {
+      x = sin(x * 1.01) + amount * 0.001;
+    }
+  }
+  out0 = x; out1 = x;
+`,
+ loud:`name Loud bug (the safety stage catches it)
+param boom 1..200 = 120 x
+
+sample:
+  // a mistake: 120 times too loud, and a division by zero now and then
+  out0 = in0 * boom / (in1 - in1);
+  out1 = in1 * boom;
+`,
+ sandbox:`name Trying to get out (will not compile)
+param x 0..1 = 0.5
+
+sample:
+  out0 = fetch(in0);
+  window = 1;
+`};
+const SC_MEM=131072,SC_MAXOPS=2000,SC_MAXPRE=25;
+const SC_RESERVED=['in0','in1','out0','out1','sr','pi','mem','if','else','loop','name','param','init','block','sample','window','self','globalThis','this','process','require','import','eval','Function','fetch','document'];
+function compileScript(src){const errs=[],res={ok:false,errs,name:'Script device',params:[],ops:0};const lines=src.split('\n');let i=0;
+ const fail=(line,msg)=>{errs.push(`Line ${line}: ${msg}.`)};
+ for(;i<lines.length;i++){const raw=lines[i].replace(/\/\/.*$/,'').trim();if(!raw)continue;if(/^(init|block|sample)\s*:$/.test(raw))break;let m;
+  if((m=/^name\s+(.+)$/.exec(raw)))res.name=m[1].slice(0,40);
+  else if((m=/^param\s+([a-z][a-z0-9_]*)\s+(-?[\d.]+)\s*\.\.\s*(-?[\d.]+)\s*=\s*(-?[\d.]+)\s*([^\s]*)?\s*(log)?$/i.exec(raw))){const[,id,a,b,d,u,lg]=m,mn=+a,mx=+b;let df=+d,unit=u||'',cv=lg?'log':'lin';if(unit==='log'&&!lg){unit='';cv='log'}
+   if(SC_RESERVED.includes(id)||FN[id])fail(i+1,`"${id}" is a reserved word and cannot be a knob name`);else if(res.params.some(p=>p.id===id))fail(i+1,`two knobs are called "${id}"`);else if(!(mx>mn))fail(i+1,'the range must go from low to high, like 0..100');else if(res.params.length>=16)fail(i+1,'a script can have at most 16 knobs');
+   else{if(cv==='log'&&mn<=0)cv='lin';res.params.push({id,name:id[0].toUpperCase()+id.slice(1),min:mn,max:mx,default:clamp(df,mn,mx),unit:unit.slice(0,5),curve:cv})}}
+  else fail(i+1,`expected "name …", "param id low..high = start unit" or a section (init: block: sample:), found "${raw.slice(0,30)}"`)}
+ const secs={init:'',block:'',sample:''},start={};let cur=null;
+ for(;i<lines.length;i++){const m=/^\s*(init|block|sample)\s*:\s*(\/\/.*)?$/.exec(lines[i]);if(m){cur=m[1];if(start[cur]){fail(i+1,`there are two "${cur}:" sections`)}start[cur]=i+2;continue}secs[cur]+=lines[i]+'\n'}
+ if(!start.sample)errs.push('The script needs a "sample:" section.');
+ const pidx=Object.fromEntries(res.params.map((p,k)=>[p.id,k])),vars={};let nv=0;
+ const vref=(n,line)=>{if(!(n in vars)){if(nv>=256)throw{line,msg:'too many variables (256 at most)'};vars[n]=nv++}return`v[${vars[n]}]`};
+ function gen(sec){const P=Parser(lex(secs[sec],start[sec]||1));let ops=0,depth=0;const inS=sec==='sample';
+  const ex=a=>{switch(a.t){case'num':return'('+String(a.v)+')';
+    case'id':{const n=a.n;if(n in pidx)return`p[${pidx[n]}]`;if(n==='sr')return'sr';if(n==='pi')return'3.141592653589793';if(n==='in0'||n==='in1'||n==='out0'||n==='out1'){if(!inS)throw{line:a.line,msg:`${n} only exists in the sample: section`};return n}
+      if(SC_RESERVED.includes(n)||FN[n])throw{line:a.line,msg:`"${n}" is not something a script can use`};return vref(n,a.line)}
+    case'un':ops++;return a.op==='-'?`(-${ex(a.a)})`:`(${ex(a.a)}===0?1:0)`;
+    case'mem':ops+=2;return`m[(${ex(a.a)})&${SC_MEM-1}]`;
+    case'call':{const f=FN[a.n];if(!f)throw{line:a.line,msg:`there is no function ${a.n}(). Functions: ${Object.keys(FN).join(', ')}`};if(a.args.length!==f[0])throw{line:a.line,msg:`${a.n}() takes ${f[0]} value${f[0]===1?'':'s'}`};ops+=['sin','cos','tan','tanh','exp','log','pow','atan','db','noise'].includes(a.n)?6:2;return`f_${a.n}(${a.args.map(ex).join(',')})`}
+    case'bin':{ops++;const x=ex(a.a),y=ex(a.b);switch(a.op){case'+':case'-':case'*':case'/':case'%':return`(${x}${a.op}${y})`;case'==':return`(${x}===${y}?1:0)`;case'!=':return`(${x}!==${y}?1:0)`;case'&&':return`((${x}!==0&&${y}!==0)?1:0)`;case'||':return`((${x}!==0||${y}!==0)?1:0)`;default:return`(${x}${a.op}${y}?1:0)`}}}};
+  const block=()=>{P.eat('{');let s='',o0=ops;while(!P.is('}')){if(P.is('end'))throw{line:P.peek().line,msg:'a "{" is never closed'};s+=stmt()}P.eat('}');return s};
+  const stmt=()=>{const k=P.peek();if(k.t!=='id')throw{line:k.line,msg:`expected a statement, found "${k.v??k.t}"`};
+   if(k.v==='if'){P.next();P.eat('(');const c=ex(P.expr());P.eat(')');ops++;const o0=ops;let s=`if(${c}!==0){${block()}}`;const oa=ops-o0;if(P.is('id')&&P.peek().v==='else'){P.next();ops=o0;s+=`else{${P.is('id')&&P.peek().v==='if'?stmt():block()}}`;ops=o0+Math.max(oa,ops-o0)}return s}
+   if(k.v==='loop'){P.next();P.eat('(');const n=P.next();if(n.t!=='num'||n.v!==Math.floor(n.v)||n.v<1||n.v>64)throw{line:n.line,msg:'loop(…) needs a whole number from 1 to 64 written out, so the cost is known before it runs'};P.eat(')');if(++depth>3)throw{line:k.line,msg:'loops can be nested 3 deep at most'};const o0=ops,L='q'+depth,body=block();depth--;ops=o0+(ops-o0+1)*n.v;return`for(let ${L}=0;${L}<${n.v};${L}++){${body}}`}
+   if(k.v==='mem'){P.next();P.eat('[');const a=ex(P.expr());P.eat(']');P.eat('=');const e=ex(P.expr());P.eat(';');ops+=3;return`m[(${a})&${SC_MEM-1}]=${e};`}
+   P.next();const n=k.v;if(!P.is('='))throw{line:k.line,msg:P.is('(')?`"${n}(…)" cannot stand alone; a script can only set its own variables`:`expected "=" after "${n}"`};P.next();
+   let lhs;if(n==='out0'||n==='out1'){if(!inS)throw{line:k.line,msg:`${n} only exists in the sample: section`};lhs=n}else if(n in pidx)throw{line:k.line,msg:`"${n}" is a knob; a script reads knobs but cannot move them`};else if(SC_RESERVED.includes(n)||FN[n])throw{line:k.line,msg:`"${n}" cannot be set by a script`};else lhs=vref(n,k.line);
+   const e=ex(P.expr());P.eat(';');ops++;return`${lhs}=${e};`};
+  let out='';while(!P.is('end'))out+=stmt();return{js:out,ops}}
+ const js={};for(const s of['init','block','sample']){try{const r=gen(s);js[s]=r.js;if(s==='sample')res.ops=r.ops;if(s==='block')res.blockOps=r.ops}catch(e){if(e&&e.msg)fail(e.line||start[s]||1,e.msg);else throw e;js[s]=''}}
+ if(errs.length)return res;
+ res.opsTotal=res.ops+Math.ceil((res.blockOps||0)/128);
+ if(res.opsTotal>SC_MAXOPS){errs.push(`Too heavy: up to ${res.opsTotal.toLocaleString('en')} steps for every sample; the limit is ${SC_MAXOPS.toLocaleString('en')}. Use smaller loops.`);res.tooHeavy=true;return res}
+ const helpers=Object.keys(FN).map(k=>({clamp:'function f_clamp(x,a,b){return x<a?a:x>b?b:x}',blend:'function f_blend(a,b,t){return a+(b-a)*t}',db:'function f_db(x){return Math.pow(10,x/20)}',noise:'function f_noise(){return Math.random()*2-1}'}[k]||`const f_${k}=Math.${k};`)).join('');
+ res.kernel=`"use strict";${helpers}function makeKernel(sr){const v=new Float64Array(${Math.max(1,nv)}),m=new Float32Array(${SC_MEM}),p=new Float64Array(${Math.max(1,res.params.length)});return{v,m,p,init(){${js.init}},block(){${js.block}},run(I0,I1,O0,O1,n){let nan=0;for(let i=0;i<n;i++){const in0=I0[i],in1=I1[i];let out0=in0,out1=in1;${js.sample}if(out0===out0&&out1===out1){O0[i]=out0>8?8:out0<-8?-8:out0;O1[i]=out1>8?8:out1<-8?-8:out1}else{nan++;O0[i]=0;O1[i]=0}}return nan}}}`;
+ res.ok=true;return res}
+/* the processor that hosts a compiled script inside the audio thread: timing, watchdog, reset on bad numbers */
+function scriptHost(NAME){const now=(typeof performance!=='undefined'&&performance.now)?()=>performance.now():()=>Date.now(),coarse=!(typeof performance!=='undefined'&&performance.now);
+ registerProcessor(NAME,class extends AudioWorkletProcessor{constructor(){super();this.k=makeKernel(sampleRate);this.t=new Float64Array(this.k.p.length);this.first=true;this.acc=0;this.nb=0;this.strk=0;this.byp=false;this.nan=0;this.z=new Float32Array(128);
+   this.port.onmessage=e=>{if(e.data.p){this.t.set(e.data.p);if(this.first){this.k.p.set(e.data.p);this.k.init();this.first=false}}}}
+  process(ins,outs){const I=ins[0],O=outs[0],n=O[0].length;if(this.z.length<n)this.z=new Float32Array(n);const I0=I[0]||this.z,I1=I[1]||I0,O0=O[0],O1=O[1]||O[0];
+   if(this.byp||this.first){O0.set(I0);if(O[1])O1.set(I1);return true}
+   const t0=now(),p=this.k.p,t=this.t;for(let i=0;i<t.length;i++)p[i]+=(t[i]-p[i])*.3;this.k.block();const nan=this.k.run(I0,I1,O0,O1,n);const dt=now()-t0,blk=n/sampleRate*1000;
+   if(nan){this.nan+=nan;this.k.v.fill(0);this.k.m.fill(0);this.k.init()}
+   if(dt>blk*1.5){this.strk+=1;if(this.strk>=6){this.byp=true;this.port.postMessage({trip:true})}}else if(this.strk>0)this.strk-=.02;
+   this.acc+=dt;this.nb++;if(this.nb>=96){this.port.postMessage({cpu:this.acc/(this.nb*blk),nan:this.nan,coarse});this.acc=0;this.nb=0}return true}})}
+/* test run in a Worker (off the audio thread, can be terminated): cost, bad numbers, loudness */
+function scriptBench(){self.onmessage=e=>{const sr=48000,k=makeKernel(sr);k.p.set(e.data.p);k.init();const n=128,I0=new Float32Array(n),I1=new Float32Array(n),O0=new Float32Array(n),O1=new Float32Array(n);let best=1e9,nan=0,peak=0,ph=0;
+  for(let pass=0;pass<3;pass++){const t0=performance.now();for(let b=0;b<375;b++){for(let i=0;i<n;i++){ph+=.0288;const s=.5*Math.sin(ph)+.25*(Math.random()*2-1);I0[i]=s;I1[i]=s*.9}k.block();const q=k.run(I0,I1,O0,O1,n);if(pass===2){nan+=q;for(let i=0;i<n;i++){const a=O0[i]<0?-O0[i]:O0[i];if(a>peak)peak=a}}}best=Math.min(best,performance.now()-t0)}
+  postMessage({ms:best,nan,peak})}}
+function preflight(kernel,pvals){return new Promise(res=>{let w;try{w=new Worker(blobURL(kernel+';('+scriptBench.toString()+')()'))}catch(e){res({err:'no-worker'});return}
+ const to=setTimeout(()=>{w.terminate();res({timeout:true})},4000);w.onmessage=e=>{clearTimeout(to);w.terminate();res(e.data)};w.onerror=e=>{clearTimeout(to);w.terminate();res({err:e.message||'error'})};w.postMessage({p:pvals})})}
+const SC={c:null,vals:{},dev:null,node:null,seq:0,live:null,pre:null};
+const scP=()=>SC.c.params.map(p=>SC.vals[p.id]);
+function setBar(id,frac,txt,lim){const b=$('#'+id);b.style.width=clamp(frac/(lim*2)*100,0,100)+'%';b.className=frac>lim?'bad':frac>lim*.5?'hot':'';$('#'+id+'T').textContent=txt}
+async function scriptFromText(){const st=$('#scSt'),seq=++SC.seq,c=compileScript($('#scTxt').value);
+ setBar('cOps',c.opsTotal||c.ops||0,(c.opsTotal||c.ops)?(c.opsTotal||c.ops).toLocaleString('en')+' steps':'–',SC_MAXOPS);
+ if(!c.ok){setBar('cPre',0,c.tooHeavy?'not run':'–',SC_MAXPRE);st.className='status bad';st.innerHTML=`<b>${c.tooHeavy?'Refused.':'Not compiled.'}</b>`+c.errs.map(e=>`<span class="e">${esc(e)}</span>`).join('')+`<span>${SC.c?'The last good script keeps playing.':''}</span>`;return}
+ const vals={};for(const p of c.params)vals[p.id]=typeof SC.vals[p.id]==='number'?clamp(SC.vals[p.id],p.min,p.max):p.default;
+ const pre=await preflight(c.kernel,c.params.map(p=>vals[p.id]));if(seq!==SC.seq)return;
+ const pct=pre.ms!=null?pre.ms/10:null;
+ if(pre.timeout||(pct!=null&&pct>SC_MAXPRE)){setBar('cPre',pct??100,pre.timeout?'timed out':pct.toFixed(1)+'%',SC_MAXPRE);st.className='status bad';st.innerHTML=`<b>Refused after the test run.</b><span class="e">One second of sound took ${pre.timeout?'more than 4 seconds':Math.round(pre.ms)+' ms'} to work out. The script never reached the audio thread.</span>`;return}
+ if(pct!=null)setBar('cPre',pct,pct<.1?'< 0.1%':pct.toFixed(1)+'%',SC_MAXPRE);else setBar('cPre',0,'not measured',SC_MAXPRE);
+ SC.c=c;SC.vals=vals;SC.pre=pre;SC.live=null;setBar('cLive',0,'–',SC_MAXPRE);
+ mountDevice($('#scHost'),{name:c.name,params:c.params,dock:c.params.slice(0,7).map(p=>p.id),more:c.params.slice(7).map(p=>p.id),presets:{},display:{type:'scope'},tag:'script'},{key:'script',vals:SC.vals,onSet:()=>SC.node&&SC.node.port.postMessage({p:scP()}),onBypass:b=>SC.dev&&SC.dev.bypass(b),analyser:()=>SC.dev&&SC.dev.analyser});
+ const notes=[];if(pre.nan)notes.push(`<span class="w">The test run produced ${pre.nan.toLocaleString('en')} bad numbers (for example a division by zero). They become silence and the script's memory is reset.</span>`);if(pre.peak>1.5)notes.push(`<span class="w">The test run peaked at ${(20*Math.log10(pre.peak)).toFixed(0)} dB over full level. The safety stage will hold it down.</span>`);
+ st.className='status'+(notes.length?' warn':'');st.innerHTML=`<b>"${esc(c.name)}" compiled:</b><span>${c.params.length} knob${c.params.length===1?'':'s'}, ${c.opsTotal} steps per sample${pct!=null?`, test run ${pct<.1?'under 0.1':pct.toFixed(1)}% of one core`:''}.</span>`+notes.join('');
+ SC.dev=null;SC.node=null;if(Rig.ctx)await scBuild()}
+async function scBuild(){if(!SC.c||SC.node)return;const c=Rig.ctx,name='ext-script-'+(++scBuild.n),cc=SC.c;await c.audioWorklet.addModule(blobURL(cc.kernel+';('+scriptHost.toString()+')('+JSON.stringify(name)+')'));if(cc!==SC.c)return;
+ const sh=devShell(c),node=new AudioWorkletNode(c,name,{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit'});sh.userIn.connect(node);node.connect(sh.userOut);
+ node.port.onmessage=e=>{if(node!==SC.node)return;if(e.data.trip){const st=$('#scSt');st.className='status bad';st.innerHTML='<b>Watchdog: the script was switched off.</b><span class="e">It kept taking longer than the time of one block. The sound now passes through untouched. Edit the script to try again.</span>'}
+  if(e.data.cpu!=null){const pc=e.data.cpu*100;SC.live=pc;setBar('cLive',pc,(pc<.1?'< 0.1%':pc.toFixed(1)+'%')+(e.data.coarse?' ~':''),SC_MAXPRE)}};
+ node.port.postMessage({p:scP()});SC.node=node;SC.dev=Object.assign(sh,{dispose(){try{node.disconnect();sh.in.disconnect();sh.out.disconnect()}catch(e){}}});Rig.setDevice('script',SC.dev)}
+scBuild.n=0;RIG_BUILD.script=scBuild;
+function initScript(){const names={clip:'Soft clip and tone',crush:'Bit crusher',comb:'Comb echo',phaser:'Six-stage phaser',heavy:'Too heavy',loud:'Loud bug',sandbox:'Trying to get out'};
+ $('#scEx').innerHTML=Object.keys(SC_EX).map(k=>`<button class="chip" data-ex="${k}">${names[k]}</button>`).join('');
+ $('#scEx').onclick=e=>{const b=e.target.closest('[data-ex]');if(b){SC.vals={};$('#scTxt').value=SC_EX[b.dataset.ex];scriptFromText()}};
+ $('#scTxt').addEventListener('input',deb(scriptFromText,500));$('#scTxt').value=SC_EX.clip;scriptFromText()}
+
+/* =====================================================================
+   6. CHAT MOCK: a rule-based helper that writes a device file from a sentence
+   ===================================================================== */
+const MODS={
+ phone:{re:/phone|radio|lo-?fi|megaphone|tinny|walkie/,noun:'telephone',label:'a narrow telephone band'},
+ drive:{re:/crunch|dirt|distort|drive|fuzz|grit|satur|overdrive|tape|harsh/,adj:'Crunchy',label:'drive',params:[['drive','Drive',0,100,38,'%']]},
+ dark:{re:/dark|warm|mellow|muffl|underwater|soft|dull|tape|vintage/,adj:'Warm',label:'a low-pass tone control',params:[['tone','Tone',200,12000,2600,'Hz','log']]},
+ bright:{re:/bright|air|crisp|sparkl|shiny/,adj:'Bright',label:'an air lift',params:[['air','Air',0,12,6,'dB']]},
+ bass:{re:/bass|sub\b|fat|boom|low end|thump/,adj:'Fat',label:'a bass lift',params:[['bass','Bass',0,12,6,'dB']]},
+ comp:{re:/punch|compress|glue|tight|squash|squeez/,adj:'Punchy',label:'a compressor',params:[['squeeze','Squeeze',0,40,20,'dB']]},
+ trem:{re:/tremolo|puls|stutter|chop|throb/,noun:'tremolo',label:'a tremolo',params:[['rate','Rate',.5,16,6,'Hz','log'],['chop','Chop',0,100,70,'%']]},
+ wah:{re:/wah|sweep|auto.?filter|moving filter|filter (that )?moves/,noun:'sweep',label:'a moving filter',params:[['speed','Speed',.05,8,.5,'Hz','log'],['range','Range',0,100,70,'%']]},
+ chorus:{re:/chorus|wide|thick|shimmer|detun|lush/,noun:'chorus',label:'a stereo chorus',params:[['depth','Depth',0,100,50,'%'],['chorus','Chorus',0,100,45,'%']]},
+ echo:{re:/echo|delay|repeat|dub/,noun:'echo',label:'an echo with feedback',params:[['time','Time',40,1200,330,'ms','log'],['feedback','Feedback',0,90,45,'%'],['echo','Echo',0,100,35,'%']]},
+ wobble:{re:/wobbl|wow|flutter|tape|seasick|warp/,adj:'Wobbly',label:'tape wobble on the echo',params:[['wobble','Wobble',.1,6,.8,'Hz','log']],needs:'echo'},
+ reverb:{re:/reverb|space|room|hall|cathedral|ambien|cave/,noun:'space',label:'a reverb',params:[['size','Size',.3,6,2.2,'s'],['space','Space',0,100,30,'%']]}
+};
+const MOD_ORDER=['phone','drive','dark','bright','bass','comp','trem','wah','chorus','echo','wobble','reverb'];
+function chatDevice(S){const P=[],B=[],W=[];let last='in';const has=k=>S.mods.has(k),ser=(id,blk)=>{B.push({id,...blk});W.push([last,id]);last=id};
+ for(const k of MOD_ORDER)if(has(k))for(const[id,name,min,max,def,unit,curve]of MODS[k].params||[]){const p={id,name,min,max,default:clamp(S.tweak[id]??def,min,max),unit};if(curve)p.curve=curve;P.push(p)}
+ if(has('phone')){ser('hp',{type:'filter',mode:'highpass',freq:420});ser('bp',{type:'filter',mode:'bandpass',freq:1300,q:1.8})}
+ if(has('drive'))ser('sat',{type:'drive',amount:'$drive'});
+ if(has('dark'))ser('lp',{type:'filter',mode:'lowpass',freq:'$tone'});
+ if(has('bright'))ser('hs',{type:'filter',mode:'highshelf',freq:6500,gain:'$air'});
+ if(has('bass'))ser('ls',{type:'filter',mode:'lowshelf',freq:110,gain:'$bass'});
+ if(has('comp')){ser('cmp',{type:'comp',threshold:'0 - $squeeze',ratio:5});ser('mk',{type:'gain',gain:'db($squeeze * 0.4)'})}
+ if(has('trem')){ser('tr',{type:'gain',gain:'1 - $chop / 200'});B.push({id:'trl',type:'lfo',rate:'$rate',depth:'$chop / 200'});W.push(['trl','tr.gain'])}
+ if(has('wah')){ser('wf',{type:'filter',mode:'lowpass',freq:1000,q:5});B.push({id:'wl',type:'lfo',rate:'$speed',depth:'$range * 8'});W.push(['wl','wf.freq'])}
+ const pre=last;W.push([pre,'out']);
+ if(has('chorus')){B.push({id:'cl',type:'delay',time:.014},{id:'cr',type:'delay',time:.02},{id:'cpl',type:'pan',pan:-.8},{id:'cpr',type:'pan',pan:.8},{id:'cl1',type:'lfo',rate:.6,depth:'$depth * 0.00006'},{id:'cl2',type:'lfo',rate:.83,depth:'$depth * 0.00006'},{id:'cw',type:'gain',gain:'$chorus / 100'});
+  W.push([pre,'cl'],[pre,'cr'],['cl','cpl'],['cr','cpr'],['cpl','cw'],['cpr','cw'],['cw','out'],['cl1','cl.time'],['cl2','cr.time'])}
+ if(has('echo')){B.push({id:'ed',type:'delay',time:'$time / 1000'},{id:'el',type:'filter',mode:'lowpass',freq:has('dark')?'$tone':5200},{id:'ef',type:'gain',gain:'$feedback / 100'},{id:'ew',type:'gain',gain:'$echo / 100'});W.push([pre,'ed'],['ed','el'],['el','ef'],['ef','ed'],['el','ew'],['ew','out']);
+  if(has('wobble')){B.push({id:'wo',type:'lfo',rate:'$wobble',depth:.0016});W.push(['wo','ed.time'])}}
+ if(has('reverb')){B.push({id:'rv',type:'reverb',size:'$size'},{id:'rw',type:'gain',gain:'$space / 100'});W.push([pre,'rv'],['rv','rw'],['rw','out'])}
+ const adj=MOD_ORDER.filter(k=>has(k)&&MODS[k].adj&&!(k==='drive'&&has('wobble'))&&!(k==='dark'&&has('wobble'))).map(k=>k==='wobble'?'Tape':MODS[k].adj),noun=MOD_ORDER.filter(k=>has(k)&&MODS[k].noun).map(k=>MODS[k].noun);
+ let name=S.name||[...adj.slice(0,2),noun.slice(0,2).join(' and ')||'tone'].join(' ').toLowerCase();name=name[0].toUpperCase()+name.slice(1);
+ const ids=P.map(p=>p.id);
+ return{format:'audiolab.device',formatVersion:1,id:'user.'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,kind:'effect',author:'you, with the Assistant',version:'1.0.0',params:P,blocks:B,wires:W,display:{type:has('trem')||has('chorus')?'scope':'spectrum'},layout:{style:'dock',dock:ids.slice(0,6),more:ids.slice(6)},presets:{}}}
+const CH={mods:new Set(),tweak:{},name:'',msgs:[],d:null,S:{d:null,vals:{},dev:null}};
+const COLOURS={orange:['#ff9a3c',24],amber:['#f5c84c',40],gold:['#f5c84c',45],yellow:['#f5d84c',52],green:['#3ecf8e',150],teal:['#2fc7b8',175],cyan:['#4cc9f0',195],blue:['#4c8dff',215],purple:['#b583ff',265],violet:['#b583ff',265],pink:['#ff7ac8',325],red:['#ff6b6b',0]};
+function chatReply(text){const s=text.toLowerCase().trim(),acts=[];let m;
+ if(/theme|colou?r|look|skin|interface/.test(s)){const col=Object.keys(COLOURS).find(c=>s.includes(c));if(col&&TH.obj){setP(TH.obj,'colors.accent',COLOURS[col][0]);setP(TH.obj,'background.tintHue',COLOURS[col][1]);if(/bright|light mode/.test(s))setP(TH.obj,'mode','bright');if(/dark/.test(s))setP(TH.obj,'mode','dark');setP(TH.obj,'name',col[0].toUpperCase()+col.slice(1)+' theme');loadTheme(TH.obj);return{t:`Made a ${col} theme. It is in prototype 1 at the top of the page, as a file you can edit.`,acts:[`Wrote ${col}-theme.audiolabtheme`,'Checked contrast']}}
+  return{t:'For a theme, name a colour: orange, gold, green, teal, cyan, blue, purple, pink or red. Add "bright" for the bright mode.',acts}}
+ if(/start over|new device|reset|clear/.test(s)){CH.mods.clear();CH.tweak={};CH.name='';CH.d=null;return{t:'Cleared. Describe a new device.',acts,clear:true}}
+ if((m=/(?:call it|name it|rename (?:it )?(?:to )?)\s*["“]?(.+?)["”]?$/i.exec(text.trim()))&&CH.d){CH.name=m[1].slice(0,30);acts.push(`Renamed to "${CH.name}"`)}
+ else{const fresh=/^(make|build|create|give me|i want|i need|can you make|design|a|an)\b/.test(s)&&CH.d&&!/\b(it|this|that)\b/.test(s);if(fresh){CH.mods.clear();CH.tweak={};CH.name=''}
+  if((m=/\b(?:remove|without|no|drop|lose) (?:the )?(.+)/.exec(s))&&CH.d){const gone=MOD_ORDER.filter(k=>CH.mods.has(k)&&MODS[k].re.test(m[1]));if(gone.includes('echo'))CH.mods.delete('wobble');gone.forEach(k=>{CH.mods.delete(k);acts.push(`Removed ${MODS[k].label}`)});if(!gone.length)return{t:`I could not find "${m[1]}" in this device.`,acts}}
+  else{const dir=/\b(more|longer|slower|bigger|higher|stronger|deeper)\b/.test(s)?1.4:/\b(less|shorter|faster|smaller|lower|weaker|shallower)\b/.test(s)?.65:0;let tw=false;
+   if(/darker|duller|warmer/.test(s)&&CH.d){if(!CH.mods.has('dark')){CH.mods.add('dark');acts.push('Added a low-pass tone control')}CH.tweak.tone=(CH.tweak.tone??2600)*.55;acts.push('Tone lower');tw=true}
+   else if(/brighter|crisper/.test(s)&&CH.d){if(CH.mods.has('dark')){CH.tweak.tone=(CH.tweak.tone??2600)*1.8;acts.push('Tone higher')}else{CH.mods.add('bright');CH.tweak.air=(CH.tweak.air??4)+3;acts.push('Air lift higher')}tw=true}
+   else if(dir&&CH.d){const cur=chatDevice(CH);for(const p of cur.params)if(s.includes(p.id)||s.includes(p.name.toLowerCase())){const inv=/faster/.test(s)&&p.unit==='Hz'?1/dir:/slower/.test(s)&&p.unit==='Hz'?1/dir:dir;CH.tweak[p.id]=clamp(p.default*inv,p.min,p.max);acts.push(`${p.name} start value ${fmt(p,CH.tweak[p.id])}`);tw=true}}
+   if(!tw){const found=MOD_ORDER.filter(k=>MODS[k].re.test(s)&&!CH.mods.has(k));for(const k of found)if(MODS[k].needs&&!CH.mods.has(MODS[k].needs)&&!found.includes(MODS[k].needs))found.splice(found.indexOf(k),1,null);
+    const add=found.filter(Boolean);if(!add.length&&!acts.length)return{t:CH.d?'I did not catch what to change. Try "add reverb", "more feedback", "darker", "remove the echo" or "call it Moon echo".':'I did not catch a sound word. I know: echo, tape, wobble, chorus, reverb, telephone, crunchy, warm, bright, fat, punchy, tremolo, sweep. Try "a warm tape echo with wobble".',acts};
+    add.forEach(k=>{CH.mods.add(k);acts.push((CH.d&&!fresh?'Added ':'Used ')+MODS[k].label)})}}}
+ if(!CH.mods.size){CH.d=null;return{t:'Nothing is left in the device. Describe a new one.',acts,clear:true}}
+ const raw=chatDevice(CH),r=normDevice(raw);if(r.errs.length)return{t:'I wrote a file but the checker refused it: '+r.errs[0],acts};
+ const isNew=!CH.d;CH.d=raw;acts.push('Checked the file: '+(r.warns.length?r.warns.length+' correction'+(r.warns.length>1?'s':''):'no corrections'));
+ return{t:isNew?`Built "${raw.name}" with ${raw.params.length} knob${raw.params.length===1?'':'s'}. Press Listen, turn the knobs, or tell me what to change.`:`Updated "${raw.name}". It now has ${raw.params.length} knob${raw.params.length===1?'':'s'}.`,acts,norm:r.d}}
+const CHH=makeDescHost(CH.S,'#chHost','chat');RIG_BUILD.chat=CHH.build;
+function chatSend(text){text=text.trim();if(!text)return;CH.msgs.push({r:'u',t:text});const r=chatReply(text);CH.msgs.push({r:'a',t:r.t,acts:r.acts});
+ if(r.norm){CH.S.dev=null;CHH.load(r.norm);$('#chFile').textContent=fmtDev(CH.d)}else if(r.clear){$('#chHost').innerHTML=chEmpty;$('#chFile').textContent='Nothing built yet.';Rig.setDevice('chat',null);CH.S.d=null;CH.S.dev=null}chatDraw()}
+const chEmpty='<div class="dev" style="align-items:center;justify-content:center;color:var(--mut)">The device appears here.</div>';
+function chatDraw(){const L=$('#chMsgs');L.innerHTML=CH.msgs.map(m=>m.r==='u'?`<div class="bub u">${esc(m.t)}</div>`:`<div class="bub a">${esc(m.t)}${m.acts&&m.acts.length?`<div class="acts">${m.acts.map(a=>`<span>✓ ${esc(a)}</span>`).join('')}</div>`:''}</div>`).join('');L.scrollTop=L.scrollHeight}
+function initChat(){$('#chHost').innerHTML=chEmpty;CH.msgs.push({r:'a',t:'What should the device do? Describe the sound in plain words.'});chatDraw();
+ const qs=['A warm tape echo with wobble','Add reverb','More feedback','Make it darker','A crunchy telephone voice','A wide chorus with a slow sweep','Call it Moon echo','Remove the echo','Make the theme purple'];
+ $('#chQ').innerHTML=qs.map(q=>`<button class="chip" type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('');$('#chQ').onclick=e=>{const b=e.target.closest('[data-q]');if(b)chatSend(b.dataset.q)};
+ $('#chForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chIn');chatSend(i.value);i.value=''});
+ $('#chToEd').onclick=()=>{if(!CH.d)return;DV.vals={};$('#dvTxt').value=fmtDev(CH.d);deviceFromText();$('#p2').scrollIntoView({behavior:'smooth'})}}
+
+/* =====================================================================
+   7. PICKS
+   ===================================================================== */
+const QS=[
+ {n:1,q:'Which stages first?',note:'Each stage is one or two tasks. Sharing as plain files (save, open) comes with every stage; the import card and signatures are stage 5.',o:[
+  ['A','In order: themes, devices, scripts, chat, sharing','Each stage builds on the checker of the one before. The safest path, and something usable after the first task.',1],
+  ['B','Devices first, themes later','Stage 2, then 3, then 1. The fun part first; themes are already half there in Settings.'],
+  ['C','Chat first','Stage 4 on top of a minimal stage 2. The most impressive demo, but built on the least tested base.'],
+  ['D','Themes and description devices only','Stop after stage 2 for now. No script language to maintain.']]},
+ {n:2,q:'How open should scripting be?',note:'The audio thread cannot be interrupted, so whatever runs there must be unable to hang.',o:[
+  ['A','No scripts: blocks only','Stage 2 is the ceiling. Nothing can go wrong; some sounds cannot be made.'],
+  ['B','The small safe language from prototype 3','Our own language: maths, if, fixed loops, delay memory. Cannot hang, cannot reach outside, cost known before it runs.',1],
+  ['C','B, written to look like Reaper JSFX','Same safety, familiar to people who know JSFX (@init, @slider, @sample, spl0). Their existing scripts would still need small changes.'],
+  ['D','Faust','A real DSP language with a large library, compiled in the app to WebAssembly. About 2 MB more to load and a language most users will not learn; good target for the chat.'],
+  ['E','Full JavaScript, for developers only','Anything is possible, including freezing the audio. Only behind a "developer mode" switch, never for shared files.']]},
+ {n:3,q:'Where does it live in the app?',note:'',o:[
+  ['A','A Workshop window, with doors from the browser and the chat','One place with three tabs (Themes, Devices, Scripts): file on the left, live result on the right, like this page. "New device…" in the device browser and "Open in Workshop" in the Assistant lead there.',1],
+  ['B','Inside the device browser only','"My devices" with an Edit button that opens the file beside the device. Themes stay in Settings. Less to build, nothing to discover.'],
+  ['C','The chat box only','No editor. You talk, the Assistant builds. The files exist but are hidden unless you export them.'],
+  ['D','Workshop as a separate page outside the app','Like this page, in the browser. Nothing added to the app; files move by hand.']]},
+ {n:4,q:'What answers in the chat box when you build by talking?',note:'Today the Assistant uses a model only when AudioLab runs inside claude.ai; in the desktop app it falls back to a short list of rules. A model costs money per request (a guess for one device: a few cents; not measured).',o:[
+  ['A','Rule helper built in, model when one is connected','Works offline for common words (prototype 4, grown to a few hundred words). If you connect a model, the same chat gets much smarter. Nothing to pay unless you choose to.',1],
+  ['B','Model only, with your own key','You paste an API key from a model provider into Settings; the desktop app keeps it in the system keychain. Best results, you pay the provider directly.'],
+  ['C','Model through an AudioLab service','No key to paste. Needs a server, accounts and a budget on your side. Only worth it once there are paying users.'],
+  ['D','No chat building','Stages 1 to 3 and 5 only.']]},
+ {n:5,q:'How free are themes?',note:'',o:[
+  ['A','Guarded, as in prototype 1','Any accent, tint, glass preset and layout, but colours are nudged until everything stays readable. A theme can never make the app unusable.',1],
+  ['B','Free colours for every part','Every surface and text colour can be set. More personal; ugly or unreadable themes become possible. A "reset look" shortcut would be needed.'],
+  ['C','B plus custom CSS for developers','Full control of the look for people who know CSS. Breaks whenever the app changes; never for shared files.']]},
+ {n:6,q:'How do people share?',note:'',o:[
+  ['A','Files only, with the import card','Send the file any way you like; dropping it on AudioLab shows the card. No server needed.',1],
+  ['B','A plus a gallery inside AudioLab later','A curated list (a public folder you approve entries for) shown in the Workshop with one-click add.'],
+  ['C','A, and files must be signed','Every shared file carries the author\'s signature and unsigned files are refused. Safer against tampering; a hurdle for casual sharing.']]},
+ {n:7,q:'What should a device file look like?',note:'Both hold the same things; only the writing differs. The chat can write either.',o:[
+  ['A','JSON, as in prototype 2','Strict and easy for the app, the chat and other tools to read and write. A little noisy to type by hand.',1],
+  ['B','A friendlier text form','Lines like "knob time 40..1200 = 330 ms log" and "in -> delay -> out", as in the script header. Nicer to type; one more parser to keep correct.'],
+  ['C','No text at all: a visual editor','Boxes and cables, like the cable system. The most work by far; could come later on top of A.']]},
+ {n:8,q:'Effects or instruments first?',note:'',o:[
+  ['A','Effects first, instruments in the next round','Effects need only sound in and out. Instruments also need notes, voices and envelopes; they reuse everything from the effect stage.',1],
+  ['B','Both from the start','Longer first stage, but you can build a synth on day one.']]},
+ {n:9,q:'The safety limiter after user devices',note:'',o:[
+  ['A','Always on, cannot be switched off','Costs almost nothing. A user device can never be louder than the limit or pass broken numbers on.',1],
+  ['B','On by default, with a switch in Settings','For people who want the raw output of their own script. Shared and chat-built devices would still be guarded.']]}
+];
+const PK={};
+function pkLine(){return'EX1 picks: '+QS.map(q=>q.n+(PK[q.n]||'?')).join(' ')}
+function pkDraw(){for(const b of $$('.opt'))b.setAttribute('aria-checked',String(PK[b.dataset.q]===b.dataset.k));$('#pkLine').textContent=pkLine();try{localStorage.setItem('ex1-picks',JSON.stringify(PK))}catch(e){}}
+function initPicks(){try{Object.assign(PK,JSON.parse(localStorage.getItem('ex1-picks')||'{}'))}catch(e){}
+ $('#qs').innerHTML=QS.map(q=>`<div class="qq"><h3>${q.n}. ${esc(q.q)}</h3>${q.note?`<p class="sm mut">${esc(q.note)}</p>`:''}<div class="opts" role="radiogroup" aria-label="${esc(q.q)}">${q.o.map(([k,t,d,star])=>`<button type="button" class="opt" role="radio" aria-checked="false" data-q="${q.n}" data-k="${k}"><span class="k">${q.n}${k}${star?' <span class="star" title="Recommended">★</span>':''}</span><span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`).join('')}</div></div>`).join('');
+ $('#qs').onclick=e=>{const b=e.target.closest('.opt');if(!b)return;PK[b.dataset.q]=PK[b.dataset.q]===b.dataset.k?undefined:b.dataset.k;pkDraw()};
+ $('#pkStar').onclick=()=>{for(const q of QS)PK[q.n]=q.o.find(o=>o[3])[0];pkDraw()};
+ $('#pkCopy').onclick=async()=>{const b=$('#pkCopy'),line=pkLine();try{await navigator.clipboard.writeText(line);b.textContent='Copied'}catch(e){const r=document.createRange();r.selectNodeContents($('#pkLine'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press copy'}setTimeout(()=>b.textContent='Copy',1800)};pkDraw()}
+
+window.EXLAB={THEME_EX,DEV_EX,SC_EX,normTheme,normDevice,compileScript,compileExpr,chatReply,chatDevice,preflight,fmtDev,stripPriv,Rig,SC,CH,DV,QS};
+initTheme();initRigs();initDevice();initScript();initChat();initPicks();requestAnimationFrame(displayLoop);
+</script>

@@ -1,0 +1,21 @@
+name Bit crusher
+param bits 2..16 = 6
+param hold 1..40 = 8 x
+param mix 0..100 = 100 %
+
+init:
+  n = 0; h0 = 0; h1 = 0;
+
+block:
+  steps = pow(2, floor(bits) - 1);
+  m = mix / 100;
+
+sample:
+  n = n + 1;
+  if (n >= floor(hold)) {        // keep one sample, repeat it
+    n = 0;
+    h0 = floor(in0 * steps + 0.5) / steps;
+    h1 = floor(in1 * steps + 0.5) / steps;
+  }
+  out0 = blend(in0, h0, m);
+  out1 = blend(in1, h1, m);

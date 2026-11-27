@@ -1,0 +1,20 @@
+name Soft clip and tone
+param drive 0..30 = 12 dB
+param tone 200..12000 = 4000 Hz log
+param mix 0..100 = 100 %
+
+init:
+  lp0 = 0; lp1 = 0;
+
+block:                 // runs once per block of 128 samples
+  g = db(drive);
+  k = 1 - exp(-2 * pi * tone / sr);
+  m = mix / 100;
+
+sample:                // runs for every sample
+  a = tanh(in0 * g) / max(1, g * 0.35);
+  b = tanh(in1 * g) / max(1, g * 0.35);
+  lp0 = lp0 + k * (a - lp0);
+  lp1 = lp1 + k * (b - lp1);
+  out0 = in0 + m * (lp0 - in0);
+  out1 = in1 + m * (lp1 - in1);

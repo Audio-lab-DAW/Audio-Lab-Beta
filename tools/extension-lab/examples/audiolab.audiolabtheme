@@ -1,0 +1,44 @@
+{
+  "format": "audiolab.theme",
+  "formatVersion": 1,
+  "id": "audiolab.default",
+  "name": "AudioLab",
+  "author": "AudioLab",
+  "mode": "dark",
+  "colors": {
+    "accent": "#3ecf8e",
+    "second": "#4c8dff",
+    "tracks": [
+      "#4c8dff",
+      "#3ecf8e",
+      "#f5c84c",
+      "#ff6b6b"
+    ]
+  },
+  "background": {
+    "brightness": 40,
+    "tintHue": 215,
+    "tintAmount": 25
+  },
+  "glass": {
+    "level": "engine",
+    "blur": "light",
+    "transparency": 50,
+    "edge": 60
+  },
+  "clips": {
+    "opacity": 36,
+    "grid": 50
+  },
+  "layout": {
+    "devicePanel": "tall",
+    "mixer": "right",
+    "trackHeight": "normal",
+    "show": {
+      "sections": true,
+      "visualizer": true,
+      "assistant": true,
+      "meters": true
+    }
+  }
+}

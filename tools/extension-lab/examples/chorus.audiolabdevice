@@ -1,0 +1,38 @@
+{
+  "format": "audiolab.device",
+  "formatVersion": 1,
+  "id": "user.wobble-chorus",
+  "name": "Wobble chorus",
+  "kind": "effect",
+  "author": "you",
+  "version": "1.0.0",
+  "params": [
+    {"id": "speed", "name": "Speed", "min": 0.05, "max": 6, "default": 0.7, "unit": "Hz", "curve": "log"},
+    {"id": "depth", "name": "Depth", "min": 0, "max": 100, "default": 55, "unit": "%"},
+    {"id": "mix", "name": "Mix", "min": 0, "max": 100, "default": 50, "unit": "%"}
+  ],
+  "blocks": [
+    {"id": "dl", "type": "delay", "time": 0.014},
+    {"id": "dr", "type": "delay", "time": 0.019},
+    {"id": "pl", "type": "pan", "pan": -0.8},
+    {"id": "pr", "type": "pan", "pan": 0.8},
+    {"id": "l1", "type": "lfo", "rate": "$speed", "depth": "$depth * 0.00006"},
+    {"id": "l2", "type": "lfo", "rate": "$speed * 1.31", "depth": "$depth * 0.00006"},
+    {"id": "wet", "type": "gain", "gain": "$mix / 100"}
+  ],
+  "wires": [
+    ["in", "dl"],
+    ["in", "dr"],
+    ["dl", "pl"],
+    ["dr", "pr"],
+    ["pl", "wet"],
+    ["pr", "wet"],
+    ["wet", "out"],
+    ["in", "out"],
+    ["l1", "dl.time"],
+    ["l2", "dr.time"]
+  ],
+  "display": {"type": "scope"},
+  "layout": {"style": "dock", "dock": ["speed", "depth", "mix"]},
+  "presets": {}
+}

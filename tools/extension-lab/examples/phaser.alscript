@@ -1,0 +1,27 @@
+name Six-stage phaser (a loop)
+param rate 0.05..6 = 0.4 Hz log
+param depth 0..100 = 80 %
+param feedback 0..90 = 50 %
+
+init:
+  ph = 0; fbk = 0;
+  loop (6) { mem[i] = 0; i = i + 1; }
+
+block:
+  ph = ph + 2 * pi * rate * 128 / sr;
+  if (ph > 2 * pi) { ph = ph - 2 * pi; }
+  f = 900 + 700 * depth / 100 * sin(ph);
+  c = (tan(pi * f / sr) - 1) / (tan(pi * f / sr) + 1);
+
+sample:
+  x = (in0 + in1) * 0.5 + fbk * feedback / 100;
+  i = 0;
+  loop (6) {                     // six all-pass filters in a row
+    y = c * x + mem[i];
+    mem[i] = x - c * y;
+    x = y;
+    i = i + 1;
+  }
+  fbk = x;
+  out0 = in0 * 0.6 + x * 0.6;
+  out1 = in1 * 0.6 + x * 0.6;
