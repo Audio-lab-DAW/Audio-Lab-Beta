@@ -2146,6 +2146,21 @@ body.fxmin #st5Strip button{background:rgb(var(--gtr2))!important}
 #st6Spot.on{animation:st6spot 2s ease-out forwards}
 @keyframes st6spot{0%{opacity:1;box-shadow:0 0 0 4px rgba(255,181,71,.35),0 0 22px rgba(255,181,71,.55)}60%{opacity:1;box-shadow:0 0 0 2px rgba(255,181,71,.2),0 0 12px rgba(255,181,71,.3)}100%{opacity:0;box-shadow:0 0 0 0 rgba(255,181,71,0)}}
 @media (prefers-reduced-motion:reduce){#st6Spot.on{animation:none;opacity:1}}
+/* task OV1 (lane F, overlays, picks R2 D3 T3 N1 X1 K1): shared overlay tokens and timing. Sizes: --ov-row list row, --ov-r menus and
+   popovers (R2, D3), --ov-r-tip the callout (T3), --ov-r-card notifications (N1), --ov-r-pal the palette (K1), --ov-r-item a row.
+   Colours: --ov-hi the focused row (R2: today's blue fill), --ov-tint a soft tint (drop targets, palette rows), --ov-ln the hairline,
+   --ov-mut quiet text, --ov-amb amber (LOOK's unit colour: T3 leader, Advanced). Type: --ov-lab mono capitals with --ov-labsp, --ov-key.
+   Motion: --ov-in 90 ms, --ov-out 60 ms, --ov-sheet 140 ms, --ov-tip 80 ms, --ov-card 140 ms, all multiplied by --ov-mo (0 = none). */
+:root{--ov-row:26px;--ov-r:10px;--ov-r-item:6px;--ov-r-tip:8px;--ov-r-card:9px;--ov-r-pal:12px;--ov-pad:4px;
+  --ov-hi:var(--blf,#4c8dff);--ov-tint:rgba(var(--bl3,76,141,255),.17);--ov-ln:rgba(255,255,255,.09);--ov-mut:#8b8b97;--ov-amb:var(--unit,#ffb547);
+  --ov-lab:500 9.5px/1.2 "JetBrains Mono",ui-monospace,Menlo,monospace;--ov-labsp:.12em;--ov-key:400 11px "JetBrains Mono",ui-monospace,Menlo,monospace;
+  --ov-mo:1;--ov-in:90ms;--ov-out:60ms;--ov-sheet:140ms;--ov-tip:80ms;--ov-card:140ms;--ov-ease:cubic-bezier(0,0,0,1)}
+body.lkm1{--ov-mo:0}
+@media (prefers-reduced-motion:reduce){:root,body{--ov-mo:0}}
+@keyframes ovIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@keyframes ovFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:no-preference){body:not(.lite):not(.fxstill):not(.lkm1) #ctxm:not([hidden]):not(.dropup){animation:ovIn calc(var(--ov-mo)*var(--ov-in)) var(--ov-ease)}}
+#ctxm[hidden].ovout{display:flex;opacity:0;pointer-events:none;transition:opacity calc(var(--ov-mo)*var(--ov-out)) linear}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6425,7 +6440,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.255',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.256',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -20972,7 +20987,7 @@ const GLFSEL=[['.fwin','window'],['.abxw','window'],['.spov','window'],['.pinw>.
 const GLFDOCK=['hglass','tr','fxglass','fxband'];
 function glfCands(n){if(GLF.cand&&n-GLF.candT<400)return GLF.cand;GLF.candT=n;const L=[],seen=new Set();for(const[s,k] of GLFSEL)for(const el of document.querySelectorAll(s))if(!seen.has(el)){seen.add(el);L.push([el,k])}return GLF.cand=L}
 /* shown at all? hidden attributes first (no layout needed), then the box */
-function glfShown(el){if(!el.isConnected)return false;for(let t=el;t&&t!==document.body;t=t.parentElement)if(t.hidden)return false;return el.getClientRects().length>0}
+function glfShown(el){if(!el.isConnected)return false;for(let t=el;t&&t!==document.body;t=t.parentElement)if(t.hidden&&!(t===el&&t.classList.contains('ovout')))return false;return el.getClientRects().length>0}
 /* the element's place in the page's stacking order: the z-index of its outermost ancestor that has one, and the child of <body> it sits in */
 function glfInfo(el,n){let c=el._glfI;if(c&&n-c.t<250)return c;let z=0,top=el;for(let t=el;t&&t!==document.body;t=t.parentElement){top=t;const s=getComputedStyle(t).zIndex;if(s!=='auto')z=parseInt(s)||0}
   const cs=getComputedStyle(el),tc=el.classList.contains('spov')&&el.querySelector('.spgl')||el,bs=tc===el?cs:getComputedStyle(tc),bg=gleCol(bs.backgroundColor||'transparent'),img=bs.backgroundImage&&bs.backgroundImage!=='none';
@@ -22376,6 +22391,25 @@ function dsWaveDraw(g,c,G,w,col){const V0=srcView(c);if(!V0)return false;const D
     dsBandCols(g,c,V0.full,D.ch[0],G.x,G.by+1,G.w,hh,ga,w);dsBandCols(g,c,V0.full,D.ch[1],G.x,G.by+1+hh,G.w,hh,ga,w)}
   else{g.fillRect(G.x,Math.round((G.by+G.bh/2)*d)/d,G.w,1/d);dsBandCols(g,c,V0.full,D.mono,G.x,G.by+2,G.w,G.bh-4,ga,w)}
   return true}
+/* task OV1 (lane F, overlays): the overlay numbers for JS, as LOOK entries (lkT().ov), the same as the --ov-* tokens.
+   ms: in/out (menus, dropdowns, popovers), sheet, tip (tag fade), card (notification in), sub (submenu hover), typeahead (menu
+   type-ahead buffer), tipDelay and tipWarm (tag after 500 ms, then at once for 300 ms), drain (notification time, paused on hover),
+   log (a log line fades), cards (most notifications on screen). ovMs(k): the time, 0 for the transitions when motion is off. */
+function ovLook(){const L=lkT();if(!L.ov)L.ov={row:26,rad:10,radItem:6,radTip:8,radCard:9,radPal:12,pad:4,
+  ease:'cubic-bezier(0,0,0,1)',lab:'500 9.5px "JetBrains Mono",ui-monospace,Menlo,monospace',labSp:'.12em',
+  ms:{in:90,out:60,sheet:140,tip:80,card:140,sub:120,typeahead:600,tipDelay:500,tipWarm:300,drain:6000,log:8000},cards:3};return L.ov}
+let OVMQ=null;
+function ovStill(){try{if(!OVMQ)OVMQ=matchMedia('(prefers-reduced-motion: reduce)');if(OVMQ.matches)return true}catch(e){}return!!(document.body&&document.body.classList.contains('lkm1'))}
+function ovMs(k){const v=ovLook().ms[k];if(v==null)return 0;return(k==='in'||k==='out'||k==='sheet'||k==='tip'||k==='card')&&ovStill()?0:v}
+ovLook();
+/* the menu's fade-out: the code sees it closed at once (hidden, inert); it stays drawn for 60 ms while it fades (class ovout).
+   Focus leaves it at once, as when it was hidden before. Not for the three-column menus (their layout changes on close), not in
+   Light mode (it has no animations) and not when motion is off. */
+{let tm=0;const end=()=>{clearTimeout(tm);tm=0;ctxm.classList.remove('ovout');ctxm.inert=false};
+ new MutationObserver(rs=>{if(!ctxm.hidden){if(ctxm.classList.contains('ovout')||tm)end();return}
+   if(ctxm.classList.contains('ovout'))return;let was=false,cols=false;for(const r of rs){if(r.attributeName==='hidden'&&r.oldValue===null)was=true;if(r.attributeName==='class'&&/\bmcols\b/.test(r.oldValue||''))cols=true}
+   if(!was||cols||ovStill()||document.body.classList.contains('lite')||document.body.classList.contains('fxstill')||!ctxm.childElementCount)return;{const a=document.activeElement;if(a&&ctxm.contains(a))a.blur()}ctxm.inert=true;ctxm.classList.add('ovout');tm=setTimeout(end,ovMs('out')+30)})
+  .observe(ctxm,{attributes:true,attributeFilter:['hidden','class'],attributeOldValue:true})}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

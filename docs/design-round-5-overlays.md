@@ -289,7 +289,7 @@ All six share one visual grammar:
 
 | Task | What | Needs |
 |---|---|---|
-| **OV1** | Shared overlay tokens and timing. Tokens: `--ov-*` (row height 26, radius 10, tint, label style), motion tokens (90 ms in, 60 ms out, 140 ms sheet), and the reduced-motion rule. No visual change beyond the menu fade. | glass engine layers (GS2) unchanged |
+| **OV1** ✅ done v0.256 | Shared overlay tokens and timing. Tokens: `--ov-*` (row height 26, radius 10, tint, label style), motion tokens (90 ms in, 60 ms out, 140 ms sheet), and the reduced-motion rule. No visual change beyond the menu fade. | glass engine layers (GS2) unchanged |
 | **OV2** | The `openMenu` rewrite to R1. Group heads (`{g:'Edit'}`), one-level submenus (`kids`), a foot help line, the APG keyboard (arrows, Home/End, type-ahead, →/←, Shift+F10 and the Menu key, Esc returning focus), `aria-haspopup` and `aria-expanded`. Then regroup the long menus: track, clip, tab, logo and mixer. The JS open call must stay at or below today's 6.9 ms for the track menu. | OV1 |
 | **OV3** | The K12 Advanced group in every right-click menu that sits on a control: "Hide the X button" and "Customise the X…", plus the first-time explanation. | OV2, extensions XT-DL steps (rules file) |
 | **OV4** | askChoice, askText and the stem, Export, Bounce and Audio to MIDI dialogs become D1 sheets. Includes the Tab trap, focus return, key hints, read-outs, and "Keep working" sending a job to N1. | OV1, MD1 (orbit loader) |
