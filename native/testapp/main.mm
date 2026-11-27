@@ -184,11 +184,11 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     _patBtn = [self button:@"Play test pattern" action:@selector(togglePattern:) frame:NSMakeRect(254, 208, 150, 30)];
     [self button:@"Show report file" action:@selector(showReport:) frame:NSMakeRect(W - 300, 208, 140, 30)];
     [self button:@"Copy report" action:@selector(copyReport:) frame:NSMakeRect(W - 156, 208, 140, 30)];
-    [self label:@"Keys A W S E D F T G Y H U J K play notes (C to C). Sound is at half level." frame:NSMakeRect(414, 213, W - 730, 20)];
-    _cpu = [self label:@"" frame:NSMakeRect(16, 182, W - 32, 20)];
+    [self label:@"Keys A W S E D F T G Y H U J K play notes, C to C (click this window first). Sound comes out at half level." frame:NSMakeRect(16, 184, W - 32, 18)];
+    _cpu = [self label:@"" frame:NSMakeRect(16, 162, W - 32, 18)];
     _cpu.font = [NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];
 
-    NSScrollView* lv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 16, W - 32, 160)]; lv.hasVerticalScroller = YES; lv.borderType = NSBezelBorder;
+    NSScrollView* lv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 16, W - 32, 138)]; lv.hasVerticalScroller = YES; lv.borderType = NSBezelBorder;
     _log = [[NSTextView alloc] initWithFrame:lv.bounds]; _log.editable = NO; _log.autoresizingMask = NSViewWidthSizable; lv.documentView = _log; [_win.contentView addSubview:lv];
     [_win makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
@@ -344,7 +344,11 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     bool ok = G.plug->openEditor((__bridge void*)host, w, h, [pw](int nw, int nh) { if (nw > 0 && nh > 0) [pw setContentSize:NSMakeSize(nw, nh)]; }, err);
     if (!ok) { [self say:[NSString stringWithFormat:@"[window] %s: no window (%s)", _loaded.c_str(), err.c_str()]]; _plugWin = nil; return; }
     if (w > 0 && h > 0) [_plugWin setContentSize:NSMakeSize(w, h)];
-    NSRect mf = _win.frame; [_plugWin setFrameTopLeftPoint:NSMakePoint(NSMaxX(mf) - 420, NSMaxY(mf) - 60)];
+    // next to the main window if there is room, otherwise wherever it fits on the screen
+    NSRect mf = _win.frame, vis = (_win.screen ?: NSScreen.mainScreen).visibleFrame, pf = _plugWin.frame;
+    CGFloat x = NSMaxX(mf) + 12; if (x + pf.size.width > NSMaxX(vis)) x = NSMaxX(vis) - pf.size.width; if (x < NSMinX(vis)) x = NSMinX(vis);
+    CGFloat top = NSMaxY(mf); if (top - pf.size.height < NSMinY(vis)) top = NSMinY(vis) + pf.size.height; if (top > NSMaxY(vis)) top = NSMaxY(vis);
+    [_plugWin setFrameTopLeftPoint:NSMakePoint(x, top)];
     [_plugWin makeKeyAndOrderFront:nil];
     [self say:[NSString stringWithFormat:@"[window] %s: its own window is open, %d x %d", _loaded.c_str(), w, h]];
 }

@@ -75,7 +75,8 @@ jobs:
         run: |
           for t in adelay mda-vst3 again note-expression-synth; do cmake --build build --target $t -j 4 > "out/build-$t.txt" 2>&1 && echo "built $t" || { echo "could not build $t"; tail -5 "out/build-$t.txt"; }; done
           mkdir -p "$RUNNER_TEMP/sdk-vst3"
-          find build -name '*.vst3' -maxdepth 6 -type d -print -exec cp -R {} "$RUNNER_TEMP/sdk-vst3/" \;
+          # only the bundles that were really built (cmake makes an empty folder for every example)
+          find build -name '*.vst3' -maxdepth 6 -type d | while read -r b; do if [ -d "$b/Contents/MacOS" ] && [ -n "$(ls -A "$b/Contents/MacOS")" ]; then echo "$b"; cp -R "$b" "$RUNNER_TEMP/sdk-vst3/"; fi; done
           ls "$RUNNER_TEMP/sdk-vst3" || true
 
       - name: Download Surge XT (GPL 3, from its official GitHub releases)
