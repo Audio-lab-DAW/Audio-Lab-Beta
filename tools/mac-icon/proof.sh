@@ -46,9 +46,13 @@ for style in Default:none:light RegularDark:RegularDark:dark TintedDark:TintedDa
   killall -u "$USER" cfprefsd iconservicesagent 2>/dev/null; sleep 2
   n=$((n+1))
   mk "$W/new-$name.app" 1 "com.audiolab.standin.new$n"; mk "$W/old-$name.app" 0 "com.audiolab.standin.old$n"
+  # the first answer of the icon service can be a quick stand-in; ask, wait, ask again and keep the second picture
+  "$OUT/render-icon" "$W/new-$name.app" "$OUT/system-$name-with-assets-car.png" 512 >/dev/null; "$OUT/render-icon" "$W/old-$name.app" "$OUT/system-$name-icns-only.png" 512 >/dev/null
+  [ -n "$APP" ] && [ -d "$APP" ] && { cp -R "$APP" "$W/built-$name.app"; "$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512 >/dev/null; }
+  sleep 4
   "$OUT/render-icon" "$W/new-$name.app" "$OUT/system-$name-with-assets-car.png" 512
   "$OUT/render-icon" "$W/old-$name.app" "$OUT/system-$name-icns-only.png" 512
-  if [ -n "$APP" ] && [ -d "$APP" ]; then cp -R "$APP" "$W/built-$name.app"; "$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512; rm -rf "$W/built-$name.app"; fi
+  if [ -n "$APP" ] && [ -d "$APP" ]; then "$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512; rm -rf "$W/built-$name.app"; fi
 done
 defaults delete -g AppleIconAppearanceTheme 2>/dev/null; defaults delete -g AppleInterfaceStyle 2>/dev/null
 rm -rf "$W" "$OUT/render-icon"

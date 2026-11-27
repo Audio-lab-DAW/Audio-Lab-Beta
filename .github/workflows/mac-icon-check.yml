@@ -23,8 +23,21 @@ jobs:
         run: bash scripts/build-mac-icon.sh
       - name: Draw the icon in every style
         run: bash tools/mac-icon/proof.sh "icon-proof/${{ matrix.os }}"
-      - name: Variants experiment
-        run: bash tools/mac-icon/variants.sh "icon-proof/${{ matrix.os }}/variants"
+      - name: Build the app without publishing and photograph the Dock (macOS 26 only)
+        if: matrix.os == 'macos-26'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          O="$PWD/icon-proof/${{ matrix.os }}"
+          mkdir -p /tmp/old && gh release download --pattern '*.dmg' -D /tmp/old && ls -la /tmp/old
+          hdiutil attach -nobrowse -readonly -mountpoint /tmp/oldmnt /tmp/old/*.dmg >/dev/null && cp -R "/tmp/oldmnt/AudioLab Pro.app" /tmp/old/ && hdiutil detach /tmp/oldmnt >/dev/null
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "/tmp/old/AudioLab Pro.app/Contents/Info.plist"
+          bash tools/mac-icon/dock-shot.sh "/tmp/old/AudioLab Pro.app" "$O" released || true
+          cd desktop && npm ci && mkdir -p bin && swiftc -O -target arm64-apple-macos11 native/alvol.swift -o bin/alvol && codesign --force --sign - bin/alvol
+          npm run sync && npx electron-builder --mac --arm64 --dir --publish never
+          cd .. && bash tools/mac-icon/dock-shot.sh "desktop/dist/mac-arm64/AudioLab Pro.app" "$O" new || true
+          bash tools/mac-icon/proof.sh "$O/built" "desktop/dist/mac-arm64/AudioLab Pro.app" || true
       - uses: actions/upload-artifact@v4
         with:
           name: mac-icon-proof-${{ matrix.os }}
