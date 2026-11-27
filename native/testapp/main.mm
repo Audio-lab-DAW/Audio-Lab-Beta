@@ -360,7 +360,11 @@ static void watchCb(void*, const char* what, uint32_t) {
     [self say:[NSString stringWithFormat:@"[scan] done: %d bundle(s) in %s; %d could be read, %d could not; %d plug-in(s). The app itself was never at risk: every bundle was opened in a separate process.", n, fl.c_str(), ok, n - ok, plugs]];
     _status.stringValue = [NSString stringWithFormat:@"%d plug-in(s) found", plugs];
     _scanBtn.enabled = YES;
-    if (_selftest) [self selftestStart];
+    if (_selftest) {     // leave the main window alone for two seconds so the build machine can take a picture of it
+        [self writeMarker:@"scanned"];
+        __weak App* me = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me selftestStart]; });
+    }
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)t { return (NSInteger)_rows.size(); }
