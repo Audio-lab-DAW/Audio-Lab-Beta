@@ -181,6 +181,17 @@ The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-7.txt` (the
 
 **The user's decision (20:20 Brussels): skip test app 0.6 for testing.** NL6 finishes and publishes as planned, but the user only tests the next version: task NL7 builds test app 0.7 on top of NL6 with the three findings above (the warning past 0 dBFS with a red meter, the worst block tied to its cause, plug-in strings cleaned) plus anything from NL6's list not finished, and that is the version the user is given.
 
+### The user's tenth report (28 November, 00:22 Brussels): test app 0.8 works
+
+Report: `tools/native-lab/reports/2026-11-28-test-app-0.8-report-10.txt`. The user: "the test app works well."
+
+- **Six plug-ins sound, none past full scale:** Phase Plant (peak -0.2 dBFS), Pigments (-12.4), Ozone 11 (-0.1), Abyss (-7.0), HALion 7 (-4.5), kHs Phase Distortion (-2.1); the safety limiter engaged 0 times; process() never failed; no notes refused.
+- **The output stayed where it was put (NL8 fix 1 works):** the Gryphon was off at the start, appeared during the session (32-bit integer on the wire, 60 formats), was chosen in the menu ("why: chosen in the Output menu with the mouse"), exclusive use taken; when the system's default output changed twice, the app stayed on the Gryphon both times. Device latency 13 + 13 frames.
+- **Silence flags counted per block (NL8 fix 2 works):** HALion 7: 1,375 of 5,024 blocks on the main bus (162,143 summed over its 33 buses, shown separately).
+- **Plug-in text (NL8 fix 3):** no mojibake anywhere in the report; Ozone writes its own decimal comma ("-2,20"), which is the plug-in's text, not an encoding fault. The degree sign of kHs Phase Distortion's Spread was not moved this time.
+- **New finding for NB (not a new test app):** the 200 ms parameter poll is cheap for most plug-ins (0.02 to 0.47 ms) but expensive for Ozone 11: 32.2 ms on average and a worst 509 ms per poll of its 687 values, on the main thread. The worst audio block in the report (5.9 ms, 50.7 % of the block) came during Ozone gestures. The real app must not poll every parameter of every open window: poll only parameters without performEdit history, stop polling a plug-in whose poll takes over 2 ms, and never on a timer while the user drags.
+- Abyss: worst block 25.7 % with nothing happening (its own work). Pigments reports 44 samples latency (1.00 ms), to be compensated.
+
 ## Test app 0.8 (task NL8, 27 November 2026): built on 0.7 with the three things from report 9
 
 Code: `native/testapp/main.mm` (the output), `native/host/vst3_format.cpp`, `plugin_api.h`, `diag.cpp` (silence flags), `native/host/live_tools.h` (symbols), `native/host/cli.cpp` (`alvst3 nl8`), `native/testapp/strictsynth/` (AL Strict Synth 0.8), `tools/native-lab/nl7/live_tools_test.cpp`, `.github/workflows/native-lab.yml`. Everything else as in 0.7.
