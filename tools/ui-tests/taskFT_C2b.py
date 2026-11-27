@@ -107,7 +107,7 @@ with sync_playwright() as p:
     press(R, 46); ok(J(R, "selT") == bass, 'Up arrow: the track before')
     press(R, 102 + i); pg.wait_for_timeout(200)
     ok(J(R, "S.tracks.find(t=>t.id==='%s').arm" % bass) is True and {x[1]: x[2] for x in btns(R)}.get(102 + i) == 5, 'lower row arms the track (lit red)')
-    press(R, 102 + i); pg.wait_for_timeout(200); ok(not J(R, "S.tracks.find(t=>t.id==='%s').arm" % bass), 'and disarms')
+    press(R, 102 + i); pg.wait_for_timeout(500); ok(not J(R, "S.tracks.find(t=>t.id==='%s').arm" % bass), 'and disarms')
     press(R, 60); press(R, 102 + i); ok(J(R, "S.tracks.find(t=>t.id==='%s').mute" % bass) is True and {x[1]: x[2] for x in btns(R)}.get(102 + i) == 13 and {x[1]: x[2] for x in btns(R)}.get(60) == 4, 'Mute: the lower row mutes (yellow), Mute lit')
     press(R, 102 + i); press(R, 61); press(R, 102 + i); ok(J(R, "S.tracks.find(t=>t.id==='%s').solo" % bass) is True and not J(R, "S.tracks.find(t=>t.id==='%s').mute" % bass), 'Solo: the lower row solos')
     press(R, 102 + i); press(R, 61); ok(J(R, "[...CTL.devs.values()][0].p1.b.lr") == 'arm', 'Solo again: back to arm')

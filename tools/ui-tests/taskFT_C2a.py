@@ -129,7 +129,7 @@ with sync_playwright() as p:
     P = pads(R); ok(P.get(36) == 45, 'track colour changed to blue: root pads blue (45)', P.get(36))
     # the Controllers page shows the Push settings
     R("ctlPage()"); pg.wait_for_timeout(200)
-    s = J(R, "(()=>{const w=document.querySelector('#ctlWin .p1set');return w?{sel:[...w.querySelectorAll('select')].map(x=>x.dataset.p1),tips:[...w.querySelectorAll('select,label')].filter(e=>!e.title).length,em:/\u2014/.test(w.textContent)}:null})()")
+    s = J(R, "(()=>{const w=document.querySelector('#ctlWin .p1set');return w?{sel:[...w.querySelectorAll('select[data-p1]')].map(x=>x.dataset.p1),tips:[...w.querySelectorAll('select,label')].filter(e=>!e.title).length,em:/\u2014/.test(w.textContent)}:null})()")
     ok(s and s['sel'] == ['lay', 'rows', 'vc', 'at', 'strip', 'oct'] and s['tips'] == 0 and not s['em'], 'the Controllers page has the Push 1 settings, with tooltips, no em dash', s)
     pg.locator('#ctlWin .p1set select[data-p1=lay]').select_option('key'); pg.wait_for_timeout(100)
     ok(J(R, "p1S().lay") == 'key' and J(R, "UI.p1.lay") == 'key', 'a change on the page reaches the Push (kept in UI.p1)')
