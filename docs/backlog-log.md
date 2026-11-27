@@ -4210,3 +4210,31 @@ The kick and bass lab is complete and visible. Edit script `tools/feature-lab/ni
 
 ### Left
 NI-3: the analysis worker and the per-beat band cache (I1 frequency map, part 1).
+
+## 27 November 2026: task NB-R1 (native CI on every push; review RN5's first fix task)
+
+Why this part and not the next N stage: when this run started, another NB run had pushed two N3c commits a minute earlier and was still writing its docs (the two-runs-at-once problem logged under NB-N3b). N2c needs `index.html` and waits for the design chain. So this run took the review's first fix task, NB-R1, which touches different files (`native/tests/`, `.github/workflows/`, the bridge). `index.html` untouched; the app is unchanged.
+
+### Built
+- **`.github/workflows/native-ci.yml`**, on every push to main touching `native/**`, `desktop/native-engine.js`, `desktop/preload.js`, `tools/native-lab/**` (Linux only, so it starts at once), and by hand with a `mac` box for the Apple Silicon job. Jobs: `linux` (Release and ASan + UBSan builds of every target; selftest; ring stress; mixer 10 scenes; all 240 device cases against the web engine rendered fresh in headless Chromium, Release at 128 frames, sanitizers at 128 and 7), `tsan` (ring stress under ThreadSanitizer), `node` (syntax of every bridge file, bridge unit tests), `mac` (on demand).
+- **`alringstress`** (`native/tests/ring_stress.cpp`, a CMake target): writer and reader threads on the engine's ring with wandering block sizes and timing; exact mode: every non-silent sample is the next one sent unless the ring counted a drop or underrun; follow mode: no torn frames, all finite.
+- **Bridge unit tests** (`tools/native-lab/bridge-unit/`): `fake-alengine.js` speaks alengine's JSON lines and takes sound on a real socket; `bridge_unit.js` runs `desktop/native-engine.js` with a fake ipcMain, webContents and worklet port (platform set to macOS): 27 checks (see the running list).
+
+### Fixed
+- `native/bridge/engine-bridge.js`: an engine that never says ready was left running after start gave up; now it is killed, and the start timer is cleared on ready or spawn error.
+- `tools/native-lab/run_mix.py`: relative paths to the renderer or the output folder failed (it runs inside `ref/mix`). `native-engine.yml`'s macOS mixer step passed a relative path and would have failed on its first Mac run; fixed there too. Summary loops no longer fail on a missing file.
+
+### Proven
+- Here (Linux, GCC 13): ASan + UBSan selftest ok, mixer all identical, devices 240 of 240 at 128, 239 of 240 at 7 and at 4096 (the known shared-random pair); TSan ring stress clean.
+- GitHub (run 46016736940): all jobs green; devices 240 of 240 (Release), 240 of 240 (sanitizers, 128), 239 of 240 (sanitizers, 7); mixer identical in both builds; ring stress 0 wrong samples, 0 torn, no TSan report; bridge 27 of 27. (Run 46015744547 before it failed on the relative mixer path, which is how that fault was found.)
+
+### Left
+- The macOS compile of N2b and its cases A to D: `native-engine.yml` dispatched (run 46016748702), still queued for a Mac when this run ended; the next run reads it. Decision D9 (a self-hosted runner on the Mac mini, or paid runners) is still open and is the only way this becomes reliable.
+- Next fix tasks before N2c: NB-R2 (rate contract), NB-R3 (sound path off the main process), NB-R4 (engine hardening), NB-R5 (follower quality). N3d (sends, groups, returns) stays the next N3 part.
+- `desktop/native-engine.js` finds the bridge at `../native/bridge/engine-bridge`, which is not inside a packaged app: N2c must copy it into `desktop/` or the files list (noted, not changed: desktop packaging is N2c's).
+
+### Assumptions
+- Took NB-R1 instead of N3d because another NB run was active on N3 (its commits 1 minute old, no log entry yet); N3c's docs landed during this run.
+- CI on push runs Linux only; the Mac job is manual, as the hosted Mac queue gave no machine for hours (D9).
+- UBSan's shift-base check is left out for the vendored LLVM libc rather than patching vendored code.
+- Commits follow the repository's CLAUDE.md identity rule (as the task asks).
