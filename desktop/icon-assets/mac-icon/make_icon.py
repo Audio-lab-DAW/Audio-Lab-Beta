@@ -37,8 +37,10 @@ back = rgba[..., :3].astype(np.float64) * (rgba[..., 3:4] / 255.0) + blue * (1 -
 print('mark.png written; worst difference to the source when laid over the blue: %.2f of 255' % np.abs(back - p).max())
 fill = {'solid': 'srgb:%.5f,%.5f,%.5f,1.00000' % tuple(v / 255.0 for v in BLUE)}
 doc = {
-    'fill': fill,
+    # The fill is written ONLY as specializations: an entry without an appearance (the default) and the same value again for dark
+    # and tinted. With a plain 'fill' key beside them the dark entry is not used and macOS falls back to its black tile (seen on CI).
     'fill-specializations': [
+        {'value': fill},
         {'appearance': 'dark', 'value': fill},
         {'appearance': 'tinted', 'value': fill},
     ],
