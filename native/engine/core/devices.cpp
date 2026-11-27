@@ -1,4 +1,5 @@
 // The devices the engine core has so far (task NB-N3a). Each line: the app's device type, the ported processor.
+#include "dev_comp.h"
 #include "dev_crush.h"
 #include "dev_dynamics.h"
 #include "dev_eq.h"
@@ -23,5 +24,7 @@ void registerCoreDevices() {
     deviceRegistry()["tstop"] = mk<mod::Tps>();
     // task NB-N3e: the first device made of browser nodes (Chromium's BiquadFilterNode and GainNode)
     deviceRegistry()["eq"] = mk<eq::ProEQ>();
+    // task NB-N3f: Chromium's DynamicsCompressorNode
+    deviceRegistry()["comp"] = mk<comp::Comp>();
 }
 }  // namespace al

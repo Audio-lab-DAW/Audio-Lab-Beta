@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -70,6 +70,19 @@ EXTRA["eq"] = {
 _FRX = json.load(open(os.path.join(HERE, "ref", "eq_fractals.json")))["eqs"]
 for _i, _e in enumerate(_FRX):
     EXTRA["eq"]["frx%02d" % _i] = _e["p"]
+# task NB-N3f: the Compressor (Chromium's DynamicsCompressorNode): the three of Fractals (Kick & Bass, Drums, the
+# master), the ends of every range, values past the AudioParams' ranges (clamped by the browser), no compression
+EXTRA["comp"] = {
+    "frx-kickbass": {"threshold": -10, "ratio": 1.5, "attack": 30, "release": 100, "makeup": 0},
+    "frx-drums": {"threshold": -18, "ratio": 2, "attack": 25, "release": 120, "makeup": 1},
+    "frx-master": {"threshold": -12, "ratio": 1.5, "attack": 30, "release": 120, "makeup": 0},
+    "x-hard": {"threshold": -60, "ratio": 20, "attack": 1, "release": 20, "makeup": 24},
+    "x-slow": {"threshold": -30, "ratio": 4, "attack": 200, "release": 1000, "makeup": 6},
+    "x-fast-release": {"threshold": -24, "ratio": 8, "attack": 1, "release": 20, "makeup": 0.5},
+    "x-past-ranges": {"threshold": -130, "ratio": 35, "attack": 1500, "release": 4000, "makeup": 2},
+    "x-none": {"threshold": 0, "ratio": 1, "attack": 10, "release": 200, "makeup": 0},
+    "x-odd": {"threshold": -17.3, "ratio": 3.7, "attack": 7.7, "release": 333.3, "makeup": 3.3},
+}
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
@@ -78,6 +91,9 @@ CHAINS = {
     # task NB-N3e: the EQ between worklet devices, M/S into a limiter
     "chain-eq-drums": [("gate", "kick"), ("eq", "x-bells"), ("trans", "punch"), ("eq", "x-pass24"), ("limit", "loud")],
     "chain-eq-ms": [("eq", "x-ms"), ("imager", None), ("eq", "x-tilt"), ("limit", "trans")],
+    # task NB-N3f: the compressor between worklet devices and EQs, two compressors in a row
+    "chain-comp-bus": [("eq", "x-bells"), ("comp", "drums-drum-bus-glue"), ("limit", "loud")],
+    "chain-comp-crush": [("crush", "8bit"), ("comp", "x-hard"), ("chorus", None), ("comp", "frx-master")],
 }
 
 

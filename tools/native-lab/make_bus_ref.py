@@ -93,6 +93,19 @@ SCENES["eqbus"] = (512, 0.8, [("eq", None, EQ_SHELF), ("limit", "trans")],
                     T("ms", "mono_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_SIDE)]),
                     T("r", kind="return", vol=0.7, fx=[("eq", None, EQ_TILT)])])
 SCENES["eqbus128"] = (128,) + SCENES["eqbus"][1:]
+# task NB-N3f: the Compressor on the buses as Fractals uses it (a group, the master before its limiter), on a mono
+# source (the compressor's output always has two channels, so the panner after it sees stereo), on a return, and its
+# 6 ms delay compensated on the other tracks
+CP_DRUMS = {"threshold": -18, "ratio": 2, "attack": 25, "release": 120, "makeup": 1}
+CP_KB = {"threshold": -10, "ratio": 1.5, "attack": 30, "release": 100, "makeup": 0}
+CP_MASTER = {"threshold": -12, "ratio": 1.5, "attack": 30, "release": 120, "makeup": 0}
+CP_HARD = {"threshold": -40, "ratio": 12, "attack": 2, "release": 60, "makeup": 6}
+SCENES["compbus"] = (512, 0.8, [("comp", None, CP_MASTER), ("limit", "trans")],
+                     [T("g", kind="group", vol=0.9, pan=0.1, fx=[("comp", None, CP_DRUMS)]), T("a", "st_a", vol=0.7, pan=-0.3, grp="g"),
+                      T("m", "mono_a", vol=0.8, pan=0.4, fx=[("comp", None, CP_KB)], sends={"r": 0.4}),
+                      T("b", "st_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_BELLS)]),
+                      T("r", kind="return", vol=0.7, fx=[("comp", None, CP_HARD)])])
+SCENES["compbus128"] = (128,) + SCENES["compbus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),
