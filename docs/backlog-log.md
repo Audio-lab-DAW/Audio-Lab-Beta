@@ -4582,3 +4582,46 @@ Fired by the scheduler; the next NB item after NB-R2 was NB-R3 (review section 6
 - The feeder queue default is 250 ms: long enough for a slow socket moment, short enough that dropped sound stays bounded; the engine's own ring still decides latency.
 - Linux CI with the null device stands in for the Mac for this part, because the change is in the shell's processes, not in Core Audio.
 - The hold test uses a waiting block for the strict cases (the main process unavailable, which is what A8 is about) and counts the spinning case as strict only on 4 or more cores.
+
+
+## 27 November 2026, v0.249: task LK, the look tokens (lane A)
+
+Section 6 step 1 of `docs/design-languages-research.md` with the user's DR3 picks `(no direction) | G3 W1 L2 A1 M3 N3`: today's colours, buttons, icons and layout stay; the details apply everywhere. Edit script `tools/design-lab/lk/lk.py` (with `lk_block.js` and `lk_css.txt`; every anchor asserted), test `tools/ui-tests/taskLK.py` (32 checks, all pass), screenshots `tools/design-lab/lk/shots.py` (not committed; the script makes them again). Written on v0.245, rebased onto v0.248 by re-running the edit script on the fresh file.
+
+### What changed
+- **One object `LOOK`** (block "task LK" before `askChoice`) and CSS custom properties (block before `.dacv`). `LOOK` is declared with `var` and filled by the hoisted `lkT()`, so a drawer that runs at start-up finds it. The Settings look sliders that had the name are now **`LOOK_SL`**. INS (lane E) now reads LOOK through `INS.look()` (its constants are the fallback).
+- **G3 drafting grid in W1 hairlines** in the arrangement: every 4 bars, bar, beat and sixteenth by alpha only, each line one device pixel on a whole device pixel (crisp at 1x, 1.75x, 2x; checked by pixel reads), a faint quarter line across each lane (graph paper) at 40 px tracks and taller, hairline track separators and ruler lines. Grid brightness, "Thin ticks" and "Stronger lines every 4 bars" work as before. The **piano roll** gets the same three levels in hairlines and hairline octave lines. **Device displays** (Pro EQ, the EQ and the three effect displays using `gridF`, `gridFreq`): decades heavy, 2 and 5 mid, the rest fine, hairlines. **Mixer scales**: hairline ticks, equal-width digits.
+- **L2 amber units**: every control read-out (`paintCtl`, so every device knob and fader number) and the channel volume show the value in the normal colour and the unit in amber (`lkOut`; the text itself is unchanged, nothing is rewritten when it did not change); the clip gain label on audio clips draws its unit in amber (`lkVU`). Units keep their case (MS would read as megaseconds); `LOOK.unitCase` is there for MD1 to change.
+- **A1 yellow selection**: selected clip (yellow with a thin dark edge so it reads on yellow clips), range selection, selected notes and their velocity stems, the piano roll's box selection, the selected track header and the selected mixer strip use today's yellow `#f5c84c`. Blue stays for "on" buttons.
+- **N3 Dense**: new setting **Density** (Roomy / Today / Dense, default Dense): default track height 74 px (96 x 48/62), Today 96, Roomy 118; menu rows 24 / 28 / 34 px (never below 24). A project that set its own track height keeps it (its view stores the default it had as `thD`; a view from before LK counts as default only at exactly 96 px). Fractals' stored view has 96, so it opens Dense.
+- **M3 motion**: new setting **Motion** (Signal only / Signal and transitions / Ambient, default Ambient). Ambient drawings (the splash and About pictures; SC's empty states later) run only at Ambient, never in Light mode (they stand still on a finished picture), and still stop off screen, in the background freeze and with "reduce motion". Signal only also stops interface transitions and the two logos. `LOOK.ambientOK()` is the one test.
+- **Settings**: both as rows in the S4 table (id, label, page, block, scope, key, control, default, help, search words) with `ap:'appearance'`; they sit on the Layout page under "Density and motion" until lane B's Appearance page exists; `LK_HOOKS.appearanceRows()` gives them with page Appearance.
+- Fixed on the way: a new project's first instrument (Plant) could lack resonance, LFO and morph values and its cards threw every frame (pre-existing console error).
+- Tests of other lanes adjusted to the new rules: `taskSP1.py` (in Light mode the splash picture now stands still; the freeze check clears Light mode first), `taskIN_A.py` (`INS._src()` is LOOK now).
+
+### Token list (LOOK)
+`grid` G3, `lines` W1, `labels` L2, `accent` A1, `motion` ambient, `density` dense, `dense`; `gr` {phrase .30, bar .16, beat .08, six .04, row .028} (arrangement, times Grid brightness, the theme factor and kd for 1x/2x); `pr` {bar .24, beat .13, six .065, oct .16} (piano roll); `gMaj`/`gMid`/`gMin` (display grids); `lwGrid` .5, `lwLine` .5, `lwCurve` 1 and `hair(dpr)`; `ink`, `mut`, `lab`, `tick`, `tickHi`; `ui`, `mono`, `digits` tabular, `unitCase`, `labelCase`; `unit` and `meas` #ffb547; `sel` #f5c84c (`sel3`), `warn`, `over`, `ok`; `dens` {roomy, today, dense}, `th0` 96, `row0` 28, `rowMin` 24; `ambientOK()`. Helpers: `lkSel(a)`, `lkGrid(dpr)`, `lkPR()`, `lkVU(g,s,x,y)`, `lkOut(el,s)`, `lkTh()`. CSS: `--sel`, `--sel3`, `--meas`, `--unit`, `--lim-warn`, `--lim-over`, `--lk-hair`, `--lk-tick`, `--lk-dens`, `--lk-row`, `--lk-rowpad`, class `.lku`, body classes `lkm1` (Signal only) and `lkstill` (not Ambient).
+
+### What the next tasks read from LOOK
+- **DS (design round 2)**: the arrangement grid (DS-A1, AG2 and the arrangement-lines round decide the ranks; take the alphas from `LOOK.gr`, widths from `lkGrid().hp`), the piano roll from `LOOK.pr`, selection from `LOOK.sel`, transport read-outs with `lkOut` or `.lku`, row heights from `lkTh()` and `--lk-row`.
+- **MD1**: read-outs with units through `INS.fmt`/`INS.parts` drawn with `lkVU` or `.lku`; the caliper and measurements in `LOOK.meas`; `LOOK.unitCase` if units become small capitals.
+- **SC**: line weights from `LOOK.hair`/`lwLine`, amber from `LOOK.meas`, grids from `gMaj`/`gMid`/`gMin`; any moving drawing asks `LOOK.ambientOK()` (empty and waiting states only).
+- **DV**: device displays draw grids with `gMaj`/`gMid`/`gMin` in hairlines (`INS.graticule`, `INS.fAxis`, `INS.dbGrid` already do), selection in `LOOK.sel`, units in `LOOK.unit`.
+
+### Tested
+- `tools/ui-tests/taskLK.py`, 32 of 32 (at 2194x1139 at 1.75x with Fractals, and the hairline check at 1x and 2x): tokens and values, CSS tokens, the renamed sliders work, Dense 74 px, Roomy / Today / Dense 118 / 96 / 74, menu rows never below 24 px, own heights kept across project switches, Settings rows and search, `LK_HOOKS.appearanceRows`, the three motion levels and Light mode, amber units with unchanged text, yellow header, mixer strip and clip outline, single-device-pixel grid lines at 1x, 1.75x and 2x, no console errors.
+- After the rebase: `taskLK.py` 32/32, `taskIN_A.py` 37/37, `taskNI_4.py` 31/31, `taskFT_C3b.py` 51/51. Before it (v0.245): `taskSP1.py` 154/154, `taskST_S4.py` 33/33, `taskGS4.py` 42/42.
+- Screenshots of the arrangement (whole and zoomed in with a clip and a range selected), piano roll, mixer, the device panel with the Pro EQ and a new empty project, before and after, dark and Light, at the user's size, and the three densities; looked at and compared with the pick page's mix preview: hairline grid with the drafting levels and graph-paper quarter lines, yellow selection, amber units next to values, tighter tracks.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured on this file): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; the same as the newest entries.
+- Frame time (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, software renderer, one 4 s window each, run twice alternating; main-thread ms per frame):
+
+  | Scene | v0.245 run 1 | LK run 1 | v0.245 run 2 | LK run 2 |
+  |---|---|---|---|---|
+  | idle | 12.41 | 13.96 | 11.08 | 10.00 |
+  | scroll | 172.83 | 176.76 | 164.20 | 145.10 |
+  | play | 37.30 | 28.66 | 32.75 | 24.25 |
+
+  Within the run-to-run noise, not worse (Dense shows more tracks at once). Nothing new runs per frame while idle: the grid is drawn with the cached arrangement picture, the tokens are read per drawing.
+
+### Not done here
+- Transport read-outs with units (BPM, position) are MD1's; the ruler's beat and sixteenth ticks are DS-A1 / the arrangement-lines round; the splash script runs before the app's code, so its colours stay its own until SC.

@@ -2100,6 +2100,16 @@ body.gle #glassCv{z-index:1}
 #niMap .nimlg button{display:flex;align-items:center;gap:4px;min-height:20px;height:20px;padding:0 7px;border-radius:10px;font-size:var(--fs1);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);box-shadow:none}
 #niMap .nimlg button i{width:8px;height:8px;border-radius:2px;background:var(--c);flex:none}
 #niMap .nimlg button.on{background:rgba(255,255,255,.16);border-color:var(--c)}
+/* task LK: the look tokens, CSS side (the canvas side is the LOOK object). --sel: the one selection accent (A1), --meas and --unit: amber for units and measurements (L2),
+   --lk-hair: one device pixel (W1, set from the screen's pixel ratio), --lk-row and --lk-rowpad: list row height and padding from the Density setting (N3, never below 24 px) */
+:root{--sel:#f5c84c;--sel3:245,200,76;--meas:#ffb547;--unit:#ffb547;--lim-warn:#f5c84c;--lim-over:#ff6b6b;--lk-hair:1px;--lk-tick:rgba(255,255,255,.32);--lk-dens:.774;--lk-row:24px;--lk-rowpad:4px}
+.lku{color:var(--unit);font-size:.88em;font-weight:var(--fw6)}
+output,.tdvo,.mxf .fsc span{font-variant-numeric:tabular-nums}
+html body .hdr.sel{background:linear-gradient(90deg,rgba(var(--sel3),.18),rgba(var(--sel3),.06))!important;box-shadow:inset 0 0 0 1px rgba(var(--sel3),.5),inset 3px 0 0 var(--sel)!important}
+html body .mx.sel{background:linear-gradient(rgba(var(--sel3),.12),rgba(var(--sel3),.03));border-color:rgba(var(--sel3),.45);border-top-color:var(--c)}
+html body .mxf .fsc span::after{height:var(--lk-hair);background:var(--lk-tick)}
+html #ctxm button{min-height:var(--lk-row);padding-top:var(--lk-rowpad);padding-bottom:var(--lk-rowpad)}
+body.lkm1 *,body.lkm1 *::before,body.lkm1 *::after{transition-duration:0s!important;transition-delay:0s!important}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3064,7 +3074,7 @@ var SPLBG=(function(){var W=window,D=document,PI=Math.PI,TAU=PI*2,S=null,
   if(S.k==='spec'){pw=BW;ph=Math.max(60,Math.round(BW*h/w));sc=1}if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}S.d.dr=0;S.w=w;S.h=h;S.sc=sc;return true}
  function draw(ts){if(!S.w&&!fit())return;var c=S.c;c.setTransform(S.sc,0,0,S.sc,0,0);if(S.k!=='spec')c.clearRect(0,0,S.w,S.h);FN[S.k](c,S.w,S.h,S.still?(S.k==='harm'?8:40+S.off):Math.max(0,(ts-S.t0)/1000)+S.off,PAL[S.k],S.d);S.fr++}
  /* at most 60 pictures a second (30 in the lighter looks); the frames are asked for by name each time, so the app's background freeze (task AO) holds them too */
- function tick(ts){if(!S||!S.on)return;S.raf=0;if(!S.el.isConnected){stop();return}var b=D.body,lim=b&&(b.classList.contains('fxstill')||b.classList.contains('lite'))?32:15;if(ts-S.last>=lim){S.last=ts;draw(ts)}S.raf=W.requestAnimationFrame(tick)}
+ function tick(ts){if(!S||!S.on)return;S.raf=0;if(!S.el.isConnected){stop();return}var b=D.body;if(b&&(b.classList.contains('lite')||b.classList.contains('lkstill'))){if(!S.lkS){S.lkS=1;var o0=S.still;S.still=true;draw(ts);S.still=o0}S.raf=W.requestAnimationFrame(tick);return}S.lkS=0;var lim=b&&(b.classList.contains('fxstill')||b.classList.contains('lite'))?32:15;if(ts-S.last>=lim){S.last=ts;draw(ts)}S.raf=W.requestAnimationFrame(tick)}
  function onRs(){if(S&&S.on){S.w=0;if(S.still)draw(0)}}
  function attach(el,k){var cv=el&&el.querySelector('canvas');if(!cv)return null;if(S&&S.on&&!k)k=S.k;
   if(!S||!S.on||S.k!==k){if(S&&S.on)stop();k=KINDS.indexOf(k)>=0?k:pick();S={k:k,t0:performance.now(),off:k==='harm'||k==='spec'?0:Math.random()*60,d:{},last:-1e9,fr:0,raf:0,still:false,on:true};try{S.still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}W.addEventListener('resize',onRs)}
@@ -3234,6 +3244,10 @@ var SPLBG=(function(){var W=window,D=document,PI=Math.PI,TAU=PI*2,S=null,
         <h4>Transport bar</h4>
         <div class="treditcard"><div class="trprev" aria-hidden="true"><i></i><i></i><i class="w"></i><i></i><i class="f"></i><i></i></div><div><b>Customise the transport bar</b><small>Opens the real, full-size transport bar in edit mode: drag modules left and right, make them compact or hide them, and add gaps, dividers and extra modules.</small><div class="row" style="gap:8px;margin-top:6px"><button type="button" id="trEditBtn" class="pri">Edit transport bar…</button><button type="button" id="trReset" class="mini">Reset</button></div></div></div>
         <div class="row" style="gap:14px;margin:6px 0 12px"><label class="chk" style="margin:0"><input type="checkbox" id="trAuto" checked> Shrink modules automatically when the screen is small</label></div>
+        <h4>Density and motion</h4>
+        <div class="row" title="How tightly tracks and lists are packed. Dense fits more tracks on the screen, Roomy gives each track more height. A project where you set the track height yourself keeps it."><span>Density</span><select id="lkDens" aria-label="Density"><option value="roomy">Roomy</option><option value="today">Today</option><option value="dense">Dense</option></select></div>
+        <div class="row" title="What may move on its own. Signal only: the playhead, meters and displays. Signal and transitions: also short animations when things open and close. Ambient: also slow drawings on empty and waiting screens, never in Light mode."><span>Motion</span><select id="lkMotion" aria-label="Motion"><option value="signal">Signal only</option><option value="trans">Signal and transitions</option><option value="ambient">Ambient</option></select></div>
+        <p class="hint">Dense fits more tracks on the screen; a project where you set the track height yourself keeps it. Motion: what may move on its own. The playhead, meters and displays always move.</p>
         <h4>Interface scale</h4>
         <div class="scalecard"><span class="scic" aria-hidden="true">Aa</span><div><b>Interface scale</b><div class="row trow"><span>75%</span><input type="range" id="setScale" min="75" max="200" step="5" aria-label="Interface scale" list="scaleTicks"><span>200%</span><output id="setScaleO"></output></div><datalist id="scaleTicks"><option value="100"></option><option value="125"></option><option value="150"></option><option value="175"></option></datalist>
         
@@ -4690,7 +4704,7 @@ function drawClip(g,t,c,G,w){
   if(!c.notes){const fi=(c.fi||0)*V.ppb,fo=(c.fo||0)*V.ppb,bt=G.y+G.h;
     fadeDraw(g,c,G,fi,fo,bt,hov);
     if(c.gain){const gy=gainY(G,c.gain);g.strokeStyle='rgba(255,255,255,.6)';g.setLineDash([3,3]);g.beginPath();g.moveTo(G.x,gy);g.lineTo(G.x+G.w,gy);g.stroke();g.setLineDash([])}
-    if(G.bh>=26){const gl=(c.gain?(c.gain>0?'+':'')+c.gain.toFixed(2):'0')+' dB',by=G.y+G.h-3-(c.warp&&c.warp.on&&!c.notes?14:0);g.fillStyle=ink;g.beginPath();g.moveTo(lx,by);g.lineTo(lx+8,by);g.lineTo(lx+8,by-7);g.closePath();g.fill();g.font='600 10px Inter,system-ui,sans-serif';g.fillText(gl,lx+11,by-.5)}
+    if(G.bh>=26){const gl=(c.gain?(c.gain>0?'+':'')+c.gain.toFixed(2):'0')+' dB',by=G.y+G.h-3-(c.warp&&c.warp.on&&!c.notes?14:0);g.fillStyle=ink;g.beginPath();g.moveTo(lx,by);g.lineTo(lx+8,by);g.lineTo(lx+8,by-7);g.closePath();g.fill();g.font='600 10px Inter,system-ui,sans-serif';lkVU(g,gl,lx+11,by-.5)}
     if(hov&&G.bh>=24){g.fillStyle='#fff';const tri=(x0,dir)=>{g.beginPath();g.moveTo(x0,G.by+1);g.lineTo(x0+dir*8,G.by+1);g.lineTo(x0,G.by+9);g.closePath();g.fill()};tri(G.x+fi,1);tri(G.x+G.w-fo,-1);
       const gy=gainY(G,c.gain||0);g.fillRect(G.x+G.w/2-3.5,gy-3.5,7,7);if(c.gain){g.font='600 10px Inter,system-ui,sans-serif';g.fillText((c.gain>0?'+':'')+c.gain.toFixed(1)+' dB',G.x+G.w/2+7,gy+3.5)}}}
   if(c.envShow&&G.bh>=16){const pts=(c.env&&c.env[c.envShow])||[],d=ENVDEF[c.envShow],ev=b=>envY(G,envAt(pts,b,d));
@@ -4698,7 +4712,7 @@ function drawClip(g,t,c,G,w){
     g.lineTo(G.x+G.w,G.y+G.h);g.lineTo(G.x,G.y+G.h);g.closePath();g.fill();g.fillStyle='#fff6c2';for(const q of pts){g.beginPath();g.arc(G.x+q.b*V.ppb,envY(G,q.v),3.5,0,7);g.fill()}
     g.font='600 9px Inter,system-ui,sans-serif';g.fillText(ENVNAME[c.envShow],lx,G.by+11)}
   g.restore();
-  if(sel){rr(g,G.x+.75,G.y+.75,G.w-1.5,G.h-1.5,CR);g.strokeStyle='rgba(80,160,255,.16)';g.lineWidth=5;g.stroke();g.strokeStyle='rgba(80,160,255,.3)';g.lineWidth=3;g.stroke();g.strokeStyle='#4ea2ff';g.lineWidth=1.6;g.stroke();g.strokeStyle='rgba(255,255,255,.95)';g.lineWidth=.6;g.stroke()}else if(!thin){g.strokeStyle=shade(col,-.45);g.globalAlpha=.6;g.lineWidth=1;rr(g,G.x+.5,G.y,G.w-1,G.h,CR);g.stroke();g.globalAlpha=1}
+  if(sel){rr(g,G.x+.75,G.y+.75,G.w-1.5,G.h-1.5,CR);g.strokeStyle=lkSel(.22);g.lineWidth=4;g.stroke();g.strokeStyle='rgba(0,0,0,.55)';g.lineWidth=2.6;g.stroke();g.strokeStyle=lkT().sel;g.lineWidth=1.4;g.stroke()}else if(!thin){g.strokeStyle=shade(col,-.45);g.globalAlpha=.6;g.lineWidth=1;rr(g,G.x+.5,G.y,G.w-1,G.h,CR);g.stroke();g.globalAlpha=1}
 }
 let ARRC=null,ARRWH=null,MAPC=null,BOOTF=null,DPX=1,SELR=null,SELCS=new Set(),PREVMAP=null,PREVT=null,RS=null,RSEND=0;
 const rowsOf=(r0,r1)=>S.tracks.slice(Math.max(0,Math.min(r0,r1)),Math.max(r0,r1)+1);
@@ -4727,10 +4741,10 @@ function drawArr(phOnly){DPX=(window.devicePixelRatio||1)*ZOOM;
   clampV();
   g.fillStyle=TH.bg;g.fillRect(0,0,w,h);
   const b0=V.x-X0/V.ppb,b1=V.x+(w-X0)/V.ppb;
-  layoutRows();g.save();g.beginPath();g.rect(0,AY,w,h-AY);g.clip();/* track rows never paint above the arrangement top */S.tracks.forEach((t,i)=>{const y=AY+TRY[i]-V.y;if(y>h||y+V.th<AY||HIDT.has(t))return;g.fillStyle=t.id===selT?TH.laneSel:(i%2?TH.lane1:TH.lane0);g.fillRect(0,y,w,V.th);g.fillStyle=t.color+'55';g.fillRect(X0,y,2,V.th-1);g.fillStyle=TH.sep;g.fillRect(0,y+V.th-1,w,1)});g.restore();
+  const LKG=lkGrid(DPX);layoutRows();g.save();g.beginPath();g.rect(0,AY,w,h-AY);g.clip();/* track rows never paint above the arrangement top */S.tracks.forEach((t,i)=>{const y=AY+TRY[i]-V.y;if(y>h||y+V.th<AY||HIDT.has(t))return;g.fillStyle=t.id===selT?TH.laneSel:(i%2?TH.lane1:TH.lane0);g.fillRect(0,y,w,V.th);g.fillStyle=t.color+'55';g.fillRect(X0,y,2,V.th-1);if(LKG.rows&&V.th>=40){g.fillStyle=LKG.rowC;for(let r=1;r<4;r++)g.fillRect(X0,Math.round((y+V.th*r/4)*DPX)/DPX,w-X0,LKG.hp)}g.fillStyle=TH.sep;g.fillRect(0,Math.round((y+V.th)*DPX)/DPX-LKG.hp,w,LKG.hp)});g.restore();
   {const xs=X0+(0-V.x)*V.ppb,xe=X0+(Math.max(songEnd(),loopEnd())-V.x)*V.ppb;g.fillStyle='rgba(0,0,0,.42)';const xr=X0+arrW;/* only over the arrangement itself: under the track headers the arrangement looks the same everywhere, so no box shows above the first track or below Master */if(xe<xr)g.fillRect(Math.max(X0,xe),AY,xr-Math.max(X0,xe),h-AY);g.fillStyle='rgba(255,255,255,.08)';if(xe<xr&&xe>X0)g.fillRect(xe,AY,1,h-AY);/* the song start is a thin line, not a darker block, so the arrangement looks the same to the left of it */if(xs>X0&&xs<xr)g.fillRect(xs,AY,1,h-AY)}
   const gk=(UI.gridB??50)/50,sub=UI.subTicks!==false&&V.ppb>=28;let step=sub?.25:1;while(step*V.ppb<8)step*=2;
-  for(let b=Math.floor(b0/step)*step;b<=b1;b+=step){const sf=b<0||sigFlat(),bar=sf?b%4===0:isBarB(b),big=UI.bars4!==false&&(sf?b%16===0:bar&&barPos(b+1e-6).bar%4===0),beat=Math.abs(b-Math.round(b))<1e-6;g.fillStyle=`rgba(${TH.gr||'255,255,255'},${Math.min(1,(big?.15:bar?.1:beat?.055:.03)*gk*(TH.grk||1))})`;g.fillRect(Math.round((X0+(b-V.x)*V.ppb)*DPX)/DPX,AY,big?1.5:1,h)}
+  for(let b=Math.floor(b0/step)*step;b<=b1;b+=step){const sf=b<0||sigFlat(),bar=sf?b%4===0:isBarB(b),big=UI.bars4!==false&&(sf?b%16===0:bar&&barPos(b+1e-6).bar%4===0),beat=Math.abs(b-Math.round(b))<1e-6;g.fillStyle=`rgba(${TH.gr||'255,255,255'},${Math.min(1,(big?LKG.phrase:bar?LKG.bar:beat?LKG.beat:LKG.six)*gk*(TH.grk||1))})`;g.fillRect(Math.round((X0+(b-V.x)*V.ppb)*DPX)/DPX,AY,LKG.hp,h)}
   
   const ey=AY+TOTH-V.y;if(ey<h){g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,Math.max(AY,ey),w,h)}/* header column above the ruler line matches the empty arrangement below, so no grey strip */
   g.save();g.beginPath();g.rect(0,AY,w,h-AY);g.clip();g.font='12px Inter,system-ui,sans-serif';
@@ -4752,9 +4766,9 @@ function drawArr(phOnly){DPX=(window.devicePixelRatio||1)*ZOOM;
     if(ad&&ad.k==='sec'&&ad.dst!=null){const xd=X0+((ad.dst>ad.s0?ad.dst-ad.l0:ad.dst)-V.x)*V.ppb;g.fillStyle='#fff';g.fillRect(xd-1,sy,2,h-sy)}}
   if(TMPH())drawTempoLane(g,w);
   let lb=1;while(lb*4*V.ppb<44)lb*=2;g.font='11px Inter,system-ui,sans-serif';
-  if(sigFlat()){for(let bar=Math.max(0,Math.floor(b0/4/lb)*lb);bar*4<=b1;bar+=lb){const x=X0+(bar*4-V.x)*V.ppb;g.fillStyle=TH.rulerLine;g.fillRect(x,TY,1,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)}}else{let bar=Math.max(0,Math.floor(barPos(Math.max(0,b0)).bar/lb)*lb);for(let k=0;k<4000;k++,bar+=lb){const bb=barStart(bar);if(bb>b1)break;const x=X0+(bb-V.x)*V.ppb;g.fillStyle=TH.rulerLine;g.fillRect(x,TY,1,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)}}
-  drawLoopLabel(g,w);g.restore();g.fillStyle='#25252c';g.fillRect(RCL,TY+RUL-1,Math.max(0,w-RCL),1);
-  if(SELR){const r0=Math.min(SELR.r0,SELR.r1),r1=Math.max(SELR.r0,SELR.r1),x1=X0+(SELR.b0-V.x)*V.ppb,x2=X0+(SELR.b1-V.x)*V.ppb,y1=AY+TRY[r0]-V.y,y2=AY+TRY[r1]+V.th-V.y;g.save();g.beginPath();g.rect(X0,AY,w-X0,h-AY);g.clip();g.fillStyle='rgba(120,170,255,.16)';g.fillRect(x1,y1,x2-x1,y2-y1);g.strokeStyle='rgba(150,190,255,.95)';g.lineWidth=1;g.setLineDash([5,3]);g.strokeRect(Math.round(x1)+.5,Math.round(y1)+.5,Math.round(x2-x1),Math.round(y2-y1));g.setLineDash([]);g.fillStyle='#bcd4ff';g.font='600 10px Inter,sans-serif';g.fillText(`${+(SELR.b1-SELR.b0).toFixed(2)} beats · drag to move · Shift-drag to insert · ⌫ to delete`,x1+6,Math.max(y1,AY)+12);g.restore()}
+  if(sigFlat()){for(let bar=Math.max(0,Math.floor(b0/4/lb)*lb);bar*4<=b1;bar+=lb){const x=X0+(bar*4-V.x)*V.ppb;g.fillStyle=TH.rulerLine;g.fillRect(Math.round(x*DPX)/DPX,TY,1/DPX,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)}}else{let bar=Math.max(0,Math.floor(barPos(Math.max(0,b0)).bar/lb)*lb);for(let k=0;k<4000;k++,bar+=lb){const bb=barStart(bar);if(bb>b1)break;const x=X0+(bb-V.x)*V.ppb;g.fillStyle=TH.rulerLine;g.fillRect(Math.round(x*DPX)/DPX,TY,1/DPX,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)}}
+  drawLoopLabel(g,w);g.restore();g.fillStyle='#25252c';g.fillRect(RCL,TY+RUL-LKG.hp,Math.max(0,w-RCL),LKG.hp);
+  if(SELR){const r0=Math.min(SELR.r0,SELR.r1),r1=Math.max(SELR.r0,SELR.r1),x1=X0+(SELR.b0-V.x)*V.ppb,x2=X0+(SELR.b1-V.x)*V.ppb,y1=AY+TRY[r0]-V.y,y2=AY+TRY[r1]+V.th-V.y;g.save();g.beginPath();g.rect(X0,AY,w-X0,h-AY);g.clip();g.fillStyle=lkSel(.12);g.fillRect(x1,y1,x2-x1,y2-y1);g.strokeStyle=lkSel(.95);g.lineWidth=1;g.setLineDash([5,3]);g.strokeRect(Math.round(x1)+.5,Math.round(y1)+.5,Math.round(x2-x1),Math.round(y2-y1));g.setLineDash([]);g.fillStyle=lkT().sel;g.font='600 10px Inter,sans-serif';g.fillText(`${+(SELR.b1-SELR.b0).toFixed(2)} beats · drag to move · Shift-drag to insert · ⌫ to delete`,x1+6,Math.max(y1,AY)+12);g.restore()}
   thUnder(g,w,h);if(play.on&&UI.follow&&(UI.followMode==='center'||UI.followMode==='stay'))ARRWH=null;else arrSnap();arrPH(g,w,h);tmFlag(X0+(curDisp()-V.x)*V.ppb+phCfg().w/2,w);clipCacheSweep();
   const hc=$('#hdrcol');hc.style.top=TY+'px';{const capH=18,top0=(AY-TY)-capH-V.y,ch=ascHcH(hc,h),nT=S.tracks.length,bot=(AY-TY)-V.y+ascAddY(),gt0=(AY-TY)-capH,gt=clamp(top0+capH,0,ch),gb=clamp(Math.min(bot,(AY-TY)-V.y+TOTH),0,Math.max(0,ch-(BY||0)))/* the header glass stops where the device panel begins: glass under glass means both are recalculated and each change in one drags the other along */,gl=$('#hglass'),cp=$('#hdrcol .cap');gl.style.top=gt+'px';gl.style.height=Math.max(0,gb-gt)+'px';gl.style.display=gb-gt>1?'':'none';HGR.t=TY+gt;HGR.b=TY+gb;HGR.on=gb-gt>1;try{if(GB.on)gbClip()}catch(e){}cp.style.top=top0+'px';const hid=top0+capH<=0;cp.style.display=hid?'none':'';cp.style.clipPath=top0<0?`inset(${-top0}px 0 0 0)`:''}
   {const tp=(AY-TY)+'px';if(hdrin.style.top!==tp)hdrin.style.top=tp}  {const dp=(window.devicePixelRatio||1)*ZOOM;hdrin.style.transform=`translate3d(0,${(-Math.round(V.y*dp)/dp).toFixed(3)}px,0)`}hdrin.style.setProperty('--th',V.th+'px');{const m=mshOf();hdrin.style.setProperty('--msh',m+'px');{const mh=hdrin.querySelector('.mhdr');if(mh)mh.style.top=(TOTH+MSY0)+'px'}hdrin.classList.toggle('mcomp',m<64);hdrin.classList.toggle('mtiny',m<38)}hdrin.style.setProperty('--lh',LH+'px');hdrin.style.setProperty('--mh',Math.max(4,V.th-7)+'px');hdrin.classList.toggle('big',V.th>=92);hdrin.classList.toggle('small',V.th<70);hdrin.classList.toggle('noaut',V.th<88);hdrin.classList.toggle('tiny',V.th<46);hdrin.classList.toggle('micro',V.th<28);hdrin.classList.toggle('nano',V.th<21);if(UI.collAll&&Math.abs(V.th-(UI.collTh||0))>3)UI.collAll=false;{const b=document.getElementById('bColl');if(b){const c=!!UI.collAll;if(b.classList.contains('on')!==c)b.classList.toggle('on',c)}}
@@ -5396,7 +5410,7 @@ function ctl(kind,id,label,spec,get,set,after){CT.set(id,{kind,spec,get,set,afte
   if(kind==='ws')return`<div class="wsl" data-c="${id}" title="${esc(label)}: drag sideways; the bar spreads from the centre as the sound gets wider. Double-click for 100%"><span>${esc(label)}</span><div class="wst"><b></b><i></i></div><output></output></div>`;
   if(kind==='vb')return`<div class="vb" data-c="${id}" title="${esc(label)}: drag up/down, shift for fine, double-click to reset"><span class="vl">${esc(label)}</span><div class="vt">${spec.bi?'<b class="vz"></b>':''}<i class="vf"></i><em class="vk"></em></div><output></output></div>`;
   return`<div class="fv" data-c="${id}"><i></i><b></b></div>`}
-function paintCtl(el){const C=CT.get(el.dataset.c);if(!C)return;const v=C.get(),n=C.spec.n(v),o=el.querySelector('output');if(o)o.textContent=C.spec.f(v)+(C.kind==='cs'&&C.spec===SPEC_VOL?' dB':'');
+function paintCtl(el){const C=CT.get(el.dataset.c);if(!C)return;const v=C.get(),n=C.spec.n(v),o=el.querySelector('output');if(o)lkOut(o,C.spec.f(v)+(C.kind==='cs'&&C.spec===SPEC_VOL?' dB':''));
   if(C.kind==='hb'){el.querySelector('.hk').style.left=(n*100).toFixed(2)+'%';const f=el.querySelector('.hf');if(C.spec.bi){f.style.left=(Math.min(.5,n)*100).toFixed(2)+'%';f.style.width=(Math.abs(n-.5)*100).toFixed(2)+'%'}else{f.style.left='0';f.style.width=(n*100).toFixed(2)+'%'}}
   if(C.kind==='cs'){el.querySelector('.ck').style.left=`calc((100% - 14px) * ${n})`;const f=el.querySelector('.cf');if(C.spec.bi){const z=.5;f.style.left=`calc((100% - 14px) * ${Math.min(z,n)} + 7px)`;f.style.width=`calc((100% - 14px) * ${Math.abs(n-z)})`}else{f.style.left='0';f.style.width=`calc((100% - 14px) * ${n} + 7px)`}}
   if(C.kind==='kn'){const a=-135+270*n,a0=C.spec.bi?0:-135;el.querySelector('.kv').setAttribute('d',arcD(Math.min(a0,a),Math.max(a0,a)));const[x,y]=kp(a,9.5),l=el.querySelector('.ki');l.setAttribute('x2',x.toFixed(2));l.setAttribute('y2',y.toFixed(2))}
@@ -5705,9 +5719,9 @@ function renderFx(){if(IBCTX){ibLiveRender();return}
   const kn=(id,label,spec,get,set)=>ctl('kn','fx:'+id,label,spec,get,set);
   const tb=(k,lab,tip,on)=>`<button class="tdbtn${on?' on':''}" data-tda="${k}" title="${tip}">${lab}</button>`;
   let h=`<div class="dev tdev tdev2" data-d="track" data-id="${t.id}" style="--c:${t.color}"><div class="devh"><span class="tdn"><i class="tdot"></i>${esc(t.name)}</span><div class="dgain tdgn" title="Gain: trims the level going into the channel (−24 to +24 dB). Double-click for 0 dB.">${ctl('hb','fx:trim','Gain',specD([-24,24,0,'dB']),()=>t.trim||0,v=>{t.trim=v;changed(false)})}</div></div><div class="tdb2 tdb3">
-    <div class="tdl"><div class="tdfz">${ctl('tv','fx:vol','Volume',SPEC_VOL,()=>t.vol,v=>{awTouch(t,'vol',v);t.vol=v;paintSel('hd:'+t.id);const o=fxin.querySelector('.tdvo');if(o)o.textContent=SPEC_VOL.f(v)+' dB';changed(false)})}<div class="tdm"><i><b></b></i><i><b></b></i></div></div></div>
+    <div class="tdl"><div class="tdfz">${ctl('tv','fx:vol','Volume',SPEC_VOL,()=>t.vol,v=>{awTouch(t,'vol',v);t.vol=v;paintSel('hd:'+t.id);const o=fxin.querySelector('.tdvo');if(o)lkOut(o,SPEC_VOL.f(v)+' dB');changed(false)})}<div class="tdm"><i><b></b></i><i><b></b></i></div></div></div>
     <div class="tdr2">${ctl('hb','fx:pan','Pan',SPEC_PAN,()=>t.pan,v=>{awTouch(t,'pan',v);t.pan=v;paintSel('hp:'+t.id);changed(false)})}${ctl('ws','fx:width','Width',{...specD([0,200,100,'%']),bi:false},()=>t.width??100,v=>{t.width=v;changed(false)})}
-      <output class="tdvo" title="Channel volume">${SPEC_VOL.f(t.vol)} dB</output>
+      <output class="tdvo" title="Channel volume">${SPEC_VOL.f(t.vol)} <span class="lku">dB</span></output>
       <div class="tdbs">${tb('mute','M','Mute',t.mute)}${tb('solo','S','Solo',t.solo)}${tb('arm','●','Record arm',t.arm)}${tb('phase','Ø','Invert phase',t.phase)}${tb('mono','Mono','Sum to mono',(t.width??100)===0)}</div>
       <button class="tdfx${t.fxByp?' on':''}" data-tda2="byp" title="Turn all of this track's effects off for a moment to hear the difference (instrument and MIDI effects stay on). Click again to bring them back.">${t.fxByp?'FX off':'FX on'}</button>
       <div class="abx abx2 tdab" title="Effects A/B: two versions of this track's effect chain. Switch to compare; copy to start the other version from this one."><div class="abt"><button data-tab="a" class="${(t.fxAB&&t.fxAB.cur||'a')==='a'?'on':''}">A</button><button data-tab="b" class="${(t.fxAB&&t.fxAB.cur)==='b'?'on':''}">B</button></div><button data-tab="copy" class="abc">${(t.fxAB&&t.fxAB.cur)==='b'?'B→A':'A→B'}</button></div></div></div></div>`;
@@ -6119,7 +6133,7 @@ ${(I.kOpen!==false)?`<div class="plk2">${['morph','fenv','space','gain','uni','d
 function drawIV(){const t=curT();if(!t||!t.inst)return;const I=t.inst;for(const cv of IVZ){if(!cv.isConnected||!cvVis(cv))continue;const{g,w,h}=fit(cv),k=cv.dataset.k,tm=performance.now()/1000,hit=IHIT.get(I),age=hit&&ctx?ctx.currentTime-hit.w:9;
   g.fillStyle='#0a0b0f';g.fillRect(0,0,w,h);
   if(k==='sfx2'){sfDraw(g,w,h,I,tm,age,hit);continue}
-  if(PL2[k]){const act=hit&&I.a!=null?clamp(plEnvAt(I,age,hit.dur),0,1):0;PL2[k](g,w,h,I,tm,act,age,hit);continue}
+  if(PL2[k]){/* task LK: a new project's first instrument can lack these values; the cards threw every frame */const I2=I.lfo==null||I.res==null||I.lamt==null||I.morph==null||I.cut==null?Object.assign({morph:0,cut:1800,res:1,lfo:.3,lamt:0},I):I;const act=hit&&I2.a!=null?clamp(plEnvAt(I2,age,hit.dur),0,1):0;PL2[k](g,w,h,I2,tm,act,age,hit);continue}
   if(k==='plant'){const cx=w*.5,cy=h*.5,R=Math.min(w,h)*.38,petals=Math.max(1,Math.round(I.uni)),sway=Math.sin(tm*I.lfo*2*Math.PI)*I.lamt/100,act=age<(hit?hit.dur+I.r:0)?1:0;
     const wf=(wv,x)=>wv==='sine'?Math.sin(x):wv==='triangle'?2/Math.PI*Math.asin(Math.sin(x)):wv==='square'?Math.sign(Math.sin(x)):((x/Math.PI)%2+2)%2-1;
     for(let L=petals;L>=1;L--){g.beginPath();const off=(L-(petals+1)/2)*I.det/400+tm*.1+sway*.4;for(let i=0;i<=180;i++){const a=i/180*Math.PI*2,x=a*3+off,v=wf(I.w1,x)*(1-I.morph)+wf(I.w2,x)*I.morph,rr=R*(.55+.32*v*(.4+I.cut/18000*.8)+.08*act*Math.sin(tm*20+L));const px=cx+Math.cos(a+off)*rr*(1+I.width/400),py=cy+Math.sin(a+off)*rr;i?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();
@@ -6372,7 +6386,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.248',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.249',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6646,7 +6660,7 @@ const fX=(f,w)=>Math.log(f/20)/Math.log(1000)*w,xF=(x,w)=>20*Math.pow(1000,x/w);
 let FQ=null,MG=null,PH=null,MT=null,SPEC=null,TD=null;
 function vizInst(f){if(IBCTX&&IBFXN&&IBCTX.fx&&IBCTX.fx[0]===f)return IBFXN;if(selT==='__m')return MFXM.get(f.id);const N=NODES.get(selT);return N&&N.fxm.get(f.id)}
 function gridFreq(g,w,h){g.strokeStyle='rgba(255,255,255,.06)';g.fillStyle='rgba(255,255,255,.3)';g.font='9px Inter,system-ui,sans-serif';g.lineWidth=1;
-  for(const f of[50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fX(f,w))+.5;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillText(f>=1000?f/1000+'k':f,x+2,h-3)}}
+  const L=lkT(),d=INS.dpr(g),lc=g.fillStyle;for(const f of[50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fX(f,w)*d)/d;g.fillStyle=f===100||f===1000||f===10000?L.gMaj:L.gMid;g.fillRect(x,0,1/d,h);g.fillStyle=lc;g.fillText(f>=1000?f/1000+'k':f,x+2,h-3)}}
 function spectrum(g,w,h,an,col,top){if(!an)return;if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);INS.fft(an,SPEC);const ny=ctx.sampleRate/2;
   g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const bin=Math.min(SPEC.length-1,Math.round(xF(x,w)/ny*SPEC.length));const db=Math.max(-100,SPEC[bin]);g.lineTo(x,h-(db+100)/80*(h-top))}g.lineTo(w,h);g.closePath();g.fillStyle=col;g.fill()}
 function level(an){if(!an)return 0;if(!TD||TD.length!==an.fftSize)TD=new Float32Array(an.fftSize);an.getFloatTimeDomainData(TD);let s=0;for(let i=0;i<TD.length;i+=2)s+=TD[i]*TD[i];return Math.sqrt(s/(TD.length/2))}
@@ -6687,8 +6701,8 @@ function eqResp(X,f,w){const n=Math.ceil(w/2);if(!FQ||FQ.length!==n){FQ=new Floa
   if(X&&X.stages){for(const s2 of X.stages){if(s2.ch==='s')continue;s2.q.getFrequencyResponse(FQ,MG,PH);for(let k=0;k<n;k++)MT[k]*=MG[k]}}return n}
 function vizEQ2(g,w,h,f,X){const p=f.p,sel=eqSel(f),R=24,dy=db=>h/2-db/R*(h/2-12),gs=(p.gs??100)/100;
   const bg=g.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#0b0d14');bg.addColorStop(1,'#06070a');g.fillStyle=bg;g.fillRect(0,0,w,h);
-  g.font='9px Inter,system-ui,sans-serif';for(const fr of[30,50,100,200,300,500,1000,2000,3000,5000,10000,20000]){const x=Math.round(fX(fr,w))+.5;g.fillStyle=/^(1|2|5)/.test(String(fr))?'rgba(255,255,255,.07)':'rgba(255,255,255,.035)';g.fillRect(x,0,1,h);if(/^(1|2|5)0*$/.test(String(fr))||fr===50){g.fillStyle='rgba(255,255,255,.32)';g.fillText(fr>=1000?fr/1000+'k':fr,x+3,h-4)}}
-  for(const db of[-18,-12,-6,0,6,12,18]){const y=Math.round(dy(db))+.5;g.fillStyle=db?'rgba(255,255,255,.05)':'rgba(255,255,255,.14)';g.fillRect(0,y,w,1);g.fillStyle='rgba(255,255,255,.3)';g.fillText((db>0?'+':'')+db,w-20,y-2)}
+  const L=lkT(),dd=INS.dpr(g);g.font='9px Inter,system-ui,sans-serif';for(const fr of[30,50,100,200,300,500,1000,2000,3000,5000,10000,20000]){const x=Math.round(fX(fr,w)*dd)/dd;g.fillStyle=/^10*$/.test(String(fr))?L.gMaj:/^(2|5)0*$/.test(String(fr))?L.gMid:L.gMin;g.fillRect(x,0,1/dd,h);if(/^(1|2|5)0*$/.test(String(fr))||fr===50){g.fillStyle='rgba(255,255,255,.32)';g.fillText(fr>=1000?fr/1000+'k':fr,x+3,h-4)}}
+  for(const db of[-18,-12,-6,0,6,12,18]){const y=Math.round(dy(db)*dd)/dd;g.fillStyle=db?(db%12?L.gMin:L.gMid):L.gMaj;g.fillRect(0,y,w,1/dd);g.fillStyle='rgba(255,255,255,.3)';g.fillText((db>0?'+':'')+db,w-20,y-2)}
   if(X&&p.an!=='off'&&ctx){const sp=(an,fill,line)=>{if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);INS.fft(an,SPEC);const ny=ctx.sampleRate/2,N=SPEC.length;g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const fr=xF(x,w),k=Math.min(N-1,Math.round(fr/ny*N)),v=SPEC[k]+4.5*Math.log2(fr/1000);const y=clamp(h-(v+90)/84*h,0,h);g.lineTo(x,y)}g.lineTo(w,h);g.closePath();g.fillStyle=fill;g.fill();if(line){g.strokeStyle=line;g.lineWidth=1;g.stroke()}};
     if(p.an==='prepost')sp(X.pre,'rgba(150,155,170,.12)',null);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(76,201,240,.35)');gr.addColorStop(1,'rgba(76,141,255,.04)');sp(X.an,gr,'rgba(120,200,255,.45)')}
   const n=eqResp(X,f,w);
@@ -7149,9 +7163,9 @@ function drawPR(){
   g.save();g.beginPath();g.rect(KEYW,PRUL,w-KEYW,gh-PRUL);g.clip();
   for(let p=pTop;p>=pBot;p--){const y=py(p),k=p%12,blk=[1,3,6,8,10].includes(k),deg=(k-PR.root+12)%12;
     let col=blk?'#121216':'#18181d';if(sc)col=sc.includes(deg)?(deg===0?'#262c3f':blk?'#1a1d27':'#1f2230'):(blk?'#0d0d10':'#111114');
-    g.fillStyle=col;g.fillRect(KEYW,y,w-KEYW,PR.rh);if(k===0){g.fillStyle='#2b2b34';g.fillRect(KEYW,y+PR.rh-1,w-KEYW,1)}}
+    g.fillStyle=col;g.fillRect(KEYW,y,w-KEYW,PR.rh);if(k===0){const P=lkPR();g.fillStyle=P.oct;g.fillRect(KEYW,Math.round((y+PR.rh)*P.d)/P.d-P.hp,w-KEYW,P.hp)}}
   const b0=PR.x,b1=PR.x+(w-KEYW)/PR.ppb;let st=PR.snap||.25;while(st*PR.ppb<7)st*=2;
-  for(let b=Math.floor(b0/st)*st;b<=b1;b+=st){const x=KEYW+(b-PR.x)*PR.ppb,isBar=Math.abs(b/4-Math.round(b/4))<1e-6,isBeat=Math.abs(b-Math.round(b))<1e-6;g.fillStyle=isBar?'#3a3a46':isBeat?'#26262e':'#1b1b21';g.fillRect(Math.round(x),PRUL,1,gh)}
+  const LKP=lkPR();for(let b=Math.floor(b0/st)*st;b<=b1;b+=st){const x=KEYW+(b-PR.x)*PR.ppb,isBar=Math.abs(b/4-Math.round(b/4))<1e-6,isBeat=Math.abs(b-Math.round(b))<1e-6;g.fillStyle=isBar?LKP.bar:isBeat?LKP.beat:LKP.six;g.fillRect(Math.round(x*LKP.d)/LKP.d,PRUL,LKP.hp,gh)}
   const sx=KEYW+(c.off-PR.x)*PR.ppb,ex=KEYW+(c.off+c.len-PR.x)*PR.ppb;g.fillStyle='rgba(0,0,0,.45)';if(sx>KEYW)g.fillRect(KEYW,PRUL,sx-KEYW,gh);if(ex<w)g.fillRect(ex,PRUL,w-ex,gh);g.fillStyle='#ff9a3c';g.fillRect(ex,PRUL,1,gh);if(c.off>0)g.fillRect(sx,PRUL,1,gh);
   if(PR.ghost){for(const t2 of S.tracks){if(t2.kind!=='inst'||PR.ghostOff.has(t2.id))continue;for(const c2 of t2.clips){if(c2===c||c2.start>=c.start+c.len||c2.start+c2.len<=c.start)continue;
     const gc=UI.ghostGrey?'#8a8e9c':t2.color;g.fillStyle=gc;g.strokeStyle=gc;g.lineWidth=1;
@@ -7161,16 +7175,16 @@ function drawPR(){
   for(const n of c.notes){const x=KEYW+(n.s-PR.x)*PR.ppb,y=py(n.p),nw=Math.max(3,n.l*PR.ppb-1);if(x>w||x+nw<KEYW||y>gh||y+PR.rh<PRUL)continue;
     if(n.m){g.strokeStyle=t.color;g.globalAlpha=.6;g.lineWidth=1;g.setLineDash([3,2]);rr(g,x+.5,y+1.5,nw-1,PR.rh-3,2);g.stroke();g.setLineDash([]);g.globalAlpha=1}
     else{g.globalAlpha=.45+.55*n.v;g.fillStyle=t.color;rr(g,x,y+1,nw,PR.rh-2,2);g.fill();g.globalAlpha=1}
-    if(n.sel){g.strokeStyle='#fff';g.lineWidth=1.5;rr(g,x,y+1,nw,PR.rh-2,2);g.stroke()}
+    if(n.sel){rr(g,x,y+1,nw,PR.rh-2,2);g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=2.6;g.stroke();g.strokeStyle=lkT().sel;g.lineWidth=1.4;g.stroke()}
     if(nw>26&&PR.rh>=12){g.fillStyle=n.m?t.color:'#0b0b0e';g.fillText(nname(n.p),x+4,y+PR.rh/2+3.5)}}
-  if(pd&&pd.k==='rect'){g.fillStyle='rgba(76,141,255,.15)';g.strokeStyle='#4c8dff';g.lineWidth=1;const rx=Math.min(pd.x0,pd.x1),ry=Math.min(pd.y0,pd.y1),rw=Math.abs(pd.x1-pd.x0),rh=Math.abs(pd.y1-pd.y0);g.fillRect(rx,ry,rw,rh);g.strokeRect(rx+.5,ry+.5,rw,rh)}
+  if(pd&&pd.k==='rect'){g.fillStyle=lkSel(.12);g.strokeStyle=lkT().sel;g.lineWidth=1;const rx=Math.min(pd.x0,pd.x1),ry=Math.min(pd.y0,pd.y1),rw=Math.abs(pd.x1-pd.x0),rh=Math.abs(pd.y1-pd.y0);g.fillRect(rx,ry,rw,rh);g.strokeRect(rx+.5,ry+.5,rw,rh)}
   if(pd&&pd.k==='zoom'){g.strokeStyle='#b583ff';g.fillStyle='rgba(181,131,255,.12)';g.lineWidth=1;g.setLineDash([4,3]);const rx=Math.min(pd.x0,pd.x1),ry=Math.min(pd.y0,pd.y1);g.fillRect(rx,ry,Math.abs(pd.x1-pd.x0),Math.abs(pd.y1-pd.y0));g.strokeRect(rx+.5,ry+.5,Math.abs(pd.x1-pd.x0),Math.abs(pd.y1-pd.y0));g.setLineDash([])}
   if(PR.scrub!=null){const sx=KEYW+(PR.scrub-PR.x)*PR.ppb;g.fillStyle='#3ecf8e';g.fillRect(sx,PRUL,2,h-PRUL)}
   if(pd&&pd.k==='slice'){g.strokeStyle='#ff6b6b';g.lineWidth=2;g.setLineDash([5,3]);g.beginPath();g.moveTo(pd.x0,pd.y0);g.lineTo(pd.x1,pd.y1);g.stroke();g.setLineDash([])}
   if(play.on){const pb=curDisp()-c.start+c.off;if(pb>=c.off&&pb<=c.off+c.len){const x=KEYW+(pb-PR.x)*PR.ppb;g.fillStyle='#3ecf8e';g.fillRect(x,PRUL,1.5,gh)}}
   g.restore();
   g.fillStyle='#141418';g.fillRect(KEYW,0,w-KEYW,PRUL);g.fillStyle='#8b8b97';g.font='11px Inter,system-ui,sans-serif';
-  let lb=1;while(lb*4*PR.ppb<40)lb*=2;for(let bar=Math.max(0,Math.floor(b0/4/lb)*lb);bar*4<=b1;bar+=lb){const x=KEYW+(bar*4-PR.x)*PR.ppb;if(x<KEYW)continue;g.fillRect(x,0,1,PRUL);g.fillText(bar+1,x+4,14)}
+  let lb=1;while(lb*4*PR.ppb<40)lb*=2;for(let bar=Math.max(0,Math.floor(b0/4/lb)*lb);bar*4<=b1;bar+=lb){const x=KEYW+(bar*4-PR.x)*PR.ppb;if(x<KEYW)continue;{const P=lkPR();g.fillRect(Math.round(x*P.d)/P.d,0,P.hp,PRUL)}g.fillText(bar+1,x+4,14)}
   g.save();g.beginPath();g.rect(0,PRUL,KEYW,gh-PRUL);g.clip();
   for(let p=pTop;p>=pBot;p--){const y=py(p),k=p%12,blk=[1,3,6,8,10].includes(k);g.fillStyle=blk?'#1e1e22':'#d8d8de';g.fillRect(0,y,blk?KEYW*.62:KEYW,PR.rh-.5);if(blk){g.fillStyle='#d8d8de';g.fillRect(KEYW*.62,y,KEYW*.38,PR.rh-.5)}
     if(k===0&&PR.rh>=9){g.fillStyle='#2a2a33';g.font='600 10px Inter,system-ui,sans-serif';g.fillText(nname(p),KEYW-26,y+PR.rh/2+3.5)}
@@ -7179,7 +7193,7 @@ function drawPR(){
   g.restore();
   g.fillStyle='#0f0f12';g.fillRect(0,gh,w,VELH);g.fillStyle='#25252c';g.fillRect(0,gh,w,1);g.fillStyle='rgba(255,255,255,.22)';g.fillRect(w/2-14,gh+2,28,2);g.fillStyle='#8b8b97';g.font='10px Inter,system-ui,sans-serif';prLaneUI();prLanePos(gh);if((PR.lane||'vel')!=='vel'){ccDraw(g,c,w,h,gh,t.color)}else{
   g.save();g.beginPath();g.rect(KEYW,gh,w-KEYW,VELH);g.clip();
-  for(const n of c.notes){const x=KEYW+(n.s-PR.x)*PR.ppb+1,top=gh+6+(1-n.v)*(VELH-12);g.fillStyle=n.sel?'#fff':t.color;g.globalAlpha=n.m?.35:1;g.fillRect(x,top,1.5,h-top-4);g.beginPath();g.arc(x+.75,top,3,0,7);g.fill()}
+  for(const n of c.notes){const x=KEYW+(n.s-PR.x)*PR.ppb+1,top=gh+6+(1-n.v)*(VELH-12);g.fillStyle=n.sel?lkT().sel:t.color;g.globalAlpha=n.m?.35:1;g.fillRect(x,top,1.5,h-top-4);g.beginPath();g.arc(x+.75,top,3,0,7);g.fill()}
   g.restore();g.globalAlpha=1;}
 }
 let pd=null;
@@ -7533,9 +7547,9 @@ function applyTheme(){const H=UI.tintH??215,A=(UI.tintA??25)/100,b=12*((UI.bgL??
 function applyScale(){ZOOM=(UI.scale??100)/100;document.documentElement.style.zoom=String(ZOOM);document.body.style.height=`calc(100dvh / ${ZOOM})`;dirty=true;setTimeout(rfAll,50)}
 function applyTrans(){const t=(UI.trans??50)/100,b=UI.blur??18,r=document.documentElement.style;r.setProperty('--ga',(1-t).toFixed(3));
   r.setProperty('--blur',b>0?`blur(${b}px) saturate(${(1+b/30).toFixed(2)})`:'none');r.setProperty('--blur2',b>0?`blur(${Math.round(b*1.5)}px) saturate(${(1+b/22).toFixed(2)})`:'none');r.setProperty('--edge',((UI.edge??60)/100).toFixed(2));rfAll()}
-const LOOK=[['#setGrid','gridB',50,v=>v+'%'],['#setTrans','trans',50,v=>v+'%'],['#setEdge','edge',60,v=>v+'%'],['#setBg','bgL',40,v=>v+'%'],['#setHue','tintH',215,v=>v+'°'],['#setTint','tintA',25,v=>v+'%'],['#setScale','scale',100,v=>v+'%'],['#setClipA','clipA',36,v=>v+'%']];
-function syncLook(){renderLogo();$('#setSplash').checked=UI.splash!==false;$('#setSub').checked=UI.subTicks!==false;$('#setBars').checked=UI.bars4!==false;for(const[id,k,d,f] of LOOK){$(id).value=UI[k]??d;$(id+'O').textContent=f(UI[k]??d)}}
-for(const[id,k] of LOOK)$(id).oninput=e=>{UI[k]=+e.target.value;if(k==='gridB'||k==='clipA')dirty=true;else if(['bgL','tintH','tintA'].includes(k))applyTheme();else if(k==='scale'){}else applyTrans();syncLook();saveUI()};
+const LOOK_SL=[['#setGrid','gridB',50,v=>v+'%'],['#setTrans','trans',50,v=>v+'%'],['#setEdge','edge',60,v=>v+'%'],['#setBg','bgL',40,v=>v+'%'],['#setHue','tintH',215,v=>v+'°'],['#setTint','tintA',25,v=>v+'%'],['#setScale','scale',100,v=>v+'%'],['#setClipA','clipA',36,v=>v+'%']];
+function syncLook(){renderLogo();$('#setSplash').checked=UI.splash!==false;$('#setSub').checked=UI.subTicks!==false;$('#setBars').checked=UI.bars4!==false;for(const[id,k,d,f] of LOOK_SL){$(id).value=UI[k]??d;$(id+'O').textContent=f(UI[k]??d)}}
+for(const[id,k] of LOOK_SL)$(id).oninput=e=>{UI[k]=+e.target.value;if(k==='gridB'||k==='clipA')dirty=true;else if(['bgL','tintH','tintA'].includes(k))applyTheme();else if(k==='scale'){}else applyTrans();syncLook();saveUI()};
 $('#setScale').onchange=()=>applyScale();
 $('#setSub').onchange=e=>{UI.subTicks=e.target.checked;saveUI();dirty=true};$('#setBars').onchange=e=>{UI.bars4=e.target.checked;saveUI();dirty=true};
 /* Apple-style refraction: an SVG displacement map per glass panel, fed into backdrop-filter (Chromium) */
@@ -9303,7 +9317,7 @@ vizHelp.phaser='Drag the green dot sideways for speed and up/down for depth · p
 {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{devFill()}catch(e){console.error('AudioLab device fill',e)}return r}}
 /* one value, one picture everywhere: whatever moves a parameter (a modulator, a macro, automation), every control that shows it follows, on the track, in the channel strip, in the mixer and in a popped-out devices window */
 function linkPaint(){const hd=document.getElementById('hdrin');if(hd)paintAll(hd);for(const id of['mixWin','devWin']){const w=document.getElementById(id);if(w&&!w.hidden)paintAll(w)}
-  const t=curT&&curT(),o=document.querySelector('#fxin .tdvo');if(t&&o){const s=SPEC_VOL.f(t.vol)+' dB';if(o.textContent!==s)o.textContent=s}
+  const t=curT&&curT(),o=document.querySelector('#fxin .tdvo');if(t&&o){const s=SPEC_VOL.f(t.vol)+' dB';if(o.textContent!==s)lkOut(o,s)}
 }
 /* modulated macros repaint as they move; Esc leaves map mode */
 {const _mt=modTick;modTick=function(now){const r=_mt.apply(this,arguments);if(typeof FRN!=='undefined'&&FRN%3===0){const t=curT&&curT();if(t&&t.macro&&t.mods)for(const m of t.mods)if(!m.off)for(const q of m.routes)if(q.pid.startsWith('x:'+t.id+':')){const it=t.macro.items.find(o=>o.id===q.pid.split(':')[2]);if(it)macPaint(it)}}if(typeof FRN!=='undefined'&&FRN%2===0&&S.tracks.some(t=>(t.mods||[]).some(m=>!m.off&&m.routes.length)))linkPaint();return r}}
@@ -10309,7 +10323,7 @@ function ovwPaint(g,w,h,e){
       rr(g,x1+1,sy+3,x2-x1-2,SECH-6,3);g.fillStyle=sc.color;g.globalAlpha=.26;g.fill();g.globalAlpha=.7;g.strokeStyle=sc.color;g.lineWidth=1;g.stroke();g.globalAlpha=1;g.fillRect(x1+1,sy+3,2.5,SECH-6);
       if(x2-x1>16){g.save();g.beginPath();g.rect(x1,sy,x2-x1-3,SECH);g.clip();g.fillStyle='rgba(236,238,244,.92)';g.fillText(sc.name,Math.max(x1,Xc)+8,sy+13);g.restore()}}}
   {const bL=(Xc-xo)/pe,bR=(Xc+aw-xo)/pe;let lb=1;while(lb*4*pe<44)lb*=2;g.font='11px Inter,system-ui,sans-serif';
-    const tick=(bar,bb)=>{const x=xOf(bb);g.fillStyle=TH.rulerLine;g.fillRect(x,TY,1,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)};
+    const tick=(bar,bb)=>{const x=xOf(bb);g.fillStyle=TH.rulerLine;g.fillRect(Math.round(x*DPX)/DPX,TY,1/DPX,RUL);g.fillStyle=TH.rulerTxt;g.fillText(bar+1,x+4,TY+14)};
     if(sigFlat()){for(let bar=Math.max(0,Math.floor(bL/4/lb)*lb);bar*4<=bR;bar+=lb)tick(bar,bar*4)}else{let bar=Math.max(0,Math.floor(barPos(Math.max(0,bL)).bar/lb)*lb);for(let k=0;k<4000;k++,bar+=lb){const bb=barStart(bar);if(bb>bR)break;tick(bar,bb)}}}
   g.restore()}
 function ovwFrame(ph){const now=performance.now(),d=window.devicePixelRatio||1,z=ZOOM;let A=OVW.a;
@@ -19620,7 +19634,7 @@ AO.nst(()=>aoEval('boot'),AOG.boot+50);
    The button's logo was painted from the frame loop only while "not calm": 3 seconds after the last click or drag (with nothing playing) it stood still.
    It is now painted from the part of the frame loop that always runs (30 times a second, 15 in the lighter looks), and the Settings logo's loop is started
    again whenever Settings is open without it. Only the system setting "reduce motion" keeps them still; the lighter looks no longer do. Both stop with every other frame while the app is away. */
-function aoStill(){return AT.red0!=null?!!AT.red0:!!AT.reduce}
+function aoStill(){return(AT.red0!=null?!!AT.red0:!!AT.reduce)||document.body.classList.contains('lkm1')}
 function aoLogoBtn(now){const cv=document.getElementById('atomC');if(!cv)return;const st=aoStill();if(st&&cv.dataset.done)return;if(UI.lite&&cv.dataset.done&&now-AOS.lb<60)return;AOS.lb=now;cv.dataset.done=1;paintAtom(cv,28,Math.min(4,(window.devicePixelRatio||1)*ZOOM*2),AT.btn,st?2:now/1000)}
 drawAtom=function(){const cv=document.getElementById('atomC');if(cv&&!cv.dataset.done)aoLogoBtn(performance.now())};
 setLoop=function(now){if($('#set').hidden){SLP2.on=false;return}requestAnimationFrame(setLoop);
@@ -20847,7 +20861,7 @@ const AB1=(()=>{const TAU=Math.PI*2,D=Math.PI/180,ATOM=116,KINDS=['corner','shee
     const np=pr(0,0,1),ux=(np[0]-cx)/R,uy=(np[1]-cy)/R,hh=Math.hypot(ux,uy)||1;c.beginPath();for(const sg of[-1,1]){c.moveTo(cx+sg*ux/hh*(R+4),cy+sg*uy/hh*(R+4));c.lineTo(cx+sg*ux/hh*(R+16),cy+sg*uy/hh*(R+16))}c.strokeStyle='rgba('+COL.earth+',.6)';c.lineWidth=1;c.stroke()}
   /* which picture: one or the other, an even chance at every opening. Test hook: AB1.force('corner' or 'sheet'), or the same word in localStorage 'audiolab-about-test' */
   function pick(){let f=force;try{f=f||localStorage.getItem('audiolab-about-test')}catch(e){}return KINDS.includes(f)?f:KINDS[Math.random()<.5?0:1]}
-  const still=()=>AT.reduce||document.body.classList.contains('lite');
+  const still=()=>AT.reduce||document.body.classList.contains('lite')||document.body.classList.contains('lkstill');
   function html(){const sr=ctx?ctx.sampleRate:0,bl=ctx&&ctx.baseLatency?Math.round(ctx.baseLatency*sr):0,ua=navigator.userAgent,br=/Chrome\/(\d+)/.exec(ua),sf=/Version\/([\d.]+).*Safari/.exec(ua);
     const info=[['Version',VERSION],['Build',BUILD],['Audio engine','Web Audio · 32-bit float'],['Running at',(sr?(sr/1000)+' kHz':'not started')+(bl?' · '+bl+' samples':'')],['Instruments',Object.keys(PRESETS).length],['Effects',Object.keys(FXDEF).length],['Platform',(/Mac/.test(ua)?'macOS':'Desktop')+' · '+(br?'Chrome '+br[1]:sf?'Safari '+sf[1]:'Browser')],['CPU cores',navigator.hardwareConcurrency||'?']];
     const all=AHF.reduce((m,x)=>m+x[2].length,0),hl=AHF.flatMap(x=>x[2].filter(y=>y[4]));
@@ -22044,6 +22058,79 @@ function NI_mapClick(e){const a=NI_mapAt(e);if(!a)return;const o=NI_mapOwn(a.b,a
   const w=NI_bb(a.b);toast(tid?`Bar ${w.bar}.${w.beat}: ${trkById(tid).name} selected.`:`Bar ${w.bar}.${w.beat}.`)}
 NI.map.open=NI_mapOpen;NI.map.close=()=>NI_mapClose(false);NI.map.draw=NI_mapDraw;NI.map.own=NI_mapOwn;NI.map.grid=()=>NI.map.g||NI_mapGrid();
 /* ===== end of lane D NI-4 ===== */
+/* ===== task LK (lane A): look tokens =====
+   One object LOOK (and the CSS custom properties at the top of the style block, see the LK block before .dacv) holds the look values that the drawers read
+   instead of literals, so later tasks (DS design round 2, MD1, SC, DV) change values here, not in the drawers. The user's DR3 picks (27 Nov):
+   G3 drafting grid, W1 hairlines, L2 amber units, A1 yellow selection, M3 ambient motion, N3 dense. No new direction: today's colours stay.
+   LOOK is declared with var and filled by lkT(), a hoisted function, so a drawer that runs before this block (at start-up) still finds it.
+   The Settings look sliders that used the name LOOK before are LOOK_SL now. INS (lane E) reads LOOK through INS.look(): the keys of the same names win. */
+var LOOK;
+function lkMake(){return{
+  v:1,
+  grid:'G3',lines:'W1',labels:'L2',accent:'A1',motion:'ambient',density:'dense',dense:true,
+  /* G3 drafting grid in the arrangement (alpha of white, times Grid brightness and the theme's factor): every 4 bars, bar, beat, sixteenth, and the
+     faint quarter lines across each lane (graph paper). All W1 hairlines: one device pixel. kd evens the weight between 1x, 1.75x and 2x. */
+  gr:{phrase:.30,bar:.16,beat:.08,six:.04,row:.028},
+  /* the piano roll's three levels (bar, beat, sixteenth) and its octave line */
+  pr:{bar:.24,beat:.13,six:.065,oct:.16},
+  /* display grids (devices, meters' scales, science drawings): three levels, as INS names them */
+  gMaj:'rgba(255,255,255,.13)',gMid:'rgba(255,255,255,.05)',gMin:'rgba(136,136,136,.07)',
+  /* line weights in CSS px as INS reads them; a hairline is never thinner than one device pixel (LOOK.hair) */
+  lwGrid:.5,lwLine:.5,lwCurve:1,
+  /* L2: values in the normal text colour with equal-width digits, units and unit-like labels in amber, case as written (MS would read as megaseconds) */
+  ink:'#ececf1',mut:'#8b8b97',lab:'#b7b7c2',tick:'rgba(255,255,255,.32)',tickHi:'rgba(255,255,255,.5)',
+  ui:'Inter,system-ui,sans-serif',mono:'"JetBrains Mono",ui-monospace,Menlo,monospace',digits:'tabular',unitCase:'as written',labelCase:'sentence',
+  unit:'#ffb547',meas:'#ffb547',
+  /* A1: today's yellow is the one selection accent; limits keep their colours */
+  sel:'#f5c84c',sel3:'245,200,76',warn:'#f5c84c',over:'#ff6b6b',ok:'#3ecf8e',
+  /* N3: track height and row spacing relative to today's (96 px tracks at the user's size; the pick page's 48 against 62 px) */
+  dens:{roomy:76/62,today:1,dense:48/62},th0:96,row0:28,rowMin:24,
+  hair:d=>1/Math.max(1,d||1),
+  ambientOK(){return lkT().motion==='ambient'&&!(typeof UI==='object'&&UI.lite)&&!(typeof AT==='object'&&AT.reduce)&&!document.hidden}
+}}
+function lkT(){return LOOK||(LOOK=lkMake())}
+lkT();
+function lkSel(a){return'rgba('+lkT().sel3+','+a+')'}
+/* the arrangement's grid values for one drawing (cheap: a few multiplications per view change) */
+function lkGrid(dpr){const L=lkT(),G=L.gr,kd=Math.min(1.15,Math.max(.7,Math.sqrt((dpr||1)/1.75))),gk=(typeof UI==='object'&&UI.gridB!=null?UI.gridB:50)/50,tk=(typeof TH==='object'&&TH.grk)||1;
+  return{hp:L.hair(dpr),kd,phrase:G.phrase*kd,bar:G.bar*kd,beat:G.beat*kd,six:G.six*kd,rows:L.grid==='G3',rowC:'rgba('+((typeof TH==='object'&&TH.gr)||'255,255,255')+','+Math.min(1,G.row*kd*gk*tk)+')'}}
+function lkPR(){const d=(window.devicePixelRatio||1)*(typeof ZOOM==='number'?ZOOM:1),L=lkT(),kd=Math.min(1.15,Math.max(.7,Math.sqrt(d/1.75))),c=a=>'rgba(255,255,255,'+Math.min(1,a*kd)+')';
+  return{d,hp:L.hair(d),bar:c(L.pr.bar),beat:c(L.pr.beat),six:c(L.pr.six),oct:c(L.pr.oct)}}
+/* L2 on a canvas: the value in the current fill colour, its unit after it in amber; returns the width */
+const LKU=/^(.*?[0-9∞])(\s?)([A-Za-zµ%°×][A-Za-z0-9µ%°×/]*|:1)$/;
+function lkVU(g,s,x,y){const m=LKU.exec(String(s));if(!m){g.fillText(s,x,y);return g.measureText(s).width}const a=m[1]+m[2],wa=g.measureText(a).width;g.fillText(a,x,y);const f=g.fillStyle;g.fillStyle=lkT().unit;g.fillText(m[3],x+wa,y);g.fillStyle=f;return wa+g.measureText(m[3]).width}
+/* L2 in the page: an output's text with its unit in an amber span; the text (textContent) stays exactly the same, and nothing is touched when it did not change */
+function lkOut(o,s){s=String(s);if(o.textContent===s&&(o.firstElementChild||!LKU.test(s)))return;const m=LKU.exec(s);if(!m){o.textContent=s;return}o.textContent=m[1]+m[2];const u=document.createElement('span');u.className='lku';u.textContent=m[3];o.appendChild(u)}
+/* ---- density (N3) ---- */
+function lkDensK(){return lkT().dens[(typeof UI==='object'&&UI.lkDens)||'dense']||lkT().dens.dense}
+function lkTh(){return Math.round(lkT().th0*lkDensK())}
+/* a project keeps a track height it chose itself; the default (marked thD in its view, or today's 96 px in a view from before LK) follows the Density setting */
+function lkIsDef(v){if(!v||v.th==null)return true;if(v.thD!=null)return Math.abs(v.th-v.thD)<.5;return Math.abs(v.th-lkT().th0)<.5}
+function lkThFix(){if(!lkIsDef(V))return false;const t=lkTh(),o=V.th;V.th=t;V.thD=t;if(o&&o!==t)V.y=V.y/o*t;try{clampV()}catch(e){}V.thD=V.th;return true}
+/* ---- motion (M3) ---- */
+function lkApply(){const L=lkT(),u=typeof UI==='object'?UI:{},b=document.body,r=document.documentElement.style,k=lkDensK(),d=(window.devicePixelRatio||1)*(typeof ZOOM==='number'?ZOOM:1);
+  L.density=u.lkDens||'dense';L.dense=L.density==='dense';L.motion=u.lkMotion||'ambient';
+  if(b){b.classList.toggle('lkm1',L.motion==='signal');b.classList.toggle('lkstill',L.motion!=='ambient')}
+  r.setProperty('--lk-hair',(1/Math.max(1,d)).toFixed(4)+'px');r.setProperty('--lk-row',Math.max(L.rowMin,Math.round(L.row0*k))+'px');r.setProperty('--lk-rowpad',Math.round(5*Math.min(k,1.3))+'px');r.setProperty('--lk-dens',k.toFixed(3));
+  if(typeof INS==='object')INS._lk=null}
+const LK_ROWS=[
+ {"id":"density","l":"Density","pg":"layout","ap":"appearance","b":"Density and motion","sc":"app","k":"UI.lkDens","c":"#lkDens","t":"select","d":"dense","h":"How tightly tracks and lists are packed. Dense fits more tracks on the screen, Roomy gives each track more height. A project where you set the track height yourself keeps it.","w":"density dense compact roomy tight spacing track height rows lists"},
+ {"id":"motion","l":"Motion","pg":"layout","ap":"appearance","b":"Density and motion","sc":"app","k":"UI.lkMotion","c":"#lkMotion","t":"select","d":"ambient","h":"What may move on its own. Signal only: the playhead, meters and displays. Signal and transitions: also short animations when things open and close. Ambient: also slow drawings on empty and waiting screens, never in Light mode.","w":"motion animation ambient transitions still calm moving drawings reduce"}];
+try{for(const r of LK_ROWS)if(!STX.has(r.id)){STT.push(r);STX.set(r.id,r)}}catch(e){}
+const LK_HOOKS=window.LK_HOOKS=window.LK_HOOKS||{};
+Object.assign(LK_HOOKS,{
+  /* for lane B's new Settings window: the two rows in the S4 table's shape, page Appearance (they sit on the Layout page until that page exists) */
+  appearanceRows:()=>LK_ROWS.map(r=>({...r,pg:'appearance'})),
+  look:lkT,apply:lkApply,th:lkTh,isDefaultHeight:lkIsDef,ambientOK:()=>lkT().ambientOK(),sel:lkSel,unitText:lkOut,unitCanvas:lkVU,grid:lkGrid,pianoGrid:lkPR});
+function lkSync(){const a=document.getElementById('lkDens'),m=document.getElementById('lkMotion');if(a)a.value=UI.lkDens||'dense';if(m)m.value=UI.lkMotion||'ambient'}
+{const a=document.getElementById('lkDens'),m=document.getElementById('lkMotion');
+ if(a)a.onchange=()=>{const was=lkIsDef(V);UI.lkDens=a.value;lkApply();if(was){V.thD=null;V.th=lkT().th0;lkThFix()}dirty=true;saveUI()};
+ if(m)m.onchange=()=>{UI.lkMotion=m.value;lkApply();try{const s=document.getElementById('splash');if(s&&typeof SPLBG==='object'&&SPLBG.running&&!SPLBG.running()&&lkT().ambientOK())SPLBG.attach(s)}catch(e){}saveUI()};
+ lkSync()}
+lkApply();lkThFix();
+{const _sp=switchProject;switchProject=function(id){const nx=PJ.list.find(p=>p.id===id),keep=V.thD;if(nx&&nx.view&&id!==PJ.cur)delete V.thD;const r=_sp.apply(this,arguments);if(V.thD==null&&!(nx&&nx.view))V.thD=keep;try{if(lkThFix())dirty=true}catch(e){}return r}}
+addEventListener('resize',()=>{try{lkApply()}catch(e){}});
+/* ===== end of task LK ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -23236,7 +23323,7 @@ function drawSpec(g,w,h,an,o){o=o||{};if(!an||!ctx)return;const D=fqOf(an),ny=ct
   if(o.peak){g.beginPath();for(let x=0;x<w;x++)x?g.lineTo(x,Y(pk[x])):g.moveTo(x,Y(pk[x]));g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1;g.stroke()}
   if(o.ref&&o.ref.length===w){g.beginPath();for(let x=0;x<w;x++)x?g.lineTo(x,Y(o.ref[x])):g.moveTo(x,Y(o.ref[x]));g.strokeStyle='rgba(255,154,60,.8)';g.setLineDash([4,3]);g.lineWidth=1.2;g.stroke();g.setLineDash([])}
   return{Y,sm,pk,X}}
-function gridF(g,w,h,lab,col){g.strokeStyle=col||'rgba(255,255,255,.06)';g.lineWidth=1;g.font='9px Inter,system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.3)';for(const f of[30,50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fX(f,w))+.5;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();if(lab!==false)g.fillText(f>=1000?f/1000+'k':f,x+2,h-3)}}
+function gridF(g,w,h,lab,col){g.strokeStyle=col||'rgba(255,255,255,.06)';g.lineWidth=1;g.font='9px Inter,system-ui,sans-serif';g.fillStyle='rgba(255,255,255,.3)';const L=lkT(),d=INS.dpr(g),lc=g.fillStyle;for(const f of[30,50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fX(f,w)*d)/d;g.fillStyle=col||(f===100||f===1000||f===10000?L.gMaj:f===30?L.gMin:L.gMid);g.fillRect(x,0,1/d,h);g.fillStyle=lc;if(lab!==false)g.fillText(f>=1000?f/1000+'k':f,x+2,h-3)}}
 /* ---- master chain ---- */
 const MFXM=new Map();let MSIG='';
 const MSTO={id:'__m',kind:'master',name:'Master',color:'#cfd3db',vol:1,pan:0,mute:false,solo:false,clips:[],get fx(){return S.mfx||(S.mfx=[])},set fx(v){S.mfx=v}};

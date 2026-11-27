@@ -109,6 +109,8 @@ with sync_playwright() as p:
         cost=pg.evaluate("()=>{const s=document.getElementById('splash'),t=performance.now();for(let i=0;i<200;i++)SPLBG.attach(s);return(performance.now()-t)/200}")
         r0,r1=res[False],res[True];print(f'  {kind}: {r0["fr"]/r0["ms"]*1000:.1f} pictures a second ({r0["scr"]/r0["ms"]*1000:.1f} screen frames), lighter looks {r1["fr"]/r1["ms"]*1000:.1f}; one picture {cost:.3f} ms at 1600x1000')
         ck(f'{kind}: at most 60 pictures a second, at most 30 in the lighter looks',r0['fr']/r0['ms']*1000<=61 and r0['fr']>20 and r1['fr']/r1['ms']*1000<=31.5,[r0,r1])
+        ck(f'{kind}: Light mode: the picture stands still (task LK, M3: no ambient motion in Light mode)',r1['fr']<=1,r1)
+        pg.evaluate("()=>{document.body.classList.remove('lite');document.body.classList.remove('fxstill')}");pg.wait_for_timeout(100)
         if kind=='dipole':
             g=pg.evaluate("()=>{const s=document.getElementById('splash');return{hint:s.querySelector(':scope>p').textContent,bar:getComputedStyle(s.querySelector('em')).transform,sp1:s.classList.contains('sp1')}}");ck('Show now: the same card, bar full, "Click to close"',g['sp1'] and g['hint']=='Click to close' and g['bar'] in('none','matrix(1, 0, 0, 1, 0, 0)'),g)
             a=pg.evaluate("()=>new Promise(r=>{const A=window.AudioLab.run('AO');A.gate=true;const f0=SPLBG.frames();setTimeout(()=>{const f1=SPLBG.frames();A.open();setTimeout(()=>r([f1-f0,SPLBG.frames()-f1]),600)},700)})") if R(pg,"typeof AO")=='object' else None
