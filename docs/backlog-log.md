@@ -5115,3 +5115,33 @@ Only the gate promotes (`AL_PROMOTE=1 node desktop/scripts/sync-app.js`, notes t
 
 ### What the user can do with v0.250 now
 Switch the IAC Driver offline in Audio MIDI Setup, or rename its "Ableton Push to Cubase" port so it does not contain "Ableton Push". Either works until v0.261 is installed. With v0.261 the IAC port can stay on.
+
+## 27 November 2026, v0.262: task DS-P1, piano roll rows, keys and chord names (design round 2, lane A)
+
+Step 3 of the lane order for design round 2 (picks `A5 P4 B3 T3 | AC3 AW3 AG2 AP2 PN3 PV3 PS3 PK3 PG1 ...`): the piano roll details **PS3** (scale rows, root line, out-of-scale ring, chord names) and **PK3** (narrow keys, every row named), drawn as the pick page's `drawPR` with `s:3,k:3`. Chord names fitted in this run, so there is no part b. Started after GS4 (v0.243, in this log; the history rewrite squashed its commit). Edit script `tools/design-lab/ds/ds_p1.py` (needs DS-A3's `dsAC3`; six asserted anchors in `drawPR` plus the block before `askChoice`), test `tools/ui-tests/taskDS_P1.py` (21 checks; `--shots DIR` saves Dark and Light pictures).
+
+### What changed
+- **Rows** (with a scale chosen): rows in the scale `#17181e`, the others `#0d0d11` (black or white key no longer matters there); a one-device-pixel amber line (`rgba(245,185,76,.42)`) along the bottom of every root row; the octave hairline at C stays. With the scale set to none, today's rows.
+- **Out of scale**: a dotted amber ring 1.5 px around each note outside the scale, and a label "G♯4 outside A minor" left of the note (right of it if there is no room) when it is one of at most two such notes in view, or selected, or under the pointer (the pointer only causes a redraw when it moves onto or off such a note). Not on drum clips.
+- **Chords in the ruler**: from every instrument track's notes under the clip (drum kits, muted tracks, clips and notes left out), in half-bar steps: the pitch classes weighted by how long they sound, a tone counts when it has at least 30 % of the strongest one's weight (so a passing melody note does not turn F into Fmaj7), matched against major, minor, dim, aug, sus2, sus4, 7, maj7 and m7, with the lowest held note favouring its root (Am7 rather than C6); equal neighbours merged. Amber name with a short tick at its start, after the bar number when it starts on a numbered bar; the chord under the left edge stays pinned there; names that would overlap are skipped. Worked out once per edit (`changed()` now counts edits in `DSP1.rev`; the list is keyed by that, the clip and the project) and never while idle or playing.
+- **Keys (PK3)**: the keys narrow to 24 px, a dark name column beside them with a name on every row from 9 px row height (C only from 7 px): root amber, in the scale light, outside grey; with no scale white keys light and black keys grey. The column is drawn into a cached picture keyed by scroll, row height, scale, root, size and pixel ratio, and only copied while playing. Clicking anywhere in the column still plays the note. Drum clips keep today's keys and pad names.
+- Only in the AudioLab look (`dsAC3()`, as DS-A3 and DS-A4); the other looks keep today's piano roll. Note names use ♯ in the new labels; the octave numbers follow the app's `nname` (60 = C5), as the notes already show.
+- Helpers `DSP1`, `dsNN`, `dsP1Begin`, `dsP1In`, `dsP1Row`, `dsP1Root`, `dsP1Out`, `dsP1Labels`, `dsP1ChordOf`, `dsP1Chords`, `dsP1Ruler`, `dsP1Keys` (before `askChoice`). Overlaps: lane C's scale lock (`PR.lock`, `scSnap`) and Feel chords are unchanged and reused (same `PR.root`, `PR.scale`); lane C's open FT-F12 (chord track) and FT-F11 (project key) can reuse `dsP1ChordOf` and these rows. No new controls, so no new tooltips.
+
+### Tested
+- `tools/ui-tests/taskDS_P1.py`, 21 of 21 (2194x1139 at 1.75x, Fractals plus a made-up pad Am F C G and an A minor lead with one G♯ after the song's end; full-screen piano roll; Dark and Light): chords Am F C G at bars 1 to 4 despite the lead, cached between pictures, nothing worked out while idle, an added F turns G into G7, known sets named (C, Am7, Cm, Dm, Bdim, Csus4); rows lift and sink and the amber root line in the pixels (Dark and Light); key column not redrawn without a view change, root named in amber, in-scale light, outside grey; the G♯ marked and labelled, the ring in the pixels; scale none: no ring; chord names amber in the ruler; FL style: today's piano roll; drum clip: today's keys; no console errors.
+- Unchanged: `taskDS_A3.py` 19/19, `taskDS_A4.py` 17/17, `taskLK.py` 32/32. `midipanel.py`, `taskAN.py`, `taskD3.py`, `taskST_S2.py` and `sideheaders.py` give the same results on main v0.261 as on this build (the first four stop the same way on both: stale names or layouts from older versions).
+- Screenshots Dark and Light at the user's size compared side by side with the pick page's `drawPR` drawn with `s:3,k:3` (rows, root line, ring and label, chord names, key names match; the page draws the ring solid although its text says dotted, the app draws it dotted).
+- Pre-existing: `hsh` is defined twice with the same body (lines near 12057 and 12354, on main too); left alone.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, this build): Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e) with the master put back to 0 dB, the same as the references in the newest entries (-19.05560 and -35.48685 dB at master -10 dB); every voice engine's checksum as before. No audio code touched.
+- Frame time (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, piano roll closed, software renderer, alternating; main-thread ms per frame):
+
+  | Scene | v0.261 run 1 | DS-P1 run 1 | v0.261 run 2 | DS-P1 run 2 |
+  |---|---|---|---|---|
+  | idle | 7.63 | 8.06 | 7.73 | 7.95 |
+  | play | 25.97 | 20.48 | 22.92 | 20.87 |
+
+  Idle within the noise of this machine (nothing of DS-P1 runs with the piano roll closed). With the piano roll open (200 `drawPR` calls, the test's clip, A minor): median 0.1 ms both (timer resolution), mean 0.82 and 0.88 ms on v0.261, 0.96 and 0.88 ms with DS-P1.
+
+### What is left
+- Next run: **DS-P2** notes and velocity (PN3 names inside notes, PV3 velocity bars with values, PG1 other tracks as faint outlines). Then DS-T2, DS-B1, DS-B2, DS-A1 (with GL1, the lines picks are in), then MD1, then DS-A2 and DS-T1.

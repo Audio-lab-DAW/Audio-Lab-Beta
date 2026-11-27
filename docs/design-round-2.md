@@ -136,7 +136,7 @@ Small and visible first, the shared grid before the things drawn on it, the brow
 2. **DR2-A2, playhead and selection** (AP): cap, flag with position and time, selection size at rest. After MD1 (time formatting, caliper style).
 3. **DR2-A3, clips** (AC): band height, body tint, length read-out, loop repeat marks; cached text per clip. **Done (task DS-A3), v0.252**: AC3, no band (name on the body, 2 px colour edge, darker body); loop repeat marks not drawn, the app has no clip looping.
 4. **DR2-A4, waveforms** (AW): peak and loudness body or outline, cached per clip and zoom level; the three-band analysis only if AW3 or A5 is picked. **Done (task DS-A4), v0.254**: AW3, three bands (lows blue, mids amber, highs white), analysis once per buffer, drawing in the per-clip cache.
-5. **DR2-P1, piano roll rows and keys** (PS, PK): scale rows, root line, out-of-scale ring, octave names, Hz on keys; chord names (PS3) as a separate step if picked.
+5. **DR2-P1, piano roll rows and keys** (PS, PK): scale rows, root line, out-of-scale ring, octave names, Hz on keys; chord names (PS3) as a separate step if picked. **Done (task DS-P1), v0.262**: PS3 (scale rows, amber root line, dotted ring and label on notes outside the scale, chord names in the ruler, all in one step) and PK3 (narrow keys, every row named), only the AudioLab look, not on drum clips.
 6. **DR2-P2, notes and velocity** (PN, PV, PG): note shape, velocity display, ghost outlines, note read-out.
 7. **DR2-T1, clock and tempo** (TT, TB, TL): after MD1; the beat orbit reuses MD1's orbit loader drawing.
 8. **DR2-T2, meters, CPU and top bar** (TM, TC, TS): meter scales, CPU line from the existing CPU sampling, the top bar status line together with X10 (science round 2, SC-K).
