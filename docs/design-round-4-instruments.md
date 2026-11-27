@@ -421,6 +421,8 @@ Each task:
    - one FFT cache per analyser per frame
 
    No visible change yet. While there, fix the meter "Loudness" reading so it is K-weighted (or label it truthfully), and fix the double `vizSide`.
+
+   **Done in v0.241** (task IN-A): module `INS` in index.html; the Loudness reading is K-weighted, `vizSide` fixed (the Visualizer's helper is `vizDockSide`). See the backlog log.
 2. **IN-M, level meters (M).** Mixer strips (Flat bars kept), track headers, master, transport and the settings preview `mtrPv`. Uses IN-A's scale and ballistics. RMS and crest come from `al-meter` or the analyser data already read.
 3. **IN-L, loudness (L).** Top-bar box, `#lufsPop`, `.mxme` master box, `ND('loud')` and `ND('measure')`. The data is already in `LM`; only the drawing and the colour rule change. LRA settling uses X15.
 4. **IN-S, spectrum (S).** `ND('spec')`, the overlay (SPO), the Visualizer spectrum and the mixer spec view share one drawer. Analyser fftSize and smoothing move to the IN-A cache.
@@ -434,3 +436,13 @@ Each task:
 
 - Whether L2 (the history) should also sit in the loudness pop-up next to L1. The page treats L as one pick.
 - K-system (M4) could be a menu choice beside any M pick rather than a design of its own.
+
+## The user's picks (27 November 2026, 15:08 Brussels)
+
+`My picks: M2 | L2 | S2 | O0 O1 O4 | G1 G3 G4 | E3 | V1 map viridis | C1 | D1`
+
+- L2 (loudness history) replaces L1.
+- O0 keeps today's stereo and scope drawing as one kept view; O1 (marks and afterglow) and O4 (polar view as an extra menu choice) are added to it.
+- The Visualizer's colour map is viridis.
+
+Built by task IN (lane E), one step per run in the implementation order above: IN-A, IN-M, IN-L, IN-S, IN-E, IN-G, IN-O, IN-V, IN-C/IN-D.

@@ -5864,7 +5864,7 @@ function drawMixer(){const w=$('#mixWin');if(!w||w.hidden||!MXV)return;if(FRN%2)
         else{for(const[p2,c2] of MXPAL[cm])gr.addColorStop(clamp(1-sy(-60+p2*60)/H,0,1),c2)}
         g.fillStyle='#14161c';g.fillRect(x,0,bw,H);g.fillStyle=gr;g.fillRect(x,sy(v),bw,H-sy(v));if(hd>-59){g.fillStyle=hd>=-.1?'#ff3b3b':'#fff';g.fillRect(x,sy(hd),bw,1.5)}if(hd>=-.1){g.fillStyle='#ff1d6e';g.fillRect(x,0,bw,3)}}
       if(mxOpt('meter','ticks')){g.fillStyle='rgba(255,255,255,.25)';for(const d of[0,-6,-12,-24,-48])g.fillRect(2,sy(d),3,1)}}
-    else if(view==='spec'){if(live){const an=aL;an.getByteFrequencyData(mxF.subarray(0,an.frequencyBinCount));const n=an.frequencyBinCount,bars=Math.max(6,Math.floor(H/5));for(let b=0;b<bars;b++){const f0=Math.floor(Math.pow(n,b/bars)),f1=Math.max(f0+1,Math.floor(Math.pow(n,(b+1)/bars)));let m=0;for(let q=f0;q<f1&&q<n;q++)m=Math.max(m,mxF[q]);const v=m/255,y=H-(b+1)*H/bars;g.fillStyle=cm==='rainbow'?`hsl(${(1-b/bars)*270},85%,${45+v*20}%)`:cm==='track'?col:cm==='heat'?heatCol(v):(()=>{const c3=mxPosRGB(cm,b/bars,cm==='tri'?.5+v*.5:v,col);return`rgb(${c3[0]},${c3[1]},${c3[2]})`})();g.globalAlpha=cm==='track'||cm==='rainbow'?.25+v*.75:.35+v*.65;const mir=mxOpt('spec','mirror');if(mir)g.fillRect(W/2-v*(W/2-3),y+1,v*(W-6),H/bars-1.5);else g.fillRect(3,y+1,v*(W-6),H/bars-1.5);H0.sc=H0.sc||[];H0.sc[b]=Math.max(v,(H0.sc[b]||0)-.012);if(mxOpt('spec','caps')){g.globalAlpha=.9;g.fillStyle='#fff';const cw=H0.sc[b]*(mir?(W/2-3):(W-6));if(mir){g.fillRect(W/2-cw-1,y+1,1.5,H/bars-1.5);g.fillRect(W/2+cw-.5,y+1,1.5,H/bars-1.5)}else g.fillRect(3+cw,y+1,1.5,H/bars-1.5)}}g.globalAlpha=1}}
+    else if(view==='spec'){if(live){const an=aL;INS.fftB(an,mxF.subarray(0,an.frequencyBinCount));const n=an.frequencyBinCount,bars=Math.max(6,Math.floor(H/5));for(let b=0;b<bars;b++){const f0=Math.floor(Math.pow(n,b/bars)),f1=Math.max(f0+1,Math.floor(Math.pow(n,(b+1)/bars)));let m=0;for(let q=f0;q<f1&&q<n;q++)m=Math.max(m,mxF[q]);const v=m/255,y=H-(b+1)*H/bars;g.fillStyle=cm==='rainbow'?`hsl(${(1-b/bars)*270},85%,${45+v*20}%)`:cm==='track'?col:cm==='heat'?heatCol(v):(()=>{const c3=mxPosRGB(cm,b/bars,cm==='tri'?.5+v*.5:v,col);return`rgb(${c3[0]},${c3[1]},${c3[2]})`})();g.globalAlpha=cm==='track'||cm==='rainbow'?.25+v*.75:.35+v*.65;const mir=mxOpt('spec','mirror');if(mir)g.fillRect(W/2-v*(W/2-3),y+1,v*(W-6),H/bars-1.5);else g.fillRect(3,y+1,v*(W-6),H/bars-1.5);H0.sc=H0.sc||[];H0.sc[b]=Math.max(v,(H0.sc[b]||0)-.012);if(mxOpt('spec','caps')){g.globalAlpha=.9;g.fillStyle='#fff';const cw=H0.sc[b]*(mir?(W/2-3):(W-6));if(mir){g.fillRect(W/2-cw-1,y+1,1.5,H/bars-1.5);g.fillRect(W/2+cw-.5,y+1,1.5,H/bars-1.5)}else g.fillRect(3+cw,y+1,1.5,H/bars-1.5)}}g.globalAlpha=1}}
     else if(view==='sgram')mxSgram(g,W,H,H0,aL,live,cm,col);
     else if(view==='fun')mxFun(g,W,H,H0,aL,aR,live,cm,col,pl,pr);
     else{const S0=Math.min(W-6,H-6)*({s:.5,m:.75}[mxOpt('stereo','size')]||1),sx=(W-S0)/2,sy0=3;
@@ -6347,7 +6347,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.240',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.241',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6622,7 +6622,7 @@ let FQ=null,MG=null,PH=null,MT=null,SPEC=null,TD=null;
 function vizInst(f){if(IBCTX&&IBFXN&&IBCTX.fx&&IBCTX.fx[0]===f)return IBFXN;if(selT==='__m')return MFXM.get(f.id);const N=NODES.get(selT);return N&&N.fxm.get(f.id)}
 function gridFreq(g,w,h){g.strokeStyle='rgba(255,255,255,.06)';g.fillStyle='rgba(255,255,255,.3)';g.font='9px Inter,system-ui,sans-serif';g.lineWidth=1;
   for(const f of[50,100,200,500,1000,2000,5000,10000]){const x=Math.round(fX(f,w))+.5;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();g.fillText(f>=1000?f/1000+'k':f,x+2,h-3)}}
-function spectrum(g,w,h,an,col,top){if(!an)return;if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(SPEC);const ny=ctx.sampleRate/2;
+function spectrum(g,w,h,an,col,top){if(!an)return;if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);INS.fft(an,SPEC);const ny=ctx.sampleRate/2;
   g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const bin=Math.min(SPEC.length-1,Math.round(xF(x,w)/ny*SPEC.length));const db=Math.max(-100,SPEC[bin]);g.lineTo(x,h-(db+100)/80*(h-top))}g.lineTo(w,h);g.closePath();g.fillStyle=col;g.fill()}
 function level(an){if(!an)return 0;if(!TD||TD.length!==an.fftSize)TD=new Float32Array(an.fftSize);an.getFloatTimeDomainData(TD);let s=0;for(let i=0;i<TD.length;i+=2)s+=TD[i]*TD[i];return Math.sqrt(s/(TD.length/2))}
 /* ---------- Pro EQ (FabFilter-style) ---------- */
@@ -6664,7 +6664,7 @@ function vizEQ2(g,w,h,f,X){const p=f.p,sel=eqSel(f),R=24,dy=db=>h/2-db/R*(h/2-12
   const bg=g.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#0b0d14');bg.addColorStop(1,'#06070a');g.fillStyle=bg;g.fillRect(0,0,w,h);
   g.font='9px Inter,system-ui,sans-serif';for(const fr of[30,50,100,200,300,500,1000,2000,3000,5000,10000,20000]){const x=Math.round(fX(fr,w))+.5;g.fillStyle=/^(1|2|5)/.test(String(fr))?'rgba(255,255,255,.07)':'rgba(255,255,255,.035)';g.fillRect(x,0,1,h);if(/^(1|2|5)0*$/.test(String(fr))||fr===50){g.fillStyle='rgba(255,255,255,.32)';g.fillText(fr>=1000?fr/1000+'k':fr,x+3,h-4)}}
   for(const db of[-18,-12,-6,0,6,12,18]){const y=Math.round(dy(db))+.5;g.fillStyle=db?'rgba(255,255,255,.05)':'rgba(255,255,255,.14)';g.fillRect(0,y,w,1);g.fillStyle='rgba(255,255,255,.3)';g.fillText((db>0?'+':'')+db,w-20,y-2)}
-  if(X&&p.an!=='off'&&ctx){const sp=(an,fill,line)=>{if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(SPEC);const ny=ctx.sampleRate/2,N=SPEC.length;g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const fr=xF(x,w),k=Math.min(N-1,Math.round(fr/ny*N)),v=SPEC[k]+4.5*Math.log2(fr/1000);const y=clamp(h-(v+90)/84*h,0,h);g.lineTo(x,y)}g.lineTo(w,h);g.closePath();g.fillStyle=fill;g.fill();if(line){g.strokeStyle=line;g.lineWidth=1;g.stroke()}};
+  if(X&&p.an!=='off'&&ctx){const sp=(an,fill,line)=>{if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);INS.fft(an,SPEC);const ny=ctx.sampleRate/2,N=SPEC.length;g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const fr=xF(x,w),k=Math.min(N-1,Math.round(fr/ny*N)),v=SPEC[k]+4.5*Math.log2(fr/1000);const y=clamp(h-(v+90)/84*h,0,h);g.lineTo(x,y)}g.lineTo(w,h);g.closePath();g.fillStyle=fill;g.fill();if(line){g.strokeStyle=line;g.lineWidth=1;g.stroke()}};
     if(p.an==='prepost')sp(X.pre,'rgba(150,155,170,.12)',null);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(76,201,240,.35)');gr.addColorStop(1,'rgba(76,141,255,.04)');sp(X.an,gr,'rgba(120,200,255,.45)')}
   const n=eqResp(X,f,w);
   // individual band curves for selected bands
@@ -8414,7 +8414,7 @@ function spoWire(ov){const el=ov.el;let d=null;el.querySelector('.sph').addEvent
 const spoX=(f,w)=>Math.log(f/20)/Math.log(1000)*w;
 function spoDraw(){SPO.raf=0;if(!SPO.list.length)return;for(const ov of SPO.list){const cv=ov.el.querySelector('canvas'),{g,w,h}=fit(cv),top=ov.top??-10,rng=60,y=db=>(1-clamp((db-(top-rng))/rng,0,1))*h;g.clearRect(0,0,w,h);let mxv=-200;
     g.font='9px ui-monospace,Menlo,monospace';for(const f of[50,100,200,500,1e3,2e3,5e3,1e4]){const x=spoX(f,w);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x,0,1,h);g.fillStyle='rgba(255,255,255,.35)';g.fillText(f>=1e3?f/1e3+'k':f,x+2,h-3)}for(let db=-12;db>-90;db-=24){g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,y(db),w,1)}
-    ov.pk=ov.pk||{};ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;const A=SPO.an.get(k),B=A.buf;an.getFloatFrequencyData(B);const sr=ctx.sampleRate,n=B.length,col=spoCol(k),pts=[];
+    ov.pk=ov.pk||{};ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;const A=SPO.an.get(k),B=A.buf;INS.fft(an,B);const sr=ctx.sampleRate,n=B.length,col=spoCol(k),pts=[];
       for(let px=0;px<=w;px+=2){const f=20*Math.pow(1000,px/w),f0=20*Math.pow(1000,(px-1)/w),f1=20*Math.pow(1000,(px+1)/w),i0=Math.max(0,Math.floor(f0/(sr/2)*n)),i1=Math.min(n-1,Math.max(i0,Math.ceil(f1/(sr/2)*n)));let e=0;for(let q=i0;q<=i1;q++)e+=Math.pow(10,B[q]/10);let v=10*Math.log10(e/(i1-i0+1)+1e-12);v+=4.5*Math.log2(f/1000);if(v>mxv)mxv=v;pts.push([px,y(v)])}
       g.beginPath();g.moveTo(0,h);for(const[x,yy] of pts)g.lineTo(x,yy);g.lineTo(w,h);g.closePath();g.globalAlpha=si?.1:.22;g.fillStyle=col;g.fill();g.globalAlpha=1;g.strokeStyle=col;g.lineWidth=1.5;g.beginPath();pts.forEach(([x,yy],i)=>i?g.lineTo(x,yy):g.moveTo(x,yy));g.stroke();
       if(ov.hold){const P=ov.pk[k]=ov.pk[k]&&ov.pk[k].length===pts.length?ov.pk[k]:pts.map(p=>p[1]);g.strokeStyle=col;g.globalAlpha=.45;g.setLineDash([2,3]);g.beginPath();pts.forEach(([x,yy],i)=>{P[i]=Math.min(P[i]+.35,yy);i?g.lineTo(x,P[i]):g.moveTo(x,P[i])});g.stroke();g.setLineDash([]);g.globalAlpha=1}});
@@ -8650,13 +8650,14 @@ function mtrPeak(an){if(!an)return 0;const now=performance.now(),st=an._ms||(an.
   const o=mtrO(),n=an.fftSize,sr=an.context.sampleRate;let a=MTB[n];if(!a)a=MTB[n]=new Float32Array(n);an.getFloatTimeDomainData(a);
   const dt=st.t?Math.min(.25,(now-st.t)/1000):.016;st.t=now;const k=Math.max(128,Math.min(n,Math.ceil(dt*sr)+128));let db;
   if(o.alg==='peak'){let m=0;for(let i=n-k;i<n;i++){const v=a[i]<0?-a[i]:a[i];if(v>m)m=v}db=m>1e-6?20*Math.log10(m):-90}
+  else if(o.alg==='lufs'){/* IN-A: K-weighted (ITU-R BS.1770) over a 400 ms window of only the new samples; +3.01 dB so a sound in both channels reads the LUFS the loudness box shows */const q=INS.kms(st.kw||(st.kw={}),a,INS.fresh(a,st.kw,dt*sr),n,sr);st.ss=q;db=q>1e-12?10*Math.log10(q)-.691+3.0103:-90}
   else{let q=0;for(let i=n-k;i<n;i++)q+=a[i]*a[i];q/=k;const T=MTRWIN[o.alg],c=T?1-Math.exp(-dt/T):1;st.ss+=(q-st.ss)*c;db=st.ss>1e-12?10*Math.log10(st.ss)+(o.alg==='lufs'?-.691:3.01):-90}
   const S0=MTRSPD[o.spd]||MTRSPD.fast;if(db>=st.db)st.db=S0.att?st.db+(db-st.db)*(1-Math.exp(-dt/S0.att)):db;else st.db=Math.max(db,st.db-S0.rel*dt);
   st.lin=st.db>-90?Math.pow(10,st.db/20):0;return st.lin}
 const MCOLS={heat:null,classic:[[0,[40,200,90]],[.7,[60,220,100]],[.82,[245,210,60]],[.93,[255,140,40]],[1,[255,60,60]]],ice:[[0,[30,60,140]],[.5,[60,160,255]],[.85,[150,230,255]],[1,[255,255,255]]],mono:[[0,[90,94,104]],[.85,[200,204,214]],[1,[255,255,255]]],lime:[[0,[0,140,66]],[.6,[0,255,129]],[.82,[240,235,70]],[.93,[255,150,40]],[1,[255,54,60]]],blue:[[0,[22,62,140]],[.55,[47,127,216]],[.76,[96,196,232]],[.87,[226,198,58]],[1,[224,67,58]]],mint:[[0,[0,128,140]],[.4,[0,191,191]],[.75,[0,218,173]],[.96,[0,254,149]],[1,[214,52,20]]]};
 const heatCol0=heatCol;
 heatCol=function(v){const c=MCOLS[mtrO().col];if(!c)return heatCol0(v);v=v<0?0:v>1?1:v;for(let i=1;i<c.length;i++)if(v<=c[i][0]){const[x0,p0]=c[i-1],[x1,p1]=c[i],t=(v-x0)/(x1-x0||1),f=j=>Math.round(p0[j]+(p1[j]-p0[j])*t);return`rgb(${f(0)},${f(1)},${f(2)})`}const l=c[c.length-1][1];return`rgb(${l[0]},${l[1]},${l[2]})`};
-function mtrUI(){const o=mtrO();for(const b of document.querySelectorAll('#mtrSet [data-mset=col] button')){const m=b.querySelector('.mi');if(!m)continue;const sv=UI.mtr;UI.mtr=Object.assign({},UI.mtr||{},{col:b.dataset.v});m.style.background=`linear-gradient(0deg,${heatCol(.1)},${heatCol(.5)},${heatCol(.85)},${heatCol(1)})`;UI.mtr=sv;m.innerHTML=''}for(const g of document.querySelectorAll('#mtrSet [data-mset]'))for(const b of g.querySelectorAll('button'))b.classList.toggle('on',b.dataset.v===String(o[g.dataset.mset]));const h=$('#mtrHint');if(h)h.textContent={instant:'Instant: falls 240 dB/s, for seeing every hit.',fast:'Fast: jumps up at once, falls 60 dB/s (PPM-like).',normal:'Normal: falls 24 dB/s.',smooth:'Smooth: soft rise and a slow 11 dB/s fall, easy to read.'}[o.spd]+' '+{peak:'Peak shows the highest sample.',rms:'RMS shows average power over 50 ms.',vu:'VU averages over 300 ms, like an analogue VU meter.',lufs:'Loudness averages over 400 ms (momentary).'}[o.alg]}
+function mtrUI(){const o=mtrO();for(const b of document.querySelectorAll('#mtrSet [data-mset=col] button')){const m=b.querySelector('.mi');if(!m)continue;const sv=UI.mtr;UI.mtr=Object.assign({},UI.mtr||{},{col:b.dataset.v});m.style.background=`linear-gradient(0deg,${heatCol(.1)},${heatCol(.5)},${heatCol(.85)},${heatCol(1)})`;UI.mtr=sv;m.innerHTML=''}for(const g of document.querySelectorAll('#mtrSet [data-mset]'))for(const b of g.querySelectorAll('button'))b.classList.toggle('on',b.dataset.v===String(o[g.dataset.mset]));const h=$('#mtrHint');if(h)h.textContent={instant:'Instant: falls 240 dB/s, for seeing every hit.',fast:'Fast: jumps up at once, falls 60 dB/s (PPM-like).',normal:'Normal: falls 24 dB/s.',smooth:'Smooth: soft rise and a slow 11 dB/s fall, easy to read.'}[o.spd]+' '+{peak:'Peak shows the highest sample.',rms:'RMS shows average power over 50 ms.',vu:'VU averages over 300 ms, like an analogue VU meter.',lufs:'Loudness is K-weighted like the loudness meter (ITU-R BS.1770), over 400 ms (momentary): a sound in both channels reads the LUFS the loudness box shows.'}[o.alg]}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#mtrSet [data-mset] button');if(!b)return;const k=b.closest('[data-mset]').dataset.mset;UI.mtr=Object.assign({},UI.mtr||{},{[k]:b.dataset.v});saveUI();mtrUI();dirty=true});
 setTimeout(mtrUI,500);
 /* the big meter in Settings → Layout: always shows exactly the chosen speed, reading, colours and hold, and only moves while music is playing */
@@ -8883,19 +8884,19 @@ function vizEnsure(){if(!ctx||!outBus)return false;if(!VZ.an||VZ.an.context!==ct
 function vizBuild(){if(VZ.el)return VZ.el;const el=document.createElement('div');el.id='vizp';el.innerHTML=`<div class="vzh"><b>Visualizer</b><span class="seg vzm">${VZM.map(([k,l,ic])=>`<button data-vz="${k}" title="${l}"><svg viewBox="0 0 20 20"><path d="${ic}"/></svg><span>${l}</span></button>`).join('')}</span><span class="vzsp"></span><select class="vzdock" aria-label="Where the visualizer sits"><option value="top">Top</option><option value="bottom">Bottom</option><option value="left">Left</option><option value="right">Right</option><option value="float">Window</option></select><button class="vzx" title="Hide the visualizer" aria-label="Hide the visualizer">✕</button></div><div class="vzb"><canvas></canvas></div><i class="vzrz" title="Drag to resize"></i>`;
   VZ.el=el;VZ.cv=el.querySelector('canvas');el.querySelector('.vzm').onclick=e=>{const b=e.target.closest('[data-vz]');if(!b)return;UI.vizMode=b.dataset.vz;saveUI();vizPaintBtns();VZ.cols=[]};el.querySelector('.vzdock').onchange=e=>{UI.vizDock=e.target.value;saveUI();vizApply()};el.querySelector('.vzx').onclick=()=>{UI.viz=false;saveUI();vizApply()};
   let d=null;el.querySelector('.vzrz').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();d={x:e.clientX,y:e.clientY,w:el.offsetWidth,h:el.offsetHeight,dock:UI.vizDock||'bottom'};e.target.setPointerCapture(e.pointerId)});
-  el.querySelector('.vzrz').addEventListener('pointermove',e=>{if(!d)return;const z=ZOOM;if(d.dock==='bottom'){UI.vizH=clamp(d.h-(e.clientY-d.y)/z,80,520);el.style.height=UI.vizH+'px'}else if(d.dock==='top'){UI.vizH=clamp(d.h+(e.clientY-d.y)/z,80,520);el.style.height=UI.vizH+'px'}else if(d.dock==='left'){UI.vizW=clamp(d.w+(e.clientX-d.x)/z,180,800);el.style.width=UI.vizW+'px';vizSide()}else if(d.dock==='right'){UI.vizW=clamp(d.w-(e.clientX-d.x)/z,180,800);el.style.width=UI.vizW+'px';vizSide()}});
+  el.querySelector('.vzrz').addEventListener('pointermove',e=>{if(!d)return;const z=ZOOM;if(d.dock==='bottom'){UI.vizH=clamp(d.h-(e.clientY-d.y)/z,80,520);el.style.height=UI.vizH+'px'}else if(d.dock==='top'){UI.vizH=clamp(d.h+(e.clientY-d.y)/z,80,520);el.style.height=UI.vizH+'px'}else if(d.dock==='left'){UI.vizW=clamp(d.w+(e.clientX-d.x)/z,180,800);el.style.width=UI.vizW+'px';vizDockSide()}else if(d.dock==='right'){UI.vizW=clamp(d.w-(e.clientX-d.x)/z,180,800);el.style.width=UI.vizW+'px';vizDockSide()}});
   el.querySelector('.vzrz').addEventListener('pointerup',()=>{if(d){d=null;saveUI();dispatchEvent(new Event('resize'))}});return el}
 function vizPaintBtns(){if(!VZ.el)return;for(const b of VZ.el.querySelectorAll('[data-vz]'))b.classList.toggle('on',b.dataset.vz===(UI.vizMode||'all'));VZ.el.querySelector('.vzdock').value=UI.vizDock||'bottom'}
 function vizApply(){const on=!!UI.viz,dock=UI.vizDock||'bottom';const el=vizBuild();const fw=document.getElementById('vizWin');
   if(!on){el.remove();if(fw)fw.hidden=true;document.body.classList.remove('viz-l','viz-r');cancelAnimationFrame(VZ.raf);VZ.raf=0;dispatchEvent(new Event('resize'));return}
   document.body.classList.toggle('viz-l',dock==='left');document.body.classList.toggle('viz-r',dock==='right');el.className='vz-'+dock;el.style.width='';el.style.height='';
   if(dock==='float'){const w=fwin('vizWin','Visualizer',{x:200,y:140,w:560,h:300},()=>{UI.viz=false;saveUI();vizApply()});w.querySelector('.fwb').appendChild(el)}
-  else{if(fw)fw.hidden=true;if(dock==='bottom'){const bo=document.getElementById('botOut');bo.insertBefore(el,bo.firstChild);el.style.height=(UI.vizH||190)+'px'}else if(dock==='top'){document.getElementById('topOut').appendChild(el);el.style.height=(UI.vizH||190)+'px'}else{document.body.appendChild(el);el.style.width=(UI.vizW||300)+'px';vizSide()}}
+  else{if(fw)fw.hidden=true;if(dock==='bottom'){const bo=document.getElementById('botOut');bo.insertBefore(el,bo.firstChild);el.style.height=(UI.vizH||190)+'px'}else if(dock==='top'){document.getElementById('topOut').appendChild(el);el.style.height=(UI.vizH||190)+'px'}else{document.body.appendChild(el);el.style.width=(UI.vizW||300)+'px';vizDockSide()}}
   vizPaintBtns();VZ.cols=[];if(!VZ.raf)VZ.raf=requestAnimationFrame(vizFrame);setTimeout(()=>dispatchEvent(new Event('resize')),30)}
 const VZHEAT=(()=>{const c=[];for(let i=0;i<256;i++){const t=i/255;const r=Math.round(255*Math.min(1,Math.max(0,1.6*t-.35))),g=Math.round(255*Math.min(1,Math.max(0,1.8*t-.8))),b=Math.round(255*Math.min(1,Math.max(0,t<.5?.25+t*1.2:1.6-t*1.4)));c.push(`rgb(${r},${g},${b})`)}return c})();
 function vizFrame(now){VZ.raf=requestAnimationFrame(vizFrame);if(!UI.viz||!VZ.el||!VZ.el.isConnected||document.hidden)return;if(now-VZ.last<(UI.lite?33:20))return;VZ.last=now;const cv=VZ.cv,box=cv.parentElement,dp=(VZ.dp=vzDp()),W=Math.max(10,Math.floor(box.clientWidth)),H=Math.max(10,Math.floor(box.clientHeight));
   if(cv.width!==Math.floor(W*dp)||cv.height!==Math.floor(H*dp)){cv.width=Math.floor(W*dp);cv.height=Math.floor(H*dp);cv.style.width=W+'px';cv.style.height=H+'px';VZ.cols=[];VZ.sg=null}
-  const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);const live=vizEnsure();if(live){VZ.an.getFloatFrequencyData(VZ.f);VZ.an.getFloatTimeDomainData(VZ.t)}
+  const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);const live=vizEnsure();if(live){INS.fft(VZ.an,VZ.f);VZ.an.getFloatTimeDomainData(VZ.t)}
   const mode=UI.vizMode||'all';g.fillStyle='#07080b';g.fillRect(0,0,W,H);
   const P=mode==='all'?(W>=H*4?[['spec',0,0,W*.3,H],['fft',W*.3,0,W*.3,H],['wave',W*.6,0,W*.3,H],['lev',W*.9,0,W*.1,H]]:W>=H*1.6?[['spec',0,0,W*.5,H*.5],['fft',W*.5,0,W*.5,H*.5],['wave',0,H*.5,W*.78,H*.5],['lev',W*.78,H*.5,W*.22,H*.5]]:[['spec',0,0,W,H*.34],['fft',0,H*.34,W,H*.22],['wave',0,H*.56,W*.72,H*.44],['lev',W*.72,H*.56,W*.28,H*.44]]):[[mode,0,0,W,H]];
   for(const[k,x,y,w,h] of P){g.save();g.beginPath();g.rect(x,y,w,h);g.clip();g.translate(x,y);try{VZD[k](g,w,h,live)}catch(e){}g.restore();if(P.length>1){g.strokeStyle='rgba(255,255,255,.07)';g.strokeRect(x+.5,y+.5,w-1,h-1)}}}
@@ -8918,8 +8919,8 @@ const VZD={
    g.fillStyle='rgba(255,255,255,.35)';g.font='600 8px ui-monospace,Menlo,monospace';for(const d of[0,-6,-12,-24,-48]){const y=dbY(d);g.fillRect(4,y,4,1);g.fillText(d,10,y+3)}
    ch.forEach((an,i)=>{const x=34+i*(bw+6);g.fillStyle='#121318';g.fillRect(x,top,bw,bot-top);if(!live||!an)return;const pk=peakOf(an),d=pk>1e-6?20*Math.log10(pk):-90;VZ.hold[i]=Math.max((VZ.hold[i]??-90)-.35,d);const y=dbY(d),gr=g.createLinearGradient(0,bot,0,top);gr.addColorStop(0,'#3ecf8e');gr.addColorStop(.7,'#f5c84c');gr.addColorStop(.92,'#ff9a3c');gr.addColorStop(1,'#ff2d55');g.fillStyle=gr;g.fillRect(x,y,bw,bot-y);g.fillStyle='#fff';g.fillRect(x,dbY(VZ.hold[i]),bw,2);if(d>-.1){g.fillStyle='#ff2d55';g.fillRect(x,top-6,bw,4)}g.fillStyle='rgba(255,255,255,.5)';g.font='600 9px Inter,system-ui,sans-serif';g.fillText(L[i],x+bw/2-3,h-4)});
    const lx=34+2*(bw+6)+4;if(lx+30<w){const s=LM.S;g.fillStyle='rgba(255,255,255,.4)';g.font='600 8px Inter,system-ui,sans-serif';g.fillText('LUFS',lx,top+8);g.fillStyle='#eef1f6';g.font='600 13px ui-monospace,Menlo,monospace';g.fillText(s>-69?s.toFixed(1):'–',lx,top+24);g.fillStyle='rgba(255,255,255,.4)';g.font='600 8px Inter,system-ui,sans-serif';g.fillText('PEAK',lx,top+42);g.fillStyle='#eef1f6';g.font='600 12px ui-monospace,Menlo,monospace';const hp=Math.max(VZ.hold[0]??-90,VZ.hold[1]??-90);g.fillText(hp>-89?hp.toFixed(1):'–',lx,top+57)}}};
-function vizSide(){const el=VZ.el,d=UI.vizDock||'bottom';document.body.style.setProperty('--vzw',(UI.vizW||300)+'px');if(!el||!UI.viz||(d!=='left'&&d!=='right'))return;const st=document.getElementById('stage').getBoundingClientRect(),z=ZOOM;el.style.top=(st.top/z+4)+'px';el.style.bottom='auto';el.style.height=Math.max(120,st.height/z-8)+'px'}
-addEventListener('resize',()=>{clearTimeout(vizSide.t);vizSide.t=setTimeout(vizSide,60)});
+function vizDockSide(){const el=VZ.el,d=UI.vizDock||'bottom';document.body.style.setProperty('--vzw',(UI.vizW||300)+'px');if(!el||!UI.viz||(d!=='left'&&d!=='right'))return;const st=document.getElementById('stage').getBoundingClientRect(),z=ZOOM;el.style.top=(st.top/z+4)+'px';el.style.bottom='auto';el.style.height=Math.max(120,st.height/z-8)+'px'}
+addEventListener('resize',()=>{clearTimeout(vizDockSide.t);vizDockSide.t=setTimeout(vizDockSide,60)});
 setTimeout(()=>{if(UI.viz)vizApply()},400);
 /* glass costs most while playing: everything under a glass panel changes every frame, so each panel is blurred again every frame. A smaller radius while playing keeps the look and cuts that cost. */
 function glassPlay(on){if(UI.lite)return;const b=UI.blur??18;if(b<=0)return;const k=on&&UI.glPlay!==false?.5:1,r=document.documentElement.style,b1=Math.max(2,Math.round(b*k)),b2=Math.max(3,Math.round(b*1.5*k));
@@ -9814,7 +9815,7 @@ function mxPosRGB(cm,pos,v,col){if(cm==='tri'){const lo=clamp(1-pos/.42,0,1),hi=
 /* band levels of one channel: H0.b5 (sub, low, mid, high-mid, air; 0..1) and H0.b3 (bass, mids, treble; 0..255) */
 const MXBE=[150,600,2500,8000],MXBB=[1,1,1.12,1.3,1.55];
 function mxBands(an,H0){const b5=H0.b5||(H0.b5=new Float32Array(5)),b3=H0.b3||(H0.b3=new Uint8Array(3));if(!an||!ctx){b5.fill(0);b3.fill(0);return}
-  const n=an.frequencyBinCount,hz=ctx.sampleRate/an.fftSize;an.getByteFrequencyData(mxF.subarray(0,n));const acc=[0,0,0,0,0],cnt=[0,0,0,0,0],mx=[0,0,0,0,0];
+  const n=an.frequencyBinCount,hz=ctx.sampleRate/an.fftSize;INS.fftB(an,mxF.subarray(0,n));const acc=[0,0,0,0,0],cnt=[0,0,0,0,0],mx=[0,0,0,0,0];
   for(let i=0;i<n;i++){const f=i*hz,k=f<MXBE[0]?0:f<MXBE[1]?1:f<MXBE[2]?2:f<MXBE[3]?3:4,v=mxF[i];acc[k]+=v;cnt[k]++;if(v>mx[k])mx[k]=v}
   for(let k=0;k<5;k++){if(!cnt[k]){b5[k]=k?b5[k-1]:0;continue}const v=clamp((acc[k]/cnt[k]*.5+mx[k]*.5)/255*MXBB[k],0,1);b5[k]=v>b5[k]?v:b5[k]*.8+v*.2}
   b3[0]=Math.max(b5[0],b5[1])*255;b3[1]=b5[2]*255;b3[2]=Math.max(b5[3],b5[4])*255}
@@ -9824,7 +9825,7 @@ const MXSGC=new Map();
 function mxSgCols(n,fft,sr,C){const key=n+'|'+fft+'|'+sr+'|'+C;let r=MXSGC.get(key);if(r)return r;r=new Float32Array(C*2);for(let x=0;x<C;x++){const f0=30*Math.pow(20000/30,x/C),f1=30*Math.pow(20000/30,(x+1)/C);r[x*2]=Math.min(n-1.001,f0*fft/sr);r[x*2+1]=Math.min(n-1.001,f1*fft/sr)}MXSGC.set(key,r);return r}
 function mxSgram(g,W,H,H0,an,live,cm,col){const C=64,R=160;let o=H0.sg;
   if(!o){o=H0.sg={c:document.createElement('canvas'),r:0};o.c.width=C;o.c.height=R;o.x=o.c.getContext('2d');o.x.fillStyle='#07080b';o.x.fillRect(0,0,C,R);o.img=o.x.createImageData(C,1)}
-  o.r=(o.r-1+R)%R;const d=o.img.data;let n=0,cols=null;if(live&&an&&ctx){n=an.frequencyBinCount;an.getByteFrequencyData(mxF.subarray(0,n));cols=mxSgCols(n,an.fftSize,ctx.sampleRate,C)}
+  o.r=(o.r-1+R)%R;const d=o.img.data;let n=0,cols=null;if(live&&an&&ctx){n=an.frequencyBinCount;INS.fftB(an,mxF.subarray(0,n));cols=mxSgCols(n,an.fftSize,ctx.sampleRate,C)}
   for(let x=0;x<C;x++){let v=0;if(n){const b0=cols[x*2],b1=cols[x*2+1];if(b1-b0<1){const m=(b0+b1)/2,i=m|0,fr=m-i;v=mxF[i]*(1-fr)+mxF[i+1]*fr}else{for(let i=b0|0;i<=Math.min(n-1,Math.ceil(b1));i++)if(mxF[i]>v)v=mxF[i]}v=clamp((v/255-.12)/.88,0,1);v=Math.pow(v,1.25)}
     const c=mxPosRGB(cm,x/C,v,col),k=cm==='tri'?Math.min(1,v*1.6):1;d[x*4]=c[0]*k;d[x*4+1]=c[1]*k;d[x*4+2]=c[2]*k;d[x*4+3]=255}
   o.x.putImageData(o.img,0,o.r);g.imageSmoothingEnabled=true;const top=R-o.r;g.drawImage(o.c,0,o.r,C,top,0,0,W,top*H/R);if(o.r)g.drawImage(o.c,0,0,C,o.r,0,top*H/R,W,o.r*H/R);
@@ -10011,7 +10012,7 @@ const ANZD={
    for(const f of[50,100,200,500,1e3,2e3,5e3,1e4]){const x=spoX(f,w);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x,0,1,h);g.fillStyle='rgba(255,255,255,.35)';if(w>150||f===100||f===1e3||f===1e4)g.fillText(f>=1e3?f/1e3+'k':f,x+2,h-3)}
    for(let db=Math.floor(top/12)*12;db>bot;db-=12){g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,y(db),w,1)}
    const np=Math.floor(w/2)+1;let mxv=-200;ov.pk=ov.pk||{};M.p=M.p||[];
-   ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;const B=SPO.an.get(k).buf;an.getFloatFrequencyData(B);const sr=ctx.sampleRate,n=B.length,col=spoCol(k);
+   ov.src.forEach((k,si)=>{if(!ctx)return;const an=spoAn(k);if(!an)return;const B=SPO.an.get(k).buf;INS.fft(an,B);const sr=ctx.sampleRate,n=B.length,col=spoCol(k);
      if(!M.bi||M.bn!==n||M.bsr!==sr){M.bn=n;M.bsr=sr;M.bi=new Int32Array(np*2);M.tl=new Float32Array(np);for(let i=0;i<np;i++){const px=i*2,f=20*Math.pow(1000,px/w),f0=20*Math.pow(1000,(px-1)/w),f1=20*Math.pow(1000,(px+1)/w),i0=Math.max(0,Math.floor(f0/(sr/2)*n)),i1=Math.min(n-1,Math.max(i0,Math.ceil(f1/(sr/2)*n)));M.bi[i*2]=i0;M.bi[i*2+1]=i1;M.tl[i]=4.5*Math.log2(f/1000)}}
      const P=M.p[si]&&M.p[si].length===np?M.p[si]:(M.p[si]=new Float32Array(np));let any=false;
      /* no sound means no curve: bins the analyser reports as silent stay on the floor (this used to draw a rising straight line, the treble tilt applied to silence) */
@@ -10027,7 +10028,7 @@ const ANZD={
  sgram(ov,M,g,w,h,st){const W=Math.max(8,Math.ceil(w)),R=Math.max(8,Math.min(220,Math.ceil(h)));
    if(!M.c){M.c=document.createElement('canvas');M.c.width=W;M.c.height=R;M.x=M.c.getContext('2d');M.img=M.x.createImageData(1,R);M.acc=0}
    const an=ctx&&spoAn(st.k);
-   if(st.active&&an){M.acc+=st.dt*60;const n=Math.min(8,M.acc|0);M.acc-=M.acc|0;if(n>0){const B=SPO.an.get(st.k).buf;an.getFloatFrequencyData(B);const sr=ctx.sampleRate,nb=B.length;
+   if(st.active&&an){M.acc+=st.dt*60;const n=Math.min(8,M.acc|0);M.acc-=M.acc|0;if(n>0){const B=SPO.an.get(st.k).buf;INS.fft(an,B);const sr=ctx.sampleRate,nb=B.length;
        if(!M.rb||M.rn!==nb||M.rsr!==sr){M.rn=nb;M.rsr=sr;M.rb=new Float32Array(R*3);for(let r=0;r<R;r++){const p0=1-(r+1)/R,p1=1-r/R,f0=20*Math.pow(1000,p0),f1=20*Math.pow(1000,p1);M.rb[r*3]=Math.min(nb-1.001,f0/(sr/2)*nb);M.rb[r*3+1]=Math.min(nb-1.001,f1/(sr/2)*nb);M.rb[r*3+2]=4.5*Math.log2(Math.sqrt(f0*f1)/1000)}}
        const d=M.img.data,cm=st.cm;for(let r=0;r<R;r++){const b0=M.rb[r*3],b1=M.rb[r*3+1];let raw;if(b1-b0<1){const m=(b0+b1)/2,i=m|0,fr=m-i;raw=B[i]*(1-fr)+B[i+1]*fr}else{raw=-200;for(let i=b0|0;i<=b1;i++)if(B[i]>raw)raw=B[i]}
          let v=raw>-104?clamp((raw+M.rb[r*3+2]-(ANZTOP-74))/70,0,1):0;v=Math.pow(v,1.3);const pos=1-(r+.5)/R,c=cm==='rainbow'?anzHue(pos,v):mxPosRGB(cm,pos,v,st.col),kk=cm==='tri'?Math.min(1,v*1.6):1;d[r*4]=c[0]*kk;d[r*4+1]=c[1]*kk;d[r*4+2]=c[2]*kk;d[r*4+3]=v<.02?0:Math.min(255,60+v*900)}
@@ -13778,7 +13779,7 @@ function msuNode(c){const i=c.createGain(),o=c.createGain(),w=wk(c,'al-meter',{e
     const wv=m.wv;if(wv)for(let k=0;k<wv.length;k+=2){X.wmn[X.wi]=wv[k];X.wmx[X.wi]=wv[k+1];X.wi=(X.wi+1)&4095;if(X.wn<4096)X.wn++}X.wt=now};
   return X}
 /* frequency data, read at most once per picture frame */
-function msuFq(X){const now=performance.now();if(now-X.fT<6)return;X.fT=now;const n=X.anM.frequencyBinCount;if(!X.fM||X.fM.length!==n)X.fM=new Float32Array(n);X.anM.getFloatFrequencyData(X.fM);X.anW.getFloatFrequencyData(X.fW);X.anS.getFloatFrequencyData(X.fS);
+function msuFq(X){const now=performance.now();if(now-X.fT<6)return;X.fT=now;const n=X.anM.frequencyBinCount;if(!X.fM||X.fM.length!==n)X.fM=new Float32Array(n);INS.fft(X.anM,X.fM);INS.fft(X.anW,X.fW);INS.fft(X.anS,X.fS);
   /* energy of the middle (L+R)/2 and the side (L-R)/2 in four bands, smoothed; per band: correlation (M-S)/(M+S), and what is lost in mono */
   const sr=X.anW.context.sampleRate,n2=X.fW.length,hz=sr/2/n2,E=X.bE;for(let b=0;b<4;b++){const i0=Math.max(1,Math.round(MSUB[b][1]/hz)),i1=Math.min(n2-1,Math.round(MSUB[b][2]/hz));let em=0,es=0;for(let i=i0;i<=i1;i++){em+=Math.pow(10,X.fW[i]/10);es+=Math.pow(10,X.fS[i]/10)}E[b*2]=E[b*2]*.8+em*.2;E[b*2+1]=E[b*2+1]*.8+es*.2}}
 function msuTD(X){const now=performance.now();if(now-X.tT<6)return;X.tT=now;X.anL.getFloatTimeDomainData(X.tL);X.anR.getFloatTimeDomainData(X.tR)}
@@ -21626,6 +21627,134 @@ const SETT={
 };
 {const _o4=openSettings;openSettings=function(){const r=_o4.apply(this,arguments);setTimeout(()=>{try{SETT.bind()}catch(e){}},0);return r}
  const nv=document.getElementById('setNav');if(nv)nv.addEventListener('click',()=>setTimeout(()=>{try{SETT.bind()}catch(e){}},0))}
+/* ===== lane E (task IN-A): the shared instrument base =====
+   One small module for every meter, scope and analyser (docs/design-round-4-instruments.md, step IN-A). It draws nothing by itself and adds no
+   audio nodes; the later steps (IN-M level meters, IN-L loudness, IN-S spectrum, IN-E EQ, IN-G dynamics, IN-O stereo, IN-V Visualizer, IN-C CPU,
+   IN-D device previews) build on it. Parts:
+   - the look values (INS_LOOK0), until task LK adds LOOK; then LOOK's values of the same names win
+   - one number formatter (INS.fmt, INS.num, INS.hz, INS.note): units, SI prefixes, a real minus sign, a thin space before the unit, Hz with the note
+   - colour maps as lookup tables (magma, inferno, viridis, today's heat) and a colour bar
+   - scale drawers: the meter taper scale, the log frequency axis, the dB grid, the scope graticule (drafting grid levels, hairlines)
+   - ballistics: digital peak (falls 20 dB in 1.7 s, IEC 60268-18) with hold and a latched maximum, VU (IEC 60268-17), PPM type IIb (IEC 60268-10),
+     RMS over a sliding window (AES17, a sine reads its peak level), K-weighted momentary loudness (ITU-R BS.1770)
+   - one analyser read per analyser per frame (INS.fft, INS.fftB, INS.td) and the samples that are new since the last frame (INS.fresh) */
+const INS_LOOK0={/* the user's design-direction picks (DR3: G3 drafting grid, W1 hairlines, L2 amber units, A1 yellow selection, N3 dense), as named constants until task LK; the keys are meant to be LOOK's names */
+  grid:'G3',gMaj:'rgba(255,255,255,.13)',gMid:'rgba(255,255,255,.05)',gMin:'rgba(136,136,136,.07)',/* G3: three levels, like graph paper */
+  lwGrid:.5,lwLine:.5,lwCurve:1,/* W1: hairlines in CSS px (one device pixel at 2x); curves (data) one CSS px */
+  unit:'#ffb547',sel:'#f5c84c',/* L2 amber units, A1 yellow selection */
+  ink:'#ececf1',mut:'#8b8b97',lab:'#b7b7c2',tick:'rgba(255,255,255,.32)',tickHi:'rgba(255,255,255,.5)',
+  mono:'"JetBrains Mono",ui-monospace,Menlo,monospace',dense:true};
+const INS={nfft:0,ntd:0,
+  _src(){/* LK's look tokens. Note: the name LOOK is already taken by the Settings look sliders (an array), so only a plain object counts; LK points this line at its object if it picks another name */try{return typeof LOOK==='object'&&LOOK&&!Array.isArray(LOOK)?LOOK:null}catch(e){return null}},
+  look(){const L=INS._src();if(this._lk&&this._lk.src===L&&this._lk.f===FRN)return this._lk.v;const v=Object.assign({},INS_LOOK0);if(L)for(const k in INS_LOOK0)if(L[k]!=null)v[k]=L[k];this._lk={src:L,f:FRN,v};return v},
+  lite:()=>!!(typeof UI==='object'&&UI.lite),/* the Light level: half rate, no afterglow or persistence, smaller FFTs */
+  due(st,now){/* screen rate, or half of it at the Light level; st keeps its own time */const iv=INS.lite()?31:0;if(now-(st.tDraw||0)<iv)return false;st.tDraw=now;return true},
+  /* ---------- numbers ---------- */
+  MIN:'−',TS:' ',
+  num(v,d=1,plus){if(!isFinite(v))return v>0?'+∞':INS.MIN+'∞';const s=Math.abs(v).toFixed(d);if(+s===0)return(0).toFixed(d);return(v<0?INS.MIN:plus?'+':'')+s},
+  sig(v,n=3){/* n significant figures, trailing zeros kept: 12.4, 1.25, 500 */const a=Math.abs(v);if(!a)return(0).toFixed(Math.max(0,n-1));const e=Math.floor(Math.log10(a)+1e-9),d=Math.max(0,n-1-e);let s=a.toFixed(d);if(s.replace('.','').replace(/^0+/,'').length>n&&d>0)s=a.toFixed(d-1);return(v<0?INS.MIN:'')+s},
+  PRE:[[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ']],
+  si(v,n=3){/* [mantissa string, prefix] */if(!isFinite(v)||!v)return[INS.sig(v||0,n),''];const a=Math.abs(v);let p=INS.PRE[INS.PRE.length-1];for(const q of INS.PRE)if(a>=q[0]*.9995){p=q;break}return[INS.sig(v/p[0],n),p[1]]},
+  LOG:{dB:1,dBFS:1,dBTP:1,dBu:1,dBV:1,LUFS:1,LKFS:1,LU:1,VU:1},
+  parts(v,u,o={}){/* [number, unit] for drawing the unit apart (amber, L2) */
+    if(u&&INS.LOG[u]){if(!isFinite(v)||v<-200)return[INS.MIN+'∞',u];return[INS.num(v,o.d==null?1:o.d,o.plus!=null?o.plus:u==='LU'),u]}
+    if(u==='%')return[INS.num(v,o.d==null?0:o.d,o.plus),'%'];
+    if(u==='ct'){const s=INS.num(v,o.d==null?0:o.d,true);return[/^[0.]+$/.test(s)?'+'+s:s,'ct']}
+    if(u===':1')return[INS.sig(v,o.n||3),':1'];
+    if(u==='°')return[INS.num(v,o.d==null?0:o.d,o.plus),'°'];
+    if(u==='x'||u==='×')return[INS.sig(v,o.n||4),'×'];
+    if(u==='Hz'||u==='s'||u==='V'||u==='B'||o.si){const[m,p]=INS.si(v,o.n||3);return[m,p+(u||'')]}
+    return[o.d!=null?INS.num(v,o.d,o.plus):INS.sig(v,o.n||3),u||'']},
+  ucap(u){/* a unit as a small capital label (L2, M1) without turning the micro sign into a Greek capital M: µs -> µS, kHz -> KHZ */return String(u||'').replace(/[^\u00b5]/g,c=>c.toUpperCase())},
+  fmt(v,u,o={}){const[a,b]=INS.parts(v,u,o);return b?a+(b==='%'||b==='°'||b===':1'?'':INS.TS)+b:a},
+  NOTES:['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'],
+  note(f,a4){/* nearest note and the offset in cents */const r0=69+12*Math.log2(f/(a4||440)),r=Math.round(r0);return{name:INS.NOTES[((r%12)+12)%12]+(Math.floor(r/12)-1),midi:r,ct:(r0-r)*100}},
+  hz(f,o={}){/* "1.25 kHz", or with the note (X8): "440 Hz  A4 +0 ct" */const s=INS.fmt(f,'Hz',o);if(!o.note||!(f>0))return s;const n=INS.note(f);return s+'  '+n.name+' '+INS.fmt(n.ct,'ct')},
+  /* ---------- colour maps (matplotlib's magma, inferno, viridis: lightness rises steadily; today's heat as the app has it) ---------- */
+  CMH:{magma:'00000402010903031206051a0a08220e0b2b130d34180f3d1d114722115029115a2f116336106b3d0f71440f764a107952137c59157e5f187f651a806b1d81721f817822817e24828426818b2981912b81982d809e2f7fa5317eab337cb2357bba3878c03a76c73d73cd4071d3436ed9466bdf4a68e44f64e95462ed5a5ff1605df4675cf66e5cf8765cfa7d5efb8560fc8e64fd9668fe9d6cfea571feac76feb47bfebb81fec287feca8dfed194fed89afde0a1fde7a9fceeb0fcf6b8fcfdbf',inferno:'00000402010a04031207051b0b072410092d150b371b0c41210c4a280b532f0a5b3609613d0965440a684a0c6b510e6c59106e5f136e65156e6c186e721a6e781c6d7f1e6c85216b8c23699225689827669f2a63a52c60ab2f5eb1325ab73557bf3952c43c4eca404acf4446d44842d94d3dde5238e25734e65d2fea632aed6925f06f20f3761bf57d15f78410f98b0bfa9407fb9b06fca309fcaa0ffcb216fbba1ffac228f9c932f7d13df5d949f4e156f2e865f1ef75f3f586f6fa96fcffa4',viridis:'44015446075a470d6047136548186a481d6f482374482878472d7b46327e453781443b844240864045883e49893d4e8a3a538b38588c365c8d34608d32648e31688e2f6c8e2d708e2c738e2a778e297b8e277f8e26828e24868e238a8d218e8d20928c1f968b1f9a8a1f9e891fa18721a58523a98326ad812ab07f2fb47c35b7793bbb7542be714ac16d52c5695ac86465cb5e6ece5877d15381d34d8bd64695d840a0da39aadc32b5de2bc0df25cae11fd5e21adfe318eae51af4e61efde725'},
+  _cm:{},
+  cmap(k){if(INS._cm[k])return INS._cm[k];const a=new Uint8Array(768);let st=null;
+    if(INS.CMH[k]){const h=INS.CMH[k],n=h.length/6;st=[];for(let i=0;i<n;i++)st.push([i/(n-1),[0,2,4].map(j=>parseInt(h.substr(i*6+j,2),16))])}
+    else st=[[0,[27,42,107]],[.22,[47,107,255]],[.45,[37,208,200]],[.65,[255,210,63]],[.85,[255,138,31]],[1,[255,95,70]]];/* today's heat (heatCol0, MXPAL.heat) */
+    for(let i=0;i<256;i++){const t=i/255;let j=1;while(j<st.length-1&&st[j][0]<t)j++;const[x0,p0]=st[j-1],[x1,p1]=st[j],u=Math.min(1,Math.max(0,(t-x0)/(x1-x0||1)));for(let c=0;c<3;c++)a[i*3+c]=Math.round(p0[c]+(p1[c]-p0[c])*u)}
+    return INS._cm[k]=a},
+  cmapNames:['magma','inferno','viridis','heat'],
+  rgb(k,t){const a=INS.cmap(k),q=Math.max(0,Math.min(255,Math.round(t*255)))*3;return`rgb(${a[q]},${a[q+1]},${a[q+2]})`},
+  _cb:{},
+  cbar(g,x,y,w,h,k,vert){/* a colour bar, made once per map and size, then copied */const key=k+'|'+(vert?1:0);let c=INS._cb[key];
+    if(!c){c=INS._cb[key]=document.createElement('canvas');c.width=vert?1:256;c.height=vert?256:1;const cg=c.getContext('2d'),im=cg.createImageData(c.width,c.height),L=INS.cmap(k);for(let i=0;i<256;i++){const q=(vert?255-i:i)*3;im.data.set([L[q],L[q+1],L[q+2],255],i*4)}cg.putImageData(im,0,0)}
+    const sm=g.imageSmoothingEnabled;g.imageSmoothingEnabled=true;g.drawImage(c,x,y,w,h);g.imageSmoothingEnabled=sm},
+  /* ---------- scales ---------- */
+  dpr(g){const m=g.getTransform?g.getTransform():null;return m&&m.a>0?m.a:1},
+  px(g,v){/* a hairline on a whole device pixel */const d=INS.dpr(g);return(Math.round(v*d-.5)+.5)/d},
+  hair(g,lw){return Math.max(1/INS.dpr(g),lw)},
+  taper:db=>dbN(db),untaper:p=>nDb(p),
+  TT:null,
+  taperTicks(){/* M1: a mark per dB from +6 to -12, every 3 dB to -24, then every 6 to -60; numbers at the long marks */if(INS.TT)return INS.TT;const all=[];for(let d=6;d>=-60;d--){if(d>=-12||(d>=-24&&d%3===0)||d%6===0)all.push(d)}
+    return INS.TT={all,long:[6,3,0,-3,-6,-9,-12,-18,-24,-30,-36,-48,-60],lab:[6,0,-6,-12,-18,-24,-36,-48,-60]}},
+  scaleTaper(g,x,y,h,o={}){/* a vertical tick scale beside a meter: top = +6 dB, bottom = -60 dB (the fader taper); o.side 1 = ticks to the right; o.lab false = no numbers; o.gap = smallest space between numbers */
+    const L=INS.look(),T=INS.taperTicks(),side=o.side||-1,Y=d=>y+h-h*dbN(d),ln=INS.hair(g,L.lwLine);g.lineWidth=ln;g.strokeStyle=o.col||L.tick;g.beginPath();
+    for(const d of T.all){const yy=INS.px(g,Y(d)),lg=T.long.includes(d),k=(lg?(d===0?5:4):2)*(o.k||1);if(h<80&&!lg)continue;g.moveTo(x,yy);g.lineTo(x+side*k,yy)}g.stroke();
+    if(o.lab===false)return Y;g.font=(o.fs||7)+'px '+L.mono;g.textAlign=side>0?'left':'right';g.textBaseline='middle';let last=-1e9;const gap=o.gap||9;
+    for(const d of T.lab){const yy=Y(d);if(Math.abs(yy-last)<gap)continue;last=yy;g.fillStyle=d===0?L.lab:(o.labCol||L.mut);g.fillText(d>0?'+'+d:d<0?INS.MIN+(-d):'0',x+side*((o.k||1)*5+2),yy)}return Y},
+  fAxis(g,x0,w,y0,h,o={}){/* log frequency axis: long marks at decades, mid at 2 and 5, short elsewhere; numbers only where they fit; returns f -> x */
+    const L=INS.look(),lo=o.lo||20,hi=o.hi||20000,K=Math.log(hi/lo),fx=f=>x0+w*Math.log(f/lo)/K,lw=INS.hair(g,L.lwGrid),gr=o.grid!==false,tk=o.ticks!==false;
+    const by=[[],[],[]];for(let d=1;d<=hi;d*=10)for(let m=1;m<10;m++){const f=d*m;if(f<lo*.999||f>hi*1.001)continue;by[m===1?0:m===2||m===5?1:2].push(f)}
+    const cols=[L.gMaj,L.gMid,L.gMin],tl=[5,3.5,2];g.lineWidth=lw;
+    for(let lv=0;lv<3;lv++){if(gr){g.strokeStyle=cols[lv];g.beginPath();for(const f of by[lv]){const x=INS.px(g,fx(f));g.moveTo(x,y0);g.lineTo(x,y0+h)}g.stroke()}
+      if(tk){g.strokeStyle=lv?L.tick:L.tickHi;g.beginPath();for(const f of by[lv]){const x=INS.px(g,fx(f));g.moveTo(x,y0+h);g.lineTo(x,y0+h+tl[lv])}g.stroke()}}
+    if(o.lab!==false){const lb=o.labels||[20,50,100,200,500,1000,2000,5000,10000,20000],fs=o.fs||7;g.font=fs+'px '+L.mono;g.textBaseline='top';let last=-1e9;
+      for(const f of lb){const x=fx(f);if(x<x0-1||x>x0+w+1)continue;const s=f>=1000?f/1000+'k':String(f),tw=g.measureText(s).width,al=f<=lo?'left':f>=hi?'right':'center',l0=al==='left'?x:al==='right'?x-tw:x-tw/2;if(l0<last+(o.gap||6))continue;last=l0+tw;
+        g.textAlign=al;g.fillStyle=f===100||f===1000||f===10000?L.lab:L.mut;g.fillText(s,x,y0+h+(tk?6:2))}}
+    return fx},
+  dbGrid(g,x0,y0,w,h,top,bot,step,o={}){/* horizontal dB lines every step, heavier every o.major; numbers on the left or right (o.side); returns dB -> y */
+    const L=INS.look(),Y=v=>y0+h*(top-v)/(top-bot),lw=INS.hair(g,L.lwGrid),maj=o.major||step*2;g.lineWidth=lw;
+    for(const m of[0,1]){g.strokeStyle=m?L.gMaj:L.gMid;g.beginPath();for(let v=top;v>=bot-1e-9;v-=step){const isM=Math.abs(v/maj-Math.round(v/maj))<1e-6;if(isM!==!!m)continue;const yy=INS.px(g,Y(v));g.moveTo(x0,yy);g.lineTo(x0+w,yy)}g.stroke()}
+    if(o.lab!==false){g.font=(o.fs||7)+'px '+L.mono;g.textBaseline='middle';const right=o.side==='right';g.textAlign=right?'left':'right';let last=-1e9;
+      for(let v=top;v>=bot-1e-9;v-=(o.labStep||maj)){const yy=Y(v);if(yy-last<(o.gap||9))continue;last=yy;g.fillStyle=o.labCol||L.mut;g.fillText(INS.num(v,0,o.plus),right?x0+w+3:x0-3,yy)}}
+    return Y},
+  graticule(g,x,y,w,h,o={}){/* oscilloscope graticule: nx by ny major divisions, five minor marks per division on the centre axes (Tektronix layout), drafting levels */
+    const L=INS.look(),nx=o.nx||10,ny=o.ny||8,lw=INS.hair(g,L.lwGrid),cx=x+w/2,cy=y+h/2;g.lineWidth=lw;
+    if(o.minor!==false&&!INS.lite()&&o.fine){g.strokeStyle=L.gMin;g.beginPath();for(let i=0;i<=nx*5;i++){if(i%5===0)continue;const xx=INS.px(g,x+i*w/(nx*5));g.moveTo(xx,y);g.lineTo(xx,y+h)}for(let j=0;j<=ny*5;j++){if(j%5===0)continue;const yy=INS.px(g,y+j*h/(ny*5));g.moveTo(x,yy);g.lineTo(x+w,yy)}g.stroke()}
+    g.strokeStyle=L.gMid;g.beginPath();for(let i=0;i<=nx;i++){const xx=INS.px(g,x+i*w/nx);g.moveTo(xx,y);g.lineTo(xx,y+h)}for(let j=0;j<=ny;j++){const yy=INS.px(g,y+j*h/ny);g.moveTo(x,yy);g.lineTo(x+w,yy)}g.stroke();
+    g.strokeStyle=L.gMaj;g.beginPath();const X=INS.px(g,cx),Y=INS.px(g,cy);g.moveTo(X,y);g.lineTo(X,y+h);g.moveTo(x,Y);g.lineTo(x+w,Y);
+    if(o.minor!==false){for(let i=0;i<=nx*5;i++){const xx=INS.px(g,x+i*w/(nx*5));g.moveTo(xx,cy-2);g.lineTo(xx,cy+2)}for(let j=0;j<=ny*5;j++){const yy=INS.px(g,y+j*h/(ny*5));g.moveTo(cx-2,yy);g.lineTo(cx+2,yy)}}g.stroke();
+    return{dx:w/nx,dy:h/ny,cx,cy}},
+  corner(g,s,x,y,al){/* a setting written in a corner of a display (graticule first, settings in the corners) */const L=INS.look();g.font='7px '+L.mono;g.textAlign=al||'left';g.textBaseline='top';g.fillStyle=L.mut;g.fillText(s,x,y)},
+  /* ---------- ballistics ---------- */
+  DPK:20/1.7,/* digital peak meter (IEC 60268-18): returns 20 dB in 1.7 s = 11.8 dB/s */
+  peak(st,db,dt,o={}){/* instant rise, falls at o.fall dB/s (11.8), the hold line waits o.hold s (2) and then falls; mx is latched until reset */
+    const fall=o.fall||INS.DPK,hold=o.hold==null?2:o.hold;st.t=(st.t||0)+dt;if(st.d==null){st.d=st.h=st.mx=-240;st.ht=0}
+    st.d=Math.max(db,st.d-fall*dt);if(db>=st.h){st.h=db;st.ht=st.t}else if(st.t-st.ht>hold)st.h=Math.max(st.d,st.h-fall*dt);if(db>st.mx)st.mx=db;return st},
+  VUZ:.81,VUW:13.4,VUAL:20*Math.log10(Math.PI/2),/* VU (IEC 60268-17): second order on the rectified signal, 99 % in 0.3 s, about 1.3 % overshoot; aligned so a sine reads its peak level */
+  vu(st,a,i0,i1,sr){let x=st.x||0,v=st.v||0;const w=INS.VUW,z=INS.VUZ,dt=1/sr,ww=w*w,zw=2*z*w;for(let i=i0;i<i1;i++){const r=a[i]<0?-a[i]:a[i];v+=(ww*(r-x)-zw*v)*dt;x+=v*dt}st.x=x;st.v=v;return x>1e-12?20*Math.log10(x)+INS.VUAL:-240},
+  PPMAL:.214,/* the steady-sine ripple of the detector, added back so a steady sine reads its peak level */
+  ppm(st,a,i0,i1,sr){/* PPM type IIb (EBU, IEC 60268-10): a 10 ms tone burst reads 2 dB below the steady tone (charge time constant 2.75 ms on the rectified signal, set by that rule), falls 24 dB in 2.8 s; returns the highest reading in this block */
+    if(st.sr!==sr){st.sr=sr;st.at=1-Math.exp(-1/(.00275*sr));st.fl=Math.pow(10,-24/2.8/20/sr)}let p=st.p||0,m=0;const at=st.at,fl=st.fl;for(let i=i0;i<i1;i++){const r=a[i]<0?-a[i]:a[i];p=r>p?p+(r-p)*at:p*fl;if(p>m)m=p}st.p=p;return m>1e-12?20*Math.log10(m)+INS.PPMAL:-240},
+  win(st,T,sr){/* a sliding window of T seconds in 10 ms pieces */if(st.T!==T||st.sr!==sr){st.T=T;st.sr=sr;st.sb=Math.max(1,Math.round(sr*.01));st.nb=Math.max(1,Math.round(T/.01));st.ring=new Float64Array(st.nb);st.ri=0;st.acc=0;st.cnt=0;st.sum=0}return st},
+  _wadd(st,q){st.acc+=q;if(++st.cnt===st.sb){st.sum+=st.acc-st.ring[st.ri];st.ring[st.ri]=st.acc;st.ri=(st.ri+1)%st.nb;st.acc=0;st.cnt=0}},
+  wmean(st){return Math.max(0,st.sum)/(st.nb*st.sb)},
+  rms(st,a,i0,i1,sr,T){/* RMS over a sliding window (T s, 0.3 by default), AES17: +3.01 dB so a sine reads its peak level */INS.win(st,T||.3,sr);for(let i=i0;i<i1;i++)INS._wadd(st,a[i]*a[i]);const m=INS.wmean(st);return m>1e-12?10*Math.log10(m)+3.0103:-240},
+  kms(st,a,i0,i1,sr){/* K-weighted mean square over a 400 ms window (ITU-R BS.1770 momentary); the two filters keep their state from block to block */
+    INS.win(st,.4,sr);if(st.ksr!==sr){st.ksr=sr;st.kc=kBiquads(sr);st.kz=new Float64Array(8)}const[A,B]=st.kc,z=st.kz;let x1=z[0],x2=z[1],y1=z[2],y2=z[3],u1=z[4],u2=z[5],w1=z[6],w2=z[7];
+    for(let i=i0;i<i1;i++){const v=a[i],o=A[0]*v+A[1]*x1+A[2]*x2-A[3]*y1-A[4]*y2;x2=x1;x1=v;y2=y1;y1=o;const p=B[0]*o+B[1]*u1+B[2]*u2-B[3]*w1-B[4]*w2;u2=u1;u1=o;w2=w1;w1=p;INS._wadd(st,p*p)}
+    if(!(Math.abs(w1)<1e6))w1=w2=u1=u2=x1=x2=y1=y2=0;z[0]=x1;z[1]=x2;z[2]=y1;z[3]=y2;z[4]=u1;z[5]=u2;z[6]=w1;z[7]=w2;return INS.wmean(st)},
+  /* ---------- analyser reads: once per analyser per frame ---------- */
+  _ok(an,k,now){return an[k+'f']===FRN&&now-an[k+'t']<12},
+  fft(an,buf){/* dB per bin (getFloatFrequencyData), read once per frame and shared by every drawer of this analyser */const n=an.frequencyBinCount,now=performance.now();let c=an._insF;if(!c||c.length!==n){c=an._insF=new Float32Array(n);an._insFf=-1}
+    if(!INS._ok(an,'_insF',now)){an.getFloatFrequencyData(c);an._insFf=FRN;an._insFt=now;INS.nfft++}if(buf&&buf!==c){if(buf.length>=n)buf.set(c);else buf.set(c.subarray(0,buf.length))}return buf||c},
+  fftB(an,buf){const n=an.frequencyBinCount,now=performance.now();let c=an._insB;if(!c||c.length!==n){c=an._insB=new Uint8Array(n);an._insBf=-1}
+    if(!INS._ok(an,'_insB',now)){an.getByteFrequencyData(c);an._insBf=FRN;an._insBt=now;INS.nfft++}if(buf&&buf!==c){if(buf.length>=n)buf.set(c);else buf.set(c.subarray(0,buf.length))}return buf||c},
+  td(an){/* the time-domain samples (getFloatTimeDomainData), read once per frame */const n=an.fftSize,now=performance.now();let c=an._insT;if(!c||c.length!==n){c=an._insT=new Float32Array(n);an._insTf=-1}
+    if(!INS._ok(an,'_insT',now)){an.getFloatTimeDomainData(c);an._insTf=FRN;an._insTt=now;INS.ntd++}return c},
+  fresh(a,st,exp){/* where the samples that arrived since this reader's last look start in a (the analyser's latest fftSize samples): the last four samples seen are found again,
+     trying the expected place first and then whole 128-sample render blocks either side, so nothing is counted twice or missed; if they are not found (a gap longer than the buffer, or the first look) the last exp samples count */
+    const n=a.length,t=st.tl||(st.tl=new Float32Array(4));let s=-1;
+    if(st.tv&&n>=256){/* the buffer always ends on a render block, so the new part is a whole number of 128-sample blocks */const m0=Math.round(Math.max(0,exp)/128),mx=n>>7,at=m=>{const j=n-m*128;return m>=0&&m<=mx&&j>=4&&a[j-1]===t[3]&&a[j-2]===t[2]&&a[j-3]===t[1]&&a[j-4]===t[0]};
+      for(let k=0;k<=16&&s<0;k++){if(at(m0+k))s=n-(m0+k)*128;else if(k&&at(m0-k))s=n-(m0-k)*128}}
+    if(s<0)s=Math.max(0,n-Math.max(0,Math.min(n,Math.round(exp))));t[0]=a[n-4];t[1]=a[n-3];t[2]=a[n-2];t[3]=a[n-1];st.tv=1;return s},
+};
+/* ===== end of lane E IN-A ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -22391,7 +22520,7 @@ function ndResync(){if(!ctx)return;for(const N of NODES.values())for(const x of 
 /* analyser helpers */
 const TDB={};function tdOf(an){const n=an.fftSize;let a=TDB[n];if(!a)a=TDB[n]=new Float32Array(n);an.getTimeDomainData?0:0;an.getFloatTimeDomainData(a);return a}
 function peakOf(an){return mtrPeak(an)}
-const FQB={};function fqOf(an){const n=an.frequencyBinCount;let a=FQB[n];if(!a)a=FQB[n]=new Float32Array(n);an.getFloatFrequencyData(a);return a}
+const FQB={};function fqOf(an){const n=an.frequencyBinCount;let a=FQB[n];if(!a)a=FQB[n]=new Float32Array(n);INS.fft(an,a);return a}
 /* log-frequency spectrum drawing; returns nothing. sm = persistent smoothing array (per canvas) */
 function drawSpec(g,w,h,an,o){o=o||{};if(!an||!ctx)return;const D=fqOf(an),ny=ctx.sampleRate/2,lo=o.lo||20,hi=o.hi||20000,top=o.top??-10,fl=o.floor??-100,sl=o.slope||0,st=o.st||(o.st={}),sm=st.sm&&st.sm.length===w?st.sm:(st.sm=new Float32Array(w).fill(-120)),a=o.smooth??.6,pk=st.pk&&st.pk.length===w?st.pk:(st.pk=new Float32Array(w).fill(-120)),y0=o.y0||0,hh=o.h||h;
   const X=x=>lo*Math.pow(hi/lo,x/w);for(let x=0;x<w;x++){const f=X(x),f2=X(x+1),b0=Math.max(1,f/ny*D.length),b1=Math.max(b0+1e-3,f2/ny*D.length);let mx=-200;const i0=Math.floor(b0),i1=Math.min(D.length-1,Math.max(i0,Math.floor(b1)));for(let i=i0;i<=i1;i++)if(D[i]>mx)mx=D[i];if(b1-b0<1){const fr=b0-i0;mx=D[Math.min(D.length-1,i0)]*(1-fr)+D[Math.min(D.length-1,i0+1)]*fr}
