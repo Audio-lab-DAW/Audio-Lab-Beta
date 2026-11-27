@@ -23,6 +23,8 @@ jobs:
         run: bash scripts/build-mac-icon.sh
       - name: Draw the icon in every style
         run: bash tools/mac-icon/proof.sh "icon-proof/${{ matrix.os }}"
+      - name: Variants experiment
+        run: bash tools/mac-icon/variants.sh "icon-proof/${{ matrix.os }}/variants"
       - uses: actions/upload-artifact@v4
         with:
           name: mac-icon-proof-${{ matrix.os }}
@@ -36,7 +38,7 @@ jobs:
           git config user.name ci && git config user.email ci@example.invalid
           for i in 1 2 3; do
             git fetch origin ic1-proof 2>/dev/null && git checkout -B ic1-proof FETCH_HEAD || git checkout --orphan ic1-proof
-            git rm -rq --cached . 2>/dev/null || true; git clean -fdxq
+            git rm -rq --cached . 2>/dev/null || true; git clean -fdxq -e '/macos-*'; git checkout -q FETCH_HEAD -- . 2>/dev/null || true; rm -rf "${{ matrix.os }}"
             cp -R /tmp/p/* . && git add -A && git commit -qm "proof ${{ matrix.os }} ${{ github.sha }}" && git push origin ic1-proof && break
             sleep 5
           done

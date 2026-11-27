@@ -64,6 +64,7 @@
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
+        "CFBundleIconName": "AppIcon",
         "NSMicrophoneUsageDescription": "AudioLab Pro needs audio input access to record and to list your audio output devices.",
         "CFBundleDocumentTypes": [
           {
@@ -104,6 +105,10 @@
         {
           "from": "build/doc.icns",
           "to": "doc.icns"
+        },
+        {
+          "from": "build/Assets.car",
+          "to": "Assets.car"
         }
       ],
       "files": [

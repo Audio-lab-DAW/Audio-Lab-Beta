@@ -11,10 +11,10 @@ const DIR = path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'de
 const fail = []; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fail.push(m); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const fsha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
-async function start(platform) {
+async function start(platform, rel) {
   const ud = fs.mkdtempSync(path.join(os.tmpdir(), 'alah-'));
   const exe = process.env.ELECTRON || require(path.join(DIR, 'node_modules', 'electron'));
-  const app = await _electron.launch({ executablePath: exe, args: ['--no-sandbox', '-r', path.join(__dirname, 'taskAH_fake.js'), DIR], env: { ...process.env, XDG_CONFIG_HOME: ud, AH_PLATFORM: platform || '' } });
+  const app = await _electron.launch({ executablePath: exe, args: ['--no-sandbox', '-r', path.join(__dirname, 'taskAH_fake.js'), DIR], env: { ...process.env, XDG_CONFIG_HOME: ud, AH_PLATFORM: platform || '', AH_DARWIN_REL: rel || '' } });
   const page = await app.firstWindow(); const errs = [];
   page.on('pageerror', (e) => errs.push(String(e).slice(0, 300)));
   await page.waitForFunction(() => window.AudioLab && window.AudioLab.version, null, { timeout: 90000 }); await sleep(6000);
@@ -45,6 +45,18 @@ async function start(platform) {
     ok(res.ok && r.dock.length === n + 1 && r.dock[n].sha === dock.sha, 'Mac: choosing Ocean Yellow sets the new Dock picture (dock-icon.png)');
     ok(dock.sha !== pickOY.sha, 'Mac: that is not the picker picture of Ocean Yellow');
     ok(!t.errs.length, 'Mac: no page errors' + (t.errs.length ? ': ' + t.errs.join(' | ') : ''));
+    await t.app.close(); }
+  // --- as a Mac with macOS 26 and the Icon Composer icon in the bundle (task IC1) ---
+  { const t = await start('darwin', '25');
+    const info = await t.page.evaluate(() => window.audiolabDesktop.listAppIcons());
+    const other = info.groups[0].icons[1], pickOther = await t.img(path.join(DIR, 'icon-assets', 'picker', other.file));
+    let r = await t.rec();
+    ok(r.dock.length === 0, 'macOS 26: at the start with Ocean Yellow no Dock picture is set, the bundle icon stays (' + r.dock.length + ' calls)');
+    await t.pick(other.id); await sleep(300); r = await t.rec();
+    ok(r.dock.length === 1 && r.dock[0].sha === pickOther.sha, 'macOS 26: ' + other.name + ' gives its picker picture, as before');
+    const res = await t.pick('ocean-yellow'); await sleep(300); r = await t.rec();
+    ok(res.ok && r.dock.length === 2 && r.dock[1].reset === true, 'macOS 26: back to Ocean Yellow hands the Dock back to the bundle icon (null), no bitmap');
+    ok(!t.errs.length, 'macOS 26: no page errors' + (t.errs.length ? ': ' + t.errs.join(' | ') : ''));
     await t.app.close(); }
   // --- as it is: the Windows and Linux code path ---
   { const t = await start('');
