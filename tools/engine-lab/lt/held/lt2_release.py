@@ -6,7 +6,7 @@ def rep(p,a,b):
 s=open('index.html').read();s,n=re.subn(r"^const VERSION='[0-9.]+',BUILD='[^']*'","const VERSION='%s',BUILD='27 November 2026'"%NUM,s,flags=re.M);assert n==1;open('index.html','w').write(s)
 p='desktop/update-notes.txt';s=open(p).read()
 line="The track you play now skips delay compensation while you play it: with a track armed or the computer keyboard on, its notes are no longer held back to line up with slow effects elsewhere in the song (6 ms in Fractals, 50 ms or more with a resonance suppressor), and the notes you record land where you heard them, within a millisecond.\n"
-if line not in s:open(p,'w').write(line+s)
+if line not in s:open(p,'w').write(s.rstrip('\n')+'\n'+line)  # appended: one line per release, newest last (the gate keeps the last ten)
 e=open(SP+'/LT-2_log.md').read().replace('v0.292',V).replace('On the step rebased onto v0.291 (as %s)'%V,'On the step rebased onto %s (as %s)'%(BASE,V))
 s=open('docs/backlog-log.md').read()
 if 'task LT-2, the played track' not in s:open('docs/backlog-log.md','w').write(s.rstrip('\n')+'\n\n'+e)

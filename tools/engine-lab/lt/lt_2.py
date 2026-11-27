@@ -20,6 +20,11 @@ rep("if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t
 rep("PDC=pdcMap(ctx.sampleRate);CPU.pdc=PDC.target/ctx.sampleRate;","PDC=pdcMap(ctx.sampleRate,1);CPU.pdc=PDC.target/ctx.sampleRate;")
 # 3. the take (lane C's): notes placed by the compensated clock, beside UI.recOff
 rep("s:Math.max(0,n.s-a-(UI.recOff||0)/1000*S.bpm/60),l:n.l,v:n.v}","s:Math.max(0,n.s-a-((UI.recOff||0)/1000+ltRecSec(t))*S.bpm/60),l:n.l,v:n.v}")
+# 4. LT-1's own switch to the mixing buffer after dropouts at the playing buffer restarts the engine, and a restart ends a recording
+#    (restartAudio calls stop, stop calls recStop): while recording it now waits; LT.heavy is set, so the next Play starts on the mixing buffer.
+#    Found by the second LT-2 run (27 Nov, 23:00 UTC): with real dropouts a take was cut after about a second.
+rep("setTimeout(()=>{if(!play.on||LT.cur!=='play')return;LT.forceMix=true;",
+    "setTimeout(()=>{if(!play.on||LT.cur!=='play'||REC.on)return;LT.forceMix=true;")
 
 JS=r"""/* ===== lane J, task LT-2 (lane J): the played track skips delay compensation (L4). docs/latency-build.md =====
    Delay compensation holds every track back to the slowest path (6 ms in Fractals, 52 ms with a resonance suppressor). The track you play

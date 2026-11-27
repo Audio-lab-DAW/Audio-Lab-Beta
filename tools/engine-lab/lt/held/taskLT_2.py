@@ -3,7 +3,8 @@
 The start project (Fractals): arming the Lead takes its compensation delay to 0 (6 ms, and 52 ms with a resonance suppressor on the Bass) with a
 ramp, the other tracks and the song's compensation (CPU.pdc) unchanged, the exporter's map (pdcMap without the live flag) unchanged; disarming
 puts it back; the computer keyboard's selected track likewise; delay compensation off: nothing; LT_HOOKS.pdcOut lists what is skipped.
-Recording: presses timed by the output clock land within a millisecond or two of what was heard, with and without the suppressor.
+Recording: presses timed by the output clock land within a millisecond or two of what was heard, with and without the suppressor;
+dropouts at the playing buffer while recording do not cut the take.
 No console errors.   python3 tools/ui-tests/taskLT_2.py [index.html] [out dir]"""
 import sys, os, json, statistics as st
 from playwright.sync_api import sync_playwright
@@ -66,6 +67,11 @@ with sync_playwright() as p:
         good = [x for x, q in zip(e, j) if q < 1]
         md = st.median(good) if good else 99; wa = max(abs(x) for x in good) if good else 99
         ok(len(e) == 10 and len(good) >= 7 and abs(md) < 1 and wa < 1.5, 'recording %s (compensation %.1f ms): notes land %.2f ms from what was heard (median), worst %.2f ms; %d of 10 presses judged (the others: the browser\'s output clock jumped by more than 1 ms during the press)' % ('with the suppressor' if reson else 'Fractals as built', r.get('target', 0), md, wa, len(good)), [(round(x, 2), round(q, 2)) for x, q in zip(e, j)])
+    # dropouts at the playing buffer while recording (LT-1's switch restarts the engine, and a restart ends a recording): the take goes on
+    r = R("""(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));UI.ltPlayBuf=128;UI.buf=-1;for(const t of S.tracks)t.arm=false;const lead=S.tracks.find(t=>t.name==='Lead');lead.arm=true;changed(true);ltSoon(30);await w(1400);
+      const o={cur:LT.cur};const n0=lead.clips.length;pos=320;recStart();await w(1300);URS.total+=3;await w(1600);o.rec=REC.on;o.play=play.on;o.heavy=LT.heavy;noteOn(70,.8,'lt2d');await w(80);noteOff('lt2d');
+      await recStop();stop();await w(900);o.take=lead.clips.length===n0+1;lead.clips.length=n0;LT.heavy=false;lead.arm=false;UI.ltPlayBuf=0;UI.buf=256;changed(true);return o})()""")
+    ok(r['cur'] == 'play' and r['heavy'] and r['rec'] and r['play'] and r['take'], 'dropouts at the playing buffer while recording: the recording goes on and the take is kept (the switch waits for Stop)', r)
     ok(not logs, 'no console errors', logs[:5])
     b.close()
 print('%d checks, %d failed' % (N[0], len(FAIL)))
