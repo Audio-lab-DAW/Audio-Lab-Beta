@@ -5265,3 +5265,27 @@ Seventh step of the settings rebuild (`docs/settings-round-1.md`, S7, depends on
 
 ### What is left
 S8 (scope: the marks and the Project group; loudness target, key and tempo lane move into the project with defaults for new projects) next, then S9 to S19. S10 adds the Keep or go back countdown for device, rate and buffer (a ↺ or page reset on Audio then asks Keep? too). S18 adds export and import of the settings file with tick boxes (the backup format of S7 is its starting point). Performance and the Glass block stay with the glass chain (G4).
+
+## 27 November 2026, v0.266: task XT-DL1, control ids part 1 (extensions and the Workshop, lane H, first step)
+The first step of task XT (docs/extensions-plan.md, section 9.7 row DL1; the user's picks: round 1 `1A 2B 3A 4A 5A 6B 7C 8B 9A`, deep layer P1 to P6 all yes, `K1c K2b K3a K4a K5b K6b K7b K8b K9b K10a K11abc K12a`). Invisible groundwork: nothing looks or behaves differently.
+
+### What was built
+- `CONTROLS`: one table of 104 stable ids, `[id, selector inside the area, plain name]`, for every control in the transport bar (`transport.*`, 41 with the 12 optional extra modules), the track headers (`track.*`, 31, with the lane headers, the add buttons and the master header) and the mixer (`mixer.*`, 32, with the strips, the master channel, monitor, A/B and the cable legend).
+- Repeated controls share one id (every track's Mute button is `track.mute`), so one rule later covers every track. The master header and master channel have their own ids, never a track's.
+- The names are written for the menus of DL5 and K12a ("Hide the Loop button", "Customise the track Mute button…").
+- `xtTag(area)` writes `data-al="<id>"` on the area's controls after it is built: wrappers after `renderHeaders`, `renderMixer`, `trApply`, and the two mixer parts built outside `renderMixer` (`cabLegend`, guarded by one query; `s1PanBuild`). Once per task turn, in a microtask, after every other wrapper has run. Nothing per frame.
+- `CONTROL_ALIAS` (old id: new id, empty) and `xtControlOf(element)`, which follows it, so a rules file from an older AudioLab keeps working.
+- `docs/ids.md`: the released ids with their names, selectors and version; how to add or retire one.
+- Code: block "CONTROL IDS, part 1 (v0.266, task XT-DL1)" before `askChoice`; edit script `tools/edits/taskXT_DL1.py` with `taskXT_DL1_block.js`. No CSS. Functions use the lane's `xt` prefix.
+
+### Tested
+- `tools/ui-tests/taskXT_DL1.py`: 21 of 21. It fails when a control in the three areas has no id, when an id of docs/ids.md is gone from `CONTROLS` (and from `CONTROL_ALIAS`), or when `CONTROLS` has an id not in docs/ids.md. Scenario: Fractals, header layout Everything, a lane open, all 12 extra modules, mixer open; again after rebuilding the three areas, and with the Minimal layout and compact channels. A probe button without an id is caught.
+- Cost: no tag pass in 3 s of playback; a full pass over the three areas with 31 tracks 2.5 to 3.2 ms (only when an area is built again).
+- Frame time (frametime.py, idle / play / play with mixer, ms per frame on the 2-core cloud machine): before 10.3 and 10.2 / 32.2 and 34.2 / 69.9 and 83.8; after 9.7 / 36.6 / 81.0. Within the noise of two runs of the old build.
+- Load time (loadtime.py, 3 runs): ready at 2391, 2458, 2207 ms before; 3157 (a cold first run), 2293, 1741 ms after.
+- Exports (`tools/engine-tests/export_same.py`): Fractals Kick -9.75669 dB and Bass -25.48699 dB over beats 64 to 96 with the master at 0 dB (-19.05560 and -35.48685 dB at -10 dB), same checksums. Plant, Sampler grains, Sampler and Drum kit differ between two runs of the old build as well (they are not repeatable); the rest identical.
+- UI tests with the change: taskHF1 19/19, taskOV1 25/25, taskNI_5a 34/34, taskIN_M 26/26, taskFT_C2b 59/59, hdrlayout, mixstrip, loopbar clean. taskST_S4 times out at start in this cloud machine on v0.261 too (not this change).
+- Lint clean; no console errors. Start-up smoke test (`smoke_electron.js`, the desktop app, 20 s per scenario): all 17 scenarios clean, no state change, no console error.
+
+### What is left (task XT, in this order)
+DL2 commands registry (`SCA` grown into `COMMANDS`, namespaced ids, aliases, `runCommand`), DL12 script sandbox spike; then DL3 advanced settings list and DL4 safe mode (both need ST-S4, which is logged); DL5 rules engine with the right-click "Advanced" entries, DL6, DL7 (control ids part 2: devices, piano roll, menus, Settings rows), DL8; then XT-EX2 to XT-EX10 (theme files, device format and checker, user device frame and My devices, the safety stage before any user device sounds, script devices); then DL9, DL10 with the Workshop window, DL11, DL13, DL14, DL15, the Assistant tools, the import card, script instruments.
