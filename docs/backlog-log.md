@@ -3526,3 +3526,8 @@ Started from the drawing code of the pick page of task SR7 (`docs/about-round-2.
 
 ### Release
 - v0.225: commit efa6a65 on main (`index.html` was not touched by other sessions during the run; the backlog log was merged by hand with the NB-N1 and NB-N2a entries). App copy synced, update note written ("New About window: Earth with its radiation belts drawn in code behind the text, one of two pictures at random each time it opens, a finer animated atom as the logo, and the features as a quiet spec list in the colours of the picture."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-about-earth.md`.
+
+### task NB-N1, the user's report on test app 0.2 and the fix in 0.3
+- On the M4 with the Gryphon: the rate switched to 192 kHz from inside the app, exclusive use was taken, and pulling the Gryphon out and putting it back was followed correctly. Serum 2: 0 failed blocks, 0 overloads.
+- Fault found from the report: after a device was plugged in, the app could set the plug-in up at the rate the device had for a moment (44.1 kHz) while it ran at 48 or 192 kHz. Fixed in 0.3 (the device is asked again when it is opened). Release `native-lab-3`.
+- The Zoom AMS-24 is still not seen by macOS in any report: not an app matter.

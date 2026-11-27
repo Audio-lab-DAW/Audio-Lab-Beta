@@ -26,6 +26,19 @@ New in 0.2, the second row of the window:
 
 Paste the report as before. The lines to look for start with `[rate]`, `[exclusive]`, `[devices]`.
 
+## The user's report on test app 0.2 (27 November 2026, M4, iFi Gryphon)
+
+"Everything works except finding the Zoom AMS-24."
+
+- **Rate:** switched the Gryphon to 192 kHz from inside the app; Serum 2 played at 192 kHz, 0 failed blocks, 0 overloads.
+- **Exclusive use:** taken ("held by process 25743, this app is 25743").
+- **Plugging:** the Gryphon was pulled out while in use. The app wrote "the device in use is gone; moving to the default output" and went on; when the Gryphon came back the list showed it again and it was opened again.
+- **Device volume:** not written into the report (it has no line of its own); the user reports it as working.
+- **A fault found in 0.2, fixed in 0.3:** twice the report shows "block lasts 11610 microseconds" while the Gryphon ran at 48 or 192 kHz. 11,610 µs is 512 frames at 44.1 kHz: after the device was plugged in, the app took its rate from a list made a moment earlier, when the device still said 44.1 kHz, and set the plug-in up at that rate. The plug-in then ran at the wrong rate (too high in pitch) until the rate was switched by hand. 0.3 asks the device again at the moment it opens it. The engine helper (`alengine`) always did.
+- **Zoom AMS-24:** never in the list, in any of the five reports, and not in the Audio MIDI Setup screenshot either. The list is everything Core Audio reports, so macOS itself does not see the unit. Open; it is a question of the connection, not of the app.
+
+**AudioLab VST3 test 0.3**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-3
+
 ## Stage N1: what was built (27 November 2026)
 
 - **`alengine`** (`native/engine/`, about 500 lines of C++ with the bridge): a native program that owns the audio output. The app starts it as a helper and talks to it in one JSON object per line.
@@ -58,11 +71,11 @@ On the user's Mac (stage 0, see `docs/native-mac-picks.md`): the same Core Audio
 
 ## Stage N1: what is not proven
 
-- **Nothing of 0.2's new controls has been clicked by a hand.** The picture `docs/native-lab/test-app-0.2-main-window.png` shows them in place; that is all.
+- 0.2's new controls were clicked by the user on the M4 (see the report above); the fix in 0.3 has not been tried by a hand yet.
 - **The integer path** (the engine writing the DAC's own bytes) has only its arithmetic tested. No device on the build machine offers a format the system does not mix, so it never ran with sound. Whether the Gryphon's 60 formats include such ones, the engine's `formats` answer will show; the test app does not use that path yet.
 - **Bit-perfect to a real DAC** cannot be shown without one. What was shown is that the engine's output equals its input sample for sample on a float loop-back device.
 - **Drift over a long time.** The test lasted 3 seconds. Over minutes the two clocks drift; the ring then drops or waits once and counts it. A smooth correction (a resampler that moves by parts per million) is not built; it belongs to N2, where the web engine's clock meets the device's.
-- **Hot-plug** (a device going away while in use) is written and unseen: the build machine has nothing to unplug.
+- Hot-plug was seen working on the user's Mac in the test app. The engine helper's own handling of it has not run on hardware.
 - **Not inside the app.** `index.html` and `desktop/` were not touched. No setting in AudioLab uses the engine yet.
 
 ## Assumptions made (change any of them)
