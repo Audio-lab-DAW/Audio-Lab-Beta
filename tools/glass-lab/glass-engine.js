@@ -1,18 +1,22 @@
-/* AudioLab glass engine (task G2). Plain JS, no build step, no dependencies.
-   One WebGL2 canvas; one shared backdrop picture; one dual-Kawase pyramid built only when the picture changed;
-   every glass surface is one quad in one shader. Glass never samples glass.
-   Use: const g = AudioLabGlass.create(canvas, opts); g.setBackdrop(arrCanvas); g.addPanel({id, rect, radius, kind}); g.render();
+/* AudioLab glass engine (tasks G2 and G2b). Plain JS, no build step, no dependencies.
+   One WebGL2 canvas. The engine draws its own backdrop on the GPU: lane backgrounds, clips as flat rectangles, the playhead,
+   straight into a quarter-size target (one instanced draw call), then one dual-Kawase pyramid, then every glass surface as one quad in one shader.
+   No canvas is uploaded on this path. A small (quarter-size) copy of a canvas is the fallback and the route for other sources (piano roll, device displays).
+   Glass never samples glass.
+   Use: const g = AudioLabGlass.create(canvas, opts); g.setScene({lanes, clips, playheadX, scrollX, zoom, rect}); g.addPanel({id, rect, radius, kind}); g.render();
+        per frame: g.setPlayhead(x) / g.setView({scrollX, zoom}) / g.updatePanel(id, {rect}); g.render(t);
    Docs: docs/glass-engine-module.md */
 (function (root) {
   'use strict';
-  var VERSION = '1.0.0';
-  /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). */
-  var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 40] };
-  /* blur presets: how deep the pyramid goes, counted from a half-size first level (deepest level 1/4, 1/8, 1/16) */
+  var VERSION = '2.0.0';
+  /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
+  var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
+  /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
   var BLUR = { light: 2, regular: 3, heavy: 4 };
-  /* quality steps: base = size of the first pyramid level (2 = half, 4 = quarter); rate = backdrop refreshes per second (0 = every change) */
-  var QNAME = { high: 3, medium: 2, low: 1, 'static': 0 };
-  var QSET = [{ base: 4, rate: 30, st: true }, { base: 4, rate: 30 }, { base: 4, rate: 60 }, { base: 2, rate: 0 }];
+  /* levels. base = size of the backdrop target (4 = quarter, 8 = an eighth of the canvas in CSS px); cut = pyramid levels left out;
+     rate = backdrop refreshes per second (0 = every change; canvas copies have their own cap, copyRate) */
+  var LEVELS = { glass: { base: 4, cut: 1, lens: true, rate: 0 }, light: { base: 8, cut: 2, lens: false, rate: 30 }, solid: { base: 4, cut: 1, lens: false, rate: 0, st: true } };
+  var QCOMPAT = { 3: 'glass', 2: 'glass', 1: 'light', 0: 'solid', high: 'glass', medium: 'glass', low: 'light', 'static': 'solid' };
   /* kinds: shadow = strength (0 none), tint = how much panel colour is mixed in, fixed = does not move (lets the blur skip the area not under glass) */
   var KINDS = {
     docked: { shadow: 0, tint: 0.5, fixed: true },
@@ -51,6 +55,32 @@
   var FS_FLAT = '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec4 rc,col;uniform float rad,aa,useT;in vec2 p;out vec4 o;' + SDF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float a=clamp(.5-sd(l,hb,rad)/aa,0.,1.);vec4 c=useT>.5?vec4(texture(t,(p-rc.xy)/rc.zw).rgb,col.a):col;o=vec4(c.rgb*c.a*a,c.a*a);}';
 
+  /* the backdrop drawn on the GPU: one instance per rectangle. r = x,y,w,h; c = colour; m = how the rectangle follows the view:
+     0 clip (x and w in scene units, scrolled and zoomed; y scrolled), 1 lane (x, w in view px; y scrolled), 2 playhead (x from the uniform ph),
+     3 fixed (view px), 4 clip title band (as 0, height in px). view = scrollX, scrollY, zoomX, zoomY; org = view rectangle x,y and the scene origin x,y (CSS px);
+     sc = CSS px to target px. The quad is grown by half a target pixel and the fragment shader computes how much of each pixel the rectangle covers,
+     so a small target gets the same picture as a full-size one reduced with a box filter (thin lines and slow scrolling do not shimmer). */
+  var VS_SCENE = '#version 300 es\nlayout(location=0) in vec4 r;layout(location=1) in vec4 c;layout(location=2) in float m;uniform vec4 view,org;uniform vec2 sc,tsz;uniform float ph;flat out vec4 col;flat out vec4 box;' +
+    'void main(){bool cl=m<.5||m>3.5,pl=m>1.5&&m<2.5,ys=m<1.5||m>3.5;float X=cl?org.z+(r.x-view.x)*view.z:pl?org.z+(ph-view.x)*view.z+r.x:org.x+r.x,Wd=cl?r.z*view.z:r.z,' +
+    'Y=ys?org.w+(r.y-view.y)*view.w:org.y+r.y,Ht=m<1.5?r.w*view.w:r.w;box=vec4(X,Y,X+Wd,Y+Ht)*sc.xyxy;vec2 k=vec2(gl_VertexID&1,gl_VertexID>>1),p=mix(box.xy-.5,box.zw+.5,k);' +
+    'col=c;gl_Position=vec4(p.x/tsz.x*2.-1.,1.-p.y/tsz.y*2.,0.,1.);}';
+  var FS_SCENE = '#version 300 es\nprecision highp float;flat in vec4 col;flat in vec4 box;uniform vec2 tsz;out vec4 o;' +
+    'void main(){vec2 f=vec2(gl_FragCoord.x,tsz.y-gl_FragCoord.y);float a=clamp(min(f.x+.5,box.z)-max(f.x-.5,box.x),0.,1.)*clamp(min(f.y+.5,box.w)-max(f.y-.5,box.y),0.,1.)*col.a;o=vec4(col.rgb*a,a);}';
+
+  var HEX = {};
+  /* colour as [r,g,b] or [r,g,b,a] (0..1), or '#rgb', '#rrggbb', '#rrggbbaa', 'rgb(r,g,b)', 'rgba(r,g,b,a)' */
+  function colOf(c) {
+    if (!c) return [0, 0, 0, 1];
+    if (typeof c !== 'string') return c;
+    var v = HEX[c], h, n;
+    if (v) return v;
+    if (c.indexOf('rgb') === 0) { h = c.slice(c.indexOf('(') + 1).split(/[,\s\/]+/).map(parseFloat); return (HEX[c] = [(h[0] || 0) / 255, (h[1] || 0) / 255, (h[2] || 0) / 255, h[3] >= 0 ? h[3] : 1]); }
+    h = c.charAt(0) === '#' ? c.slice(1) : c;
+    if (h.length === 3 || h.length === 4) h = h.replace(/./g, '$&$&');
+    n = parseInt(h.slice(0, 6), 16); if (isNaN(n)) n = 0;
+    v = [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255, h.length >= 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1];
+    return (HEX[c] = v);
+  }
   function rectOf(r) {
     if (!r) return { x: 0, y: 0, w: 0, h: 0 };
     if (r.length === 4) return { x: +r[0], y: +r[1], w: +r[2], h: +r[3] };
@@ -61,8 +91,10 @@
   function create(canvas, o) {
     o = o || {};
     var opt = {
-      lens: o.lens in LENS ? o.lens : 'apple',
-      blur: o.blur in BLUR ? o.blur : 'regular',
+      lens: o.lens in LENS ? o.lens : 'wide',
+      blur: o.blur in BLUR ? o.blur : 'light',
+      copyRate: o.copyRate != null ? +o.copyRate : 60,          /* canvas copies per second at level Glass, at most (0 = every markDirty) */
+      copyQuality: o.copyQuality || 'low',                     /* imageSmoothingQuality used when a canvas is reduced before the upload */
       maxDpr: o.maxDpr || 2,
       dpr: o.dpr || 0,                                         /* 0 = follow the screen */
       tint: o.tint || [0.086, 0.11, 0.165],                    /* panel colour mixed into the face (rgb 22 28 42) */
@@ -83,20 +115,25 @@
     if (o.kinds) for (k in o.kinds) kinds[k] = o.kinds[k];
 
     var gl = null, prog = null, vao = null, mode = 'none', reason = '', destroyed = false;
-    var W = 0, H = 0, D = 1, quality = 3;
+    var W = 0, H = 0, D = 1, level = 'glass', LV = LEVELS.glass;
     var panels = new Map(), order = [], seq = 0, flats = new Map();
-    var src = null, srcRect = null, srcTex = null, srcReady = false, lastUp = -1e9;
+    var kind = 'none';   /* where the backdrop comes from: 'scene' (drawn on the GPU), 'copy' (a small copy of a canvas), 'none' */
+    var scene = null, sVao = null, sBuf = null, geomDirty = false, sceneDirty = false, lastScene = -1e9;
+    var src = null, srcRect = null, srcH = { tex: null, q: null, qx: null }, srcReady = false, lastUp = -1e9;
     var srcDirty = false, pyrDirty = true, bDirty = true, panelsDirty = true, lastFlat = -1e9, flatWait = false;
-    var pyrA = null, pyrB = null, regs = null, regKey = '';
+    var pyrA = null, pyrB = null, regs = null, regKey = '', blank = null;
     var acc = { rt: o.reduceTransparency, ic: o.increaseContrast };
     var mRT = mq('(prefers-reduced-transparency: reduce)'), mIC = mq('(prefers-contrast: more)');
     var fb = null;   /* fallback: {c, x, own, vis} */
-    var stats = { renders: 0, skipped: 0, draws: 0, uploads: 0, pyramids: 0, flatPyramids: 0, flatUploads: 0, lost: 0, restored: 0 };
+    /* sceneSends = rectangle lists sent to the GPU, sceneDraws = backdrop drawn on the GPU, uploads = canvas copies of the backdrop (stays 0 on the scene path),
+       uploadPixels = size of the largest copy so far */
+    var stats = { renders: 0, skipped: 0, draws: 0, sceneSends: 0, sceneDraws: 0, uploads: 0, uploadPixels: 0, pyramids: 0, flatPyramids: 0, flatUploads: 0, lost: 0, restored: 0 };
 
     function ask() { if (opt.requestRender) try { opt.requestRender(); } catch (e) { } }
     function reduceT() { return acc.rt != null ? !!acc.rt : !!(mRT && mRT.matches); }
     function moreC() { return acc.ic != null ? !!acc.ic : !!(mIC && mIC.matches); }
-    function isStatic() { return !!QSET[quality].st || reduceT() || !src; }
+    function isStatic() { return !!LV.st || reduceT() || kind === 'none'; }
+    function capOf(copy) { return LV.rate || (copy ? opt.copyRate : 0); }
     function onMq() { panelsDirty = true; ask(); }
 
     /* ---------- GL set-up ---------- */
@@ -126,25 +163,29 @@
       return { t: t, f: f };
     }
     function glInit() {
-      prog = { d: mk(VS_FULL, FS_DOWN), u: mk(VS_FULL, FS_UP), g: mk(VS_QUAD, FS_GLASS), f: mk(VS_QUAD, FS_FLAT) };
+      prog = { d: mk(VS_FULL, FS_DOWN), u: mk(VS_FULL, FS_UP), g: mk(VS_QUAD, FS_GLASS), f: mk(VS_QUAD, FS_FLAT), s: mk(VS_SCENE, FS_SCENE) };
+      /* the rectangles of the scene: 24 bytes each (x,y,w,h floats, colour 4 bytes, mode float), one instance per rectangle */
+      sVao = gl.createVertexArray(); sBuf = gl.createBuffer(); gl.bindVertexArray(sVao); gl.bindBuffer(gl.ARRAY_BUFFER, sBuf);
+      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 24, 0); gl.vertexAttribDivisor(0, 1);
+      gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.UNSIGNED_BYTE, true, 24, 16); gl.vertexAttribDivisor(1, 1);
+      gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 24, 20); gl.vertexAttribDivisor(2, 1);
       vao = gl.createVertexArray(); gl.bindVertexArray(vao);
       gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.activeTexture(gl.TEXTURE0);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-      srcTex = tex(0, 0); srcReady = false; pyrA = pyrB = null;
-      flats.forEach(function (f) { f.tex = null; f.dirty = true; });
-      srcDirty = !!src; pyrDirty = bDirty = panelsDirty = true; regKey = '';
+      srcH.tex = tex(0, 0); blank = tex(1, 1); srcReady = false; pyrA = pyrB = null;
+      flats.forEach(function (f) { f.tex = null; f.dirty = !!f.source; });
+      srcDirty = !!src; geomDirty = sceneDirty = !!scene; lastScene = lastUp = -1e9; pyrDirty = bDirty = panelsDirty = true; regKey = '';
     }
     /* level plan: sizes as divisors of the canvas in CSS pixels, so the blur looks the same on a 1x and a 2x screen (and a 2x screen pays no more).
-       Half base: 2,4,(8),(16). Quarter base: 4,(8),(16); "light" is one level plus a same-size pass. */
+       Glass: 4,(8),(16); "light" is one level plus a same-size pass. Light: 8,(16). The first level is the target the backdrop is drawn into. */
     function plan() {
-      var base = QSET[quality].base, n = BLUR[opt.blur], m = base === 2 ? n : Math.max(1, n - 1), a = [], i;
-      for (i = 0; i < m; i++) a.push(base << i);
+      var m = Math.max(1, BLUR[opt.blur] - LV.cut), a = [], i;
+      for (i = 0; i < m; i++) a.push(LV.base << i);
       return a;
     }
     function freePyr(P) {
       if (!P || !gl) return;
       P.lev.forEach(function (L) { gl.deleteTexture(L.t); gl.deleteFramebuffer(L.f); if (L.t2) { gl.deleteTexture(L.t2); gl.deleteFramebuffer(L.f2); } });
-      if (P.pre) { gl.deleteTexture(P.pre.t); gl.deleteFramebuffer(P.pre.f); }
     }
     function makePyr() {
       var pl = plan(), lev = [], i, L, a, b;
@@ -154,10 +195,7 @@
         if (i < pl.length - 1 || pl.length === 1) { b = target(L.w, L.h); L.t2 = b.t; L.f2 = b.f; }
         lev.push(L);
       }
-      /* the first level is more than 4 times smaller than the picture (2x screen, quarter base): go there in two steps so thin lines are not skipped */
-      var pre = null;
-      if (lev[0].div > 4.001) { pre = target(Math.max(2, Math.round(W * 2 / lev[0].div)), Math.max(2, Math.round(H * 2 / lev[0].div))); pre.div = lev[0].div / 2; pre.w = Math.max(2, Math.round(W * 2 / lev[0].div)); pre.h = Math.max(2, Math.round(H * 2 / lev[0].div)); }
-      return { lev: lev, pre: pre, ready: false };
+      return { lev: lev, ready: false };
     }
     function dropPyr() { freePyr(pyrA); freePyr(pyrB); pyrA = pyrB = null; pyrDirty = bDirty = panelsDirty = true; regKey = ''; }
 
@@ -207,26 +245,72 @@
     }
     function tri() { gl.drawArrays(gl.TRIANGLES, 0, 3); }
 
+    /* ---------- the backdrop drawn on the GPU ---------- */
+    function grow(sc, n) {
+      if (sc.buf && sc.buf.byteLength >= n * 24) return;
+      var nb = new ArrayBuffer(Math.max(n * 24, sc.buf ? sc.buf.byteLength * 2 : 24 * 256)), u = new Uint8Array(nb);
+      if (sc.buf) u.set(sc.u8);
+      sc.buf = nb; sc.f32 = new Float32Array(nb); sc.u8 = u;
+    }
+    function put(sc, x, y, w, h, c, a, m) {
+      grow(sc, sc.n + 1);
+      var o = sc.n * 6, f = sc.f32, u = sc.u8, k = sc.n * 24 + 16;
+      f[o] = x; f[o + 1] = y; f[o + 2] = w; f[o + 3] = h; f[o + 5] = m;
+      u[k] = c[0] * 255 + 0.5; u[k + 1] = c[1] * 255 + 0.5; u[k + 2] = c[2] * 255 + 0.5; u[k + 3] = (c[3] == null ? 1 : c[3]) * a * 255 + 0.5;
+      sc.n++;
+    }
+    /* the rectangle list: background, lanes, clips (body, title band, selection tint), then the playhead as the last one */
+    function listScene() {
+      var sc = scene, BIG = 1e6, i, c, col, th, L = sc.lanes || [], C = sc.clips || [], sel = colOf(sc.selColor);
+      sc.n = 0;
+      put(sc, 0, 0, BIG, BIG, colOf(sc.bg || opt.backdropColor), 1, 3);
+      for (i = 0; i < L.length; i++) { c = L[i]; put(sc, c.x || 0, c.y, c.w != null ? c.w : BIG, c.h, colOf(c.color), 1, 1); }
+      for (i = 0; i < C.length; i++) {
+        c = C[i]; col = colOf(c.color);
+        put(sc, c.x, c.y, c.w, c.h, col, c.alpha != null ? c.alpha : sc.bodyAlpha, 0);
+        th = c.titleH != null ? c.titleH : sc.titleH; if (th > 0) put(sc, c.x, c.y, c.w, Math.min(th, c.h), col, 1, 4);
+        if (c.selected) put(sc, c.x, c.y, c.w, c.h, sel, 1, 0);
+      }
+      put(sc, -sc.playheadW / 2, 0, sc.playheadW, BIG, colOf(sc.playheadColor), 1, 2);
+      geomDirty = sceneDirty = true;
+    }
+    function sendScene() {
+      gl.bindBuffer(gl.ARRAY_BUFFER, sBuf); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(scene.buf, 0, scene.n * 24), gl.DYNAMIC_DRAW);
+      geomDirty = false; stats.sceneSends++;
+    }
+    function drawScene(l0, rs) {
+      var sc = scene, u = prog.s.u, cw = W / D, ch = H / D, v = sc.rect || { x: 0, y: 0, w: cw, h: ch }, sx = l0.w / cw, sy = l0.h / ch;
+      var n = sc.n - (sc.playheadX == null ? 1 : 0), i, r, x0, y0, x1, y1;
+      /* the view rectangle in target pixels (y up for the scissor) */
+      var vx0 = Math.max(0, Math.floor(v.x * sx)), vx1 = Math.min(l0.w, Math.ceil((v.x + v.w) * sx)), vy0 = Math.max(0, l0.h - Math.ceil((v.y + v.h) * sy)), vy1 = Math.min(l0.h, l0.h - Math.floor(v.y * sy));
+      if (n <= 0 || vx1 <= vx0 || vy1 <= vy0) return;
+      gl.viewport(0, 0, l0.w, l0.h); gl.useProgram(prog.s.p); gl.bindVertexArray(sVao);
+      gl.uniform4f(u.view, sc.scrollX, sc.scrollY, sc.zoom, sc.zoomY); gl.uniform4f(u.org, v.x, v.y, v.x + sc.originX, v.y + sc.originY);
+      gl.uniform2f(u.sc, sx, sy); gl.uniform2f(u.tsz, l0.w, l0.h); gl.uniform1f(u.ph, sc.playheadX == null ? 0 : sc.playheadX);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.SCISSOR_TEST);
+      if (!rs) { gl.scissor(vx0, vy0, vx1 - vx0, vy1 - vy0); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n); }
+      else for (i = 0; i < rs.length; i++) {
+        r = rs[i]; x0 = Math.max(vx0, Math.floor(r[0] * l0.w / W)); x1 = Math.min(vx1, Math.ceil((r[0] + r[2]) * l0.w / W)); y0 = Math.max(vy0, Math.floor((H - r[1] - r[3]) * l0.h / H)); y1 = Math.min(vy1, Math.ceil((H - r[1]) * l0.h / H));
+        if (x1 > x0 && y1 > y0) { gl.scissor(x0, y0, x1 - x0, y1 - y0); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n); }
+      }
+      gl.disable(gl.SCISSOR_TEST); gl.disable(gl.BLEND); gl.bindVertexArray(vao);
+      stats.sceneDraws++;
+    }
+
     /* ---------- the blur pyramid ---------- */
     function build(P, withFlats) {
-      var L = P.lev, m = L.length, rs = withFlats ? null : regs, i, t, l0 = L[0], f0 = P.pre || l0;
+      var L = P.lev, m = L.length, rs = withFlats ? null : regs, i, t, l0 = L[0], bc = opt.backdropColor;
       gl.disable(gl.BLEND);
-      /* 1: the backdrop picture into the first level (its rectangle on the canvas becomes the viewport).
-         Exactly half size: one dual-Kawase step, as in the Glass Bench. Smaller: a box filter (4 taps = 4x4 pixels at quarter size). */
-      var sr = srcRect || { x: 0, y: 0, w: W / D, h: H / D }, sx = f0.w / W, sy = f0.h / H;
-      var vx = Math.round(sr.x * D * sx), vw = Math.max(1, Math.round(sr.w * D * sx)), vh = Math.max(1, Math.round(sr.h * D * sy)), vy = f0.h - Math.round(sr.y * D * sy) - vh;
-      gl.bindFramebuffer(gl.FRAMEBUFFER, f0.f);
-      if (vx > 0 || vy > 0 || vx + vw < f0.w || vy + vh < f0.h) {
-        gl.viewport(0, 0, f0.w, f0.h); gl.clearColor(opt.backdropColor[0], opt.backdropColor[1], opt.backdropColor[2], 1);
-        each(rs, f0, function () { gl.clear(gl.COLOR_BUFFER_BIT); });
-      }
-      gl.viewport(vx, vy, vw, vh); gl.useProgram(prog.d.p); gl.bindTexture(gl.TEXTURE_2D, srcTex);
-      var kaw = f0.div <= 2.001, f = kaw ? 1 : 0.25;
-      gl.uniform2f(prog.d.u.px, f / vw, f / vh); gl.uniform1f(prog.d.u.flip, 1); gl.uniform1f(prog.d.u.cw, kaw ? 4 : 0);
-      each(rs, f0, tri);
-      if (P.pre) {
-        gl.bindFramebuffer(gl.FRAMEBUFFER, l0.f); gl.viewport(0, 0, l0.w, l0.h); gl.bindTexture(gl.TEXTURE_2D, P.pre.t);
-        gl.uniform2f(prog.d.u.px, 1 / l0.w, 1 / l0.h); gl.uniform1f(prog.d.u.flip, 0); gl.uniform1f(prog.d.u.cw, 4); each(rs, l0, tri);
+      /* 1: the backdrop into the first level, which is already the small target: the scene is drawn there directly, a canvas copy arrives at that size */
+      gl.bindFramebuffer(gl.FRAMEBUFFER, l0.f); gl.viewport(0, 0, l0.w, l0.h); gl.clearColor(bc[0], bc[1], bc[2], 1);
+      each(rs, l0, function () { gl.clear(gl.COLOR_BUFFER_BIT); });
+      if (kind === 'scene') drawScene(l0, rs);
+      else {
+        var sr = srcRect || { x: 0, y: 0, w: W / D, h: H / D }, sx = l0.w * D / W, sy = l0.h * D / H;
+        var vx = Math.round(sr.x * sx), vw = Math.max(1, Math.round(sr.w * sx)), vh = Math.max(1, Math.round(sr.h * sy)), vy = l0.h - Math.round(sr.y * sy) - vh;
+        gl.viewport(vx, vy, vw, vh); gl.useProgram(prog.d.p); gl.bindTexture(gl.TEXTURE_2D, srcH.tex);
+        gl.uniform2f(prog.d.u.px, 0, 0); gl.uniform1f(prog.d.u.flip, 1); gl.uniform1f(prog.d.u.cw, 4);
+        each(rs, l0, tri);
       }
       if (withFlats) drawFlats(l0);
       /* 2: down */
@@ -253,16 +337,31 @@
         var c = fl.color || [0, 0, 0, 1];
         gl.uniform4f(u.rc, fl.x * D, fl.y * D, fl.w * D, fl.h * D); gl.uniform1f(u.rad, fl.radius * D);
         gl.uniform4f(u.col, c[0], c[1], c[2], c[3] == null ? 1 : c[3]); gl.uniform1f(u.useT, fl.tex && fl.ok ? 1 : 0);
-        if (fl.tex && fl.ok) gl.bindTexture(gl.TEXTURE_2D, fl.tex);
+        /* a plain colour still needs some texture bound that is not the target being drawn into */
+        gl.bindTexture(gl.TEXTURE_2D, fl.tex && fl.ok ? fl.tex : blank);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       });
       gl.disable(gl.BLEND);
     }
-    function upload(t, s) {
+    /* a canvas goes to the GPU as a small copy: reduced on a 2D canvas to the size of the first pyramid level (a quarter, at Light an eighth, of its size on screen)
+       and only that is uploaded. A source that is already that small is uploaded as it is. Never a full-size upload. */
+    function upload(h, s, cssW, cssH) {
       try {
-        if (!(s.width || s.videoWidth)) return false;
-        gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, s); return true;
-      } catch (e) { return false; }
+        var sw = s.width || s.videoWidth, sh = s.height || s.videoHeight, tw, th;
+        if (!sw || !sh) return 0;
+        tw = Math.max(2, Math.round(cssW / LV.base)); th = Math.max(2, Math.round(cssH / LV.base));
+        if (!h.tex) h.tex = tex(0, 0);
+        gl.bindTexture(gl.TEXTURE_2D, h.tex);
+        if (sw * sh <= tw * th * 1.5) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, s); tw = sw; th = sh; }
+        else {
+          if (!h.q) { h.q = document.createElement('canvas'); h.qx = h.q.getContext('2d', { alpha: false }); }
+          if (h.q.width !== tw || h.q.height !== th) { h.q.width = tw; h.q.height = th; }
+          h.qx.imageSmoothingEnabled = true; h.qx.imageSmoothingQuality = opt.copyQuality; h.qx.drawImage(s, 0, 0, tw, th);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, h.q);
+        }
+        if (tw * th > stats.uploadPixels) stats.uploadPixels = tw * th;
+        return tw * th;
+      } catch (e) { return 0; }
     }
 
     /* ---------- the glass faces ---------- */
@@ -281,7 +380,7 @@
         t = st ? null : useB ? pyrB.out : pyrA && pyrA.ready ? pyrA.out : null;
         if (t && t !== bound) { gl.bindTexture(gl.TEXTURE_2D, t); bound = t; }
         /* lens: band follows the panel's size; no lens with Increase Contrast or when the panel asks for none */
-        if (ln[0] && !hc && p.lens !== false) { band = Math.max(0.5, Math.min(ln[1], sh / ln[0])); amt = Math.min(sh / 2, Math.max(24, band * 1.2)); } else { band = 0.5; amt = 0; }
+        if (ln[0] && LV.lens && !hc && p.lens !== false) { band = Math.max(0.5, Math.min(ln[1], sh / ln[0])); amt = Math.min(sh / 2, Math.max(24, band * 1.2)); } else { band = 0.5; amt = 0; }
         tin = t ? (p.tint || opt.tint) : (p.solid || opt.solid);
         tA = p.tintAmount != null ? p.tintAmount : K.tint; if (hc) tA = Math.max(tA, 0.82);
         /* shadow (Apple's numbers): offset 8, radius 4 + 20t, opacity 0.04 + 0.56t, t from the short side between 64 and 160 */
@@ -350,7 +449,7 @@
     /* ---------- context ---------- */
     function onLost(e) {
       e.preventDefault(); stats.lost++;
-      srcReady = false; pyrA = pyrB = null; prog = null;
+      srcReady = false; pyrA = pyrB = null; prog = null; srcH.tex = null;
       fallbackOn('lost'); ask();
     }
     function onRestored() {
@@ -390,8 +489,8 @@
       get gl() { return gl; },
       get mode() { return mode; },            /* 'gl' or 'fallback' */
       get reason() { return reason; },        /* why the fallback is on */
-      get pending() { return mode === 'gl' && (srcDirty || flatWait) && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
-      get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, quality: quality, lens: opt.lens, blur: opt.blur, levels: plan(), rate: QSET[quality].rate, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
+      get pending() { return mode === 'gl' && ((kind === 'scene' ? sceneDirty : srcDirty) || flatWait) && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
+      get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, level: level, source: kind, lens: LV.lens ? opt.lens : 'off', blur: opt.blur, levels: plan(), rate: capOf(kind === 'copy'), copyRate: capOf(true), sceneRects: scene ? scene.n : 0, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
 
       addPanel: function (d) {
         var p = panels.get(d.id);
@@ -406,13 +505,58 @@
       removePanel: function (id) { if (panels.delete(id)) { sortOrder(); panelsDirty = true; return true; } return false; },
       hasPanel: function (id) { return panels.has(id); },
 
-      /* the picture behind all glass. rect = where it sits on the engine canvas in CSS px (default: it covers the canvas) */
-      setBackdrop: function (source, d) { src = source || null; srcRect = d && d.rect ? rectOf(d.rect) : null; srcDirty = !!src; lastUp = -1e9; panelsDirty = true; return api; },
+      /* THE BACKDROP, DRAWN ON THE GPU. Everything is optional; what is left out keeps its value.
+         lanes: [{y, h, color}]                       track lane backgrounds (y in scene px, scrolls with scrollY; full width)
+         clips: [{x, y, w, h, color, titleH, selected}]  x and w in scene units (for example beats), y and h in px; body = colour at bodyAlpha, title band = full colour
+         playheadX (scene units, null = none), scrollX (scene units), scrollY (px), zoom (px per scene unit), zoomY (1),
+         rect [x,y,w,h] = where the arrangement shows on the engine canvas in CSS px (or viewW, viewH; default the whole canvas),
+         originX, originY = where scene x = scrollX and y = scrollY land inside rect (0, 0), bg, titleH (14), bodyAlpha (0.533), selColor, playheadColor, playheadW (1).
+         Passing lanes or clips sends the rectangle list to the GPU again; everything else is a uniform. */
+      setScene: function (d) {
+        if (!d) { scene = null; kind = src ? 'copy' : 'none'; geomDirty = sceneDirty = false; pyrDirty = bDirty = panelsDirty = true; return api; }
+        var first = !scene, k;
+        if (first) scene = { n: 0, buf: null, f32: null, u8: null, lanes: [], clips: [], rect: null, originX: 0, originY: 0, scrollX: 0, scrollY: 0, zoom: 1, zoomY: 1, playheadX: null, playheadW: 1, playheadColor: [0.243, 0.812, 0.557], bg: null, titleH: 14, bodyAlpha: 0.533, selColor: [1, 1, 1, 0.25] };
+        var geo = first || 'lanes' in d || 'clips' in d;
+        for (k in { bg: 1, titleH: 1, bodyAlpha: 1, selColor: 1, playheadColor: 1, playheadW: 1 }) if (k in d && d[k] !== scene[k]) { scene[k] = d[k]; geo = true; }
+        if ('lanes' in d) scene.lanes = d.lanes || []; if ('clips' in d) scene.clips = d.clips || [];
+        if (geo) listScene();
+        api.setView(d); if ('playheadX' in d) api.setPlayhead(d.playheadX);
+        if (kind !== 'scene') { kind = 'scene'; sceneDirty = panelsDirty = true; lastScene = -1e9; }
+        return api;
+      },
+      /* scroll and zoom: uniforms only, the rectangles stay on the GPU */
+      setView: function (d) {
+        if (!scene || !d) return api;
+        var ch = false, r, o, k;
+        for (k in { scrollX: 1, scrollY: 1, zoom: 1, zoomY: 1, originX: 1, originY: 1 }) if (d[k] != null && +d[k] !== scene[k]) { scene[k] = +d[k]; ch = true; }
+        if ('rect' in d || d.viewW != null) {
+          r = d.rect ? rectOf(d.rect) : d.viewW != null ? { x: 0, y: 0, w: +d.viewW, h: +d.viewH } : null; o = scene.rect;
+          if (!r !== !o || (r && (r.x !== o.x || r.y !== o.y || r.w !== o.w || r.h !== o.h))) { scene.rect = r; ch = true; }
+        }
+        if (ch) sceneDirty = true;
+        return api;
+      },
+      /* the playhead: one rectangle, placed by one uniform. x in scene units, null hides it */
+      setPlayhead: function (x) {
+        if (!scene) return api;
+        x = x == null ? null : +x;
+        if (x !== scene.playheadX) { scene.playheadX = x; sceneDirty = true; }
+        return api;
+      },
+
+      /* THE SMALL-COPY ROUTE: a canvas as the backdrop (fallback, and for glass over a piano roll or a display). It is reduced to a quarter of its size on screen
+         before it is uploaded, only after markDirty(), at most copyRate times per second. rect = where it sits on the engine canvas in CSS px (default: it covers the canvas).
+         The last of setScene and setBackdrop decides the source; setBackdrop(null) goes back to the scene. */
+      setBackdrop: function (source, d) {
+        src = source || null; srcRect = d && d.rect ? rectOf(d.rect) : null; srcDirty = !!src; srcReady = false; lastUp = -1e9;
+        kind = src ? 'copy' : scene ? 'scene' : 'none'; if (kind === 'scene') { sceneDirty = true; lastScene = -1e9; }
+        pyrDirty = bDirty = panelsDirty = true; return api;
+      },
       markDirty: function () { if (src) srcDirty = true; },
 
       /* flat pictures over the backdrop, seen only by panels with over:'flats' (glass that floats over DOM). color = [r,g,b,a] 0..1, or source = a canvas */
       setFlat: function (id, d) {
-        var f = flats.get(id), r; if (!f) { f = { id: id, x: 0, y: 0, w: 0, h: 0, radius: 0, color: null, source: null, tex: null, ok: false, dirty: false, hidden: false }; flats.set(id, f); }
+        var f = flats.get(id), r; if (!f) { f = { id: id, x: 0, y: 0, w: 0, h: 0, radius: 0, color: null, source: null, tex: null, q: null, qx: null, ok: false, dirty: false, hidden: false }; flats.set(id, f); }
         if (d.rect) { r = rectOf(d.rect); f.x = r.x; f.y = r.y; f.w = r.w; f.h = r.h; }
         if (d.radius != null) f.radius = +d.radius; if (d.color) f.color = d.color; if ('hidden' in d) f.hidden = !!d.hidden;
         if ('source' in d) { f.source = d.source || null; f.dirty = !!f.source; if (!f.source) f.ok = false; }
@@ -423,8 +567,11 @@
 
       setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
       setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },
-      /* 3 or 'high': half-size blur, every change. 2 'medium': quarter-size, backdrop 60 per second. 1 'low': quarter-size, 30 per second. 0 'static': plain tint with noise. */
-      setQuality: function (q) { if (q in QNAME) q = QNAME[q]; q = Math.max(0, Math.min(3, q | 0)); if (q === quality) return; quality = q; if (mode === 'gl') dropPyr(); panelsDirty = true; },
+      /* 'glass': lens, quarter-size backdrop, refreshed on every change. 'light': the same engine with the lens off, a backdrop half that size, refreshed 30 times per second.
+         'solid': no glass, plain tint with noise (also what Reduce Transparency and a missing WebGL2 give). */
+      setLevel: function (n) { if (!(n in LEVELS) || n === level) return api; level = n; LV = LEVELS[n]; if (mode === 'gl') dropPyr(); srcDirty = !!src; sceneDirty = !!scene; lastScene = lastUp = -1e9; panelsDirty = true; return api; },
+      /* older name: 3 and 2 = glass, 1 = light, 0 = solid */
+      setQuality: function (q) { if (q in QCOMPAT) api.setLevel(QCOMPAT[q]); },
       /* true / false to force, null to follow the system setting */
       setAccessibility: function (d) { if ('reduceTransparency' in d) acc.rt = d.reduceTransparency; if ('increaseContrast' in d) acc.ic = d.increaseContrast; panelsDirty = true; },
       setFace: function (d) { for (var k in d) opt.face[k] = d[k]; panelsDirty = true; },
@@ -447,22 +594,33 @@
         if (!W) api.resize();
         if (mode !== 'gl') { if (mode === 'fallback' && panelsDirty && W) { draw2d(); panelsDirty = false; return true; } stats.skipped++; return false; }
         if (gl.isContextLost()) { stats.skipped++; return false; }
-        var rebuilt = false, any = false, needA = false, needB = false, i, p, rate, rk;
+        var rebuilt = false, any = false, needA = false, needB = false, ready = false, i, p, rate, rk;
         for (i = 0; i < order.length; i++) { p = order[i]; if (p.visible && p.opacity > 0) { any = true; if (p.over === 'flats' && flats.size) needB = true; else needA = true; } }
         if (any && !isStatic()) {
-          rate = QSET[quality].rate; if (now == null) now = performance.now();
-          if (srcDirty && (!srcReady || !rate || now - lastUp >= 1000 / rate - 2)) {
-            if (upload(srcTex, src)) { srcReady = true; stats.uploads++; pyrDirty = bDirty = true; lastUp = now; }
-            srcDirty = false;
+          if (now == null) now = performance.now();
+          if (kind === 'scene') {
+            /* the rectangles go to the GPU only when the app passed new ones; the backdrop is drawn again only when something in it changed */
+            if (geomDirty) sendScene();
+            rate = capOf(false);
+            if (sceneDirty && (!rate || now - lastScene >= 1000 / rate - 2)) { pyrDirty = bDirty = true; sceneDirty = false; lastScene = now; }
+            ready = true;
+          } else {
+            rate = capOf(true);
+            if (srcDirty && (!srcReady || !rate || now - lastUp >= 1000 / rate - 2)) {
+              if (upload(srcH, src, srcRect ? srcRect.w : W / D, srcRect ? srcRect.h : H / D)) { srcReady = true; stats.uploads++; pyrDirty = bDirty = true; lastUp = now; }
+              srcDirty = false;
+            }
+            ready = srcReady;
           }
-          if (srcReady) {
+          if (ready) {
             regs = regions(); rk = regs ? regs.join(';') : 'all';
             if (rk !== regKey) { regKey = rk; pyrDirty = true; }
             if (needA && (pyrDirty || !pyrA)) { if (!pyrA) pyrA = makePyr(); build(pyrA, false); pyrDirty = false; rebuilt = true; }
             if (needB) {
-              /* fed canvases follow the same refresh cap as the backdrop */
+              /* fed canvases (device displays) go the small-copy route with the same cap */
+              rate = capOf(true);
               var fdue = !rate || now - lastFlat >= 1000 / rate - 2, fup = false; flatWait = false;
-              flats.forEach(function (f) { if (f.source && f.dirty) { if (fdue || !f.tex) { if (!f.tex) f.tex = tex(0, 0); f.ok = upload(f.tex, f.source); f.dirty = false; stats.flatUploads++; bDirty = fup = true; } else flatWait = true; } });
+              flats.forEach(function (f) { if (f.source && f.dirty) { if (fdue || !f.tex) { f.ok = !!upload(f, f.source, f.w, f.h); f.dirty = false; stats.flatUploads++; bDirty = fup = true; } else flatWait = true; } });
               if (fup) lastFlat = now;
               if (bDirty || !pyrB) { if (!pyrB) pyrB = makePyr(); build(pyrB, true); bDirty = false; rebuilt = true; }
             }
@@ -474,8 +632,9 @@
 
       /* for tests and the bench page */
       debug: {
-        upload: function () { if (mode === 'gl' && src) upload(srcTex, src); },
-        rebuild: function () { if (mode === 'gl' && srcReady) { if (pyrA) build(pyrA, false); if (pyrB) build(pyrB, true); } },
+        upload: function () { if (mode === 'gl' && src) upload(srcH, src, srcRect ? srcRect.w : W / D, srcRect ? srcRect.h : H / D); },
+        send: function () { if (mode === 'gl' && scene) sendScene(); },
+        rebuild: function () { if (mode === 'gl' && (kind === 'scene' || srcReady)) { if (pyrA) build(pyrA, false); if (pyrB) build(pyrB, true); } },
         draw: function () { if (mode === 'gl') drawPanels(); },
         lose: function () { loseExt = gl && !gl.isContextLost() && gl.getExtension('WEBGL_lose_context'); if (loseExt) loseExt.loseContext(); return !!loseExt; },
         restore: function () { if (loseExt && gl.isContextLost()) loseExt.restoreContext(); return !!loseExt; }
@@ -487,10 +646,10 @@
         if (mRT && mRT.removeEventListener) mRT.removeEventListener('change', onMq); if (mIC && mIC.removeEventListener) mIC.removeEventListener('change', onMq);
         if (ro) ro.disconnect();
         if (fb) { opt.onFallback = null; fallbackOff(); }
-        if (gl && !gl.isContextLost()) { freePyr(pyrA); freePyr(pyrB); if (srcTex) gl.deleteTexture(srcTex); flats.forEach(function (f) { if (f.tex) gl.deleteTexture(f.tex); });
+        if (gl && !gl.isContextLost()) { freePyr(pyrA); freePyr(pyrB); if (srcH.tex) gl.deleteTexture(srcH.tex); if (sBuf) gl.deleteBuffer(sBuf); flats.forEach(function (f) { if (f.tex) gl.deleteTexture(f.tex); });
           /* give the context back at once (browsers allow only a handful per page) */
           var le = gl.getExtension('WEBGL_lose_context'); if (le) le.loseContext(); }
-        panels.clear(); flats.clear(); order = []; src = null;
+        panels.clear(); flats.clear(); order = []; src = null; scene = null; kind = 'none';
       }
     };
 
@@ -500,9 +659,9 @@
     var ro = null, loseExt = null;
     if (opt.autoResize && root.ResizeObserver) { ro = new ResizeObserver(function () { if (api.resize()) ask(); }); ro.observe(canvas); }
     api.resize();
-    if (o.quality != null) api.setQuality(o.quality);
+    if (o.level != null) api.setLevel(o.level); else if (o.quality != null) api.setQuality(o.quality);
     return api;
   }
 
-  root.AudioLabGlass = { create: create, version: VERSION, LENS: LENS, BLUR: BLUR, KINDS: KINDS };
+  root.AudioLabGlass = { create: create, version: VERSION, LENS: LENS, BLUR: BLUR, KINDS: KINDS, LEVELS: LEVELS };
 })(typeof window !== 'undefined' ? window : this);
