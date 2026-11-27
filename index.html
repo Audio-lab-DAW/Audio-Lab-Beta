@@ -6463,7 +6463,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.263',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.264',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -6776,16 +6776,16 @@ setInterval(()=>{if(!ctx)return;const now=ctx.currentTime;for(const X of DYNEQ){
   const gs=(X.p.gs??100)/100;for(const S2 of X.stages)if(S2.bi===d.bi&&/shelf|peak/.test(b.t))S2.q.gain.setTargetAtTime(b.g*gs+nv,now,.015)}}},30);
 function eqResp(X,f,w){const n=Math.ceil(w/2);if(!FQ||FQ.length!==n){FQ=new Float32Array(n);MG=new Float32Array(n);PH=new Float32Array(n);MT=new Float32Array(n);for(let i=0;i<n;i++)FQ[i]=xF(i*2,w)}MT.fill(1);
   if(X&&X.stages){for(const s2 of X.stages){if(s2.ch==='s')continue;s2.q.getFrequencyResponse(FQ,MG,PH);for(let k=0;k<n;k++)MT[k]*=MG[k]}}return n}
-function vizEQ2(g,w,h,f,X){const p=f.p,sel=eqSel(f),R=24,dy=db=>h/2-db/R*(h/2-12),gs=(p.gs??100)/100;
+function vizEQ2(g,w,h,f,X){const p=f.p,sel=eqSel(f),R=24,dy=db=>h/2-db/R*(h/2-12),gs=(p.gs??100)/100;INSE.bw=[];INSE.cal=[];INSE.corner=[];/* IN-E */
   const bg=g.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#0b0d14');bg.addColorStop(1,'#06070a');g.fillStyle=bg;g.fillRect(0,0,w,h);
   const L=lkT(),dd=INS.dpr(g);g.font='9px Inter,system-ui,sans-serif';for(const fr of[30,50,100,200,300,500,1000,2000,3000,5000,10000,20000]){const x=Math.round(fX(fr,w)*dd)/dd;g.fillStyle=/^10*$/.test(String(fr))?L.gMaj:/^(2|5)0*$/.test(String(fr))?L.gMid:L.gMin;g.fillRect(x,0,1/dd,h);if(/^(1|2|5)0*$/.test(String(fr))||fr===50){g.fillStyle='rgba(255,255,255,.32)';g.fillText(fr>=1000?fr/1000+'k':fr,x+3,h-4)}}
-  for(const db of[-18,-12,-6,0,6,12,18]){const y=Math.round(dy(db)*dd)/dd;g.fillStyle=db?(db%12?L.gMin:L.gMid):L.gMaj;g.fillRect(0,y,w,1/dd);g.fillStyle='rgba(255,255,255,.3)';g.fillText((db>0?'+':'')+db,w-20,y-2)}
+  for(const db of[-18,-12,-6,0,6,12,18]){const y=Math.round(dy(db)*dd)/dd;g.fillStyle=db?(db%12?L.gMin:L.gMid):L.gMaj;g.fillRect(0,y,w,1/dd);g.fillStyle=db?INSE.gain:INS.look().ink;g.fillText(INS.num(db,0,true),3,y-2)}/* IN-E: the gain scale on the left, in its colour */
   if(X&&p.an!=='off'&&ctx){const sp=(an,fill,line)=>{if(!SPEC||SPEC.length!==an.frequencyBinCount)SPEC=new Float32Array(an.frequencyBinCount);INS.fft(an,SPEC);const ny=ctx.sampleRate/2,N=SPEC.length;g.beginPath();g.moveTo(0,h);for(let x=0;x<=w;x+=2){const fr=xF(x,w),k=Math.min(N-1,Math.round(fr/ny*N)),v=SPEC[k]+4.5*Math.log2(fr/1000);const y=clamp(h-(v+90)/84*h,0,h);g.lineTo(x,y)}g.lineTo(w,h);g.closePath();g.fillStyle=fill;g.fill();if(line){g.strokeStyle=line;g.lineWidth=1;g.stroke()}};
-    if(p.an==='prepost')sp(X.pre,'rgba(150,155,170,.12)',null);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(76,201,240,.35)');gr.addColorStop(1,'rgba(76,141,255,.04)');sp(X.an,gr,'rgba(120,200,255,.45)')}
+    if(p.an==='prepost')sp(X.pre,'rgba(150,155,170,.12)',null);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(76,201,240,.35)');gr.addColorStop(1,'rgba(76,141,255,.04)');sp(X.an,gr,'rgba(120,200,255,.45)');ineAnaScale(g,w,h)}
   const n=eqResp(X,f,w);
   // individual band curves for selected bands
-  const hv0=EQH.get(f);if(X&&X.stages)for(let i=0;i<p.bands.length;i++){const b=p.bands[i];if(!b||!b.on)continue;const hot=sel.has(i)||(hv0&&hv0.band===i);const M2=new Float32Array(n).fill(1);for(const s2 of X.stages){if(s2.bi!==i||s2.ch==='s')continue;s2.q.getFrequencyResponse(FQ,MG,PH);for(let k=0;k<n;k++)M2[k]*=MG[k]}g.beginPath();for(let k=0;k<n;k++){const y=dy(clamp(20*Math.log10(M2[k]),-30,30));k?g.lineTo(k*2,y):g.moveTo(0,y)}const col=EQC12[i%12];g.strokeStyle=col+(hot?'ee':'70');g.lineWidth=hot?1.4:1;g.stroke();if(hot){g.lineTo(w,dy(0));g.lineTo(0,dy(0));g.closePath();g.fillStyle=col+'30';g.fill()}}
-  const og=Math.pow(10,(p.out||0)/20);g.beginPath();for(let k=0;k<n;k++){const y=dy(clamp(20*Math.log10(MT[k]*og),-30,30));k?g.lineTo(k*2,y):g.moveTo(0,y)}g.save();g.shadowColor='rgba(255,210,122,.6)';g.shadowBlur=8;g.strokeStyle='#ffd27a';g.lineWidth=2;g.stroke();g.restore();
+  const hv0=EQH.get(f);if(X&&X.stages)for(let i=0;i<p.bands.length;i++){const b=p.bands[i];if(!b||!b.on)continue;const hot=sel.has(i)||(hv0&&hv0.band===i);const M2=new Float32Array(n).fill(1);for(const s2 of X.stages){if(s2.bi!==i||s2.ch==='s')continue;s2.q.getFrequencyResponse(FQ,MG,PH);for(let k=0;k<n;k++)M2[k]*=MG[k]}g.beginPath();for(let k=0;k<n;k++){const y=dy(clamp(20*Math.log10(M2[k]),-30,30));k?g.lineTo(k*2,y):g.moveTo(0,y)}const col=EQC12[i%12];g.strokeStyle=col+(hot?'ee':'70');g.lineWidth=hot?1.4:1;g.stroke();ineBand(i,b,M2,n,w,dy);if(hot){g.lineTo(w,dy(0));g.lineTo(0,dy(0));g.closePath();g.fillStyle=col+'30';g.fill()}}
+  ineFill(g,p,n,dy);/* IN-E: E3 */const og=Math.pow(10,(p.out||0)/20);g.beginPath();for(let k=0;k<n;k++){const y=dy(clamp(20*Math.log10(MT[k]*og),-30,30));k?g.lineTo(k*2,y):g.moveTo(0,y)}g.save();g.shadowColor='rgba(255,210,122,.6)';g.shadowBlur=8;g.strokeStyle='#ffd27a';g.lineWidth=2;g.stroke();g.restore();ineMarks(g,w,h);
   const solo=p.bands.findIndex(b=>b.on&&b.solo);
   p.bands.forEach((b,i)=>{const col=EQC12[i%12],x=fX(b.f,w),gst=/shelf|peak|tilt/.test(b.t)?b.g*gs:0,gl=gst+(X&&X.dyn[i]||0),y=dy(gl),on=b.on,isS=sel.has(i);
     if(b.dyn&&/shelf|peak|tilt/.test(b.t)){const y0=dy(gst),y1=dy(gst+(b.dr??-6));g.fillStyle=col+'40';g.fillRect(x-2,Math.min(y0,y1),4,Math.abs(y1-y0));g.strokeStyle=col;g.lineWidth=1;g.beginPath();g.arc(x,y0,7,0,7);g.stroke()}
@@ -6794,7 +6794,7 @@ function vizEQ2(g,w,h,f,X){const p=f.p,sel=eqSel(f),R=24,dy=db=>h/2-db/R*(h/2-12
     g.fillStyle=on?'#0b0b0f':col;g.font='600 8.5px Inter,system-ui,sans-serif';const lab=String(i+1);g.fillText(lab,x-g.measureText(lab).width/2,y+3);
     if(b.pl&&b.pl!=='st'){g.fillStyle='#fff';g.font='600 8px Inter,system-ui,sans-serif';g.fillText(b.pl==='m'?'M':'S',x+8,y-7)}if(b.solo){g.fillStyle='#f5c84c';g.fillText('S',x-14,y-7)}});
   const hv=EQH.get(f);if(hv&&hv.box){const B=hv.box;g.fillStyle='rgba(120,170,255,.12)';g.fillRect(B.x,B.y,B.w,B.h);g.strokeStyle='rgba(150,190,255,.9)';g.setLineDash([4,3]);g.strokeRect(B.x+.5,B.y+.5,B.w,B.h);g.setLineDash([])}
-  const show=hv&&hv.band!=null?hv.band:sel.size===1?[...sel][0]:null;if(show!=null&&p.bands[show]){const b=p.bands[show],x=fX(b.f,w),txt=`${EQT[b.t]} · ${fmt(b.f,'Hz')}${/shelf|peak|tilt/.test(b.t)?' · '+(b.g>0?'+':'')+b.g.toFixed(1)+' dB':''}${/pass/.test(b.t)&&b.t!=='bandpass'?' · '+(b.sl||12)+' dB/oct':' · Q '+b.q.toFixed(2)}${b.dyn?' · dyn '+(b.dr??-6)+' dB':''}`;g.font='600 10.5px Inter,system-ui,sans-serif';const tw=g.measureText(txt).width+14,bx=clamp(x-tw/2,4,w-tw-4);g.fillStyle='rgba(8,9,12,.88)';rr(g,bx,32,tw,20,5);g.fill();g.strokeStyle=EQC12[show%12];g.lineWidth=1;g.stroke();g.fillStyle='#eef0f4';g.fillText(txt,bx+7,46)}
+  const show=hv&&hv.band!=null?hv.band:sel.size===1?[...sel][0]:null;if(show!=null&&p.bands[show]){const b=p.bands[show],x=fX(b.f,w),txt=`${EQT[b.t]} · ${fmt(b.f,'Hz')} ${INS.note(b.f).name}${/shelf|peak|tilt/.test(b.t)?' · '+(b.g>0?'+':'')+b.g.toFixed(1)+' dB':''}${/pass/.test(b.t)&&b.t!=='bandpass'?' · '+(b.sl||12)+' dB/oct':' · Q '+b.q.toFixed(2)+(INSE.bw[show]?' · '+ineOct(INSE.bw[show]):'')}${b.dyn?' · dyn '+(b.dr??-6)+' dB':''}`;g.font='600 10.5px Inter,system-ui,sans-serif';const tw=g.measureText(txt).width+14,bx=clamp(x-tw/2,4,w-tw-4);g.fillStyle='rgba(8,9,12,.88)';rr(g,bx,32,tw,20,5);g.fill();g.strokeStyle=EQC12[show%12];g.lineWidth=1;g.stroke();g.fillStyle='#eef0f4';g.fillText(txt,bx+7,46)}
   if(hv&&hv.mx!=null&&hv.band==null&&!hv.box){const fr=xF(hv.mx,w),note=Math.round(69+12*Math.log2(fr/440));g.fillStyle='rgba(255,255,255,.55)';g.font='9.5px Inter,system-ui,sans-serif';g.fillText(`${fmt(fr,'Hz')} · ${nname(note)}`,clamp(hv.mx+8,4,w-90),h-16)}
   if(X&&p.auto){g.fillStyle='#3ecf8e';g.font='600 9px Inter,system-ui,sans-serif';g.fillText(`auto gain ${X.auto>0?'+':''}${X.auto.toFixed(1)} dB`,8,h-16)}}
 const EQH=new WeakMap();
@@ -6934,9 +6934,9 @@ function vizDrive(g,w,h,f,X){const p=f.p,k=p.drive*1.5,m=p.mix/100;g.fillStyle='
   g.beginPath();for(let i=0;i<=80;i++){const x=i/40-1,y=(1-m)*x+m*((1+k)*x/(1+k*Math.abs(x)))/(1+p.drive/60)*1.6;i?g.lineTo(cx+x*S,cy-clamp(y,-1.1,1.1)*S):g.moveTo(cx+x*S,cy-y*S)}g.save();g.shadowColor='#ff9a3c';g.shadowBlur=6+10*lv;g.strokeStyle='#ff9a3c';g.lineWidth=2;g.stroke();g.restore();
   g.fillStyle='rgba(255,255,255,.55)';g.font='9px Inter,system-ui,sans-serif';g.fillText('IN →',cx+S-24,cy+S+10>h?h-3:cy+S+10);g.fillText(`drive ${Math.round(p.drive)}% · mix ${Math.round(p.mix)}%`,6,12)}
 function vizFilter(g,w,h,f,X){const p=f.p;g.fillStyle='#07070a';g.fillRect(0,0,w,h);if(X&&X.an)spectrum(g,w,h,X.an,'rgba(62,207,142,.12)',40);g.strokeStyle='rgba(255,255,255,.06)';for(const fr of[100,1000,10000]){const x=Math.log(fr/20)/Math.log(1000)*w;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke()}
-  const dbY=db=>h*.5-db/24*h*.4;g.beginPath();for(let x=0;x<=w;x+=2){const fr=20*Math.pow(1000,x/w),r=fr/p.freq,mag=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Math.max(.1,p.q),2)),y=clamp(dbY(20*Math.log10(mag)),2,h+2);x?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fillStyle='rgba(62,207,142,.14)';g.fill();
+  const dbY=db=>h*.5-db/24*h*.4;g.beginPath();for(let x=0;x<=w;x+=2){const fr=20*Math.pow(1000,x/w),r=fr/p.freq,mag=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Math.max(.1,p.q),2)),y=clamp(dbY(20*Math.log10(mag)),2,h+2);x?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,dbY(0));g.lineTo(0,dbY(0));g.closePath();g.fillStyle='rgba(62,207,142,.14)';g.fill();/* IN-E: the fill to 0 dB */
   g.beginPath();for(let x=0;x<=w;x+=2){const fr=20*Math.pow(1000,x/w),r=fr/p.freq,mag=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Math.max(.1,p.q),2)),y=clamp(dbY(20*Math.log10(mag)),2,h+2);x?g.lineTo(x,y):g.moveTo(x,y)}g.strokeStyle='#3ecf8e';g.lineWidth=2;g.stroke();
-  g.fillStyle='rgba(255,255,255,.45)';g.font='9px Inter,system-ui,sans-serif';g.fillText('100',Math.log(5)/Math.log(1000)*w+3,h-4);g.fillText('1k',Math.log(50)/Math.log(1000)*w+3,h-4);g.fillText('10k',Math.log(500)/Math.log(1000)*w+3,h-4)}
+  g.fillStyle='rgba(255,255,255,.45)';g.font='9px Inter,system-ui,sans-serif';g.fillText('100',Math.log(5)/Math.log(1000)*w+3,h-4);g.fillText('1k',Math.log(50)/Math.log(1000)*w+3,h-4);g.fillText('10k',Math.log(500)/Math.log(1000)*w+3,h-4);ineVizFilter(g,w,h,p)}
 let HD=null;
 {const hitH=(cv,f,e)=>{const fn=HND[f.type];if(!fn)return null;const r=cv.getBoundingClientRect(),z=r.width/cv.clientWidth,x=(e.clientX-r.left)/z,y=(e.clientY-r.top)/z,w=cv.clientWidth,h=cv.clientHeight,L=fn(f.p,w,h);let bi=-1,bd=13;L.forEach((q,i)=>{const d=Math.hypot(q.x-x,q.y-y);if(d<bd){bd=d;bi=i}});return{i:bi,x,y,w,h}};
  const fxOf=cv=>{const t=curT();return t&&t.fx.find(q=>q.id===cv.dataset.id)};
@@ -22876,6 +22876,56 @@ function insMxSpecTicks(g,W,H,an){if(!an||!ctx)return;const n=an.frequencyBinCou
   for(const f of[100,1000,10000]){const k=f/bh;if(k<1||k>=n)continue;const yy=INS.px(g,H*(1-Math.log(k)/Math.log(n)));g.moveTo(W-4,yy);g.lineTo(W,yy);lb.push([f,yy])}g.stroke();
   if(W>=44){g.font='6.5px '+L.mono;g.textAlign='right';g.textBaseline='middle';g.fillStyle=L.mut;for(const[f,yy] of lb)if(yy>6&&yy<H-4)g.fillText(f>=1000?f/1000+'k':String(f),W-6,yy)}}
 /* ===== end of lane E IN-S ===== */
+/* ===== lane E (task IN-E): the EQ displays, the user's pick E3 (bandwidth calipers) =====
+   E3 is E1 (the calibrated EQ) with the area between the summed curve and 0 dB lightly filled, so boosts and cuts read as shapes; an amber
+   caliper under each bell marking its bandwidth with the width in octaves (the M3 caliper style); shelves and cuts show their corner frequency.
+   - Pro EQ (vizEQ2): the gain scale on the left in the gain colour (it was on the right in grey), the analyzer's dBFS scale on the right in the
+     analyzer's colour with its 4.5 dB/oct tilt named (levels in dBFS as IN-S calibrated them: the analyser reads a sine 13.56 dB low), the fill,
+     the calipers and corner marks; the band read-out adds the note (X8) and the width in octaves. The ±24 dB range stays: the hit test, the drag
+     and the box select share it, so a zoom (E1's ±6 to ±30) would have to change them together (left for later, named in the log).
+   - Bell widths are measured on the band's own response (getFrequencyResponse, what the band really does): the two frequencies where the bell
+     is at half its gain in dB, which is how Q is defined for a bell (for a 6 dB bell, its -3 dB points). Band-pass: 3 dB under its top; notch:
+     3 dB under 0. Nothing new in the audio path; drawn with the display, nothing extra when it is hidden.
+   - Filter (vizFilter) and Auto Filter: the fill to 0 dB, the corner mark at the cutoff for low-pass and high-pass, the caliper for band-pass,
+     notch and peak. */
+const INSE={gain:'#c9b37a',ana:'rgba(120,200,255,.62)',fill:'rgba(255,210,122,.08)',bw:[],cal:[],corner:[]};
+/* the bandwidth around index ic of a response (F ascending in Hz, D in dB) at the level lv: the two crossings, interpolated on the log axis */
+function ineBW(F,D,n,ic,lv){const up=D[ic]>lv;let a=-1,b=-1;
+  for(let k=ic;k>0;k--)if((D[k-1]>lv)!==up){const t=(lv-D[k])/((D[k-1]-D[k])||1e-9);a=Math.exp(Math.log(F[k])+(Math.log(F[k-1])-Math.log(F[k]))*t);break}
+  for(let k=ic;k<n-1;k++)if((D[k+1]>lv)!==up){const t=(lv-D[k])/((D[k+1]-D[k])||1e-9);b=Math.exp(Math.log(F[k])+(Math.log(F[k+1])-Math.log(F[k]))*t);break}
+  return a>0&&b>0?{f1:a,f2:b,oct:Math.log2(b/a)}:null}
+/* an amber caliper from x1 to x2 at y with its label above (up) or below */
+function ineCaliper(g,x1,x2,y,s,up,lo,hi){const L=INS.look(),yy=INS.px(g,Math.max(lo,Math.min(hi,y)));g.strokeStyle=L.unit;g.lineWidth=INS.hair(g,1);g.beginPath();
+  g.moveTo(x1,yy-3);g.lineTo(x1,yy+3);g.moveTo(x2,yy-3);g.lineTo(x2,yy+3);g.moveTo(x1,yy);g.lineTo(x2,yy);g.stroke();
+  g.font='7.5px '+L.mono;g.textAlign='center';g.textBaseline=up?'bottom':'top';const xm=(x1+x2)/2,tw=g.measureText(s).width;if(tw<Math.max(40,x2-x1+60)){g.fillStyle=L.unit;g.fillText(s,xm,up?yy-3:yy+3)}g.textAlign='left';g.textBaseline='alphabetic'}
+/* corner marks along the bottom: an amber tick at each frequency, its value above it where there is room */
+function ineCorners(g,list,yb){if(!list.length)return;const L=INS.look();list.sort((a,b)=>a[0]-b[0]);g.strokeStyle=L.unit;g.lineWidth=INS.hair(g,1);g.beginPath();for(const[x] of list){const xx=INS.px(g,x);g.moveTo(xx,yb);g.lineTo(xx,yb-8)}g.stroke();
+  g.font='7.5px '+L.mono;g.textBaseline='bottom';g.textAlign='center';g.fillStyle=L.unit;let last=-1e9;for(const[x,s] of list){const tw=g.measureText(s).width;if(x-tw/2<last+4)continue;g.fillText(s,x,yb-10);last=x+tw/2}g.textAlign='left';g.textBaseline='alphabetic'}
+const ineOct=o=>INS.num(o,2)+' oct',ineHz=f=>INS.fmt(f,'Hz');
+/* Pro EQ: the analyzer's scale (dBFS at 1 kHz, with the tilt) on the right */
+function ineAnaScale(g,w,h){const L=INS.look();g.font='7.5px '+L.mono;g.textAlign='right';g.textBaseline='middle';g.fillStyle=INSE.ana;
+  for(const t of[-20,-40,-60]){const raw=t-INS.SPCAL,y=h-(raw+90)/84*h;if(y<44||y>h-26)continue;g.fillText(INS.num(t,0)+' dBFS',w-4,y)}
+  g.textBaseline='top';g.fillText('analyzer, tilt 4.5 dB/oct',w-4,4);g.textAlign='left';g.textBaseline='alphabetic'}
+/* Pro EQ: one band's mark from its own response (M2 over FQ); called in the band loop */
+function ineBand(i,b,M2,n,w,dy){if(!b||!b.on)return;const F=FQ,D=INSE.D&&INSE.D.length>=n?INSE.D:(INSE.D=new Float32Array(n));for(let k=0;k<n;k++)D[k]=20*Math.log10(Math.max(1e-9,M2[k]));
+  const t=b.t;if(t==='peaking'||t==='bandpass'||t==='notch'){let ic=0,ext=0;for(let k=0;k<n;k++){const v=t==='bandpass'?D[k]:Math.abs(D[k]);if(k===0||v>ext){ext=v;ic=k}}
+      const top=D[ic];if(t==='peaking'&&Math.abs(top)<.5)return;const lv=t==='peaking'?top/2:t==='bandpass'?top-3:-3,r=ineBW(F,D,n,ic,lv);if(!r)return;INSE.bw[i]=r.oct;
+      INSE.cal.push([fX(r.f1,w),fX(r.f2,w),dy(top)+(top>0?-14:14),ineOct(r.oct),top>0])}
+  else if(/shelf|pass|tilt/.test(t))INSE.corner.push([fX(b.f,w),ineHz(b.f)])}
+/* Pro EQ: the fill between the summed curve and 0 dB (before the curve is drawn) */
+function ineFill(g,p,n,dy){const og=Math.pow(10,(p.out||0)/20),y0=dy(0);g.beginPath();g.moveTo(0,y0);for(let k=0;k<n;k++)g.lineTo(k*2,dy(clamp(20*Math.log10(Math.max(1e-9,MT[k]*og)),-30,30)));g.lineTo((n-1)*2,y0);g.closePath();g.fillStyle=INSE.fill;g.fill()}
+/* Pro EQ: the calipers and corner marks (after the curve), then clear for the next draw */
+function ineMarks(g,w,h){for(const[a,b,y,s,up] of INSE.cal)ineCaliper(g,a,b,y,s,up,12,h-30);ineCorners(g,INSE.corner,h-14);INSE.cal=[];INSE.corner=[]}
+/* Filter and Auto Filter: marks from a response (F Hz, lin magnitudes), x and y mappings */
+function ineFiltMarks(g,kind,f0,F,mag,n,X,Y,yb,lo,hi){const D=new Float32Array(n);for(let k=0;k<n;k++)D[k]=20*Math.log10(Math.max(1e-9,mag[k]));
+  if(kind==='lp'||kind==='hp'){ineCorners(g,[[X(f0),ineHz(f0)]],yb);return}
+  let ic=0,ext=-1e9;for(let k=0;k<n;k++){const v=kind==='notch'?-D[k]:D[k];if(v>ext){ext=v;ic=k}}const top=D[ic],lv=kind==='notch'?-3:kind==='peak'?top/2:top-3;if(kind==='peak'&&Math.abs(top)<.5)return;
+  const r=ineBW(F,D,n,ic,lv);if(r)ineCaliper(g,X(r.f1),X(r.f2),Y(top)+(top>0?-14:14),ineOct(r.oct),top>0,lo,hi)}
+function ineVizFilter(g,w,h,p){const n=120,F=new Float32Array(n),M=new Float32Array(n);for(let k=0;k<n;k++){const fr=20*Math.pow(1000,k/(n-1)),r=fr/p.freq;F[k]=fr;M[k]=1/Math.sqrt(Math.pow(1-r*r,2)+Math.pow(r/Math.max(.1,p.q),2))}
+  ineFiltMarks(g,'lp',p.freq,F,M,n,f=>fX(f,w),db=>h*.5-db/24*h*.4,h-14,10,h-24)}
+function ineAfilt(g,p,fr,mg,N,w,Yd,Bm,m){const t=p.type,kind=/^lp/.test(t)?'lp':/^hp/.test(t)?'hp':t==='bp'?'bp':t==='notch'?'notch':t==='peak'?'peak':null;if(!kind)return;
+  const M=new Float32Array(N);for(let k=0;k<N;k++)M[k]=m*mg[k]+(1-m);ineFiltMarks(g,kind,p.freq,fr,M,N,f=>Math.log(f/20)/Math.log(1000)*w,Yd,Bm-2,12,Bm-16)}
+/* ===== end of lane E IN-E ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -24504,7 +24554,7 @@ ND('afilt',{name:'Auto Filter',vw:540,grp:['Tone & colour','#f5c84c'],desc:'Mult
   if(!X||!X.an)return;drawSpec(g,w,h,X.an,{lo:20,hi:20000,top:-10,floor:-90,slope:3,smooth:.75,y0:T,h:Bm-T,st:X.st||(X.st={}),c0:'rgba(245,200,76,.22)',c1:'rgba(245,200,76,.02)',line:'rgba(245,200,76,.35)'});
   const N=Math.min(220,Math.floor(w/2)),fr=new Float32Array(N),mg=new Float32Array(N),ph=new Float32Array(N),mg2=new Float32Array(N);for(let k=0;k<N;k++)fr[k]=20*Math.pow(1000,k/(N-1));const t=p.type;
   if(t==='formant'){mg.fill(0);for(let k=0;k<3;k++){X.fm[k].getFrequencyResponse(fr,mg2,ph);for(let j=0;j<N;j++)mg[j]+=mg2[j]*X.fg[k].gain.value}}else if(t==='comb'){const D=X.cur&&X.cur.freq?1/Math.max(40,p.freq):.001,gg=clamp(p.res,-.95,.95);for(let j=0;j<N;j++){const wv=2*Math.PI*fr[j]*D;mg[j]=Math.hypot(1+gg*Math.cos(wv),gg*Math.sin(wv))}}else{X.b1.getFrequencyResponse(fr,mg,ph);if(t==='lp24'||t==='hp24'){X.b2.getFrequencyResponse(fr,mg2,ph);for(let j=0;j<N;j++)mg[j]*=mg2[j]}}
-  const m=p.mix/100;g.beginPath();for(let k=0;k<N;k++){const db=toDb(m*mg[k]+(1-m)),x=k/(N-1)*w,y=Yd(db);k?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,Bm);g.lineTo(0,Bm);g.closePath();g.fillStyle='rgba(245,200,76,.16)';g.fill();g.beginPath();for(let k=0;k<N;k++){const db=toDb(m*mg[k]+(1-m)),x=k/(N-1)*w,y=Yd(db);k?g.lineTo(x,y):g.moveTo(x,y)}glow(g,'#f5c84c',7);g.strokeStyle='#f5c84c';g.lineWidth=2.2;g.stroke();g.shadowBlur=0;
+  const m=p.mix/100;g.beginPath();for(let k=0;k<N;k++){const db=toDb(m*mg[k]+(1-m)),x=k/(N-1)*w,y=Yd(db);k?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,Yd(0));g.lineTo(0,Yd(0));g.closePath();g.fillStyle='rgba(245,200,76,.16)';g.fill();/* IN-E: the fill to 0 dB */g.beginPath();for(let k=0;k<N;k++){const db=toDb(m*mg[k]+(1-m)),x=k/(N-1)*w,y=Yd(db);k?g.lineTo(x,y):g.moveTo(x,y)}glow(g,'#f5c84c',7);g.strokeStyle='#f5c84c';g.lineWidth=2.2;g.stroke();g.shadowBlur=0;ineAfilt(g,p,fr,mg,N,w,Yd,Bm,m);
   const fx=(fr0)=>Math.log(fr0/20)/Math.log(1000)*w,range=p.lamt/100*4800,lo=p.freq*Math.pow(2,-range/1200),hi=p.freq*Math.pow(2,range/1200);if(range>20){g.fillStyle='rgba(76,201,240,.1)';g.fillRect(fx(clamp(lo,20,20000)),T,fx(clamp(hi,20,20000))-fx(clamp(lo,20,20000)),Bm-T)}
   const lv=X.lan?tdOf(X.lan)[31]:0,ev=X.ean?tdOf(X.ean)[31]:0,cur=clamp(p.freq*Math.pow(2,(lv+ev)/1200),20,20000);g.strokeStyle='#4cc9f0';g.lineWidth=2;glow(g,'#4cc9f0',10);g.beginPath();g.moveTo(fx(cur),T);g.lineTo(fx(cur),Bm);g.stroke();g.shadowBlur=0;
   txt(g,(cur>=1000?(cur/1000).toFixed(2)+' kHz':Math.round(cur)+' Hz'),fx(cur)+4,T+10,'#4cc9f0',9);txt(g,(AFT.find(a=>a[0]===t)||['',''])[1]+(p.lsync&&p.lsync!=='free'?' · LFO '+p.lsync:' · LFO '+p.lrate.toFixed(2)+' Hz'),w-6,h-4,'rgba(255,255,255,.4)',8,'right')},

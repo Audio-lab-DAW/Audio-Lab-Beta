@@ -5207,3 +5207,38 @@ Fired by the scheduler. Next step after NB-R5 by its own "Left" list: NB-R6 wait
 - Diffs at `changed()` instead of rewriting the 327 `pushUndo` sites (they belong to the design chain's lanes).
 - The engine's change wins when both changed the same place; the app's own undo stays until N4.
 - 64 MB of history, five older copies, commit once per frame, autosave 2 s after the last edit and every 2 minutes, hash check after 2 s idle and before saving; plug-in blobs over 64 KB into a side store by content hash.
+
+## 27 November 2026, v0.264: task IN-E, the EQ displays: bandwidth calipers (lane E, instruments)
+
+Step IN-E of `docs/design-round-4-instruments.md`, the user's pick **E3** (bandwidth calipers: E1, the calibrated EQ, with the area between curve and 0 dB filled, an amber caliper under each bell, corner marks on shelves and cuts). Edit script `tools/design-lab/in/in_e.py` with `in_e_block.js` (every anchor asserted unique), test `tools/ui-tests/taskIN_E.py` (17 checks, all pass). Written on v0.263; nothing else changed index.html before the push.
+
+### Built (block "lane E (task IN-E)" before `askChoice`)
+- **Pro EQ** (`vizEQ2`, small anchored edits; the drawing of the bands, dots, dynamic bands, solo, mid/side marks, box select and hover read-outs stays):
+  - the area between the **summed curve and 0 dB** lightly filled in the curve's colour (`INSE.fill`), so boosts and cuts read as shapes; the curve keeps today's colour and glow;
+  - an amber **caliper under each bell** (above a boost, below a cut) with its width in octaves, measured on the band's own response (the `getFrequencyResponse` values the band curves are drawn from): the two frequencies where the bell is at half its gain in dB, which is how Q is defined for a bell (for a 6 dB bell, its −3 dB points). Band-pass: 3 dB under its top; notch: 3 dB under 0 dB (`ineBW`);
+  - amber **corner marks** with the frequency on low and high shelves, tilt shelves, low and high cuts, along the bottom above the frequency labels (labels skipped where they would overlap);
+  - the **gain scale on the left** in the gain colour (`#c9b37a`, as on the pick page), with signs and a real minus (it was grey on the right); the **analyzer's scale on the right** in the analyzer's colour, in dBFS as IN-S calibrated it (the analyser reads a sine 13.56 dB low), with its tilt named ("analyzer, tilt 4.5 dB/oct");
+  - the selected band's **read-out** adds the note (X8) and the width in octaves: "Bell · 1 kHz B5 · +6.0 dB · Q 1.41 · 1.00 oct".
+- **Not built:** E1's gain zoom (±6, 12, 18, 30). The ±24 dB mapping is written in four places (the drawing, `eqHit`, the drag and the box select), so a zoom has to change them together; a later step can add `INSE.R(f)` and use it in all four.
+- **Filter** (`vizFilter`) and **Auto Filter** (`VIZX.afilt`): the fill between the curve and 0 dB (it was down to the bottom); a corner mark at the cutoff for low-pass and high-pass; a caliper for band-pass, notch and peak (measured on the drawn response, the mix included). Formant and comb: no marks.
+- **Overlaps named:** NI-5b (lane D) adds a notch on a Pro EQ from the clash card: it shows with its caliper like any notch, nothing of lane D's changed. MD1 (lane G) builds read-outs: the band read-out here uses `INS.note`, `INS.num` and `INS.fmt` from IN-A, the formatter MD1 is to reuse. DV (lane I) frames device displays: only what is drawn inside changed.
+
+### Tested (`tools/ui-tests/taskIN_E.py`, at 2194x1139, the normal level)
+- A Pro EQ with known bands: low cut 30 Hz, low shelf 100 Hz +3 dB, bell 1 kHz +6 dB Q 1.41, bell 4 kHz −6 dB Q 4, high shelf 12 kHz +2 dB. The 1 kHz caliper reads 1.0013 oct (theory 2/ln2 asinh(1/2Q) = 1.003), the 4 kHz one 0.347 (theory 0.360; Web Audio's bilinear transform narrows a bell a little near 4 kHz, plus the 2 px sampling); the boost's caliper above, the cut's below; corner marks 30.0 Hz, 100 Hz, 12.0 kHz; gain scale −18 to +18 on the left with signs and real minus signs; the analyzer scale in dBFS with its tilt; the fill under the bell and not outside; the hit test finds the 1 kHz dot at +6 dB as before; the read-out with B5 and 1.00 oct. Band-pass and notch, Q 2: 0.71 and 0.70 oct (theory 0.71).
+- Live, pink noise at −20 dBFS through that EQ: post minus pre reads +5.9 dB at 1 kHz and −5.3 dB at 4 kHz (the narrow cut averaged over ±6 %).
+- Filter at 2 kHz: the corner mark "2.00 kHz", the fill under 0 dB where it cuts, nothing at the bottom where the curve is at 0 dB. Auto Filter: low-pass 24 corner mark at 1.00 kHz; band-pass, notch and peak at resonance 3: 0.48 oct each.
+- Screenshots looked at (dark and the Light level): the Pro EQ, the Filter, the Auto Filter band-pass; they match the pick page's E3 mock-up. No console errors, no audio nodes in the block, no em dashes.
+- `taskIN_A.py` 37 of 37, `taskIN_M.py` 26 of 26, `taskIN_L.py` 24 of 24, `taskIN_S.py` 34 of 34 (one at a time). Lint of the release gate clean; the gate's start-up smoke test cannot run on the cloud machine (the Electron binary download is blocked here), as in IN-S.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured on this file): Kick −19.05560 dB (fb577dd5202b), Bass −35.48685 dB (392ec52590c7) with the master at −10 dB; at 0 dB Kick −9.75669 (0496bb147f6c), Bass −25.48699 (09e0415bec5e), as in the newest entries.
+- **Frame time** (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, software renderer, one 4 s window each, alternating with the untouched v0.263; app ms per frame, main-thread ms in brackets):
+
+| Scene | v0.263 untouched | with IN-E |
+|---|---|---|
+| idle | 0.70, 0.91, 0.78 (9.7, 13.8, 11.6) | 0.62, 0.73, 0.76 (10.0, 11.9, 11.3) |
+| playing, mixer closed | 3.18, 4.41, 4.00 (26.0, 34.9, 36.7) | 5.16, 4.77, 3.16 (37.4, 38.7, 27.0) |
+| playing, mixer open | 9.27, 8.69, 9.86, 11.86, 14.37, 13.86 (76.3, 86.7, 87.3, 99.4, 112.9, 124.1) | 11.80, 11.88, 12.77, 10.30, 12.23, 14.63 (89.3, 105.9, 127.7, 92.4, 100.9, 138.6) |
+
+  With the mixer open the first three pairs came out about 3 ms worse, the next three (run in the other order) 1.6 and 2.1 ms better and 0.8 worse: the cloud machine drifts. Measured directly, the Pro EQ's display on the Kick (5 bands, playing) takes 1.68 and 1.53 ms a draw untouched, 1.66 and 1.79 ms with IN-E: the same. IN-E changes nothing else that runs while playing.
+
+### Left
+IN-G next: dynamics (G1 gain reduction history, G3 transfer curve with a live point, G4 per-band gain reduction) in `vizComp()`, the limiter, gate, ducker, OTT and multiband displays. Then IN-O (O0 kept, O1, O4; the track taps' size), IN-V (V1, viridis), IN-C and IN-D. Open: E1's gain zoom (see above).
