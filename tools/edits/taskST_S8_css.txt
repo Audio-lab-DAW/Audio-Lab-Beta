@@ -1,0 +1,15 @@
+/* v0.262 (task ST-S8): scope marks (project, computer, new) and the Project page's two cards */
+#set .st8t{display:inline-block;flex:none;margin:0 0 0 7px;padding:2px 4px 1px;border:1px solid rgba(255,255,255,.16);border-radius:3px;font:600 9px/1 var(--ffu,Inter,sans-serif);font-style:normal;letter-spacing:.04em;text-transform:uppercase;color:#9aa0ad;vertical-align:1px;white-space:nowrap;cursor:help}
+#set .st8t::after{content:attr(data-t)}
+#set .st8t.st8project{color:#ffb547;border-color:rgba(255,181,71,.4)}
+#set .st8t.st8new{color:#c39bff;border-color:rgba(183,123,255,.42)}
+#set .st8two{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+#set .st8two select{flex:none!important;width:auto!important;min-width:60px;max-width:104px}
+#set .cprow.st8r{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}
+#set .cprow.st8r>span:first-child{flex:1 1 auto;min-width:0;white-space:nowrap}
+#set .cprow.st8r>select{flex:0 1 220px;width:220px;min-width:0}
+#set .st8two{flex:none;flex-wrap:nowrap}
+#set .sbox>h4>.st8t{vertical-align:1px}
+#st8NBpm{width:110px;height:26px;background:#0b0c0f;border:1px solid #2b2c34;border-radius:4px;padding:0 6px;color:#eceef2;font-variant-numeric:tabular-nums}
+#set .st8u{font:600 9px/1 var(--ffu,Inter,sans-serif);font-style:normal;letter-spacing:.06em;color:#ffb547}
+#set .cprow.st8r>.st8two{width:auto!important;max-width:none!important;flex:none!important}
