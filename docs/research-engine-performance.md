@@ -234,3 +234,16 @@ Order suggested: AE2-1 and AE2-2 first (largest gain for the least work, both to
 - [W3C workshop 2021: audio latency in browser-based DAWs](https://w3.org/2021/03/media-production-workshop/talks/ulf-hammarqvist-audio-latency.html); [public-audio 2014: Chris Wilson on buffering](https://lists.w3.org/Archives/Public/public-audio/2014JulSep/0177.html)
 - [RTINGS: latency tests](https://www.rtings.com/headphones/learn/research/latency); [Apple forum 679274: Bluetooth output latency](https://developer.apple.com/forums/thread/679274)
 - Earlier AudioLab research: `docs/research-native-mac.md`, `docs/research-native-windows.md`, `docs/native-mac-picks.md`, `docs/native-mac-build.md`
+
+---
+
+## The user's picks (27 November 2026, 20:41 Brussels)
+
+`AE2 picks: L1a L2a L3b L4a L5a L6b L7? L8a L9a L10? L11b L12a L13a L14a L15a L16a L17a` (a = now, b = later, c = no, ? = not chosen)
+
+- **Now:** L1 output check, L2 playing buffer (Auto comes back down), L4 played track outside delay compensation, L5 notes past the main thread (desktop), L8 sleep idle tracks, L9 render ahead in the web engine; native engine: L12 parallel graph on the performance cores, L13 MIDI in the engine, L14 never play through the bridge, L15 two paths (live set and render-ahead), L16 live path rules, L17 "Live" marker and an honest key-to-sound read-out.
+- **Later:** L3 no start offset, L6 lighter main thread while playing, L11 cost per track.
+- **Not chosen:** L7 steady timing (left open), L10 several AudioContexts (not recommended).
+
+Who builds it: a new lane J, task **LT** (live playing and engine load), one step per run, plan in `docs/latency-build.md`: AE2-1 (L1, L2), AE2-2 (L4 only; L3 later), AE2-3 (L5, two runs), AE2-5 (L8), RA1 to RA3 (L9). The native items L12 to L17 go to task NB (stages N3 to N4, with NR1, NR3, NR4, NR-LAT). L3, L6 and L11 wait until the "now" items are done.
+
