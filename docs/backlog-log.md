@@ -3302,7 +3302,7 @@ The app's own work per frame (`FPS.js`, same machine, Fractals song): playing wi
 Reading: on the user's Mac in dark mode the app icon had a black background (white rings, yellow dots). Wanted: always the blue square with the Ocean Yellow W7 logo. `index.html` is not touched; only `desktop/`, `.github/workflows/`, `tools/` and `docs/`. Full write-up with sources: `docs/app-icon-mac-styles.md`.
 
 ### Found
-- The black icon is drawn by macOS 26 itself. Under System Settings > Appearance > Icon & widget style > Dark it makes its own dark version of every app icon that has none: background colour out, black tile in, light parts kept. The app shipped only `icon.icns`, so it got that. **Reproduced** on GitHub's macOS 26.7.2 machine with the released app 0.222: kept in the Dock and closed, style Dark, the tile is black (`docs/app-icon-mac-styles/dock-macos26.png`, first row).
+- The black icon is drawn by macOS 26 itself. Under System Settings > Appearance > Icon & widget style > Dark it makes its own dark version of every app icon that has none: background colour out, black tile in, light parts kept. The app shipped only `icon.icns`, so it got that. **Reproduced** on GitHub's macOS 26.7.2 machine with the released desktop app (DMG 0.219, the newest one): kept in the Dock and closed, style Dark, the tile is black (`docs/app-icon-mac-styles/dock-macos26.png`, first row).
 - The released app while it is **open** is blue under Dark: the picture the app sets on the Dock (`dock-icon.png`) is left alone by macOS (second row). So the black one is what shows in Finder, Launchpad, Spotlight and on the Dock tile of the closed app.
 - No old build and no wrong file is involved: `icon.icns`, `dock-icon.png` and the picker pictures are as the scheduling chat said.
 
@@ -3316,7 +3316,7 @@ Reading: on the user's Mac in dark mode the app icon had a black background (whi
 ### Proof (on GitHub's macOS 26.7.2 machine, no Mac here)
 - `assetutil --info Assets.car`: the layered AppIcon for `NSAppearanceNameAqua`, `NSAppearanceNameDarkAqua` and `ISAppearanceTintable`, the tile of each the colour 0.078, 0.314, 0.659.
 - macOS drawing the icon of the really built app (`NSWorkspace`, style set with `AppleIconAppearanceTheme`): Default blue, **Dark blue, 0.00 difference to Default** at 512 px, tile colour 21, 80, 168 (wanted 20, 80, 168). The app with `icon.icns` only: Dark black. Picture: `docs/app-icon-mac-styles/styles-macos26.png`.
-- A real Dock under Dark, both apps kept in it: released 0.222 black, new build blue, closed and open (`dock-macos26.png`, rows 3 and 4).
+- A real Dock under Dark, both apps kept in it: released 0.219 black, new build blue, closed and open (`dock-macos26.png`, rows 3 and 4).
 - Default against today's `dock-icon.png` at 512 px: the tile box is the same (50 to 461 px, so no grey plate, same margin); mean difference inside the tile 1.6 of 255, 1.4 % of pixels off by more than 24, on ring edges and the thin light rim macOS 26 adds. The old `.icns` as macOS 26 draws it is further from the reference (3.2).
 - `tools/ui-tests/taskAH_electron.js`: 21 checks, all pass (4 new: macOS 26 start sets no Dock picture, another icon sets its picture, back to Ocean Yellow gives null, no page errors).
 - Windows: `desktop/build/icon.ico` not touched (sha256 62cbbba8..., the same as in v0.219); `icon.icns` not touched (23beac77...); the Windows part of `package.json` and the Windows path in `main.js` unchanged.

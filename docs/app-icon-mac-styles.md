@@ -61,7 +61,7 @@ Wanted: always the blue square with the Ocean Yellow W7 logo.
 - Electron cannot take an Icon Composer icon in `setIcon`: "This is not technically possible", the icon has to be compiled into
   the bundle; with the icon in the bundle it "works the same as for any other macOS app (no `setIcon` needed)"
   (Electron issue 48476, https://github.com/electron/electron/issues/48476).
-- Our own measurement: the released app 0.222 running under Dark has a blue Dock icon (the bitmap is left alone); the new app,
+- Our own measurement: the released desktop app (DMG 0.219, the newest one) running under Dark has a blue Dock icon (the bitmap is left alone); the new app,
   which sets no picture for the default icon, is blue too (the bundle icon with our dark version).
 
 ### How apps not built with Xcode ship an Icon Composer icon
@@ -125,7 +125,7 @@ the setting took.
 | macOS drawing the icon, app with `Assets.car` | Default blue; **Dark blue, 0.00 difference to Default** at 512 px; Tinted and Clear as above (system treatment). |
 | Same for the really built AudioLab Pro.app | Same result: Default and Dark blue, tile colour 21, 80, 168 against 20, 80, 168 wanted. |
 | Default against today's picture (`dock-icon.png`) at 512 px | Tile box identical (50 to 461 px in both, so no grey plate and the same margin). Mean difference inside the tile 1.6 of 255; 1.4 % of pixels differ by more than 24, all on the edges of the rings (smoothing) and the tile's rim, where macOS 26 adds its thin light edge. The old `.icns` drawn by macOS 26 differs from the same reference by 3.2, so the new icon is the closer one. |
-| Real Dock, style Dark (photographs of the build machine's screen, `docs/app-icon-mac-styles/dock-macos26.png`) | Released app 0.222 kept in the Dock, closed: **black tile**. The same app open: blue (its own picture). New build closed: **blue**. New build open: **blue**. |
+| Real Dock, style Dark (photographs of the build machine's screen, `docs/app-icon-mac-styles/dock-macos26.png`) | Released desktop app (DMG 0.219) kept in the Dock, closed: **black tile**. The same app open: blue (its own picture). New build closed: **blue**. New build open: **blue**. |
 | The four styles as macOS draws the new app (`docs/app-icon-mac-styles/styles-macos26.png`) | Default blue, Dark blue, Tinted and Clear the system's treatment; beside them the old app's Default and Dark. |
 | Windows | `desktop/build/icon.ico` not touched (sha256 unchanged, see the log); the Windows part of `package.json` and the Windows code path in `main.js` are unchanged. |
 
