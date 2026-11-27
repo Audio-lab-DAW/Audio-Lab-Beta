@@ -70,6 +70,10 @@ macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15); docs/extensions
 | `clip.quantize16` | Quantize the selected clip (1/16) |  | `quant` | 0.273 |
 | `clip.mute` | Mute / unmute the selected clip |  | `clipmute` | 0.273 |
 | `clip.rename` | Rename the selected clip |  | `rename` | 0.273 |
+| `clip.newSteps` | New step sequencer clip (lane C, task FT-F9a; listed by XT-DL12) |  |  | 0.277 |
+| `clip.editSteps` | Edit steps of the selected clip (lane C, task FT-F9a; listed by XT-DL12) |  |  | 0.277 |
+| `clip.toSteps` | Make step sequencer clip (lane C, task FT-F9b; listed by XT-DL12) |  |  | 0.288 |
+| `clip.toNotes` | Make normal MIDI clip (lane C, task FT-F9b; listed by XT-DL12) |  |  | 0.288 |
 
 ## Arrangement
 
@@ -134,3 +138,4 @@ macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15); docs/extensions
 | `ni.clashes` | Show clashes between tracks in the mixer |  |  | 0.273 |
 | `ni.kickBass` | Kick and bass lab (is the kick in tune with the bass?) |  |  | 0.273 |
 | `ni.energyArc` | Energy arc on / off (loudness, tracks playing and brightness over the song) |  |  | 0.273 |
+| `ni.levelJourney` | Level journey of the selected track (level after each device) (lane D, task NI-7; listed by XT-DL12) |  |  | 0.279 |
