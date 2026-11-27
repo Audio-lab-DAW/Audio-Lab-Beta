@@ -1,0 +1,268 @@
+<title>AudioLab: features you might be missing</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a studio rack. Sticky group chips on top, cards in an auto grid, a picks bar fixed to the bottom. Dark-first like AudioLab. */
+:root{
+  --bg:#0d0f14; --panel:#151922; --panel2:#1b202b; --line:#262c39; --fg:#e7eaf0; --dim:#9aa3b5; --faint:#6b7488;
+  --accent:#4cc9f0; --star:#f5c84c; --part:#ff9a3c; --no:#ff5d73; --ok:#3ecf8e; --sel:rgba(76,201,240,.13);
+  --display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; --body:'Inter',ui-sans-serif,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--body);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 140px}
+header h1{font:700 clamp(26px,4vw,38px)/1.1 var(--display);margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
+header h1 span{color:var(--accent)}
+.lede{color:var(--dim);max-width:68ch;margin:0 0 6px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--faint);font-size:12px;margin:14px 0 0}
+.legend b{color:var(--dim);font-weight:500}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;margin-top:18px;border-bottom:1px solid var(--line)}
+nav a,nav button{font:500 12px var(--body);color:var(--dim);text-decoration:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;cursor:pointer}
+nav a:hover,nav button:hover{color:var(--fg);border-color:var(--accent)}
+nav button[aria-pressed="true"]{color:var(--bg);background:var(--star);border-color:var(--star)}
+section{scroll-margin-top:64px}
+h2{font:600 19px var(--display);margin:30px 0 4px;display:flex;align-items:baseline;gap:10px}
+h2 small{font:500 12px var(--body);color:var(--faint)}
+.gnote{color:var(--dim);font-size:13px;margin:0 0 12px;max-width:80ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:12px}
+.card{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0;cursor:pointer;transition:border-color .15s,background .15s}
+.card:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.card.on{background:linear-gradient(var(--sel),var(--sel)),var(--panel);border-color:var(--accent)}
+.card.starred{box-shadow:inset 0 2px 0 var(--star)}
+.top{display:flex;align-items:flex-start;gap:10px}
+.top input{appearance:none;width:20px;height:20px;border:1.5px solid var(--faint);border-radius:5px;margin:2px 0 0;flex:none;cursor:pointer;display:grid;place-items:center;background:var(--panel2)}
+.top input:checked{background:var(--accent);border-color:var(--accent)}
+.top input:checked::after{content:"";width:10px;height:6px;border:2px solid var(--bg);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.top input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.id{font:500 12px var(--mono);color:var(--accent);margin-right:6px}
+.t{font:600 15.5px/1.3 var(--display);flex:1;min-width:0}
+.st{color:var(--star);font-size:15px;line-height:1;flex:none}
+.d{margin:0;color:var(--fg)}
+.why{margin:0;color:var(--dim);font-size:13px}
+.why b{color:var(--fg);font-weight:600}
+canvas.mock{width:100%;height:84px;display:block;border-radius:7px;background:var(--panel2);border:1px solid var(--line)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11.5px;margin-top:auto}
+.pill{border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.pill.no{color:var(--no);border-color:color-mix(in srgb,var(--no) 40%,transparent)}
+.pill.partial{color:var(--part);border-color:color-mix(in srgb,var(--part) 40%,transparent)}
+.val{display:inline-flex;gap:2px;align-items:center;margin-left:2px}
+.val i{width:7px;height:7px;border-radius:2px;background:var(--line)}
+.val i.f{background:var(--accent)}
+.has{font-size:11.5px;color:var(--faint);margin:0}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--panel) 94%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bar .in{max-width:1240px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.line{flex:1 1 320px;min-width:0;font:500 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+.bar input[type=text]{flex:1 1 200px;min-width:0;font:13px var(--body);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+.btn{font:600 13px var(--body);border:0;border-radius:7px;padding:9px 14px;cursor:pointer;background:var(--accent);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+.btn:focus-visible,.bar input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font:500 12px var(--body);color:var(--faint);white-space:nowrap}
+footer{margin-top:36px;color:var(--faint);font-size:12px;max-width:80ch}
+footer a{color:var(--accent)}
+@media (max-width:560px){.bar .in{gap:6px}.count{order:-1}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>AudioLab: <span>features you might be missing</span></h1>
+  <p class="lede">I compared AudioLab v0.228 with Live 12, Bitwig 6, Cubase 15, Logic Pro 12, FL Studio 2025, Fender Studio Pro 8 (formerly Studio One), REAPER 7, Reason 13, Renoise 3.5 and Waveform 13. I also looked at the tools psytrance producers depend on. These are the 40 gaps worth a look. The ★ cards are the ones I think matter most for full-on psytrance.</p>
+  <p class="lede">Tick what you want, add a note if you like, and paste the line from the bar at the bottom.</p>
+  <div class="legend"><span><b>Today</b> what AudioLab has now</span><span><b>Value</b> for your music, 1 to 5</span><span><b>Effort</b> in tasks (one task is one session)</span><span><b>Has it</b> DAWs that ship it</span></div>
+</header>
+<nav id="nav" aria-label="Groups"></nav>
+<main id="main"></main>
+<footer>Research: docs/research-features-gap.md in the repository, with the inventory, the full gap table and every source. Not covered here because AudioLab already has them: warping, groove pool, modulators, macros, groups, returns, sidechain, freeze, bounce, pitch correction, stem splitting, LUFS and true peak, mid/side, dither, templates, Time Machine and autosave.</footer>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <span class="count" id="count">0 picked</span>
+    <div class="line" id="line" aria-live="polite">RF1 picks: none yet</div>
+    <input type="text" id="note" placeholder="Note (optional)" aria-label="Note to add to the line">
+    <button class="btn" id="copy" type="button">Copy line</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+  </div>
+</div>
+
+<script>
+const G=[
+ ['A','Arrangement','Moving, copying and shaping the song. Psytrance is built from 8 to 32-bar blocks, so these save the most clicks.'],
+ ['B','MIDI and sequencing','Writing parts, from rolling basslines to acid lines.'],
+ ['C','Psytrance sound tools','The plug-ins full-on producers use most, built in and tied to the song grid.'],
+ ['D','Mix and master','Checking the mix against the records you play next to it.'],
+ ['E','Workflow','Finding sounds and moving projects in and out.'],
+ ['F','Engine and hardware','Plug-ins, CPU and controllers.']];
+// id, group, title, star, desc, why, today, value, effort, has, mock
+const C=[
+ ['F1','A','Linked clips',1,'Edit one kick or bass clip and every linked copy changes with it. "Make unique" breaks the link.','A full-on track repeats the same 8-bar kick and bass clip 20 times. Today a fix to the roll means 20 edits.','no',5,'1–2','Bitwig 6 (aliases), FL (patterns)','linked'],
+ ['F2','A','Arranger moves',1,'Drag a section (Drop 1, Breakdown) to move or copy it with all its clips, automation and tempo changes. Insert or remove bars anywhere.','Lets you try a longer breakdown or a second drop in seconds, keeping 16-bar phrasing intact.','partial',4,'1','Cubase (Arranger track), Studio Pro, Bitwig/Live partly','arranger'],
+ ['F3','A','Automation curve shapes',0,'Bend any automation segment: exponential, S-curve, late rise or steps. A small library of shapes you stamp into a lane.','Filter sweeps and reverb swells sound right with an exponential or late curve, not a straight line.','partial',4,'1','All ten','curve'],
+ ['F4','A','Automation clips',0,'Automation as clips you can loop, cut, stretch and copy between tracks, like Bitwig 6.','Draw a 1-bar filter wobble once and loop it under a whole section, then stretch it for the next.','partial',4,'2','Bitwig 6, Live (clip envelopes), FL','autoclip'],
+ ['F5','A','Snap and grid menu',0,'A snap selector for the arrangement (bar, beat, 1/16, triplets, off), separate from the piano roll.','Today the step follows the zoom. A fixed 1-bar snap keeps clips on phrase lines while you zoom.','no',3,'1','All ten',''],
+ ['F6','A','Crossfades and glue',0,'Overlap two audio clips to crossfade them. Glue several clips into one.','Clean edits on vocal chops, risers and bounced FX tails.','partial',3,'1','All ten',''],
+ ['F7','A','Take lanes and comping',0,'Loop-record several takes, then swipe the best parts into one comp. Punch in and out.','Useful mainly for vocals or live synth takes; less central for psy.','no',2,'2–3','Live, Bitwig, Cubase, Logic, Studio Pro, REAPER, Reason, Waveform',''],
+ ['F8','A','Clip launcher',0,'A grid of clips and scenes you launch in time, then record into the arrangement.','Jamming bassline and lead variations against a looped drop before arranging.','no',3,'4+','Live, Bitwig, Logic, Studio Pro, Waveform','launcher'],
+ ['F9','B','Step sequencer clips',1,'A clip made of steps: level, accent, slide, chance and ratchet per step, for drums, Acid and Psy Bass. A Roll preset writes the KBBB pattern.','The fastest way to write and vary a rolling bass and 303 lines. FL users expect it.','partial',5,'2','FL (Channel rack), Logic, Bitwig (Note Grid), Reason, Renoise','steps'],
+ ['F10','B','Note chance and ratchets',0,'Each note gets a chance to play, a ratchet count (2, 3, 4 repeats) and conditions such as "every 4th time".','Small variations keep 8 minutes of rolling bass and hats alive without new clips.','partial',4,'1','Live, Bitwig, Logic, Reason 13.1, Renoise','chance'],
+ ['F11','B','Project key',0,'One key and scale for the song. Piano roll, Arpeggiator, Chord, Tuner, Psy Bass and pitch effects follow it.','Set E minor once and every part, kick tuning hint and arp stays in key.','partial',4,'1','Live 12, Bitwig 6, Cubase, Logic, Studio Pro','key'],
+ ['F12','B','Chord track',0,'A lane of chords for the song that MIDI tracks can follow, with a progression helper.','Helps melodic full-on and progressive pads and leads; less needed for pure rolling grooves.','partial',3,'2','Cubase, Logic 12, Studio Pro, FL, Waveform 14',''],
+ ['F13','B','MIDI file import',0,'Drop a .mid file on the arrangement or a track, with tempo and track names.','Bring ideas and old projects over from Cubase and FL. Today AudioLab only exports MIDI.','no',4,'1','All ten',''],
+ ['F14','B','Per-note slides and MPE',0,'Slides, pitch and timbre per note (FL-style slides, Bitwig note expressions) and MPE controllers.','Acid glides and lead bends on single notes without bending the whole track.','no',3,'2–3','Live, Bitwig, Cubase, Logic, FL, Studio Pro',''],
+ ['F15','B','Generators',0,'Euclidean rhythms, seeded melodies in the key, rhythm and pitch transforms on a clip.','Quick percussion and arp ideas at 145 BPM; you keep the ones you like.','partial',3,'1–2','Live 12, Bitwig, Cubase 15, FL',''],
+ ['F16','C','Volume shaper',1,'Draw a volume curve per 1/4, 1/2 or bar. It runs on the tempo, on notes from another track (ghost kick) or on audio, and can duck only the lows.','This is how psy kick and bass are shaped (LFOTool, Kickstart). Drawn by hand, sample exact, same in the export.','partial',5,'1–2','LFOTool, Kickstart 2, ShaperBox (plug-ins)','shaper'],
+ ['F17','C','Multi-shaper',0,'Curves per bar for filter, pan, width, drive, crush and stutter in one device, in up to three bands.','Movement on pads and leads that locks to the groove, like ShaperBox.','no',4,'2','ShaperBox 3 (plug-in)','multi'],
+ ['F18','C','Kick and bass lab',1,'For a kick and bass pair: the kick\'s pitch as a note, where its tail meets the first bass hit, the phase between them, and one-click fixes.','The kick-bass handoff is the heart of full-on. On revealing speakers a wrong tuning or phase is the first thing you hear.','partial',5,'2','No DAW has it; Kick 3 does part','kickbass'],
+ ['F19','C','Step FX',0,'A 16 or 32-step row of effects: stutter, reverse, tape stop, gate, crush and filter. Patterns switch by note.','Glitch fills and transitions at phrase ends, like Effectrix.','partial',4,'2','Effectrix 2, ShaperBox, Bitwig and FL devices','stepfx'],
+ ['F20','C','Build designer',1,'Pick 8, 16 or 32 bars and one Build control writes the curves: high-pass, reverb send, noise riser, snare roll density, pitch rise. Everything stays editable.','Long, automation-heavy builds are a signature of the genre and take an hour by hand.','partial',5,'2','Done by hand in every DAW','build'],
+ ['F21','C','FX throws',0,'Hold a button to throw a track into the delay or reverb. The throw is written as send automation.','The classic psy delay throw on the last 1/8 of a phrase, played in real time.','no',4,'1','Mixer automation everywhere','throw'],
+ ['F22','C','Spectral editing',0,'Paint out a click, a breath or a ringing frequency on a picture of the audio.','Cleaning samples and vocal chops. Rarely needed in synth-based psy.','no',2,'3','REAPER, Cubase (SpectraLayers), FL (Edison)',''],
+ ['F23','C','Slice to pads',0,'Chop a loop or a dialogue sample at its hits or on the grid, and play the slices from pads or MIDI.','Film dialogue and vocal chops are a Goa and psy staple.','partial',4,'2','Live, Bitwig 6.1, Cubase, Logic, FL, Reason, Renoise','slices'],
+ ['F24','C','Multisample zones',0,'A sampler with key and velocity zones and round robin.','For sampled instruments; less used in psy than synths.','partial',2,'2','Live, Bitwig 6.1, Logic, FL, Reason, Renoise',''],
+ ['F25','D','Reference A/B',1,'Up to eight reference tracks, matched in loudness automatically. One key flips between your mix and a reference at the same spot. Spectra are overlaid, and you can listen in mono, side only, sub only or small speaker.','Your mix next to the tracks you play it with, without the louder one fooling you.','partial',5,'1–2','No DAW natively; Metric AB, REFERENCE 2','refab'],
+ ['F26','D','Loudness export and presets',0,'Export to a LUFS target with a true-peak ceiling, and save export presets (club master, streaming, stems 24-bit).','Hit -8 LUFS for club play or -14 for streaming without guessing.','partial',4,'1','Cubase, Studio Pro, REAPER',''],
+ ['F27','D','VCA faders',0,'One fader that moves the level of several channels without summing them.','Ride all the FX or all the drums together in a breakdown.','no',2,'1','Cubase, Logic, Studio Pro, REAPER',''],
+ ['F28','D','Mastering page',0,'A page to order finished tracks, set gaps and loudness per track, and export an album or a DDP.','For EPs and albums; not needed for single tracks.','no',2,'3','Studio Pro, REAPER partly',''],
+ ['F29','D','Mix snapshots',0,'Save the whole mixer as a snapshot and flip between snapshots while playing.','Compare two balances of kick, bass and lead at once.','partial',3,'1','Cubase, Studio Pro, Logic',''],
+ ['F30','D','Phrase markers and DJ check',0,'8, 16 and 32-bar phrase lines on the ruler, and a check that the intro and outro are kick-led and mixable.','DJs mix psy in 16-bar phrases. A 32-bar clean intro gets your track played.','partial',3,'1','None as a feature','phrase'],
+ ['F31','E','Sample browser',1,'Add your sample folders. Search, tag and favourite files; each one is analysed for tempo, key and type. Preview in the song\'s tempo and key, then drag it in.','Every psy track uses dozens of one-shots, FX and loops. Today the only ways in are Import audio and drag from the Finder.','no',5,'2','Live, Bitwig, Cubase, Logic, FL, Studio Pro, Reason','browser'],
+ ['F32','E','DAWproject',0,'Open and save the DAWproject format: tracks, clips, automation and plug-in states.','Move a project between AudioLab, Bitwig, Cubase and Studio Pro.','no',4,'2','Bitwig, Cubase 15, Studio Pro, Waveform 14',''],
+ ['F33','E','Racks with macros',0,'Parallel chains in one device with macros, saved as a preset (like FL Patcher or Ableton racks).','Your psy lead chain or bass bus as one preset with 8 knobs.','partial',4,'2','Live, Bitwig, FL, Reason, REAPER',''],
+ ['F34','E','Genre starters',0,'Starter projects: full-on 145, progressive 138, dark 150+, with sections, routing, a sidechain and a 32-bar DJ intro ready.','Start writing the groove, not setting up returns.','partial',3,'1','Templates in every DAW',''],
+ ['F35','E','Collaboration',0,'Share a project online, see who changed what, and leave comments on the timeline.','Useful for collabs; large effort for a single-user app.','no',2,'4+','FL Cloud, Live (Note), Cubase (VST Connect)',''],
+ ['F36','F','Plug-ins in AudioLab',1,'Run your VST3 and AU plug-ins (Pro-Q, Kick 3, Pigments, OTT, Melodyne) on AudioLab tracks, with their state saved in the project.','Already underway in the native Mac lab (test app 0.4). Ticking it raises its priority.','partial',5,'native','All ten',''],
+ ['F37','F','CPU per track',0,'A small CPU reading on every track and device, sorted to show what is heavy.','Find the one wavetable patch that eats the CPU in a 40-track project.','partial',3,'1','Live, REAPER, Waveform 13','cpu'],
+ ['F38','F','Controllers and mappings',0,'A page listing every MIDI learn mapping, and ready-made support for common controllers and Mackie Control.','Real faders and knobs for filter rides and throws during builds.','partial',3,'2','All ten',''],
+ ['F39','F','Link, clock and OSC',0,'Ableton Link and MIDI clock to sync with other apps and hardware. OSC to control AudioLab from a phone or tablet.','Jam with hardware synths or a friend\'s laptop in time.','no',2,'1–2','Live, Bitwig, Reason, Renoise, REAPER, Logic',''],
+ ['F40','F','Multicore engine',0,'Spread tracks over several processor cores.','Bigger projects with heavy synths before you need to freeze.','partial',3,'3 / native','All ten','']];
+
+const $=s=>document.querySelector(s);
+const PK='rf1-picks';let picked=new Set();try{picked=new Set(JSON.parse(localStorage.getItem(PK)||'[]'))}catch(e){}
+let starOnly=false;
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){
+  const nav=$('#nav');nav.innerHTML=G.map(([k,n])=>`<a href="#g${k}">${n}</a>`).join('')+`<button type="button" id="starBtn" aria-pressed="${starOnly}">★ Starred only</button>`;
+  $('#starBtn').onclick=()=>{starOnly=!starOnly;render()};
+  $('#main').innerHTML=G.map(([k,n,note])=>{
+    const cs=C.filter(c=>c[1]===k&&(!starOnly||c[3]));if(!cs.length)return'';
+    return `<section id="g${k}"><h2>${n}<small>${cs.length} card${cs.length>1?'s':''}</small></h2><p class="gnote">${note}</p><div class="grid">${cs.map(card).join('')}</div></section>`}).join('');
+  document.querySelectorAll('.card').forEach(el=>{
+    const cb=el.querySelector('input');
+    el.addEventListener('click',e=>{if(e.target!==cb){cb.checked=!cb.checked}toggle(el.dataset.id,cb.checked)});
+  });
+  mocks();upd();
+}
+function card(c){
+  const [id,,t,star,d,why,today,val,eff,has,mock]=c;const on=picked.has(id);
+  return `<article class="card${on?' on':''}${star?' starred':''}" data-id="${id}">
+  <div class="top"><input type="checkbox" id="cb${id}" ${on?'checked':''} aria-label="Pick ${id} ${esc(t)}"><div class="t"><span class="id">${id}</span>${esc(t)}</div>${star?'<span class="st" title="Most valuable for you">★</span>':''}</div>
+  <p class="d">${esc(d)}</p>
+  ${mock?`<canvas class="mock" data-k="${mock}" aria-hidden="true"></canvas>`:''}
+  <p class="why"><b>Why for psy:</b> ${esc(why)}</p>
+  <p class="has">Has it: ${esc(has)}</p>
+  <div class="meta"><span class="pill ${today}">Today: ${today}</span><span class="pill">Value <span class="val">${[1,2,3,4,5].map(i=>`<i class="${i<=val?'f':''}"></i>`).join('')}</span></span><span class="pill">Effort: ${eff}${/^\d/.test(eff)?(eff==='1'?' task':' tasks'):''}</span></div></article>`;
+}
+function toggle(id,on){on?picked.add(id):picked.delete(id);document.querySelector(`.card[data-id="${id}"]`).classList.toggle('on',on);try{localStorage.setItem(PK,JSON.stringify([...picked]))}catch(e){}upd()}
+function lineText(){const ids=C.map(c=>c[0]).filter(i=>picked.has(i));const n=$('#note').value.trim();return 'RF1 picks: '+(ids.length?ids.join(' '):'none')+(n?' | '+n:'')}
+function upd(){const n=picked.size;$('#count').textContent=n+' picked';$('#line').textContent=lineText()}
+$('#note').addEventListener('input',upd);
+try{const n=localStorage.getItem('rf1-note');if(n)$('#note').value=n}catch(e){}
+$('#note').addEventListener('change',()=>{try{localStorage.setItem('rf1-note',$('#note').value)}catch(e){}});
+$('#copy').onclick=()=>{const t=lineText(),b=$('#copy');const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy line',1500)};
+  try{navigator.clipboard.writeText(t).then(done,()=>sel())}catch(e){sel()}
+  function sel(){const r=document.createRange();r.selectNodeContents($('#line'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Copy'}};
+$('#clear').onclick=()=>{picked.clear();try{localStorage.setItem(PK,'[]')}catch(e){}render()};
+
+/* ---------- mocks ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+let live=[];
+function mocks(){
+  live=[...document.querySelectorAll('canvas.mock')].map(cv=>({cv,k:cv.dataset.k,vis:true}));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{const m=live.find(x=>x.cv===e.target);if(m)m.vis=e.isIntersecting}));
+  live.forEach(m=>{io.observe(m.cv);size(m);draw(m,0)});
+}
+function size(m){const r=m.cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);m.w=r.width;m.h=r.height;m.cv.width=Math.round(r.width*d);m.cv.height=Math.round(r.height*d);m.g=m.cv.getContext('2d');m.g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',()=>live.forEach(m=>{size(m);draw(m,performance.now()/1000)}));
+let last=0;function loop(ts){if(!RM&&ts-last>33){last=ts;const t=ts/1000;live.forEach(m=>{if(m.vis)draw(m,t)})}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+const BPM=145,beat=60/BPM;
+function draw(m,t){
+  const g=m.g,w=m.w,h=m.h;if(!g||!w)return;g.clearRect(0,0,w,h);
+  const A=css('--accent'),S=css('--star'),P=css('--part'),N=css('--no'),O=css('--ok'),D=css('--faint'),L=css('--line'),F=css('--fg');
+  g.lineWidth=1.5;g.font='10px Inter, sans-serif';
+  const ph=(t/(beat*4))%1; // one bar
+  const txt=(s,x,y,c)=>{g.fillStyle=c||D;g.fillText(s,x,y)};
+  switch(m.k){
+  case 'linked':{const n=6,cw=(w-20)/n,pulse=(t%2)/2;for(let i=0;i<n;i++){const x=10+i*cw;g.fillStyle=A+'33';g.fillRect(x+2,18,cw-4,46);g.strokeStyle=A;g.strokeRect(x+2.5,18.5,cw-5,45);
+      for(let s=0;s<16;s++){const on=s%4===0||(s%4!==0&&(s+Math.floor(t)%3)%4!==1);g.fillStyle=s%4===0?S:A;const sh=s%4===0?26:on?(s%4===1?8:14):0;g.fillRect(x+6+s*(cw-12)/16,58-sh,2,sh)}
+      g.fillStyle=F;g.fillText('⛓',x+cw-16,30)}
+    txt('Bass 17  →  edits reach every copy',10,12);g.fillStyle=A;g.globalAlpha=1-pulse;g.fillRect(10,66+pulse*8,w-20,2);g.globalAlpha=1;break}
+  case 'arranger':{const secs=[['Intro',2,'#6b7488'],['Groove',3,'#3ecf8e'],['Break',2,'#b583ff'],['Drop',3,'#ff5d73']],tot=10,u=(w-20)/tot;const sw=Math.floor(t/2.5)%2;let order=sw?[0,2,1,3]:[0,1,2,3];let x=10;
+      order.forEach(i=>{const [n,len,c]=secs[i];g.fillStyle=c+'55';g.fillRect(x+1,14,len*u-2,16);g.fillStyle=c;g.fillRect(x+1,14,len*u-2,2);txt(n,x+5,26,F);for(let r=0;r<3;r++){g.fillStyle=c+'33';g.fillRect(x+1,36+r*14,len*u-2,10)}x+=len*u});
+      txt(sw?'Break moved before Groove, with all its clips':'Drag a section to move it',10,h-4);break}
+  case 'curve':{const shapes=[q=>q,q=>q*q*q,q=>q<.5?2*q*q:1-2*(1-q)*(1-q),q=>Math.floor(q*6)/6],names=['Linear','Exponential','S-curve','Steps'],k=Math.floor(t/1.8)%4;
+      g.strokeStyle=L;for(let i=1;i<4;i++){g.beginPath();g.moveTo(10+i*(w-20)/4,8);g.lineTo(10+i*(w-20)/4,h-14);g.stroke()}
+      g.strokeStyle=A;g.lineWidth=2;g.beginPath();for(let i=0;i<=100;i++){const q=i/100,x=10+q*(w-20),y=h-16-shapes[k](q)*(h-30);i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
+      const q=(t%1.8)/1.8;g.fillStyle=S;g.beginPath();g.arc(10+q*(w-20),h-16-shapes[k](q)*(h-30),4,0,7);g.fill();txt('Filter cutoff · '+names[k],10,12);break}
+  case 'autoclip':{const cw=(w-20)/4;for(let i=0;i<4;i++){const x=10+i*cw;g.fillStyle=i?A+'1f':A+'40';g.fillRect(x+1,16,cw-2,h-28);g.strokeStyle=A;g.beginPath();for(let j=0;j<=40;j++){const q=j/40,y=16+(h-28)*(.5-.4*Math.sin(q*Math.PI*2*(i<2?1:2)));j?g.lineTo(x+1+q*(cw-2),y):g.moveTo(x+1,y)}g.stroke()}
+      g.fillStyle=S;g.fillRect(10+((t/(beat*4))%4)/4*(w-20),14,2,h-24);txt('1-bar wobble clip, looped, then stretched ×2',10,11);break}
+  case 'launcher':{const cols=4,rows=3,cw=(w-20)/cols,rh=(h-14)/rows;const act=Math.floor(t/(beat*8))%rows;for(let c=0;c<cols;c++)for(let r=0;r<rows;r++){const x=10+c*cw,y=12+r*rh,on=r===act;g.fillStyle=on?A+'66':L;g.fillRect(x+2,y+2,cw-4,rh-4);if(on){g.fillStyle=A;g.fillRect(x+2,y+rh-5,(cw-4)*ph,2)}txt(['Kick','Bass','Lead','FX'][c]+' '+(r+1),x+6,y+14,on?F:D)}break}
+  case 'steps':{const n=16,cw=(w-20)/n,st=Math.floor(ph*16);txt('Psy Bass · KBBB roll',10,11);
+      for(let s=0;s<n;s++){const x=10+s*cw,k=s%4===0,lv=k?0:(s%4===1?.55:.9),acc=s===6||s===14,sl=s===11;
+        g.fillStyle=s===st?S:L;g.fillRect(x+1,h-10,cw-2,3);
+        if(k){g.strokeStyle=D;g.strokeRect(x+2.5,20.5,cw-5,8);txt('K',x+cw/2-3,28,D)}else{g.fillStyle=s===st?S:A;const bh=lv*(h-44);g.fillRect(x+2,h-14-bh,cw-4,bh)}
+        if(acc){g.fillStyle=P;g.fillRect(x+2,34,cw-4,3)}if(sl){g.fillStyle=O;g.fillRect(x+cw/2,38,cw,2)}}
+      txt('accent',w-110,h-0.5,P);txt('slide',w-60,h-0.5,O);break}
+  case 'chance':{const n=16,cw=(w-20)/n,bar=Math.floor(t/(beat*4));const ch=[1,.5,1,.3,1,.7,1,.4,1,.5,1,.3,1,.9,1,.6];
+      for(let s=0;s<n;s++){const x=10+s*cw,c=ch[s],r=(Math.sin(bar*12.9898+s*78.233)*43758.5453)%1,on=Math.abs(r)<c;g.fillStyle=on?A:L;g.globalAlpha=.35+.65*c;g.fillRect(x+2,22,cw-4,30);g.globalAlpha=1;
+        if(s===6||s===14){for(let q=0;q<3;q++){g.fillStyle=on?S:L;g.fillRect(x+3+q*(cw-6)/3,56,(cw-6)/3-1,6)}}
+        if(c<1)txt(Math.round(c*100),x+2,h-6,D)}
+      txt('Hats · chance % per note · ratchet ×3',10,12);break}
+  case 'key':{const keys=['E','F♯','G','A','B','C','D'],devs=['Piano roll','Arp','Psy Bass','Tuner','Chord'];txt('Song key: E minor',10,12,S);
+      devs.forEach((d,i)=>{const x=10+i*(w-20)/5,y=30;g.fillStyle=L;g.fillRect(x+2,y,(w-20)/5-4,30);txt(d,x+6,y+13,F);txt(keys[(i+Math.floor(t))%7]+' ✓',x+6,y+26,O)});
+      g.strokeStyle=S;g.globalAlpha=.4+.3*Math.sin(t*3);for(let i=0;i<5;i++){g.beginPath();g.moveTo(60,16);g.lineTo(10+(i+.5)*(w-20)/5,30);g.stroke()}g.globalAlpha=1;break}
+  case 'shaper':{const pts=[[0,0],[.04,0],[.3,.85],[1,1]];const f=q=>{for(let i=1;i<pts.length;i++)if(q<=pts[i][0]){const a=pts[i-1],b=pts[i],u=(q-a[0])/(b[0]-a[0]);return a[1]+(b[1]-a[1])*Math.pow(u,.6)}return 1};
+      const bq=(t/beat)%1;g.fillStyle=A+'22';g.strokeStyle=A;g.lineWidth=2;g.beginPath();g.moveTo(10,h-12);for(let i=0;i<=120;i++){const q=i/120,x=10+q*(w-20),bb=(q*4)%1,y=h-12-f(bb)*(h-30);g.lineTo(x,y)}g.lineTo(w-10,h-12);g.closePath();g.fill();g.stroke();
+      for(let b=0;b<4;b++){const x=10+b*(w-20)/4;g.fillStyle=N;g.fillRect(x,h-12,3,-10)}
+      const x=10+((t/beat)%4)/4*(w-20);g.fillStyle=S;g.beginPath();g.arc(x,h-12-f(bq)*(h-30),4,0,7);g.fill();txt('Bass level per beat · lows only below 120 Hz',10,12);break}
+  case 'multi':{const lanes=[['Filter',A,q=>.5+.45*Math.sin(q*Math.PI*4)],['Pan',O,q=>q%.5<.25?.15:.85],['Crush',P,q=>q%.25<.06?.9:.1]];const lh=(h-8)/3;
+      lanes.forEach(([n,c,f],i)=>{const y=4+i*lh;txt(n,10,y+12,c);g.strokeStyle=c;g.beginPath();for(let j=0;j<=100;j++){const q=j/100,x=56+q*(w-66),yy=y+lh-4-f(q)*(lh-8);j?g.lineTo(x,yy):g.moveTo(x,yy)}g.stroke()});
+      g.fillStyle=S;g.fillRect(56+((t/(beat*4))%1)*(w-66),2,2,h-4);break}
+  case 'kickbass':{const mid=h/2+4,X=q=>10+q*(w-20);txt('Kick tail',10,12,A);txt('Bass hit 1',X(.42),12,P);const sh=Math.sin(t*1.3)*.5+.5;
+      g.strokeStyle=A;g.beginPath();for(let i=0;i<=300;i++){const q=i/300,tt=q*.25,f=48+250*Math.exp(-tt*60),env=Math.exp(-q*(5+sh*3)),y=mid-Math.sin(2*Math.PI*f*tt)*env*(h/2-14);i?g.lineTo(X(q),y):g.moveTo(X(q),y)}g.stroke();
+      g.strokeStyle=P;g.beginPath();for(let i=0;i<=200;i++){const q=.42+i/200*.33,tt=(q-.42)*.25,env=Math.min(1,(q-.42)*60)*Math.exp(-(q-.42)*10),y=mid-Math.sin(2*Math.PI*82.4*tt+Math.PI*sh)*env*(h/2-18);i?g.lineTo(X(q),y):g.moveTo(X(q),y)}g.stroke();
+      g.fillStyle=N+'33';g.fillRect(X(.42),18,X(.42+.12*(1-sh))-X(.42)+1,h-26);
+      txt('Kick F♯1 → tune to E1 · overlap '+Math.round(4+14*(1-sh))+' ms · phase '+Math.round(sh*180)+'°',X(.0),h-3,F);break}
+  case 'stepfx':{const fx=['—','STUT','REV','—','GATE','—','CRSH','TAPE'];const n=16,cw=(w-20)/n,st=Math.floor(ph*16);
+      for(let s=0;s<n;s++){const f=fx[(s*3+Math.floor(s/8))%8],x=10+s*cw,on=f!=='—';g.fillStyle=s===st?S:on?A+'55':L;g.fillRect(x+1,22,cw-2,34);if(on){g.save();g.translate(x+cw/2+3,52);g.rotate(-Math.PI/2);txt(f,0,0,s===st?'#000':F);g.restore()}}
+      txt('Lead · step effects, 1/16',10,12);break}
+  case 'build':{const curves=[['High-pass',A,q=>Math.pow(q,2.2)],['Reverb send',O,q=>q],['Noise riser',S,q=>Math.pow(q,3)],['Snare density',P,q=>Math.floor(q*4)/4]];const p=(t/8)%1;
+      for(let b=0;b<=16;b+=4){const x=10+b/16*(w-20);g.strokeStyle=L;g.beginPath();g.moveTo(x,14);g.lineTo(x,h-6);g.stroke();txt(String(b+1),x+2,h-1)}
+      curves.forEach(([n,c,f],i)=>{g.strokeStyle=c;g.lineWidth=1.8;g.beginPath();for(let j=0;j<=100;j++){const q=j/100,x=10+q*(w-20),y=h-10-f(q)*(h-28);j?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();txt(n,10+i*((w-20)/4),11,c)});
+      g.fillStyle=F;g.fillRect(10+p*(w-20),14,1.5,h-20);break}
+  case 'throw':{const n=32,cw=(w-20)/n,on=(Math.floor(t/(beat*2))%4)===3;txt(on?'THROW held: delay send 0 → 100 %':'Hold Throw on the last 1/8',10,12,on?S:D);
+      for(let s=0;s<n;s++){const x=10+s*cw;g.fillStyle=(s%2?A+'55':A);g.fillRect(x+1,24,cw-2,10)}
+      for(let r=1;r<6&&on;r++){g.globalAlpha=1-r/6;g.fillStyle=O;g.fillRect(10+(n-4+r*2)%n*cw,40+r*5,cw*2,4)}g.globalAlpha=1;
+      g.fillStyle=on?S:L;g.fillRect(10,h-10,(w-20)*(on?1:.08),4);break}
+  case 'slices':{const X=q=>10+q*(w-20);g.strokeStyle=A;g.beginPath();for(let i=0;i<=300;i++){const q=i/300,y=h/2+2+Math.sin(i*1.7)*Math.sin(i*.09)*(h/2-14)*Math.abs(Math.sin(q*Math.PI*6+1));i?g.lineTo(X(q),y):g.moveTo(X(q),y)}g.stroke();
+      const sl=[0,.17,.33,.5,.66,.83],a=Math.floor(t*2)%6;sl.forEach((q,i)=>{g.fillStyle=i===a?S:N;g.fillRect(X(q),10,1.5,h-14);txt('C'+(i+1),X(q)+3,h-2,i===a?S:D)});txt('"We are all one…"  sliced at the hits → pads',10,10);break}
+  case 'refab':{const ab=Math.floor(t/2)%2;txt(ab?'B: reference "Full-on 2024", matched':'A: your mix',10,12,ab?S:A);
+      for(let i=0;i<60;i++){const q=i/60,x=10+q*(w-90),s1=(h-30)*(.85-q*.6+.08*Math.sin(i*.9)),s2=(h-30)*(.8-q*.55+.06*Math.sin(i*1.3+1));g.fillStyle=A+'aa';g.fillRect(x,h-8-s1,(w-90)/60-1,2);g.fillStyle=S+'aa';g.fillRect(x,h-8-s2,(w-90)/60-1,2)}
+      g.fillStyle=L;g.fillRect(w-70,18,22,h-28);g.fillRect(w-40,18,22,h-28);const lv=.72+.03*Math.sin(t*5);g.fillStyle=A;g.fillRect(w-70,18+(h-28)*(1-lv),22,(h-28)*lv);g.fillStyle=S;g.fillRect(w-40,18+(h-28)*(1-lv),22,(h-28)*lv);txt('-8.1',w-72,h-1,F);txt('-8.1',w-42,h-1,F);break}
+  case 'phrase':{const bars=64,u=(w-20)/bars;for(let b=0;b<=bars;b++){const x=10+b*u,m=b%32===0?3:b%16===0?2:b%8===0?1:0;if(!m)continue;g.fillStyle=m===3?S:m===2?A:L;g.fillRect(x,14,m===1?1:2,h-28)}
+      g.fillStyle=O+'44';g.fillRect(10,h-12,32*u,6);txt('32-bar intro: kick-led ✓   bass filtered in at 17 ✓',10,12,F);g.fillStyle=F;g.fillRect(10+((t/(beat*4))%bars)*u,14,1.5,h-28);break}
+  case 'browser':{const rows=[['Kick_Fullon_F#.wav','one-shot','F♯','—'],['Riser_16bar.wav','FX','—','145'],['Dialogue_one.wav','vocal','—','—'],['Acid_Loop_E.wav','loop','E','145']];const a=Math.floor(t/1.2)%4;
+      rows.forEach((r,i)=>{const y=6+i*19;g.fillStyle=i===a?A+'33':'transparent';g.fillRect(8,y,w-16,17);txt((i===1?'♥ ':'  ')+r[0],12,y+12,F);txt(r[1],w*.52,y+12);txt(r[2],w*.72,y+12,S);txt(r[3],w*.84,y+12);if(i===a){g.fillStyle=A;g.fillRect(8,y+15,(w-16)*((t%1.2)/1.2),2)}});break}
+  case 'cpu':{const tr=[['Venom lead',.31],['Psy Bass',.12],['Pad (Plant)',.22],['Kick',.03],['Vector Grain',.18]];tr.forEach(([n,v],i)=>{const y=6+i*15,vv=v*(1+.12*Math.sin(t*3+i));txt(n,10,y+10,F);g.fillStyle=L;g.fillRect(110,y+3,w-170,8);g.fillStyle=vv>.25?N:vv>.15?P:O;g.fillRect(110,y+3,(w-170)*vv/.4,8);txt(Math.round(vv*100)+' %',w-52,y+10)});break}
+  }
+}
+render();
+</script>
