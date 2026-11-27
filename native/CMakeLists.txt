@@ -42,6 +42,9 @@ target_compile_options(alrender PRIVATE -ffp-contract=off)
 # the control: fusing allowed, to show on each machine whether the rule matters for these devices
 add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
+# ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
+add_executable(almix engine/mix/almix.cpp)
+target_compile_options(almix PRIVATE -ffp-contract=off)   # the same bits as JavaScript and Chromium: no fused multiply-add
 
 # ---- tests B and C: need the VST 3 SDK ---------------------------------------------------------------
 if(VST3_SDK_ROOT)

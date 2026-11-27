@@ -1,0 +1,98 @@
+{
+ "app": "0.229",
+ "sr": 48000,
+ "frames": 12000,
+ "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+ "cases": {
+  "one": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 0.7,
+   "tracks": 1,
+   "peak": 0.5747931599617004,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "two": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 1.0,
+   "tracks": 2,
+   "peak": 2.002194404602051,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "pans": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 0.5,
+   "tracks": 5,
+   "peak": 1.1877708435058594,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 7391
+  },
+  "mono": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 0.8,
+   "tracks": 2,
+   "peak": 0.8837992548942566,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "mixed": {
+   "quantum": 128,
+   "webQuantum": 128,
+   "master": 0.9,
+   "tracks": 2,
+   "peak": 1.0868685245513916,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "silent": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 0.8,
+   "tracks": 2,
+   "peak": 0.6204351782798767,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "crushone": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 1.0,
+   "tracks": 1,
+   "peak": 1.1928837299346924,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "crushdry": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 1.0,
+   "tracks": 1,
+   "peak": 0.6924840807914734,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "crush": {
+   "quantum": 512,
+   "webQuantum": 512,
+   "master": 0.6,
+   "tracks": 2,
+   "peak": 0.9782551527023315,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "crush128": {
+   "quantum": 128,
+   "webQuantum": 128,
+   "master": 0.6,
+   "tracks": 2,
+   "peak": 1.140073537826538,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 17912
+  }
+ }
+}

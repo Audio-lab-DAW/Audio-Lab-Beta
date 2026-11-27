@@ -1,0 +1,5 @@
+{"sr": 48000, "frames": 12000, "quantum": 128, "master": 0.6}
+{"track": "st_a", "in": "in_st_a.wav", "vol": 1.3, "pan": 0.4}
+{"device": "crush", "bits": 8, "rate": 2.5, "jit": 0, "dith": 0, "drive": 6, "mix": 70, "out": -3, "pre": 6000, "post": 9000, "shape": "round", "coef": "4060000000000000,3fffec982d5bb8af,3fe6a77deae8ab8a,3fe168f47187dbc4,3fe625fa74f0e096"}
+{"track": "st_c", "in": "in_st_c.wav", "vol": 0.7, "pan": 0.3}
+{"device": "crush", "bits": 5, "rate": 4, "jit": 30, "dith": 50, "drive": 9, "mix": 100, "out": 0, "pre": 0, "post": 0, "shape": "fold", "coef": "4030000000000000,40068c0c59ab1564,3ff0000000000000,3ff0000000000000,3ff0000000000000"}

@@ -33,13 +33,16 @@ jobs:
       - name: Build the engine (no plug-in SDK needed)
         run: |
           cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
-          cmake --build build --target alengine alnative -j 4
+          cmake --build build --target alengine alnative almix -j 4
           file build/alengine
 
       - name: 'Engine: checks that need no sound card (ring, formats, the clock follower)'
         run: |
           build/alengine selftest | tee out/selftest.json
           python3 -c "import json;d=json.load(open('out/selftest.json'));print('\n'.join(d['measured'].split(', ')));exit(0 if d['ok'] else 1)"
+
+      - name: 'N3b: the mixer against the web engine (gain, pan, master, the Bitcrusher in a chain, bit for bit)'
+        run: python3 tools/native-lab/run_mix.py build/almix out/mix | tee out/mix.txt
 
       - name: A loop-back device (BlackHole) and a tool to choose the default output
         run: |
@@ -97,7 +100,7 @@ jobs:
           {
             echo "## Native engine, task NB-N2b"
             echo '```'; cat out/machine.txt; echo '```'
-            for f in out/selftest.json out/engine.txt out/case-a.txt out/case-b-page-device.txt out/case-b.txt out/case-c.txt out/case-d.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-3000 "$f"; echo '```'; }; done
+            for f in out/selftest.json out/mix.txt out/engine.txt out/case-a.txt out/case-b-page-device.txt out/case-b.txt out/case-c.txt out/case-d.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-3000 "$f"; echo '```'; }; done
           } > out/RESULTS.md
           cat out/RESULTS.md >> "$GITHUB_STEP_SUMMARY"
           cat out/RESULTS.md

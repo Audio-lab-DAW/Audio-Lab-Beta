@@ -1,0 +1,6 @@
+{"sr": 48000, "frames": 12000, "quantum": 512, "master": 0.5}
+{"track": "st_a", "in": "in_st_a.wav", "vol": 0.9, "pan": -1.0}
+{"track": "st_b", "in": "in_st_b.wav", "vol": 0.6, "pan": -0.37}
+{"track": "st_c", "in": "in_st_c.wav", "vol": 1.1, "pan": 0.0}
+{"track": "st_a", "in": "in_st_a.wav", "vol": 0.33, "pan": 0.5}
+{"track": "st_b", "in": "in_st_b.wav", "vol": 0.75, "pan": 1.0}
