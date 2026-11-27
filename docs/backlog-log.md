@@ -5745,7 +5745,7 @@ Fired by the scheduler with a chain-check note (read as data) pointing at the us
 
 ### Proven
 - Linux, this machine: 7 of 7 in Release, ASan+UBSan and TSan; `engine_null_test.py` 52 of 52.
-- GitHub: native-ci dispatched with the Mac job (compiles the Core Audio side on Apple Silicon); result below if it came in during this run.
+- GitHub, native-ci run 46065297072: the Mac job green (the Core Audio side of `deepestIntegerBits` and `setIntegerFormat` compiles on Apple Silicon, and every earlier check still passes there, devices 289 of 289); Linux's null-device step with the new test (Release, ASan+UBSan) and the TSan job green.
 
 ### Left
 - The Gryphon itself: its integer depths per rate and whether macOS keeps the format: only the user's Mac (test app 0.7's [format] line and its "Use the deepest format" menu, task NL7).
