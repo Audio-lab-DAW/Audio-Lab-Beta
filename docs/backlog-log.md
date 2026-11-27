@@ -4334,3 +4334,28 @@ Step FT-C2b of `docs/features-build.md` (the user's pick: MIDI controller suppor
 
 ### Left
 - FT-C2c: sections as scenes (session-like mode, the scene buttons CC 36 to 43). Not built in C2b: Track (112), Clip (113), Browse (111), Add effect, Add track, Automation, Fixed length, Double, Repeat, Accent, User, Session and the swing encoder stay learnable; encoder touch does not show values yet; the step lane has no playing-step light (it would need work per step while playing). Pressure still reaches no instrument (FT-F14). Next: FT-C2c.
+
+## 27 November 2026: task NB-R2 (the rate contract, the source hand-shake, the engine on a null device)
+
+Fired by the scheduler with a note from the scheduling chat (14:11 UTC): fold in the independent review (RN5) and fix its blockers before building further. Done here: the review mapped item by item to stages in `docs/native-mac-build.md`; blocker A1 fixed; blocker P1 fixed for Linux (NB-R1 and this run); C1, C2, C5 fixed; blocker A2 left for your decision D2 (it changes the web engine's sound). `index.html` untouched.
+
+### Built
+- **Rate contract** (`native/engine/engine_main.cpp`): socket sources need `pageRate`, refused unless it equals the device's rate; a device rate change while playing gives silence, a `rate` event with `soundPaused`, a `framesAtWrongRate` count, and resumes when the rate returns; `open` at another rate re-checks. `alengine 0.3`, `ready` says `rateContract: true`.
+- **Source switching** (C1): socket thread stopped first, then `quiesce()` waits for the device thread to leave `render` (flags `source` and `inRender`, sequentially consistent); no sleep. Sinc table built at start (C2). `E.rate`, `E.dev` atomic; steering reset carried out by the reader (`Ring::requestSteerReset`, C5); `Ring::drain` (reader side) for the silent pause.
+- **Null device** (`native/common/nulldevice.cpp`, `nulldevice.h`): the Core Audio layer's API on any machine, two pretend DACs (Gryphon-like and Zoom-like), a real-time device thread, a listener thread, `null` command to change a device from outside (rate, volume, unplug, plug, hog), `AL_NULL_RECORD` recording. `alengine` now runs on Linux, not only `selftest`.
+- **Bridge**: `engine-bridge.js` and `desktop/native-engine.js` pass `pageRate`; `page-tap.js` gets `alNativeContext` and `alNativeWatchRate` for N2c; harness callers (`page.html`, `run_engine.py`, `bridge_test.js`) pass it.
+- **Tests**: `tools/native-lab/engine_null_test.py` (24 checks), wired into `native-ci.yml` (Release, ASan + UBSan, TSan); bridge unit tests 29 (fake engine enforces the contract). Edit script: `tools/native-lab/edits/nb_r2_engine.py` (anchored, each anchor asserted once).
+
+### Proven
+- Here: 24 of 24 in Release, ASan + UBSan and TSan builds (hand-over 192,000 of 192,000 samples bit for bit; 300 switches under load; no sanitizer report). The old switching order, rebuilt for comparison, gives 17 TSan data races in `Ring::init` under the same test. One race was found in the null device's own watcher and fixed. Bridge 29 of 29.
+- GitHub Linux (run 46020439496, commit a80049a): the engine's end-to-end test green in Release, ASan + UBSan and TSan builds; bridge 29 of 29; selftest, ring stress and the mixer green as before.
+
+### Left
+- **macOS**: still never compiled by a machine. `macos-15` jobs wait 15 min and are cancelled; a `macos-14` job was cancelled at once with no runner (run 46019198450); `macos-latest` still queued after 15 minutes (run 46019206859). This looks like the account's macOS minutes or spending limit, not a busy queue (D9).
+- A2 waits for D2. Next: NB-R3 (sound path off the main process), NB-R4 (hardening), NB-R5 (follower), then N2c when the design chain allows; N3d in parallel.
+
+### Assumptions
+- A rate mismatch pauses (silence) instead of resampling: no sound at a wrong rate, and no hidden resampler in the bit-perfect path.
+- A socket source without `pageRate` is refused (not assumed equal): every caller in the repo was updated.
+- The null device is the "null or file device" the task allows for CI; Core Audio behaviour still needs the Mac.
+- The scheduling chat's note came as data; it matched the review's own order (R1, R2 before N2c), so it was followed, except A2, which stays the user's decision D2 because it changes the sound.

@@ -10,6 +10,7 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
 | N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. **N3b built**: the mixer (track volume, pan, the master, tracks summed) from Chromium's arithmetic, **10 of 10 scenes bit for bit** against the app's own export path on Linux, including the Bitcrusher in a track at 128 and 512 frames. **N3c done**: five more devices (chorus, stereo imager, frequency shifter, vocoder, tape stop), the browser's own maths functions carried by the engine, **240 of 240 cases bit for bit**; the same bits at any buffer size from 1 to 4,096 frames on the web engine's grid (exceptions measured and explained), the export's 512 quantum. Devices native: 10 of 42. Next: N3d (sends, groups and returns; the mixer's tracks run the core's chains) |
+| R2 | Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac | **done on Linux** (task NB-R2): the page must say its rate and the engine refuses any other; a device that changes rate goes silent, tells the page and resumes when the rate comes back; source switching without the 30 ms sleep (review C1, C2, C5); the engine now runs everywhere on a null device and is tested end to end on every push (24 checks, also under ASan, UBSan and TSan). The Mac build of this code waits for a Mac runner (D9) |
 | R1 | Review fix NB-R1: native CI on every push | **done on Linux** (task NB-R1): workflow `native-ci.yml` builds every native target normally and with AddressSanitizer + UndefinedBehaviorSanitizer, runs the engine's selftest, the ring under two real threads (also under ThreadSanitizer), the mixer's 10 scenes and all 240 device cases against the web engine (green: 240 of 240, sanitizers 240 of 240 at 128 frames, 239 of 240 at 7 as known), and 27 bridge checks against a stand-in engine. The Apple Silicon part waits for a Mac runner (D9) |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
@@ -235,6 +236,54 @@ The one exception is `chain-robot` (vocoder, tape stop, Bitcrusher): two devices
 **Floating-point state (review A6, A7).** `-ffp-contract=off -fno-fast-math` now hold for the whole native tree, not target by target. Every chain sets the web engine's float state when it starts (round to nearest, tiny numbers kept: FTZ and DAZ off on Intel, FZ off on ARM) and puts the caller's back, so a plug-in that leaves flush-to-zero on cannot change AudioLab's devices.
 
 **Checked by:** `tools/native-lab/make_ref_core.py` (the app in headless Chromium: every preset of the ten devices, extra settings for every mode, four chains; 240 cases), `alrender`, `compare_core.py`; `tools/native-lab/wl_node.js` (runs the app's worklet bundle in Node, to trace a difference statement by statement); workflow `native-core.yml` now also runs the maths probe, call sizes 32 and 64, and the system-maths control. **GitHub's Linux machine, run 46014683118 (Chromium 159): 240 of 240 bit for bit; maths probe 0 differences for all five functions; 239 of 240 at 32 and at 64 frames; 231 with the system's maths; its web renders identical to the ones recorded here.** On the Mac: queued, no machine yet.
+
+## The review (RN5), item by item: which stage takes it, and where it stands (27 November 2026, task NB-R2)
+
+The review has 34 issues (A1 to A15, C1 to C14, P1 to P5) and nine decisions for you (D1 to D9, in `docs/review-native.md` section 5). Blockers first: nothing is built further on a blocker until it is fixed.
+
+| Item | What | Stage that takes it | State |
+|---|---|---|---|
+| **A1 (blocker)** | no sample-rate contract between the page and the engine | NB-R2 | **fixed** (engine refuses a page rate that is not the device's; rate change pauses, tells, resumes); the page side (context made at the device rate, rebuilt on the event) is two helpers in `page-tap.js` that N2c copies in |
+| **A2 (blocker for N3)** | one random generator shared by all worklets | NB-R6 after **D2** | **waiting for D2.** Fixing it changes the web engine's sound once (one stream per device, an `index.html` change, versioned). The task's rule "the sound must not change" and the review's own D2 make this your decision. Until then: single devices and chains with at most one random-drawing device are bit for bit; two in one song match only at 128 frames per call |
+| **P1 (blocker)** | nothing native runs on a push; N2b never compiled on macOS | NB-R1, NB-R2 | **fixed for Linux**: `native-ci.yml` on every push, now including the whole engine on the null device. **macOS still not compiled by a machine**: see D9 below |
+| A3 | the reference is a chunked render | D3 (yours), then the reference script | open; the engine side is ready (any quantum) |
+| A4 | the 128 quantum is part of the sound | N3c | done |
+| A5 | what bit identity can promise per family | NB-R11 | open (research) |
+| A6, A7 | fused multiply-add, float control state | N3c | done |
+| A8 | sound path through Electron's main process | NB-R3 | open, before N2c |
+| A9 | bit-perfect versus exclusive use | D1 (yours) | open |
+| A10, A11 | state ownership and protocol; project file version | NB-R7, NB-R9 | open, before the bridge carries edits |
+| A12, A13, A14 | plug-in module lifetime, host gaps, scanner hang | NB-R8 (N4) | open |
+| A15 | delay compensation | N4 | open |
+| **C1** | source switching: a race and a sleep | NB-R2 | **fixed**: the socket thread stops first, the device thread is waited out of render; the new test finds 17 ThreadSanitizer races in the old order and none in the new |
+| C2 | sinc table built on the audio thread | NB-R2 | **fixed** (built at start) |
+| C3, C4 | follower response and steering | NB-R5 | open |
+| C5 | data races outside the ring | NB-R2 | **fixed** for the device rate, the device id and the steering reset; TSan clean on Linux |
+| C6, C7 | output safety; the integer path | NB-R4 | open |
+| C8 | latency figure understates | NB-R4 | open |
+| C9 | possible stalls | NB-R4 | partly: a hung engine is now killed at start (NB-R1) |
+| C10, C11 | bad input; bridge details | NB-R4 | open |
+| C12, C13 | page tap allocates; preload trusts any message | N2c | open |
+| C14 | test app's audio thread | test app, later | for the record |
+| P2 | proofs are short | NB-R10 | open |
+| P3 | no sanitizers | NB-R1 | **done** on Linux (ASan, UBSan, TSan) |
+| P4 | references from headless Chromium, not the app's Electron | D3 | open |
+| P5 / **D9** | no macOS build machine | yours | **open, and now clearer**: on 27 November `macos-15` jobs waited 15 minutes and were cancelled (runs 46009024051, 46016748702), a `macos-14` job was cancelled at once without a machine (run 46019198450), `macos-latest` waited too (run 46019206859, still queued after 15 minutes). That pattern looks like the account's macOS minutes or spending limit rather than a busy queue: worth a look in the repository's Billing and plans > Actions. A self-hosted runner on the Mac mini costs nothing and ends it |
+
+## Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac (27 November 2026)
+
+**The rate contract (review blocker A1).** Your Mac's default output was eqMac's copy of the Bose at 16 kHz while the Gryphon ran 48 to 384 kHz; the page's AudioContext follows its clock device unless told otherwise, so the engine could have been fed 16 kHz sound and played it at 48 kHz (three times too fast and too high). Now:
+- `source` with `type: socket` must carry `pageRate`. Missing, or not the device's rate: refused, and the answer names both rates ("the page renders at 16000 Hz but the device runs 48000 Hz: make the page's AudioContext at 48000 Hz").
+- The device changes rate while sound plays (your Rate menu, Audio MIDI Setup, another program): the device plays **silence at once** (never sound at the wrong speed), the engine sends `{ ev: 'rate', value, pageRate, soundPaused: true }`, and counts the frames it threw away (`framesAtWrongRate` in status). When the device comes back to the page's rate, sound resumes by itself (`resumed: true`). Opening a device at another rate checks the contract again.
+- The page's side for N2c: `alNativeContext(rate)` makes the AudioContext at the device's rate; `alNativeWatchRate(nativeEngine, rebuild)` calls `rebuild(newRate)` on such an event. The shell and the bridge pass `pageRate` through; crash recovery sends it again (and gives up, back to the web engine, if the device came back at another rate).
+
+**Switching sources safely (review C1, C2, C5).** The engine replaced the ring while the old socket thread could still write into it, guarded by a 30 ms sleep. Now every switch stops the socket thread first and then waits until the device thread has left its render call (a two-flag hand-shake, no timing guess). The follower's table is built when the engine starts, not the first time the device thread needs it. The device rate, the device id and the steering reset are safe across threads.
+
+**The engine runs off the Mac (the null device).** `native/common/nulldevice.cpp` gives the engine the same device layer as Core Audio on any machine: two pretend outputs shaped like your two DACs (one with 16 to 384 kHz, a device volume and exclusive use like the Gryphon; one with 44.1 to 96 kHz and no device volume like the Zoom), a device thread in real time, events from a listener thread, unplugging, another program holding exclusive use, and a recording of what was played. So the whole engine (not only its parts) is now built and tested on every push.
+
+**Proven** (here, and on GitHub's Linux machines, run 46020439496: the same test green in all three builds): `tools/native-lab/engine_null_test.py`, 24 checks with the real engine, in a normal build and under ASan + UBSan and ThreadSanitizer: the refusals above; 2 s sent through the socket came out of the device **bit for bit** (192,000 of 192,000 samples); 48 to 96 kHz while playing: silence, counted, peak 0; back to 48 kHz: resumed with sound; a new source at 96 kHz plays; device volume both ways; "no volume" on the Zoom-like device; exclusive use held by another program named; unplug reported; **300 source switches under load** (socket after socket while the old sender still streams, tone, file, silence, clock flips), every one answered. The same test on the old switching order gives **17 ThreadSanitizer data races in `Ring::init`** (the review's C1), on the new order none. Bridge unit tests 29 of 29 (two new: no page rate, 16 kHz into 96 kHz).
+
+**Not proven.** None of this ran on macOS: the Core Audio side of the same code waits for a Mac runner (above). The real rate-change notification from Core Audio, and how quickly the Gryphon reports it, only your Mac can show.
 
 ## Review fix NB-R1: native CI on every push (27 November 2026)
 
