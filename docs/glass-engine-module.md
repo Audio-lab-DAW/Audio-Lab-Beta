@@ -1,16 +1,16 @@
-# AudioLab glass engine: the module (tasks G2 and G2b, 27 November 2026)
+# AudioLab glass engine: the module (tasks G2, G2b and G2c, 27 November 2026)
 
-The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.0 (task G2b): the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here.
+The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.1 (task G2c). Since 2.0 (task G2b) the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). 2.1 follows the Mac run of the 2.0 test page (plan 3.6): two small savings, a canvas that can be only as large as its glass, a backdrop rate, and a test page that finds the cost; see section 7b. **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here.
 
 | File | What it is |
 |---|---|
-| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 48 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
-| `tools/glass-lab/engine-test.html` | Test page: AudioLab-sized panels over a scrolling arrangement; levels Glass, Light, Solid; background drawn on the GPU or small copy; live frame-share readout and counters; "Run" table like Glass Bench 3. Needs `glass-engine.js` beside it. |
-| `tools/glass-lab/engine_test.py` | 126 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
+| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 51 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
+| `tools/glass-lab/engine-test.html` | Test page: AudioLab-sized panels over a scrolling arrangement; levels Glass, Light, Solid; background drawn on the GPU or small copy; live frame-share readout and counters; "Run" table like Glass Bench 3 (with Bench 3's own GPU path as a row); "Find the cost" table. Needs `glass-engine.js` beside it. |
+| `tools/glass-lab/engine_test.py` | 151 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
 
 Test page as an artifact (one file, engine inlined): https://claude.ai/artifact/HCdnmA3jbVsRyz4ifo7yvY
 
-**Please run it on the Mac** (full window, and if possible inside the AudioLab desktop app): press "Run (about 40 s)", then "Copy table". What must be true there: the rows "drawn on GPU" deliver 100 % of the frames at 3840x2027 and 240 Hz, like Solid. The cloud machine that built this has no graphics card, so **every frame rate measured here means nothing**; only correctness was checked.
+**Please run it on the Mac** (full window, other heavy tabs closed, and if possible inside the AudioLab desktop app): press "Run (about 45 s)", then "Find the cost (about 2 min)", then "Copy tables" and paste both. What must be true there: "Solid (page only)" and "Bench 3 path" reach 240, and the rows "drawn on GPU" deliver 100 % of the frames at 3840x2027 and 240 Hz, like Solid (plan 3.6 says how to read the rest). The cloud machine that built this has no graphics card, so **every frame rate measured here means nothing**; only correctness was checked.
 
 ## 1. How it works
 
@@ -59,7 +59,21 @@ g.setView({scrollX, scrollY, zoom});              // one uniform; the clip list 
 g.render(now);                                    // draws only what changed; returns true when it drew
 ```
 
-Panel rectangles and `rect` are in **CSS pixels relative to the engine canvas**, as `[x,y,w,h]`, `{x,y,w,h}` or a DOMRect. Colours are `[r,g,b]` or `[r,g,b,a]` (0 to 1), `'#rgb'`, `'#rrggbb'`, `'#rrggbbaa'`, `'rgb(...)'` or `'rgba(...)'`.
+Added in 2.1 (nothing else in the API changed):
+
+```js
+g.setOrigin(x, y);          // the canvas does not start at the top left of the space the rectangles are given in (a small canvas, below)
+g.setBackdropRate(120);     // draw the backdrop again at most 120 times per second; panels still move on every frame. 0 or null = the level decides
+g.info.origin               // [x, y]
+g.debug.set({aa:false});    // test page only: rectangles with hard edges
+g.debug.set({freeze:true}); // test page only: a backdrop change redraws the faces but not the backdrop
+```
+
+`create(canvas, {backdropRate: 120})` sets the rate at the start. `info.sceneRects` is one less than in 2.0: the background colour is no longer a rectangle.
+
+**A canvas only as large as its glass.** By default the engine canvas covers the whole window and every rectangle is relative to it. For floating glass that is wasteful: a 1100x430 mixer window on a 3840x2027 canvas clears, draws and composites 13 times more pixels than it shows. Instead: make the canvas the size of the window plus 34 px on every side (its shadow), in steps of 8 px; put it at the window's place with CSS (`transform: translate(x, y)`); call `g.setOrigin(x, y)` with the same whole-pixel numbers; keep giving panels, the scene `rect`, the backdrop `rect` and flats in window coordinates, exactly as before. When the window is dragged: move the canvas, `updatePanel`, `setOrigin`, `render`. The size stays, so nothing is allocated again. Several floating panels far apart need one canvas over all of them (then little is saved) or the rule "one floating window at a time gets the fitted canvas". The test page does this behind the switch "floating canvas only as large as its glass". Whether it is needed is for the Mac to say (plan 3.6).
+
+Panel rectangles and `rect` are in **CSS pixels relative to the engine canvas** (or, with `setOrigin`, relative to the point the origin is measured from), as `[x,y,w,h]`, `{x,y,w,h}` or a DOMRect. Colours are `[r,g,b]` or `[r,g,b,a]` (0 to 1), `'#rgb'`, `'#rrggbb'`, `'#rrggbbaa'`, `'rgb(...)'` or `'rgba(...)'`.
 
 ### The scene
 
@@ -143,7 +157,10 @@ Sizes are counted in **CSS pixels**: on a 2x (Retina) screen the backdrop target
 - No work without a change: no draw, no blur pass.
 - A scroll, a zoom or a playhead step is one uniform. The clip list is sent once per edit.
 - One backdrop and one pyramid for all glass in a layer, instead of one capture and blur per element as `backdrop-filter` does.
-- Docked-only layouts work only on the area under glass.
+- Docked-only layouts work only on the area under glass; that area is worked out when a panel changes, not per frame (2.1).
+- The scene's background colour is the clear, not a rectangle: each small pixel is cleared once (2.1).
+- The rectangle shader's edge smoothing is arithmetic on the rectangle's own edges: one result per pixel, no texture lookup, no extra samples.
+- A canvas may be only as large as its glass (`setOrigin`, 2.1): all work of that layer shrinks with it.
 - The lens is one texture lookup per pixel at any width; the shadow is computed in the same quad.
 - A layer with no visible panel does nothing.
 
@@ -197,7 +214,7 @@ The test page is built exactly this way (two engines, docked and floating, both 
 
 ## 5. What was tested (headless, cloud machine)
 
-`python3 tools/glass-lab/engine_test.py`: **126 checks, all pass**, no console errors or warnings. `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
+`python3 tools/glass-lab/engine_test.py`: **151 checks, all pass**, no console errors or warnings (126 before task G2c). `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
 
 - **Uploads == 0 on the scene path**: scrolling and playing for one second at a simulated 240 frames per second with a panel moving: backdrop drawn 240 times, 0 canvas uploads, 0 lists sent, 240 panel redraws. On the test page (1x and 2x): scrolling + mixer moving and playing + mixer moving give 0 uploads and 0 sends on both layers.
 - **A playhead-only change does not send the clips again**: 20 playhead steps give 20 backdrop draws and 0 sends; the same for 20 scroll steps and 20 zoom steps; setting a value it already has does nothing; an edit sends once.
@@ -208,6 +225,11 @@ The test page is built exactly this way (two engines, docked and floating, both 
 - **Levels**: Glass (lens Wide, quarter size, every frame), Light (lens off, an eighth, 30 backdrop draws per second, panels still 240), Solid (no backdrop work); defaults are Glass, Wide 45, blur Light.
 - **Small-copy fallback**: a 1600x1000 canvas over an 800x500 engine goes up as 200x125 (never full size), 100x63 at Light; with the picture dirty on every frame at 240 per second: 60 uploads at Glass, 30 at Light; no upload without `markDirty()`; a 640x480 display shown at 120x90 goes up as 30x23; fed displays follow the same cap.
 - **No glass on glass**, **dirty logic**, **working only under docked glass** gives identical pixels (both routes, both levels, three blur presets), **flat picture** for glass over DOM, **shadow**, **opacity**, **face colour**.
+- **2.1, small canvas (`setOrigin`)**: a 372x272 canvas placed at (264,124) draws the same window, shadow and backdrop as an 800x600 canvas, within 1 of 255 (scene and copy route, over the backdrop and over flats); moved with its window: same picture, no upload, no list sent; an origin off the small-pixel grid differs only within the blur (mean under 1.5 of 255). On the test page at 1x and 2x: the fitted mixer canvas (1168x504 instead of 1600x1000) looks the same within 1 of 255, travels with the window while scrolling with 0 uploads and 0 lists, and switching it off gives the earlier picture exactly.
+- **2.1, background as a clear**: right colour inside the view rectangle (also half-transparent), backdrop colour outside; a new background colour is one backdrop draw and no list.
+- **2.1, `setBackdropRate`** at a simulated 240 frames per second: 240 backdrop draws by default, 120 and 60 when asked, panels redrawn 240 times in each case; a level with a lower rate keeps it.
+- **2.1, area under docked glass** worked out only on change: after moving, resizing and removing docked panels the pixels are identical to working on everything.
+- **2.1, test page**: "Solid (page only)" has no engine canvas in the page and does not call the engine; "Bench 3 path" draws frosted headers and mixer with Bench 3's own code and leaves no canvas or context behind; Run has 8 rows; Find the cost has 25 rows and puts every switch back.
 - **Reduce Transparency and Increase Contrast** through the emulated system settings and through `setAccessibility`.
 - **Context loss and restore** (`WEBGL_lose_context`), scene path and copy path: Solid look appears on a 2D canvas in the same place, panels still move, after restore the glass is pixel-identical to before, the rectangle list was sent again once by the engine itself, four losses in a row, no canvases left behind.
 - **WebGL2 missing**: Solid look on the same canvas, every API call harmless.
@@ -215,7 +237,8 @@ The test page is built exactly this way (two engines, docked and floating, both 
 
 Not tested here, for the user's Mac and for Windows:
 
-- **Frame rate and real GPU cost.** This is the point of the Mac run. Bench 3 says the recipe holds 240 Hz at 7.8 megapixels; the module adds exact edge coverage in the rectangle shader and a second layer, both untested on a GPU.
+- **Frame rate and real GPU cost.** This is the point of the Mac run. Bench 3 says the recipe holds 240 Hz at 7.8 megapixels; the module adds exact edge coverage in the rectangle shader and a second layer. The first Mac run of the engine page (plan 3.6) kept 67 % while scrolling and 93 % while playing; which piece costs is what "Find the cost" on the 2.1 page measures.
+- **Whether the fitted canvas or a backdrop rate is needed**, and which. Both are built and draw correctly; neither is a default.
 - **The small-copy route on a GPU.** The reduction uses the browser's fast setting (`copyQuality: 'low'`, the one Bench 3 measured). `'medium'` would be smoother for thin lines but may cost more; not measured.
 - A real driver context loss (GPU process restart, sleep and wake), Windows drivers.
 - `allowSoftware:false`: Chromium here did not report its software renderer as a "major performance caveat", so the refusal could not be seen working on this machine.
@@ -228,9 +251,11 @@ Open `tools/glass-lab/engine-test.html` in Chrome (or the artifact), full window
 
 - **Level**: Glass, Light, Solid. **Background from**: rectangles drawn on the graphics card (default), or a small copy of the canvas (the fallback), to compare look and cost.
 - **Live readout**: frames per second and the **share of the screen's frames that were delivered**, median / 95 % / worst frame time, and per second: background drawn on the GPU, **canvas uploads (must be 0)**, clip lists sent (must be 0), face redraws; CPU time in the engine's calls per frame.
-- **Run (about 40 s)** gives a table to copy, like Glass Bench 3: Solid; Light and Glass drawn on the GPU while scrolling; Glass while playing; Light and Glass with the small copy. Columns: fps, frames delivered, median, 95 %, worst, and the three counters.
+- **Run (about 45 s)** gives a table to copy, like Glass Bench 3: Solid as in Bench 3 (page only: no engine canvas, plain panels; it sets the screen rate); Solid drawn by the engine; Light and Glass drawn on the GPU while scrolling; Glass while playing; Light and Glass with the small copy; **Bench 3 path** (Bench 3's own GPU code and five panels, on this page). Columns: fps, frames delivered, median, 95 %, worst, and the three counters.
+- **Find the cost (about 2 min)**: Glass while scrolling, 25 rows with one piece switched off at a time: anti-aliasing off; background 120 and 60 per second; background frozen (faces still drawn); engine idle (canvases on screen, nothing drawn); floating layer off; docked layer off; each panel off in turn; scene with 0 clips; page scrolling off (the 2D arrangement stands still, the glass still scrolls its backdrop); mixer not moving; lens off; engine canvases at half size; only the mixer floating, with a full-window and with a fitted canvas; Bench 3 path; Glass playing. The last column is the change in frames delivered against "everything on". Plan 3.6 has the table that says what each jump means.
+- **Copy tables** copies both.
 - **Time the pieces**: each piece alone with the graphics card made to finish (send the list, draw the background + blur, draw the faces, the small copy).
-- Switches: what moves underneath (scrolling, playing, still), move the mixer, a moving device display (a small copy per refresh, off by default), lens, blur, face, Reduce transparency, Increase contrast, lose and restore the graphics context, each panel on or off.
+- Switches: what moves underneath (scrolling, playing, still), move the mixer, floating canvas only as large as its glass, a moving device display (a small copy per refresh, off by default), lens, blur, face, Reduce transparency, Increase contrast, lose and restore the graphics context, each panel on or off.
 
 ## 7. What changed from engine 1.0 (task G2) to 2.0 (task G2b)
 
@@ -242,6 +267,21 @@ Open `tools/glass-lab/engine-test.html` in Chrome (or the artifact), full window
 | Defaults lens Apple 20, blur Regular; Wide was 40 px | Defaults lens Wide 45, blur Light |
 | Fed display canvases uploaded full size | Fed display canvases reduced to quarter size, same cap |
 | Counters `uploads`, `pyramids`, ... | plus `sceneSends`, `sceneDraws`, `uploadPixels` |
+
+## 7b. What changed from engine 2.0 (task G2b) to 2.1 (task G2c)
+
+The reason, the Mac table and the reading are in plan 3.6. API: nothing removed or changed; `setOrigin`, `setBackdropRate`, `info.origin`, `debug.set` and the option `backdropRate` are new.
+
+| 2.0 | 2.1 |
+|---|---|
+| Scene background colour = a blended rectangle over the whole small target, on top of a clear | The clear itself (one clear per pixel); `info.sceneRects` is one less; a new `bg` is no longer a new list |
+| Area under docked glass worked out on every frame (small arrays thrown away 240 times per second) | Only when a panel, the size or the blur changes |
+| The canvas had to cover the whole space of the rectangles | `setOrigin(x, y)`: a canvas only as large as its glass, moved with its window |
+| Backdrop rate fixed by the level (Glass: every change) | `setBackdropRate(n)` caps it (off by default) |
+| Comment said the rectangle shader gives "the same picture as ... a box filter" | Same shader; the comment now says what it costs: arithmetic on the rectangle's edges, one result per pixel, no lookups |
+| Test page: Solid kept two engine canvases on screen; 6 rows | Solid as in Bench 3; Bench 3's own GPU path as a row; Find the cost; readout paused during runs |
+
+**For the task that ports this into `index.html`** (GS1 integrated 2.0.0): replace the engine text with `tools/glass-lab/glass-engine.js` 2.1.0 as it is. Nothing the app calls has changed. Do not use `setOrigin` or `setBackdropRate` in the app until the Mac run in plan 3.6 says which one is needed.
 
 ## 8. History: first numbers from the user's Mac with engine 1.0 (26 November 2026)
 

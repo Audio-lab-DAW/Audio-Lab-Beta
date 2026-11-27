@@ -230,6 +230,91 @@ So the three levels become:
 
 `backdrop-filter` is then used nowhere in the app. On the bench, Light corresponds to the GL engine with Lens set to off.
 
+### 3.6 Engine 2.0 test on the user's Mac (27 Nov) and engine 2.1 (task G2c)
+
+The user ran the engine 2.0 test page (`tools/glass-lab/engine-test.html`) on the Mac: M4, Chrome 157, ANGLE Metal, 3840x2027 at 1x, 240 Hz, mixer moving, panels hdr tr band dev mix menu pill, lens Wide, blur Light.
+
+| Mode | fps | frames delivered | median ms | 95 % ms | worst ms | GPU background per s | uploads | lists |
+|---|---|---|---|---|---|---|---|---|
+| Solid | 219 | 92 % | 4.20 | 8.30 | 8.9 | 0 | 0 | 0 |
+| Light, drawn on GPU | 217 | 91 % | 4.20 | 8.30 | 8.8 | 60 | 0 | 0 |
+| **Glass, drawn on GPU (scrolling)** | **160** | **67 %** | **7.80** | 8.50 | 8.9 | 319 | 0 | 0 |
+| Glass, drawn on GPU, playing | 222 | 93 % | 4.20 | 8.30 | 8.4 | 444 | 0 | 0 |
+| Light, small copy | 210 | 88 % | 4.20 | 8.40 | 8.9 | 0 | 60 | 0 |
+| Glass, small copy | 187 | 78 % | 4.20 | 8.40 | 12.5 | 0 | 120 | 0 |
+
+For comparison, Bench 3 on the same Mac (3.4): Solid 240 fps 100 %, and "GL, backdrop drawn on the GPU, every frame" 240 fps 100 % with worst 4.8 ms, scrolling with the mixer moving.
+
+**Reading.**
+1. Uploads and lists are 0, as required.
+2. Glass while scrolling keeps 67 % (median 7.8 ms: every second frame missed). Glass while playing keeps 93 %, the same as Solid on this page, although the background is drawn more often (444 against 319 per second). So drawing the background is not the problem as such.
+3. Solid keeps only 92 % on this page against 100 % on Bench 3. The page itself was heavier than Bench 3, so its ceiling was wrong.
+
+**What comparing the engine 2.0 code with the Bench 3 code showed** (suspect by suspect; the cloud machine has no graphics card, so this is from reading the code, not from measuring):
+
+| Suspect | Finding |
+|---|---|
+| Anti-aliasing in the rectangle shader costs many samples | **No.** It is not multi-sampling and not a box filter over samples. The shader works out, from the rectangle's own edges, how much of the pixel is covered: a few multiplications, one result per pixel, no texture lookup. The comment near line 62 was misleading and is rewritten. A switch on the test page turns it off to prove it. |
+| Background larger than quarter size, or two layers at full cost | Quarter size (960x507 here). But there **are** two layers and each is its own WebGL context, so each draws its own background and blur: 444 per second is 2 x 222. In 2.0 the background colour and the lanes were blended rectangles over the whole small target (about three layers of overdraw where Bench 3 has a clear and opaque clips). 2.1 removes one of them: the background colour is now the clear. |
+| Pyramid larger or more passes while scrolling | **No.** With blur Light it is one same-size pass (8 lookups per small pixel); Bench 3 does one pass down and one up. Scrolling and playing are the same work for the engine: one number each. |
+| Extra work in `setView` | **No** state changes, buffer uploads, `getError`, `readPixels`, `finish` or `flush` anywhere on the frame path. One thing was found: the area under docked glass was worked out again on every frame, with a few dozen small arrays thrown away per frame at 240 per second. 2.1 works it out only when a panel changes. |
+| Canvas size or devicePixelRatio | The size is right (1x, 3840x2027). But the engine page has **two full-window engine canvases** where Bench 3 has one, and both are cleared, redrawn and handed to the compositor on every frame while scrolling. |
+| The menu and pill panels | One small quad each, no full-screen pass. The second **layer** is what adds full-screen work, not these panels. |
+| The test page | **Yes, for Solid.** On the engine page Solid kept both engine canvases on screen and redrew the floating one on every frame (the mixer moves). Bench 3's Solid has no GL canvas at all. 2.1's Solid row is now the same as Bench 3's. |
+
+**The reading that fits all six rows.** What differs between "Glass, playing" (93 %) and "Glass, scrolling" (67 %) is not inside the engine. It is the page: while scrolling, the 7.8 megapixel 2D arrangement canvas is redrawn in full on every frame (as the app does); while playing it stands still. So:
+
+| Row | Full-window canvases redrawn per frame | Kept |
+|---|---|---|
+| Bench 3, GL drawn on GPU | 2D arrangement + one GL layer | 100 % |
+| Engine page, Glass playing | two engine layers | 93 % (the page's ceiling then) |
+| Engine page, Light scrolling | 2D arrangement + floating layer, docked layer 30 per second | 91 % |
+| Engine page, Solid scrolling | 2D arrangement + floating layer | 92 % |
+| **Engine page, Glass scrolling** | **2D arrangement + both engine layers** | **67 %** |
+
+Two full-window surfaces per frame fit into 4.2 ms on this Mac; three do not. **This is an inference, not a measurement.** The code cannot say whether the third surface costs because of its pixels (two more 7.8 megapixel layers for the compositor), because of its backdrop and blur work, or because a second WebGL context costs a fixed amount per frame. The next run decides (below).
+
+**What changed (engine 2.1.0, test page; `index.html` and `desktop/` not touched, API kept).**
+
+Engine, on by default:
+- The scene's background colour is the clear of the view rectangle, no longer a blended rectangle over the whole target. One clear per pixel instead of two.
+- The area under docked glass is worked out only when a panel, the size or the blur changes.
+
+Engine, new and off by default (built and checked for correct pixels; the Mac decides which is needed):
+- `setOrigin(x, y)`: the canvas may be **only as large as the glass it draws** (a floating window plus 34 px for its shadow) instead of the whole window. It is moved with its window by CSS; rectangles are still given in window coordinates. All of that layer's work (clear, compositing, backdrop, blur) shrinks with the canvas: for the mixer window here 1168x504 instead of 3840x2027, 13 times fewer pixels. This is the rule from 3.2 ("keep the engine's canvas no larger than the glass it draws").
+- `setBackdropRate(n)`: the backdrop is drawn again at most n times per second while the panels still move on every frame (120 or 60 at a 240 Hz screen; under frost this cannot be seen, 3.2).
+- `debug.set({aa:false})` and `debug.set({freeze:true})` for the test page.
+
+Test page:
+- **Solid (page only, as Bench 3)**: no engine canvas, plain panels. This row sets the screen rate and should reach 240.
+- **Bench 3 path**: the GPU code of Bench 3 ("backdrop drawn on the GPU, every frame", its five panels) copied into the page as a row, for a direct comparison on the same page in the same minute.
+- **Find the cost** (about 2 minutes): "Glass, scrolling" measured 25 times with one piece switched off at a time, as a table to copy.
+- The readout stands still during a run; the frame loop reads no controls from the DOM; the screen's frame time is the shortest median of the run.
+- A switch "floating canvas only as large as its glass".
+
+Checked headless: `python3 tools/glass-lab/engine_test.py`, 151 checks, all pass, no console errors (was 126). Frame rates from the cloud mean nothing.
+
+**What the next run must show** (same Mac, same window, other heavy tabs closed):
+
+1. "Solid (page only)" at 240 fps, 100 %. If not, the Mac was busy: run again before reading anything else.
+2. "Bench 3 path" at 100 %, as in 3.4. If not, this page or this hour differs from the Bench 3 run and the other rows cannot be judged yet.
+3. Uploads and lists 0 on the "drawn on GPU" rows.
+4. **"Glass, drawn on GPU" at 100 %: this is the requirement.** If it is still below, the Find the cost table names the piece:
+
+| Row that jumps to (about) 100 % | Then the cost is | Fix that is ready |
+|---|---|---|
+| "floating layer off" or "docked layer off" | the second layer as a whole | fitted canvas for floating glass; or one layer redrawn at half the rate |
+| "engine canvases at half size" | the pixels of the engine canvases (compositing), not the backdrop | `setOrigin` canvases; the docked layer as strips |
+| "same, canvas fitted to it" (against "only the mixer floating") | the same, proven for the floating window | `setOrigin`, already in 2.1 |
+| "background frozen, faces drawn" (and not "half size") | drawing the backdrop and its blur | `setBackdropRate`; a smaller target |
+| "background 120 per second" or "60 per second" | the same | make that rate the default at a 240 Hz screen |
+| "page scrolling off (2D still)" only | the app's own full redraw of the 2D arrangement, together with the glass | outside the engine: `drawArr` while scrolling |
+| "anti-aliasing off" | the coverage shader (not expected) | hard edges plus a mipmap of the target |
+| one "without ..." row | that panel's face | look at that kind |
+| only "engine idle" | a fixed cost per WebGL canvas per frame | one context: fewer layers |
+
+No fix that changes the look or the defaults was made blind. After this run the fix is one line (a default) or one integration rule for G3.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
