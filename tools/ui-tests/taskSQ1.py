@@ -1,12 +1,13 @@
-"""Task SQ1 (sound quality, lane N): the Quality switch, Classic / Clean, per device and per song, and the DC blocker after biased
-shapers (Q10) as the first Clean feature.
+"""Task SQ1 (sound quality, lane N): the Quality switch (shown as one on/off switch "Hi-Fi", the user's naming), per device and per
+song, and the DC blocker after biased shapers (Q10) as the first Hi-Fi feature. Internally off = 'classic', on = 'clean'.
 Checks: the open song (Fractals) is Classic and no device is stamped when a song opens; the mirror p._sq is never saved (not in JSON,
 not in Object.keys); a new device is Clean; in a song set to Classic by hand a new device is Classic; the Soft Clipper's Classic output is
 bit-identical to the device without the switch, at Asymmetry 0, 25 and 50 %; the DC measured at its output (110 Hz sine at -4.4 dBFS,
 +12 dB, research doc section 3) falls from about -24 / -18 dBFS to under -90 dBFS in Clean and the sine's level stays within 0.05 dB;
-the live node follows the switch; the chip in the device's title strip (text, tooltip, click, undo, right-click menu); "Use Clean
-everywhere" and back in one undo step each; Settings > Project > Sound quality (select, counts, buttons, search); a song from the New
-project window starts Clean; dark and Light level; no console errors.
+the live node follows the switch; the Hi-Fi switch with its short line at the bottom of the device's controls (text, line, tooltip,
+click, undo, right-click menu, inside the device); "Hi-Fi everywhere" and back in one undo step each; Settings > Project > Hi-Fi (the
+switch, its line, the one-time note for an older song, counts, buttons, search); a song from the New project window starts with Hi-Fi
+on; dark and Light level; no console errors.
   python3 tools/ui-tests/taskSQ1.py [repo dir] [out dir]"""
 
 import sys,os,mimetypes,json
@@ -66,53 +67,64 @@ with sync_playwright() as p:
         lv=lambda:J(pg,"(()=>{const N=NODES.get(%s),x=N&&N.fxm.get(%s);return x&&x.sqDc?x.sqDc():null})()"%(json.dumps(t['id']),json.dumps(t['f'])))
         ck(f'{L}: the live node has the DC blocker in Clean',lv()==True,lv())
         R(pg,"renderFx();1");pg.wait_for_timeout(400)
-        sel="#fxin .dev[data-id='%s'] .sqchip"%t['f']
+        sel="#fxin .dev[data-id='%s'] .sqrow .sqchip"%t['f']
         ch=pg.locator(sel)
-        ck(f'{L}: the chip is in the title strip',ch.count()==1 and ch.inner_text()=='Clean' and 'DC blocker' in (ch.get_attribute('title') or ''),ch.count())
+        LN=lambda:J(pg,"(()=>{const D=document.querySelector(\"#fxin .dev[data-id='%s']\"),r=D.querySelector('.sqrow'),l=r&&r.querySelector('.sqln'),a=r&&r.getBoundingClientRect(),d=D.getBoundingClientRect();return r&&{line:l.textContent,vis:l.offsetWidth>0&&l.offsetHeight>0,inside:a.bottom<=d.bottom+1&&a.right<=d.right+1,rail:r.parentNode.classList.contains('dfs'),ar:r.querySelector('.sqchip').getAttribute('aria-checked'),title:!D.querySelector('.devh>.sqchip')}})()"%t['f'])
+        ln=LN()
+        ck(f'{L}: the Hi-Fi switch and its line sit at the bottom of the device controls',ch.count()==1 and ch.inner_text().strip()=='Hi-Fi' and ln and ln['line']=='Hi-Fi on: higher quality sound.' and ln['vis'] and ln['inside'] and ln['rail'] and ln['ar']=='true' and ln['title'] and 'DC blocker' in (ch.get_attribute('title') or '') and 'Hi-Fi off: lighter and faster' in (ch.get_attribute('title') or ''),(ch.count(),ln))
         others=J(pg,"[...document.querySelectorAll('#fxin .dev')].filter(D=>!D.querySelector('.sqchip')).length")
-        ck(f'{L}: devices without a Clean sound have no chip',others>0,others)
+        ck(f'{L}: devices without a Hi-Fi sound have no switch',others>0,others)
+        ui=J(pg,"[...document.querySelectorAll('#fxin .sqrow,#fxin .sqchip')].map(e=>e.textContent+' '+(e.title||'')).join(' ')")
+        ck(f'{L}: no Classic or Clean in the interface, no em dash',not any(w in ui for w in ('Classic','Clean','\u2014')),ui)
         if ch.count():
             ch.scroll_into_view_if_needed();pg.locator('#fxin').screenshot(path=f'{OUT}/sq1_chip_{L}.png')
             ch.click();pg.wait_for_timeout(300)
             q=J(pg,"S.tracks.flatMap(t=>t.fx).find(f=>f.id===%s).q"%json.dumps(t['f']))
-            ck(f'{L}: a click switches the device to Classic',q=='classic' and pg.locator(sel).inner_text()=='Classic' and lv()==False,(q,lv()))
+            ln=LN()
+            ck(f'{L}: a click turns Hi-Fi off on the device',q=='classic' and ln['ar']=='false' and ln['line'].startswith('Hi-Fi off: lighter and faster') and lv()==False,(q,ln,lv()))
             R(pg,"undo();1");pg.wait_for_timeout(300)
             q=J(pg,"S.tracks.flatMap(t=>t.fx).find(f=>f.id===%s).q"%json.dumps(t['f']));R(pg,"syncGraph();1")
-            ck(f'{L}: undo puts it back to Clean',q=='clean' and lv()==True,(q,lv()))
+            ck(f'{L}: undo turns Hi-Fi on again',q=='clean' and lv()==True,(q,lv()))
             R(pg,"renderFx();1");pg.wait_for_timeout(300);pg.locator(sel).click(button='right');pg.wait_for_timeout(300)
             mn=J(pg,"[...document.querySelectorAll('#ctxm .mlab')].map(e=>e.firstChild.textContent)")
-            ck(f'{L}: the right-click menu',all(x in mn for x in ['Clean','Classic','Use Clean everywhere','Use Classic everywhere']),mn)
+            ck(f'{L}: the right-click menu',all(x in mn for x in ['Hi-Fi on','Hi-Fi off','Hi-Fi everywhere','Hi-Fi off everywhere']),mn)
             pg.keyboard.press('Escape');pg.wait_for_timeout(200)
         # the whole song, one undo step each
         n0=R(pg,"UNDO.length")
         a=J(pg,"(sqUseAll('clean'),{p:S.sq,all:sqDevs(S).every(([d])=>sqOwnQ(d)==='clean'),u:UNDO.length})")
-        ck(f'{L}: Use Clean everywhere sets the song and every device in one undo step',a['p']=='clean' and a['all'] and a['u']==n0+1,a)
+        ck(f'{L}: Hi-Fi everywhere sets the song and every device in one undo step',a['p']=='clean' and a['all'] and a['u']==n0+1,a)
         R(pg,"undo();1");pg.wait_for_timeout(200)
         a=J(pg,"{p:S.sq===undefined,n:sqDevs(S).filter(([d])=>sqOwnQ(d)).length,c:sqProj()}")
         ck(f'{L}: one undo brings the song back as it was',a['p'] and a['n']==1 and a['c']=='classic',a)
         # a song set to Classic by hand: new devices are Classic
         R(pg,"(sqUseAll('classic'),1)")
         q=J(pg,"(()=>{const t=curT();pushUndo();const f=mkFx('drive');t.fx.push(f);changed(true);return f.q})()")
-        ck(f'{L}: in a song set to Classic by hand a new device is Classic',q=='classic',q)
+        ck(f'{L}: in a song set to Hi-Fi off by hand a new device has Hi-Fi off',q=='classic',q)
         R(pg,"undo();undo();1");pg.wait_for_timeout(200)
         # Settings > Project
         R(pg,"openSettings('files')");pg.wait_for_timeout(600)
-        s=J(pg,"(()=>{const c=document.getElementById('sqCard');return c&&{h:c.querySelector('h4').textContent,v:$('#sqProj').value,st:$('#sqStat').textContent,b:[...c.querySelectorAll('button')].map(b=>[b.textContent,!!b.title]),vis:c.offsetWidth>0,find:SETT.find('sound quality').includes('songQuality'),tip:!!c.querySelector('.cprow').title}})()")
-        ck(f'{L}: Settings > Project has the Sound quality card',s and s['h']=='Sound quality' and s['v']=='classic' and s['vis'] and s['find'] and s['tip'] and all(x[1] for x in s['b']) and '1 Clean' in s['st'],s)
+        s=J(pg,"(()=>{const c=document.getElementById('sqCard');return c&&{h:c.querySelector('h4').textContent,v:$('#sqProj').checked,ln:$('#sqLine').textContent,old:$('#sqOld').hidden?'':$('#sqOld').textContent,st:$('#sqStat').textContent,b:[...c.querySelectorAll('button')].map(b=>[b.textContent,!!b.title]),vis:c.offsetWidth>0,find:SETT.find('hi-fi').includes('songHiFi')&&SETT.find('sound quality').includes('songHiFi'),tip:!!c.querySelector('label.chk').title}})()")
+        ck(f'{L}: Settings > Project has the Hi-Fi card with its line',s and s['h']=='Hi-Fi' and s['v']==False and s['ln']=='Hi-Fi off: lighter and faster, good for slower computers or big projects.' and s['vis'] and s['find'] and s['tip'] and all(x[1] for x in s['b']) and [x[0] for x in s['b']]==['Hi-Fi everywhere','Hi-Fi off everywhere'] and '1 on' in s['st'],s)
+        ck(f'{L}: an older song shows the note once',s and s['old']=='This song was made before Hi-Fi mode was implemented, so it plays as you made it. Turn Hi-Fi on for higher quality.',s and s['old'])
         pg.locator('#sqCard').screenshot(path=f'{OUT}/sq1_settings_{L}.png')
-        pg.select_option('#sqProj','clean');pg.wait_for_timeout(300)
+        pg.check('#sqProj');pg.wait_for_timeout(300)
         a=J(pg,"{p:S.sq,o:sqDevs(S).filter(([d])=>!sqOwnQ(d)).every(([d])=>sqOf(d)==='clean')}")
-        ck(f'{L}: the select sets the song; devices without their own choice follow',a['p']=='clean' and a['o'],a)
+        ck(f'{L}: the switch sets the song; devices without their own choice follow',a['p']=='clean' and a['o'] and J(pg,"$('#sqLine').textContent")=='Hi-Fi on: higher quality sound.',a)
         R(pg,"undo();1");pg.wait_for_timeout(300)
-        ck(f'{L}: undo of the select',J(pg,"[S.sq===undefined,$('#sqProj').value]")==[True,'classic'])
+        ck(f'{L}: undo of the switch',J(pg,"[S.sq===undefined,$('#sqProj').checked]")==[True,False])
         pg.click('#sqAllC');pg.wait_for_timeout(300)
-        ck(f'{L}: Use Clean everywhere in Settings',J(pg,"S.sq==='clean'&&sqDevs(S).every(([d])=>sqOwnQ(d)==='clean')&&/Clean, 0 Classic/.test($('#sqStat').textContent)"))
+        ck(f'{L}: Hi-Fi everywhere in Settings',J(pg,"S.sq==='clean'&&sqDevs(S).every(([d])=>sqOwnQ(d)==='clean')&&/ on, 0 off/.test($('#sqStat').textContent)"))
         R(pg,"undo();1");pg.keyboard.press('Escape');pg.wait_for_timeout(300);R(pg,"$('#set').hidden=true;1")
         # the command list
         ck(f'{L}: commands',J(pg,"SCM.has('sq.cleanAll')&&SCM.has('sq.classicAll')"))
         # New project window: Clean
         R(pg,"(npOpen(),1)");pg.wait_for_timeout(300);pg.click('#npGo');pg.wait_for_timeout(2500)
-        ck(f'{L}: a song from the New project window starts Clean',J(pg,"[S.sq,sqProj()]")==['clean','clean'])
+        ck(f'{L}: a song from the New project window starts with Hi-Fi on',J(pg,"[S.sq,sqProj()]")==['clean','clean'])
+        R(pg,"openSettings('files')");pg.wait_for_timeout(600)
+        ck(f'{L}: a new song shows no older-song note, the switch is on',J(pg,"[$('#sqOld').hidden,$('#sqProj').checked]")==[True,True])
+        R(pg,"switchProject(PJ.list[0].id);1");pg.wait_for_timeout(1500);R(pg,"openSettings('files')");pg.wait_for_timeout(600)
+        ck(f'{L}: the older song note does not come back',J(pg,"[S.sq===undefined,$('#sqOld').hidden]")==[True,True],J(pg,"[S.sq,S.sqSeen,$('#sqOld').hidden]"))
+        R(pg,"$('#set').hidden=true;1")
         ck(f'{L}: no console errors',not errs,errs)
         c.close()
     b.close()

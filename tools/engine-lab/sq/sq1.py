@@ -9,6 +9,7 @@ js = open(os.path.join(H, 'sq1.js'), encoding='utf-8').read().rstrip('\n') + '\n
 css = open(os.path.join(H, 'sq1.css'), encoding='utf-8').read().rstrip('\n') + '\n'
 # remove an earlier copy
 s = re.sub(r'/\* ===== lane N \(task SQ1\).*?/\* ===== end of lane N SQ1 ===== \*/\n', '', s, flags=re.S)
+s = re.sub(r'/\* lane N \(task SQ1\): the Hi-Fi switch.*?#sqCard \.sqold\{color:#f5c84c\}\n', '', s, flags=re.S)
 s = re.sub(r'/\* lane N \(task SQ1\): the Quality chip.*?#fxin \.dev\.dfclosed \.dfs>\.devh>\.sqchip\{display:none\}\n', '', s, flags=re.S)
 A = 'function askChoice(title,text,btns,icon){'
 B = '.dacv{display:flex;'
