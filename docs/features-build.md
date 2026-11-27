@@ -61,7 +61,7 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 | FT-C2c | **Push 1, part 3: sections as scenes.** Session-like mode: the scene buttons launch sections (jump at the next bar, or queued like a scene), pads show sections per track as "has notes here"; Push's user mode left alone. Clip launching waits for F8 (step FT-C2d). | **done v0.244** |
 | FT-C3a | **Generic controllers.** Templates for class-compliant keyboards and pad controllers (Akai MPK, Arturia KeyLab and MiniLab, Novation Launchkey, Native Instruments Komplete Kontrol in MIDI mode, generic 8 knobs and 8 faders): knobs to the selected device's parameters, faders to track levels, pads to the drum kit, transport buttons; a template is a mapping set the user can edit and save as their own. | **done v0.247** |
 | FT-C3b | **Mackie Control and HUI.** Faders (14-bit pitch bend per channel) with motor feedback, V-pots, mute, solo, arm, select, banks of 8, transport, jog, the 2x56 display and the time code display. | **done v0.248** |
-| FT-C3c | **Launchpad and APC.** Novation Launchpad (Mini MK3, X, Pro MK3) in programmer mode and Akai APC40 MK2 and APC mini: grid to sections now and clips after F8, colours, faders on the APCs. | open |
+| FT-C3c | **Launchpad and APC.** Novation Launchpad (Mini MK3, X, Pro MK3) in programmer mode and Akai APC40 MK2 and APC mini: grid to sections now and clips after F8, colours, faders on the APCs. | | in progress (a lane C run started it at 16:28 UTC, 27 Nov; another run should take the next open step) |
 
 ### Group S: the starred cards (section 4 order of the research)
 | Step | What | Status |
