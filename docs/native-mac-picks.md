@@ -68,8 +68,22 @@ Plan: `docs/native-mac-plan.md`. Pick page: https://claude.ai/artifact/17AwgeWUC
 - **Not done in this report:** no plug-in window was opened, the Buffer menu was not used, and no plug-in was played through the Gryphon (the output was switched to the Bose before loading).
 - **Small faults of the test app seen in the report:** "Play test pattern" with nothing loaded is silent and does not say so; the line after "test pattern off." runs on without a break.
 
+### Third report, the same day: Serum 2 through the Gryphon, down to 32 frames
+The Gryphon was set to 48 kHz, 32-bit integer, in Audio MIDI Setup; its buffer range at that rate is 15 to 4096 frames, device latency 14 + safety 14 frames. Serum 2 loaded in 100 ms (2,623 parameters, 2,172 bytes of state). The user heard the melody clearly at every size.
+
+| Buffer | Block lasts | Serum 2, average per block | Worst block | Failed blocks | Overloads |
+|---|---|---|---|---|---|
+| 512 frames | 10.67 ms | 289 µs = 2.7 % | 1,021 µs = 9.6 % | 0 | 0 |
+| 128 frames | 2.67 ms | 38 µs = 1.4 % | 185 µs = 7.0 % | 0 | 0 |
+| 64 frames | 1.33 ms | 24.5 µs = 1.8 % | 178 µs = 13.3 % | 0 | 0 |
+| 32 frames | 0.67 ms | 16.1 µs = 2.4 % | 139 µs = 20.8 % | 0 | 0 |
+
+- Every buffer size asked for was accepted by the device. **32 frames ran clean on real hardware**: this is the point the build machine could not show.
+- Calculated, not measured: at 32 frames the way out is 32 + 14 + 14 = 60 frames, 1.25 ms at 48 kHz. The web engine's measured round trip in the plan is 25 ms and more.
+- The figures are one instrument playing a simple pattern from its start patch. A full song is another matter; the worst block (20.8 % at 32 frames) is the number to watch as more is added.
+- Still no plug-in window opened in any report.
+
 ### Still open from the Mac
 - The plug-in windows ("Open its window") and the keys.
-- A plug-in played through the Gryphon, at Buffer 128 and 64.
 - Kontakt 8, Serum 2, Phase Plant, Kick 3, Melodyne, Scaler 3, SubLabXL and a Steinberg instrument were scanned but not loaded yet.
 - The AMS-24.
