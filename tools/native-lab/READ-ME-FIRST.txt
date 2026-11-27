@@ -1,4 +1,4 @@
-AudioLab VST3 test 0.2 (tasks NM1 and NB-N1)
+AudioLab VST3 test 0.3 (tasks NM1 and NB-N1)
 
 This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
 find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.

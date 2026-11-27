@@ -221,7 +221,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 
 - (void)machineInfo {
     char model[128] = {0}, cpu[128] = {0}; size_t l = sizeof model; sysctlbyname("hw.model", model, &l, nullptr, 0); l = sizeof cpu; sysctlbyname("machdep.cpu.brand_string", cpu, &l, nullptr, 0);
-    [self say:@"AudioLab VST3 test 0.2 (tasks NM1 and NB-N1). Report file: paste all of it back."];
+    [self say:@"AudioLab VST3 test 0.3 (tasks NM1 and NB-N1). Report file: paste all of it back."];
     [self say:[NSString stringWithFormat:@"[machine] %s, %s, macOS %@, this app runs as %s", model, cpu, NSProcessInfo.processInfo.operatingSystemVersionString, hostArch().c_str()]];
 }
 
@@ -244,7 +244,9 @@ static void watchCb(void*, const char* what, uint32_t) {
     [_devPop selectItemAtIndex:sel];
     [self startDevice:_devs[sel]];
 }
-- (void)startDevice:(const DeviceInfo&)d {
+- (void)startDevice:(const DeviceInfo&)d0 {
+    // ask the device again: a list made when the device was plugged in can hold the rate it had for a moment only
+    DeviceInfo d = deviceInfo(d0.id); if (!d.id) d = d0;
     _stream.stop();
     if (_hog && _dev && _dev != d.id) { int o; std::string e; setHog(_dev, false, o, e); _hog = NO; }
     { std::lock_guard<std::mutex> g(G.lock); G.sr = d.rate > 0 ? d.rate : 48000; if (G.plug) { std::string e; G.ready = G.plug->prepare(G.sr, G.maxBlock, false, e); } }

@@ -12,7 +12,7 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-2'
+        default: 'native-lab-3'
 
 permissions:
   contents: write
