@@ -103,7 +103,9 @@ def main():
         R("(()=>{pmSetOn(false)})()"); pg.wait_for_timeout(1500)
         chk = R("JSON.stringify({fx:UI.fx,lite:UI.lite,cls:document.body.className,hg:getComputedStyle(document.getElementById('hglass')).backdropFilter,tr:getComputedStyle(document.getElementById('tr')).backdropFilter})")
         print('full effects:', chk, flush=True); res['meta']['full_check'] = json.loads(chk)
-        if 'url(' not in json.loads(chk)['hg']: print('!! refraction is NOT active, aborting'); sys.exit(2)
+        eng = R("typeof GLE==='object'?JSON.stringify({on:GLE.on,lv:GLE.lv,info:GLE.g&&GLE.g.info}):''")   # v0.223 and later: the docked panels are drawn by the glass engine, not by backdrop-filter
+        if eng: print('glass engine:', eng, flush=True); res['meta']['engine'] = json.loads(eng)
+        elif 'url(' not in json.loads(chk)['hg']: print('!! refraction is NOT active, aborting'); sys.exit(2)
 
         cur = {'state': 'full'}
         def apply(vn):
