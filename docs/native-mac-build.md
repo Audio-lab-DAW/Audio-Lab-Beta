@@ -9,13 +9,13 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | 0 | The proofs: one effect bit for bit, a VST3 host, the test app | done (task NM1), proven on the user's Mac |
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
-| N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. **N3b built**: the mixer (track volume, pan, the master, tracks summed) from Chromium's arithmetic, **10 of 10 scenes bit for bit** against the app's own export path on Linux, including the Bitcrusher in a track at 128 and 512 frames. Next: N3c (sends, groups and returns; the mixer's tracks run the N3a chains; quantum 512 for exports) |
+| N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. **N3b built**: the mixer (track volume, pan, the master, tracks summed) from Chromium's arithmetic, **10 of 10 scenes bit for bit** against the app's own export path on Linux, including the Bitcrusher in a track at 128 and 512 frames. **N3c done**: five more devices (chorus, stereo imager, frequency shifter, vocoder, tape stop), the browser's own maths functions carried by the engine, **240 of 240 cases bit for bit**; the same bits at any buffer size from 1 to 4,096 frames on the web engine's grid (exceptions measured and explained), the export's 512 quantum. Devices native: 10 of 42. Next: N3d (sends, groups and returns; the mixer's tracks run the core's chains) |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
 
-Nothing new to try from stages N2b and N3a: they change nothing you can hear or click yet (the native engine core renders offline and is checked by machines). The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
+Nothing new to try from stages N2b to N3c: they change nothing you can hear or click yet (the native engine core renders offline and is checked by machines). The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
 
 ## What you could try with test app 0.2 (stage N1)
 
@@ -204,6 +204,69 @@ What it took, found by comparing (each of these changes the last bit, so a port 
 **Found on the way: the web engine's own export is not always the same bits.** Rendering the same scene twice in the app gave different results for the five-track scene (10,465 samples differed) and for the two dithering Bitcrushers (17,912). Chromium keeps the connections into a bus in an order that changes between renders; the order decides how float sums round and in which order devices draw random numbers. Every other scene came out the same twice. The native mixer takes the order as a setting, and for each web render there is an order that reproduces it bit for bit (`run_mix.py` finds it). So "the same as the export" is exact for one or two tracks per bus; with three or more tracks, or random-drawing devices on several tracks, the web engine itself differs from render to render at about -140 dB, and the native engine matches one of its renders exactly. The native engine always uses project order, so its own renders are always the same.
 
 Not yet: sends, groups, returns, the master's devices and limiter, volume and pan that move (automation, the 10 ms smoothing in live play), other sample rates. The Mac check is in `native-engine.yml` and waits for a build machine like the others.
+
+## Stage N3c: the modulation and time family, the browser's maths, any buffer size (27 November 2026)
+
+(Two NB runs worked at the same time this afternoon. This part is called N3c; the mixer's next part, sends, groups and returns, which N3b's run named N3c, is **N3d** below.)
+
+**Five more devices ported** (`native/engine/core/dev_modulation.h`): Chorus (`al-chorus`: chorus, flanger, ensemble, dimension, triangle or sine), Stereo imager (`al-imager`: four bands in Linkwitz-Riley filters, width per band, mono bass, solo), Frequency shifter (`al-fshift`: shift up or down, ring, both, LFO, feedback), Vocoder (`al-voc`: 4 to 32 bands, chords, saw, pulse, square or sine carrier, noise, sibilants, formant), Tape stop (`al-tstop`: tape stop, half time, double, reverse, stutter, in time with the transport). **Devices native: 10 of 42; instruments: 0 of 32** (see "Port debt" below).
+
+**What it took to give the browser's bits.** The first comparison gave 231 of 240. The rest were all one cause, found by measuring the browser itself (`tools/native-lab/math_probe.py`, `almathprobe`):
+- The browser's `Math.sin`, `Math.cos`, `Math.exp` and `Math.log10` are not the system's. V8 15.8 (Chromium 158) takes them from **LLVM's libc**, correctly rounded. Over 400,000 arguments of the kinds the devices use, glibc's `sin` and `cos` differ from the browser's on 0.15 %, `exp` on 0.07 %, `log10` on **21 %**; Node's older V8 on about 3 %. The engine now carries the same LLVM functions (`native/third_party/llvm-libc/`, header only, 143 files, Apache 2.0 with LLVM exception): **0 differences** on all 400,000.
+- `Math.pow` is the exception: V8 handles `x**2` and `x**0.5` itself and otherwise calls the **system's own** `pow`. So the engine does the same (`js::pow`), which on the Mac means Apple's, as in the desktop app there.
+- The differences showed up in a way worth knowing: the frequency shifter's feedback dying away in silence gave samples that were 0 in both, with the opposite sign. A first guess (the browser flushes tiny numbers to zero) was wrong: with flushing every device broke, so Chromium's worklets keep them, and the engine must too.
+
+**Any buffer size, the same bits.** The web engine's worklet bundle keeps two rules per render quantum (128 frames): the 3-second silence rule and the tiny-value guard every 16 quanta. Run at the audio device's own buffer (32 or 64 frames), a device would apply them at the wrong frames. `WorkletShell` now keeps them on the web engine's grid in sample time, whatever the call size: silence decided per quantum (if sound arrives inside a quantum that started silent, the silent frames are run through the device first, so its state is exactly the web engine's), the guard after every 16th quantum, `currentTime` of the quantum for the tape stop. No frames are held back, so this adds no latency. This is the review's (RN5) decision D4 and RN1's point 5, settled by measurement:
+
+| Frames per call | Cases bit for bit |
+|---|---|
+| 128 (the web engine's) | 240 of 240 |
+| 1, 7, 32, 64, 100, 512, 4096 | 239 of 240 each (see the export's quantum below for one more case) |
+
+The one exception is `chain-robot` (vocoder, tape stop, Bitcrusher): two devices that draw random numbers in one chain. In the web engine all worklets of a song share **one** random stream (`Math.random` in the worklet scope), handed out in Chromium's render order, quantum by quantum. At other call sizes the two devices take their numbers in a different order. A single device draws the same numbers at any call size. This is the review's blocker A2; its fix (one stream per device, decision D2) needs your yes and a change in the web engine first (below).
+
+**The export's quantum.** The app's export renders in 512-frame quanta (`renderSizeHint`), so the bundle's rules fall on a 512 grid there and the export sounds slightly different from playback in the same places. The grid is now a setting of the render (`RenderContext::quantum`, `"quantum"` in a case file), and `make_ref_core.py` can make references at 512. Measured:
+- **156 of the 240 web renders change** between quantum 128 and 512: the quantum is part of the sound, as the review said (A4).
+- At quantum 512 called in 512s: **240 of 240 bit for bit.**
+- At quantum 512 called in pieces of 128 or 32: 209 of 240. Every difference but the random-stream chain sits in the 256 frames between the start of the quantum and the return of sound after more than 3 s of silence (my test signal; at the 128 grid its sound returns exactly on a quantum boundary, so this showed only at 512). There the web engine computes the silent frames and outputs leftovers of at most 1.5e-12 (236 dB under full scale); a live engine has already sent zeros for them, because it cannot know sound is coming without waiting. From the next frame on the state is the web engine's again.
+- So: **an export runs in whole quanta and is exact; live play at any buffer is exact except for those leftovers** (and two random-drawing devices in one song, D2).
+
+**Floating-point state (review A6, A7).** `-ffp-contract=off -fno-fast-math` now hold for the whole native tree, not target by target. Every chain sets the web engine's float state when it starts (round to nearest, tiny numbers kept: FTZ and DAZ off on Intel, FZ off on ARM) and puts the caller's back, so a plug-in that leaves flush-to-zero on cannot change AudioLab's devices.
+
+**Checked by:** `tools/native-lab/make_ref_core.py` (the app in headless Chromium: every preset of the ten devices, extra settings for every mode, four chains; 240 cases), `alrender`, `compare_core.py`; `tools/native-lab/wl_node.js` (runs the app's worklet bundle in Node, to trace a difference statement by statement); workflow `native-core.yml` now also runs the maths probe, call sizes 32 and 64, and the system-maths control. On the Mac: queued, no machine yet.
+
+## The research and the review, folded into the stages (27 November 2026)
+
+The scheduling chat asked to fold RN2 (Windows), RN3 (lessons), RN4 (native screens) and RN6 (testing, licences, distribution) into the stages, and RN5 (the independent review, `docs/review-native.md`) when it landed. What changes, and what moved:
+
+**Decided and done in this run**
+- Block size (RN1 point 5, RN3 D4, RN5 A4/D4): the 128-frame grid in sample time, see N3c. Proven, no latency added.
+- The maths library (RN5 A5): the engine carries V8's own functions. **The reference moves when Electron's V8 changes them**: references record the browser version (`web.json`); a change is re-baselined only with a reason line (RN3 RL2).
+- Float flags and state (RN5 A6, A7), done.
+
+**Waiting for your decision (each also in `docs/review-native.md` section 5)**
+- **D2, one random stream per device.** Without it, devices that draw random numbers (Bitcrusher with dither or jitter, vocoder noise, later the instruments) are bit-identical alone but not with each other, and multicore is ruled out for them. It is one deliberate sound change in the web engine (an `index.html` task, versioned). Until you decide, the engine keeps the shared stream for single-threaded renders, as N3b does.
+- **D3, the reference is a single-pass render in the shipped Electron on the Mac,** not headless Chromium 158 on Linux and not the chunked export. The engine side is ready (any quantum, any call size); the reference script needs Electron on the Mac runner.
+- **D6, Fractals v10 as the first native build's song (your pick U5b):** RN6 found the vocals are cut from Electric Universe's commercial recording and v7 to v10 take riffs from its stems. **N7 will not put v10 in the DMG until you decide** (QL1): v6 without the original vocals, a new song, or written permission.
+- **D9, a Mac to build on.** Every macOS run of this task today waited and was cancelled. A self-hosted runner on your Mac mini (free while it is on) or GitHub's paid larger runners would end that; until then the Mac proofs keep waiting and your test builds are the only Mac evidence.
+- **D7, the ASIO agreement (RN2, W0):** send it now if Windows matters; replies take weeks.
+
+**Moved into the stages (from RN3's RL list and RN5's NB-R list)**
+
+| Stage | Now includes |
+|---|---|
+| N2c (the hook) | the rate contract (NB-R2: the page and the engine agree on the sample rate or refuse), the sound path off the shell's main thread (NB-R3), engine hardening (NB-R4), follower quality (NB-R5), CI on every push for `native/` with sanitizers (NB-R1, RN6 QL6); the native engine stays a setting with the web engine as fallback until stage 3 ends (RL6) |
+| N3 (engine core) | NB-R6 rules (the grid, float flags and state: done; per-device random streams after D2); the state and edit protocol design (NB-R7) before the bridge carries edits; reference songs compared web against native after every engine change (RL2); a one-hour soak per engine change and a weekly eight-hour one (RL12, NB-R10); RealtimeSanitizer on the audio path when the Mac runner exists (RN1, QL6) |
+| N3 order | N3d the mixer's sends, groups, returns and the master's chain (N3b's run); then the remaining worklets (the FFT family: pitch shifter, pitch corrector, resonance suppressor; the delays, voice, ducker, loudness); then the worklet instruments; then the browser-node devices with a measured tolerance each (NB-R11); a check-point after 30 port tasks against the estimate, with a JUCE or Tracktion review if over by half (RL9). Stage 3 is done when "Fractals plays wholly native" holds, not by count (RL9) |
+| New, before N4 | **project safety**: `minReader` beside `formatVersion` and a loader that reads it, a placeholder device that keeps a missing plug-in's bytes, atomic saves with rotating backups, start with plug-ins off after a crash (RL1, RL4, NB-R9); **projects out of browser storage** into real files before any change to the desktop app's identity (RL1b). Both need `index.html` work in turn |
+| N4 (VST3 in the app) | host hardening (NB-R8: module cache, scanner with a deadline, FPCR saved and restored around every plug-in call), the plug-in corpus run after every host change (RL3, QL8); no second plug-in format until the VST3 corpus and your U3 self test pass twice (RL9) |
+| N7 (packaging) | third-party notices including LLVM libc now (QL2), no silent calls to Google Fonts or CDNs (QL3), **signed updates** (Ed25519) before the native build reaches anyone else (QL4), a stable self-signed identity so the microphone permission survives updates, and the App Translocation warning (QL9); the fresh-install song waits for D6 |
+| Windows (after the engine has moved) | WASAPI exclusive first, then shared and low latency, ASIO after the agreement; power-throttling and timer opt-out, MMCSS, P-cores; plug-in host defences (RN2 section 9.2, N-W1 to N-W10) |
+| Stage 4 | "AppKit with Metal" is superseded until question R2 is asked again (RN5 D8); RN4's route: stay on the web interface, move heavy surfaces to a GPU scene layer that can be ported (U0 to U3), decide at a measured gate. Not NB work; the engine keeps all state for it |
+
+**Bridge parts and when they go (RN3 D5):** the socket, the ring and the page's clock device (N2), the clock follower (N2b) and the page tap: all removed when the native engine makes the whole sound (end of stage 3).
+
+**Port debt (RN3 RL10):** devices native **10 of 42**, instruments **0 of 32**, the mixer: tracks, volume, pan and master (N3b). The rule that every task adding a device to `index.html` also adds it to the port list touches other tasks, so it is yours to set.
 
 ## Next: N2c, and why it was not started here
 

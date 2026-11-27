@@ -4065,3 +4065,33 @@ Step FT-C1b of `docs/features-build.md`. (This run's trigger still named FT-C1a,
 ### Left
 - Mappings to controls of a device never opened since AudioLab started still wait until it is drawn (as C1a). Learn again takes the very next message, also from a key played by accident (Esc or press it again to cancel).
 - Next: FT-C2a, Push 1 part 1 (connect, display, pads).
+
+## 27 November 2026: task NB-N3c (the modulation and time family; the browser's own maths; any buffer size on the web engine's grid; research and review folded in)
+
+No app changes: `index.html` and `desktop/` untouched, no version. Running list: `docs/native-mac-build.md` (sections "Stage N3c" and "The research and the review, folded into the stages"). A second NB run did N3b (the mixer) at the same time; this part is N3c, and the mixer's sends, groups and returns become N3d.
+
+### Built
+- `native/engine/core/dev_modulation.h`: Chorus (`al-chorus`), Stereo imager (`al-imager`), Frequency shifter (`al-fshift`), Vocoder (`al-voc`), Tape stop (`al-tstop`), ported statement by statement. Devices native: 10 of 42; instruments 0 of 32.
+- `native/third_party/llvm-libc/` (143 header files, Apache 2.0 with LLVM exception, commit 19b71e03): the browser's `sin`, `cos`, `exp`, `log10`. `js::pow` follows V8 (its own `x**2`, `x**0.5`, otherwise the system's `pow`). All devices call `js::` maths only.
+- `WorkletShell` keeps the worklet bundle's rules on the web engine's quantum grid in sample time at any call size (silence per quantum with catch-up, the tiny-value guard every 16 quanta, `currentTime` of the quantum); `RenderContext::quantum` (128 playing, 512 export); `Processor::init` (settings made with) apart from `set` (settings by message, counts `pv`).
+- Float rules: `-ffp-contract=off -fno-fast-math` for the whole native tree; every chain sets round-to-nearest with tiny numbers kept and restores the caller's state.
+- `alrender cases ... [block]`; targets `alrender_sysmath` (control), `almathprobe`; `tools/native-lab/math_probe.py`, `wl_node.js` (the app's worklet bundle run in Node); `make_ref_core.py` with ten device types, 4 chains and any quantum; `native-core.yml` with the maths probe, call sizes 32 and 64, and the controls.
+
+### Proven (Linux; headless Chromium 158; app v0.230)
+- **240 of 240 cases bit for bit** at quantum 128 (every preset of the ten devices, extra settings for every mode, four chains). With the system's maths library instead: 231.
+- The browser's maths: over 400,000 arguments, the engine's functions 0 differences for sin, cos, exp, log10, pow; glibc differs for sin 596, cos 579, exp 262, log10 84,586; pow 0 (it is glibc's own in the browser on Linux).
+- Call sizes 1, 7, 32, 64, 100, 512, 4096 on the 128 grid: 239 of 240 each; the exception is two random-drawing devices in one chain (one shared stream in the web engine, review A2).
+- Quantum 512 (the export's): 156 of 240 web renders differ from 128; native at 512 in 512s 240 of 240; in pieces of 128 or 32, 209 of 240, all differences (but the random chain) in the frames between a quantum's start and the return of sound after more than 3 s of silence, at most 1.5e-12.
+- Wrong guess ruled out on the way: the browser does not flush tiny numbers to zero (with flushing every device differed).
+
+### Not proven
+- **Apple Silicon.** No macOS machine again: the `native-core.yml` runs (macos-15 and macos-14) and the N2b run stayed queued. On the Mac the browser's `pow` is Apple's; the probe step will show it when a machine comes.
+- Electron's own V8 (the app ships Electron 45, Chromium 156) against Chromium 158's: the review's D3; the engine side is ready.
+
+### Assumptions
+- The parallel run's mixer (N3b) and this core stay separate directories until N3d joins them; neither run edited the other's files.
+- The scheduling chat's note to use the repository's new name was followed for reading; pushing works only through the old name (`Audio-lab-DAW/audio-lab-beta`, which redirects), because this session is authorised for that name only.
+- Research and review folded as written in the running list; the decisions D2, D3, D6, D7, D9 stay with the user.
+
+### Next
+- N3d (sends, groups, returns, the master's chain; joining the mixer and the core), or the FFT family (pitch shifter, pitch corrector, resonance suppressor: `atan2`, `hypot`, the FFT), whichever run comes first; N2c when the design chain allows `index.html` work.
