@@ -1,7 +1,7 @@
 {
-  "version": "0.222",
-  "sha256": "43c543798f9d618b75b427f0d8ba5f0f773a1a4c6ffafbf49d1f24ca8d4778d2",
-  "size": 5813605,
+  "version": "0.223",
+  "sha256": "d27b642eb86351159ad84e9672c727ae0ff2bfd0e44066eccd93d7563d1bad4e",
+  "size": 5903124,
   "minShell": "0.147.0",
-  "notes": "The mixer fader design 'Flat bars' is the standard again; if you were on 'Flat bars 2' you are back on 'Flat bars' and can pick 'Flat bars 2' again in the mixer settings."
+  "notes": "The docked panels (track headers, transport bar, devices) are now drawn by the new glass engine: Glass, Light or Solid in Settings, Performance. Please tell us the frame rate you see on your Mac."
 }

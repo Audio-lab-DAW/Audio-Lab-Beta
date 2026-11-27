@@ -414,6 +414,14 @@ Checked headless: `python3 tools/glass-lab/engine_test.py`, **171 checks, all pa
 - The "Bench 3 path" row keeps Bench 3's own shader: a speed reference, not a look.
 - `index.html` still carries an older engine; GS1b ports 2.3.0 (module doc section 7d).
 
+### 3.9 Glass step 1 is in the app (27 Nov, v0.223, task GS1)
+
+Done as section 3.1 "Step 1" and the rules of 3.2 to 3.5 say: one engine canvas under the arrangement for the docked panels, backdrop drawn on the graphics card from the clip geometry, levels Glass / Light / Solid, defaults Wide 45 and Light, no `backdrop-filter` on the docked panels at any level. From the G1 list, in the same step: the playhead as its own layer, Follow centre without a redraw in frames where the view did not move, pointer capture on window drags; the transport's logo glow, meters, time text and CPU graph no longer sit inside a filtered element because the transport has no filter any more (its glass is the engine's canvas, a separate layer under it). What was built, what was measured and what was not: `docs/backlog-log.md` (task GS1) and `docs/glass-engine-module.md` section 9.
+
+The app has **one** engine canvas (the docked layer), so while scrolling two full-window surfaces are redrawn per frame (the 2D arrangement and the engine canvas), the case that held every frame in Bench 3; the second engine layer arrives with GS2 (3.7: with engine 2.1 two layers held every frame on the test page, so no fitted canvas and no backdrop rate are used). The engine text in the app is 2.3.0 from task G2e (for the square docked panels that is K7 exactly, 3.8) with one method added for the app, `setBackdropColor`. The app names the free edges itself: the track headers bend only towards the arrangement, the device panel on its top edge under the track tabs, the transport only while no device panel lies against it. So the corner artifact the user saw on the test page (3.7) is not in the app.
+
+**Still open: the frame rate on the Mac** (3840x2027 at 240 Hz must deliver 100 % of the frames with room to spare). The cloud machine has no graphics card, so nothing measured there says anything about it. Next: GS2 (floating windows, sheets, menus), then step 3 (remove the old glass code) after the user's check.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
