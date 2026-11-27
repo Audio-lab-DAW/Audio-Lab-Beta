@@ -285,3 +285,10 @@ Chromium, Core Audio, Windows
 - [Steinberg opens VST3 and ASIO (CDM)](https://cdm.link/open-steinberg-vst3-and-asio/) · [audify (RtAudio for Node)](https://github.com/Xcraft-Inc/audify)
 
 Earlier AudioLab research on the same subject: `docs/backlog-log.md`, v0.172 (run 11), with its own source list.
+
+## Note from the user's Mac (27 November 2026): Bluetooth speakers drop to 16 kHz when their microphone is open
+
+The About window showed AudioLab running at 16 kHz. Audio MIDI Setup on the user's Mac showed why: the Bose Mini II SoundLink (through eqMac) was at "16.000 Hz, 2 ch", with the rate not changeable, and a second Bose device "Bose Mini II SoundLink 1" with 1 input. A Bluetooth speaker or headset switches from its music mode (A2DP, 44.1 or 48 kHz, output only) to its call mode (HFP, 16 kHz or lower, with a microphone) as soon as any app opens its microphone, and the rate cannot be changed while it is in that mode. Rules for the settings rebuild (task ST) and the native engine (task NB):
+- Never open the input of a Bluetooth device unless the user picked it to record from. Listing devices must not open any input stream (in the web engine, ask for permission with a device that is not Bluetooth, or with constraints that avoid it, and close the stream at once).
+- When the output is a Bluetooth device running at 16 kHz or less, say so plainly on its device card ("this speaker is in call mode because its microphone is in use; choose another input to get full quality back") and offer the one-click fix (switch the recording input away from it).
+- Never pick a Bluetooth device as the recording input automatically.
