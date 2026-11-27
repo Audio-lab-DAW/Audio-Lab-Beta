@@ -96,3 +96,13 @@ A later report with the window open: 254,554 blocks at 32 frames (about 170 seco
 ## User decision, 27 November 2026 (13:50 Brussels): fold the native Mac research into the engine
 
 Task RN1 wrote `docs/research-native-mac.md` (findings, 16 proposed tasks NR1 to NR16 in section 3, 12 changes for the engine's plan in section 4). Asked what to do with it, the user chose **"Fold them into the native engine"**: task NB adopts the 12 changes of section 4 and works NR1 to NR16 into its own stage order (no separate NR tasks, so two tasks never edit the same engine files). NB: from your next run, read `docs/research-native-mac.md` sections 3 and 4 first, write the new stage order into `docs/native-mac-build.md`, then continue. The same will apply to `docs/research-native-windows.md` (task RN2) for the Windows stages once it is written.
+
+## The user's wish for Windows audio (27 November 2026, 19:26 Brussels)
+
+"When it comes to making [ASIO] work on Windows, can we just do that ourselves so it just works? Or do we need our own audio driver for Windows? I would like it to be fully integrated, so when you install the Windows version, it just works. You don't have to install anything separate. Or if you do have to install something separate, it's just included in the installer."
+
+What this means for the plan (answered in the scheduling chat, from docs/research-native-windows.md):
+- No own audio driver. A Windows audio driver is kernel code that needs Microsoft's driver signing and months of work, and it would not make any device faster than its maker's driver.
+- The native engine speaks **WASAPI** (built into Windows: every device, shared and exclusive, bit-perfect in exclusive) directly, so a fresh install plays on any device with nothing else to install. This is the default path.
+- **ASIO** is used in addition when a device's own driver is installed (interface makers ship it with the device, for example Zoom for the AMS-24, iFi for the Gryphon); AudioLab cannot bundle other makers' drivers. Talking to ASIO needs Steinberg's free licence agreement (decision D7).
+- Everything AudioLab itself needs (engine, helpers, the WASAPI path, plug-in hosting) ships inside the one installer.
