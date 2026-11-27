@@ -4914,3 +4914,29 @@ Edit script `tools/feature-lab/ni/ni_5a.py` (anchored; needs NI-3 and NI-4), tes
 
 ### Left
 NI-5b: click a clash cable for the fixes (a band-limited duck of one under the other with the Ducker, or a 2 dB EQ notch), each one undo step, through `NI_HOOKS.clashPop`.
+
+
+## 27 November 2026: task NB-R5 (the clock follower's quality; review RN5 C3, C4)
+
+Fired by the scheduler with a note from the scheduling chat (16:27 UTC, read as data): do the next stage; stop if another NB run committed in the last 20 minutes. The only NB commits in the 20 minutes before were this session's own NB-R4b (finished); the note predates R4a and R4b. To avoid a second overlap like R4's, the step was claimed in the running list first (commit c0485b0). `index.html` untouched.
+
+### Built
+- `native/engine/follow.h`: `SincTable` 128 taps, cutoff 1.0 (the top frequency), Kaiser beta 13 (was 48, 0.92, 11); rows at whole samples exact (now the kernel's own limit, no jump). `Steer` kp 0.1, ki 0.0025 (was 0.04, 0.0004), acquisition: x3 (kp x3, ki x9) for 30 s after a reset, integral rescaled at the handover so the speed does not jump; `holdIntegral()`.
+- `native/engine/ring.h`: speed exactly 1 on a whole sample copies the sample (bit for bit, -0.0 kept); the steering is no longer reset when the ring primes again after running empty, and only the fill's smoothing restarts after a drop; `HISTORY` 160 frames (the kernel looks back 63); `fillMin` with a reset request (`noteFill`).
+- `native/engine/engine_main.cpp`: default `prefillMs` 40; the socket thread measures the longest wait between arrivals; status `ring.targetMs`, `fillMinMs`, `worstGapMs`; `reset` clears them; the selftest's follower part rewritten (bit for bit with -0.0, a response table at 44.1 kHz from 997 Hz to 21 kHz, four bursty senders at the 40 ms target, the cost).
+- Shell and bridge default `prefillMs` 40 (`desktop/native-engine.js`, `native/bridge/engine-bridge.js`).
+- The model and the simulation used to choose these: a numpy model of the kernel (it reproduces the review's table for the old one: -4.23 dB at 20 kHz) and a C++ simulation of `ring.h` with a sender whose blocks are delayed by 0 to 4 ms and held 10 or 25 ms about once a second, at targets 30, 40, 50 ms (scratch files, not committed; their results are in the running list).
+
+### Proven
+- Selftest (Release here): 20 kHz at 44.1 kHz 0.000 dB with error -120 dB (needed: within 0.5 dB); 21 kHz -0.018 dB; senders off by +50, -250, +1000, -1000 ppm, bursty, 40 ms target, 4 minutes: never empty, never a drop, steered to 52.1, -249.9, 1000.7, -999.9 ppm, fill 8 to 41 ms after the first minute; cost 16 to 18 us per 128-frame block at 48 kHz (0.6 to 0.7 %). Under ASan + UBSan the selftest passes in 49 s.
+- `engine_null_test.py` 52 of 52 in Release, ASan + UBSan and TSan (new: the default target is 40 ms; a feeder-like sender with one 20 ms stall: worst wait 20.3 ms and lowest fill 26 ms in the status, never empty). Ring stress (two threads) ok in both modes. `bridge_unit.js` 55 (its default check now expects 40). Electron feeder test 13 of 13. Mixer identical.
+- GitHub: push run 46042034200 (commit e7163f7, which also carries test app 0.5's commit 0e3bb3a whose own run it replaced) **green on every Linux job**: linux (Release and ASan+UBSan selftest with the new follower checks, the null-device test, the mixer, all device cases against the web engine), tsan, node, electron. The Mac job was not asked for; the dispatch with the Mac ticked after NB-R4b (run 46040068132) ended without a Mac machine (D9, as every run since NB-R1).
+
+### Left
+- The real clocks: how many ppm the Gryphon and the Zoom are off from the page's device, and the real gaps on the M4 (status `worstGapMs`), come with N2c on the user's Mac; the 1-hour run is NB-R10.
+- Next review items: NB-R6 (N3 ground rules: the quantum grid, per-device random streams after decision D2, FP flags), NB-R7 (state and edit protocol design), NB-R8 (host hardening). N2c waits for the design chain.
+
+### Assumptions
+- 40 ms is the default because it is the smallest of the tested targets that held through the worst gaps measured at the feeder (25 ms); lower latency is for the settings page to offer from what `worstGapMs` and `fillMinMs` show on the user's Mac, and for N3 (native playback has no ring).
+- The acquisition phase (30 s, three times faster) is chosen so that a sender 1,000 ppm off never sinks the fill below the margin; its extra wobble (about 3 times, still under 0.1 cent) lasts only those 30 s.
+- Real crystals are usually under 100 ppm; ±1,000 ppm is tested as the far case.
