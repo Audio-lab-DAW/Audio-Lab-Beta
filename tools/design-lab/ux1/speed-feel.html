@@ -1,0 +1,758 @@
+<title>AudioLab speed and feel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a pick sheet in AudioLab's own dark look, same family as the earlier pick pages (DR5, RF1).
+   Five groups (A fewer clicks, B keyboard, C mouse and trackpad, D zoom and scroll, E response and timing), each a grid of
+   option cards with a live mock-up drawn at AudioLab's proportions (half scale: 112 px headers, 30 px lanes, 22 px ruler).
+   Measurements up top, the before/after table, picks bar fixed at the bottom. */
+:root{color-scheme:dark;
+ --bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--amber:#f5c84c;--red:#ff5d6c;--bar:#0e0e12f2;
+ --a-bg:#0b0c10;--a-lane0:#121318;--a-lane1:#0f1014;--a-hd:#16171c;--a-ln:#24252d;--a-ink:#e6e8ee;--a-mut:#8c8f9b;--a-grid:rgba(255,255,255,.06);
+ --fl:#1d1e24f5;--fl-ln:rgba(255,255,255,.09);--fl-sh:0 12px 32px rgba(0,0,0,.5);--hi:rgba(76,141,255,.17);--chip:#2a2b33;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#13945c;--blue:#2f6fe0;--amber:#9a6d00;--red:#d22b3d;--bar:#fffffff2;
+ --a-bg:#e9ebef;--a-lane0:#f6f7f9;--a-lane1:#eef0f3;--a-hd:#ffffff;--a-ln:#d6d9df;--a-ink:#17181c;--a-mut:#62666f;--a-grid:rgba(0,0,0,.07);
+ --fl:#fbfbfcf7;--fl-ln:rgba(0,0,0,.12);--fl-sh:0 10px 28px rgba(20,24,40,.18);--hi:rgba(47,111,224,.13);--chip:#e7e9ee}}
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#13945c;--blue:#2f6fe0;--amber:#9a6d00;--red:#d22b3d;--bar:#fffffff2;
+ --a-bg:#e9ebef;--a-lane0:#f6f7f9;--a-lane1:#eef0f3;--a-hd:#ffffff;--a-ln:#d6d9df;--a-ink:#17181c;--a-mut:#62666f;--a-grid:rgba(0,0,0,.07);
+ --fl:#fbfbfcf7;--fl-ln:rgba(0,0,0,.12);--fl-sh:0 10px 28px rgba(20,24,40,.18);--hi:rgba(47,111,224,.13);--chip:#e7e9ee}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);margin:0;padding-block:28px 150px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 14px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:80ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+kbd{font:500 11px var(--fm);background:var(--chip);border:1px solid var(--ln2);border-bottom-width:2px;border-radius:4px;padding:0 5px;white-space:nowrap}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--mut)}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#04130c}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--fm);color:var(--mut)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.lede{font-size:15px;line-height:1.55}
+.tblw{overflow-x:auto;border:1px solid var(--ln);border-radius:10px;background:var(--pn)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--ln);vertical-align:top}
+th.n{text-align:right}
+th{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);background:var(--pn2)}
+tr:last-child td{border-bottom:0}
+td.n{text-align:right;font-family:var(--fm);white-space:nowrap}
+td.good{color:var(--acc)} td.bad{color:var(--red)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px}
+section.fam{display:flex;flex-direction:column;gap:14px;scroll-margin-top:12px}
+.gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;border-bottom:1px solid var(--ln);padding-bottom:8px}
+.gh .k{font:500 12px var(--fm);color:var(--mut)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:16px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.ch{display:flex;align-items:flex-start;gap:10px}
+.ch .id{font:600 13px var(--fm);background:var(--chip);border-radius:6px;padding:2px 7px;flex:none}
+.ch h3{flex:1;min-width:0}
+.stars{font-size:12px;color:var(--amber);letter-spacing:1px;flex:none}
+.pick{flex:none;border:1px solid var(--ln2);background:var(--pn2);border-radius:999px;padding:2px 10px;font:500 11.5px var(--fm)}
+.card.picked .pick{background:var(--acc);border-color:var(--acc);color:#04130c}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}
+.meta dt{color:var(--mut);font:500 10.5px/1.9 var(--fm);letter-spacing:.05em;text-transform:uppercase}
+.meta dd{margin:0;min-width:0}
+.mock{background:var(--a-bg);border:1px solid var(--a-ln);border-radius:9px;overflow:hidden;position:relative;color:var(--a-ink)}
+.mock canvas{display:block;width:100%;touch-action:none}
+.mbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:7px 9px;border-top:1px solid var(--a-ln);font-size:11.5px;color:var(--a-mut)}
+.mbar b{color:var(--a-ink);font-weight:500}
+.hud{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--fl);border:1px solid var(--fl-ln);box-shadow:var(--fl-sh);border-radius:8px;padding:4px 10px;font:500 12px var(--fm);pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.hud.on{opacity:1}
+.count{font:600 12px var(--fm);color:var(--a-ink)}
+.mock:focus-within{border-color:var(--blue)}
+.hint{font-size:11.5px;color:var(--mut)}
+/* S3 browser */
+.brw{display:flex;flex-direction:column;gap:0;height:300px}
+.brw input{background:var(--a-lane0);border:0;border-bottom:1px solid var(--a-ln);color:var(--a-ink);font:500 14px var(--f);padding:10px 12px;outline:none}
+.brw ul{list-style:none;margin:0;padding:4px;overflow:auto;flex:1}
+.brw li{display:flex;gap:10px;align-items:center;padding:5px 8px;border-radius:6px;font-size:12.5px;cursor:pointer}
+.brw li .cat{font:500 10.5px var(--fm);color:var(--a-mut);width:72px;flex:none}
+.brw li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brw li mark{background:none;color:var(--blue);font-weight:600}
+.brw li.on{background:var(--hi)}
+.brw li .k{font:500 10.5px var(--fm);color:var(--a-mut)}
+/* S5 headers */
+.hdrs{display:flex;flex-direction:column;gap:4px;padding:10px;min-height:200px;position:relative}
+.hrow{display:flex;align-items:center;gap:8px;background:var(--a-hd);border:1px solid var(--a-ln);border-radius:6px;padding:6px 8px;font-size:12.5px;cursor:context-menu;user-select:none}
+.hrow .sw{width:4px;align-self:stretch;border-radius:2px}
+.hrow .tag{margin-left:auto;font:500 10.5px var(--fm);color:var(--acc)}
+.menu{position:absolute;background:var(--fl);border:1px solid var(--fl-ln);box-shadow:var(--fl-sh);border-radius:8px;padding:4px;min-width:200px;font-size:12.5px;z-index:3}
+.menu div{padding:5px 9px;border-radius:5px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.menu div:hover,.menu div.on{background:var(--hi)}
+.menu hr{border:0;border-top:1px solid var(--fl-ln);margin:4px 0}
+.menu small{color:var(--a-mut);font:500 10.5px var(--fm)}
+/* S6 inspector */
+.insp{display:grid;grid-template-columns:1fr 190px;min-height:200px}
+@media (max-width:520px){.insp{grid-template-columns:1fr}}
+.ip{border-left:1px solid var(--a-ln);padding:10px;display:flex;flex-direction:column;gap:8px;font-size:12px;background:var(--a-hd)}
+.ip label{display:flex;flex-direction:column;gap:3px;color:var(--a-mut);font:500 10.5px var(--fm);text-transform:uppercase;letter-spacing:.05em}
+.ip input,.ip select{background:var(--a-lane0);border:1px solid var(--a-ln);border-radius:5px;color:var(--a-ink);font:13px var(--f);padding:3px 6px;text-transform:none;letter-spacing:0}
+.sws{display:flex;gap:4px;flex-wrap:wrap}
+.sws button{width:16px;height:16px;border-radius:4px;border:1px solid var(--a-ln);padding:0}
+/* S13 headers */
+.lay{height:220px;overflow:hidden;position:relative;border-bottom:1px solid var(--a-ln)}
+.lrow{display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--a-ln);background:var(--a-hd);font-size:11.5px;overflow:hidden;height:30px}
+.lrow span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow i{font-style:normal;font:500 10px var(--fm);border:1px solid var(--a-ln);border-radius:3px;padding:0 4px;color:var(--a-mut)}
+.lrow em{width:40px;height:4px;background:linear-gradient(90deg,var(--acc),var(--amber));border-radius:2px}
+/* S16 motion */
+.mo{height:180px;position:relative;overflow:hidden}
+.mo .sheet{position:absolute;right:12px;top:12px;bottom:12px;width:min(60%,260px);background:var(--fl);border:1px solid var(--fl-ln);box-shadow:var(--fl-sh);border-radius:10px;padding:12px;transform:translateX(110%);opacity:0;transition-property:transform,opacity;transition-timing-function:cubic-bezier(.2,0,0,1)}
+.mo .sheet.open{transform:none;opacity:1}
+/* S18 */
+.bar{height:6px;background:var(--a-lane0);border-radius:3px;overflow:hidden;flex:1;min-width:80px}
+.bar i{display:block;height:100%;width:0;background:var(--acc)}
+/* picks bar */
+.picks{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);border-top:1px solid var(--ln);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pin .line{flex:1;min-width:220px;font:500 13px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:6px 10px;overflow-x:auto;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips button{border:1px solid var(--ln2);background:var(--pn2);border-radius:6px;padding:1px 6px;font:500 11px var(--fm);color:var(--mut)}
+.chips button.on{background:var(--acc);border-color:var(--acc);color:#04130c}
+.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px}
+.note{border-left:3px solid var(--amber);padding:6px 12px;background:var(--pn);border-radius:0 8px 8px 0}
+</style>
+
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:12px">
+  <div class="eyebrow">AudioLab Pro · task UX1 · 27 Nov 2026 · v0.263</div>
+  <h1>Speed and feel</h1>
+  <p class="lede">Eighteen ways to make AudioLab quicker to work in and smoother to touch, for big psytrance projects. Each option has a mock-up you can try here, a measured or estimated saving, and the lane that would build it. Tap <b>Pick</b> on the ones you want, then copy the line in the bar at the bottom and paste it into the chat.</p>
+  <p class="mut sm">★ to ★★★★★ is the value for your way of working. The six with five stars are the recommendation (button in the bar). Already picked elsewhere and built on here, not repeated: the command palette K1 and menus R2 (task OV), design round 2 with the catalogue browser B3 (task DS), the commands registry and macros (task XT), the controller layer and Push 1 (task FT). Mock-ups are drawn at half AudioLab's size: 112 px headers, 30 px lanes, 22 px ruler.</p>
+  <nav class="toc"><a href="#m">Today's measurements</a><a href="#t">15 tasks before and after</a><a href="#A">A · Fewer clicks</a><a href="#B">B · Keyboard</a><a href="#C">C · Mouse and trackpad</a><a href="#D">D · Zoom and scroll</a><a href="#E">E · Response and timing</a></nav>
+</header>
+
+<section class="fam" id="m">
+  <div class="gh"><h2>Today's measurements</h2><span class="k">real app v0.263, Fractals (31 tracks, 364 clips), real browser input</span></div>
+  <p>Inputs were sent as real trackpad, wheel, pointer and key events (Chrome DevTools input), the same path as on your Mac, and timed from the event's own time stamp to the app's first listener (<b>queue</b>), to the end of the first arrangement drawing that shows the change (<b>first drawn</b>), and to 90 % of the final change (<b>90 % drawn</b>). Add one screen frame (4.2 ms at 240 Hz) for the display. The cloud machine has no graphics card, so the user-size column is slow everywhere; the small column (1280 × 800 at 1×) is closer to the Mac's speed. What matters is the app's own share: the easing and the waiting.</p>
+  <div class="tblw"><table>
+    <thead><tr><th>Input</th><th>How the app handles it today</th><th class="n">small: queue / first / 90 %</th><th class="n">your size: queue / first / 90 %</th><th class="n">model on the Mac, 240 Hz</th></tr></thead>
+    <tbody>
+    <tr><td>Two-finger scroll</td><td>applied directly, same frame (good)</td><td class="n">6.0 / 8.9 / 8.9 ms</td><td class="n">19.7 / 24.0 / 24.0 ms</td><td class="n good">≈ 4–8 ms</td></tr>
+    <tr><td>Mouse wheel notch, Shift</td><td>eased, time constant 40 ms</td><td class="n">5.7 / 34 / 142 ms</td><td class="n">50 / 140 / 392 ms</td><td class="n bad">90 % after ≈ 96 ms</td></tr>
+    <tr><td>Trackpad pinch</td><td>eased, time constant 40 ms, on top of macOS's own smoothing</td><td class="n">5.3 / 40 / 149 ms</td><td class="n">57 / 137 / 488 ms</td><td class="n bad">90 % after ≈ 96 ms</td></tr>
+    <tr><td>Clip drag, one move</td><td>waits for the next frame (browser), drawn in it</td><td class="n">–</td><td class="n">14 / 17 / 17 ms</td><td class="n">≈ 4–8 ms</td></tr>
+    <tr><td>Key of the keyboard piano, idle</td><td>note started in the key's handler</td><td class="n">1.6 → note 1.7 ms</td><td class="n">4.2 → note 4.3 ms</td><td class="n good">≈ 1 ms + audio buffer</td></tr>
+    <tr><td>Same key while playing, mixer open</td><td>the key waits for the frame being drawn</td><td class="n">median 17, 90 % 43, worst 51 ms</td><td class="n">median 94, 90 % 140, worst 188 ms</td><td class="n bad">0 to one slow frame of jitter</td></tr>
+    </tbody></table></div>
+  <div class="tblw"><table>
+    <thead><tr><th>Main-thread time per frame</th><th class="n">idle</th><th class="n">scroll</th><th class="n">pinch zoom</th><th class="n">clip drag</th><th class="n">playing + mixer</th></tr></thead>
+    <tbody>
+    <tr><td>small (1280 × 800, 1×)</td><td class="n">1.0 ms</td><td class="n">12.4 ms</td><td class="n bad">60.9 ms (layout 15.4)</td><td class="n">–</td><td class="n">63.1 ms</td></tr>
+    <tr><td>your size (3840 × 1993 px)</td><td class="n">5–12 ms</td><td class="n">49.6 ms</td><td class="n bad">204–223 ms (layout 14–16)</td><td class="n">29.1 ms</td><td class="n">100–318 ms</td></tr>
+    <tr><td>budget at 240 Hz</td><td class="n" colspan="5" style="text-align:left">4.17 ms for everything; about 2.5 ms for the app's own script and drawing (web.dev's 60 Hz ratio applied to 240 Hz)</td></tr>
+    </tbody></table></div>
+  <p class="mut sm">Three things stand out. A pinch costs about five times a scroll, and 15 ms of every pinch frame is page layout: the linked zoom also changes the track height, so the header rows are laid out again on every frame (S13). Every zoom is eased by 40 ms on top of the trackpad's own motion, which puts the view about 90 ms behind your fingers; the threshold where a lag in indirect dragging becomes noticeable is about 55 ms (Deber et al. 2015) (S9). A key played while the mixer draws waits for that frame, so timing jitter grows with how busy the screen is (S15). Script: <code>tools/design-lab/ux1/measure_ux1.py</code>.</p>
+</section>
+
+<section class="fam" id="t">
+  <div class="gh"><h2>15 psytrance tasks, before and after</h2><span class="k">clicks + keys + drags, shortest path today, counted in the code</span></div>
+  <div class="tblw"><table>
+    <thead><tr><th class="n">#</th><th>Task</th><th class="n">today</th><th class="n">with the ★★★★★ picks + S2 S4 S5 S6 S8</th><th class="n">Ableton 12 (estimate)</th><th>What changes</th></tr></thead>
+    <tbody id="tasks"></tbody>
+    <tfoot><tr><td></td><td><b>Total</b></td><td class="n"><b>74</b></td><td class="n good"><b>50 (−32 %)</b></td><td class="n">≈ 67</td><td>plus no visual hunting for presets, no overwriting paste, automation across clips</td></tr></tfoot>
+  </table></div>
+  <p class="mut sm">Seconds use the keystroke-level model (a pointer click or drag about 1.1–1.5 s, a key 0.28 s, a decision 1.35 s). Today's paths with code lines are in <code>docs/research-ux-speed.md</code>.</p>
+</section>
+
+<!-- ================= A ================= -->
+<section class="fam" id="A">
+  <div class="gh"><h2>A · Fewer clicks for the common tasks</h2><span class="k">S1–S6</span></div>
+  <div class="cards">
+
+  <article class="card" data-id="S1" data-stars="5">
+    <div class="ch"><span class="id">S1</span><h3>Time verbs: duplicate, insert and delete time across all tracks</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>Select bars on the ruler (or click a section), then one chord: <kbd>⌘⇧D</kbd> duplicate time (the copy pushes the rest of the song later, nothing is overwritten), <kbd>⌘I</kbd> insert empty time, <kbd>⌘⇧⌫</kbd> delete time, <kbd>L</kbd> loop the selection. Automation, sections and markers move with it.</p>
+    <div class="mock" tabindex="0" id="m1"><canvas height="268"></canvas><div class="hud"></div>
+      <div class="mbar"><span>Drag on the ruler or click a section, then press the keys or</span><button class="btn" data-a="dup">Duplicate time</button><button class="btn" data-a="ins">Insert</button><button class="btn" data-a="del">Delete</button><button class="btn" data-a="loop">Loop</button><button class="btn" data-a="reset">Reset</button><span class="count"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Duplicate a 16-bar section: 5 actions (and an overwriting paste, all 30 tracks on screen) → 2. About 3 s each time; a song is built from dozens of these.</dd>
+    <dt>Builds on</dt><dd>F2 Arranger moves (task FT), the sections that exist, K1 lists the verbs, XT registry ids <code>time.duplicate</code>, <code>time.insert</code>, <code>time.delete</code>.</dd>
+    <dt>Lane</dt><dd>C (FT) for the edit, A (DS) draws the ruler selection.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S2" data-stars="4">
+    <div class="ch"><span class="id">S2</span><h3>Loop a clip by dragging its corner</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>A clip gets a loop length. Drag the small notch at the top right corner to repeat its content; repeats are drawn with a faint seam at each loop. Dragging the edge as today still trims or extends. Today a clip cannot loop, so a 1-bar bass becomes 16 copies.</p>
+    <div class="mock" id="m2"><canvas height="150"></canvas><div class="hud"></div>
+      <div class="mbar"><div class="seg" data-seg="m2"><button data-v="today">Today</button><button data-v="s2" class="on">S2</button></div><span>Drag the notch (S2) or the right edge (today)</span><button class="btn" data-a="reset">Reset</button><span class="count"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>1-bar clip to 16 bars: 6 actions (Mod+D, Shift-click, three doubling drags) → 1 drag. About 6 s. Editing the bar changes every repeat.</dd>
+    <dt>Builds on</dt><dd>F1 linked clips (one source, many places) and F4 automation clips; drawing by DS clip style.</dd>
+    <dt>Lane</dt><dd>C (FT) for the clip model and playback, A for drawing the repeats.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S3" data-stars="5">
+    <div class="ch"><span class="id">S3</span><h3>Pop-up browser with search, where you click</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>The browser opens at the spot you clicked (the empty lane, the device chain's +, a mixer slot) with the cursor already in a search field. Type a few letters: instruments, presets and effects in one list, fuzzy matched. <kbd>↑</kbd> <kbd>↓</kbd> audition while you move, <kbd>Enter</kbd> puts it on the track you clicked, <kbd>Esc</kbd> closes. What you choose for a word comes first next time.</p>
+    <div class="mock" id="m3"><div class="brw"><input id="q3" placeholder="Type: bass, kick, rev, eq…" autocomplete="off" aria-label="Search the browser"><ul id="l3" role="listbox"></ul></div>
+      <div class="mbar"><label><input type="checkbox" id="snd3"> Audition with sound</label><span class="count" id="c3"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Find a preset by name: right-click, Change instrument, look through tiles, double-click, pick the sub-preset (≈ 5 clicks and 5–10 s of looking) → open, type, Enter (≈ 3 s). Today there is no search field in either browser.</dd>
+    <dt>Builds on</dt><dd>DS B3 (catalogue with a measured preview): S3 is how B3 opens and is searched. K1's fuzzy matcher and Recent; FT F31 sample browser shares the list.</dd>
+    <dt>Lane</dt><dd>A (the browser), F (the pop-up sheet and focus).</dd></dl>
+  </article>
+
+  <article class="card" data-id="S4" data-stars="4">
+    <div class="ch"><span class="id">S4</span><h3>Draw automation over a time range, across clips</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>Drag a line in a track's automation lane from the start of the build to the drop; it does not care where clips start or stop. Pick the shape (straight, exponential, S) after drawing. Today points exist only inside a clip, so a build of four clips needs eight clicks and has holes in the gaps.</p>
+    <div class="mock" id="m4"><canvas height="150"></canvas><div class="hud"></div>
+      <div class="mbar"><div class="seg" data-seg="m4"><button data-v="today">Today</button><button data-v="s4" class="on">S4</button></div><div class="seg" data-seg="m4s"><button data-v="lin" class="on">straight</button><button data-v="exp">exp</button><button data-v="s">S</button></div><span>Drag in the lower lane</span><span class="count"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>16-bar filter sweep over four clips: 11 actions → 4. About 8 s, and the sweep has no gaps.</dd>
+    <dt>Builds on</dt><dd>F3 curve shapes, F4 automation clips, F20 Build designer (the one-knob riser; S4 is the hand-drawn sibling).</dd>
+    <dt>Lane</dt><dd>C (FT).</dd></dl>
+  </article>
+
+  <article class="card" data-id="S5" data-stars="3">
+    <div class="ch"><span class="id">S5</span><h3>Sidechain in one step from the track menu</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>Right-click the bass: <b>Duck to ▸</b> lists the tracks, the kick-like ones first (found from their notes and level). One click makes the same duck the cable makes today. The cable system stays exactly as it is; this is a shortcut into it.</p>
+    <div class="mock" id="m5"><div class="hdrs" id="h5"></div>
+      <div class="mbar"><span>Right-click (or long-press) the Bass header</span><button class="btn" data-a="reset">Reset</button><span class="count"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Sidechain part of "kick and bass": open mixer, Cables, drag a cable across up to 32 strips, choose "ducks", close (5 actions) → 2 clicks. 4–8 s.</dd>
+    <dt>Builds on</dt><dd>R2 command row menus (OV), the cable system and <code>abxMake</code> (kept), NI kick detection.</dd>
+    <dt>Lane</dt><dd>F for the menu entry, C for the routing call.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S6" data-stars="3">
+    <div class="ch"><span class="id">S6</span><h3>Inspector that follows the selection</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>A narrow strip at the right (fold it away with <kbd>I</kbd>) shows what is selected: a clip's name, colour, loop, quantize grid and strength, gain; a track's name, colour, sends, sidechain. Changing a value there replaces a menu, a dialog or a trip into the mixer.</p>
+    <div class="mock" id="m6"><div class="insp"><canvas height="200"></canvas><div class="ip" id="ip6"></div></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Rename and recolour a track 5 → 4; quantize with a grid and strength (today fixed 1/16, start only) 6 → 3. About 2 s each and fewer dialogs.</dd>
+    <dt>Builds on</dt><dd>DS round 2 layout, MD read-outs with units (lane G) for the fields.</dd>
+    <dt>Lane</dt><dd>A (layout space) with G (fields). Needs a decision on width; off by default would be fine.</dd></dl>
+  </article>
+  </div>
+</section>
+
+<!-- ================= B ================= -->
+<section class="fam" id="B">
+  <div class="gh"><h2>B · Keyboard</h2><span class="k">S7–S8</span></div>
+  <div class="cards">
+  <article class="card" data-id="S7" data-stars="5">
+    <div class="ch"><span class="id">S7</span><h3>A single-key layer on the arrangement, and "G then" jumps</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>When the arrangement has focus and the keyboard piano is off, plain keys do the common jobs: <kbd>S</kbd> solo, <kbd>M</kbd> mute (all selected tracks), <kbd>Q</kbd> quantize, <kbd>R</kbd> rename, <kbd>L</kbd> loop selection, <kbd>[</kbd> <kbd>]</kbd> previous / next section, <kbd>←</kbd> <kbd>→</kbd> move by the ruler's grid, <kbd>Enter</kbd> play from the selection. <kbd>K</kbd> turns the keyboard piano on and off (then the letters play notes, as today). Two-key jumps as in Linear: <kbd>G</kbd> <kbd>M</kbd> mixer, <kbd>G</kbd> <kbd>P</kbd> piano roll, <kbd>G</kbd> <kbd>B</kbd> browser, <kbd>G</kbd> <kbd>D</kbd> drop.</p>
+    <div class="mock" tabindex="0" id="m7"><canvas height="268"></canvas><div class="hud"></div>
+      <div class="mbar"><span>Click a header or a clip, then type here</span><span id="pk7" class="count"></span><span class="count" id="c7"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>A menu command (right-click, find, click ≈ 2.6 s and a decision) becomes one key (0.3 s). Today <code>quant</code>, <code>solo</code>, <code>mute</code>, <code>rename</code>, <code>browser</code> and <code>pianoroll</code> have no key; there is no next-section key; ← → move by a step that follows the zoom.</dd>
+    <dt>Builds on</dt><dd>XT commands registry (every key is a rebindable command), K1 palette shows the keys, the existing <code>SCA</code> list.</dd>
+    <dt>Lane</dt><dd>H (XT) for the key layer, C for the few new actions.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S8" data-stars="3">
+    <div class="ch"><span class="id">S8</span><h3>Repeat the last edit with <kbd>.</kbd> and type a count first</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>From Vim: <kbd>.</kbd> repeats the last edit at the new selection or playhead; a number typed before a command repeats it (<kbd>1</kbd><kbd>5</kbd> <kbd>⌘D</kbd> makes 15 copies). Each repeat is one undo step. Piano roll duplicate also moves by whole grid steps, so off-beat patterns stop drifting.</p>
+    <div class="mock" tabindex="0" id="m8"><canvas height="120"></canvas><div class="hud"></div>
+      <div class="mbar"><span>Click here, then try <kbd>⌘D</kbd>, <kbd>.</kbd>, <kbd>1</kbd><kbd>5</kbd><kbd>⌘D</kbd> (Ctrl on Windows)</span><button class="btn" data-a="reset">Reset</button><span class="count"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Rolling bass for 4 bars 12 → 7; any repeated edit, one key per repeat.</dd>
+    <dt>Builds on</dt><dd>XT macros (a repeat is a one-step macro with one undo point).</dd>
+    <dt>Lane</dt><dd>H (XT).</dd></dl>
+  </article>
+  </div>
+</section>
+
+<!-- ================= C ================= -->
+<section class="fam" id="C">
+  <div class="gh"><h2>C · Mouse and trackpad gestures</h2><span class="k">S9–S11</span></div>
+  <div class="cards">
+  <article class="card" data-id="S9" data-stars="5">
+    <div class="ch"><span class="id">S9</span><h3>Direct trackpad: pinch and scroll follow the fingers, same frame</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>A trackpad already glides (macOS adds momentum). AudioLab eases every zoom again by 40 ms, so the view trails behind. With S9 pinch and two-finger scroll apply 1:1 in the frame they arrive; only a notched mouse wheel is eased, and shorter (15 ms). Pinch on a trackpad or <kbd>⌘</kbd>/Ctrl + wheel over either view; both get the same input. The graph shows the zoom you asked for (white) and what each view draws.</p>
+    <div class="mock" id="m9"><canvas height="380"></canvas>
+      <div class="mbar"><button class="btn" data-a="pinch">Play a pinch</button><span>at 90 % of the zoom: today <b id="l9a">–</b>, S9 <b id="l9b">–</b></span><span class="hint">frames here: <span id="hz9">–</span></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>About 90 ms less lag on every pinch at 240 Hz (90 % after ≈ 4 ms instead of ≈ 96 ms). The noticeable lag for indirect dragging is about 55 ms.</dd>
+    <dt>Builds on</dt><dd>The existing zoom presets (AudioLab, Ableton, Logic, FL style), zoom around the pointer and <code>smoothZoom</code>: kept, only the easing changes.</dd>
+    <dt>Lane</dt><dd>A (DS, arrangement and ruler).</dd></dl>
+  </article>
+
+  <article class="card" data-id="S10" data-stars="3">
+    <div class="ch"><span class="id">S10</span><h3>Grab and fling with a mouse</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>Middle-button drag (or the overview) pans both ways; let go while moving and the view glides on, slowing the way iOS lists do (0.998 per millisecond), and stretches softly at the song's start instead of stopping hard. For mouse and Magic Mouse users; trackpads keep macOS's own momentum. In the mock-up any drag pans.</p>
+    <div class="mock" id="m10"><canvas height="170"></canvas>
+      <div class="mbar"><div class="seg" data-seg="m10"><button data-v="today">Today: stops dead</button><button data-v="s10" class="on">S10: glides</button></div><span>Drag and let go while moving</span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Fewer strokes to cross a 9-minute song: one flick instead of 4–6 drags.</dd>
+    <dt>Builds on</dt><dd>The overview map (<code>map</code>), song overview (<code>OVW</code>).</dd>
+    <dt>Lane</dt><dd>A.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S11" data-stars="3">
+    <div class="ch"><span class="id">S11</span><h3>Every pointer point, and a step ahead</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>The browser hands over pointer moves once per frame. Drawing automation or notes freehand keeps the in-between points too (<code>getCoalescedEvents</code>), and the ghost of a dragged clip is drawn where the pointer is about to be (<code>getPredictedEvents</code>), so it sits under the cursor. Draw fast below: grey uses one point per frame, green uses every point; the ring is the prediction.</p>
+    <div class="mock" id="m11"><canvas height="170"></canvas>
+      <div class="mbar"><span>Draw fast</span><span class="count" id="c11"></span><button class="btn" data-a="clear">Clear</button></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Smooth freehand curves at any speed; a clip ghost about one frame closer to the cursor (today a move waits 14 ms in the cloud test).</dd>
+    <dt>Builds on</dt><dd>The automation pencil and piano roll paint tool.</dd>
+    <dt>Lane</dt><dd>A (drag ghost), C (automation pencil).</dd></dl>
+  </article>
+  </div>
+</section>
+
+<!-- ================= D ================= -->
+<section class="fam" id="D">
+  <div class="gh"><h2>D · Zoom and scroll</h2><span class="k">S12–S14</span></div>
+  <div class="cards">
+  <article class="card" data-id="S12" data-stars="4">
+    <div class="ch"><span class="id">S12</span><h3>Zoom keys and a zoom stack</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p><kbd>Z</kbd> zoom to the selection, <kbd>X</kbd> back out one step (a stack, like Ableton), <kbd>⇧1</kbd> whole song, <kbd>⇧2</kbd> selection, <kbd>⇧3</kbd> 16 bars around the playhead (Figma's keys). The move takes 160 ms, can be interrupted by any input, and is instant with Reduce motion.</p>
+    <div class="mock" tabindex="0" id="m12"><canvas height="200"></canvas><div class="hud"></div>
+      <div class="mbar"><button class="btn" data-a="z">Z</button><button class="btn" data-a="x">X</button><button class="btn" data-a="1">⇧1</button><button class="btn" data-a="2">⇧2</button><button class="btn" data-a="3">⇧3</button><span>Drag on the ruler to select</span><span class="count" id="c12"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Going from the whole song to the drop and back: 2–4 pinches and scrolls (≈ 3 s) → 2 keys (0.6 s).</dd>
+    <dt>Builds on</dt><dd><code>zoomAround</code>, the S7 key layer (same registry).</dd>
+    <dt>Lane</dt><dd>A.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S13" data-stars="5">
+    <div class="ch"><span class="id">S13</span><h3>Zoom without page layout</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>While a pinch is moving, the header rows are moved with transforms (no layout), and laid out once when the fingers rest. The arrangement picture is scaled between real drawings. Measured: today 15 ms of every pinch frame is layout and a pinch costs five times a scroll. This test runs in your browser: 64 header rows, a 2-second pinch, both ways.</p>
+    <div class="mock" id="m13"><div class="lay" id="lay13"></div>
+      <div class="mbar"><button class="btn" data-a="run">Run both</button><span>today (heights each frame): <b id="a13">–</b></span><span>S13 (transforms): <b id="b13">–</b></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Pinch frame cost down to the scroll's (cloud: 61 → about 12 ms per frame at the small size). On the Mac that is the difference between a pinch that drops frames and one that holds the screen rate.</dd>
+    <dt>Builds on</dt><dd>GS3's finding (two forced layouts per drawing kept), the glass engine's backdrop (only redrawn on rest).</dd>
+    <dt>Lane</dt><dd>A, with I (DV) for the header frame.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S14" data-stars="4">
+    <div class="ch"><span class="id">S14</span><h3>Tiled arrangement: draw only the new strip</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>The arrangement is drawn into 256-pixel tiles that are kept; scrolling moves the tiles and draws only the strip that comes into view, and an edit redraws only the tiles it touches. GS3 found that scrolling draws the whole arrangement on every frame and noted tiles as the way to 240 with Settings open. This test runs in your browser: the same scene scrolled both ways.</p>
+    <div class="mock" id="m14"><canvas height="170"></canvas>
+      <div class="mbar"><div class="seg" data-seg="m14"><button data-v="full" class="on">Today: full redraw</button><button data-v="tile">S14: tiles</button></div><span>drawing per frame: <b id="t14">–</b></span><span class="hint" id="n14"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Scrolling: cloud 12–50 ms per frame of full redraw; tiles typically 70–95 % less drawing while scrolling.</dd>
+    <dt>Builds on</dt><dd>GS3 strip-shift experiment (kept unused), the glass engine reading the tiles as its backdrop.</dd>
+    <dt>Lane</dt><dd>A with the glass engine (GS lane).</dd></dl>
+  </article>
+  </div>
+</section>
+
+<!-- ================= E ================= -->
+<section class="fam" id="E">
+  <div class="gh"><h2>E · Response and animation timing</h2><span class="k">S15–S18</span></div>
+  <div class="cards">
+  <article class="card" data-id="S15" data-stars="5">
+    <div class="ch"><span class="id">S15</span><h3>Steady timing when you play</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>A note starts at the key's (or MIDI message's) own time stamp plus a small fixed delay, not whenever the busy screen lets the handler run, so there is no jitter. While a track is armed, meters and the mixer draw at half rate and no task runs longer than 2 ms. Musicians feel about 10 ms of delay and need jitter under 1 ms (Wessel & Wright). Press <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> or tap the pads with the busy screen on.</p>
+    <div class="mock" tabindex="0" id="m15"><canvas height="190"></canvas>
+      <div class="mbar"><button class="btn" data-a="snd">Start sound</button><label><input type="checkbox" id="busy15" checked> Busy screen (12 ms frames)</label><div class="seg" data-seg="m15"><button data-v="today">Hear today</button><button data-v="s15" class="on">Hear S15</button></div><span class="count" id="c15"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Today a key played with the mixer open waited median 17 ms, worst 51 ms (cloud, small) and median 94, worst 188 ms (cloud, your size). With S15: one constant delay, jitter below 1 ms.</dd>
+    <dt>Builds on</dt><dd>The controller layer (FT-C1a) and <code>noteOn</code>; Auto buffer (256 samples) and the render size hint stay.</dd>
+    <dt>Lane</dt><dd>C (FT) for the timing, E (IN) for the meter rate while armed.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S16" data-stars="4">
+    <div class="ch"><span class="id">S16</span><h3>Four motion timings, always interruptible</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>One set of durations for the whole app, added to LOOK as tokens: <b>0 ms</b> for anything you drag or pinch, <b>90 ms</b> for hover and press feedback, <b>150 ms</b> for opening and closing panels and menus, <b>220 ms</b> for large moves. One ease-out curve. No animation on actions you repeat often; a click during an animation reverses it at once. Click quickly to feel the difference.</p>
+    <div class="mock" id="m16"><div class="mo"><div class="sheet" id="sh16"><b>Settings</b><p class="mut sm">A panel opening.</p></div></div>
+      <div class="mbar"><div class="seg" data-seg="m16"><button data-v="300">300 ms (common)</button><button data-v="150" class="on">150 ms (S16)</button><button data-v="0">0 ms</button></div><button class="btn" data-a="go">Open / close</button></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>About 150 ms on every panel open and close compared with 300 ms; never waits on an animation.</dd>
+    <dt>Builds on</dt><dd>LK tokens (adds only), OV menus and dialogs (lane F uses them), Apple HIG motion, Material 3 short durations.</dd>
+    <dt>Lane</dt><dd>LK tokens, then F.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S17" data-stars="3">
+    <div class="ch"><span class="id">S17</span><h3>Frame guard: a budget per part</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>The frame-rate read-out (Settings › Performance) grows a histogram of frame times against the screen's real frame (4.17 ms at 240 Hz) and names the part that spent the most (arrangement, meters, glass, mixer). The test harness gets a budget per part and the release gate fails a push that goes over it. Below: this page's own frames.</p>
+    <div class="mock" id="m17"><canvas height="150"></canvas>
+      <div class="mbar"><label>Extra work per frame <input type="range" id="w17" min="0" max="12" step="1" value="0"> <b id="wv17">0 ms</b></label><span id="hz17"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>Keeps the other options' gains from slipping back as nine lanes add code.</dd>
+    <dt>Builds on</dt><dd>GS3 read-out, <code>tools/ui-tests/frametime.py</code>, the release gate (task RG).</dd>
+    <dt>Lane</dt><dd>E (CPU graph) and the release gate.</dd></dl>
+  </article>
+
+  <article class="card" data-id="S18" data-stars="3">
+    <div class="ch"><span class="id">S18</span><h3>An answer within 100 ms, work in the background</h3><span class="stars"></span><button class="pick">Pick</button></div>
+    <p>Every action shows its result, or a progress line on the track, within 100 ms. Bounce, freeze, export and analysis run in small slices or a worker so the screen and the playhead keep moving; edits are drawn in the same frame and saved in idle time (as Linear does).</p>
+    <div class="mock" id="m18"><canvas height="60"></canvas>
+      <div class="mbar"><button class="btn" data-a="a">Bounce like today (blocks)</button><button class="btn" data-a="b">Bounce with S18</button><div class="bar"><i id="p18"></i></div><span class="count" id="c18"></span></div></div>
+    <dl class="meta"><dt>Saves</dt><dd>No frozen screen during bounce or export; the moving playhead above shows it.</dd>
+    <dt>Builds on</dt><dd>The particle devices' threads, the NI analysis worker.</dd>
+    <dt>Lane</dt><dd>C (bounce, export), D (analysis), F (progress line).</dd></dl>
+  </article>
+  </div>
+</section>
+
+<section class="fam">
+  <div class="gh"><h2>Sources</h2></div>
+  <p class="sm mut">Ableton <a href="https://www.ableton.com/en/live-manual/12/live-keyboard-shortcuts/">Live 12 keyboard shortcuts</a> · Bitwig <a href="https://bitwig.com/userguide/latest/meet_inspector_panel">Inspector</a> and <a href="https://www.bitwig.com/userguide/latest/browsers">browsers</a> · <a href="https://www.soundonsound.com/techniques/automate-anything-reapers-custom-actions">REAPER custom actions</a> · FL Studio <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/playlist.htm">Playlist</a> · Logic <a href="https://support.apple.com/guide/logicpro/lgcp0182c4e5/mac">Tool menu keys</a> · Linear <a href="https://linear.app/enablement/guide/navigating-linear">navigation</a> and <a href="https://performance.dev/how-is-linear-so-fast-a-technical-breakdown">why it is fast</a> · Raycast <a href="https://manual.raycast.com/search-bar">search</a> · Figma <a href="https://www.figma.com/blog/building-a-professional-design-tool-on-the-web/">rendering engine</a> · Apple HIG <a href="https://developer.apple.com/design/human-interface-guidelines/pointing-devices">pointing devices</a> and <a href="https://developer.apple.com/design/human-interface-guidelines/motion">motion</a> · <a href="https://dev.to/danburzo/pinch-me-i-m-zooming-gestures-in-the-dom-a0e">pinch as ctrl+wheel</a> · <a href="https://medium.com/@esskeetit/scrolling-mechanics-of-uiscrollview-142adee1142c">UIScrollView deceleration</a> · <a href="https://www.atlassian.com/engineering/rendering-like-butter-a-confluence-whiteboards-story">Atlassian: rendering like butter</a> · Chrome <a href="https://developer.chrome.com/blog/aligning-input-events">aligned input events</a>, <a href="https://developer.chrome.com/blog/desynchronized">desynchronized canvas</a>, <a href="https://developer.chrome.com/blog/use-scheduler-yield">scheduler.yield</a> · MDN <a href="https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/getPredictedEvents">getPredictedEvents</a> · <a href="https://www.nngroup.com/articles/response-times-3-important-limits/">Nielsen response times</a> · <a href="https://dcmpx.remotevs.com/com/tactuallabs/www/SL/papers/howMuchFasterIsFastEnoughCHI15.pdf">Deber et al. 2015</a> · <a href="https://ccrma.stanford.edu/workshops/mid2005/Wright-SIMS2002.pdf">Wessel & Wright 2002</a> · <a href="https://learn.microsoft.com/en-us/windows/apps/design/motion/timing-and-easing">Fluent timing</a> · <a href="https://web.dev/articles/rendering-performance">web.dev rendering performance</a> · <a href="https://en.wikipedia.org/wiki/Keystroke-level_model">keystroke-level model</a>. Full list in <code>docs/research-ux-speed.md</code>.</p>
+</section>
+</div>
+
+<div class="picks"><div class="pin">
+  <div class="chips" id="chips"></div>
+  <div class="line" id="line">UX1 picks: (none yet)</div>
+  <button class="btn" id="rec">Pick the recommended</button>
+  <button class="btn ok" id="copy">Copy</button>
+</div></div>
+
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+for(const c of document.querySelectorAll('canvas[height]'))c.style.height=c.getAttribute('height')+'px';
+const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MAC=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
+let TK={};const ALL=[];
+function tok(){const s=getComputedStyle(document.documentElement),c=n=>s.getPropertyValue(n).trim();
+  TK={bg:c('--a-bg'),l0:c('--a-lane0'),l1:c('--a-lane1'),hd:c('--a-hd'),ln:c('--a-ln'),ink:c('--a-ink'),mut:c('--a-mut'),grid:c('--a-grid'),acc:c('--acc'),blue:c('--blue'),amber:c('--amber'),red:c('--red'),hi:c('--hi')};
+  for(const a of ALL)a.draw&&a.draw()}
+function fit(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1,w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));
+  if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d)}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w,h}}
+function rr(g,x,y,w,h,r){w=Math.max(0,w);h=Math.max(0,h);g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,Math.max(0,Math.min(r,w/2,h/2)));else g.rect(x,y,w,h)}
+function hud(m,t){const h=$('.hud',m);if(!h)return;h.textContent=t;h.classList.add('on');clearTimeout(h._t);h._t=setTimeout(()=>h.classList.remove('on'),1300)}
+const ck=e=>e.metaKey||e.ctrlKey;const MOD=MAC?'⌘':'Ctrl+';
+/* ---------- a small psytrance song, in bars ---------- */
+const TRK=[['Kick','#ff6b6b'],['Bass','#ffa94d'],['Hats','#ffd43b'],['Clap','#69db7c'],['Lead','#4dabf7'],['Pad','#9775fa'],['FX','#f783ac'],['Vox','#38d9a9']];
+const PRES={Kick:[[0,16],[16,28],[32,64],[80,96]],Bass:[[24,32],[32,64],[80,96]],Hats:[[8,16],[16,32],[32,64],[80,96]],Clap:[[36,64],[80,96]],Lead:[[40,64],[64,80],[84,96]],Pad:[[0,16],[64,80]],FX:[[16,32],[60,64],[64,80]],Vox:[[68,76],[80,88]]};
+function song(){const T=TRK.map(([n,c],i)=>{const cl=[];for(const[a,b]of PRES[n]){for(let s=a;s<b;s+=8)cl.push({a:s,b:Math.min(b,s+8),n})}return{n,c,i,clips:cl,mute:0,solo:0}});
+  return{T,sec:[{n:'Intro',a:0,b:16},{n:'Build',a:16,b:32},{n:'Drop',a:32,b:64},{n:'Break',a:64,b:80},{n:'Drop 2',a:80,b:96}],len:96}}
+/* ---------- the arrangement mock (AudioLab proportions at half size) ---------- */
+class Arr{constructor(cv,o){this.cv=cv;this.o=Object.assign({hw:112,rh:22,th:30,fitAll:false},o||{});this.S=this.o.song||song();this.v={x:0,ppb:12,y:0};this.sel=null;this.loop=null;this.ph=null;this.selT=null;this.selC=null;ALL.push(this);
+  if(window.ResizeObserver)new ResizeObserver(()=>this.draw()).observe(cv)}
+ bx(b){return this.o.hw+(b-this.v.x)*this.v.ppb} xb(x){return(x-this.o.hw)/this.v.ppb+this.v.x}
+ rowY(i){return this.o.rh+i*this.o.th-this.v.y}
+ fitNow(){const w=this.cv.getBoundingClientRect().width;this.v.ppb=(w-this.o.hw-8)/(this.S.len+2);this.v.x=0}
+ pt(e){const r=this.cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+ hit(p){const i=Math.floor((p.y-this.o.rh+this.v.y)/this.o.th),t=this.S.T[i];if(!t||p.y<this.o.rh)return{i:-1};if(p.x<this.o.hw)return{i,t,hdr:true};const b=this.xb(p.x);return{i,t,b,c:t.clips.find(c=>b>=c.a&&b<c.b)}}
+ draw(){if(!TK.bg)return;const{g,w,h}=fit(this.cv);this.w=w;this.h=h;if(this.o.fitAll)this.fitNow();const{hw,rh,th}=this.o,S=this.S,v=this.v;
+  g.fillStyle=TK.bg;g.fillRect(0,0,w,h);
+  const anyS=S.T.some(t=>t.solo);
+  S.T.forEach((t,i)=>{const y=this.rowY(i);if(y>h||y+th<rh)return;g.fillStyle=i%2?TK.l1:TK.l0;g.fillRect(hw,y,w-hw,th)});
+  // grid
+  const step=v.ppb>=24?1:v.ppb>=10?4:v.ppb>=4?8:16;g.fillStyle=TK.grid;const b0=Math.floor(v.x/step)*step;
+  for(let b=b0;this.bx(b)<w;b+=step){const x=Math.round(this.bx(b))+.5;if(x<hw)continue;g.fillRect(x,rh,1,h-rh)}
+  // selection under clips
+  if(this.sel){const x0=Math.max(hw,this.bx(this.sel.a)),x1=this.bx(this.sel.b);g.fillStyle=TK.hi;g.fillRect(x0,rh,Math.max(0,x1-x0),h-rh)}
+  // clips
+  g.save();g.beginPath();g.rect(hw,rh,w-hw,h-rh);g.clip();
+  S.T.forEach((t,i)=>{const y=this.rowY(i);if(y>h||y+th<rh)return;const dim=t.mute||(anyS&&!t.solo);
+   for(const c of t.clips){const x0=this.bx(c.a),x1=this.bx(c.b);if(x1<hw||x0>w)continue;const cw=Math.max(1,x1-x0-1);
+    g.globalAlpha=dim?.3:1;g.fillStyle=c.col||t.c;g.globalAlpha*=.24;rr(g,x0,y+2,cw,th-4,3);g.fill();g.globalAlpha=dim?.3:1;
+    g.fillStyle=c.col||t.c;rr(g,x0,y+2,cw,5,2);g.fill();
+    if(this.o.content)this.o.content(g,c,t,x0,x1,y,th,this);else{g.globalAlpha*=.75;const n=Math.max(1,Math.floor((c.b-c.a)*(t.n==='Kick'||t.n==='Clap'?1:2)));for(let k=0;k<n;k++){const xx=x0+(k+.5)/n*cw;g.fillRect(xx,y+11,Math.max(1,cw/n*.45),th-16)}}
+    if(this.selC===c){g.globalAlpha=1;g.strokeStyle=TK.ink;g.lineWidth=1.5;rr(g,x0+.75,y+2.75,cw-1.5,th-5.5,3);g.stroke()}
+    if(c.label&&cw>40){g.globalAlpha=1;g.fillStyle=TK.ink;g.font='500 10px Inter,sans-serif';g.fillText(c.label,x0+4,y+th-6)}
+    g.globalAlpha=1}});
+  g.restore();
+  // ruler
+  g.fillStyle=TK.hd;g.fillRect(0,0,w,rh);g.fillStyle=TK.ln;g.fillRect(0,rh-.5,w,1);
+  const lst=v.ppb>=24?1:v.ppb>=10?4:v.ppb>=4?8:16;g.font='500 9.5px "JetBrains Mono",monospace';g.fillStyle=TK.mut;
+  for(let b=Math.floor(v.x/lst)*lst;this.bx(b)<w;b+=lst){const x=this.bx(b);if(x<hw)continue;g.fillRect(x,0,1,5);g.fillText(String(b+1),x+3,9)}
+  if(this.o.sections!==false)for(const s of S.sec){const x0=Math.max(hw,this.bx(s.a)),x1=Math.min(w,this.bx(s.b));if(x1<=x0)continue;g.fillStyle=this.selSec===s?TK.blue:TK.ln;g.globalAlpha=this.selSec===s?.55:.9;rr(g,x0+1,12,x1-x0-2,9,2);g.fill();g.globalAlpha=1;if(x1-x0>34){g.fillStyle=TK.ink;g.font='500 8.5px Inter,sans-serif';g.fillText(s.n,x0+4,19.5)}}
+  if(this.loop){const x0=this.bx(this.loop.a),x1=this.bx(this.loop.b);g.fillStyle=TK.acc;g.fillRect(Math.max(hw,x0),0,Math.max(0,Math.min(w,x1)-Math.max(hw,x0)),3)}
+  if(this.sel){const x0=this.bx(this.sel.a),x1=this.bx(this.sel.b);g.fillStyle=TK.blue;g.globalAlpha=.5;g.fillRect(Math.max(hw,x0),3,Math.max(0,x1-Math.max(hw,x0)),8);g.globalAlpha=1}
+  // headers
+  g.fillStyle=TK.hd;g.fillRect(0,rh,hw,h-rh);g.fillStyle=TK.ln;g.fillRect(hw-.5,0,1,h);
+  S.T.forEach((t,i)=>{const y=this.rowY(i);if(y>h||y+th<rh)return;if(this.selT===t){g.fillStyle=TK.hi;g.fillRect(0,y,hw,th)}g.fillStyle=t.c;g.fillRect(4,y+5,3,th-10);
+   g.fillStyle=TK.ink;g.font='500 11px Inter,sans-serif';g.fillText(t.n,13,y+th/2+4);
+   const bt=(lab,on,col,k)=>{const x=hw-18-k*17;g.fillStyle=on?col:TK.l0;rr(g,x,y+th/2-6,14,12,3);g.fill();g.fillStyle=on?'#000':TK.mut;g.font='600 8px Inter,sans-serif';g.fillText(lab,x+4,y+th/2+3)};
+   bt('S',t.solo,TK.amber,0);bt('M',t.mute,TK.blue,1);g.fillStyle=TK.ln;g.fillRect(0,y+th-.5,hw,1)});
+  if(this.ph!=null){const x=this.bx(this.ph);if(x>=hw){g.fillStyle=TK.ink;g.fillRect(Math.round(x),0,1.5,h)}}
+  if(this.o.over)this.o.over(g,this,w,h)}
+}
+/* ruler selection drag, shared */
+function rulerSel(A,after){A.cv.addEventListener('pointerdown',e=>{const p=A.pt(e);if(p.y>=A.o.rh||p.x<A.o.hw)return;e.preventDefault();
+  if(p.y>11&&A.o.sections!==false){const b=A.xb(p.x),s=A.S.sec.find(s=>b>=s.a&&b<s.b);if(s){A.selSec=s;A.sel={a:s.a,b:s.b};A.draw();after&&after('sec');return}}
+  const b0=Math.round(A.xb(p.x));A.selSec=null;A.cv.setPointerCapture(e.pointerId);
+  const mv=ev=>{const b=Math.round(A.xb(A.pt(ev).x));A.sel={a:Math.max(0,Math.min(b0,b)),b:Math.max(b0,b)};if(A.sel.b===A.sel.a)A.sel=null;A.draw()};
+  const up=()=>{A.cv.removeEventListener('pointermove',mv);A.cv.removeEventListener('pointerup',up);after&&after('drag')};
+  A.cv.addEventListener('pointermove',mv);A.cv.addEventListener('pointerup',up)})}
+
+/* ================= S1 time verbs ================= */
+(()=>{const m=$('#m1'),A=new Arr($('canvas',m),{fitAll:true});let n=0;const cnt=()=>$('.count',m).textContent=n?`${n} action${n>1?'s':''} here · today 5 for one duplicate`:'';
+ rulerSel(A,()=>{n++;cnt()});
+ const shift=(at,L)=>{for(const t of A.S.T)for(const c of t.clips){if(c.a>=at){c.a+=L;c.b+=L}else if(c.b>at){/* split at 'at' */const k={a:at+L,b:c.b+L,n:c.n};c.b=at;t.clips.push(k)}}for(const s of A.S.sec){if(s.a>=at){s.a+=L;s.b+=L}else if(s.b>at)s.b+=L}A.S.len+=L};
+ const act={dup(){if(!A.sel)return hud(m,'Select bars or a section first');const{a,b}=A.sel,L=b-a;const copy=A.S.T.map(t=>t.clips.filter(c=>c.b>a&&c.a<b).map(c=>({a:Math.max(a,c.a)+L,b:Math.min(b,c.b)+L,n:c.n})));const sc=A.S.sec.filter(s=>s.a>=a&&s.b<=b).map(s=>({n:s.n+' copy',a:s.a+L,b:s.b+L}));
+   shift(b,L);A.S.T.forEach((t,i)=>t.clips.push(...copy[i]));A.S.sec.push(...sc);A.S.sec.sort((x,y)=>x.a-y.a);A.sel={a:b,b:b+L};A.selSec=null;hud(m,`Duplicate time: bars ${a+1}–${b} copied, the rest moved ${L} bars later`)},
+  ins(){if(!A.sel)return hud(m,'Select bars first');const{a,b}=A.sel,L=b-a;shift(a,L);hud(m,`Insert time: ${L} empty bars at bar ${a+1}`)},
+  del(){if(!A.sel)return hud(m,'Select bars first');const{a,b}=A.sel,L=b-a;for(const t of A.S.T){const out=[];for(const c of t.clips){if(c.b<=a)out.push(c);else if(c.a>=b){c.a-=L;c.b-=L;out.push(c)}else{if(c.a<a)out.push({a:c.a,b:a,n:c.n});if(c.b>b)out.push({a:a,b:c.b-L,n:c.n})}}t.clips=out}
+   A.S.sec=A.S.sec.filter(s=>!(s.a>=a&&s.b<=b)).map(s=>{if(s.a>=b){s.a-=L;s.b-=L}else if(s.b>a)s.b=Math.max(s.a+1,s.b-L);return s});A.S.len=Math.max(16,A.S.len-L);A.sel=null;A.selSec=null;hud(m,`Delete time: ${L} bars removed, the rest closed up`)},
+  loop(){if(!A.sel)return hud(m,'Select bars first');A.loop={...A.sel};hud(m,`Loop bars ${A.sel.a+1}–${A.sel.b}`)},
+  reset(){A.S=song();A.sel=A.loop=A.selSec=null;n=0;cnt()}};
+ const run=k=>{act[k]();if(k!=='reset'){n++;cnt()}A.draw()};
+ $$('[data-a]',m).forEach(b=>b.onclick=()=>run(b.dataset.a));
+ m.addEventListener('keydown',e=>{const k=e.key.toLowerCase();let a=null;if(ck(e)&&e.shiftKey&&k==='d')a='dup';else if(ck(e)&&k==='i')a='ins';else if(ck(e)&&e.shiftKey&&(k==='backspace'||k==='delete'))a='del';else if(!ck(e)&&k==='l')a='loop';if(a){e.preventDefault();run(a)}});
+ A.sel={a:32,b:48};A.draw()})();
+
+/* ================= S2 loop by the corner ================= */
+(()=>{const m=$('#m2');let mode='s2',n=0;const S={T:[{n:'Bass',c:'#ffa94d',i:0,clips:[]},{n:'Kick',c:'#ff6b6b',i:1,clips:[]}],sec:[],len:20};
+ const reset=()=>{S.T[0].clips=[{a:0,b:1,src:1,rep:true}];S.T[1].clips=[{a:0,b:16,src:16}];n=0};reset();
+ const A=new Arr($('canvas',m),{song:S,sections:false,th:44,content(g,c,t,x0,x1,y,th,A){const src=c.src||1,bar=A.v.ppb;g.globalAlpha=.85;
+   for(let k=0;k<(c.b-c.a)*16;k++){const inSrc=k<src*16;if(!inSrc&&!(c.rep&&mode==='s2'))break;const st=k%4;if(t.n==='Bass'&&st===0)continue;if(t.n==='Kick'&&st!==0)continue;const x=x0+k*bar/16;g.fillRect(x+1,y+(t.n==='Bass'?20:14),Math.max(1,bar/16-2),t.n==='Bass'?6:th-20)}
+   if(c.rep&&mode==='s2'){g.globalAlpha=.6;g.fillStyle=TK.ink;for(let r=src;r<c.b-c.a;r+=src){const x=x0+r*bar;g.fillRect(x,y+8,1,th-12)}}
+   g.globalAlpha=1;if(t.n==='Bass'&&mode==='s2'){g.fillStyle=TK.ink;g.beginPath();g.moveTo(x1-1,y+2);g.lineTo(x1-10,y+2);g.lineTo(x1-1,y+11);g.closePath();g.fill()}}});
+ const hd=()=>{const w=$('canvas',m).getBoundingClientRect().width;A.v.ppb=(w-A.o.hw-10)/S.len};
+ A.o.over=()=>{};const draw=()=>{hd();A.draw();$('.count',m).textContent=`${n} action${n===1?'':'s'} · today 6 for 16 bars`};
+ $('canvas',m).addEventListener('pointerdown',e=>{const p=A.pt(e),c=S.T[0].clips[0],y=A.rowY(0),x1=A.bx(c.b);if(p.y<y||p.y>y+A.o.th||Math.abs(p.x-x1)>12)return;
+   const corner=mode==='s2'&&p.y<y+16;e.preventDefault();A.cv.setPointerCapture(e.pointerId);
+   const mv=ev=>{const b=Math.max(1,Math.min(S.len,Math.round(A.xb(A.pt(ev).x))));c.b=b;draw();hud(m,corner?`Loop: ${b} bars (${b} repeats)`:mode==='s2'?`Length ${b} bars (no repeats: use the notch)`:`Length ${b} bars, but the clip only plays its first bar`)};
+   const up=()=>{A.cv.removeEventListener('pointermove',mv);A.cv.removeEventListener('pointerup',up);n++;draw()};A.cv.addEventListener('pointermove',mv);A.cv.addEventListener('pointerup',up)});
+ $('canvas',m).addEventListener('pointermove',e=>{const p=A.pt(e),c=S.T[0].clips[0],y=A.rowY(0),x1=A.bx(c.b);A.cv.style.cursor=Math.abs(p.x-x1)<12&&p.y>y&&p.y<y+A.o.th?(mode==='s2'&&p.y<y+16?'alias':'ew-resize'):''});
+ $('[data-seg=m2]').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;$$('[data-seg=m2] button').forEach(x=>x.classList.toggle('on',x===b));draw()};
+ $('[data-a=reset]',m).onclick=()=>{reset();draw()};ALL.push({draw});draw()})();
+
+/* ================= S3 pop-up browser ================= */
+(()=>{const D=[['Instrument','Psy Bass'],['Preset','Psy Bass › Rolling 145'],['Preset','Psy Bass › Gated Mid'],['Preset','Psy Bass › Acid Tail'],['Instrument','Kick'],['Preset','Kick › Full-on 145'],['Preset','Kick › Prog Punch'],['Instrument','Sub'],['Preset','Sub › Duck to kick'],['Instrument','Supersaw'],['Preset','Supersaw › Morning Lead'],['Instrument','FM Pluck'],['Preset','FM Pluck › Goa Arp'],['Instrument','Acid 303'],['Preset','Acid 303 › Squelch'],['Instrument','Pad'],['Preset','Pad › Nebula'],['Instrument','Drum kit'],['Preset','Drum kit › Psy hats'],['Effect','Reverb'],['Preset','Reverb › Hall 3 s'],['Preset','Reverb › Plate short'],['Effect','Echo delay'],['Preset','Echo delay › Dotted 1/8'],['Effect','Pro EQ'],['Preset','Pro EQ › High-pass 30 Hz'],['Effect','Compressor'],['Effect','OTT'],['Effect','Phaser'],['Effect','Filter'],['Preset','Filter › Low-pass sweep'],['Effect','Volume shaper'],['Effect','Sidechain ducker'],['Effect','Bitcrusher'],['Effect','Stereo width'],['Instrument','Vocal chops'],['Effect','Tape stop'],['Effect','Limiter']].map(([c,n],i)=>({c,n,i}));
+ const q=$('#q3'),l=$('#l3'),FR=new Map();let cur=0,res=[],n=0,ac=null;
+ const score=(s,qq)=>{if(!qq)return 1;s=s.toLowerCase();let j=0,sc=0,last=-2,hits=[];for(let i=0;i<s.length&&j<qq.length;i++){if(s[i]===qq[j]){sc+=(i===last+1?3:1)+(i===0||s[i-1]===' '?4:0);hits.push(i);last=i;j++}}return j===qq.length?{sc,hits}:null};
+ const render=()=>{const qq=q.value.trim().toLowerCase();res=D.map(d=>{const r=score(d.n,qq);if(!r)return null;const f=(FR.get(qq)||{})[d.i]||0;return{d,sc:(r.sc||0)+f*20-d.n.length*.05,hits:r.hits||[]}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,40);cur=Math.min(cur,Math.max(0,res.length-1));
+  l.innerHTML=res.map((r,k)=>{let s='';const H=new Set(r.hits);for(let i=0;i<r.d.n.length;i++){const ch=r.d.n[i].replace(/&/,'&amp;').replace(/</,'&lt;');s+=H.has(i)?`<mark>${ch}</mark>`:ch}return`<li role="option" data-k="${k}" class="${k===cur?'on':''}"><span class="cat">${r.d.c}</span><span class="nm">${s}</span>${k===cur?'<span class="k">↵ insert</span>':''}</li>`}).join('')||'<li><span class="nm">Nothing found. In the app the last row offers "Ask the Assistant".</span></li>';
+  const o=l.querySelector('.on');if(o)o.scrollIntoView({block:'nearest'})};
+ const aud=()=>{if(!$('#snd3').checked||!res[cur])return;try{ac=ac||new AudioContext();const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();const d=res[cur].d;o.type=d.c==='Effect'?'triangle':'sawtooth';o.frequency.value=55*Math.pow(2,(d.i%12)/12)*(d.n.includes('Kick')?1:2);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.3)}catch(e){}};
+ const pick=()=>{const r=res[cur];if(!r)return;const qq=q.value.trim().toLowerCase();const f=FR.get(qq)||{};f[r.d.i]=(f[r.d.i]||0)+1;FR.set(qq,f);n++;$('#c3').textContent=`Inserted ${r.d.n} on the Bass track · ${n} pick${n>1?'s':''} · "${qq||'…'}" now ranks it first`;q.select();render()};
+ q.addEventListener('input',()=>{cur=0;render()});q.addEventListener('focus',()=>q.select());
+ q.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();cur=Math.min(res.length-1,cur+1);render();aud()}else if(e.key==='ArrowUp'){e.preventDefault();cur=Math.max(0,cur-1);render();aud()}else if(e.key==='Enter'){e.preventDefault();pick()}else if(e.key==='Escape'){q.value='';render()}});
+ l.addEventListener('click',e=>{const li=e.target.closest('li[data-k]');if(!li)return;cur=+li.dataset.k;render();aud();q.focus()});l.addEventListener('dblclick',()=>pick());
+ q.value='bass';render()})();
+
+/* ================= S4 automation across clips ================= */
+(()=>{const m=$('#m4');let mode='s4',shape='lin',pts=null,n=0;const S={T:[{n:'Lead',c:'#4dabf7',i:0,clips:[{a:0,b:3.5},{a:4,b:7.5},{a:8,b:11.5},{a:12,b:15.5}]}],sec:[{n:'Build',a:0,b:16}],len:16};
+ const A=new Arr($('canvas',m),{song:S,th:46,over(g,A,w,h){const y0=A.rowY(1),lh=h-y0;g.fillStyle=TK.l1;g.fillRect(A.o.hw,y0,w-A.o.hw,lh);g.fillStyle=TK.hd;g.fillRect(0,y0,A.o.hw,lh);g.fillStyle=TK.mut;g.font='500 10px Inter,sans-serif';g.fillText('Filter cutoff',12,y0+18);
+   g.fillStyle=TK.ln;g.fillRect(0,y0,w,1);
+   if(mode==='today'){g.fillStyle=TK.red;g.globalAlpha=.12;for(let i=0;i<S.T[0].clips.length;i++){const c=S.T[0].clips[i],nx=S.T[0].clips[i+1];if(nx)g.fillRect(A.bx(c.b),y0,A.bx(nx.a)-A.bx(c.b),lh)}g.globalAlpha=1}
+   if(pts){g.strokeStyle=TK.amber;g.lineWidth=2;g.beginPath();let first=true;const N=200;for(let k=0;k<=N;k++){const u=k/N,b=pts.a+(pts.b-pts.a)*u;if(mode==='today'&&!S.T[0].clips.some(c=>b>=c.a&&b<=c.b)){first=true;continue}
+     const f=shape==='lin'?u:shape==='exp'?u*u*u:u*u*(3-2*u);const yy=pts.y0+(pts.y1-pts.y0)*f;const x=A.bx(b),y=y0+6+(1-yy)*(lh-12);if(first){g.moveTo(x,y);first=false}else g.lineTo(x,y)}g.stroke()}}});
+ const draw=()=>{const w=A.cv.getBoundingClientRect().width;A.v.ppb=(w-A.o.hw-8)/16;A.draw();$('.count',m).textContent=mode==='today'?'today: 8 clicks (2 per clip), gaps stay flat':`${n} drag${n===1?'':'s'} · today 11 actions over four clips`};
+ A.cv.addEventListener('pointerdown',e=>{const p=A.pt(e),y0=A.rowY(1),lh=A.h-y0;if(p.y<y0||p.x<A.o.hw)return;e.preventDefault();A.cv.setPointerCapture(e.pointerId);const v=y=>Math.max(0,Math.min(1,1-(y-y0-6)/(lh-12)));const b0=A.xb(p.x);
+  if(mode==='today'){const c=S.T[0].clips.find(c=>b0>=c.a&&b0<=c.b);if(!c){hud(m,'No clip here: today points can only go inside a clip');return}}
+  pts={a:b0,b:b0,y0:v(p.y),y1:v(p.y)};const mv=ev=>{const q=A.pt(ev);pts.b=A.xb(q.x);pts.y1=v(q.y);if(mode==='today'){const c=S.T[0].clips.find(c=>b0>=c.a&&b0<=c.b);pts.b=Math.min(c.b,Math.max(c.a,pts.b))}draw()};
+  const up=()=>{A.cv.removeEventListener('pointermove',mv);A.cv.removeEventListener('pointerup',up);n++;draw()};A.cv.addEventListener('pointermove',mv);A.cv.addEventListener('pointerup',up)});
+ $('[data-seg=m4]').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;$$('[data-seg=m4] button').forEach(x=>x.classList.toggle('on',x===b));pts=null;n=0;draw()};
+ $('[data-seg=m4s]').onclick=e=>{const b=e.target.closest('button');if(!b)return;shape=b.dataset.v;$$('[data-seg=m4s] button').forEach(x=>x.classList.toggle('on',x===b));draw()};
+ pts={a:0.2,b:15.8,y0:.08,y1:.95};ALL.push({draw});draw()})();
+
+/* ================= S5 duck to ================= */
+(()=>{const m=$('#m5'),H=$('#h5');let n=0,menu=null;const T=[['Kick','#ff6b6b','kick-like 98 %'],['Bass','#ffa94d',''],['Clap','#69db7c','kick-like 41 %'],['Hats','#ffd43b',''],['Lead','#4dabf7','']];const duck={};
+ const render=()=>{H.innerHTML=T.map(([nm,c])=>`<div class="hrow" data-n="${nm}" tabindex="0"><span class="sw" style="background:${c}"></span>${nm}${duck[nm]?`<span class="tag">ducks to ${duck[nm]}</span>`:''}</div>`).join('');$('.count',m).textContent=n?`${n} clicks · today 5 actions in the mixer`:''};
+ const close=()=>{if(menu){menu.remove();menu=null}};
+ const open=(row,x,y)=>{close();n=1;const nm=row.dataset.n;menu=document.createElement('div');menu.className='menu';menu.style.left=Math.min(x,H.clientWidth-210)+'px';menu.style.top=y+'px';
+  menu.innerHTML=`<div>Rename<small>R</small></div><div>Duplicate<small>${MOD}D</small></div><div>Colour ▸</div><hr><div class="on" data-sub>Duck to ▸</div>`+T.filter(t=>t[0]!==nm).sort((a,b)=>(b[2]?1:0)-(a[2]?1:0)).map(t=>`<div data-to="${t[0]}" style="padding-left:22px">${t[0]}<small>${t[2]}</small></div>`).join('')+`<hr><div>Bounce to audio</div>`;
+  H.appendChild(menu);menu.onclick=e=>{const d=e.target.closest('[data-to]');if(!d)return;duck[nm]=d.dataset.to;n=2;close();render()}};
+ H.addEventListener('contextmenu',e=>{const r=e.target.closest('.hrow');if(!r)return;e.preventDefault();const b=H.getBoundingClientRect();open(r,e.clientX-b.left,e.clientY-b.top)});
+ let lp;H.addEventListener('pointerdown',e=>{const r=e.target.closest('.hrow');if(!r||e.pointerType==='mouse')return;lp=setTimeout(()=>{const b=H.getBoundingClientRect();open(r,e.clientX-b.left,e.clientY-b.top)},450)});H.addEventListener('pointerup',()=>clearTimeout(lp));
+ H.addEventListener('keydown',e=>{const r=e.target.closest('.hrow');if(r&&(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10'))){e.preventDefault();open(r,40,r.offsetTop+20)}});
+ document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target))close()});
+ $('[data-a=reset]',m).onclick=()=>{for(const k in duck)delete duck[k];n=0;render()};render()})();
+
+/* ================= S6 inspector ================= */
+(()=>{const m=$('#m6'),P=$('#ip6');const S={T:[{n:'Kick',c:'#ff6b6b',i:0,clips:[{a:0,b:8,label:'Kick 145'}]},{n:'Bass',c:'#ffa94d',i:1,clips:[{a:0,b:4,label:'Roller'},{a:4,b:8,label:'Roller 2'}]},{n:'Lead',c:'#4dabf7',i:2,clips:[{a:2,b:8,label:'Morning'}]}],sec:[],len:8};
+ const A=new Arr($('canvas',m),{song:S,sections:false,th:44});const COLS=['#ff6b6b','#ffa94d','#ffd43b','#69db7c','#38d9a9','#4dabf7','#9775fa','#f783ac'];
+ const draw=()=>{const w=A.cv.getBoundingClientRect().width;A.v.ppb=(w-A.o.hw-8)/8;A.draw()};
+ const esc=s=>String(s).replace(/[&<"]/g,c=>({'&':'&amp;','<':'&lt;','"':'&quot;'}[c]));
+ const panel=()=>{const c=A.selC,t=A.selT;if(c){P.innerHTML=`<b>Clip</b><label>Name<input id="i6n" value="${esc(c.label||'')}"></label><label>Colour<span class="sws">${COLS.map(x=>`<button data-c="${x}" style="background:${x}" aria-label="colour ${x}"></button>`).join('')}</span></label><label>Loop<select id="i6l"><option>off</option><option>1 bar</option><option>4 bars</option></select></label><label>Quantize<select id="i6q"><option>1/16</option><option>1/8</option><option>1/32</option><option>1/16 T</option></select></label><label>Strength <input id="i6s" type="range" min="0" max="100" value="100"></label><label>Gain<input id="i6g" value="0.0 dB"></label>`;
+   $('#i6n').oninput=e=>{c.label=e.target.value;draw()};$$('[data-c]',P).forEach(b=>b.onclick=()=>{c.col=b.dataset.c;draw()})}
+  else if(t){P.innerHTML=`<b>Track</b><label>Name<input id="i6t" value="${esc(t.n)}"></label><label>Colour<span class="sws">${COLS.map(x=>`<button data-c="${x}" style="background:${x}" aria-label="colour ${x}"></button>`).join('')}</span></label><label>Send A (reverb)<input type="range" value="20"></label><label>Ducks to<select><option>none</option><option>Kick</option></select></label>`;
+   $('#i6t').oninput=e=>{t.n=e.target.value;draw()};$$('[data-c]',P).forEach(b=>b.onclick=()=>{t.c=b.dataset.c;draw()})}
+  else P.innerHTML='<span class="mut">Click a clip or a track header.</span>'};
+ A.cv.addEventListener('pointerdown',e=>{const h=A.hit(A.pt(e));A.selC=h.c||null;A.selT=h.t||null;if(h.c)A.selT=null;draw();panel()});
+ A.selC=S.T[1].clips[0];ALL.push({draw});draw();panel()})();
+
+/* ================= S7 key layer ================= */
+(()=>{const m=$('#m7'),A=new Arr($('canvas',m),{fitAll:true});let piano=false,gk=0,n=0,zs=[];
+ A.selT=A.S.T[1];A.sel={a:32,b:48};A.ph=32;
+ const pk=()=>$('#pk7').textContent=piano?'Keyboard piano ON (K to turn off)':'Keyboard piano off';pk();
+ const say=t=>{hud(m,t);n++;$('#c7').textContent=`${n} command${n>1?'s':''}, no menus`};
+ const NOTES='awsedftgyhujk';let play=null;
+ const secAt=d=>{const s=A.S.sec,ph=A.ph??0;return d>0?s.find(x=>x.a>ph+.01):[...s].reverse().find(x=>x.a<ph-.01)};
+ m.addEventListener('keydown',e=>{const k=e.key;if(ck(e)||e.altKey)return;
+  if(k==='k'||k==='K'){piano=!piano;pk();hud(m,piano?'Keyboard piano on: letters play notes':'Keyboard piano off: letters are commands');e.preventDefault();return}
+  if(piano){const i=NOTES.indexOf(k.toLowerCase());if(i>=0){hud(m,'Note '+['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B','C'][i]+'3 on '+(A.selT||A.S.T[1]).n);e.preventDefault()}return}
+  if(gk&&performance.now()-gk<1200){gk=0;const G={m:'Go to the mixer',p:'Go to the piano roll',b:'Go to the browser',a:'Go to the arrangement',s:'Go to Settings',d:'Go to the Drop'};const t=G[k.toLowerCase()];if(t){e.preventDefault();if(k.toLowerCase()==='d'){const s=A.S.sec.find(s=>s.n==='Drop');A.ph=s.a;A.draw()}say('G '+k.toUpperCase()+' · '+t)}return}
+  const sel=A.selT,run=(t,f)=>{e.preventDefault();f&&f();A.draw();say(t)};
+  switch(k){
+   case'g':case'G':gk=performance.now();e.preventDefault();hud(m,'G … (M mixer, P piano roll, B browser, D drop)');return;
+   case's':case'S':return run(sel?(sel.solo?'Unsolo ':'Solo ')+sel.n:'Select a track',()=>{if(sel)sel.solo^=1});
+   case'm':case'M':return run(sel?(sel.mute?'Unmute ':'Mute ')+sel.n:'Select a track',()=>{if(sel)sel.mute^=1});
+   case'q':case'Q':return run(A.selC?'Quantize clip to 1/16 (strength in the Inspector)':'Quantize the selected clip');
+   case'r':case'R':return run(A.selC?'Rename clip… (typing in place)':'Rename '+(sel?sel.n:'track')+'… (typing in place)');
+   case'l':case'L':return run(A.sel?`Loop bars ${A.sel.a+1}–${A.sel.b}`:'Select first',()=>{if(A.sel)A.loop={...A.sel}});
+   case']':return run('Next section',()=>{const s=secAt(1);if(s){A.ph=s.a;A.sel={a:s.a,b:s.b}}});
+   case'[':return run('Previous section',()=>{const s=secAt(-1);if(s){A.ph=s.a;A.sel={a:s.a,b:s.b}}});
+   case'ArrowRight':case'ArrowLeft':if(A.selC){const d=k==='ArrowRight'?1:-1;return run(`Clip moved ${d>0?'later':'earlier'} by 1 bar (the ruler's grid)`,()=>{A.selC.a+=d;A.selC.b+=d})}return;
+   case'Enter':return run('Play from bar '+((A.sel?A.sel.a:A.ph||0)+1),()=>{A.ph=A.sel?A.sel.a:A.ph||0;cancelAnimationFrame(play);let t0=performance.now(),p0=A.ph;const f=t=>{A.ph=p0+(t-t0)/1000*145/60/4;A.draw();if(t-t0<4000)play=requestAnimationFrame(f)};play=requestAnimationFrame(f)});
+  }});
+ A.cv.addEventListener('pointerdown',e=>{const h=A.hit(A.pt(e));if(h.t){A.selT=h.t;A.selC=h.c||null;if(h.c)A.sel={a:h.c.a,b:h.c.b};A.draw()}m.focus()});
+ rulerSel(A,()=>m.focus());A.draw()})();
+
+/* ================= S8 repeat and counts ================= */
+(()=>{const m=$('#m8');let cnt='',last=null,n=0;const S={T:[{n:'Bass',c:'#ffa94d',i:0,clips:[]}],sec:[],len:20};
+ const reset=()=>{S.T[0].clips=[{a:0,b:1}];last=null;cnt='';n=0};reset();
+ const A=new Arr($('canvas',m),{song:S,sections:false,th:60});
+ const draw=()=>{const w=A.cv.getBoundingClientRect().width;A.v.ppb=(w-A.o.hw-8)/S.len;A.selC=S.T[0].clips[S.T[0].clips.length-1];A.draw();$('.count',m).textContent=`${S.T[0].clips.length} bar${S.T[0].clips.length>1?'s':''} · ${n} key${n===1?'':'s'}`+(cnt?` · count ${cnt}`:'')};
+ const dup=k=>{for(let i=0;i<k;i++){const c=S.T[0].clips[S.T[0].clips.length-1];if(c.b>=S.len)break;S.T[0].clips.push({a:c.b,b:c.b+1})}};
+ m.addEventListener('keydown',e=>{if(/^\d$/.test(e.key)&&!ck(e)){cnt+=e.key;n++;e.preventDefault();draw();hud(m,'Count '+cnt+' …');return}
+  if(ck(e)&&e.key.toLowerCase()==='d'){e.preventDefault();const k=+cnt||1;dup(k);last=k;cnt='';n++;draw();hud(m,`Duplicate ×${k}`);return}
+  if(e.key==='.'){e.preventDefault();if(!last)return hud(m,'Nothing to repeat yet');const k=+cnt||last;dup(k);cnt='';n++;draw();hud(m,`. repeats: duplicate ×${k}`)}});
+ A.cv.addEventListener('pointerdown',()=>m.focus());
+ $('[data-a=reset]',m).onclick=()=>{reset();draw()};ALL.push({draw});draw()})();
+
+/* ================= S9 direct vs eased ================= */
+(()=>{const m=$('#m9'),cv=$('canvas',m);const W={tgt:Math.log(14),a:Math.log(14),b:Math.log(14),rem:0,anchor:.5,hist:[],lastIn:0,doneA:0,doneB:0};let lt=0,raf=0;const S=song();const mk=()=>{const A=new Arr(document.createElement('canvas'),{song:S});return A};
+ const VA=mk(),VB=mk();let t0=0;
+ const draw=()=>{if(!TK.bg)return;const{g,w,h}=fit(cv);const ph=110,vh=(h-ph-6)/2;g.fillStyle=TK.bg;g.fillRect(0,0,w,h);
+  const paint=(V,lp,y,lab)=>{V.cv.width=Math.round(w*(devicePixelRatio||1));V.cv.height=Math.round(vh*(devicePixelRatio||1));V.cv.style.width=w+'px';V.cv.style.height=vh+'px';
+   const ppb=Math.exp(lp);const anchorBar=24+48*W.anchor;const vis=(w-112)/ppb;V.v.ppb=ppb;V.v.x=anchorBar-W.anchor*vis;
+   V.cv.getBoundingClientRect=()=>({width:w,height:vh,left:0,top:0});V.draw();g.drawImage(V.cv,0,y,w,vh);g.fillStyle=TK.ink;g.font='600 11px Inter,sans-serif';g.fillText(lab,w-150,y+16)};
+  paint(VA,W.a,0,'Today: eased 40 ms');paint(VB,W.b,vh+3,'S9: direct');
+  // graph
+  const y0=h-ph;g.fillStyle=TK.l1;g.fillRect(0,y0,w,ph);g.fillStyle=TK.mut;g.font='500 9.5px "JetBrains Mono",monospace';g.fillText('zoom over the last 1.5 s',8,y0+12);
+  const now=performance.now(),H=W.hist.filter(p=>now-p.t<3000);W.hist=H;const Hs=H.filter(p=>now-p.t<1500);if(Hs.length>1){let lo=Infinity,hi=-Infinity;for(const p of Hs){lo=Math.min(lo,p.tg,p.a,p.b);hi=Math.max(hi,p.tg,p.a,p.b)}if(hi-lo<.05){hi+=.03;lo-=.03}
+   const X=t=>w-(now-t)/1500*w,Y=v=>y0+ph-8-(v-lo)/(hi-lo)*(ph-24);
+   for(const[k,c,lw]of[['a',TK.red,2],['b',TK.acc,2],['tg',TK.ink,1]]){g.strokeStyle=c;g.lineWidth=lw;g.beginPath();Hs.forEach((p,i)=>i?g.lineTo(X(p.t),Y(p[k])):g.moveTo(X(p.t),Y(p[k])));g.stroke()}}
+  g.font='500 9.5px "JetBrains Mono",monospace';g.fillStyle=TK.ink;g.fillText('asked',w-60,y0+12);g.fillStyle=TK.red;g.fillText('today',w-110,y0+12);g.fillStyle=TK.acc;g.fillText('S9',w-140,y0+12)};
+ const step=t=>{raf=0;const dt=lt?Math.min(64,t-lt):16;lt=t;const k=1-Math.exp(-dt/40);const st=Math.abs(W.rem)<.003?W.rem:W.rem*k;W.rem-=st;W.a+=st;
+  W.hist.push({t,tg:W.tgt,a:W.a,b:W.b});
+  if(W.lastIn&&!W.doneA&&Math.abs(W.rem)<1e-3&&performance.now()-W.lastIn>150){W.doneA=1;const G=W.hist.filter(p=>p.t>=W.g0),tot=Math.abs(W.tgt-W.a0);
+   if(tot>1e-3&&G.length){const at=k=>{const p=G.find(p=>Math.abs(p[k]-W.a0)>=.9*tot);return p?p.t:t};const t0=at('tg');$('#l9a').textContent=Math.round(at('a')-t0)+' ms behind';$('#l9b').textContent=Math.round(at('b')-t0)+' ms behind'}}
+  draw();if(Math.abs(W.rem)>1e-4||performance.now()-W.lastIn<1600)raf=requestAnimationFrame(step);else lt=0};
+ const kick=()=>{if(!raf)raf=requestAnimationFrame(step)};
+ const input=(d,x)=>{const r=cv.getBoundingClientRect();W.anchor=Math.max(0,Math.min(1,(x-r.left-112)/(r.width-112)));if(!W.lastIn||performance.now()-W.lastIn>250){W.a0=W.a;W.g0=performance.now()-1}W.doneA=0;W.lastIn=performance.now();
+  const nt=Math.max(Math.log(2),Math.min(Math.log(120),W.tgt+d));const dd=nt-W.tgt;W.tgt=nt;W.rem+=dd;W.b=nt;kick()};
+ cv.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();input(-Math.max(-60,Math.min(60,e.deltaMode===1?e.deltaY*16:e.deltaY))*.0085,e.clientX)},{passive:false});
+ let gs=1;cv.addEventListener('gesturestart',e=>{e.preventDefault();gs=1});cv.addEventListener('gesturechange',e=>{e.preventDefault();input(Math.log(e.scale/gs),e.clientX);gs=e.scale});
+ $('[data-a=pinch]',m).onclick=()=>{const r=cv.getBoundingClientRect();let k=0;const dir=W.tgt>Math.log(30)?-1:1;const f=()=>{input(dir*.045*Math.sin(Math.PI*k/18),r.left+r.width*.6);if(++k<18)requestAnimationFrame(f)};requestAnimationFrame(f)};
+ // measure this display's frame rate
+ {let c=0,s=0;const f=t=>{if(!s)s=t;c++;if(t-s<1000)requestAnimationFrame(f);else $('#hz9').textContent=Math.round(c*1000/(t-s))+' per second'};requestAnimationFrame(f)}
+ ALL.push({draw});if(window.ResizeObserver)new ResizeObserver(draw).observe(cv);draw()})();
+
+/* ================= S10 fling ================= */
+(()=>{const m=$('#m10');let mode='s10',vel=0,raf=0,lt=0,over=0;const A=new Arr($('canvas',m),{});A.v.ppb=14;
+ const clampX=()=>{const vis=(A.w-112)/A.v.ppb,max=A.S.len-vis+2;return{min:0,max}};
+ const shown=()=>{const{min,max}=clampX();const x=A.vx??0;let o=x;const d=(A.w-112)/A.v.ppb*.4,c=.55;if(x<min){const u=min-x;o=min-(1-1/(u*c/d+1))*d}else if(x>max){const u=x-max;o=max+(1-1/(u*c/d+1))*d}A.v.x=o;A.draw()};
+ A.vx=0;const glide=t=>{raf=0;const dt=lt?Math.min(32,t-lt):16;lt=t;const{min,max}=clampX();A.vx+=vel*dt;vel*=Math.pow(.998,dt);
+  if(A.vx<min||A.vx>max){const tgt=A.vx<min?min:max;vel*=Math.pow(.9,dt/4);A.vx+=(tgt-A.vx)*(1-Math.exp(-dt/60))}
+  shown();if(Math.abs(vel)>.0004||A.vx<min-.01||A.vx>max+.01)raf=requestAnimationFrame(glide);else lt=0};
+ let drag=null;A.cv.addEventListener('pointerdown',e=>{e.preventDefault();cancelAnimationFrame(raf);raf=0;lt=0;vel=0;A.cv.setPointerCapture(e.pointerId);drag={x:e.clientX,vx:A.vx,s:[{t:e.timeStamp,x:e.clientX}]};A.cv.style.cursor='grabbing'});
+ A.cv.addEventListener('pointermove',e=>{if(!drag)return;A.vx=drag.vx-(e.clientX-drag.x)/A.v.ppb;drag.s.push({t:e.timeStamp,x:e.clientX});drag.s=drag.s.filter(p=>e.timeStamp-p.t<80);shown()});
+ const end=e=>{if(!drag)return;A.cv.style.cursor='';const s=drag.s,a=s[0],b=s[s.length-1];drag=null;vel=b.t>a.t?-(b.x-a.x)/(b.t-a.t)/A.v.ppb:0;if(mode==='today')vel=0;if(e.timeStamp-b.t>60)vel=0;raf=requestAnimationFrame(glide)};
+ A.cv.addEventListener('pointerup',end);A.cv.addEventListener('pointercancel',end);
+ $('[data-seg=m10]').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;$$('[data-seg=m10] button').forEach(x=>x.classList.toggle('on',x===b))};A.draw()})();
+
+/* ================= S11 coalesced and predicted ================= */
+(()=>{const m=$('#m11'),cv=$('canvas',m);let A=[],B=[],P=null,on=false,na=0,nb=0;const has=!!(window.PointerEvent&&PointerEvent.prototype.getCoalescedEvents),hp=!!(window.PointerEvent&&PointerEvent.prototype.getPredictedEvents);
+ const draw=()=>{if(!TK.bg)return;const{g,w,h}=fit(cv);g.fillStyle=TK.l0;g.fillRect(0,0,w,h);g.fillStyle=TK.grid;for(let x=0;x<w;x+=40)g.fillRect(x,0,1,h);
+  const line=(pts,c,lw,dot)=>{if(pts.length<2)return;g.strokeStyle=c;g.lineWidth=lw;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.stroke();if(dot){g.fillStyle=c;for(const p of pts)g.fillRect(p.x-1.5,p.y-1.5,3,3)}};
+  line(B,TK.acc,2,false);line(A,TK.mut,2,true);if(P){g.strokeStyle=TK.amber;g.lineWidth=1.5;g.beginPath();g.arc(P.x,P.y,7,0,7);g.stroke()}
+  $('#c11').textContent=(A.length?`one per frame: ${A.length} points · every point: ${B.length}`:'')+(has?'':' · this browser gives no coalesced points')+(hp?'':' · no prediction here')};
+ const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+ cv.addEventListener('pointerdown',e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);on=true;A=[pt(e)];B=[pt(e)];P=null;draw()});
+ cv.addEventListener('pointermove',e=>{if(!on)return;A.push(pt(e));const cs=has?e.getCoalescedEvents():[e];for(const c of cs)B.push(pt(c));if(hp){const pr=e.getPredictedEvents();P=pr.length?pt(pr[pr.length-1]):null}draw()});
+ const up=()=>{on=false;P=null;draw()};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ $('[data-a=clear]',m).onclick=()=>{A=[];B=[];draw()};ALL.push({draw});if(window.ResizeObserver)new ResizeObserver(draw).observe(cv)})();
+
+/* ================= S12 zoom stack ================= */
+(()=>{const m=$('#m12'),A=new Arr($('canvas',m),{});let stack=[],anim=0;A.ph=40;
+ const vis=()=>(A.w-A.o.hw-8);const fitTo=(a,b)=>({ppb:vis()/(b-a),x:a});
+ const go=(t,label)=>{stack.push({...A.v});if(stack.length>8)stack.shift();to(t);hud(m,label);$('#c12').textContent=`zoom stack: ${stack.length}`};
+ const to=t=>{cancelAnimationFrame(anim);const s={...A.v},T=RM()?0:160,t0=performance.now();const f=n=>{const u=T?Math.min(1,(n-t0)/T):1,e=1-Math.pow(1-u,3);
+   const lp=Math.log(s.ppb)+(Math.log(t.ppb)-Math.log(s.ppb))*e;A.v.ppb=Math.exp(lp);const c0=s.x+vis()/s.ppb/2,c1=t.x+vis()/t.ppb/2,c=c0+(c1-c0)*e;A.v.x=c-vis()/A.v.ppb/2;A.draw();if(u<1)anim=requestAnimationFrame(f)};anim=requestAnimationFrame(f)};
+ const act={z:()=>A.sel?go(fitTo(A.sel.a,A.sel.b),`Z · zoom to bars ${A.sel.a+1}–${A.sel.b}`):hud(m,'Select bars on the ruler first'),
+  x:()=>{const p=stack.pop();if(p){to(p);hud(m,'X · back')}else hud(m,'Nothing to go back to');$('#c12').textContent=`zoom stack: ${stack.length}`},
+  1:()=>go(fitTo(0,A.S.len),'⇧1 · whole song'),2:()=>act.z(),3:()=>go(fitTo(Math.max(0,A.ph-8),A.ph+8),'⇧3 · 16 bars around the playhead')};
+ $$('[data-a]',m).forEach(b=>b.onclick=()=>{act[b.dataset.a]();m.focus()});
+ m.addEventListener('keydown',e=>{if(ck(e)||e.altKey)return;const k=e.key.toLowerCase();if(k==='z'){e.preventDefault();act.z()}else if(k==='x'){e.preventDefault();act.x()}else if(e.shiftKey&&/^(digit[123])$/i.test(e.code)){e.preventDefault();act[e.code.slice(-1)]()}});
+ m.addEventListener('pointerdown',()=>cancelAnimationFrame(anim),true);
+ rulerSel(A,()=>m.focus());requestAnimationFrame(()=>{const r=A.cv.getBoundingClientRect();A.w=r.width;Object.assign(A.v,fitTo(0,A.S.len));A.sel={a:32,b:64};A.draw()})})();
+
+/* ================= S13 layout vs transforms ================= */
+(()=>{const m=$('#m13'),L=$('#lay13');const N=64;L.innerHTML=Array.from({length:N},(_,i)=>`<div class="lrow"><span>${TRK[i%8][0]} ${Math.floor(i/8)+1}</span><i>M</i><i>S</i><i>●</i><em></em><i>−6.0</i></div>`).join('');const rows=$$('.lrow',L);
+ const run=mode=>new Promise(res=>{const t0=performance.now();let n=0,tot=0;const h0=30;
+  const f=now=>{const u=(now-t0)/2000;const h=h0*(1+.6*Math.sin(u*Math.PI*2));const s=performance.now();
+   if(mode==='a'){for(const r of rows)r.style.height=h+'px';void L.scrollHeight;void rows[N-1].offsetTop}
+   else{const k=h/h0;rows.forEach((r,i)=>{r.style.transform=`translateY(${i*(h-h0)}px)`})}
+   tot+=performance.now()-s;n++;if(u<1)requestAnimationFrame(f);else{for(const r of rows){r.style.transform='';r.style.height=h0+'px'}res(tot/n)}};requestAnimationFrame(f)});
+ $('[data-a=run]',m).onclick=async()=>{$('#a13').textContent='…';$('#b13').textContent='…';const a=await run('a');$('#a13').textContent=a.toFixed(2)+' ms per frame';const b=await run('b');$('#b13').textContent=b.toFixed(2)+' ms per frame'}})();
+
+/* ================= S14 tiles ================= */
+(()=>{const m=$('#m14'),cv=$('canvas',m);let mode='full',x=0,dir=1,acc=[],tiles=new Map(),made=0,ppb=22;const TW=256;const S=song();
+ const scene=(g,x0,w,h)=>{/* draw world range [x0,x0+w) in px */g.fillStyle=TK.l0;g.fillRect(0,0,w,h);const th=h/8;
+  S.T.forEach((t,i)=>{const y=i*th;g.fillStyle=i%2?TK.l1:TK.l0;g.fillRect(0,y,w,th);for(const c of t.clips){const a=c.a*ppb-x0,b=c.b*ppb-x0;if(b<0||a>w)continue;g.fillStyle=t.c;g.globalAlpha=.25;g.fillRect(a,y+1,b-a-1,th-2);g.globalAlpha=.9;
+   g.beginPath();for(let px=Math.max(0,Math.floor(a));px<Math.min(w,b);px+=1){const s=Math.sin((px+x0)*.37)*Math.sin((px+x0)*.051+i);g.moveTo(px+.5,y+th/2-s*th*.4);g.lineTo(px+.5,y+th/2+s*th*.4)}g.strokeStyle=t.c;g.lineWidth=1;g.stroke();g.globalAlpha=1}})};
+ const tile=(k,h,d)=>{let c=tiles.get(k);if(c&&c.h===h)return c;c=document.createElement('canvas');c.width=TW*d;c.height=h*d;c.h=h;const g=c.getContext('2d');g.scale(d,d);scene(g,k*TW,TW,h);tiles.set(k,c);made++;return c};
+ const frame=()=>{if(!TK.bg){requestAnimationFrame(frame);return}const{g,w,h}=fit(cv);const d=devicePixelRatio||1,max=S.len*ppb-w;x+=6*dir;if(x>max||x<0){dir=-dir;x=Math.max(0,Math.min(max,x))}
+  const s=performance.now();
+  if(mode==='full'){scene(g,x,w,h)}else{const k0=Math.floor(x/TW),k1=Math.floor((x+w)/TW);for(let k=k0;k<=k1;k++){const c=tile(k,h,d);g.drawImage(c,k*TW-x,0,TW,h)}}
+  acc.push(performance.now()-s);if(acc.length>=60){const a=acc.reduce((p,q)=>p+q,0)/acc.length;$('#t14').textContent=a.toFixed(2)+' ms';$('#n14').textContent=mode==='tile'?`${made} tiles drawn in the last second, the rest reused`:'whole view drawn every frame';acc=[];made=0}
+  requestAnimationFrame(frame)};
+ $('[data-seg=m14]').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;tiles.clear();$$('[data-seg=m14] button').forEach(x=>x.classList.toggle('on',x===b))};
+ ALL.push({draw(){tiles.clear()}});
+ if('IntersectionObserver' in window){let vis=false,started=false;new IntersectionObserver(es=>{vis=es[0].isIntersecting;if(vis&&!started){started=true;requestAnimationFrame(frame)}}).observe(cv)}else requestAnimationFrame(frame)})();
+
+/* ================= S15 steady timing ================= */
+(()=>{const m=$('#m15'),cv=$('canvas',m);let ac=null,mode='s15',hits=[],busy=true,off=8;const PADS=['a','s','d','f'];
+ // busy screen: spin for 12 ms in every frame, as a heavy mixer frame would
+ const spin=()=>{if(busy&&document.visibilityState==='visible'&&inView){const s=performance.now();while(performance.now()-s<12);}requestAnimationFrame(spin)};let inView=false;
+ if('IntersectionObserver' in window)new IntersectionObserver(es=>{inView=es[0].isIntersecting}).observe(m);requestAnimationFrame(spin);
+ $('#busy15').onchange=e=>{busy=e.target.checked};
+ const draw=()=>{if(!TK.bg)return;const{g,w,h}=fit(cv);g.fillStyle=TK.bg;g.fillRect(0,0,w,h);
+  const pw=Math.min(70,(w-20)/4-8);PADS.forEach((k,i)=>{const x=10+i*(pw+8);g.fillStyle=TK.l0;rr(g,x,10,pw,pw*.7,6);g.fill();g.strokeStyle=TK.ln;g.stroke();g.fillStyle=TK.mut;g.font='600 12px "JetBrains Mono",monospace';g.fillText(k.toUpperCase(),x+8,26)});
+  const gx=10,gy=pw*.7+24,gw=w-20,gh=h-gy-8;g.fillStyle=TK.l1;g.fillRect(gx,gy,gw,gh);const mx=60;g.fillStyle=TK.mut;g.font='500 9.5px "JetBrains Mono",monospace';g.fillText('delay from the key to the note (ms), last 40 hits',gx+6,gy+12);
+  for(const v of[0,20,40,60]){const y=gy+gh-4-v/mx*(gh-20);g.fillStyle=TK.grid;g.fillRect(gx,y,gw,1);g.fillStyle=TK.mut;g.fillText(String(v),gx+gw-18,y-2)}
+  const H=hits.slice(-40);H.forEach((p,i)=>{const x=gx+10+i*(gw-40)/40;for(const[v,c]of[[p.a,TK.red],[p.b,TK.acc]]){const y=gy+gh-4-Math.min(mx,v)/mx*(gh-20);g.fillStyle=c;g.beginPath();g.arc(x,y,3,0,7);g.fill()}});
+  if(H.length>1){const sd=a=>{const mu=a.reduce((p,q)=>p+q,0)/a.length;return Math.sqrt(a.reduce((p,q)=>p+(q-mu)**2,0)/a.length)};const A=H.map(p=>p.a),B=H.map(p=>p.b);
+   $('#c15').textContent=`today: ${(A.reduce((p,q)=>p+q,0)/A.length).toFixed(1)} ms ± ${sd(A).toFixed(1)} · S15: ${(B.reduce((p,q)=>p+q,0)/B.length).toFixed(1)} ms ± ${sd(B).toFixed(1)}`}else $('#c15').textContent='red today, green S15'};
+ const hit=(i,ts)=>{const now=performance.now(),qd=Math.max(0,now-ts);const recent=hits.slice(-20).map(p=>p.a).sort((x,y)=>x-y);off=Math.min(14,Math.max(4,(recent[Math.floor(recent.length*.95)]||6)+1));
+  hits.push({a:qd,b:Math.max(off,qd)});if(hits.length>200)hits.shift();
+  if(ac){const t=ac.currentTime;let at=t;if(mode==='s15'){const o=ac.getOutputTimestamp?ac.getOutputTimestamp():null;at=o&&o.performanceTime?o.contextTime+(ts+off-o.performanceTime)/1000:t+(ts+off-now)/1000;at=Math.max(t,at)}
+   const os=ac.createOscillator(),gn=ac.createGain();os.frequency.setValueAtTime(180+i*60,at);os.frequency.exponentialRampToValueAtTime(50,at+.08);gn.gain.setValueAtTime(.5,at);gn.gain.exponentialRampToValueAtTime(.0001,at+.12);os.connect(gn).connect(ac.destination);os.start(at);os.stop(at+.15)}
+  draw()};
+ m.addEventListener('keydown',e=>{const i=PADS.indexOf(e.key.toLowerCase());if(i<0||e.repeat||ck(e))return;e.preventDefault();hit(i,e.timeStamp)});
+ cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,pw=Math.min(70,(r.width-20)/4-8);const i=Math.floor((x-10)/(pw+8));if(i>=0&&i<4&&e.clientY-r.top<10+pw*.7){m.focus();hit(i,e.timeStamp)}});
+ $('[data-a=snd]',m).onclick=e=>{try{ac=ac||new AudioContext({latencyHint:'interactive'});ac.resume();e.target.textContent='Sound on';m.focus()}catch(err){e.target.textContent='No audio here'}};
+ $('[data-seg=m15]').onclick=e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;$$('[data-seg=m15] button').forEach(x=>x.classList.toggle('on',x===b));m.focus()};
+ ALL.push({draw});if(window.ResizeObserver)new ResizeObserver(draw).observe(cv)})();
+
+/* ================= S16 motion ================= */
+(()=>{const m=$('#m16'),sh=$('#sh16');let d=150;const set=()=>{sh.style.transitionDuration=(RM()?0:d)+'ms'};set();
+ $('[data-seg=m16]').onclick=e=>{const b=e.target.closest('button');if(!b)return;d=+b.dataset.v;set();$$('[data-seg=m16] button').forEach(x=>x.classList.toggle('on',x===b))};
+ $('[data-a=go]',m).onclick=()=>sh.classList.toggle('open')})();
+
+/* ================= S17 frame histogram ================= */
+(()=>{const m=$('#m17'),cv=$('canvas',m);let iv=[],last=0,extra=0,inView=false,hz=0;$('#w17').oninput=e=>{extra=+e.target.value;$('#wv17').textContent=extra+' ms'};
+ if('IntersectionObserver' in window)new IntersectionObserver(es=>{inView=es[0].isIntersecting}).observe(m);
+ const f=t=>{if(last)iv.push(t-last);last=t;if(iv.length>240)iv.shift();if(inView){if(extra){const s=performance.now();while(performance.now()-s<extra);}draw()}requestAnimationFrame(f)};requestAnimationFrame(f);
+ const draw=()=>{if(!TK.bg||iv.length<10)return;const{g,w,h}=fit(cv);g.fillStyle=TK.bg;g.fillRect(0,0,w,h);const s=[...iv].sort((a,b)=>a-b),med=s[s.length>>1];hz=1000/med;
+  const B=40,mx=20,bins=new Array(B).fill(0);for(const v of iv)bins[Math.min(B-1,Math.floor(v/mx*B))]++;const top=Math.max(...bins);const bw=(w-20)/B,gy=h-20;
+  bins.forEach((c,i)=>{const x=10+i*bw,v=(i+.5)*mx/B;g.fillStyle=v>4.17*1.5&&v>med*1.5?TK.red:TK.acc;const bh=c/top*(gy-14);g.fillRect(x+1,gy-bh,bw-2,bh)});
+  const X=v=>10+v/mx*(w-20);g.fillStyle=TK.amber;g.fillRect(X(4.17),8,1.5,gy-8);g.font='500 9.5px "JetBrains Mono",monospace';g.fillText('4.17 ms (240 Hz)',X(4.17)+4,16);
+  g.fillStyle=TK.ink;g.fillRect(X(med),8,1,gy-8);g.fillStyle=TK.mut;for(const v of[0,5,10,15,20])g.fillText(v+' ms',X(v)-6,h-6);
+  const late=iv.filter(v=>v>med*1.5).length;$('#hz17').textContent=`this screen ≈ ${Math.round(hz)} Hz · ${late} of the last ${iv.length} frames late`};})();
+
+/* ================= S18 background work ================= */
+(()=>{const m=$('#m18'),cv=$('canvas',m);let ph=0,lt=0,busy=false;const p=$('#p18');
+ const f=t=>{const dt=lt?t-lt:16;lt=t;ph=(ph+dt/1000*145/60/4)%8;if(TK.bg){const{g,w,h}=fit(cv);g.fillStyle=TK.l0;g.fillRect(0,0,w,h);g.fillStyle=TK.grid;for(let b=0;b<8;b++)g.fillRect(b*w/8,0,1,h);g.fillStyle='#ffa94d';g.globalAlpha=.3;g.fillRect(0,12,w,h-24);g.globalAlpha=1;g.fillStyle=TK.ink;g.fillRect(ph/8*w,0,2,h)}requestAnimationFrame(f)};requestAnimationFrame(f);
+ $('[data-a=a]',m).onclick=()=>{if(busy)return;p.style.width='0';$('#c18').textContent='working… (the screen is frozen)';setTimeout(()=>{const s=performance.now();while(performance.now()-s<1500);p.style.width='100%';$('#c18').textContent='done after 1.5 s of frozen screen'},30)};
+ $('[data-a=b]',m).onclick=async()=>{if(busy)return;busy=true;const s=performance.now();$('#c18').textContent='working… playhead keeps moving';let done=0;
+  while(done<1500){const t=performance.now();while(performance.now()-t<3);done+=3;p.style.width=(done/15)+'%';await new Promise(r=>setTimeout(r,0))}
+  $('#c18').textContent=`done in ${((performance.now()-s)/1000).toFixed(1)} s, screen never stopped`;busy=false}})();
+
+/* ================= tasks table ================= */
+(()=>{const R=[[1,'16-bar loop at bar 33 and play',2,2,3,'same; L also loops any selection (S7)'],[2,'Kick and bass, bass ducked by the kick',9,6,'≈ 12','S5 Duck to ▸ Kick replaces the mixer cable trip; S3 finds both by typing'],
+ [3,'Duplicate a 16-bar section, all tracks',5,2,3,'S1 Duplicate time, nothing overwritten'],[4,'Filter sweep over a 16-bar build',5,4,'≈ 6','S4 one line across all clips (today 11 if the build has four clips)'],
+ [5,'Bounce one track',2,2,2,'already good'],[6,'Find a preset by name and load it',5,3,3,'S3 search, no looking through tiles'],[7,'Send reverb from two tracks',4,4,'2–6','already good'],
+ [8,'Rolling bass 1/16 pattern, 4 bars',12,7,'≈ 9','S8 counts and grid-true duplicate, S2 loop'],[9,'Loop a 1-bar clip for 16 bars',6,1,1,'S2 drag the notch'],
+ [10,'Solo the drums (several tracks)',4,3,4,'S7 S solos every selected track'],[11,'EQ with a 30 Hz high-pass',4,4,'≈ 5','S3 helps find it, same count'],
+ [12,'Rename and recolour a track',5,4,'5–6','S6 name and colour in one place'],[13,'Jump to the drop and play',2,2,2,'S7 ] ] Enter without the mouse'],
+ [14,'Export the song to WAV',3,3,3,'already good'],[15,'Quantize to 1/16 and nudge a 1/16 later',6,3,'4–5','S7 Q and → by the grid (today the step follows the zoom)']];
+ $('#tasks').innerHTML=R.map(r=>`<tr><td class="n">${r[0]}</td><td>${r[1]}</td><td class="n">${r[2]}</td><td class="n ${r[3]<r[2]?'good':''}">${r[3]}</td><td class="n">${r[4]}</td><td>${r[5]}</td></tr>`).join('')})();
+
+/* ================= stars, picks bar ================= */
+(()=>{const cards=$$('.card[data-id]'),P=new Set();try{(JSON.parse(localStorage.getItem('ux1picks')||'[]')).forEach(x=>P.add(x))}catch(e){}
+ for(const c of cards){const s=+c.dataset.stars;$('.stars',c).textContent='★'.repeat(s)+'☆'.repeat(5-s);$('.stars',c).setAttribute('aria-label',s+' of 5')}
+ const ids=cards.map(c=>c.dataset.id);$('#chips').innerHTML=ids.map(i=>`<button data-id="${i}">${i}</button>`).join('');
+ const sync=()=>{const L=ids.filter(i=>P.has(i));$('#line').textContent='UX1 picks: '+(L.length?L.join(' '):'(none yet)');for(const c of cards)c.classList.toggle('picked',P.has(c.dataset.id));
+  for(const b of $$('#chips button'))b.classList.toggle('on',P.has(b.dataset.id));for(const c of cards)$('.pick',c).textContent=P.has(c.dataset.id)?'Picked':'Pick';try{localStorage.setItem('ux1picks',JSON.stringify(L))}catch(e){}};
+ const tg=i=>{P.has(i)?P.delete(i):P.add(i);sync()};
+ for(const c of cards)$('.pick',c).onclick=()=>tg(c.dataset.id);$('#chips').onclick=e=>{const b=e.target.closest('button');if(b)tg(b.dataset.id)};
+ $('#rec').onclick=()=>{for(const c of cards)if(+c.dataset.stars===5)P.add(c.dataset.id);sync()};
+ $('#copy').onclick=async()=>{const t=$('#line').textContent;try{await navigator.clipboard.writeText(t);$('#copy').textContent='Copied'}catch(e){const r=document.createRange();r.selectNodeContents($('#line'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#copy').textContent='Selected: press '+MOD+'C'}setTimeout(()=>$('#copy').textContent='Copy',1800)};
+ sync()})();
+
+tok();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',tok);new MutationObserver(tok).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+document.fonts&&document.fonts.ready.then(tok);
+</script>

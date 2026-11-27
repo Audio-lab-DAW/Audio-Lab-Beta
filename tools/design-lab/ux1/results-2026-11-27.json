@@ -1,0 +1,451 @@
+{
+ "note": "task UX1, 27 Nov 2026, cloud machine (SwiftShader, no graphics card), v0.263, Fractals; see measure_ux1.py",
+ "user_size": {
+  "meta": {
+   "v": "0.263",
+   "tracks": 31,
+   "clips": 364,
+   "dpr": 1.75,
+   "w": 2194,
+   "h": 1139,
+   "zs": {
+    "zoom": "ctrl",
+    "th": "alt",
+    "cw": "shift",
+    "side": "ctrl+shift",
+    "speed": 100,
+    "anchor": "mouse",
+    "inv": false,
+    "pinch": true
+   },
+   "sr": 44100,
+   "base": 0.01,
+   "hint": "balanced",
+   "chromium": "158.0.8127.36"
+  },
+  "latency": {
+   "scroll": {
+    "queue": {
+     "med": 19.65,
+     "p90": 55.5,
+     "max": 106.2
+    },
+    "drawn": {
+     "med": 24.0,
+     "p90": 65.9,
+     "max": 111.8
+    },
+    "t50": {
+     "med": 24.0,
+     "p90": 65.9,
+     "max": 111.8
+    },
+    "t90": {
+     "med": 24.0,
+     "p90": 65.9,
+     "max": 111.8
+    },
+    "draws": {
+     "med": 1.0,
+     "p90": 1,
+     "max": 1
+    },
+    "n": 12
+   },
+   "wheel": {
+    "queue": {
+     "med": 49.5,
+     "p90": 97.9,
+     "max": 109.8
+    },
+    "drawn": {
+     "med": 140.1,
+     "p90": 174.4,
+     "max": 181.0
+    },
+    "t50": {
+     "med": 382.7,
+     "p90": 418.2,
+     "max": 435.2
+    },
+    "t90": {
+     "med": 392.2,
+     "p90": 441.0,
+     "max": 584.2
+    },
+    "draws": {
+     "med": 2.0,
+     "p90": 3,
+     "max": 3
+    },
+    "n": 12
+   },
+   "pinch": {
+    "queue": {
+     "med": 57.0,
+     "p90": 113.0,
+     "max": 116.7
+    },
+    "drawn": {
+     "med": 137.3,
+     "p90": 174.1,
+     "max": 206.7
+    },
+    "t50": {
+     "med": 340.45,
+     "p90": 408.0,
+     "max": 452.5
+    },
+    "t90": {
+     "med": 488.45,
+     "p90": 573.6,
+     "max": 583.9
+    },
+    "draws": {
+     "med": 3.0,
+     "p90": 3,
+     "max": 3
+    },
+    "n": 12
+   },
+   "key": {
+    "queue": {
+     "med": 4.15,
+     "p90": 16.8,
+     "max": 29.2
+    },
+    "drawn": {
+     "med": 4.3,
+     "p90": 16.8,
+     "max": 29.2
+    },
+    "n": 12
+   },
+   "key_playing_mixer": {
+    "queue": {
+     "med": 67.5,
+     "p90": 226.7,
+     "max": 241.6
+    },
+    "drawn": {
+     "med": 67.5,
+     "p90": 226.8,
+     "max": 241.6
+    },
+    "n": 12
+   }
+  },
+  "frames": {
+   "idle": {
+    "fps": 80.8,
+    "med": 9.5,
+    "p95": 30.1,
+    "worst": 52.7,
+    "main": 12.44,
+    "js": 1.06,
+    "layout": 0.47,
+    "events": 0
+   },
+   "scroll": {
+    "fps": 21.1,
+    "med": 12.8,
+    "p95": 119.5,
+    "worst": 169.4,
+    "main": 49.68,
+    "js": 2.91,
+    "layout": 0.63,
+    "events": 23
+   },
+   "pinch": {
+    "fps": 5.6,
+    "med": 183.7,
+    "p95": 293.6,
+    "worst": 293.6,
+    "main": 222.97,
+    "js": 64.62,
+    "layout": 15.68,
+    "events": 7
+   },
+   "playmix": {
+    "fps": 11.1,
+    "med": 45.7,
+    "p95": 247.9,
+    "worst": 317.6,
+    "main": 99.52,
+    "js": 11.99,
+    "layout": 4.92,
+    "events": 0
+   }
+  },
+  "errors": []
+ },
+ "user_size_drag": {
+  "meta": {
+   "v": "0.263",
+   "tracks": 31,
+   "clips": 364,
+   "dpr": 1.75,
+   "w": 2194,
+   "h": 1139,
+   "zs": {
+    "zoom": "ctrl",
+    "th": "alt",
+    "cw": "shift",
+    "side": "ctrl+shift",
+    "speed": 100,
+    "anchor": "mouse",
+    "inv": false,
+    "pinch": true
+   },
+   "sr": 44100,
+   "base": 0.01,
+   "hint": "balanced",
+   "chromium": "158.0.8127.36"
+  },
+  "latency": {
+   "drag": {
+    "queue": {
+     "med": 14.05,
+     "p90": 19.4,
+     "max": 19.4
+    },
+    "drawn": {
+     "med": 17.3,
+     "p90": 22.0,
+     "max": 22.0
+    },
+    "t50": {
+     "med": 17.3,
+     "p90": 22.0,
+     "max": 22.0
+    },
+    "t90": {
+     "med": 17.3,
+     "p90": 22.0,
+     "max": 22.0
+    },
+    "draws": {
+     "med": 1.5,
+     "p90": 2,
+     "max": 2
+    },
+    "n": 4
+   },
+   "key_playing_mixer": {
+    "queue": {
+     "med": 94.2,
+     "p90": 140.1,
+     "max": 188.2
+    },
+    "drawn": {
+     "med": 94.45,
+     "p90": 140.1,
+     "max": 188.3
+    },
+    "n": 12
+   }
+  },
+  "frames": {
+   "drag": {
+    "fps": 35.6,
+    "med": 18,
+    "p95": 122.1,
+    "worst": 135.1,
+    "main": 29.06,
+    "js": 3.4,
+    "layout": 0.48,
+    "events": 31
+   },
+   "playmix": {
+    "fps": 4.1,
+    "med": 258.6,
+    "p95": 302.1,
+    "worst": 302.1,
+    "main": 317.99,
+    "js": 20.11,
+    "layout": 5.41,
+    "events": 0
+   }
+  },
+  "errors": []
+ },
+ "small_1280x800_1x": {
+  "meta": {
+   "v": "0.263",
+   "tracks": 31,
+   "clips": 364,
+   "dpr": 1,
+   "w": 1280,
+   "h": 800,
+   "zs": {
+    "zoom": "ctrl",
+    "th": "alt",
+    "cw": "shift",
+    "side": "ctrl+shift",
+    "speed": 100,
+    "anchor": "mouse",
+    "inv": false,
+    "pinch": true
+   },
+   "sr": 44100,
+   "base": 0.01,
+   "hint": "balanced",
+   "chromium": "158.0.8127.36"
+  },
+  "latency": {
+   "scroll": {
+    "queue": {
+     "med": 5.95,
+     "p90": 14.4,
+     "max": 24.8
+    },
+    "drawn": {
+     "med": 8.9,
+     "p90": 20.5,
+     "max": 29.9
+    },
+    "t50": {
+     "med": 8.9,
+     "p90": 20.5,
+     "max": 29.9
+    },
+    "t90": {
+     "med": 8.9,
+     "p90": 20.5,
+     "max": 29.9
+    },
+    "draws": {
+     "med": 1.5,
+     "p90": 2,
+     "max": 2
+    },
+    "n": 12
+   },
+   "wheel": {
+    "queue": {
+     "med": 5.7,
+     "p90": 11.2,
+     "max": 11.3
+    },
+    "drawn": {
+     "med": 34.1,
+     "p90": 42.3,
+     "max": 58.9
+    },
+    "t50": {
+     "med": 88.25,
+     "p90": 105.0,
+     "max": 106.6
+    },
+    "t90": {
+     "med": 142.25,
+     "p90": 149.5,
+     "max": 159.1
+    },
+    "draws": {
+     "med": 7.0,
+     "p90": 7,
+     "max": 8
+    },
+    "n": 12
+   },
+   "pinch": {
+    "queue": {
+     "med": 5.3,
+     "p90": 11.1,
+     "max": 11.8
+    },
+    "drawn": {
+     "med": 39.75,
+     "p90": 56.3,
+     "max": 59.1
+    },
+    "t50": {
+     "med": 93.9,
+     "p90": 118.6,
+     "max": 129.5
+    },
+    "t90": {
+     "med": 149.0,
+     "p90": 172.2,
+     "max": 206.9
+    },
+    "draws": {
+     "med": 4.5,
+     "p90": 5,
+     "max": 5
+    },
+    "n": 12
+   },
+   "key": {
+    "queue": {
+     "med": 1.6,
+     "p90": 3.0,
+     "max": 7.0
+    },
+    "drawn": {
+     "med": 1.65,
+     "p90": 3.1,
+     "max": 7.2
+    },
+    "n": 12
+   },
+   "key_playing_mixer": {
+    "queue": {
+     "med": 16.6,
+     "p90": 43.2,
+     "max": 50.6
+    },
+    "drawn": {
+     "med": 16.65,
+     "p90": 43.3,
+     "max": 50.7
+    },
+    "n": 12
+   }
+  },
+  "frames": {
+   "idle": {
+    "fps": 938.1,
+    "med": 0.9,
+    "p95": 2,
+    "worst": 7.7,
+    "main": 0.96,
+    "js": 0.12,
+    "layout": 0.16,
+    "events": 0
+   },
+   "scroll": {
+    "fps": 82.2,
+    "med": 8.5,
+    "p95": 25.1,
+    "worst": 35.1,
+    "main": 12.37,
+    "js": 2.12,
+    "layout": 0.51,
+    "events": 94
+   },
+   "pinch": {
+    "fps": 17.2,
+    "med": 59.3,
+    "p95": 77,
+    "worst": 104.3,
+    "main": 60.88,
+    "js": 17.99,
+    "layout": 15.35,
+    "events": 18
+   },
+   "playmix": {
+    "fps": 16.9,
+    "med": 56.6,
+    "p95": 104.9,
+    "worst": 144.3,
+    "main": 63.07,
+    "js": 9.69,
+    "layout": 3.02,
+    "events": 0
+   }
+  },
+  "errors": []
+ }
+}
