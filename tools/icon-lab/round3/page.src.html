@@ -1,0 +1,387 @@
+<title>AudioLab app icon, round 3: dipole field</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One dark lab sheet, as rounds 1 and 2: palettes, design grid, bench, small-size check, animation, recommendations; picks bar fixed at the bottom. The page is dark in both themes on purpose: it is a lab sheet, and the light desktop is shown inside the mock-ups. */
+:root{
+  --bg:#07080c; --panel:#0e1017; --panel2:#141722; --line:#232838; --fg:#e8ebf2; --mute:#8a90a2; --dim:#6a7083;
+  --acc:#6096ff; --star:#ffc43c; --ok:#5fd39a; --warn:#ffb627; --bad:#ff6b6b;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07080c}}
+:root[data-theme="dark"]{--bg:#07080c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 var(--sans);padding-block:28px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font:700 22px/1.25 var(--sans);margin:0;text-wrap:balance}
+h2{font:600 15px/1.3 var(--sans);margin:0 0 4px;text-wrap:balance}
+.lede{color:var(--mute);max-width:80ch;margin:6px 0 0}
+.lede q{color:#c9cfdc}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sec-h p{margin:0;color:var(--mute);font-size:12px;max-width:80ch}
+.mono{font-family:var(--mono)}
+.tag{font:600 11px var(--mono);color:var(--dim);letter-spacing:.06em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,.card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+.pals{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.pal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:72px 1fr;gap:10px 12px}
+.pal .ic svg{width:72px;height:72px;display:block}
+.pal b{font:600 13px var(--sans);display:block}
+.pal .from{color:var(--mute);font-size:11.5px;line-height:1.35}
+.sw{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.sw span{display:flex;flex-direction:column;gap:3px;font:500 10px var(--mono);color:var(--mute);min-width:0;overflow-wrap:anywhere}
+.sw i{height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.14)}
+.ck{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px}
+.ck em{font:500 10.5px var(--mono);font-style:normal;padding:2px 6px;border-radius:99px;background:var(--panel2);color:var(--mute);white-space:nowrap}
+.ck em.ok{color:var(--ok)} .ck em.warn{color:var(--warn)} .ck em.bad{color:var(--bad)}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 11px;font-size:12px;color:var(--mute)}
+.chip:hover,.chip.on{color:var(--fg);border-color:var(--acc)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:12px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:9px;cursor:pointer;min-width:0}
+.card.sel{border-color:var(--acc)}
+.card.picked{box-shadow:0 0 0 2px var(--star) inset}
+.card .art{aspect-ratio:1;border-radius:10px;display:grid;place-items:center}
+.art.dk{background:radial-gradient(circle at 50% 40%,#161b2b,#0a0b10 75%)} .art.lt{background:radial-gradient(circle at 50% 40%,#f2f4f8,#cfd7e3 80%)}
+.card .art svg{width:84%;height:auto;display:block}
+.card .hd{display:flex;align-items:baseline;gap:8px}
+.card .hd b{font:600 13.5px var(--sans)}
+.card .hd .st{margin-left:auto;color:var(--star);font-size:13px;white-space:nowrap}
+.card .note{color:var(--mute);font-size:12px;line-height:1.4;margin:0;min-height:4.2em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel2);padding:4px 10px;font:600 11.5px var(--mono);color:var(--mute);display:flex;align-items:center;gap:6px}
+.seg button i{width:11px;height:11px;border-radius:50%;display:block;border:1px solid rgba(255,255,255,.25)}
+.seg button.on{background:#22283a;color:var(--fg)}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pick{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 10px;font-size:12px}
+.pick.on{background:var(--star);color:#1a1300;border-color:var(--star);font-weight:600}
+.grp{font:500 10.5px var(--mono);color:var(--dim);margin-left:auto}
+
+.bench{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:22px}
+.bench-top{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:24px;align-items:start}
+.big{border-radius:14px;overflow:hidden;aspect-ratio:1;max-width:100%}
+.big svg{width:100%;height:auto;display:block}
+.wp-dark{background:linear-gradient(135deg,#1a1c26,#0a0b10)} .wp-light{background:linear-gradient(135deg,#eef1f6,#c9d4e4)}
+.info h2{font-size:18px}
+.info .why{color:#c9cfdc;margin:8px 0 0;max-width:64ch}
+.ladder{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-top:16px}
+.ladder figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ladder figcaption,.mag figcaption{font:500 10.5px var(--mono);color:var(--dim)}
+.mag{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px}
+.mag figure{margin:0}
+.mag canvas{image-rendering:pixelated;border-radius:6px;background:#1c1d22;display:block}
+.mag canvas.lt{background:#e6e8ee}
+.mocks{display:grid;grid-template-columns:1fr;gap:14px}
+.mock{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+.mock svg{display:block;height:auto;margin:0 auto}
+.mock-h{font:600 12px var(--sans);color:var(--mute);margin:0 0 6px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.two>div,.mocks>div,.bench-top>*,.grid>*,.pals>*{min-width:0}
+.note-s{color:var(--dim);font-size:11.5px;margin:6px 0 0;max-width:92ch}
+
+.small{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;overflow-x:auto}
+.small table{border-collapse:collapse}
+.small td,.small th{padding:6px 8px;text-align:center;vertical-align:middle}
+.small th{font:600 11px var(--mono);color:var(--dim);font-weight:600}
+.small td:first-child,.small th:first-child{text-align:left;white-space:nowrap}
+.small canvas{image-rendering:pixelated;display:block;margin:0 auto;border-radius:4px}
+
+.anim{background:var(--panel);border:1px dashed #3a4258;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.later{display:inline-block;font:700 10.5px var(--mono);letter-spacing:.08em;color:#1a1300;background:var(--warn);border-radius:6px;padding:2px 8px}
+.stage{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.stage figure{margin:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.stage canvas{width:220px;height:220px;max-width:100%;display:block}
+.stage .minis{display:flex;gap:12px;align-items:flex-end}
+.stage .minis canvas{width:64px;height:64px}
+.stage .minis canvas.s32{width:32px;height:32px}
+.stage figcaption{font:500 11.5px var(--sans);color:var(--mute);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{border-top:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.tbl th{font:600 11px var(--mono);color:var(--dim)}
+.tbl td:first-child{font-weight:600;white-space:nowrap}
+.tblw{overflow-x:auto}
+.cost{font:500 11.5px var(--mono);color:var(--ok)}
+
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.rec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:76px 1fr;gap:12px;cursor:pointer;text-align:left}
+.rec svg{width:76px;height:76px;display:block}
+.rec b{font:600 13px var(--sans)} .rec p{margin:4px 0 0;color:var(--mute);font-size:12px;line-height:1.4}
+.after{color:var(--mute);max-width:92ch}
+.after li{margin:4px 0}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(10,11,16,.96);border-top:1px solid var(--line);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar .in{max-width:1320px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar code{flex:1;min-width:0;font:500 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;overflow-wrap:anywhere;user-select:all}
+.bar .btn{border:0;border-radius:8px;padding:9px 14px;font-weight:600;background:var(--acc);color:#04122e}
+.bar .ghost{background:var(--panel2);color:var(--mute);border:1px solid var(--line)}
+.bar small{width:100%;color:var(--dim);font-size:11.5px}
+@media (max-width:760px){.bench-top{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC3 · 27 NOVEMBER 2026 · ROUND 3</div>
+    <h1>AudioLab app icon, round 3: dipole field</h1>
+    <p class="lede">From your picks: <q>I7 dipole field … P2 Orbit Night … P8 Chart Paper. Just make sure that the field in the center should be centered with a circle … the field should be perfectly around that as if it's the Earth. Let's also use the porthole … and W7 with measurements … I do like the fine particles.</q></p>
+    <p class="lede">The fix first: in round 2 the field was centred on the tile, but the shipped atom carries a small optical offset, so the nucleus sat 10 px left and 20 px up of the field's centre. Now each design puts the <b>nucleus</b> first and draws the field lines (r = L sin²θ) around that exact point; every line starts and ends on a circle a clean gap outside the yellow nucleus, like field lines on the Earth. Inside the rings only the innermost loops are drawn; the outer lines come out from behind the atom. Switch each design between P2 and P8, open it on the bench, press <b>Pick</b>, then paste the line from the bar.</p>
+  </header>
+
+  <section aria-labelledby="h-pal">
+    <div class="sec-h"><h2 id="h-pal">Palettes</h2><div class="row"><button class="chip" type="button" data-all="P2">All designs in P2</button><button class="chip" type="button" data-all="P8">All in P8</button></div></div>
+    <div class="pals" id="pals"></div>
+    <p class="note-s">Contrast is WCAG, worst of the tile's two gradient ends. Marks need 3 : 1; field lines are decoration and are drawn at 44 to 66 % strength on top of that value. P8N is not a third choice: it is the Dark entry proposed for P8 (see the macOS styles on the bench).</p>
+  </section>
+
+  <section aria-labelledby="h-des">
+    <div class="sec-h"><h2 id="h-des">Designs J1 to J11</h2><p>★ recommended. Click a card for the bench; the switch sets that card's palette.</p></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="bench" id="bench" aria-labelledby="h-bench">
+    <div class="bench-top">
+      <div class="big wp-light" id="big"></div>
+      <div class="info">
+        <div class="tag" id="bTag"></div>
+        <h2 id="h-bench">Bench</h2>
+        <p class="why" id="bNote"></p>
+        <div class="row" style="margin-top:12px"><span class="seg" id="bSeg"></span><button class="pick" id="bPick" type="button">Pick</button><button class="chip" id="bWp" type="button">Wallpaper: light</button></div>
+        <div class="ladder" id="ladder"></div>
+        <div class="mag" id="mag"></div>
+        <p class="note-s">1024 to 128 draw everything; 48 to 64 keep the bold structure (three lines, the M ring tier); 24 to 32 are the small master (one bold field arc each side, the S ring tier, no particles, ticks or grid); 16 is the XS master. The magnified views are the real pixels at 32 and 16.</p>
+      </div>
+    </div>
+    <div class="mocks">
+      <div class="two">
+        <div><p class="mock-h">Dock, dark desktop (64 pt icons; the others are invented stand-ins)</p><div class="mock" id="dockD"></div></div>
+        <div><p class="mock-h">Dock, light desktop</p><div class="mock" id="dockL"></div></div>
+      </div>
+      <div><p class="mock-h">macOS 26 icon styles</p><div class="mock" id="styles"></div>
+        <p class="note-s" id="stNote"></p></div>
+      <div class="two">
+        <div><p class="mock-h">Windows taskbar, dark, 150 % (36 px)</p><div class="mock" id="tbD"></div></div>
+        <div><p class="mock-h">Windows taskbar, light, 100 % (24 px)</p><div class="mock" id="tbL"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-small">
+    <div class="sec-h"><h2 id="h-small">Small-size check, every design</h2><p>Real pixels, magnified 3 times, on a dark and a light desktop. What must survive: the nucleus and the field's shape.</p></div>
+    <div class="small" id="small"></div>
+  </section>
+
+  <section class="anim" aria-labelledby="h-anim">
+    <div class="sec-h"><h2 id="h-anim"><span class="later">LATER OPTION</span>&nbsp; Animated: fine particles on the field (I12)</h2><div class="row"><button class="chip" id="aPlay" type="button">Pause</button><span class="cost" id="aCost"></span></div></div>
+    <p class="note-s" style="margin:0">Not part of the pick: the static icon does not depend on any of this. Trapped particles bounce between their two mirror points along the field lines (as on the splash), fine particles run on the three orbits (as in the About window's atom). Shown in each favourite's current palette, at preview size and at Dock sizes. The number on the right is measured in your browser: drawing time for one frame of all previews together. Stands still with "reduce motion".</p>
+    <div class="stage" id="stage"></div>
+    <div class="tblw"><table class="tbl">
+      <thead><tr><th>Where</th><th>macOS</th><th>Windows</th><th>CPU cost</th></tr></thead>
+      <tbody>
+        <tr><td>Dock or taskbar icon while the app runs</td><td>Possible. Electron's <span class="mono">app.dock.setIcon</span> with a new picture 10 to 15 times a second, or a native <span class="mono">NSDockTile</span> view (needs a small native piece). Only while running; Finder, Launchpad and the Dock when closed always show the static icon. While a picture is set, macOS 26 does not apply Tinted or Clear to it (IC1), so the animation would stop in those styles and the static icon come back.</td><td>No real support. The taskbar button shows the window icon; swapping it many times a second works but is not meant for this (Windows reloads it into the shell each time) and flickers on some setups. An overlay badge is 16 px only. Recommendation: static on Windows.</td><td id="cDock">Drawing a 256 px frame: about 0.1 ms (measured, Chromium on a 2-core cloud machine without a graphics card). Handing it over as a PNG: about 8.7 ms a frame (about 10 % of one core at 12 fps), so the frames would go over as raw pixels (<span class="mono">nativeImage.createFromBitmap</span>, about 0.4 ms to read them). The Dock's own redraw cannot be measured here: to be measured on a Mac before it ships. Stops when the app is hidden, with reduce motion and at the Light level.</td></tr>
+        <tr><td>Splash</td><td colspan="2">Already a canvas animation (task SP1); this would be one more picture or replace the dipole picture's dots. Same on both systems.</td><td>The splash's dipole picture costs 0.10 to 0.19 ms a frame (v0.224 log); this adds about the same.</td></tr>
+        <tr><td>About window / menu card</td><td colspan="2">Already runs the fine-particle atom (FATOM, task AB1) only while open; the field particles would join it there.</td><td>Only while About is open; stands still at the Light level and with reduce motion, as today.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2><p>Click one to load it on the bench.</p></div>
+    <div class="recs" id="recs"></div>
+  </section>
+
+  <section aria-labelledby="h-after" class="after">
+    <h2 id="h-after">After you pick</h2>
+    <ol>
+      <li>The first pick becomes the default shortcut icon. It goes through the Icon Composer pipeline of IC1 (<span class="mono">mac-icon/AppIcon.icon</span>): the tile colour as the fill for Default, Dark and Tinted, so Dark stays blue for P2. For a P8 pick the Dark entry gets the P8N tile and its own layer (paper and ink swapped), unless you would rather keep the paper in Dark.</li>
+      <li><span class="mono">Assets.car</span>, <span class="mono">icon.icns</span> and <span class="mono">icon.ico</span> (with the small masters at 16 to 32), <span class="mono">dock-icon.png</span> and the web favicons are made again.</li>
+      <li>Every pick is added to Settings › App icon with its plain name ("Dipole field, Orbit night").</li>
+      <li>The Mac icon proof job runs on macOS 26 and checks Default and Dark against the expected tile colour.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <code id="line">Icon round 3: (nothing picked yet)</code>
+    <button class="btn" id="copy" type="button">Copy</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+    <small>The first pick is the new default shortcut icon; the others go into the in-app icon picker. Paste the line into the chat.</small>
+  </div>
+</div>
+
+<script>/*GEOM*/</script>
+<script>/*ICONS*/</script>
+<script>
+(function(){
+  var A = window.AL3, $ = function(id){ return document.getElementById(id); };
+  var REC = {}; A.RECS.forEach(function(r){ (REC[r.d] = REC[r.d] || []).push(r); });
+  var state = { sel: 'J2', cur: {}, picks: [], wp: 'light', play: true };
+  A.DESIGNS.forEach(function(d){ state.cur[d.id] = 'P2'; });
+  A.RECS.slice().reverse().forEach(function(r){ state.cur[r.d] = r.p; }); /* each recommended design starts in its first recommended palette */
+  try { var s = JSON.parse(localStorage.getItem('al3-picks') || 'null'); if (s && Array.isArray(s.picks)) { state.picks = s.picks; if (s.cur) Object.keys(s.cur).forEach(function(k){ if (state.cur[k]) state.cur[k] = s.cur[k]; }); } } catch (e) {}
+  function save(){ try { localStorage.setItem('al3-picks', JSON.stringify({ picks: state.picks, cur: state.cur })); } catch (e) {} }
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var PB = A.PAL, DBY = {}; A.DESIGNS.forEach(function(d){ DBY[d.id] = d; });
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) state.play = false;
+
+  /* palettes */
+  function badge(v, lim, label){ var c = v >= lim ? 'ok' : v >= lim * 0.66 ? 'warn' : 'bad'; return '<em class="' + c + '" title="' + label + '">' + label.split(' ')[0] + ' ' + v.toFixed(1) + '</em>'; }
+  function edge(v, rim, label){ if (v >= 1.5) return badge(v, 1.5, label); return '<em class="' + (rim ? 'warn' : 'bad') + '" title="' + label + (rim ? '; low, so a hairline rim marks the tile edge' : '') + '">' + label.split(' ')[0] + ' ' + v.toFixed(1) + (rim ? ' +rim' : '') + '</em>'; }
+  $('pals').innerHTML = A.PALETTES.map(function(p){
+    var c = A.checks(p);
+    return '<div class="pal"><div class="ic">' + A.svg('J2', p.id, 128, { frame: 'mac' }) + '</div><div><span class="tag">' + p.id + '</span><b>' + esc(p.name) + '</b><div class="from">' + esc(p.from) + '</div></div>' +
+      '<div class="sw">' + [['tile', p.bg[0] + '→' + p.bg[1], 'linear-gradient(180deg,' + p.bg[0] + ',' + p.bg[1] + ')'], ['rings', p.ring, p.ring], ['nucleus', p.nuc, p.nuc], ['electron', p.el, p.el], ['field', p.det, p.det]].map(function(x){ return '<span><i style="background:' + x[2] + '"></i>' + x[0] + '<br>' + x[1].replace('→', '→<br>') + '</span>'; }).join('') + '</div>' +
+      '<div class="ck">' + badge(c.ring, 3, 'rings against the tile') + badge(c.nuc, 3, 'nucleus against the tile') + badge(c.el, 3, 'electron against the tile') + badge(c.det, 3, 'field colour against the tile (full strength)') + edge(c.onLight, c.rim, 'light desktop: tile against #E6E8EE') + edge(c.onDark, c.rim, 'dark desktop: tile against #1C1D22') + '</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-all]'), function(b){ b.addEventListener('click', function(){ var p = b.getAttribute('data-all'); A.DESIGNS.forEach(function(d){ state.cur[d.id] = p; }); save(); drawAll(); }); });
+
+  function segHtml(did, withN){ return ['P2', 'P8'].concat(withN ? ['P8N'] : []).map(function(p){ var P = PB[p]; return '<button type="button" class="' + (state.cur[did] === p ? 'on' : '') + '" data-d="' + did + '" data-p="' + p + '" aria-pressed="' + (state.cur[did] === p) + '" title="' + p + ' ' + esc(P.name) + '"><i style="background:linear-gradient(135deg,' + P.bg[0] + ' 0 55%,' + P.nuc + ' 55% 100%)"></i>' + p + '</button>'; }).join(''); }
+  function isPicked(did){ return state.picks.some(function(x){ return x.d === did && x.p === state.cur[did]; }); }
+  function recFor(did, p){ return (REC[did] || []).filter(function(r){ return r.p === p; })[0]; }
+
+  function drawGrid(){
+    $('grid').innerHTML = A.DESIGNS.map(function(d){
+      var p = state.cur[d.id], rs = REC[d.id] || [], light = p === 'P8';
+      return '<div class="card' + (state.sel === d.id ? ' sel' : '') + (isPicked(d.id) ? ' picked' : '') + '" tabindex="0" data-d="' + d.id + '"><div class="art ' + (light ? 'dk' : 'lt') + '">' + A.svg(d.id, p, 256, { frame: 'mac' }) + '</div>' +
+        '<div class="hd"><span class="tag">' + d.id + '</span><b>' + esc(d.name) + '</b>' + (rs.length ? '<span class="st" title="Recommended">★ ' + rs.map(function(r){ return r.p; }).join(' ') + '</span>' : '') + '</div>' +
+        '<p class="note">' + esc(d.note) + '</p>' +
+        '<div class="row"><span class="seg">' + segHtml(d.id, false) + '</span><button type="button" class="pick' + (isPicked(d.id) ? ' on' : '') + '" data-pick="' + d.id + '">' + (isPicked(d.id) ? 'Picked' : 'Pick') + ' ' + d.id + ' ' + p + '</button><span class="grp">' + esc(d.group) + '</span></div></div>';
+    }).join('');
+  }
+  $('grid').addEventListener('click', function(e){
+    var b = e.target.closest('button');
+    if (b && b.hasAttribute('data-p')) { state.cur[b.getAttribute('data-d')] = b.getAttribute('data-p'); state.sel = b.getAttribute('data-d'); save(); drawAll(); return; }
+    if (b && b.hasAttribute('data-pick')) { togglePick(b.getAttribute('data-pick')); return; }
+    var c = e.target.closest('.card'); if (c) { state.sel = c.getAttribute('data-d'); drawGrid(); drawBench(); }
+  });
+  $('grid').addEventListener('keydown', function(e){ var c = e.target.closest('.card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.sel = c.getAttribute('data-d'); drawGrid(); drawBench(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+
+  function togglePick(did){
+    var p = state.cur[did]; if (p === 'P8N') p = 'P8';
+    var i = -1; state.picks.forEach(function(x, k){ if (x.d === did && x.p === p) i = k; });
+    if (i >= 0) state.picks.splice(i, 1); else state.picks.push({ d: did, p: p });
+    save(); drawGrid(); drawBench(); drawLine();
+  }
+  function drawLine(){ $('line').textContent = state.picks.length ? 'Icon round 3: ' + state.picks.map(function(x, i){ return x.d + ' ' + x.p + (i === 0 ? ' (default)' : ''); }).join(', ') : 'Icon round 3: (nothing picked yet)'; }
+  $('copy').addEventListener('click', function(){
+    var t = $('line').textContent, b = $('copy');
+    var sel = function(){ var r = document.createRange(); r.selectNodeContents($('line')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected, press Copy'; };
+    try { navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1400); }, sel); } catch (e) { sel(); }
+  });
+  $('clear').addEventListener('click', function(){ state.picks = []; save(); drawGrid(); drawBench(); drawLine(); });
+
+  function rasterInto(cv, svgStr, n, k){
+    cv.width = n; cv.height = n; cv.style.width = (n * k) + 'px'; cv.style.height = (n * k) + 'px';
+    var img = new Image(), url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+    img.onload = function(){ var g = cv.getContext('2d'); g.clearRect(0, 0, n, n); g.drawImage(img, 0, 0, n, n); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+  function drawBench(){
+    var d = DBY[state.sel], p = state.cur[d.id], P = PB[p], rc = recFor(d.id, p === 'P8N' ? 'P8' : p);
+    $('big').className = 'big wp-' + state.wp; $('big').innerHTML = A.svg(d.id, p, 1024, { frame: 'mac' });
+    $('bTag').textContent = d.id + ' · ' + p + ' ' + P.name + ' · ' + d.group;
+    $('h-bench').textContent = d.name + (rc ? '  ★' : '');
+    $('bNote').textContent = d.note + (rc ? ' ★ ' + rc.why : '');
+    $('bSeg').innerHTML = segHtml(d.id, true);
+    $('bPick').textContent = isPicked(d.id) ? 'Picked ' + d.id + ' ' + (p === 'P8N' ? 'P8' : p) + ' (click to remove)' : 'Pick ' + d.id + ' ' + (p === 'P8N' ? 'P8' : p);
+    $('bPick').classList.toggle('on', isPicked(d.id));
+    $('bWp').textContent = 'Wallpaper: ' + state.wp;
+    $('ladder').innerHTML = [[1024, 200], [512, 128], [128, 128], [64, 64], [32, 32], [16, 16]].map(function(z){ return '<figure><div style="width:' + z[1] + 'px;height:' + z[1] + 'px">' + A.svg(d.id, p, z[0], { frame: 'mac' }).replace(/width="\d+" height="\d+"/, 'width="' + z[1] + '" height="' + z[1] + '"') + '</div><figcaption>' + z[0] + (z[0] > z[1] ? ' (at ' + z[1] + ')' : '') + '</figcaption></figure>'; }).join('');
+    var mag = $('mag'); mag.innerHTML = '';
+    [[32, 'dark'], [16, 'dark'], [32, 'light'], [16, 'light']].forEach(function(z){ var f = document.createElement('figure'), cv = document.createElement('canvas'); cv.className = z[1] === 'light' ? 'lt' : ''; cv.setAttribute('aria-label', z[0] + ' px on a ' + z[1] + ' desktop, magnified'); f.appendChild(cv); var c = document.createElement('figcaption'); c.textContent = z[0] + ' px ×' + (z[0] === 16 ? 6 : 3) + ' · ' + z[1]; f.appendChild(c); mag.appendChild(f); rasterInto(cv, A.svg(d.id, p, z[0], { frame: 'mac' }), z[0], z[0] === 16 ? 6 : 3); });
+    $('dockD').innerHTML = A.dock(d.id, p, 'dark'); $('dockL').innerHTML = A.dock(d.id, p, 'light');
+    $('styles').innerHTML = A.styles(d.id, p);
+    $('stNote').textContent = p === 'P2' ? 'P2: Default and Dark are the same navy tile: the Icon Composer file of IC1 gives the Dark appearance the same fill, so it stays blue. Tinted and Clear are the system\'s own treatment (approximated here); no app can keep its colours there.'
+      : p === 'P8' ? 'P8 is a light tile, so Dark needs a decision. Kept as paper: the IC1 file with the same fill, a bright icon among dark ones. *macOS automatic (approximation): what macOS 26 makes when an icon brings no Dark entry: the paper becomes its black tile and the dark ink nearly vanishes. Proposed: P8N, paper and ink swapped, the same orange and blue lifted; the Icon Composer file gets a dark fill and a dark layer for it. Tinted and Clear: system, approximated.'
+      : 'P8N is the proposed Dark entry of P8: shown here with Default (P8) beside it.';
+    $('tbD').innerHTML = A.taskbar(d.id, p, 'dark', 1.5); $('tbL').innerHTML = A.taskbar(d.id, p, 'light', 1);
+    [['dockD', 2], ['dockL', 2], ['styles', 1], ['tbD', 1], ['tbL', 1]].forEach(function(x){ var s = $(x[0]).querySelector('svg'); s.style.width = '100%'; s.style.maxWidth = (s.getAttribute('width') / x[1]) + 'px'; });
+  }
+  $('bSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); });
+  $('bPick').addEventListener('click', function(){ togglePick(state.sel); });
+  $('bWp').addEventListener('click', function(){ state.wp = state.wp === 'light' ? 'dark' : 'light'; drawBench(); });
+
+  /* small-size check: every design, its current palette, real pixels */
+  function drawSmall(){
+    var h = '<table><thead><tr><th>Design</th><th>64 dark</th><th>32 dark ×3</th><th>16 dark ×3</th><th>32 light ×3</th><th>16 light ×3</th></tr></thead><tbody>';
+    A.DESIGNS.forEach(function(d){ h += '<tr><td><span class="tag">' + d.id + ' ' + state.cur[d.id] + '</span><br>' + esc(d.name) + '</td>' + ['64d', '32d', '16d', '32l', '16l'].map(function(k){ return '<td><canvas data-k="' + k + '" data-d="' + d.id + '" style="background:' + (k[2] === 'l' ? '#e6e8ee' : '#1c1d22') + '"></canvas></td>'; }).join('') + '</tr>'; });
+    $('small').innerHTML = h + '</tbody></table>';
+    Array.prototype.forEach.call($('small').querySelectorAll('canvas'), function(cv){ var k = cv.getAttribute('data-k'), n = parseInt(k, 10), did = cv.getAttribute('data-d'); rasterInto(cv, A.svg(did, state.cur[did], n, { frame: 'mac' }), n, n === 64 ? 1 : 3); });
+  }
+
+  /* recommendations */
+  function drawRecs(){
+    $('recs').innerHTML = A.RECS.map(function(r){ var d = DBY[r.d]; return '<button type="button" class="rec" data-d="' + r.d + '" data-p="' + r.p + '">' + A.svg(r.d, r.p, 128, { frame: 'mac' }) + '<span><span class="tag">★ ' + r.d + ' ' + r.p + (r.first ? ' · FIRST CHOICE' : '') + '</span><br><b>' + esc(d.name) + ', ' + esc(PB[r.p].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+  }
+  $('recs').addEventListener('click', function(e){ var b = e.target.closest('.rec'); if (!b) return; state.sel = b.getAttribute('data-d'); state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  /* ---------- animated preview (later option) ---------- */
+  var TILE = new Path2D(A.TILE), TAU = Math.PI * 2, AN = [];
+  function mkRng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function fpt(c, Leq, tilt, th, side){ var a = tilt * Math.PI / 180, r = Leq * Math.pow(Math.sin(th), 2), x = side * r * Math.sin(th), y = -r * Math.cos(th); return [c[0] + x * Math.cos(a) - y * Math.sin(a), c[1] + x * Math.sin(a) + y * Math.cos(a)]; }
+  function hexA(h, a){ h = h.replace('#', ''); return 'rgba(' + parseInt(h.substr(0, 2), 16) + ',' + parseInt(h.substr(2, 2), 16) + ',' + parseInt(h.substr(4, 2), 16) + ',' + a + ')'; }
+  function buildAnim(did){
+    var G = A.anim(did), R = mkRng(31), parts = [], fine = [];
+    var q = G.kind === 'field' ? (G.hide || 0) : 0;
+    G.lines.forEach(function(Leq, i){
+      var t0 = Math.asin(Math.min(1, Math.sqrt(G.Rs / Leq))), n = G.kind === 'orbits' ? 5 : 3;
+      for (var s = -1; s <= 1; s += 2) for (var j = 0; j < n; j++) parts.push({ L: Leq, side: s, amp: (Math.PI / 2 - t0) * (0.35 + 0.55 * R()), w: 1.6 / (0.5 + Leq / 260) * (0.8 + 0.4 * R()), ph: R() * TAU, warm: R() < 0.45 });
+    });
+    if (G.orbits) G.orbits.forEach(function(o){ for (var i = 0; i < 70; i++) fine.push({ o: o, ph: R() * TAU, rr: 1.1 + R() * 0.14, w: 0.55 + R() * 0.12, sz: 0.7 + R() * 0.7, el: R() < 0.2 }); });
+    return { G: G, parts: parts, fine: fine };
+  }
+  function paintAnim(g, S, img, M, t, P){
+    var k = S / 1024, G = M.G; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, S, S); if (img.complete && img.naturalWidth) g.drawImage(img, 0, 0, S, S);
+    g.save(); g.scale(k, k); g.clip(TILE);
+    if (G.lens) { g.beginPath(); g.arc(512, 512, G.lens - 14, 0, TAU); g.clip(); }
+    var dotR = Math.max(5.5, 1.1 / k);
+    M.parts.forEach(function(p){
+      var th = Math.PI / 2 + p.amp * Math.sin(t * p.w + p.ph), xy = fpt(G.c, p.L, G.tilt, th, p.side);
+      if (G.kind === 'field' && p.L > 262 * (G.sc || 1) && Math.hypot(xy[0] - G.c[0], xy[1] - G.c[1]) < 300 * (G.sc || 1)) return; /* behind the atom */
+      g.fillStyle = p.warm ? hexA(P.nuc, 0.95) : hexA(P.el, 0.95); g.beginPath(); g.arc(xy[0], xy[1], dotR, 0, TAU); g.fill();
+    });
+    if (S >= 120) M.fine.forEach(function(p){
+      var a = p.o.a * Math.PI / 180, th = p.ph + t * p.w, x = p.o.rx * p.rr * Math.cos(th), y = p.o.ry * p.rr * Math.sin(th), far = Math.sin(th) < 0;
+      g.fillStyle = p.el ? hexA(P.el, far ? 0.4 : 0.85) : hexA(P.ring, far ? 0.35 : 0.8);
+      g.beginPath(); g.arc(G.oc[0] + x * Math.cos(a) - y * Math.sin(a), G.oc[1] + x * Math.sin(a) + y * Math.cos(a), (far ? 2.6 : 3.6) * p.sz * Math.max(1, 0.9 / k / 3), 0, TAU); g.fill();
+    });
+    g.restore();
+  }
+  function setupAnim(){
+    var favs = A.RECS.filter(function(r){ return r.anim; }).map(function(r){ return r.d; }).filter(function(v, i, a){ return a.indexOf(v) === i; });
+    $('stage').innerHTML = favs.map(function(did){ return '<figure><canvas class="an" data-d="' + did + '" aria-label="Animated preview of ' + did + '"></canvas><div class="minis"><canvas data-d="' + did + '" data-s="64" aria-label="' + did + ' at Dock size"></canvas><canvas class="s32" data-d="' + did + '" data-s="32" aria-label="' + did + ' at 32 px"></canvas></div><figcaption>' + did + ' ' + esc(DBY[did].name) + ' · <span data-pl="' + did + '"></span></figcaption></figure>'; }).join('');
+    AN = [];
+    Array.prototype.forEach.call($('stage').querySelectorAll('canvas'), function(cv){
+      var did = cv.getAttribute('data-d'), css = parseInt(cv.getAttribute('data-s') || '220', 10), dpr = Math.min(2, window.devicePixelRatio || 1), S = Math.round(css * dpr);
+      cv.width = S; cv.height = S; AN.push({ cv: cv, g: cv.getContext('2d'), did: did, S: S, css: css, M: buildAnim(did), img: new Image(), key: '' });
+    });
+    refreshAnimImages();
+  }
+  function refreshAnimImages(){
+    AN.forEach(function(a){ var p = state.cur[a.did], key = p + a.css; if (a.key === key) return; a.key = key; a.P = PB[p];
+      var url = URL.createObjectURL(new Blob([A.svg(a.did, p, a.css >= 120 ? 1024 : a.css, { frame: 'full', still: true })], { type: 'image/svg+xml' })); a.img = new Image(); a.img.onload = function(){ URL.revokeObjectURL(url); if (!state.play) frame(performance.now(), true); }; a.img.src = url; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pl]'), function(s){ var p = state.cur[s.getAttribute('data-pl')]; s.textContent = p + ' ' + PB[p].name; });
+  }
+  var last = 0, acc = 0, nAcc = 0, t0 = performance.now();
+  function frame(now, once){
+    if (!once && state.play) requestAnimationFrame(frame);
+    if (!once && now - last < 33) return; last = now;
+    var t = reduce ? 3 : (now - t0) / 1000, a0 = performance.now();
+    AN.forEach(function(a){ paintAnim(a.g, a.S, a.img, a.M, t, a.P); });
+    acc += performance.now() - a0; nAcc++;
+    if (nAcc >= 30 || once) { $('aCost').textContent = (acc / nAcc).toFixed(2) + ' ms a frame for ' + AN.length + ' canvases'; acc = 0; nAcc = 0; }
+  }
+  $('aPlay').addEventListener('click', function(){ state.play = !state.play; $('aPlay').textContent = state.play ? 'Pause' : 'Play'; if (state.play) requestAnimationFrame(frame); });
+  window.AL3T = { bench: function(n){ var a0 = performance.now(); for (var i = 0; i < n; i++) AN.forEach(function(a){ paintAnim(a.g, a.S, a.img, a.M, i / 30, a.P); }); return (performance.now() - a0) / n; },
+    encode: function(n){ var cv = document.createElement('canvas'); cv.width = cv.height = 256; var g = cv.getContext('2d'), a = AN[0], a0 = performance.now(); for (var i = 0; i < n; i++) { paintAnim(g, 256, a.img, a.M, i / 30, a.P); cv.toDataURL('image/png'); } return (performance.now() - a0) / n; } };
+
+  function drawAll(){ drawGrid(); drawBench(); drawSmall(); refreshAnimImages(); }
+  drawGrid(); drawBench(); drawSmall(); drawRecs(); drawLine(); setupAnim();
+  $('aPlay').textContent = state.play ? 'Pause' : 'Play';
+  if (state.play) requestAnimationFrame(frame); else setTimeout(function(){ frame(performance.now(), true); }, 300);
+})();
+</script>
