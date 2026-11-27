@@ -6634,7 +6634,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.287',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.288',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -25153,6 +25153,8 @@ const SCA=[
  {id:'arr.secDelete',g:'edit',l:'Delete the section at the playhead and close the gap',d:'',ic:'M4 6h12M7 6V4h6v2M6 6l1 10h6l1-10',run:()=>ftAmCmd('del')},
  {id:'clip.newSteps',g:'edit',l:'New step sequencer clip',d:'',ic:'M3 5h3v3H3zM8 5h3v3H8zM13 12h3v3h-3zM3 12h3v3H3z',run:()=>ftSqCmdNew()},
  {id:'clip.editSteps',g:'edit',l:'Edit steps of the selected clip',d:'',ic:'M3 5h14M3 10h14M3 15h14M6 3v14M11 3v14',run:()=>ftSqCmdEdit()},
+ {id:'clip.toSteps',g:'edit',l:'Make step sequencer clip',d:'',ic:'M3 5h3v3H3zM8 5h3v3H8zM13 12h3v3h-3z',run:()=>ftSqCmdConv('steps')},
+ {id:'clip.toNotes',g:'edit',l:'Make normal MIDI clip',d:'',ic:'M3 6h6v2H3zM10 11h7v2h-7z',run:()=>ftSqCmdConv('notes')},
  {id:'dup',g:'edit',l:'Duplicate clip',d:'Mod+D',nat:1,ic:'M7 7h9v9H7zM4 13V4h9',run:()=>{const f=selC&&findClip(selC);if(f){pushUndo();dupClip(f.t,f.c);changed(false)}}},
  {id:'split',g:'edit',l:'Split clip at the playhead',d:'Shift+S',ic:'M10 3v14M4 6l3 3-3 3M16 6l-3 3 3 3',run:()=>{const f=selC&&findClip(selC);if(!f){toast('Select a clip first.');return}pushUndo();if(splitClip(f.t,f.c,curDisp()))changed(false);else toast('Move the playhead inside the clip first.')}},
  {id:'del',g:'edit',l:'Delete selection',d:'Delete',lock:1,ic:'M5 6h10M8 6V4h4v2M6 6l1 10h6l1-10',run:()=>{}},
@@ -26327,16 +26329,16 @@ function ftSqFit(st){const R=st.rows.length;st.g=Array.isArray(st.g)?st.g:[];whi
 const ftSqHash=N=>{let h=0;for(const n of N||[]){const s=n.p+','+n.s+','+n.l+','+n.v;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0}return h+':'+(N||[]).length};
 const ftSqClean=c=>!!(c&&c.steps&&(c.steps.h==null||c.steps.h===ftSqHash(c.notes)));
 /* the pattern writes the clip's notes */
-function ftSqGen(c){const st=c&&c.steps;if(!st)return;ftSqFit(st);const d=st.res,P=st.n*d,cov=Math.max(P,(c.off||0)+c.len),reps=Math.max(1,Math.ceil(cov/P-1e-9)),out=[];let gi=0;
+function ftSqGen(c){const st=c&&c.steps;if(!st)return;const acid=ftSqAcid(c);ftSqFit(st);const d=st.res,P=st.n*d,cov=Math.max(P,(c.off||0)+c.len),reps=Math.max(1,Math.ceil(cov/P-1e-9)),out=[];let gi=0;
   for(let k0=0;k0<reps;k0++)for(let r=0;r<st.rows.length;r++){const p=st.rows[r].p,a=st.g[r];for(let i=0;i<st.n;i++){const q=a[i];if(!q)continue;
-    const s0=k0*P+i*d,rt=Math.max(1,Math.min(4,q.rt|0||1)),lv=q.lv==null?FTSQ.LV:q.lv,v=+Math.min(1,lv+(q.ac?.25:0)).toFixed(4),ch=q.ch==null?1:q.ch,g=++gi;
+    const s0=k0*P+i*d,rt=Math.max(1,Math.min(4,q.rt|0||1)),lv=q.lv==null?FTSQ.LV:q.lv,v=ftSqV(lv,q.ac,acid),ch=q.ch==null?1:q.ch,g=++gi;
     for(let k=0;k<rt;k++){const n={p,s:+(s0+k*d/rt).toFixed(6),l:+(rt>1?d/rt*.8:q.sl?d*1.05:d*(st.gate||.5)).toFixed(6),v};if(q.ac)n.ac=1;if(q.sl&&k===rt-1)n.sl=1;if(ch<1){n.ch=ch;n.cg=g}out.push(n)}}}
   out.sort((a,b)=>a.s-b.s||a.p-b.p);c.notes=out;st.cov=reps*P;st.h=ftSqHash(out)}
 function ftSqNewSteps(t){const dr=!!(t&&t.inst&&t.inst.preset==='drums'),st={v:1,n:16,res:.25,mode:dr?'drums':'key',oct:3,gate:dr?.5:.85,rows:[],g:[]};st.rows=ftSqRowsFor(st,t);ftSqFit(st);return st}
 function ftSqAdd(t,beat){if(!t||!t.inst){toast('Step sequencer clips go on instrument tracks. Select one first.');return null}if(t.frz){toast('This track is frozen. Unfreeze it to add clips.');return null}
   pushUndo();const st=ftSqNewSteps(t),b=Math.max(0,Math.floor((beat==null?pos:beat)/4)*4),c=mkClip({start:b,len:st.n*st.res,name:'Steps',notes:[],steps:st});ftSqGen(c);t.clips.push(c);selC=c.id;changed(false);ftSqOpen(c.id);return c}
 /* chance is rolled while playing: a note with ch < 1 plays with that chance; the hits of one ratcheted step (same cg) share one roll */
-{const _cs=ccSus;ccSus=function(c,notes){const r=_cs.apply(this,arguments);if(!c||!c.steps||!Array.isArray(r))return r;let any=false;for(const n of r)if(n.ch!=null&&n.ch<1){any=true;break}if(!any)return r;
+{const _cs=ccSus;ccSus=function(c,notes){const r=_cs.apply(this,arguments);if(!c||!(c.steps||c.nch)||!Array.isArray(r))return r;let any=false;for(const n of r)if(n.ch!=null&&n.ch<1){any=true;break}if(!any)return r;
   const now=performance.now(),M=FTSQ.memo;if(M.size>400)for(const[k,m]of M)if(now-m.t>2000)M.delete(k);
   return r.filter(n=>{if(n.ch==null||n.ch>=1)return true;if(n.cg){const k=c.id+':'+n.cg,m=M.get(k);if(m&&now-m.t<400)return m.keep;const keep=Math.random()<n.ch;M.set(k,{t:now,keep});return keep}return Math.random()<n.ch})}}
 /* a step clip opens in the step editor; Open in piano roll from the clip menu still reaches the piano roll */
@@ -26461,6 +26463,92 @@ function ftSqCmdEdit(){const f=selC&&findClip(selC);if(!f||!f.c.steps){toast('Se
 try{if(Array.isArray(LK.MIDI)&&!LK.MIDI.includes('steps'))LK.MIDI.push('steps')}catch(e){}
 FT_HOOKS.stepClip=c=>c&&c.steps?{n:c.steps.n,res:c.steps.res,mode:c.steps.mode,edited:!ftSqClean(c)}:null;
 FT_HOOKS.stepEditor={open:id=>ftSqOpen(id),close:()=>ftSqClose(),paint:()=>ftSqPaint(),add:(trackId,beat)=>ftSqAdd(S.tracks.find(t=>t.id===trackId),beat),gen:id=>{const f=findClip(id);if(f)ftSqGen(f.c)}};
+/* v0.288 (task FT-F9b): step sequencer clips, part 2. Ready-made patterns in the step editor (Pattern: Roll K B B B for the psytrance
+   bass with the first hit lower, Gallop, Off-beat; on a drum kit Four on the floor and Psy drums). A step clip turns into a normal MIDI
+   clip and back (clip menu, the editor's Normal clip button, commands clip.toNotes and clip.toSteps): back is exact when the notes were
+   not changed in between, otherwise the notes are read into steps (step size, ratchets, slides, accents, chance, gate) and the editor
+   says how many moved. Accented steps always reach Acid's accent (velocity over 0.88) and plain steps on an Acid track stay under it, so
+   accent and slide (the note overlaps the next one, which Acid glides into) play as on a 303. A converted clip keeps its notes' chance
+   (clip.nch). Push 1's drum step lane edits the pattern of a step clip under the playhead. Psy Bass's own slide is lane L's (hook). */
+const FTSQP={key:[['roll','Roll (K B B B)','Psytrance roll on the root: the bass on the three 16ths after each kick, the first of them lower'],
+    ['gallop','Gallop (K - B B)','The bass on the last two 16ths of each beat, the first of them lower'],['off','Off-beat (K - B -)','The bass on the off-beat 8th of each beat'],['clear','Clear all','Turn every step off']],
+  drums:[['four','Four on the floor','The kick on every beat'],['psy','Psy drums','Kick on every beat, clap on 2 and 4, closed hat on the off-beats'],['clear','Clear all','Turn every step off']]};
+Object.assign(FTSQ_TIP,{'Make normal MIDI clip':'Keep the notes as they are and drop the steps. Make step sequencer clip turns it back.',
+  'Make step sequencer clip':'Read the notes into a step pattern you can edit step by step. Notes off the steps move to the nearest one.'});
+/* velocity of a step: accent adds 25 %; on Acid an accent always crosses its accent line (0.88) and a plain step stays under it */
+function ftSqV(lv,ac,acid){let v=Math.min(1,lv+(ac?.25:0));if(ac)v=Math.max(v,.9);else if(acid)v=Math.min(v,.88);return+v.toFixed(4)}
+const ftSqAcid=c=>{const f=c&&findClip(c.id);return!!(f&&f.t.inst&&f.t.inst.preset==='acid')};
+function ftSqPreset(f,id){const c=f.c,t=f.t,st=c.steps;if(!st||!FTSQP[st.mode].some(p=>p[0]===id))return false;pushUndo();
+  if(st.res!==.25&&id!=='clear'){const P0=st.n*st.res;st.res=.25;if(Math.abs(c.len-P0)<1e-6)c.len=st.n*.25}
+  ftSqFit(st);st.g=st.rows.map(()=>Array(st.n).fill(null));
+  const put=(row,fn)=>{if(row<0||row>=st.rows.length)return;for(let i=0;i<st.n;i++){const q=fn(i%4,i);if(q)st.g[row][i]=q}};let sel=FTSQ.row;
+  if(st.mode==='key'){const r=st.rows.length-1;sel=r;
+    if(id==='roll')put(r,k=>k===0?null:k===1?{lv:.55}:{});else if(id==='gallop')put(r,k=>k===2?{lv:.6}:k===3?{}:null);else if(id==='off')put(r,k=>k===2?{}:null)}
+  else{const P=t.inst&&t.inst.preset==='drums'?ensurePads(t.inst):[],row=(...ty)=>{for(const y of ty){const i=P.findIndex(p=>p&&p.type===y);if(i>=0)return st.rows.findIndex(r=>r.p===36+i)}return-1};
+    let kick=row('kick','kd');if(kick<0)kick=0;sel=kick;
+    if(id==='four'||id==='psy')put(kick,k=>k===0?{}:null);
+    if(id==='psy'){put(row('clap','snare'),(k,i)=>k===0&&(i>>2)%2===1?{}:null);put(row('chat','shaker'),k=>k===2?{lv:.6}:null)}}
+  FTSQ.row=sel;ftSqGen(c);changed(false);ftSqPaint();return true}
+/* step clip to a normal MIDI clip: the notes stay; the steps are kept aside so turning it back is exact while the notes are unchanged */
+function ftSqToNotes(t,c){if(!c||!c.steps)return false;pushUndo();const st=c.steps;if(ftSqClean(c))c.stepsOld=JSON.parse(JSON.stringify(st));else delete c.stepsOld;delete c.steps;
+  if(c.notes.some(n=>n.ch!=null&&n.ch<1))c.nch=1;if(FTSQ.id===c.id)ftSqClose();changed(false);toast('This is a normal MIDI clip now. Make step sequencer clip in its menu turns it back.');return true}
+/* a normal MIDI clip to a step clip: the notes are read into steps */
+function ftSqRead(t,c){const N=(c.notes||[]).filter(n=>n&&isFinite(n.s)&&isFinite(n.p)),acid=!!(t.inst&&t.inst.preset==='acid'),ps=[...new Set(N.map(n=>n.p))].sort((a,b)=>b-a);
+  const dr=!!(t.inst&&t.inst.preset==='drums')&&ps.every(p=>p>=36&&p<=51),st={v:1,n:16,res:.25,mode:dr?'drums':'key',oct:3,gate:dr?.5:.85,rows:[],g:[]};
+  if(dr)st.rows=ftSqRowsFor(st,t);
+  else{if(ps.length>16)return{err:'This clip has '+ps.length+' different notes; a step clip has up to 16 rows.'};let ok=!ps.length;if(ok)st.rows=ftSqRowsFor(st,t);
+    for(let o=0;o<=8&&!ok;o++){st.oct=o;st.rows=ftSqRowsFor(st,t);ok=ps.every(p=>st.rows.some(r=>r.p===p))}
+    if(!ok){st.oct=3;st.rows=ps.map(p=>({p,nm:nname(p)}));st.cust=1;st.key='Notes of the clip'}}
+  /* the step size that fits the most notes: one note at the start of a step, or 2 to 4 hits spread evenly over it (a ratchet) */
+  const groups=d=>{const G=new Map();for(const n of N){const i=Math.floor(n.s/d+.02),k=n.p+'|'+i;if(!G.has(k))G.set(k,{p:n.p,i,ns:[]});G.get(k).ns.push(n)}let bad=0;
+    for(const g of G.values()){g.ns.sort((a,b)=>a.s-b.s);const m=g.ns.length;if(m>4){bad+=m-1;g.m=1;continue}g.m=m;let ok=true;for(let k=0;k<m;k++)if(Math.abs(g.ns[k].s-(g.i*d+k*d/m))>.01)ok=false;if(!ok){bad+=m;g.m=1}}return{G,bad}};
+  let best=null;for(const d of[.25,.125,.5]){const r=groups(d);if(!best||r.bad<best.bad)best=Object.assign(r,{d})}
+  const d=best.d,cl=Math.max(d,(c.off||0)+c.len);st.res=d;st.n=FTSQ.NS.find(n=>n*d>=cl-1e-6)||64;st.g=st.rows.map(()=>Array(st.n).fill(null));
+  const gl=[];
+  for(const g of[...best.G.values()].sort((a,b)=>a.i-b.i)){const r=st.rows.findIndex(x=>x.p===g.p);if(r<0)continue;const j=g.i%st.n;if(j<0||st.g[r][j])continue;const n=g.ns[0],last=g.ns[g.ns.length-1];
+    const ac=!!n.ac||acid&&n.v>.88,q={},lv=Math.round(Math.max(.05,Math.min(1,(n.v==null?.8:n.v)-(ac?.25:0)))*100)/100;if(lv!==FTSQ.LV)q.lv=lv;if(ac)q.ac=1;
+    if(g.m>1&&g.m===g.ns.length)q.rt=g.m;else if(last.sl||n.l>d*1.001)q.sl=1;else gl.push(n.l/d);if(n.ch!=null&&n.ch<1)q.ch=Math.max(.05,Math.round(n.ch*20)/20);st.g[r][j]=q}
+  if(gl.length){gl.sort((a,b)=>a-b);st.gate=Math.round(clamp(gl[gl.length>>1],.05,1)*100)/100}
+  return{st}}
+function ftSqToSteps(t,c){if(!c||!c.notes||c.steps)return false;if(!t||!t.inst){toast('Step sequencer clips go on instrument tracks.');return false}
+  if(c.stepsOld&&c.stepsOld.h===ftSqHash(c.notes)){pushUndo();c.steps=c.stepsOld;delete c.stepsOld;delete c.nch;changed(false);ftSqOpen(c.id);toast('Back to a step sequencer clip, as it was.');return true}
+  const R=ftSqRead(t,c);if(R.err){toast(R.err);return false}
+  const old=c.notes.map(n=>({p:n.p,s:n.s,l:n.l}));pushUndo();c.steps=R.st;delete c.stepsOld;delete c.nch;ftSqGen(c);
+  const key=n=>n.p+'|'+Math.round(n.s*1e4),nw=new Map(c.notes.map(n=>[key(n),n]));let moved=0,len=0;
+  for(const n of old){const m=nw.get(key(n));if(!m)moved++;else if(Math.abs(m.l-n.l)>1e-3)len++}
+  FTSQ.lastRead={moved,len,before:old.length,after:c.notes.length};changed(false);ftSqOpen(c.id);
+  toast(moved||len?'Made a step sequencer clip: '+(moved?moved+' note'+(moved>1?'s':'')+' moved to the steps':'')+(moved&&len?', ':'')+(len?len+' length'+(len>1?'s':'')+' changed':'')+'. Mod+Z undoes it.':'Made a step sequencer clip. The notes are the same.');return true}
+function ftSqCmdConv(dir){const f=selC&&findClip(selC);if(!f||!f.c.notes){toast('Select a MIDI clip first.');return}
+  if(dir==='notes'){if(!f.c.steps){toast('This clip is already a normal MIDI clip.');return}ftSqToNotes(f.t,f.c)}else{if(f.c.steps){ftSqOpen(f.c.id);return}ftSqToSteps(f.t,f.c)}}
+/* the editor: a Pattern menu and a Normal clip button */
+{const _b=ftSqBuild;ftSqBuild=function(){const had=!!FTSQ.el,el=_b.apply(this,arguments);try{if(!had&&el){const pr=el.querySelector('.ftsqt [data-a="pr"]');
+  if(pr){pr.insertAdjacentHTML('beforebegin','<label title="Write a ready-made pattern over the whole clip (Mod+Z undoes it)">Pattern <select data-a="pat"></select></label>');
+    pr.insertAdjacentHTML('afterend','<button type="button" data-a="norm" title="Make this a normal MIDI clip: the notes stay, the steps go. Make step sequencer clip in the clip menu turns it back.">Normal clip</button>')}}}catch(e){console.error('AudioLab steps',e)}return el}}
+{const _p=ftSqPaint;ftSqPaint=function(){const r=_p.apply(this,arguments);try{const el=FTSQ.el,f=el&&!el.hidden&&ftSqClip();if(f){const s=el.querySelector('[data-a="pat"]'),m=f.c.steps.mode;
+  if(s&&s.dataset.m!==m){s.dataset.m=m;s.innerHTML='<option value="">Choose…</option>'+FTSQP[m].map(([v,l,tp])=>`<option value="${v}" title="${tp}">${l}</option>`).join('')}if(s)s.value='';
+  if(f.c.steps.cust){const k=el.querySelector('.ftsqk');if(k){k.textContent='Notes of the clip';k.title='The rows are the notes this clip had. Follow key gives the rows of the key instead.'}}}}catch(e){console.error('AudioLab steps',e)}return r}}
+{const _a=ftSqAct;ftSqAct=function(a,val){const f=ftSqClip();if(f){const c=f.c,st=c.steps;
+  if(a==='pat'){if(val)ftSqPreset(f,val);return}
+  if(a==='norm'){ftSqToNotes(f.t,c);return}
+  if(st.cust&&(a==='od'||a==='ou')){const dx=a==='ou'?12:-12;if(!st.rows.every(r=>r.p+dx>=0&&r.p+dx<=127))return;pushUndo();st.rows=st.rows.map(r=>({p:r.p+dx,nm:nname(r.p+dx)}));ftSqGen(c);changed(false);ftSqPaint();return}
+  if(a==='fk'&&st.cust){delete st.cust;st.oct=st.oct==null?3:st.oct}
+  if(a==='mode'&&st.cust){delete st.cust;st.custK=1}}
+  const r=_a.apply(this,arguments);try{const g=ftSqClip();if(g&&a==='mode'&&g.c.steps.custK&&g.c.steps.mode==='key'){g.c.steps.cust=1;delete g.c.steps.custK;ftSqPaint()}}catch(e){}return r}}
+/* clip menu: Make normal MIDI clip on a step clip, Make step sequencer clip on a MIDI clip of an instrument track */
+{const _om=openMenu;openMenu=function(cx,cy,items){const M=FTSQ.menu;if(M&&M.k==='c'&&M.c&&M.c.notes&&Array.isArray(items)){try{const i=items.findIndex(o=>o&&o.label==='Open in piano roll');if(i>=0){const t=M.t,c=M.c;
+    const it=c.steps?{label:'Make normal MIDI clip',sub:'the notes stay, the steps go',act:()=>ftSqToNotes(t,c)}:{label:'Make step sequencer clip',sub:'edit the notes as steps',dis:!t.inst||!!t.frz,act:()=>ftSqToSteps(t,c)};
+    items=items.slice(0,i+1).concat([it],items.slice(i+1))}}catch(e){console.error('AudioLab steps',e)}}return _om.call(this,cx,cy,items)}}
+/* Push 1's drum step lane: on a step clip it shows and edits the pattern (the steps of the bar under the playhead) */
+{const _l=p1bLane;p1bLane=function(t){const L=_l.apply(this,arguments);try{const c=L.c;if(c&&c.steps&&c.steps.mode==='drums'){const st=c.steps;ftSqFit(st);const row=st.rows.findIndex(r=>r.p===L.pd),base=L.B-c.start+(c.off||0),idx=[];
+  for(let k=0;k<16;k++){const x=base+k/4,y=x/st.res,i=Math.round(y);let j=-1;if(Math.abs(y-i)<1e-6&&L.B+k/4<c.start+c.len-1e-6)j=((i%st.n)+st.n)%st.n;idx.push(j);L.on[k]=row>=0&&j>=0&&!!st.g[row][j]}
+  L.sq={c,row,idx}}}catch(e){console.error('AudioLab steps',e)}return L}}
+{const _s=p1bStep;p1bStep=function(t,k){const L=p1bLane(t);if(!L.sq)return _s.apply(this,arguments);const{c,row,idx}=L.sq,j=idx[k];if(row<0||j==null||j<0)return;
+  pushUndo();const a=c.steps.g[row];a[j]=a[j]?null:{};ftSqGen(c);changed(false)}}
+{const _x=p1bClear;p1bClear=function(t,i){const L=p1bLane({inst:{psel:i},clips:t.clips});if(!L.sq)return _x.apply(this,arguments);const{c,row,idx}=L.sq;if(row<0)return;const a=c.steps.g[row];
+  if(!idx.some(j=>j>=0&&a[j]))return;pushUndo();for(const j of idx)if(j>=0)a[j]=null;ftSqGen(c);changed(false)}}
+try{for(const k of['nch','stepsOld'])if(Array.isArray(LK.MIDI)&&!LK.MIDI.includes(k))LK.MIDI.push(k)}catch(e){}
+FT_HOOKS.stepConvert={toSteps:id=>{const f=findClip(id);return f?ftSqToSteps(f.t,f.c):false},toNotes:id=>{const f=findClip(id);return f?ftSqToNotes(f.t,f.c):false},
+  preset:(id,p)=>{const f=findClip(id);return f&&f.c.steps?ftSqPreset(f,p):false},presets:mode=>(FTSQP[mode]||[]).map(p=>({id:p[0],name:p[1],tip:p[2]}))};
 const scBind=a=>{const k=UI.keys&&UI.keys[a.id];return k===undefined?a.d:k};
 const scCombo=e=>{const k=e.key;if(['Shift','Control','Alt','Meta','CapsLock'].includes(k))return null;let n=k===' '?'Space':k.length===1?k.toUpperCase():k;const p=[];if(e.metaKey||e.ctrlKey)p.push('Mod');if(e.altKey)p.push('Alt');if(e.shiftKey&&!(k.length===1&&!/[a-z]/i.test(k)&&k!==' '))p.push('Shift');if(e.altKey&&/^Key/.test(e.code))n=e.code.slice(3);return p.concat(n).join('+')};
 const scShow=c=>!c?[]:c.split('+').map(x=>({Mod:'⌘',Shift:'⇧',Alt:'⌥',Delete:'⌫',Backspace:'⌫',ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Escape:'Esc'})[x]||x);
