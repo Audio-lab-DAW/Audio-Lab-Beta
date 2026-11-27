@@ -1,0 +1,332 @@
+<meta charset="utf-8">
+<title>AudioLab built-in sounds: what to improve and add</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a studio rack like the earlier pick pages. Sticky group chips, one card per device with its grade and numbered improvements, a picks bar fixed to the bottom. Dark-first like AudioLab. */
+:root{
+  --bg:#0d0f14; --panel:#151922; --panel2:#1b202b; --line:#262c39; --fg:#e7eaf0; --dim:#9aa3b5; --faint:#6b7488;
+  --accent:#4cc9f0; --star:#f5c84c; --part:#ff9a3c; --no:#ff5d73; --ok:#3ecf8e; --sel:rgba(76,201,240,.13);
+  --today:#ff9a3c; --proto:#4cc9f0;
+  --display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; --body:'Inter',ui-sans-serif,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); --today:#c2620a; --proto:#0b88b4; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f5f9; --panel:#ffffff; --panel2:#eef1f6; --line:#d9dee8; --fg:#141821; --dim:#4d5668; --faint:#7a8396;
+  --accent:#0b88b4; --star:#b98400; --part:#c2620a; --no:#c8243b; --ok:#13865a; --sel:rgba(11,136,180,.09); --today:#c2620a; --proto:#0b88b4; color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--body);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 150px}
+header h1{font:700 clamp(26px,4vw,38px)/1.1 var(--display);margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
+header h1 span{color:var(--accent)}
+.lede{color:var(--dim);max-width:72ch;margin:0 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--faint);font-size:12px;margin:14px 0 0}
+.legend b{color:var(--dim);font-weight:500}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px;margin:18px 0 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.kpi b{display:block;font:600 18px var(--display);font-variant-numeric:tabular-nums}
+.kpi span{color:var(--dim);font-size:12.5px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;margin-top:18px;border-bottom:1px solid var(--line)}
+nav a,nav button{font:500 12px var(--body);color:var(--dim);text-decoration:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;cursor:pointer}
+nav a:hover,nav button:hover{color:var(--fg);border-color:var(--accent)}
+section{scroll-margin-top:64px}
+h2{font:600 19px var(--display);margin:30px 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 small{font:500 12px var(--body);color:var(--faint)}
+.gnote{color:var(--dim);font-size:13px;margin:0 0 12px;max-width:80ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:12px;align-items:start}
+.card{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.head{display:flex;align-items:flex-start;gap:10px}
+.grade{flex:none;width:44px;height:44px;border-radius:8px;display:grid;place-items:center;font:700 18px var(--display);border:1.5px solid currentColor}
+.g-A{color:var(--ok)}.g-B{color:var(--accent)}.g-C{color:var(--part)}.g-D{color:var(--no)}.g-N{color:var(--star)}
+.ttl{flex:1;min-width:0}
+.ttl .t{font:600 16px/1.25 var(--display)}
+.ttl .k{font:500 11.5px var(--mono);color:var(--faint)}
+.facts{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:12.5px;color:var(--dim)}
+.facts li{padding-left:12px;position:relative}
+.facts li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.facts li.m::before{background:var(--accent)}
+.facts b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.vs{font-size:12px;color:var(--faint);margin:0}
+.items{display:grid;gap:7px}
+.it{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;cursor:pointer;transition:border-color .15s,background .15s}
+.it:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.it.on{background:linear-gradient(var(--sel),var(--sel)),var(--panel2);border-color:var(--accent)}
+.it input{appearance:none;width:19px;height:19px;border:1.5px solid var(--faint);border-radius:5px;margin:1px 0 0;cursor:pointer;display:grid;place-items:center;background:var(--panel)}
+.it input:checked{background:var(--accent);border-color:var(--accent)}
+.it input:checked::after{content:"";width:10px;height:6px;border:2px solid var(--bg);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.it input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ih{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.id{font:500 12px var(--mono);color:var(--accent)}
+.it .n{font:600 14px/1.3 var(--display)}
+.stars{color:var(--star);letter-spacing:1px;font-size:12px}
+.it p{grid-column:2;margin:0;font-size:12.5px;color:var(--dim)}
+.tags{grid-column:2;display:flex;flex-wrap:wrap;gap:5px;font-size:11px}
+.tag{border-radius:999px;padding:1px 8px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.tag.v2{color:var(--part);border-color:color-mix(in srgb,var(--part) 45%,transparent)}
+.tag.same{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.tag.both{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.demo{display:grid;gap:7px;border:1px dashed var(--line);border-radius:8px;padding:9px}
+.demo .dt{font-size:12px;color:var(--dim)}
+.demo .row{display:flex;flex-wrap:wrap;gap:6px}
+.pb{font:600 12.5px var(--body);border-radius:7px;padding:7px 11px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg);display:inline-flex;gap:7px;align-items:center}
+.pb i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pb.today i{background:var(--today)}.pb.proto i{background:var(--proto)}
+.pb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.pb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+canvas.cv{width:100%;height:120px;display:block;border-radius:7px;background:var(--panel2);border:1px solid var(--line)}
+.note{font-size:11.5px;color:var(--faint);margin:0}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--panel) 94%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bar .in{max-width:1240px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.line{flex:1 1 320px;min-width:0;font:500 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+.bar input[type=text]{flex:1 1 200px;min-width:0;font:13px var(--body);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+.btn{font:600 13px var(--body);border:0;border-radius:7px;padding:9px 14px;cursor:pointer;background:var(--accent);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+.btn:focus-visible,.bar input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font:500 12px var(--body);color:var(--faint);white-space:nowrap}
+footer{margin-top:36px;color:var(--faint);font-size:12px;max-width:86ch}
+footer a{color:var(--accent)}
+.tbl{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:720px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font:600 12px var(--body);color:var(--dim);background:var(--panel2)}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px;white-space:nowrap}
+@media (max-width:560px){.bar .in{gap:6px}.count{order:-1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>AudioLab built-in sounds: <span>what to improve and add</span></h1>
+  <p class="lede">I measured every built-in instrument and the main effects of AudioLab v0.263 through the app's own render, headless: aliasing on high notes, filter and EQ curves, envelope speed, stereo, compressor behaviour, reverb tails and cost. Then I compared each one with the plug-ins you own (Serum 2, Phase Plant, Pigments, Kick 3, SubLabXL, FabFilter, Kilohearts, Valhalla) and with what full-on psytrance needs most.</p>
+  <p class="lede">Each card gives the device a grade for today and numbered improvements (B1, B2 ...). New devices are N1 to N6. Any change that alters the sound is a <b>v2 engine mode</b> or a new device, so old projects never change by themselves. Tick what you want and paste the line from the bar at the bottom. The play buttons compare <b style="color:var(--today)">today</b> (rendered by the app) with a <b style="color:var(--proto)">prototype</b> computed in this page on the same notes.</p>
+  <div class="legend"><span><b>Grade</b> A (stands next to the plug-in) to D (needs a rebuild)</span><span><b>★★★</b> most value for psytrance</span><span><b>CPU</b> extra, one core</span><span><b>Old projects</b> what happens to saved songs</span><span><b>Both engines</b> the native engine (NB) ports it bit for bit too</span></div>
+  <div class="kpis">
+    <div class="kpi"><b>−63 to −157 dB</b><span>aliasing of the clean engines at C7: Psy Bass, Venom, Wavetable, Sub, the saw lead</span></div>
+    <div class="kpi"><b>−30 dB</b><span>Acid at C7 once Distortion is on (−48 dB with it off): no oversampling</span></div>
+    <div class="kpi"><b>+3.4 dB, not +9.7</b><span>a +12 dB Pro EQ bell at 16 kHz, read at 20 kHz: the top bands get narrow</span></div>
+    <div class="kpi"><b>−4 dB, not −21</b><span>Compressor at 8:1, 24 dB over threshold: the browser adds hidden make-up gain</span></div>
+  </div>
+</header>
+<nav id="nav" aria-label="Groups"></nav>
+<main id="main"></main>
+
+<section id="table"><h2>The audit in numbers <small>v0.263, 48 kHz, headless Chromium; script tools/engine-lab/ae4/measure.py</small></h2>
+<p class="gnote">Aliasing is the energy between 40 Hz and 0.45 × the fundamental of a single held C7 (2093 Hz), against the whole sound. A clean high note has nothing there, so detune and unison cannot fake it. Cost is offline render time per second of audio, minus an empty render: a rough guide, not a live CPU meter.</p>
+<div class="tbl"><table id="tbl"><thead><tr><th>Device</th><th>Engine</th><th>Aliasing C7</th><th>Attack to 90 %</th><th>Stereo (L/R corr.)</th><th>Cost (s per s)</th><th>Grade</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<footer>Research: docs/research-built-in-sounds.md in the repository, with the audit, the findings and every source. Measurement and demo scripts: tools/engine-lab/ae4/. Not covered here because the parallel tasks take them: engine-wide sound quality (sample rate, resampling, dither) in AE1, performance in AE2, mixing and the master chain in AE3. Not repeated from the feature picks: the volume shaper (F16), multi-shaper (F17), kick and bass lab (F18), step FX (F19), MPE (F14), slicing (F23), multisample zones (F24) and racks with macros (F33). The prototypes in this page are simplified DSP written for the comparison, not the final code.</footer>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <span class="count" id="count">0 picked</span>
+    <div class="line" id="line" aria-live="polite">AE4 picks: none yet</div>
+    <input type="text" id="note" placeholder="Note (optional)" aria-label="Note to add to the line">
+    <button class="btn" id="copy" type="button">Copy line</button>
+    <button class="btn ghost" id="star" type="button">Take all ★★★</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+  </div>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const G=[
+ ['bass','Bass and kick','The heart of a full-on track: the kick on every beat and the rolling bass on the three 16ths after it.'],
+ ['syn','Synths','Leads, pads, plucks, acid and metallic textures.'],
+ ['drum','Drums','Hats, claps, snares and toms on top of the kick.'],
+ ['dyn','EQ, dynamics and drive','The tone and control tools every track uses.'],
+ ['space','Reverbs, delays and filters','Big but clean space, throws and sweeps.'],
+ ['new','New devices worth adding','Things the plug-ins you own do and AudioLab has no device for yet.']];
+/* device: [group,name,key,grade,facts[[text,measured]],vs,items[[id,name,stars,desc,cpu,old,both]],demo] ; old: 'same' | 'v2' | 'new' | 'off' */
+const D=[
+ ['bass','Psy Bass','psyb · al-psb worklet','B+',[['Saw and square with a 4-point polyBLEP; the whole voice runs at 2× and comes down through a halfband filter',0],['Aliasing at C7 <b>−63 dB</b>; one rolling 16th falls 40 dB in <b>58 ms</b>; 90 % of its peak <b>8.4 ms</b> after the note (default preset)',1],['24 dB ladder or 12 dB SVF, both linear: no saturation inside the filter, tanh only after it',0]],
+  'Against: the rolling basses you would build in Serum 2 or Phase Plant with a driven ladder filter.',
+  [['B1','Driven ladder (v2 engine)',3,'A tanh in each stage of the 24 dB ladder, solved at the 2× rate it already runs at. The resonance squelches and compresses like a hardware filter instead of whistling on top.','+0.3 %','v2',1],
+   ['B2','Pitch blip per note',2,'A short pitch drop at the start of each note (0 to 12 semitones over 2 to 30 ms): the "tok" many psy basses have on every 16th. Off at 0.','+0.02 %','off',1],
+   ['B3','Snap attack',1,'Attack down to 0.3 ms with a 32-sample anti-click ramp, for basses that hit right after the kick gap.','none','off',1]],'bass'],
+ ['bass','Kick designer','kick · per-note render','B−',[['A sine with its own curved log sweep, computed per sample: exact and click-free, no Web Audio ramps',0],['One layer; drive is a tanh with no oversampling; output scaled to 0.95; the sound is rendered per note, so nothing can move during a hit',0]],
+  'Against Kick 3: layers, drawn pitch and amp curves, pitch snap to the key, phase align, a click layer, sub harmonics.',
+  [['B4','Drawn pitch and level curves, snapped to the key',3,'Curve points with Bézier bends for pitch and level; the end note snaps to the project key (the kick and bass lab F18 shows the clash; this lets you fix it in the kick). Today\'s knobs become the starting curve.','none','same',1],
+   ['B5','Click layer',2,'A second layer for the attack: noise burst, short FM zap or your own sample, with its own filter, envelope and phase alignment to the body.','+0.05 %','off',1],
+   ['B6','Clean drive and a clipper',2,'Drive at 4× with antiderivative antialiasing (ADAA), then an optional soft clipper, so a hard psy kick stays clean in the top end.','+0.1 %','v2',1]],'kick'],
+ ['bass','Sub','sbass · al-sbs worklet','A−',[['Built from exact harmonics: aliasing at C7 below <b>−150 dB</b>; drive is computed as harmonics, not by waveshaping',1],['Mono, glide and legato, "duck to kick"',0]],
+  'Against SubLabXL: a second VA or sample layer and more distortion types.',
+  [['B7','Top layer for small speakers',1,'A band-limited saw or square with its own low-pass, mixed above 150 Hz only, so the sub is heard on phones and laptops (SubLab\'s VA layer).','+0.1 %','off',1]]],
+ ['syn','Acid','acid · al-poly (or nodes)','C',[['Two 12 dB biquads in series, not a ladder or diode filter',0],['Distortion after the filter with no oversampling: aliasing at C7 goes from <b>−48 dB</b> (Distortion 0) to <b>−30 dB</b> (Distortion 55 to 100)',1],['Accent is velocity above 0.88; slide is a per-sample glide',0]],
+  'Against a TB-303 model (Open303, the diode ladder in Zavalishin\'s book): the squelch comes from a resonant diode ladder and the accent circuit.',
+  [['B8','Acid v2: diode ladder and accent sweep',3,'A 4-pole diode ladder solved without delay (ZDF), nonlinear, at 2× with the distortion inside the loop. Repeated accents stack up like the 303\'s accent capacitor, so the filter "wows" higher and higher.','+0.4 %','v2',1],
+   ['B9','Squelch controls',2,'Separate decay for accented notes, filter tracking, soft attack and a sub octave (the Devil Fish mods).','none','off',1]],'acid'],
+ ['syn','Venom','venom · al-venom worklet','B+',[['Two scanning wavetables with 8 mip levels: aliasing at C7 <b>−69 dB</b>',1],['ZDF 4-pole ladder and SVF with drive, comb, vowel; 2 LFOs and an 8-slot mod matrix; several distortions, none oversampled',0],['Unison is clamped to 7 in the code while the knob goes to 16; with 7 voices the energy below the note rises to <b>−43 dB</b> (to check: drift or aliasing)',1]],
+  'Against Serum 2 and Phase Plant: 16-voice unison with a detune curve, your own wavetables, warp modes, MSEGs, 16+ mod slots.',
+  [['B10','Unison like Serum',3,'Up to 16 voices for real, the JP-8000 detune spacing (Szabo), random or fixed start phase per voice, stereo spread, and a blend of the centre voice against the sides.','+3 % at 16 voices','same',1],
+   ['B11','Your own wavetables',2,'Import WAV wavetables (2048-sample frames, the layout Serum uses), draw or edit frames, cubic interpolation between samples.','none','same',1],
+   ['B12','Oversampled distortion and filter drive',2,'2× with polyphase halfband filters (HIIR, WTFPL licence) around the distortion and the filter.','+40 % of the voice','v2',1],
+   ['B13','More modulation',2,'16 slots, 4 envelopes, drawn LFO and MSEG shapes, audio-rate FM from oscillator B to A.','depends','same',1]],'saw'],
+ ['syn','Wavetable','wtab · al-poly (or nodes)','C',[['Very clean: aliasing at C7 <b>−114 dB</b>',1],['The tables hold only <b>63 harmonics</b>, so a note at A1 (55 Hz) stops at 3.5 kHz: basses and low leads sound dull',0],['Parameters are read when a note starts',0]],
+  'Against Serum 2: full-band tables of 256 frames, warp modes, import.',
+  [['B14','Full-band tables (v2) and a shared import',2,'Tables up to 1024 harmonics and 256 frames, using Venom\'s import (B11). Or retire Wavetable into Venom as its simple face.','+0.05 %','v2',1]]],
+ ['syn','Plant and the classic synths','plant, saw, square, sub, bass, reese, pad, strings, pluck, keys · al-poly','C',[['2-point polyBLEP: the saw lead is clean (<b>−80 dB</b> at C7); Plant <b>−40 dB</b>',1],['12 dB RBJ biquad recomputed every 16 samples; no glide; Plant has one LFO, to the cutoff only',0],['Knob moves and automation do not reach notes that are already sounding; the classic synths are mono (L = R)',1]],
+  'Against Pigments\' analog engine and Phase Plant\'s analog generator.',
+  [['B15','Live parameters',3,'Knob moves and automation reach the notes already playing, smoothed per sample. Same sound with the knobs still.','+0.1 %','same',1],
+   ['B16','Analog v2 voice',2,'A ZDF filter with drive (from N5), 4-point polyBLEP, glide, 2 LFOs, stereo unison with the JP-8000 spacing.','+0.2 % per voice','v2',1]]],
+ ['syn','Vector FM and Orbit','vfm, orb · al-vfm, al-orb','B',[['Phase modulation on 2048-point tables, linear interpolation; at E7 the energy below the note is <b>−32 dB</b> (feedback and ratios fold back)',1],['Envelopes and index change every 64 samples',0]],
+  'Against FM8 or Serum\'s FM: clean feedback FM at high notes is what makes metallic psy stabs.',
+  [['B17','Per-sample index and smoother feedback',2,'Index and envelopes per sample, feedback averaged over two samples (the DX7 method), 2× when the index is high.','+0.3 %','v2',1]]],
+ ['syn','Growl','growl · per-note render','B−',[['2-operator FM into formant filters (TPT SVFs); fold and drive without oversampling: <b>−26 dB</b> at E7, <b>−45 dB</b> at C7',1],['Each note is rendered when it is played, so the vowel only moves by the LFO set before the note',0]],
+  'Against Serum or Phase Plant growls, where the vowel follows a macro while you hold the note.',
+  [['B18','Growl live',2,'The same voice in a worklet, so vowel, FM and fold follow automation and macros during a note. With the knobs still, the sound is the same.','+0.4 %','same',1],
+   ['B19','Clean fold',1,'Fold and drive at 2× with ADAA.','+0.1 %','v2',1]]],
+ ['drum','Drum kit and the drum designers','drums, zhat, zsnare, zclap, ztom','C+',[['Kit hats and cymbals: 6 square OscillatorNodes (band-limited by the browser)',0],['The Hat designer uses 6 naive squares (they alias); tanh drive without oversampling; each hit is rendered per note',0],['The kit has 3 random variants per pad',0]],
+  'Against sample packs and Kick 3\'s click layers: clean top end and hits that are never twice the same.',
+  [['B20','Hat designer v2',2,'Band-limited (polyBLEP) metal oscillators and 2× drive: cleaner 16th hats at 145 BPM.','none (pre-rendered)','v2',1],
+   ['B21','Velocity to tone and small variations',2,'A harder hit is brighter and longer; each designer hit gets a slight random pitch and decay change (round robin).','none','off',1]]],
+ ['dyn','Pro EQ','eq · native biquads','B−',[['A +12 dB bell at 16 kHz (Q 1) measures <b>+1.8 dB</b> at 8 kHz (analog +4.0) and <b>+3.4 dB</b> at 20 kHz (analog +9.7): bands near the top get much narrower than asked',1],['A 24 dB cut is two Q 0.707 stages: −6 dB at the corner instead of −3 dB',0],['Dynamic EQ is moved by a 30 ms timer on the main thread',0]],
+  'Against Pro-Q 4: analog-matched bands up to Nyquist, natural and linear phase, sample-accurate dynamic EQ with sidechain.',
+  [['B22','Matched bands',3,'Coefficients fitted to the analog shape (Vicanek 2016): the same cost per sample, the top bands keep their width. "Natural" for new EQs, "Classic" kept for old ones.','none','v2',1],
+   ['B23','True Butterworth cuts',2,'The right Q per stage, so 24 and 48 dB cuts are −3 dB at the frequency shown.','none','v2',1],
+   ['B24','Dynamic EQ in the audio thread',2,'Per-band detectors in a worklet, sample accurate, with an external sidechain per band.','+0.2 %','v2',1],
+   ['B25','Linear-phase mode',1,'For the master and bass buses, with its latency reported to the delay compensation.','+1 to 2 %','off',0]],'eq'],
+ ['dyn','Compressor, OTT, Multiband','comp, ott, mband · DynamicsCompressorNode','C−',[['The browser\'s own compressor: knee fixed at 6 dB, a 6 ms look-ahead always on, no sidechain, no mix',0],['Attack is honoured (63 % at <b>2, 10, 47 ms</b> for 1, 10, 50 ms set)',1],['At 8:1 with a tone 24 dB over the threshold the level drops only <b>3.5 to 4.3 dB</b> against 1:1 (about 21 dB expected): the browser adds its own make-up gain, so Ratio and Threshold do not do what they say',1],['OTT\'s "upward" part is make-up gain, not upward compression',0]],
+  'Against Pro-C 2 and OTT: styles, sidechain with filter, mix, real upward compression.',
+  [['B26','Compressor v2',3,'A worklet compressor after Giannoulis, Massberg and Reiss (2012): soft knee, peak or RMS detector, clean, punch and opto styles, external sidechain with a high-pass, mix, look-ahead 0 to 5 ms, gain reduction that matches the numbers.','+0.2 %','v2',1],
+   ['B27','OTT and Multiband on the same core',2,'Real upward compression below the threshold, the 3-band OTT sound with honest controls.','+0.5 %','v2',1]]],
+ ['dyn','Drive and Soft Clipper','drive, clip · WaveShaper','C+',[['Drive: one curve at 4×: a 4.5 kHz sine at full drive leaves aliasing at <b>−40 dB</b>; no tone, bias or modes',1],['Soft Clipper at 4×: <b>−128 dB</b> at the same level',1],['Timeless delay\'s drive has no oversampling: <b>−35 dB</b>',1]],
+  'Against Saturn 2 and Kilohearts Distortion.',
+  [['B28','Antialiasing on every waveshaper',2,'First-order ADAA (Parker, Zavalishin, Le Bivic 2016) together with the oversampling already there: one shared function for Drive, Timeless delay, Auto Filter and the Grid fold.','+0.05 % each','v2',1],
+   ['B29','Tone, bias and modes for Drive',1,'Even harmonics by bias, a tilt before and after, tape, tube, diode and fold curves. The full version is N2.','none','off',1]]],
+ ['dyn','Limiter','limit · al-limit worklet','B+',[['Look-ahead 1 to 30 ms, two-stage release, a 4-point true-peak estimate, then a hard clip at the ceiling; ported to the native engine bit for bit',0]],
+  'Against Pro-L 2. The master chain belongs to the mixing task (AE3); this card only covers the device.',
+  [['B30','Oversampled true-peak detection',1,'4× polyphase detection as in ITU-R BS.1770-5 instead of the 4-point estimate. Check with AE3 before building.','+0.3 %','v2',1]]],
+ ['space','Space reverb','reverb · ConvolverNode with a generated noise IR','C+',[['Tail is noise-flat, with no metallic ring (peak over median <b>2.79</b>; pure noise is 2.77) and fully decorrelated (L/R <b>0.003</b>); RT60 <b>2.0 s</b> for 2.2 s set',1],['Dense from the first 10 ms: no early reflections and no build-up; static (no modulation); the IR is rebuilt 120 ms after a change',1]],
+  'Against ValhallaRoom, VintageVerb and Supermassive: early reflections, modulation, size, freeze, shimmer.',
+  [['B31','Ducking and synced pre-delay',2,'The tail ducks under the dry signal (for psy leads); pre-delay in notes.','+0.02 %','off',1],
+   ['B32','Early reflections and build-up',1,'IR options for a room-like start and a slower attack of the tail.','none','v2',1]],'verb'],
+ ['space','Convolution Reverb','conv · ConvolverNode','C',[['Also a generated IR, with a few early taps; 8 room types; the default room measures RT60 <b>0.26 s</b>',1]],
+  'Against any convolution plug-in: your own impulse responses.',
+  [['B33','Load your own impulse responses',2,'WAV files, mono, stereo or true stereo (4 channels), with trim, reverse and stretch.','same as today','same',1]]],
+ ['space','Echo delay and Timeless delay','delay, tdelay · DelayNodes','C+',[['Echo: two delay lines, filters in the loop, no drive or modulation; time changes glide over 20 ms',0],['Timeless: tanh in the loop without oversampling (<b>−35 dB</b> aliasing), wow LFO',1]],
+  'Against ValhallaDelay and EchoBoy: diffusion, ducking, tape modes.',
+  [['B34','Diffusion in the feedback loop',3,'Four allpass filters inside the loop with an amount knob: each repeat smears more, so a lead throw turns into a cloud.','+0.1 %','off',1],
+   ['B35','Ducking delay',2,'The repeats drop while the dry plays and come up in the gaps.','+0.02 %','off',1],
+   ['B36','Tape mode',1,'Wow and flutter scaled to the delay time, age and noise, oversampled drive.','+0.1 %','v2',1]]],
+ ['space','Low-pass filter and Auto Filter','filter, afilt · biquads','D',[['Low-pass filter: one 12 dB biquad, values set without smoothing, so fast sweeps can zipper',0],['Auto Filter: biquads (12 and 24 dB, vowel by 3 bandpasses); drive with no oversampling',0]],
+  'Against Kilohearts Filter and Pro-Q sweeps: ladder, diode, SVF and comb models with drive.',
+  [['B37','Filter v2',3,'A new Filter device on the shared filter set (N5): ladder, diode, SVF 12 and 24, comb and formant, drive inside, every value smoothed. Auto Filter gets the same models. The old Low-pass filter stays for old projects.','+0.1 %','new',1]]]
+];
+const N=[
+ ['N1','Hall: an algorithmic reverb',3,'A feedback delay network of 8 or 16 lines (Householder matrix) and a Dattorro plate, with input diffusion, slow modulation of the delay lines, damping per line, shimmer, freeze and ducking. Modes from small room to huge psy pad space.','The reverb psytrance pads and leads are made with: big, moving, clean. Today only noise IRs exist.','+0.5 to 1 %','Signalsmith "Let\'s write a reverb" (MIT), CloudSeedCore (MIT, credit asked), Freeverb (public domain); ideas from Valhalla\'s blog','verb'],
+ ['N2','Saturate: multiband saturation',3,'Up to 3 bands, ten models (tape, tube, transistor, diode, fold, rectify, bit), ADAA plus 2×, tone, dynamics per band, modulation.','Saturn 2 is on most psy basses and leads; AudioLab\'s Drive has one curve.','+0.5 %','HIIR (WTFPL) for the halfband filters; ADAA from the open papers','alias'],
+ ['N3','FM6: a classic six-operator FM synth',2,'32 algorithms, ratio or fixed frequency per operator, an envelope per operator, feedback, velocity and key scaling. For metallic stabs, bells and FM basses.','Vector FM is a particle field; a plain operator page is quicker for the metallic textures psytrance uses.','about 1 % for 8 voices','msfa, Dexed\'s engine (Apache 2.0; Dexed itself is GPL and not copyable)'],
+ ['N4','Comb and Resonator',2,'A bank of tuned combs or resonators that follow MIDI or a chord, with Karplus feedback and damping: metal and strings out of noise, drums or the bass.','Kilohearts Comb Filter and Resonator snap-ins, Serum 2\'s comb filters.','+0.1 to 0.3 %','own code; Zavalishin\'s book for the damping filters'],
+ ['N5','One filter set for everything',3,'One library of filters solved without delay: Moog-style ladder (nonlinear, Huovilainen), diode ladder, SVF (Simper), MS-20 style Sallen-Key, comb, formant. Used by Filter v2, Acid v2, Plant v2, Venom and Auto Filter, and ported once to the native engine.','The filter is most of a synth\'s character; today every device has its own.','none by itself','Zavalishin, The Art of VA Filter Design (free PDF); Cytomic SVF papers; Open303 engine (MIT, licence seen only second-hand)'],
+ ['N6','Clouds: a granular texture effect',2,'Grains from the live input with freeze, pitch, size, density, spread and feedback.','Psy breakdowns and atmospheres; Serum 2 and Pigments have granular engines, and the Sampler\'s grain mode runs from a 40 ms main-thread timer.','+0.5 to 1 %','Mutable Instruments Clouds/Beads ideas (STM32 code MIT); Roads, Microsound']
+];
+const TBL=[['Psy Bass','al-psb, 2×','−63 dB','8.4 ms','1.00 (mono)','0.02','B+'],['Sub','al-sbs, additive','−157 dB','10.4 ms','1.00 (mono)','<0.01','A−'],['Kick designer','per-note render','n/a (sweep)','0.04 ms','1.00 (mono)','<0.01','B−'],['Acid','al-poly','−39 dB (−30 dB with drive)','2.7 ms','1.00 (mono)','<0.01','C'],['Venom','al-venom','−71 dB (unison 7: −43 dB)','5.3 ms','1.00 (init), 0.82 (unison 7)','0.07','B+'],['Wavetable','al-poly','−114 dB','11.1 ms','1.00 (init), 0.46 (unison 5)','<0.01','C'],['Saw lead','al-poly','−81 dB','7.7 ms','1.00','0.03','C'],['Reese','al-poly','−61 dB','23 ms','1.00','<0.01','C'],['Plant (lush)','al-poly','−40 dB','203 ms (pad)','0.63','0.07 to 0.10','C'],['Vector FM','al-vfm','−32 dB (E7), −140 dB (C7)','3.8 ms','0.83','0.01 to 0.04','B'],['Growl','per-note render','−26 dB (E7), −45 dB (C7)','34 ms','0.98','<0.01','B−'],['Fractal','al-crki, 2×','−71 dB','15 ms','1.00','0.04 to 0.06','B']];
+const DESC={same:'Old projects: same sound',v2:'Old projects: kept on v1; v2 is a choice',off:'Old projects: same (new control off)',new:'Old projects: keep the old device'};
+
+/* ---------------- render ---------------- */
+const sel=new Set();let note='';try{const s=JSON.parse(localStorage.getItem('ae4picks')||'{}');(s.p||[]).forEach(x=>sel.add(x));note=s.n||''}catch(e){}
+const esc=s=>String(s).replace(/&(?![a-z#0-9]+;)/g,'&amp;');
+const st=n=>'★'.repeat(n)+'<span style="opacity:.25">'+'★'.repeat(3-n)+'</span>';
+const itemHTML=(id,name,stars,desc,cpu,old,both)=>`<label class="it${sel.has(id)?' on':''}" data-id="${id}"><input type="checkbox" ${sel.has(id)?'checked':''} aria-label="${id} ${esc(name)}"><span class="ih"><span class="id">${id}</span><span class="n">${esc(name)}</span><span class="stars" aria-label="${stars} of 3 stars">${st(stars)}</span></span><p>${esc(desc)}</p><span class="tags"><span class="tag">CPU ${cpu}</span><span class="tag ${old==='v2'?'v2':'same'}">${DESC[old]}</span>${both?'<span class="tag both">Both engines</span>':'<span class="tag">Web engine first</span>'}</span></label>`;
+const DEMOS={
+ bass:['Rolling bass, F1, K-B-B-B at 145 BPM (bass only)','Today: Psy Bass default','Driven ladder prototype'],
+ acid:['The acid line of the app\'s own psy demo, two bars','Today: Acid, cut 520, dist 65','Diode-ladder prototype with accent sweep, 2×'],
+ kick:['Four kicks at 145 BPM, tuned to F1','Today: Kick designer as in the demo song','Prototype: drawn sweep, click layer, clean drive'],
+ saw:['F minor chord, 7-voice unison','Today: Venom, unison 7','Prototype: JP-8000 spacing, random phase, spread'],
+ verb:['A short pluck arpeggio, 3.2 s decay, 35 % wet','Today: Space reverb','Prototype: 8-line FDN with diffusion and modulation'],
+ alias:['A sine sweep 1 to 8 kHz into hard drive (listen for whistles moving down)','Without antialiasing','ADAA at 2× (N2, B28)'],
+ eq:['A +12 dB bell at 16 kHz, Q 1, at 48 kHz','','']};
+function demoHTML(k){const d=DEMOS[k];if(k==='eq')return`<div class="demo"><span class="dt">${d[0]}: <b style="color:var(--today)">today\'s biquad</b> (dots: measured in the app) against <b style="color:var(--proto)">the analog shape</b> a matched design follows</span><canvas class="cv" id="eqcv" width="760" height="240" aria-label="EQ curves"></canvas></div>`;
+ return`<div class="demo"><span class="dt">${d[0]}</span><div class="row"><button class="pb today" type="button" data-demo="${k}" data-v="a" aria-pressed="false"><i></i>${d[1]}</button><button class="pb proto" type="button" data-demo="${k}" data-v="b" aria-pressed="false"><i></i>${d[2]}</button></div></div>`}
+function render(){
+ const nav=document.getElementById('nav'),main=document.getElementById('main');
+ nav.innerHTML=G.map(g=>`<a href="#g-${g[0]}">${g[1]}</a>`).join('')+'<a href="#table">Numbers</a>';
+ main.innerHTML=G.map(([gk,gn,gd])=>{let cards;
+  if(gk==='new')cards=N.map(([id,name,stars,desc,why,cpu,open,demo])=>`<article class="card"><div class="head"><span class="grade g-N" aria-label="new device">${id}</span><div class="ttl"><div class="t">${esc(name)}</div><div class="k">new device</div></div></div><p class="vs"><b style="color:var(--dim)">Why:</b> ${esc(why)}</p><div class="items">${itemHTML(id,'Add '+name.split(':')[0],stars,desc,cpu,'new',1)}</div><p class="note">Open code and papers: ${esc(open)}</p>${demo?demoHTML(demo):''}</article>`).join('');
+  else cards=D.filter(d=>d[0]===gk).map(([g,name,key,grade,facts,vs,items,demo])=>`<article class="card"><div class="head"><span class="grade g-${grade[0]}" aria-label="grade ${grade}">${grade}</span><div class="ttl"><div class="t">${esc(name)}</div><div class="k">${esc(key)}</div></div></div><ul class="facts">${facts.map(([t,m])=>`<li class="${m?'m':''}">${t}</li>`).join('')}</ul><p class="vs">${esc(vs)}</p><div class="items">${items.map(i=>itemHTML(...i)).join('')}</div>${demo?demoHTML(demo):''}</article>`).join('');
+  return`<section id="g-${gk}"><h2>${gn} <small>${gk==='new'?N.length+' devices':D.filter(d=>d[0]===gk).length+' cards'}</small></h2><p class="gnote">${gd}</p><div class="grid">${cards}</div></section>`}).join('');
+ document.querySelector('#tbl tbody').innerHTML=TBL.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${r[5]}</td><td>${r[6]}</td></tr>`).join('');
+ document.getElementById('note').value=note;update();drawEQ();
+}
+const ORDER=[...D.flatMap(d=>d[6].map(i=>i[0])),...N.map(n=>n[0])];
+const STAR3=[...D.flatMap(d=>d[6].filter(i=>i[2]===3).map(i=>i[0])),...N.filter(n=>n[2]===3).map(n=>n[0])];
+function update(){const ids=ORDER.filter(x=>sel.has(x));const nt=document.getElementById('note').value.trim();
+ document.getElementById('line').textContent='AE4 picks: '+(ids.length?ids.join(' '):'none yet')+(nt?' | '+nt:'');document.getElementById('count').textContent=ids.length+' picked';
+ try{localStorage.setItem('ae4picks',JSON.stringify({p:ids,n:nt}))}catch(e){}}
+document.addEventListener('change',e=>{const l=e.target.closest('.it');if(!l)return;const id=l.dataset.id;if(e.target.checked)sel.add(id);else sel.delete(id);l.classList.toggle('on',e.target.checked);update()});
+document.getElementById('note').addEventListener('input',update);
+document.getElementById('clear').onclick=()=>{sel.clear();document.querySelectorAll('.it').forEach(l=>{l.classList.remove('on');l.querySelector('input').checked=false});update()};
+document.getElementById('star').onclick=()=>{STAR3.forEach(x=>sel.add(x));document.querySelectorAll('.it').forEach(l=>{const on=sel.has(l.dataset.id);l.classList.toggle('on',on);l.querySelector('input').checked=on});update()};
+document.getElementById('copy').onclick=async()=>{const t=document.getElementById('line').textContent,b=document.getElementById('copy');try{await navigator.clipboard.writeText(t);b.textContent='Copied'}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('line'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press copy'}setTimeout(()=>b.textContent='Copy line',1600)};
+
+/* ---------------- EQ drawing ---------------- */
+function drawEQ(){const c=document.getElementById('eqcv');if(!c)return;const g=c.getContext('2d'),w=c.width,h=c.height,cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim();
+ g.clearRect(0,0,w,h);const fs=48000,f0=16000,G=12,Q=1,A=Math.pow(10,G/40),w0=2*Math.PI*f0/fs,al=Math.sin(w0)/(2*Q),cw=Math.cos(w0);
+ const b=[1+al*A,-2*cw,1-al*A],a=[1+al/A,-2*cw,1-al/A];
+ const rbj=f=>{const om=2*Math.PI*f/fs,re=x=>x[0]+x[1]*Math.cos(om)+x[2]*Math.cos(2*om),im=x=>-(x[1]*Math.sin(om)+x[2]*Math.sin(2*om));return 10*Math.log10((re(b)**2+im(b)**2)/(re(a)**2+im(a)**2))};
+ const ana=f=>{const s2=-((f/f0)**2),sr=f/f0;const nr=1+s2,ni=sr*A/Q,dr=1+s2,di=sr/(A*Q);return 10*Math.log10((nr*nr+ni*ni)/(dr*dr+di*di))};
+ const X=f=>30+(Math.log10(f/1000)/Math.log10(24))*(w-40),Y=d=>h-22-(d+1)/14*(h-34);
+ g.font='11px Inter,system-ui,sans-serif';g.fillStyle=col('--faint');g.strokeStyle=col('--line');g.lineWidth=1;
+ for(const f of [1000,2000,4000,8000,16000,20000]){g.beginPath();g.moveTo(X(f),8);g.lineTo(X(f),h-22);g.stroke();g.fillText(f>=1000?f/1000+'k':f,X(f)-8,h-6)}
+ for(const d of [0,6,12]){g.beginPath();g.moveTo(30,Y(d));g.lineTo(w-10,Y(d));g.stroke();g.fillText('+'+d,4,Y(d)+4)}
+ const line=(fn,c)=>{g.strokeStyle=c;g.lineWidth=2.2;g.beginPath();for(let i=0;i<=300;i++){const f=1000*Math.pow(24,i/300);if(f>23900)break;const y=Y(fn(f));i?g.lineTo(X(f),y):g.moveTo(X(f),y)}g.stroke()};
+ line(ana,col('--proto'));line(rbj,col('--today'));
+ g.fillStyle=col('--today');for(const [f,d] of [[8000,1.78],[12000,5.26],[16000,12],[20000,3.42],[22000,.84]]){g.beginPath();g.arc(X(f),Y(d),4,0,7);g.fill()}
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',drawEQ);
+
+/* ---------------- audio: today = app renders (demos/*.wav), prototype = computed here ---------------- */
+let ac=null,cur=null;const SR=32000,cache={};
+const ctx=()=>ac||(ac=new (window.AudioContext||window.webkitAudioContext)());
+async function today(k){if(cache['a'+k])return cache['a'+k];const r=await fetch('demos/'+k+'_today.wav');const ab=await r.arrayBuffer();return cache['a'+k]=await ctx().decodeAudioData(ab)}
+function toBuf(L,R){const b=ctx().createBuffer(2,L.length,SR);let pk=1e-9;for(let i=0;i<L.length;i++)pk=Math.max(pk,Math.abs(L[i]),Math.abs((R||L)[i]));const s=.7/pk;b.getChannelData(0).set(L.map(v=>v*s));b.getChannelData(1).set((R||L).map(v=>v*s));return b}
+const blep=(t,dt)=>t<dt?(t/=dt,t+t-t*t-1):t>1-dt?(t=(t-1)/dt,t*t+t+t+1):0;
+function Ladder(sr){/* 4-pole ladder, TPT one-poles with tanh at each stage input, one-sample feedback estimate (simplified Huovilainen) */let s=[0,0,0,0],y3=0;
+ return(x,fc,res,drive)=>{const g=Math.tan(Math.PI*Math.min(fc,sr*.45)/sr),G=g/(1+g);let u=Math.tanh(drive*(x-res*4*y3));for(let k=0;k<4;k++){const v=(Math.tanh(u)-s[k])*G,y=v+s[k];s[k]=y+v;u=y}y3=u;return u}}
+function os2(fn,n){/* run fn at 2x and come down with a 15-tap halfband-ish lowpass */const H=[-.0041,0,.0253,0,-.0932,0,.3132,.5,.3132,0,-.0932,0,.0253,0,-.0041];const out=new Float32Array(n),z=new Float32Array(15);let zi=0;
+ for(let i=0;i<n*2;i++){z[zi]=fn(i);let acc=0;for(let k=0;k<15;k++)acc+=H[k]*z[(zi-k+15)%15];zi=(zi+1)%15;if(i&1)out[i>>1]=acc}return out}
+const mtof=p=>440*Math.pow(2,(p-69)/12);
+const PROTO={
+ bass(){const bpm=145,sb=60/bpm,n=Math.floor(sb*8*SR+.2*SR),sr2=SR*2,lad=Ladder(sr2);let ph=0;const notes=[];for(let b=0;b<8;b++)[.25,.5,.75].forEach((o,i)=>notes.push([(b+o)*sb,[.92,.74,.84][i]]));
+  const f=mtof(29);return os2(i=>{const t=i/sr2;let env=0,fe=0;for(const [s,v] of notes){const d=t-s;if(d>=0&&d<.2*sb+.02){const a=Math.min(1,d/.0008),r=d>.2*sb?Math.max(0,1-(d-.2*sb)/.004):1;env=v*a*r*Math.exp(-d*9);fe=Math.exp(-d*38)}}
+   if(env===0){ph=0}const dt=f/sr2;ph+=dt;if(ph>=1)ph-=1;const saw=2*ph-1-blep(ph,dt);return env*lad(saw,90+5200*fe*env,.55,2.2)*.8},n)},
+ acid(){const AS=[[0,.9],[0,.6],[12,.95],[0,.6],[-1,.7],[0,.6],[7,.95],[0,.6],[3,.7],[0,.6],[12,.95],[11,.65],[0,.7],[8,.95],[7,.7],[0,.6]],bpm=145,st=60/bpm/4,n=Math.floor(st*32*SR+.3*SR),sr2=SR*2,lad=Ladder(sr2);
+  const seq=[];for(let r=0;r<2;r++)AS.forEach(([iv,v],k)=>seq.push({s:(r*16+k)*st,p:41+iv,v,acc:v>.9,sl:v>.9&&k%4<3}));let ph=0,fr=mtof(41),accC=0,lastIdx=-1;
+  return os2(i=>{const t=i/sr2,idx=Math.min(seq.length-1,Math.floor(t/st));const N=seq[idx],d=t-N.s,prev=seq[idx-1];if(idx!==lastIdx){lastIdx=idx;if(N.acc)accC=Math.min(1.6,accC*.9+.55)}accC*=Math.exp(-1/(sr2*.35));
+   const target=mtof(N.p),glide=prev&&prev.sl;fr+= (target-fr)*(glide?1-Math.exp(-1/(sr2*.03)):1);const gate=d<(N.sl?st:st*.55)?1:Math.max(0,1-(d-st*.55)/.003);
+   const dt=fr/sr2;ph+=dt;if(ph>=1)ph-=1;const saw=2*ph-1-blep(ph,dt);const env=Math.exp(-d/(N.acc?.09:.16));const amp=gate*(N.acc?1:.7)*Math.min(1,d/.002+(glide?1:0));
+   const fc=180+ (N.acc?2600:1500)*env+1400*accC;return amp*lad(saw*1.4,fc,.86,1.8)},n)},
+ kick(){const bpm=145,sb=60/bpm,n=Math.floor(sb*4*SR+.3*SR),fE=mtof(29),fS=2600;let seed=1;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647*2-1;let ph=0,F=0,lp=0;const out=new Float32Array(n);
+  for(let i=0;i<n;i++){const t=i/SR,b=Math.floor(t/sb),d=t-b*sb;if(b>3){out[i]=0;continue}if(d<1/SR)ph=0;
+   const fr=fE+(fS-fE)*Math.exp(-d/.0065)+ (fS*.02)*Math.exp(-d/.04);ph+=fr/SR;const body=Math.sin(2*Math.PI*ph)*(d<.18?1:Math.pow(Math.max(0,1-(d-.18)/.12),2));
+   const nz=rnd();lp+=(nz-lp)*.35;const click=(nz-lp)*Math.exp(-d/.0016)*.9;
+   const x=1.9*(body+click),Fx=Math.log(Math.cosh(x)),y=Math.abs(x-F)<1e-5?Math.tanh(x):(Fx-Math.log(Math.cosh(F)))/(x-F);F=x;out[i]=y*.9}return out},
+ saw(){const n=Math.floor(2.2*SR),det=[-.11002313,-.06288439,-.01952356,0,.01991221,.06216538,.10745242],amt=.22,pan=[-1,-.66,-.33,0,.33,.66,1],L=new Float32Array(n),R=new Float32Array(n);
+  for(const p of [53,56,60,65]){const f=mtof(p);for(let v=0;v<7;v++){let ph=Math.random();const fr=f*(1+det[v]*amt*.5),dt=fr/SR,gl=Math.cos((pan[v]+1)*Math.PI/4),gr=Math.sin((pan[v]+1)*Math.PI/4),g=v===3?.9:.55;
+   for(let i=0;i<n;i++){ph+=dt;if(ph>=1)ph-=1;const t=i/SR,env=Math.min(1,t/.01)*(t<1.5?1:Math.max(0,1-(t-1.5)/.5));const s=(2*ph-1-blep(ph,dt))*env*g;L[i]+=s*gl;R[i]+=s*gr}}}
+  let a=0,b=0,c=0,d=0;const k=1-Math.exp(-2*Math.PI*6000/SR);for(let i=0;i<n;i++){a+=(L[i]-a)*k;b+=(a-b)*k;L[i]=b;c+=(R[i]-c)*k;d+=(c-d)*k;R[i]=d}return [L,R]},
+ verb(){const n=Math.floor(4.5*SR),dry=new Float32Array(n);[[523.25,0],[659.25,.375],[783.99,.75],[1046.5,1.125]].forEach(([f,at])=>{for(let i=Math.floor(at*SR);i<n;i++){const t=i/SR-at;dry[i]+=.5*Math.exp(-t*18)*(Math.sin(2*Math.PI*f*t)+.35*Math.sin(4*Math.PI*f*t)+.15*Math.sin(6*Math.PI*f*t))}});
+  const len=[1031,1327,1523,1871,2053,2381,2687,2999].map(x=>Math.round(x*SR/32000*1.6)),buf=len.map(l=>new Float32Array(l+64)),pos=len.map(()=>0),lp=len.map(()=>0),rt=3.2,gains=len.map(l=>Math.pow(10,-3*l/SR/rt));
+  const ap=[142,107,379,277].map(l=>({b:new Float32Array(l),i:0,l}));const L=new Float32Array(n),R=new Float32Array(n),pre=Math.round(.015*SR),pd=new Float32Array(pre+1);let pi=0;const damp=1-Math.exp(-2*Math.PI*6500/SR);
+  for(let i=0;i<n;i++){let x=pd[pi];pd[pi]=dry[i];pi=(pi+1)%(pre+1);for(const A of ap){const z=A.b[A.i],y=-.6*x+z;A.b[A.i]=x+.6*y;A.i=(A.i+1)%A.l;x=y}
+   const o=len.map((l,k)=>{const m=(k<2?(1+Math.sin(2*Math.PI*(.13+k*.07)*i/SR))*6:0),rp=(pos[k]-l-m+buf[k].length*4)%buf[k].length,i0=Math.floor(rp),fr=rp-i0;return buf[k][i0]*(1-fr)+buf[k][(i0+1)%buf[k].length]*fr});
+   let s=0;for(const v of o)s+=v;s*=2/8;let l=0,r=0;
+   for(let k=0;k<8;k++){lp[k]+=(o[k]-lp[k])*damp;const fb=(lp[k]-s)*gains[k];buf[k][pos[k]]=fb+x*.35;pos[k]=(pos[k]+1)%buf[k].length;if(k&1)r+=o[k];else l+=o[k]}
+   L[i]=dry[i]*.65+.35*l*.7;R[i]=dry[i]*.65+.35*r*.7}return [L,R]},
+ aliasA(){const n=3*SR,o=new Float32Array(n);let ph=0;for(let i=0;i<n;i++){const t=i/SR,f=1000*Math.pow(8,t/3);ph+=f/SR;o[i]=Math.tanh(6*Math.sin(2*Math.PI*ph))*.5}return o},
+ alias(){const n=3*SR;let ph=0,F=0,x1=0;return os2(i=>{const t=i/(2*SR),f=1000*Math.pow(8,t/3);ph+=f/(2*SR);const x=6*Math.sin(2*Math.PI*ph),Fx=Math.log(Math.cosh(x));const y=Math.abs(x-x1)<1e-5?Math.tanh((x+x1)/2):(Fx-F)/(x-x1);F=Fx;x1=x;return y*.5},n)}
+};
+async function play(btn){const k=btn.dataset.demo,v=btn.dataset.v;const c=ctx();if(c.state==='suspended')await c.resume();
+ if(cur){try{cur.src.stop()}catch(e){}cur.btn.setAttribute('aria-pressed','false');if(cur.btn===btn){cur=null;return}}
+ let b;try{if(k==='alias')b=toBuf(v==='a'?PROTO.aliasA():PROTO.alias());else if(v==='a')b=await today(k);else{if(!cache['b'+k]){const r=PROTO[k]();cache['b'+k]=Array.isArray(r)?toBuf(r[0],r[1]):toBuf(r)}b=cache['b'+k]}}catch(e){btn.textContent='Could not load: '+e.message;return}
+ const s=c.createBufferSource();s.buffer=b;const g=c.createGain();g.gain.value=.9;s.connect(g).connect(c.destination);s.start();btn.setAttribute('aria-pressed','true');cur={src:s,btn};s.onended=()=>{if(cur&&cur.src===s){btn.setAttribute('aria-pressed','false');cur=null}}}
+document.addEventListener('click',e=>{const b=e.target.closest('.pb');if(b)play(b)});
+render();
+</script>

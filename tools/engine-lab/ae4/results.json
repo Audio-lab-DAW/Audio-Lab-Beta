@@ -1,0 +1,294 @@
+{
+ "version": "0.263",
+ "inst": {
+  "saw": {
+   "name": "Saw lead (al-poly)",
+   "peak_C7_dB": -22.69645016595994,
+   "t90_ms": 7.729166666666666,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 5,
+   "alias_96_dB": -83.06189119027235,
+   "alias_100_dB": -80.5317335171005
+  },
+  "reese": {
+   "name": "Reese bass",
+   "peak_C7_dB": -27.35439538946771,
+   "t90_ms": 23.416666666666664,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 5,
+   "alias_96_dB": -62.48921753669525,
+   "alias_100_dB": -60.68867739921842
+  },
+  "acid": {
+   "name": "Acid",
+   "peak_C7_dB": -21.473653499219466,
+   "t90_ms": 2.7291666666666665,
+   "t_minus40_ms": 138.0,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 1,
+   "alias_96_dB": -31.257967028662893,
+   "alias_100_dB": -39.407184063729105
+  },
+  "plant": {
+   "name": "Plant",
+   "peak_C7_dB": -26.873429034188906,
+   "t90_ms": 203.45833333333331,
+   "t_minus40_ms": 0.0,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 0.6321679299041373,
+   "side_mid_dB": -6.467518055367332,
+   "render_s_per_s": 0.07288467884063721,
+   "voices": 5,
+   "alias_96_dB": -42.0241137083076,
+   "alias_100_dB": -40.033122949128305
+  },
+  "wtab": {
+   "name": "Wavetable",
+   "peak_C7_dB": -23.99564113043216,
+   "t90_ms": 11.083333333333334,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 5,
+   "alias_96_dB": -113.0038399671987,
+   "alias_100_dB": -114.0134951215968
+  },
+  "venom": {
+   "name": "Venom",
+   "peak_C7_dB": -15.587530844972468,
+   "t90_ms": 5.291666666666667,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0671750009059906,
+   "voices": 5,
+   "alias_96_dB": -86.96917287688024,
+   "alias_100_dB": -70.68249447865895
+  },
+  "psyb": {
+   "name": "Psy Bass",
+   "peak_C7_dB": -240.0,
+   "t90_ms": 8.4375,
+   "t_minus40_ms": 58.0,
+   "pre_onset_dB": -156.77977313368842,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 1,
+   "alias_96_dB": null,
+   "alias_100_dB": null
+  },
+  "sbass": {
+   "name": "Sub",
+   "peak_C7_dB": -14.223366213077126,
+   "t90_ms": 10.375,
+   "t_minus40_ms": 176.0,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 1.0,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 1,
+   "alias_96_dB": -156.53623367623558,
+   "alias_100_dB": -160.79094623456137
+  },
+  "vfm": {
+   "name": "Vector FM",
+   "peak_C7_dB": -14.027191794535634,
+   "t90_ms": 3.8125,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 0.8306332905760484,
+   "side_mid_dB": -10.337731374675514,
+   "render_s_per_s": 0.012275993824005127,
+   "voices": 5,
+   "alias_96_dB": -140.02545279462194,
+   "alias_100_dB": -31.882108248705435
+  },
+  "growl": {
+   "name": "Growl",
+   "peak_C7_dB": -12.97505765623005,
+   "t90_ms": 33.791666666666664,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 0.976379494305953,
+   "side_mid_dB": -19.22580637115032,
+   "render_s_per_s": 0.0,
+   "voices": 1,
+   "alias_96_dB": -44.668755715078404,
+   "alias_100_dB": -25.742300255314333
+  },
+  "kick": {
+   "name": "Kick designer",
+   "peak_C7_dB": -13.437801927592814,
+   "t90_ms": 0.041666666666666664,
+   "t_minus40_ms": null,
+   "pre_onset_dB": -240.0,
+   "corr_LR": 0.9999999999999999,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.0,
+   "voices": 1,
+   "alias_96_dB": -1.879667097809735e-11,
+   "alias_100_dB": -9.382424085840341e-12
+  },
+  "crk": {
+   "name": "Fractal",
+   "peak_C7_dB": -21.326214695415423,
+   "t90_ms": 15.395833333333332,
+   "t_minus40_ms": 50.0,
+   "pre_onset_dB": -211.57427950429255,
+   "corr_LR": 0.9999999999999998,
+   "side_mid_dB": -240.0,
+   "render_s_per_s": 0.04022014141082764,
+   "voices": 5,
+   "alias_96_dB": -70.72077932411383,
+   "alias_100_dB": -75.76049343457738
+  }
+ },
+ "fx": {
+  "drive": {
+   "alias_4k5_dB": -40.44295551853552,
+   "peak_dB": -15.294825602614946
+  },
+  "clip": {
+   "alias_4k5_dB": -128.27446209498237,
+   "peak_dB": -10.015134159656906
+  },
+  "tdelay_drive": {
+   "alias_4k5_dB": -34.58899096881482,
+   "peak_dB": -3.3293851416202065
+  },
+  "reverb": {
+   "rt60_s": 2.01525,
+   "corr_tail": 0.00284805464988937,
+   "t_dense_ms": 10.0,
+   "echo_density_first20ms": 0.0032827991536816424,
+   "tail_peak_over_median": 2.7943033221258586,
+   "render_s": 0.778022289276123
+  },
+  "conv": {
+   "rt60_s": 0.255875,
+   "corr_tail": 0.09215265335228634,
+   "t_dense_ms": 10.0,
+   "echo_density_first20ms": 0.0032827991536816424,
+   "tail_peak_over_median": 3.7025475057768817,
+   "render_s": 0.5928249359130859
+  },
+  "blur": {
+   "rt60_s": 2.0024166666666665,
+   "corr_tail": -9.874944277795402e-05,
+   "t_dense_ms": null,
+   "echo_density_first20ms": 0.0032827991536816424,
+   "tail_peak_over_median": 1.5037945730337983,
+   "render_s": 0.47826099395751953
+  },
+  "eq_bell16k": {
+   "8k": {
+    "app_dB": 1.78,
+    "analog_dB": 3.96
+   },
+   "12k": {
+    "app_dB": 5.26,
+    "analog_dB": 8.64
+   },
+   "16k": {
+    "app_dB": 12.0,
+    "analog_dB": 12.0
+   },
+   "20k": {
+    "app_dB": 3.42,
+    "analog_dB": 9.65
+   },
+   "22k": {
+    "app_dB": 0.84,
+    "analog_dB": 8.17
+   }
+  },
+  "comp_step_att1": {
+   "final_gr_dB": -4.317140290595158,
+   "t63_ms": 2.0,
+   "gain_first_ms_dB": 14.553238063618776
+  },
+  "comp_step_att10": {
+   "final_gr_dB": -3.7966016663088262,
+   "t63_ms": 10.0,
+   "gain_first_ms_dB": 14.55323957377493
+  },
+  "comp_step_att50": {
+   "final_gr_dB": -3.523923155336655,
+   "t63_ms": 47.0,
+   "gain_first_ms_dB": 14.553245614396918
+  }
+ },
+ "t_empty_16beats": 0.6427774429321289,
+ "extra": {
+  "acid dist 0 cut 3k note 96": {
+   "alias_dB": -48.34443505846754,
+   "peak_dB": -21.473653499219466,
+   "corr_LR": 1.0
+  },
+  "acid dist 55 cut 3k note 96": {
+   "alias_dB": -32.109466881237715,
+   "peak_dB": -21.473653499219466,
+   "corr_LR": 1.0
+  },
+  "acid dist 100 cut 3k note 96": {
+   "alias_dB": -30.183792852212264,
+   "peak_dB": -21.473653499219466,
+   "corr_LR": 1.0
+  },
+  "psyb note 96": {
+   "alias_dB": -63.01422387650977,
+   "peak_dB": -57.33749807587377,
+   "corr_LR": 1.0
+  },
+  "reese note 96": {
+   "alias_dB": -61.72064337534259,
+   "peak_dB": -23.927670859180566,
+   "corr_LR": 1.0
+  },
+  "plant uni1 note 96": {
+   "alias_dB": -45.47017072389724,
+   "peak_dB": -32.18941464791418,
+   "corr_LR": 0.8905835711398886
+  },
+  "growl note 96": {
+   "alias_dB": -45.352685450015855,
+   "peak_dB": -12.97505765623005,
+   "corr_LR": 0.98377535583819
+  },
+  "wtab uni5 note 96": {
+   "alias_dB": -117.52278249052866,
+   "peak_dB": -18.90720896758015,
+   "corr_LR": 0.4642799181689815
+  },
+  "venom unison7 note 96": {
+   "alias_dB": -42.60934264491222,
+   "peak_dB": -12.988409194982642,
+   "corr_LR": 0.8174897534056772
+  },
+  "saw note 100 (E7)": {
+   "alias_dB": -78.8657737465381,
+   "peak_dB": -21.153328618288946,
+   "corr_LR": 1.0
+  },
+  "square note 96": {
+   "alias_dB": -77.6040595576877,
+   "peak_dB": -20.063565804897436,
+   "corr_LR": 1.0
+  }
+ }
+}
