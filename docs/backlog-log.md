@@ -3800,3 +3800,34 @@ The card is the one at the bottom of the Settings side menu, under Output, Proje
 
 ### Release
 - v0.229: commit e5bd788 on main, the edit script first in commit e1bd162 (`index.html` was not touched by other sessions during the run; the backlog log was merged by hand with the NL4 entry). App copy synced, update note written ("The About card in the Settings menu now has the new fine atom and, behind it, a small version of one of the five splash drawings, a different one each time Settings opens; the name and the version take the drawing's colours, as on the splash."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-about-card.md`.
+
+## 27 November 2026: task NB-N2b (the clock follower, and the bridge's shell and page pieces, ready for the hook)
+
+No app changes: `index.html` was not touched (task AB2 had work in progress there when this run started, and the design chain comes first by the user's order). `desktop/` got only the bridge, idle until the page asks; no version, no desktop build. Running list: `docs/native-mac-build.md`.
+
+### Built
+- **The clock follower** (`native/engine/follow.h`, `ring.h`): N2a showed that the page's clock and the DAC's clock drift. A second reading mode for the engine's ring, `follow`: a 48-tap Kaiser-windowed sinc (4,096 phases) reads between the samples at a speed steered by how full the ring is (PI control in seconds of fill, critically damped, settles in about a minute, limited to 2,000 ppm unless the source asks for more). `exact` stays the default and is unchanged: every sample handed over untouched, rare counted corrections. Chosen per sound source (`"clock":"exact"|"follow"`) or switched with the new `clock` command; status shows the speed (`ppm`, `ppmMin`, `ppmMax`). `alengine 0.2`.
+- **The desktop shell's side** (`desktop/native-engine.js`, registered in `main.js` in a try like the AI voices): finds `alengine` (packaged `Resources/bin`, `desktop/bin`, `native/build`, or `AL_ENGINE`), starts it only when the page asks, forwards the engine's events, takes the far end of the page's worklet port and feeds the engine. **Crash recovery** (research RN1, point 10): an engine that stops unasked is started again with the last device and sound settings, at most 3 times a minute, then `gave-up` tells the page to play through the web engine again. Added to the files list in `desktop/package.json`.
+- **`preload.js`**: `audiolabDesktop.nativeEngine` on the Mac (`available`, `start`, `stop`, `cmd`, `sound`, `silence`, `on`) and the hand-over of the worklet port (`{ alNativePort: true }` posted to the window).
+- **The page's side as one function** (`native/bridge/page-tap.js`, `alNativeTap(ctx, master)`): the worklet that copies each 128-frame block of the master and posts it from the audio thread; N2c copies it into `index.html` unchanged.
+- **The test with the real pieces** (`tools/native-lab/electron-bridge/`: the real `desktop/native-engine.js`, the real `desktop/preload.js`, `page-tap.js`; cases A one clock exact noise bit for bit, B two clocks follow 997 Hz, C two clocks exact as the contrast, D the engine killed while playing), `tools/native-lab/sine_check.py` (clicks and gaps in a recorded sine, the speed it settled on), workflow `.github/workflows/native-engine.yml` (new; started by hand, runner label as an input).
+
+### Proven (Linux, `alengine selftest`, all pass)
+- At speed 1 the follower is bit for bit.
+- Against the ideal (100 ppm fast): error -111.7 dB at 997 Hz, -116.8 dB at 15 kHz.
+- 5 simulated minutes, sender in 128-frame blocks, device in 256: off by +250 ppm, steered to 253.9 ppm (mean of the last minute); -250 to -255.1; +1000 to 1019.5; -1000 to -1020.6 (still settling at 5 minutes); in all four 0 times empty, 0 drops, fill within 20 ms of the 50 ms target after two minutes.
+- The JavaScript files pass Node's syntax check; `native-engine.js` loads in plain Node.
+
+### Not proven
+- **Nothing ran on a Mac this run.** From about 12:36 UTC no macOS run in the repository got a machine: two runs of the new workflow on `macos-15` waited 15 minutes and were cancelled, one on `macos-14` was cancelled at once (no reason shown), the same happened to other tasks' runs (native-lab, ui-bench), and one dispatch got a 502 from GitHub. The Core Audio side of the change (the `clock` command and status fields) is therefore not compiled on macOS yet; the next run must dispatch `native-engine.yml` first and fix anything it shows before going on. Cases A to D are written and waiting.
+- Real clocks: how far the page's device and the Gryphon drift on the M4. Nothing here ran on the user's Mac.
+
+### Assumptions
+- `exact` stays the default; the bridge (N2c) picks `follow` only when the page's clock device is not the engine's device (with exclusive use on the DAC it cannot be). Page and engine on the same device without exclusive use share one clock, so `exact` is bit-perfect there.
+- The follower is a bridge measure until N3: once the native engine makes the sound itself there is nothing to follow.
+- Recovery restarts up to 3 times a minute; after that the page goes back to the web engine.
+- The research RN1 suggestions taken in this stage: no locks on the audio path (the ring is lock-free), crash recovery. Left for later stages: meters through shared memory (N2c), App Nap guard (N2c), workgroups and block-size rule (N3).
+
+### Next
+- Dispatch `native-engine.yml` and read cases A to D (fix the Mac build first if it fails).
+- N2c, when the design chain allows `index.html` work: the hook (copy `alNativeTap`, the "Native output" settings: device, rate, buffer, exclusive use, device volume both ways, switch back to the web engine), and shipping `alengine` in the desktop build (`desktop.yml` builds `alvol` the same way; that workflow may only be changed with the user's leave or through `afterPack`).

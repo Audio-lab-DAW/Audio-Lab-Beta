@@ -8,12 +8,16 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 |---|---|---|
 | 0 | The proofs: one effect bit for bit, a VST3 host, the test app | done (task NM1), proven on the user's Mac |
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
-| N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done: the path is proven outside the app** (the real desktop shell sends a page's sound to the engine). The app itself is untouched: the hook in `index.html` waits for the design chain |
+| N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
 | N3 | The engine core, devices ported family by family | not started |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
+
+Nothing new to try from stage N2b: it changes nothing you can hear or click yet. The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
+
+## What you could try with test app 0.2 (stage N1)
 
 **AudioLab VST3 test 0.2**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-2 (file `AudioLab-VST3-test-mac-arm64.zip`; open it once through System Settings > Privacy & Security > Open Anyway, as before).
 
@@ -140,6 +144,27 @@ What this settles for N2:
 
 Not shown: any of this inside AudioLab, with its real master output, on a real DAC, or for longer than 20 seconds.
 
-## Next: N2, and why it was not started here
+## Stage N2b: the clock follower and the bridge's pieces (27 November 2026)
+
+**The clock follower.** N2a showed the page's clock and the DAC's clock drift apart. The engine's ring now has two ways of reading:
+
+| Mode | What reaches the DAC | When |
+|---|---|---|
+| `exact` (default) | every sample as sent, bit for bit; when the clocks have drifted too far, one counted correction (a drop or a short wait) | the page and the engine share one device (one clock), and for listening to files later |
+| `follow` | the sound read between the samples at a speed steered a few parts per million (a 48-tap windowed sinc); no gaps, no drops, not bit-perfect | the page's clock device is another one (with exclusive use on the DAC it must be) |
+
+Measured in the engine's own tests (they run on Linux too): bit for bit at speed 1; error against the ideal -111.7 dB at 997 Hz and -116.8 dB at 15 kHz; over 5 simulated minutes against a sender 250 or 1,000 ppm off, never empty, never dropped, the fill within 20 ms of its 50 ms target, the speed settled on 254 ppm for a 250 ppm sender. The speed moves by up to about 50 ppm with the beat of the two block sizes: under a tenth of a cent, too slow and too small to hear.
+
+**The shell's side** (`desktop/native-engine.js`): starts the engine only when the page asks, forwards its events, takes the sound from the page's audio thread and feeds the engine. If the engine crashes it is started again with the same device and settings (up to 3 times a minute), then the page is told to go back to the web engine. **The page's side** (`native/bridge/page-tap.js`): one function N2c copies into the app unchanged. **The preload** gives the page `audiolabDesktop.nativeEngine`.
+
+Nothing of this is active in the app: the page never calls it yet, and the desktop build does not carry `alengine` yet.
+
+**Proof on the Mac, waiting.** Workflow `native-engine.yml`, four cases with the real shell pieces on the loop-back device: A one clock, exact, bit for bit; B two clocks, follow, a clean sine; C two clocks, exact, as the contrast; D the engine killed while it plays and started again. On 27 November from about 12:36 UTC no macOS build machine was given to any run in the repository (queued 15 minutes then cancelled, or cancelled at once), so these have not run yet.
+
+## Next: N2c, and why it was not started here
+
+N2c puts the engine under the app: copy `alNativeTap` into `index.html`, Settings > "Native output" (device, rate, buffer, exclusive use, device volume both ways, the switch back to the web engine), `alengine` built into the desktop app. The design chain still has `index.html` work queued and the user's order is design first.
+
+## Earlier note: N2, and why it was not started in N2a
 
 N2 puts the engine under the app: the desktop shell ships `alengine`, the page sends its master output to it, the web engine's own output goes silent, and Settings gets "Native output" with device, rate, buffer, exclusive use and volume. That needs a hook in `index.html` and changes in `desktop/`. Other tasks (the design chain) are working in `index.html`, only one task may edit it at a time, and the user's order was "first finish all the complete new design, and then build the native engine". So N2 is left for task NB, fired in its turn.
