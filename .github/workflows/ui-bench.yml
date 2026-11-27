@@ -1,0 +1,72 @@
+name: UI bench (task RN4)
+
+# Research only (docs/research-native-ui.md): the same scene (64-track arrangement scrolling, 1,000 meters)
+# drawn with Metal in a native window and with WebGL2 and Canvas 2D in Electron, on the macOS runner.
+# The runner is a virtual Mac with a virtual display and a paravirtual graphics device: its numbers compare
+# the three ways with each other, they do not say what the user's M4 at 240 Hz will do.
+# Runs only when started by hand. Does not touch the app, the desktop build or the engine.
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: 'Seconds per on-screen run'
+        type: string
+        default: '10'
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    runs-on: macos-15          # Apple Silicon runner
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Machine and display
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; sw_vers; sysctl -n machdep.cpu.brand_string; sysctl -n hw.model; swiftc --version 2>&1 | head -1; system_profiler SPDisplaysDataType; } | tee out/machine.txt
+
+      - name: 'Metal: build and run'
+        continue-on-error: true
+        run: |
+          swiftc -O tools/native-lab/ui-bench/metal/main.swift -o out/metalbench 2>&1 | tee out/metal-build.txt
+          out/metalbench "${{ inputs.seconds }}" > out/metal.json 2> out/metal-stderr.txt || true
+          cat out/metal.json; tail -20 out/metal-stderr.txt
+
+      - name: 'Electron (the desktop shell''s version): WebGL2 and Canvas 2D'
+        continue-on-error: true
+        run: |
+          ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
+          desktop/node_modules/.bin/electron tools/native-lab/ui-bench/web/main.js "$PWD/out/web.json" "${{ inputs.seconds }}" 2> out/web-stderr.txt || true
+          cat out/web.json; tail -20 out/web-stderr.txt
+
+      - name: 'Electron with the frame-rate limit off (how fast it could go)'
+        continue-on-error: true
+        run: |
+          desktop/node_modules/.bin/electron --disable-frame-rate-limit --disable-gpu-vsync tools/native-lab/ui-bench/web/main.js "$PWD/out/web-unlimited.json" "${{ inputs.seconds }}" 2> out/web-unlimited-stderr.txt || true
+          cat out/web-unlimited.json
+
+      - name: Summary
+        if: always()
+        run: python3 tools/native-lab/ui-bench/summary.py out | tee out/summary.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-bench-results
+          path: out
+
+      - name: Keep the results on the branch ui-bench-results
+        if: always()
+        continue-on-error: true
+        run: |
+          rm -rf "$RUNNER_TEMP/res" && mkdir -p "$RUNNER_TEMP/res" && cp -R out/. "$RUNNER_TEMP/res/"
+          rm -f "$RUNNER_TEMP/res/metalbench"
+          cd "$RUNNER_TEMP/res"
+          echo "run ${GITHUB_RUN_ID} on ${GITHUB_SHA}" > RUN.txt
+          git init -q -b ui-bench-results .
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "ui bench results, run ${GITHUB_RUN_ID} (${GITHUB_SHA})"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" ui-bench-results
