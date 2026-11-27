@@ -404,6 +404,8 @@ It is not the AudioLab app. Apple Silicon, macOS 12 or later.
 
 **What the report holds:** Mac model and macOS version; every audio device with its rates, buffer range, format on the wire, whether it has a volume the computer can set and whether exclusive use can be taken; every plug-in found or failed and why; what loaded, how long it took, parameters, state size, latency; the time per block (average and worst), failed blocks, overloads, buffer size. Nothing is sent anywhere.
 
+**Stage N1 (native output as a helper) is built and proven on the build machine: see `docs/native-mac-build.md`.**
+
 ## 11. What happens next
 
 **Answered on 27 November 2026.** The picks and the first report from the Mac are in `docs/native-mac-picks.md`. In short: the recommended route and order stand; Windows follows after stage 3 instead of after stage 2; no Apple account for now; Fractals v10 comes with the first native build; a native look at 240 Hz is wanted. On the Mac the test app found 222 plug-ins (all the named makers are built for Apple Silicon, 31 old bundles are Intel only) and opened the iFi Gryphon; the Zoom AMS-24 was not seen by macOS; no plug-in has been loaded there yet.
