@@ -31,7 +31,11 @@
 using namespace al;
 
 static std::mutex outLock;
-static void say(const std::string& line) { std::lock_guard<std::mutex> g(outLock); fputs(line.c_str(), stdout); fputc('\n', stdout); fflush(stdout); }
+static void say(const std::string& line0) {
+    std::string line = line0;                       // one answer is one line: text inside strings is escaped, so any line break here is layout only
+    for (auto& c : line) if (c == '\n' || c == '\r') c = ' ';
+    std::lock_guard<std::mutex> g(outLock); fputs(line.c_str(), stdout); fputc('\n', stdout); fflush(stdout);
+}
 static const char* tf(bool b) { return b ? "true" : "false"; }
 
 // ---- checks that need no sound card (also run on Linux) ------------------------------------------------
