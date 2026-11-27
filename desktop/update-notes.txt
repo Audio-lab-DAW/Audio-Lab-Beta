@@ -1,1 +1,1 @@
-The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected.
+The mixer fader design 'Flat bars' is the standard again; if you were on 'Flat bars 2' you are back on 'Flat bars' and can pick 'Flat bars 2' again in the mixer settings.

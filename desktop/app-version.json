@@ -1,7 +1,7 @@
 {
-  "version": "0.221",
-  "sha256": "e18fb6d4134ce26e1066d3b9085d2ec0d77f54a48217549ef3c6c9231d9e1dfa",
-  "size": 5812606,
+  "version": "0.222",
+  "sha256": "43c543798f9d618b75b427f0d8ba5f0f773a1a4c6ffafbf49d1f24ca8d4778d2",
+  "size": 5813605,
   "minShell": "0.147.0",
-  "notes": "The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected."
+  "notes": "The mixer fader design 'Flat bars' is the standard again; if you were on 'Flat bars 2' you are back on 'Flat bars' and can pick 'Flat bars 2' again in the mixer settings."
 }

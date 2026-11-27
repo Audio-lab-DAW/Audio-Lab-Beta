@@ -6105,7 +6105,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.221',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.222',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -9454,7 +9454,7 @@ setTimeout(()=>{try{fxGlassSync();new ResizeObserver(fxGlassSync).observe(docume
 /* ---------- mixer settings, master strip extras, fader designs (v0.159) ----------
    One settings object (UI.mxs, defaults in MXSD) edited from two places that stay in sync: the settings button in the mixer's tab (#mxSetB opens #mxsPop)
    and Settings > Layout > Mixer (#mxsSet). Every control carries data-mxs (a UI.mxs key), data-mxm (a UI.mtr key) or data-fd (a fader design number). */
-const MXSD={w:96,mw:136,fh:0,fx:1,snd:1,view:1,pan:1,btn:1,num:1,sc:1,val:1,pkr:0,gband:0,fd:22,panst:'auto',pin:1,mLu:1,mTp:1,mTgt:1,mCorr:1};
+const MXSD={w:96,mw:136,fh:0,fx:1,snd:1,view:1,pan:1,btn:1,num:1,sc:1,val:1,pkr:0,gband:0,fd:7,panst:'auto',pin:1,mLu:1,mTp:1,mTgt:1,mCorr:1};
 const mxsO=()=>Object.assign({},MXSD,UI.mxs||{});
 const fdLn=(h,c)=>`linear-gradient(transparent ${h/2-1}px,${c} ${h/2-1}px,${c} ${h/2+1}px,transparent ${h/2+1}px)`;
 const fdCap=(w,h,r,bg,sh,fw)=>`§ .fv i::after{left:${((fw||34)-w)/2}px!important;right:${((fw||34)-w)/2}px!important;top:${-h/2}px!important;height:${h}px!important;border-radius:${r}!important;background:${bg}!important;box-shadow:${sh}!important}§ .fv:hover i::after,§ .fv.act i::after{filter:brightness(1.15)}`;
@@ -10842,7 +10842,7 @@ setTimeout(()=>{try{fxBuild()}catch(e){console.error('AudioLab glass settings',e
    and the controls it starts with (fd: fader and meter design, mcol: meter colours). thPaint() runs after applyTheme() and writes all of it;
    thPick() is the click on a card in Settings. Only colours and general shapes are taken from the reference programs. */
 const THEMES=[
- {id:'audiolab',n:'AudioLab',d:'Dark blue glass, see-through clips',bgL:40,tintH:215,tintA:25,gridB:50,clipA:36,fd:22,mcol:'classic',pal:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'],
+ {id:'audiolab',n:'AudioLab',d:'Dark blue glass, see-through clips',bgL:40,tintH:215,tintA:25,gridB:50,clipA:36,fd:7,mcol:'classic',pal:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'],
   pf:{cw:14,ch:6,cr:1.5,cf:'#d9dce4'}},
  {id:'ableton',n:'Live style',d:'Flat grey, amber, pastel blocks',bgL:52,tintH:40,tintA:3,gridB:50,clipA:100,fd:7,mcol:'lime',sharp:1,knw:2,
   pal:['#fd95a7','#fda43a','#f7f384','#c0f932','#39fdaa','#65fee8','#8dc6fd','#93a9fc','#d670e2','#e3569f','#f46c20','#44c121'],
@@ -14883,7 +14883,7 @@ setTimeout(()=>{try{prHandles();prWords();fxBandSync();const ro=new ResizeObserv
    energy of left and right (b=(R²-L²)/(R²+L²), shown at the pan position that would give that balance with the app's equal-power panner: p=2/π·asin b).
    Green at the centre, amber off centre, hidden when the channel is silent.
    Width slider: the bracket shows the setting, the strip behind it shows the live stereo field (where the energy of each sample pair sits from left to right, out of phase at the red ends).
-   Flat bars 2 (design 22) is the default fader and meter design. Master pin. Compact mode shrinks the height too. Double-click and double right-click on channels. */
+   Flat bars 2 (design 22) was the default fader and meter design until v0.222 (task D1), now Flat bars (design 7) again. Master pin. Compact mode shrinks the height too. Double-click and double right-click on channels. */
 const S1BL=new Float32Array(512),S1BR=new Float32Array(512);
 /* left and right energy of the newest 512 samples of two analysers; returns null when silent (below about -70 dB) */
 function s1Bal(aL,aR){if(!aL||!aR||!ctx)return null;aL.getFloatTimeDomainData(S1BL);aR.getFloatTimeDomainData(S1BR);let sl=0,sr=0;for(let i=0;i<512;i++){const l=S1BL[i],r=S1BR[i];sl+=l*l;sr+=r*r}
@@ -14970,11 +14970,10 @@ function s1MixFocus(id){let w=document.getElementById('mixWin');if(!w||w.hidden)
     e.stopImmediatePropagation();e.preventDefault();const id=h.dataset.id;if(h.classList.contains('mhdr')||id==='master'||id==='__m'){if(typeof selMaster==='function'&&selT!=='__m')selMaster();if(UI.devPop)devPop(true);else if(UI.fxHide)devHide(false);return}if(S.tracks.some(t=>t.id===id))goDevice(id,null)},true);
   let rc=null;document.addEventListener('contextmenu',e=>{const now=performance.now();if(rc&&now-rc.t<450&&Math.hypot(e.clientX-rc.x,e.clientY-rc.y)<10){const id=rc.id;rc=null;e.preventDefault();e.stopImmediatePropagation();try{closeMenu()}catch(x){}s1MixFocus(id);return}
     const h=e.target.closest&&(e.target.closest('#hdrin .hdr,#hdrin .mhdr')||e.target.closest('#mixWin .mx[data-id]'));rc=null;if(!h||e.target.closest('canvas.mxv'))return;let id=h.dataset.id;if(h.classList.contains('mhdr')||id==='__m')id='master';if(!id)return;rc={t:now,x:e.clientX,y:e.clientY,id}},true)}
-/* Flat bars 2: the default fader and meter design (from the flat bars the user likes, with zone colours shown dimly behind the bars, a 0 dB line, a firm peak line and a flat grip tab) */
+/* Flat bars 2: the default fader and meter design until v0.222, since then a choice like the others (from the flat bars the user likes, with zone colours shown dimly behind the bars, a 0 dB line, a firm peak line and a flat grip tab) */
 {const z=(dbN(0)*100).toFixed(1);FDS.push({n:'Flat bars 2',css:fdBar(30,22,10,'opacity:1!important;border-radius:0;position:relative;z-index:1')+`§ .fm{background:linear-gradient(#101217,#101217) left/10px 100% no-repeat,linear-gradient(#101217,#101217) right/10px 100% no-repeat}§ .fm::before{content:'';position:absolute;inset:0;background:GRAD left/10px 100% no-repeat,GRAD right/10px 100% no-repeat;opacity:.12}§ .fm::after{content:'';position:absolute;left:-3px;right:-3px;bottom:${z}%;height:1px;background:rgba(255,255,255,.38);z-index:2}§ .fm s{height:2px!important;z-index:3;background:#f4f6fa}§ .fv::before{display:none}§ .fv i::before{left:2px!important;width:28px!important;margin-left:0;top:-1px!important;height:2px!important;bottom:auto;background:#f2f4f8!important;opacity:1;border-radius:0;z-index:2!important;box-shadow:0 0 0 1px rgba(0,0,0,.45)}§ .fv i::after{left:28px!important;right:auto!important;width:9px;top:-8px!important;height:16px!important;border-radius:2px!important;background:linear-gradient(transparent 7px,#3a3e49 7px,#3a3e49 9px,transparent 9px),#e9ecf2!important;box-shadow:inset 2px 0 0 var(--c),0 1px 3px rgba(0,0,0,.7)!important}§ .fv:hover i::after,§ .fv.act i::after{filter:brightness(1.12)}§ .fsc span{color:#8e93a2}`});
   HFD.push(HFD[6]+`¶ i{background:#101217!important}`)}
-/* once: the old default (Classic) and the old Flat bars move to Flat bars 2 */
-if(!UI.fd22){UI.fd22=1;if(UI.mxs&&(UI.mxs.fd===1||UI.mxs.fd===7)){UI.mxs.fd=22}try{saveUI()}catch(e){}}
+/* v0.222 (task D1): the one-time move of Classic and Flat bars to Flat bars 2 (UI.fd22) is gone; it is undone in the block "v0.222 (task D1)" */
 try{fdCssUp(true);mxsApply();hfdCss()}catch(e){}
 /* ===================== v0.195: visualizer, glass preview, splash, zoom (task U) ===================== */
 /* --- visualizer: drawn at the screen's own pixels (device pixels times the app zoom, at most 3), docks at the top too, right-click menu for the map and the visualizer --- */
@@ -19567,6 +19566,13 @@ function abxSelNow(){try{const w=document.getElementById('mixWin');if(w&&!w.hidd
 {const _s=selectTrack;selectTrack=function(){const r=_s.apply(this,arguments);abxSelNow();return r}}
 {const _h=hdrMark;hdrMark=function(){const r=_h.apply(this,arguments);abxSelNow();return r}}
 {const _m=selMaster;selMaster=function(){const r=_m.apply(this,arguments);abxSelNow();return r}}
+/* ===================== v0.222 (task D1): Flat bars (design 7) is the standard fader and meter design again =====================
+   MXSD.fd and the AudioLab theme are 7. The one-time move to Flat bars 2 (UI.fd22, v0.19x) is undone once per profile (UI.fd7):
+   a profile that went through that move (UI.fd22 set) and has Flat bars 2 saved goes back to Flat bars. The app saved nothing that tells
+   "moved by the migration" from "picked Flat bars 2 by hand" (no flag per choice, no time), so every such profile goes back, as the user asked.
+   A profile that never ran the old move keeps what it saved. Flat bars 2 picked after this step stays (UI.fd7 is set). UI.fd7: 1 nothing to do, 2 moved back. */
+if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object.assign({},UI.mxs,{fd:7});UI.fd7=back?2:1;UI.fd22=1;try{saveUI()}catch(e){}
+  if(back){try{fdCssUp(true);mxsApply();mxsSync();hfdCss()}catch(e){}}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

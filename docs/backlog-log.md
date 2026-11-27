@@ -3198,3 +3198,30 @@ Started after task AI (v0.220) was in the log. Only the mixer's outline code cha
 ### Release
 - v0.221: commit 02555dc on main (rebased once on another session's commit; `index.html` was not touched by it).
 - v0.221. App copy synced, update note written ("The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-task-D2.md`. Next in the chain: D1.
+
+## 27 November 2026, v0.222: "Flat bars" is the standard fader design again (task D1)
+> Plan `docs/glass-engine-plan.md`, section 1: "Fader design 'Flat bars' (the original, design 7), not 'Flat bars 2'. It becomes the standard again."
+
+Started after task D2 (v0.221) was in the log. Only the default and one start-up step changed; the 22 designs themselves, the half pan dial, the mixer header, the stereo displays, the cables and the audio engine are not touched; no desktop file changed (no desktop build needed).
+
+### What was there before
+- Since v0.194 (task S1) the default was Flat bars 2 (design 22): `MXSD.fd` and the AudioLab theme. Once per profile (`UI.fd22`) a saved Classic (1) or Flat bars (7) was moved to 22.
+
+### Built
+- New installs: `MXSD.fd` is 7 and the AudioLab theme sets design 7, so a profile with no saved design shows Flat bars (also people who never picked a design and only had 22 because it was the default).
+- The old one-time move is removed: a profile that has not run it yet keeps its saved Classic or Flat bars.
+- Block "v0.222 (task D1)" before `askChoice`, once per profile (`UI.fd7`): a profile that went through the old move (`UI.fd22` set) and has Flat bars 2 saved goes back to Flat bars. Other saved designs are left alone. Flat bars 2 picked after this step stays.
+- **Choice made, as the task told for this case:** the app could not tell "moved by the migration" from "picked Flat bars 2 by hand". The old move saved only the flag `UI.fd22` (set for every profile, moved or not) and the design number; there is no time stamp and no note of who set the number, and clicking the AudioLab theme also wrote 22. So everyone who had Flat bars 2 saved goes back to Flat bars, including anyone who picked it by hand before v0.222. One click in the mixer settings brings it back for them. People who were moved from Classic (1) also land on Flat bars, not Classic: which of the two they had is not saved either.
+- No UI text and no CSS changed. Edit script `tools/edits/taskD1.py` (every replacement asserted unique).
+
+### Tested (`tools/ui-tests/taskD1.py`, headless Chromium, 18 checks, all pass; 13 of them fail on v0.221 as expected)
+- Fresh profile: Flat bars in the mixer, nothing written into the saved settings, the design button in the mixer settings reads "7 Flat bars" and the list marks 7; all 22 designs still there.
+- Profile as the migration left it (flag set, Flat bars 2 saved, another mixer setting saved): back to Flat bars, saved, the other setting kept, track headers follow, the same after a second start.
+- Deliberate later choice: Flat bars 2 picked by hand (click in the list on the fresh profile, and again on the moved-back profile) is still Flat bars 2 after a restart.
+- A v0.221 profile with no saved design gets Flat bars; a saved LED ladder stays; a profile from before the old move with Classic or Flat bars saved stays as it is.
+- Screenshots of the mixer (fresh and moved-back profile) and of the design list looked at: the strips show the original flat bars with the plain grip, the list marks 7.
+- No console or page errors. Existing tests pass on this build: `themes.py`, `mix.py`, `mixstrip.py`, `taskD2.py`, `taskAE.py`, `taskAI.py`, `taskAN.py`, `play.py`.
+- Levels (`tools/engine-tests/export_same.py`, beats 64 to 96): Fractals as it opens (master -10 dB): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7); with the master put back to 0 dB: Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e). The same figures and checksums as v0.221.
+
+### Not verified
+- On the user's Mac, and in the real desktop app (the page is the same there). The user's own saved profile was not seen; it is expected to be the "migrated" case.
