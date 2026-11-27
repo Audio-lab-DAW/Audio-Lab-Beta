@@ -3751,7 +3751,7 @@ No app changes: `index.html` and `desktop/` were not touched, no version. Touche
 - `[warning]` and a red line when the output runs at 16 kHz or less, naming Bluetooth call mode and its fix when the device is (or is named after) a Bluetooth device.
 - CI: Surge XT and mda JX10 rendered at 16 kHz; the self test searches (with an accented query), groups, and drags across Surge XT's window.
 
-### Tested (build machine, run 45998343614; run 46000688420 rebuilds with the corrected wording)
+### Tested (build machine, run 45998343614, commit e58f1e8, the published build; the wording fix 52e2af7 is not in the published zip: runs 46000688420 and 46003881315 were cancelled without a Mac runner)
 Searches 2 of 2, 1 of 2, 1 of 2, 0 of 2 as expected; group headings; Surge XT 45 notes, peak 0.187; parameter moves reached the host from synthetic drags. Pre-release `native-lab-4` published; the latest release is still v0.223.0 (checked after publishing).
 
 ### Not verified
