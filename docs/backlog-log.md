@@ -3596,3 +3596,61 @@ Nearest step; a tie (11.5, 12.5, 14) goes to the smaller step, so that less text
 - All 7 branches rewritten with git filter-repo and pushed: every commit is now by `Audio-lab-DAW <360039460+Audio-lab-DAW@users.noreply.github.com>`, all `Co-Authored-By:`, `Claude-Session:` and `Generated with` lines removed, trees and dates unchanged. main: 22619e7 -> ed0ddb4. Full record: project doc `claude/audiolab-history-rewrite.md`.
 - Not done: the 105 release tags still point at the old commits (this session was not allowed to force-push tags). The commands for the owner are in the project doc. The Contributors box is built from the default branch, so it should clear without them; GitHub caches it for about a day.
 - `CLAUDE.md` added with the commit identity rule (added by the scheduling chat after HR1 stopped at the tags).
+
+## 27 November 2026, v0.227: windows, sheets and menus on the glass engine, backdrop-filter nowhere (task GS2, glass step 2)
+> Plan `docs/glass-engine-plan.md`, section 3.1 "Step 2" and 2.4 option a, under the binding Mac rules of 3.2 to 3.5: the engine draws its own backdrop on the graphics card and never copies the full-size arrangement canvas; levels Glass, Light, Solid; "backdrop-filter is used nowhere, not even as a fallback"; defaults lens Wide 45 px and blur Light; "Moving a window costs one quad redraw, no scene or pyramid rebuild".
+
+Started after task D3 was released (v0.226, commit 30cd5e5); "task GS2" was not in this log. Main moved only by the CLAUDE.md commit of task HR1 before the start; nobody else touched `index.html` during the run. The audio path is not touched; no desktop shell file changed (no desktop build).
+
+**Not proven here: the frame rate.** The cloud machine has no graphics card (SwiftShader) and two cores that this renderer keeps busy; the times below only say how much work is asked for. The user's check on the Mac decides.
+
+### What was there before
+- 18 elements with `backdrop-filter` when the mixer was open (605,000 px of live blur): the mixer window at 27 px blur over the arrangement with its tab `.fwh` and every pan handle `.ck` (1.6 px) as glass on glass; sheets, menus, pop-ups, the update window, spectrum windows and some small things inside devices with their own blurs; the SVG lens (`rfAttach`) on menus, sheets and the master pop-up.
+
+### Built (edit script `tools/edits/taskGS2.py`, app code `tools/edits/taskGS2_block.js`, every replacement asserted unique)
+- **`backdrop-filter` nowhere**, at any level: one CSS rule for every element and pseudo element. The nested blurs in the mixer (tab, pan handles) are gone with it. The few small things that had a blur of their own got a slightly more opaque background (toast, layout presets inside Settings, visualizer pane, EQ overlay, device header buttons, export overlay).
+- **Floating glass on the engine**: floating windows (mixer, devices, envelopes, grid, Venom, bounce, audio devices, visualizer), the sidechain window, spectrum windows, pinned devices, the mixer's tab, sheets (Settings, askChoice, the audio to MIDI pop-up and every other dialog), the update window, menus and pop-ups. Each is one face; the element keeps its own tint, border, CSS shadow and content.
+- **Layers, not a face per window** (measured below): up to three more engines, each on one full-window canvas put into the page's stacking order directly before the lowest element it serves, with its z-index. An element that overlaps another floating element goes one layer up. A layer with nothing to show is hidden and draws nothing. A fourth level of overlap is solid.
+- **Backdrop on the graphics card**: the docked engine's rectangle list (sent to a layer only when it changed), view and playhead as uniforms. **0 uploads.** Overview and full-screen piano roll: small copies (capped), as the docked engine does.
+- **Glass never samples glass** (plan 2.4 option a): what a face covers that is not the arrangement is fed as flat pictures: the docked panels in the theme's panel colour, the device displays and the piano roll as small copies (at most the 12 largest; refreshed only where a face covers them, at most 20 times a second while playing and twice a second when stopped), and floating elements of a lower layer in their own colour. No flat source is an engine canvas.
+- **Moving a window** is one face redraw: no list, no backdrop, no blur pyramid. The mixer's tab face reaches under the window, so the window's square top right corner is glass too.
+- **Levels** follow the docked panels: Glass (lens), Light (no lens, 30 backdrops a second), Solid and no WebGL2 and Lightest: no layer at all, the floating elements solid.
+- **Settings, Performance**: the glass block is now "Glass: docked panels, windows, sheets and menus"; the old Refraction, Blur and "Softer blur while playing" rows say that they change nothing now (kept so saved choices and tests still work); slider stop texts updated.
+- **Old lens code** kept but unused: `rfAttach` makes nothing, `rfUpdate` only clears; `rfBuild`, `rfMap`, `rfStyle` and the `feImage` lens are still in the file for step 3.
+- `bench.py`: the drag scenario now grabs a free spot of the mixer's tab (it aimed at the hidden title, so before this its "dragging" row moved nothing); new row `glf_face`.
+
+### Measured (`tools/glass-lab/bench.py --capped --reps 2 --win 3 --scen c,d`, Fractals song, 1600x1000, software renderer; two runs each; compositor = gpu + viz thread time per presented frame)
+| Scene | v0.226 | v0.227, layers (released) | v0.227, a face per window (`glf_face`) |
+|---|---|---|---|
+| playing, mixer open: frames per second | 8.4, 6.5 | 7.2, 5.7 | 8.1, 12.5 |
+| playing, mixer open: compositor ms per frame | 1.22, 1.39 | 0.66, 0.72 | 0.68, 0.66 |
+| dragging the mixer: frames per second | 13.5, 6.7 | 12.6, 13.9 | 6.8, 12.8 |
+| dragging the mixer: compositor ms per frame | 2.53, 2.62 | 0.47, 0.42 | 0.86, 0.42 |
+| elements with backdrop-filter / px | 18 / 605,000 | 0 / 0 | 0 / 0 |
+
+Reading: the compositor work per frame is about half while playing and a fifth while dragging. The frame rates on this machine are noise: both cores are saturated by the software renderer in every row (1,750 to 1,920 ms of CPU per second), so they say nothing for the Mac. **Layers or a face per window**: the face mode draws fewer pixels when nothing moves (its canvas is only as large as the window), which is why it can look as good or better while playing here, but each move of the window draws the backdrop and the blur again (counted in the test), it needs one more graphics context per open window, and the Mac test page (plan 3.7) showed two full-window engine layers over the arrangement holding 240 fps. The task's rule "moving a window costs one quad redraw, no scene or pyramid rebuild" decides it: **layers**. If the Mac shows a cost for the floating layer's full-window canvas, the fitted canvas is the fallback that is already built.
+
+### Tested (`tools/ui-tests/glass_gs2.py`, 49 checks, all pass on the released file, headless Chromium with SwiftShader)
+- Version, defaults (layer mode, at most 3 layers), nothing floating open: no extra canvas or engine.
+- **No element or pseudo element with a computed `backdrop-filter`** (all of about 4,900 to 7,800 elements, `::before` and `::after` included) at Full effects with nothing open, with the mixer open, with a menu over the mixer, with Settings open, at Lighter, Lightest, Solid picked by hand, and without WebGL2. Tab and pan handle checked by name.
+- Old lens code in the file, unused: no SVG filter, nothing attached.
+- Mixer: one layer, its canvas directly before the mixer in the page with the same z-index; mixer and tab two faces; flats are the docked panels and two device displays (small copies: 4,500 px for a 71,400 px display). **Pixel checks**: face opaque under the mixer, layer empty beside it; frosted (fine detail 0.9 of 255 along a column, colour spread 149: the track rows); lens Wide against Off changes the rim, not the middle.
+- **Upload counter 0** for the arrangement scene while scrolling and playing (floating layer and docked engine); the list not sent again, the backdrop redrawn by uniforms.
+- **Dragging the mixer with the mouse** (over the arrangement): 25 face redraws, 0 lists sent, 0 backdrops drawn, 0 pyramid and 0 flat-pyramid builds, no regrouping.
+- **Menu over the mixer**: layer 2, its canvas directly before the menu with its z-index; it sees the mixer as a flat picture; **pixel check**: opaque, frosted, 9 to 12 of 255 from the mixer's colour, nothing of the mixer's controls. Closed: layer hidden, no faces. A menu over the arrangement only stays in layer 1.
+- Settings sheet and askChoice have faces; askChoice's layer sits directly before it. The selector list covers the sidechain window, the update window, the audio to MIDI pop-up, menus and pop-ups.
+- **Context loss** on the floating layer: the engine's solid look; restored: glass back, the scene sent again by the engine.
+- Levels: Lighter = Light (lens off); Lightest and Solid by hand: no layer, no canvas, solid mixer. **WebGL2 switched off**: Solid, no floating engine, mixer and menu solid, plays without errors.
+- Face mode: the canvas fits the window and moves with it, and a move rebuilds the blur.
+- **No console errors** in either run. Screenshots looked at: mixer at Glass and at Light (dark theme), menu over the mixer, Settings over the mixer, askChoice, the Ableton theme with the mixer and a menu, Solid without WebGL2.
+- Also on the released file: `glass_gs1.py` (65; its version check now accepts later versions and its two old-lens checks say "unused" instead of "attached"), `glass.py`, `glass2.py`, `glass5.py`, `tools/glass-lab/engine_test.py` (191) pass.
+- Levels (`tools/engine-tests/export_same.py`, beats 64 to 96, the audio code is not touched): Fractals as it opens (master -10 dB, task AI): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7); master put back to 0 dB: Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e). The same figures and checksums as v0.226.
+
+### Not done, not verified
+- **Frame rate on the Mac** (3840x2027 at 240 Hz, 100 % of frames with room to spare), on Windows and in the desktop app. To look at there with the mixer open while playing: Settings > Performance shows the frame rate; `AudioLab.run('JSON.stringify(GLF.L.map(L=>L&&L.g.stats))')` must show `uploads` 0 and a `sceneSends` that does not grow.
+- What a window covers that is DOM (device knobs, the track tabs, the toolbar) shows as the panel colour, not as the controls themselves (plan 2.4 option a). HTML-in-Canvas (Electron 46) could show them.
+- When a drag of the mixer ends, its left edge goes back to where it was (the vertical move stays). v0.226 does exactly the same; the mixer's placement code is not changed by this task. During the drag the glass follows the window.
+- Step 3 (delete `rfAttach`, `rfBuild`, `rfMap`, `rfStyle`, the `feImage` lens) waits for the user's frame-rate check.
+
+### Release
+- v0.227: commit 326e89b on main (`index.html` was not touched by other sessions during the run). Tools first in commit fb6f3dc. App copy synced (`node desktop/scripts/sync-app.js`), update note written ("Windows, sheets and menus now get their glass from the new glass engine too, and the browser's own blur is no longer used anywhere in AudioLab. Please open the mixer, play a song and tell us the frame rate you see in Settings, Performance."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Docs: `docs/glass-engine-plan.md` 3.10, `docs/glass-engine-module.md` section 10, "Where it stands" in `docs/device-backlog-2026-11-25.md`. Project doc `claude/audiolab-glass-step-2.md`. Also passing on the released file: `fxlevels.py`, `themes.py`, `taskAO.py`, `mix.py`, `play.py`, `overview.py`, `tools/glass-lab/devices_lab.py` (17). Next in the chain: the user's frame-rate check on the Mac with the mixer open, then step 3.

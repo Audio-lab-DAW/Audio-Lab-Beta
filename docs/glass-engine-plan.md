@@ -422,6 +422,16 @@ The app has **one** engine canvas (the docked layer), so while scrolling two ful
 
 **Still open: the frame rate on the Mac** (3840x2027 at 240 Hz must deliver 100 % of the frames with room to spare). The cloud machine has no graphics card, so nothing measured there says anything about it. Next: GS2 (floating windows, sheets, menus), then step 3 (remove the old glass code) after the user's check.
 
+### 3.10 Glass step 2 is in the app (27 Nov, v0.227, task GS2)
+
+Done as 3.1 "Step 2" says, under the rules of 3.2 to 3.5: windows, sheets and menus get their glass from the engine, and **`backdrop-filter` is used nowhere in the app any more, at no level** (one CSS rule). The engine draws its backdrop on the graphics card from the same rectangle scene as the docked panels (0 uploads); levels Glass, Light, Solid as for the docked panels; defaults Wide 45 and Light.
+
+**Layer or face per window, decided: layers.** Each layer is one more engine on one full-window canvas, put into the page's stacking order directly under the floating elements it serves; at most three. An element that overlaps another floating element goes one layer up and sees the one below as a flat picture (plan 2.4 option a), as do the docked panels (their colour) and the device displays and the piano roll (small copies, capped). So glass never samples glass, and moving a window is one face redraw: no list, no backdrop, no blur pyramid (counted). A face per window (one engine per window on a canvas only as large as the window) was built as a debug mode and measured too (backlog log, task GS2): it needs one more graphics context per open window and has to draw the backdrop and the blur again on every move of the window, because its canvas moves with it. That breaks the rule "moving a window costs one quad redraw", so the layers stay the default. The nested blurs in the mixer (tab, pan handles) are gone.
+
+How it is wired: `docs/glass-engine-module.md` section 10. What was measured and tested: `docs/backlog-log.md` (task GS2).
+
+**Still open: the frame rate on the Mac** with the mixer open (3840x2027 at 240 Hz must deliver 100 % of the frames with room to spare); the cloud machine has no graphics card. Next: the user's check, then step 3 (delete `rfAttach`, `rfBuild`, `rfMap`, `rfStyle`, the `feImage` lens).
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)
