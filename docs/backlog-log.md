@@ -3917,7 +3917,7 @@ No app changes: `index.html` and `desktop/` untouched, no version. Running list:
 
 ### Proven (Linux, headless Chromium with the app v0.229/v0.230)
 - 10 of 10 scenes identical bit for bit, repeated over four fresh sets of web renders.
-- The four rules it took (two panner paths, `pan + 1` in float, silence at gain 0, whole quanta with random numbers drawn past the end) are each needed: without any one of them scenes differ (from 94 to 11,096 samples, about -132 to -145 dB).
+- Three of the rules were found by a failing comparison and each fixed it: the two panner paths (94 samples per track in the first block), `pan + 1` in float (2,755 samples in the Bitcrusher scene), whole quanta with random numbers drawn past the end (127 samples in the last block). Silence at gain 0 was written from how Chromium's GainNode behaves and was not tested without it; the scene with a track at volume 0 passes.
 - The web engine repeats itself on 8 of the 10 scenes. On five tracks into one bus and on two dithering Bitcrushers it does not (10,465 and 17,912 samples differ between two renders of the same scene); in 24 renders of the second there were two outcomes, one per order of the two tracks, and the native mixer reproduces both.
 - Speed on this machine: 350 to 16,000 times real time depending on the scene (one shared core).
 
