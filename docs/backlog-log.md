@@ -5307,7 +5307,7 @@ Fired by the scheduler with a note from the scheduling chat (18:20 UTC, read as 
 - Cost: `wide` (10 devices, 7 nodes) 19 times real time on one core of this build machine, `song` 38 times.
 
 ### Left
-- The Mac result of run 46056395016 (devices and buses against the Mac's own Chromium): logged by the next run if not below.
+- **Mac, run 46056395016:** the 240 device cases bit for bit against Chromium on Apple Silicon (first time). The buses differed by about -138 dB from the second quantum: Chromium's arm64 build fuses `a + b * g` in StereoPannerNode (contraction on; JavaScript devices unaffected). Fixed in `al_mix.h` (`AL_WEB_PAN_FUSED`, on for arm64, both pan paths; Linux unchanged and still 14 of 14 and N3b's 10 of 10 here). The CI gate `grep -q 'ALL IDENTICAL'` also matched 'NOT ALL IDENTICAL' (since N3b); now `grep -qx`. Rerun 46058415128 (Mac job also makes the Mac's own references for N3b's scenes): its result is read by the next run if not added here.
 - Clips as sources (the export's clip chain), moving values (automation, live smoothing), the Ducker's keys, the export's output limiter, other sample rates; then the remaining devices (FFT family, delays, voice, ducker, loudness) and the instruments.
 - NB-R8 when the test-app task is not working in `native/host/`; NB-R9 needs `index.html`.
 

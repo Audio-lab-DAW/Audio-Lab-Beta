@@ -380,7 +380,11 @@ What it took (each measured against the app):
 
 **Cost** (Linux Release, this build machine): the ten-device `wide` scene renders 19 times faster than real time on one core, the seven-node `song` 38 times.
 
-**The Mac:** the Mac job now installs Chromium on the Mac and makes the Mac's own web references for the 240 device cases and the 14 bus scenes (review D3: on the Mac the reference is the Mac's browser, which uses Apple's maths), then compares. Run dispatched; the result is below when it is in.
+**The Mac:** the Mac job now installs Chromium on the Mac and makes the Mac's own web references (review D3: on the Mac the reference is the Mac's browser), then compares. First result (run 46056395016, macOS 26.7, Apple Silicon):
+- **the 240 device cases: 240 of 240 bit for bit against Chromium on the Mac.** The ported devices give the Mac's web engine's exact bits on Apple Silicon.
+- **the bus scenes: off by about -138 dB from the second render quantum on** (the first matched). Cause: Chromium for arm64 is compiled with floating-point contraction, so the panner's `a + b * g` is one fused multiply-add there. On Intel it is not. The devices are JavaScript in the web engine, so they are not affected; only Chromium's own C++ nodes are. Fixed: the mixer now fuses where the web engine it matches does (on for arm64, `AL_WEB_PAN_FUSED`).
+- **CI gate bug found:** the "ALL IDENTICAL" check also matched "NOT ALL IDENTICAL", in N3b's mixer step too, so that run's Mac job was green by mistake. Now exact lines; Linux's results were and are truly identical (checked here).
+- Rerun dispatched (46058415128); the Mac job now also makes the Mac's own references for N3b's mixer scenes and gates on devices, mixer and buses.
 
 **Not yet in the native mixer:** clips as sources (the export's clip chain: clip gain, fades, clip envelopes, its own pan), volume, pan and send levels that move (automation; the 10 ms smoothing in live play), the Ducker's sidechain keys (the Ducker is not ported), the export's optional output limiter (a browser compressor), other sample rates. And the devices not yet ported: 32 of 42 and the 32 instruments.
 
