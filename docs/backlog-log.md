@@ -3196,4 +3196,5 @@ Started after task AI (v0.220) was in the log. Only the mixer's outline code cha
 - On the user's Mac with a real GPU. The light level of the outline while playing read 0.00 in the headless run on both v0.220 and v0.221 (no live sidechain meter there), so the moving glow was not seen, only that the outline is on or off.
 
 ### Release
+- v0.221: commit 02555dc on main (rebased once on another session's commit; `index.html` was not touched by it).
 - v0.221. App copy synced, update note written ("The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-task-D2.md`. Next in the chain: D1.
