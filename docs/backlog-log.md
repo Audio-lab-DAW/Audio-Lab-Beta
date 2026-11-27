@@ -6057,3 +6057,39 @@ Step LT-1 of `docs/latency-build.md` (research id AE2-1). Edit script `tools/eng
 
 ### Left
 - LT-2 next: the played track skips delay compensation (L4), recorded notes on the compensated clock. Lane B: take over the two rows from `LT_HOOKS.audioRows` when the Audio page gets its row API. Lane F: when the notification (N1) exists, fill `LT_HOOKS.notify(n)` (n has title, text, buttons, device, wired; return the chosen button's value). The dialog box shows an empty icon square when `askChoice` gets no icon (seen in screenshots; the output notice passes one): lane F's styling of `#cdI[hidden]`.
+
+## 27 November 2026, v0.290: task IN-V, the Visualizer: one frequency axis, viridis (lane E, instruments)
+
+Step IN-V of `docs/design-round-4-instruments.md`, the user's pick **V1** (one frequency axis) with **map viridis**, and the V menu's entries. Edit script `tools/design-lab/in/in_v.py` with `in_v_block.js` (every anchor asserted unique), test `tools/ui-tests/taskIN_V.py` (22 checks, all pass). Claimed at 21:27 UTC before work started (after IN-O was built twice by two runs, see v0.284). Written on v0.284.
+
+### Built (block "lane E (task IN-V)" before `askChoice`, one object `INV`)
+- **One frequency axis (V1):** in All, the Spectrogram and Spectrum panes become one module: the spectrogram, then the shared log axis (20 Hz at the bottom to 20 kHz at the top; long marks at decades, mid at 2 and 5, numbers where they fit, HZ in amber), then the **spectrum laid sideways** on the same rows, so a line in the spectrogram and its peak in the spectrum sit at the same height (the test finds them in the same row, at the height of 1 kHz). The Spectrogram tab shows the same module on its own. Narrow panes (under 220 px) keep the spectrogram alone with its numbers inside the edge.
+- **The spectrogram in viridis** (the user's map) with its **colour bar in dBFS** under it (−90 to 0 DBFS); levels are true dBFS (IN-S's calibration, a sine reads its peak level); below the range floor and while stopped the panel's own background. The columns are kept as levels (0.6 dB steps), so a new map or range **repaints the history** instead of clearing it. Each column is two CSS pixels, written at the Visualizer's own rate (as before).
+- **The sideways spectrum:** the same rows, a line every range/3 dB with numbers, faint lines at 100 Hz, 1 kHz and 10 kHz across it, tilt around 1 kHz, the live line in today's cyan with a faint fill, **max hold** as a faint white line falling 3 dB/s (none at the Light level), "TILT 4.5 · MAX" in its top corner, averaging 0.25 s by time.
+- **Spectrum tab:** IN-S's analyzer front panel (S2) stays, now with the menu's tilt and hold (its 10 dB/div stays).
+- **Waveform:** today's scrolling picture, bar lines and clipping kept, plus an amplitude scale (0 dBFS and −6) and a **time scale bar (X11)** in amber measured from the columns really written (0.25, 0.5, 1, 2, 5 or 10 s, whichever is 40 px or more).
+- **Levels as M2:** the RMS core in the bar with the peak part faint above it (`INS.mbar`, `INM.rfr`), on the fader taper with IN-A's scale, today's colours and hold line; read-outs short-term LUFS, peak, RMS and crest, numbers ink, units amber.
+- **The right-click menu** (`pvMenu`, after "Visualizer sits"), as submenus: **Colour map** (Viridis, Magma, Inferno, Today's heat), **Range** (60, 90, 120 dB), **Spectrum tilt** (off, 3, 4.5 dB per octave), **Max hold** (switch), **Speed** (slow, normal, fast: half, one or two columns a frame). Kept in `UI.vzO`; without it the Visualizer opens on viridis, 90 dB, 4.5, hold on, normal.
+- **Not changed:** the audio path (the Visualizer's analyser `VZ.an`, read once a frame as before); the panes' layout rules, docking, resizing and the tab bar; the Visualizer's frame gate (screen rate, half at the Light level, nothing while hidden).
+- **Overlaps named:** the frequency map (lane D, I1) and the analyser overlay keep their own pictures; MD1's units style (amber small capitals) is used for HZ, DBFS, LUFS. Lane F's menus (OV2a) draw the submenus.
+
+### Tested (`tools/ui-tests/taskIN_V.py`, at 2194x1139, signals played through the app)
+- A 1 kHz sine at −18 dBFS: the spectrogram's brightest row and the sideways spectrum's peak are row 106 of 246, which is 1 kHz on the axis; they read −18.06 and −18.03 dBFS; the spectrogram pixel is viridis at (−18 + 90) / 90 exactly (123, 210, 81).
+- A new map repaints the same old column to magma's colour for −18 dBFS (254, 160, 110), a 60 dB range to (246, 112, 92): the history is kept.
+- A 4 kHz sine at −18 dBFS: −18.9 dBFS with the tilt off (the window's scalloping between bins), 8.8 dB higher with 4.5 dB per octave (two octaves, 9 dB; the row's centre is not exactly 4 kHz).
+- Speed: 15, 29 and 56 columns a second for slow, normal and fast. Max hold falls 3.00 dB in a second; none at the Light level. In All the two panes become one; the Spectrum tab keeps the front panel with the menu's tilt; the waveform's scale bar (2 s at this width); the levels' core brighter than the peak part.
+- The menu's five entries and their choices, kept in `UI.vzO`; `pvMenu` carries them. Nothing written while the Visualizer is hidden (0 columns in 1 s) or in the background freeze (0). No audio nodes in the block, no em dashes, no console errors.
+- Screenshots looked at (dark and the Light level): All with the 1 kHz sine and pink noise, each tab alone; they match the pick page's V1 mock-up with viridis.
+- `taskIN_A.py` 37 of 37, `taskIN_M.py` 26 of 26, `taskIN_S.py` 34 of 34 (its check that the Visualizer draws through `insVzSpec` now also accepts `INV.fft`, the same panel with the menu's tilt and hold), `taskIN_O.py` 28 of 28. `taskU.py` stops waiting for `#gpvCh [data-gv="now"]` (the glass preview) on the untouched v0.284 too. Lint clean. The start-up smoke test of the release gate cannot run on the cloud machine (the Electron download is blocked; `--here --quick` stops on the reference v0.250), as in the earlier IN entries.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured on this file): Kick −19.05560 dB (fb577dd5202b), Bass −35.48685 dB (392ec52590c7) with the master at −10 dB; at 0 dB Kick −9.75669 (0496bb147f6c), Bass −25.48699 (09e0415bec5e), as in the newest entries. The first run read Bass −26.74483 at 0 dB, the run-to-run variation the earlier entries note on untouched files; the second run read the reference.
+- **Frame time** (2194x1139 at 1.75x, Fractals playing, software renderer; untouched v0.284 against IN-V):
+
+| Scene | v0.284 untouched | with IN-V |
+|---|---|---|
+| The Visualizer's own frame (`vizFrame`, its own animation loop; All, docked at the bottom, default height), `tools/design-lab/in/viz_cost_v.py`, two 4 s windows per load, three loads alternating | 1.71, 1.27, 1.44, 1.59, 1.46, 1.25 ms (mean 1.45) | 1.29, 1.36, 0.90, 1.65, 1.57, 1.32 ms (mean 1.35) |
+| `frametime.py` play (Visualizer off, as the harness has it), app ms/f (main ms/f) | 4.11 (29.5) | 3.47 (27.0) |
+| `frametime.py` playmix (mixer open) | 9.72 (73.2) | 9.15 (69.9) |
+
+  `frametime.py` and `frame0_cost.py` time the app's main frame callback; the Visualizer draws in its own loop, so `viz_cost_v.py` times that loop directly.
+
+IN-C and IN-D next (C1 load against budget for the CPU graph, D1 scope preview in devices; DS-T2 in lane A is claimed for TM1 and TC1: whichever lands second reuses the first one's drawer). Then the AE3 additions: IN-X17 band listen on any spectrum (the filter from lane K, `MX_HOOKS.bandFilter`), IN-X19 low-band correlation on the meters (with `inoCorr`), IN-X25 the target band in the loudness history. Open: E1's gain zoom (IN-E); the track taps' size (IN-O).

@@ -25,7 +25,7 @@ ERR = []; pg.on('console', lambda m: ERR.append(m.text) if m.type == 'error' els
 R = al.run
 print('version', al.version)
 R("UI.lite=false;0")  # the headless app starts at the Light level; the normal level first
-ck('IN-S is there (INS.spec, INS.an; the overlay and the Visualizer draw through it)', R("typeof INS.spec==='function'&&typeof INS.an==='function'&&ANZD.spec===insSpoSpec&&VZD.fft===insVzSpec"))
+ck('IN-S is there (INS.spec, INS.an; the overlay and the Visualizer draw through it)', R("typeof INS.spec==='function'&&typeof INS.an==='function'&&ANZD.spec===insSpoSpec&&(VZD.fft===insVzSpec||typeof INV==='object'&&VZD.fft===INV.fft)/* IN-V draws the same panel through INV.fft, with the menu tilt and hold */"))
 
 # ---------- 1. the drawer with a made-up analyser ----------
 FAKE = r"""

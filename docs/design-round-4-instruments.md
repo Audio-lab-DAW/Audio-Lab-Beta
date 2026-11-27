@@ -442,6 +442,8 @@ Each task:
 
    **Done in v0.280** (task IN-O, O0 O1 O4): today's stereo field kept with `inoMarks` (the O1 marks), `inoLayer` (the afterglow), the newest sample amber, `inoCorr` (the phase bar's scale, value and angle); the master box's Stereo value and bar; the overlay's stereo module with the marks; the polar view (`inoPolBg`, `inoPol`) as a Picture choice in the stereo view's menu. The track taps stay at 256. See the backlog log. v0.283: the phase angle from the value as shown (`in_o_fix1.py`).
 8. **IN-V, Visualizer (V).** The layout, plus the right-click menu entries (colour map, range, tilt, hold, speed).
+
+   **Done in v0.290** (task IN-V, V1 map viridis): `INV`: in All the spectrogram and the spectrum are one module, the spectrum laid sideways on the spectrogram's rows with the log axis between them; viridis with its colour bar in dBFS (a new map or range repaints the history); the sideways spectrum with tilt and max hold; the Spectrum tab keeps the S2 front panel with the menu's tilt and hold; the waveform with an amplitude scale and a time scale bar; levels as M2. The right-click menu: Colour map, Range (60, 90, 120 dB), Spectrum tilt (off, 3, 4.5), Max hold, Speed, kept in `UI.vzO`. See the backlog log.
 9. **IN-C and IN-D, CPU graph and device previews (C, D).** The smallest; they can go with IN-M or IN-G.
 
 ## Open questions for the user
