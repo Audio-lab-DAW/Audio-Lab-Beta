@@ -457,3 +457,10 @@ All of it is the block "v0.227 (task GS2, glass step 2)" in `index.html` (before
 - **Old lens code**: `rfAttach` is replaced by an empty function and `rfUpdate` only clears; `rfBuild`, `rfMap`, `rfStyle`, `rfAttach`'s original text and the `feImage` lens stay in the file, unused (step 3 deletes them after the user's frame-rate check on the Mac).
 - **Face mode** (debug and bench only): `GLF.mode='face';glfReset()` gives every floating element its own engine on a canvas only as large as the element (`setOrigin`), placed directly before it. That is the "one face per window" way the task asked to compare. It needs one more WebGL context per open element and, because the canvas moves with the window, a backdrop and blur rebuild on every move (`GLF.n.move`). The bench numbers are in the backlog log (task GS2).
 - **Counters** (console): `AudioLab.run('JSON.stringify(GLF.L.map(L=>L&&L.g.stats))')`: `uploads` 0, `sceneSends` not growing while scrolling or playing, `pyramids` and `flatPyramids` not growing while a window is dragged over the arrangement. `AudioLab.run('JSON.stringify(GLF.n)')`: ticks, regroupings, layers made, flats set, display refreshes.
+
+## 11. Step 3 (v0.228, task GS3): the old glass code is gone
+
+- No `rfMap`, `rfBuild`, `rfStyle`, `RFX`, `feImage` map, `#arrBlur`, `abDraw`, `fxBlurPic` or `ABL` any more. `rfAttach`, `rfUpdate` and `rfAll` are empty calls kept for older code. `gbCopy` only keeps the 2 x 2 click layer `#arrBack` and the cut-away (`gbLayout`, `gbClip`, `#arrCol`); `elTick` is the glass step 1 version (a 384 x 216 copy of the arrangement, only while a window or menu is open).
+- One CSS rule still sets `backdrop-filter` to none on every element and pseudo element; no other declaration of it is left in the file.
+- The engine itself and how the app wires it (sections 9 and 10) are unchanged. Frame-time work of the same task: `docs/backlog-log.md` (task GS3).
+

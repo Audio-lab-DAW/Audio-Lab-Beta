@@ -430,7 +430,19 @@ Done as 3.1 "Step 2" says, under the rules of 3.2 to 3.5: windows, sheets and me
 
 How it is wired: `docs/glass-engine-module.md` section 10. What was measured and tested: `docs/backlog-log.md` (task GS2).
 
-**Still open: the frame rate on the Mac** with the mixer open (3840x2027 at 240 Hz must deliver 100 % of the frames with room to spare); the cloud machine has no graphics card. Next: the user's check, then step 3 (delete `rfAttach`, `rfBuild`, `rfMap`, `rfStyle`, the `feImage` lens).
+**Still open: the frame rate on the Mac** with the mixer open (3840x2027 at 240 Hz must deliver 100 % of the frames with room to spare); the cloud machine has no graphics card. Next: the user's check, then step 3 (delete `rfAttach`, `rfBuild`, `rfMap`, `rfStyle`, the `feImage` lens): done in 3.11.
+
+### 3.11 Glass step 3 (27 Nov, v0.228, task GS3): the old lens code is gone; where the app's own drawing spends the frames
+
+**The user's check on the Mac** (v0.223, Mac mini M4, 240 Hz, the real app): about 180 fps idle, 100 to 120 while moving the arrangement with Settings open over it, 90 at the lowest, "a big improvement ... it looks good". The engine test page on the same Mac held 240 fps with every frame kept, so the engine itself is not the limit. With that, step 3 was done:
+
+- **Removed**: the SVG lens (`rfMap`, `rfBuild`, `rfStyle`, `rfAttach`'s body, the `feImage` map), the blurred picture (`#arrBlur`, `abDraw`, `fxBlurPic`), the half-size copy behind live glass, the edge light's reader of the blurred picture, 90 `backdrop-filter` declarations (the guard rule that sets it to none everywhere stays), the Glass preview that imitated the old levels, and the settings that changed nothing any more (Blur, Refraction, Softer blur while playing, Half-size picture behind glass). Their stored choices are dropped once.
+- **Measured** with `tools/ui-tests/frametime.py` (the user's size, Fractals open, one drawing part switched off at a time): scrolling costs the full drawing of the arrangement canvas on every frame and the glass drawn again for the new view; idle cost frames because things were drawn again without any change: the capture button's dot pulsed through an opacity animation that the compositor runs on **every screen frame** (on a 240 Hz screen the whole window was put together 240 times a second just for it), the master meter drew 120 times a second in silence, and the Settings logo up to 160 times a second.
+- **Fixed**: the dot pulses through its colour in 12 steps, the meter draws only on change, the Settings logo at most 60 a second, two forced layout reads per arrangement drawing are kept. Idle compositor frames went from one per screen frame (57 a second at 60 Hz) to the logo's 30; in the moving scenes the compositor no longer makes extra frames between the app's own.
+- **Tried, left out**: scrolling by shifting the old picture and drawing only strips. Pixel-identical, but no faster on the cloud machine's software renderer (its copies of a full-window picture cost as much as drawing it); it might pay on a graphics card, kept as an unused experiment.
+- **The frame-rate read-out**: Settings > Performance > "Frame-rate read-out on screen": frames per second and the slowest frame of the last 5 seconds, in a corner, on top of everything.
+
+**Still open**: the frame rate on the Mac with v0.228 (idle should now reach the screen rate; scrolling still draws the whole arrangement every frame). Scrolling at 240 with Settings open needs the arrangement drawn in tiles the compositor moves, or by the glass engine on the graphics card: a task of its own. Numbers and tests: `docs/backlog-log.md` (task GS3).
 
 ## 4. Open questions for the user
 
