@@ -3733,3 +3733,29 @@ Settings > Performance, under Frame limit: "Frame-rate read-out on screen" (off 
 
 ### Release
 - v0.228: commit c6bec45 on main, tools first in commit 7544aaf (`index.html` was not touched by other sessions during the run). App copy synced (`node desktop/scripts/sync-app.js`), update note written ("Glass step 3: the old glass code is gone, an idle AudioLab no longer redraws the whole window on every screen frame, and Settings, Performance has a frame-rate read-out you can switch on ... Please switch it on and tell us what you see on your Mac."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Docs: `docs/glass-engine-plan.md` 3.11, `docs/glass-engine-module.md` section 11, "Where it stands" in `docs/device-backlog-2026-11-25.md`. Project doc `claude/audiolab-glass-step-3.md`. Next: the user's look at the read-out on the Mac (idle, scrolling with Settings open, playing with the mixer open); if scrolling stays well under 240, a task for drawing the arrangement in tiles the compositor moves (or in the glass engine).
+
+## 27 November 2026: task NL4 (VST3 test app 0.4: search, knob moves in the report, Bluetooth warning)
+
+No app changes: `index.html` and `desktop/` were not touched, no version. Touched: `native/` (test app, host layer), `tools/native-lab/READ-ME-FIRST.txt`, `.github/workflows/native-lab.yml`, `docs/native-mac-build.md`, this log. Test app 0.4: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-4 (pre-release).
+
+### From the user's fourth report on 0.3
+- Phase Plant was found by the scan (Kilohearts, instrument, 2.2.1); it was lost in a list of 222 plug-ins plus 32 that cannot load. Hence the search.
+- 0.3 counted moves from a plug-in's window but never wrote them into the report: the missing knob lines were the app's gap. 0.4 logs them; on the build machine drags in Surge XT's window reached the host (3 moves, 13 gestures).
+- Pigments silent at 16 kHz, after playing at 44.1 kHz in an earlier report with the same app code: very likely Pigments at that rate, not the app (Surge XT and mda JX10 sound at 16 kHz on the build machine). Not yet confirmed on the Mac.
+- theTapeStop silent: expected, an effect with the test pattern off.
+- The output was the Bose through eqMac at 16 kHz, Bluetooth call mode.
+
+### Built (0.4)
+- Search over name, maker and kind (case and accents ignored), Cmd+F, Escape, Enter, down arrow; kind filter; sort by name or maker, group by maker; "N of 222"; last 8 loaded on top, kept between starts; Edit menu.
+- `EditStats` in `plugin_api.h`: performEdit, beginEdit, endEdit, restartComponent (and "values changed"), last parameter and value. Report lines `[param]` and `[notes]` per plug-in; read-out "moves in its window: N   notes sent: N"; mouse use in the plug-in's window counted, so "touched but nothing reached the host" is said plainly.
+- `[warning]` and a red line when the output runs at 16 kHz or less, naming Bluetooth call mode and its fix when the device is (or is named after) a Bluetooth device.
+- CI: Surge XT and mda JX10 rendered at 16 kHz; the self test searches (with an accented query), groups, and drags across Surge XT's window.
+
+### Tested (build machine, run 45998343614; run 46000688420 rebuilds with the corrected wording)
+Searches 2 of 2, 1 of 2, 1 of 2, 0 of 2 as expected; group headings; Surge XT 45 notes, peak 0.187; parameter moves reached the host from synthetic drags. Pre-release `native-lab-4` published; the latest release is still v0.223.0 (checked after publishing).
+
+### Not verified
+Nothing by hand. The Bluetooth warning never ran (no Bluetooth device on the build machine). Pigments and Phase Plant not on the build machine.
+
+### Next
+The user: search for Phase Plant, load it, turn knobs in its window, play the pattern, paste the report; and Pigments again at 44.1 kHz or more.

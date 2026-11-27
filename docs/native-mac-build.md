@@ -10,7 +10,7 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done: the path is proven outside the app** (the real desktop shell sends a page's sound to the engine). The app itself is untouched: the hook in `index.html` waits for the design chain |
 | N3 | The engine core, devices ported family by family | not started |
-| N4 | VST3 in the app | host layer and scanner exist from stage 0; not in the app |
+| N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
@@ -47,6 +47,30 @@ Paste the report as before. The lines to look for start with `[rate]`, `[exclusi
 - **Gryphon at 192 kHz and 64 frames** (0.33 ms): 0 failed blocks. At 48 kHz and 64 frames with exclusive use, the device reported 1 overload in about 38,000 blocks.
 - **The Zoom's own line** (from a later start with it connected): "ZOOM AMS-24 Driver" by ZOOM Corporation, USB; 2 outputs and 2 inputs; rates 44.1, 48, 88.2 and 96 kHz, and the rate can be set; buffer 27 to 4096 frames; 24-bit integer on the wire, 16 formats offered; exclusive use can be taken; **no volume the computer can set**.
 - **What the two devices differ in**, which the engine and the app's settings must respect: the Gryphon has a volume the computer can set, the Zoom has none (its volume is the knob on the unit, so a "device volume" control must show "this device has none" there, as the test app does). The Gryphon goes to 768 kHz and 32-bit, the Zoom to 96 kHz and 24-bit. The Zoom has 2 inputs, the Gryphon none. The smallest buffer is 15 frames on the Gryphon at 48 kHz and 27 on the Zoom.
+
+## The user's fourth report on test app 0.3 (27 November 2026), and test app 0.4 (task NL4)
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.3-report-4.txt`. The user's words: "I opened some VSTs and turned some knobs. I did notice I did not find Phase Plant, I think, next to VST test version, it would be nice for me to have a search function because I have a lot of VSTs."
+
+What the report shows:
+- **Phase Plant was found.** The scan lists "Phase Plant by Kilohearts, instrument, version 2.2.1" among 222 plug-ins (253 bundles, 32 that cannot load). The problem was finding it in a list of 254 lines with no search.
+- **14 plug-ins loaded, none failed:** Pro-Q 3 and 4, Pro-R, Abyss, Timeless 3, Kick 3, Faturator, kHs Chorus, Melodyne, Neutron 4, OTT, Omnivocal Beta, Pigments, theTapeStop; 12 windows opened (Melodyne twice, at 812 x 600 and 1024 x 800). New figures: Faturator and kHs Chorus have about 2,086 parameters each (Kilohearts lists its MIDI-learn slots), Kick 3 3,087, Abyss 3,158; Faturator reports 38 samples of latency, OTT 2, Pigments 44.
+- **Knobs turned, no line about them.** Test app 0.3 counted moves from a plug-in's window (the read-out "moves in its window") but **never wrote them into the report**. So the report could not say whether the moves arrived. That was the app's gap, not proof of a fault in the path. 0.4 logs them, and the build machine now shows the path working: drags in Surge XT's window reached the host as parameter moves (3 moves, 13 gestures begun and ended, last "A Filter Configuration = 0.57 (Dual 2)").
+- **Pigments was silent (peak 0.000 over 595 blocks with the test pattern on).** Notes were sent (it was treated as an instrument, with a note input), and nothing in the app differs from the earlier report where Pigments **played at 44.1 kHz** through the same Bose speaker. The difference is the rate: this time the output was "Bose Mini II SoundLink (eqMac)" at **16,000 Hz** (the Bose in Bluetooth call mode, see the end of `docs/settings-research-audiophile.md`). So the silence is very likely Pigments not making sound at 16 kHz, not the app. On the build machine Surge XT and mda JX10 do sound at 16 kHz (peaks -5.6 and -3.7 dB), so silence at that rate is particular to some instruments. This is a likely explanation, not a proven one: it is confirmed only when Pigments sounds again at 44.1 kHz in 0.4.
+- **theTapeStop's silence is expected:** it is an effect, and the test pattern was off while it was loaded, so nothing was fed into it.
+- **The output ran at 16 kHz** through eqMac's copy of the Bose. Everything played lost all sound above 8 kHz.
+
+What 0.4 changes (everything else as in 0.3):
+1. **Search** above the list: filters as you type over name, maker and kind (instrument, effect, "cannot load"), any order of words, capitals and accents ignored (`SÜRGE XT` finds Surge XT). Cmd+F (also Edit > Find Plug-in) jumps to it, Escape clears it, Enter loads the selected match, the down arrow moves into the list. A kind filter (all, instruments, effects, cannot load), sort by name or by maker, or group by maker with a heading and a count per maker. "12 of 222" beside it (plug-ins that can load; the ones that cannot are counted apart). The last 8 plug-ins loaded stay on top, marked "recently loaded", kept between starts. The computer keys only play notes when the search field does not have focus.
+2. **Parameter moves:** the host's component handler now counts performEdit, beginEdit, endEdit and restartComponent (and which of those said "all values changed"), and keeps the last parameter moved and its value. The read-out shows "moves in its window: N   notes sent: N". The report gets "[param] Pigments: first move from its window: …" at once, and when a plug-in is replaced or the app quits, "[param] Pigments: 37 moves from its window (gestures begun 12, ended 12), last: Macro 1 = 0.62 (62 %)". Clicks, drags and scrolls in the plug-in's window are counted too, so if the mouse was used there and nothing reached the host, the line says so plainly.
+3. **Output warning:** when the chosen output runs at 16 kHz or less, a red line at the top and a `[warning]` line in the report. When the output is a Bluetooth device, or a device named after one (eqMac's copy), the line names call mode and gives the fix: choose another input in System Settings > Sound > Input, or quit the app using the microphone. The app follows the rate by itself when it comes back.
+4. **Notes:** "[notes] Pigments: 48 notes sent (46 from the test pattern, 2 from the keys), output peak 0.000: SILENT although the notes reached it …", with the rate named when it is below 44.1 kHz. For an effect: how many blocks of test sound were fed into it, so "silent because nothing was fed" can be told apart from "silent although fed".
+
+Tested on the build machine (virtual M1, macOS 15, run 45998343614; run 46000688420 rebuilds it with the corrected wording): the app builds and starts; search "SÜRGE XT" 2 of 2, "instrument" 1 of 2 (Surge XT), "effect" 1 of 2 (Surge XT Effects), "zzzz-nothing" 0 of 2; grouped by maker gives 1 heading; Surge XT loaded, its window opened, 45 notes sent, peak 0.187; the drags reached the host as moves. **Not tested:** anything by hand, the Bluetooth warning (the build machine has no Bluetooth device and runs at 48 kHz), and Pigments, Phase Plant or any paid plug-in.
+
+**AudioLab VST3 test 0.4**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-4 (a pre-release; the desktop app's latest release stays v0.223.0).
+
+What to try: search for Phase Plant, load it, turn a few knobs in its window, play the pattern, paste the report. Before that, take the Bose out of call mode (or pick the Gryphon), and load Pigments once more to see whether it sounds at 44.1 kHz.
 
 ## Stage N1: what was built (27 November 2026)
 
