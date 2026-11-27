@@ -150,6 +150,8 @@ jobs:
           mkdir -p out/c
           "build/AudioLab VST3 test.app/Contents/MacOS/AudioLab VST3 test" --selftest "$PWD/out/c" --plugin-name "Surge XT" > out/c/stdout.txt 2>&1 &
           PID=$!
+          for i in $(seq 1 60); do [ -f out/c/scanned ] && break; kill -0 $PID 2>/dev/null || break; sleep 0.5; done
+          sleep 0.7; screencapture -x out/c/screen-main.png || echo "no screenshot"
           for i in $(seq 1 120); do [ -f out/c/ready-for-screenshot ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
           screencapture -x out/c/screen.png || echo "no screenshot"
           for i in $(seq 1 40); do [ -f out/c/done ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
