@@ -144,3 +144,7 @@ The starred ideas first in the research's section 5 order (NF1 I3, NF2 I2, NF3 a
 | `NI_HOOKS.earDoseSetting`, `NI_HOOKS.mixHabitsSetting` (planned) | lane B, Settings | NI-19, NI-16 |
 | `NI_HOOKS.phraseLaunch` (planned) | lane C, FT-F8 | NI-21 |
 | `NI_HOOKS.explainPicture` (planned) | lane A, display-first devices | NI-26a |
+
+## Added from the mixing research picks (AE3, 27 Nov 2026, 21:07 Brussels): fold into your order
+
+Read `docs/research-mixing.md` (picks and notes at its end). Lane D builds: X16 the beat-aware clash measure into NI-5 (time-gated, pair view on a cable click), X18 high-pass hints with one-click cut (reads the NI-3 cache), X23 the gain staging check into NI-7 (I13), X27 glide between mix scenes over bars into idea I28 (NI-20; scenes come from lane C's F29 with X26).

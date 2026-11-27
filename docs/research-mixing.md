@@ -197,3 +197,22 @@ The lane table in CLAUDE.md has no owner for the audio graph itself (`syncGraph`
 - Facts marked as blogs (Myloops, FeelYourSound) are practitioner rules of thumb. REAPER anticipative FX, Bitwig's monitoring mode and the absence of scenes in Logic, Live, Bitwig and FL were not verified from official pages.
 - Pro-Q, Melda and Sonible do not publish their collision algorithms; the page's clash rule is my own estimate and is labelled as such.
 - The latency-when-playing pain mostly belongs to the performance research task; X7 is the mixing-side part and should be picked in one place only.
+
+---
+
+## The user's picks (27 November 2026, 21:07 Brussels)
+
+`AE3 picks: X1 X3 X4 X5 X6 X8 X11 X12 X13 X14 X15 X16 X17 X18 X19 X20 X21 X22 X23 X25 X26 X27`
+
+Not picked as written: X2 (ducking by shape: card F16 is built by lane C anyway), X7, X9, X10 and X24. The user's notes change several options:
+
+- **X4 duck under the kick, in the cable menu too.** The Ducker tuned for tails (fast attack, recovery in one 16th, keyed from the kick) is not only a switch on each return: it is one of the choices offered whenever you draw a cable to a sidechain or to a Ducker ("Duck under the kick, tuned for tails").
+- **X6 latency you can see: subtle, few places.** First in the track's first device on the left (the channel strip with the main volume), then only where it makes sense (the device's hover and the routing map). Not on every surface.
+- **X7 replaced by the user's idea (proposal, waiting for the user's yes):** instead of skipping slow devices on the played track, play the fast part at once and let the slow part come in later, in sync. For the other tracks this is what delay compensation and render ahead already do (they come from the timeline, so they are started early: AE2 L4 and L9). For the played track: the dry part now and the wet part of a parallel device (a send to a reverb, a Mix knob) when it is ready; a device with look-ahead runs a low-latency stand-in while you play and the exact version in playback and export. Answer in the chat: Cubase, Ableton, Logic, Studio One and Pro Tools all have a monitoring mode of this family, but none of them lets the slow part of the played track arrive late on purpose.
+- **X8 bounce with a tap point lives in the bounce pop-up** (and the automatic bounce's settings), not in a new window.
+- **X9 freeze up to here, as a right-click on the freeze button only**, with a small pop-up.
+- **X10 group stems ("extends" in the voice note = stems): an option in Export, kept out of the way** (an Advanced part of the export window). The user is unsure how useful it is.
+- **X25 loudness along the song goes into the existing loudness history** (meter pick L2, task IN-L): the target band is added there, no second view.
+
+### Who builds it
+A new lane K, task **MX** (mixing engine, prefix `mx`): MX-1 X12 pre/post per send and X13 output to any bus; MX-2 X5 compensation for returns, sends and sidechain triggers with X6's numbers and X6's subtle display; MX-3 X1 sidechain from anything and X4 (switch on returns and the cable menu choice); MX-4 X3 spectral ducking and X19's Bass mono switch; MX-5 the user's play-through idea, only after the user's yes. Lane C (FT): X8 with X9, X10 (Advanced in Export, hook for lane B), X11, X14 into F27, X15 into F18, X20, X21 and X22 into F25, X26 into F29. Lane D (NI): X16 into NI-5, X18, X23, X27 into idea I28. Lane E (IN): X17 band listen, X19's low-band correlation, X25 the target band in the loudness history. Native engine (NB): X5 for VST3.

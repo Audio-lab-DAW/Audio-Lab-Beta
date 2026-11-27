@@ -454,3 +454,7 @@ Each task:
 - The Visualizer's colour map is viridis.
 
 Built by task IN (lane E), one step per run in the implementation order above: IN-A, IN-M, IN-L, IN-S, IN-E, IN-G, IN-O, IN-V, IN-C/IN-D.
+
+## Added from the mixing research picks (AE3, 27 Nov 2026, 21:07 Brussels)
+
+After the current order, lane E adds (read `docs/research-mixing.md`, picks and notes at its end): **IN-X17** band listen on any spectrum (the filter comes from lane K, MX-4), **IN-X19** low-band correlation on the meters, **IN-X25** the user's own target band drawn in the existing loudness history (pick L2, IN-L): no second loudness view.
