@@ -494,4 +494,4 @@ Not starred but cheap and close to the starred ones, for a later round: I6 energ
 
 `RF2 picks: I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I20 I21 I22 I23 I26 I27 I28 I29 I31 I32`
 
-Not picked: I19, I24, I25, I30, I33, I34 (so NF6 'What-if branch' and NF7 'ghost suggestions' are not built unless the user changes this). Implementation is waiting for a lane; see the scheduling chat.
+Not picked: I19, I24, I25, I30, I33, I34 (so NF6 'What-if branch' and NF7 'ghost suggestions' are not built unless the user changes this). The user allowed a fourth index.html lane for these ideas (27 Nov, 14:22 Brussels): task NI, lane D, plans its steps in docs/ideas-build.md.
