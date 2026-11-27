@@ -1,0 +1,8 @@
+/* lane N (task SQ1): the Quality chip in a device's title strip */
+.devh>.sqchip{flex:none;height:18px;padding:0 7px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:rgba(255,255,255,.62);font:var(--fw5,500) 10px/16px Inter,system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;white-space:nowrap}
+.devh>.sqchip:hover{color:#fff;border-color:rgba(255,255,255,.3)}
+.devh>.sqchip.on{color:#3ecf8e;border-color:rgba(62,207,142,.45);background:rgba(62,207,142,.1)}
+.devh>.sqchip.on:hover{color:#7fe6b6}
+body.lite .devh>.sqchip{transition:none}
+.ds>.devh>.sqchip{writing-mode:vertical-rl;transform:rotate(180deg);height:auto;width:18px;padding:7px 0;line-height:16px}
+#fxin .dev.dfclosed .dfs>.devh>.sqchip{display:none}
