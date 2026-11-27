@@ -65,7 +65,8 @@ with sync_playwright() as p:
     ok(own[0] == 130 and own[1] == 74 and own[2] == 130 and own[3] == 140, 'a project with its own track height keeps it; an old view at the old default gets Dense; a height set later is kept', own)
     # ---- 3. settings rows ----
     s = J("{r:['density','motion'].map(id=>{const r=SETT.get(id);return r&&[r.pg,r.ap,r.d,!!r.h,!!r.w,SETT.isDefault(id)]}),f:SETT.find('dense'),f2:SETT.find('ambient motion'),h:LK_HOOKS.appearanceRows().map(r=>r.pg+':'+r.id),row:!!SETT.row('density')}")
-    ok(s['r'][0] == ['layout', 'appearance', 'dense', True, True, True] and s['r'][1] == ['layout', 'appearance', 'ambient', True, True, True], 'Density and Motion rows in the S4 table (id, label, page, default, help, search words), at their defaults', s['r'])
+    # from v0.250 (task ST-S5) the rows sit on their own page, Appearance (page 'appearance'); before it on Layout
+    ok(s['r'][0][1:] == ['appearance', 'dense', True, True, True] and s['r'][1][1:] == ['appearance', 'ambient', True, True, True] and s['r'][0][0] in ('layout', 'appearance') and s['r'][1][0] == s['r'][0][0], 'Density and Motion rows in the S4 table (id, label, page, default, help, search words), at their defaults', s['r'])
     ok('density' in s['f'] and 'motion' in s['f2'] and s['row'], 'found by search, row found in the window', [s['f'], s['f2']])
     ok(s['h'] == ['appearance:density', 'appearance:motion'], 'LK_HOOKS.appearanceRows gives them for an Appearance page', s['h'])
     R("SETT.set('motion','signal')"); m1 = J("{b:document.body.className.includes('lkm1'),st:document.body.classList.contains('lkstill'),ui:UI.lkMotion,l:LOOK.motion,amb:LOOK.ambientOK(),logo:aoStill(),tr:getComputedStyle(document.querySelector('#ctxm')).transitionDuration}")

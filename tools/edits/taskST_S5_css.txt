@@ -1,0 +1,27 @@
+/* settings step S5 (task ST-S5): 13 pages as cards under a strip of live read-outs */
+#set .setw.st5s{grid-template-rows:auto auto minmax(0,1fr) auto;width:min(1040px,94vw);max-width:min(1240px,96vw)}
+#st5Strip{display:flex;flex-wrap:wrap;gap:5px;padding:7px 14px 8px;border-bottom:1px solid rgba(255,255,255,.08)}
+#st5Strip button{display:inline-flex;align-items:baseline;gap:6px;height:24px;padding:0 9px;border-radius:5px;background:rgba(5,5,7,.55);border:1px solid rgba(255,255,255,.07);box-shadow:none;color:#e6e8ee;font:500 11px/22px "JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}
+#st5Strip button:hover{border-color:rgba(var(--bl3),.75)}
+#st5Strip button:focus-visible{outline:2px solid rgba(var(--bl3),.9);outline-offset:1px}
+#st5Strip button i{font:600 9px/22px Inter,system-ui,sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#ffb547}
+body.fxmin #st5Strip button{background:rgb(var(--gtr2))!important}
+#setNav{overflow:auto;min-height:0}
+#setNav button[data-tab]{padding:6px 10px}
+#st5Head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 2px 8px}
+#st5Head b{font-size:var(--fs4,15px);font-weight:var(--fw6);color:var(--ink,#ececf1)}
+#st5Head small{font-size:var(--fs1);color:var(--mut)}
+#setBody>section.st5g:not([hidden]){display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));align-items:start;align-content:start;gap:10px}
+#setBody>section.st5g>.sbox,#setBody>section.st5g>section>.sbox{margin:0;min-width:0}
+#setBody>section.st5g .st5w,#setBody>section.st5g>.pmlink,#setBody>section.st5g>p,#setBody>section.st5g>.dacz{grid-column:1/-1}
+#setBody section.st5in{display:contents!important}
+#setBody section.st5sec{display:block;margin:0}
+#setBody section.st5sec>.pmlink{margin:2px 0 8px}
+#setBody .st5slim{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:6px 14px}
+#setBody .st5slim>h4{margin:0!important;flex:none}
+#setBody .st5slim>.hint{flex:1 1 260px;min-width:0}
+#setBody .st5btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#setBody .st5slim .st5btns{margin-top:0}
+#setBody .st5zs>.zsbox{margin:0}
+#setBody>section.st5g label.chk>input[type=checkbox]{flex:none}
+#setNav>button[data-tab],#setNav>.navh,#setNav>.setsrch{flex-shrink:0}

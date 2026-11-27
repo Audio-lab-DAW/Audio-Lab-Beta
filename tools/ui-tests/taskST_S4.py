@@ -91,9 +91,9 @@ with sync_playwright() as p:
         ck(f'{L}: an older profile reads back through the table',v==[True,'-3','lead','ableton','70','5','flac','16'],v)
         ck(f'{L}: older profile: not default where changed',J(pg,"['mono','grid','tips'].map(i=>SETT.isDefault(i))")==[False,False,True])
         ck(f'{L}: older profile: no console errors',not errs,errs)
-        c.close()
+        VER=float(R(pg,'VERSION'));c.close()
         # no visible change against the previous version
-        if OLD:
+        if OLD and VER<0.250:  # from v0.250 (ST-S5) the pages are rebuilt on purpose; taskST_S5.py checks the blocks moved whole
             c,pg,e1=ctx(b,lite,{});alltabs(pg);new=pg.evaluate(STRUCT);c.close()
             c,pg,e2=ctx(b,lite,{},'old.html');alltabs(pg);old=pg.evaluate(STRUCT);c.close()
             diff=[k for k in old if old[k]!=new.get(k)]

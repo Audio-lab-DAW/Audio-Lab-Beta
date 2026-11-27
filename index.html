@@ -2110,6 +2110,33 @@ html body .mx.sel{background:linear-gradient(rgba(var(--sel3),.12),rgba(var(--se
 html body .mxf .fsc span::after{height:var(--lk-hair);background:var(--lk-tick)}
 html #ctxm button{min-height:var(--lk-row);padding-top:var(--lk-rowpad);padding-bottom:var(--lk-rowpad)}
 body.lkm1 *,body.lkm1 *::before,body.lkm1 *::after{transition-duration:0s!important;transition-delay:0s!important}
+/* settings step S5 (task ST-S5): 13 pages as cards under a strip of live read-outs */
+#set .setw.st5s{grid-template-rows:auto auto minmax(0,1fr) auto;width:min(1040px,94vw);max-width:min(1240px,96vw)}
+#st5Strip{display:flex;flex-wrap:wrap;gap:5px;padding:7px 14px 8px;border-bottom:1px solid rgba(255,255,255,.08)}
+#st5Strip button{display:inline-flex;align-items:baseline;gap:6px;height:24px;padding:0 9px;border-radius:5px;background:rgba(5,5,7,.55);border:1px solid rgba(255,255,255,.07);box-shadow:none;color:#e6e8ee;font:500 11px/22px "JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}
+#st5Strip button:hover{border-color:rgba(var(--bl3),.75)}
+#st5Strip button:focus-visible{outline:2px solid rgba(var(--bl3),.9);outline-offset:1px}
+#st5Strip button i{font:600 9px/22px Inter,system-ui,sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#ffb547}
+body.fxmin #st5Strip button{background:rgb(var(--gtr2))!important}
+#setNav{overflow:auto;min-height:0}
+#setNav button[data-tab]{padding:6px 10px}
+#st5Head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 2px 8px}
+#st5Head b{font-size:var(--fs4,15px);font-weight:var(--fw6);color:var(--ink,#ececf1)}
+#st5Head small{font-size:var(--fs1);color:var(--mut)}
+#setBody>section.st5g:not([hidden]){display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));align-items:start;align-content:start;gap:10px}
+#setBody>section.st5g>.sbox,#setBody>section.st5g>section>.sbox{margin:0;min-width:0}
+#setBody>section.st5g .st5w,#setBody>section.st5g>.pmlink,#setBody>section.st5g>p,#setBody>section.st5g>.dacz{grid-column:1/-1}
+#setBody section.st5in{display:contents!important}
+#setBody section.st5sec{display:block;margin:0}
+#setBody section.st5sec>.pmlink{margin:2px 0 8px}
+#setBody .st5slim{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:6px 14px}
+#setBody .st5slim>h4{margin:0!important;flex:none}
+#setBody .st5slim>.hint{flex:1 1 260px;min-width:0}
+#setBody .st5btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#setBody .st5slim .st5btns{margin-top:0}
+#setBody .st5zs>.zsbox{margin:0}
+#setBody>section.st5g label.chk>input[type=checkbox]{flex:none}
+#setNav>button[data-tab],#setNav>.navh,#setNav>.setsrch{flex-shrink:0}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6386,7 +6413,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.249',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.250',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8864,10 +8891,10 @@ function genSync(){const g=id=>document.getElementById(id);if(!g('genTut'))retur
 {const _ct=closeTab;closeTab=async function(id){const p=PJ.list.find(q=>q.id===id);if(p&&p.dirty&&UI.askClose!==false){const r=await askChoice('Close “'+p.name+'”?','It has changes that are not saved to its file yet. An autosave copy stays in Time Machine, but the project file itself will not have them.',[{label:'Keep it open',v:null},{label:'Save and close',v:2,cls:'pri'},{label:'Close without saving',v:1,cls:'dng'}]);if(!r)return;if(r===2){try{if(id!==PJ.cur)switchProject(id);await writeProject(curP(),false)}catch(e){return}}}return _ct.apply(this,arguments)}}
 /* settings search: finds any setting by its words and takes you there */
 {const q=document.getElementById('setQ'),R=document.getElementById('setQR');let IDX=null,sel=-1;
- const build=()=>{IDX=[];const navs=[...document.querySelectorAll('#setNav [data-tab]')];{const gr=document.getElementById('genReset');/* the reset button sits in the footer, outside every tab page */if(gr)IDX.push({tab:'',tn:'Bottom of Settings',el:gr,t:(gr.textContent||'').replace(/\s+/g,' ').trim()||'Reset all settings',head:'',ex:'restore defaults factory start over clear '+(gr.title||''),self:1})}for(const sec of document.querySelectorAll('#setBody section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab),tn=nb?nb.textContent.trim():tab;let head='';
+ const build=()=>{IDX=[];const navs=[...document.querySelectorAll('#setNav [data-tab]')];{const gr=document.getElementById('genReset');/* the reset button sits in the footer, outside every tab page */if(gr)IDX.push({tab:'',tn:'Bottom of Settings',el:gr,t:(gr.textContent||'').replace(/\s+/g,' ').trim()||'Reset all settings',head:'',ex:'restore defaults factory start over clear '+(gr.title||''),self:1})}for(const sec of document.querySelectorAll('#setBody>section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab),tn=nb?nb.textContent.trim():tab;let head='';
    for(const el of sec.querySelectorAll('h4,label.chk,.cprow>span:first-child,.bptx b,.scalecard b,.treditcard b,.pnlrow label,.mgcol h5,.devrow button,.lhead h4,.dawpres button,.pfbtns button,.aboutrow,.pmq')){const t=(el.textContent||'').replace(/\s+/g,' ').trim();if(!t||t.length>140)continue;if(el.tagName==='H4'){head=t}IDX.push({tab,tn,el,t,head:el.tagName==='H4'?'':head,ex:(el.closest('label,.cprow,.bpcard')&&el.closest('label,.cprow,.bpcard').title)||''})}}
    const extra={audio:'buffer latency sample rate driver output device headroom limiter test tone sine noise',dac:'audio devices change output bit perfect dac interface mode rate balance mono swap dc headphone ceiling lossless buffer latency input monitoring round trip output channels profile gryphon scarlett exclusive volume',layout:'panels map visualizer transport scale zoom meters presets tracks right left devices colours daw ableton fl studio cubase logic bitwig',glass:'blur transparency glass edge light look preview',perf:'light mode lightest lighter optimised optimise optimize full effects automatic auto speed fast slow computer weak laptop battery fps frame rate frames per second refresh hz limit refraction blur edge light animations note cache sleeping tracks cost performance',colors:'background tint hue clip transparency grid app icon dock logo favicon tab picture ocean yellow',nav:'zoom playhead follow scroll look ahead push at the edge follow again stay in place page by page keep centred',keys:'keyboard shortcuts keys hotkeys ableton fl studio cubase',general:'performance tooltips splash tour updates reset version about',files:'save save as open audiolab project autosave file folder',export:'export wav mp3 flac render bounce mixdown dither remember file name format bit depth'};
-   for(const sec of document.querySelectorAll('#setBody section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab);if(nb)IDX.push({tab,tn:nb.textContent.trim(),el:null,t:nb.textContent.trim(),head:'',ex:extra[tab]||'',page:1})}};
+   for(const sec of document.querySelectorAll('#setBody>section[data-page]')){const tab=sec.dataset.page,nb=navs.find(b=>b.dataset.tab===tab);if(nb)IDX.push({tab,tn:nb.textContent.trim(),el:null,t:nb.textContent.trim(),head:'',ex:(extra[tab]||'')+' '+(typeof ST5W==='object'&&ST5W[tab]||'')+(tab==='appearance'?' '+(extra.glass||'')+' '+(extra.colors||''):''),page:1})}};
  const go=it=>{const nb=it.tab?document.querySelector(`#setNav [data-tab="${it.tab}"]`):null;if(nb)nb.click();R.hidden=true;q.value='';if(it.el){requestAnimationFrame(()=>{const t=it.self?it.el:it.el.closest('label,.cprow,.bpcard,.row,.pnlrow,h4,.scalecard,.treditcard,.mtrset,.dawpres,.devrow,.pmr,.pmtop,.pmsl,.pmauto,.pmfps,.pmlim')||it.el;t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.remove('sflash');void t.offsetWidth;t.classList.add('sflash');setTimeout(()=>t.classList.remove('sflash'),1800)})}};
  const render=()=>{const v=q.value.toLowerCase().trim();if(!v){R.hidden=true;return}if(!IDX)build();const ws=v.split(/\s+/);const hits=IDX.map(it=>{const hay=(it.t+' '+it.head+' '+it.tn+' '+it.ex).toLowerCase();if(!ws.every(w=>hay.includes(w)))return null;let sc=it.t.toLowerCase().startsWith(ws[0])?3:it.t.toLowerCase().includes(v)?2:1;if(it.page)sc-=.5;return{it,sc}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,9);
    sel=hits.length?0:-1;R.innerHTML=hits.length?hits.map((h,i)=>`<button role="option" data-qi="${i}" class="${i===0?'on':''}"><b>${esc(h.it.t)}</b><small>${esc(h.it.tn)}${h.it.head&&h.it.head!==h.it.t?' › '+esc(h.it.head):''}</small></button>`).join(''):`<div class="qnone">Nothing matches “${esc(q.value)}”.</div>`;R.hidden=false;R._hits=hits};
@@ -22131,6 +22158,122 @@ lkApply();lkThFix();
 {const _sp=switchProject;switchProject=function(id){const nx=PJ.list.find(p=>p.id===id),keep=V.thD;if(nx&&nx.view&&id!==PJ.cur)delete V.thD;const r=_sp.apply(this,arguments);if(V.thD==null&&!(nx&&nx.view))V.thD=keep;try{if(lkThFix())dirty=true}catch(e){}return r}}
 addEventListener('resize',()=>{try{lkApply()}catch(e){}});
 /* ===== end of task LK ===== */
+/* ===== settings step S5 (task ST-S5), v0.250: the new pages in the picked structure A3 =====
+   docs/settings-round-1.md (A3) and docs/settings-audit.md section 6: 13 pages in four groups (Program, Working, Sound, Project), each page
+   built from cards that use the width, under a strip of live read-outs (engine rate, buffer, CPU, frame rate, glass level, output); each
+   read-out opens its page. Every block is moved whole (the same elements, ids and handlers: nothing is drawn twice, no stored key changes).
+   The old page names stay as search words, and the old page ids still open the right page (glass and colors open Appearance at their card).
+   Performance and the Glass block belong to the glass chain (G4): they are moved as they are, never changed here. */
+const STS5={v:'0.250'};
+const ST5P=[/* id, name, group, icon colour, icon (null: keep today's), old names and extra search words */
+ ['general','General','Program',null,null,'general help tooltips splash tour closing about'],
+ ['appearance','Appearance','Program','#ff7fb8','<path d="M10 3a7 7 0 1 0 0 14c1 0 1.5-.8 1.5-1.5s-.6-1.2-.6-2c0-.8.7-1.5 1.5-1.5H14a3 3 0 0 0 3-3c0-3.3-3.1-6-7-6zM6.5 9.5h0M9 6.5h0M13 7h0"/>','Glass & light Colours & clips colors look theme interface size scale glass blur transparency edge light background tint hue clip transparency grid app icon dock logo daw ableton fl studio cubase logic bitwig'],
+ ['perf','Performance','Program',null,null,'performance light mode speed frame rate fps'],
+ ['layout','Layout','Program',null,null,'Interface layout panels map visualizer transport bar track controls presets'],
+ ['keys','Keyboard shortcuts','Program',null,null,'keys hotkeys'],
+ ['nav','Navigation','Working',null,null,'Zoom and playhead zoom scroll keys follow playhead look'],
+ ['editing','Editing','Working','#f5c84c','<path d="M4 16l1-4 8.5-8.5a2.1 2.1 0 0 1 3 3L8 15z"/><path d="M12 5l3 3"/>','editing playback chase pick up notes piano roll snap'],
+ ['mixer','Mixer and meters','Working','#3ecf8e','<path d="M5 3v14M10 3v14M15 3v14"/><rect x="3.3" y="10" width="3.4" height="2.6" rx=".8"/><rect x="8.3" y="5.5" width="3.4" height="2.6" rx=".8"/><rect x="13.3" y="12" width="3.4" height="2.6" rx=".8"/>','Interface mixer channels strips meters level meters faders pan'],
+ ['audio','Audio','Sound',null,null,'Audio system driver output device buffer latency sample rate test tone'],
+ ['dac','DAC and audio interface','Sound',null,null,'Interface and DAC dac audio interface bit perfect protection limiter ceiling'],
+ ['recording','Recording and metronome','Sound','#ff6b6b','<circle cx="10" cy="10" r="6.5"/><circle cx="10" cy="10" r="2.6" fill="currentColor"/>','recording record inputs microphone metronome click count-in capture latency offset midi controllers learn mappings'],
+ ['files','Project','Project',null,null,'Project file save open autosave template'],
+ ['export','Export','Project',null,null,'Export audio mixdown bounce render']];
+const ST5W=Object.fromEntries(ST5P.map(p=>[p[0],p[5]]));
+const ST5A={glass:['appearance','#st5Glass'],colors:['appearance','#st5Bg']};/* old page ids that live on as a card */
+const ST5={done:false,cur:'general',tmr:0,
+ alias(t){return ST5A[t]?ST5A[t]:[t,null]},
+ name(t){const p=ST5P.find(x=>x[0]===t);return p?p[1]:t},
+ sec(t){return document.querySelector('#setBody>section[data-page="'+t+'"]')},
+ card(id,title,html,cls){const d=document.createElement('div');d.className='sbox'+(cls?' '+cls:'');d.id=id;d.innerHTML='<h4>'+title+'</h4>'+html;return d},
+ build(){if(ST5.done)return;const body=document.getElementById('setBody'),nav=document.getElementById('setNav');if(!body||!nav)return;
+  try{if(typeof stfBuild==='function')stfBuild()}catch(e){}try{if(typeof fxBuild==='function')fxBuild()}catch(e){}try{if(typeof pmBuild==='function')pmBuild()}catch(e){}
+  const S0=t=>document.querySelector('#setBody section[data-page="'+t+'"]');
+  if(!S0('general')||!S0('layout')||!S0('audio')||!S0('dac'))return;ST5.done=true;
+  const boxOf=sel=>{const e=typeof sel==='string'?document.querySelector(sel):sel;return e?e.closest('.sbox'):null};
+  const mk=(id,after)=>{let s=S0(id);if(!s){s=document.createElement('section');s.dataset.page=id;s.hidden=true;(after&&after.parentNode===body?after.after(s):body.appendChild(s))}return s};
+  /* Appearance: theme, interface size, glass (the glass chain's section, as it is), background, clips, grid, app icon */
+  const app=mk('appearance',S0('general'));
+  {const th=boxOf('#dawPres'),sc=S0('layout').querySelector('.stfsc'),gl=S0('glass'),co=S0('colors');
+   if(th){th.classList.add('st5w');app.appendChild(th)}
+   if(sc){if(!sc.querySelector(':scope>h4')){const h=document.createElement('h4');h.textContent='Interface size';sc.prepend(h)}app.appendChild(sc)}
+   {/* task LK's Density and motion rows (LK_HOOKS.appearanceRows: their page is Appearance); only their own block moves */const dn=document.getElementById('lkDens'),db=dn&&dn.closest('.sbox');if(db&&!db.classList.contains('stfl')&&!db.querySelector('#setScale,#layMap,#trEditBtn'))app.appendChild(db)}
+   if(gl){gl.hidden=false;gl.classList.add('sbox','st5sec','st5w');if(!gl.querySelector(':scope>h4.st5h')){const h=document.createElement('h4');h.className='st5h';h.id='st5Glass';h.textContent='Glass';gl.prepend(h)}app.appendChild(gl)}
+   if(co){co.hidden=false;co.classList.add('st5in');const b=co.querySelector('.sbox');if(b)b.id=b.id||'st5Bg';app.appendChild(co)}}
+  /* Layout keeps the layout picture, the panels, the transport bar and the track controls; the zoom keys go to Navigation */
+  const navS=S0('nav'),zs=document.getElementById('zsBox');
+  if(navS&&zs){const c=document.createElement('div');c.className='sbox st5zs';c.appendChild(zs);const z=boxOf('#setZoom');(z?z.after(c):navS.prepend(c))}
+  {const st=S0('layout').querySelector('.stfl');if(st)st.classList.add('st5w')}
+  /* Editing: playback behaviour from Audio system, and where the editing options live */
+  const ed=mk('editing',navS);
+  {const ch=boxOf('#chaseChk')||boxOf(SETT.ctl&&SETT.ctl('chase'));if(ch)ed.appendChild(ch);
+   ed.appendChild(ST5.card('st5Pr','Piano roll','<p class="hint">Snap, chords, ghost notes and the scale lock are in the piano roll’s own header, where you use them. AudioLab remembers them; the scale and root are kept in the project.</p>'))}
+  /* Mixer and meters: the mixer and level meter blocks from Interface, with a way to the mixer itself */
+  const mx=mk('mixer',ed);
+  {mx.appendChild(ST5.card('st5Mx','The mixer','<p class="hint">Compact channels, cables, Mono, Dim and the loudness target are on the mixer itself.</p><div class="st5btns"><button type="button" id="st5ShowMix" title="Close Settings and show the mixer">Show the mixer</button></div>','st5w st5slim'));
+   const a=boxOf('#mxsSet'),b=boxOf('#mtrSet');if(a){a.classList.add('st5w');mx.appendChild(a)}if(b){b.classList.add('st5w');mx.appendChild(b)}}
+  /* DAC and audio interface: the protection block (the safety limiter) joins the hardware page */
+  {const d=S0('dac'),li=boxOf(SETT.ctl&&SETT.ctl('limiter'));const ifd=document.getElementById('ifd');if(ifd)ifd.classList.add('st5w');if(d&&li){const h=li.querySelector('h4');if(h&&h.textContent.trim()==='Safety and monitoring')h.textContent='Protection';d.appendChild(li)}}
+  /* Recording and metronome: what exists today, linked where it lives */
+  const rec=mk('recording',S0('dac'));
+  {rec.appendChild(ST5.card('st5In','Inputs','<p class="hint">Record from, the input channels and input monitoring are on DAC and audio interface, in Interface mode.</p><div class="st5btns"><button type="button" data-pmgo="dac" title="Open DAC and audio interface">DAC and audio interface</button></div>'));
+   rec.appendChild(ST5.card('st5Lat','Latency','<p class="hint">The recording latency offset moves recorded audio earlier so it lines up with what you heard. It is in the audio driver panel on Audio.</p><div class="st5btns"><button type="button" data-pmgo="audio" title="Open Audio">Audio</button></div>'));
+   rec.appendChild(ST5.card('st5Met','Count-in and metronome','<p class="hint">The click sound, its level, the count-in and the patterns for each time signature. Metronome and count-in are switched on in the transport bar.</p><div class="st5btns"><button type="button" id="st5Mset" title="Open the Metronome setup">Metronome setup…</button></div>'));
+   rec.appendChild(ST5.card('st5Cap','Capture','<p class="hint">Capture keeps what you played while nothing was recording. Its source, length and options are in the Capture panel of the transport bar.</p><div class="st5btns"><button type="button" id="st5CapB" title="Close Settings and open the Capture panel">Show the Capture panel</button></div>'));
+   if(typeof FT_HOOKS==='object'&&FT_HOOKS.controllersPage)rec.appendChild(ST5.card('st5Ctl','MIDI controllers','<p class="hint">Your MIDI keyboards and control surfaces, MIDI learn and every learned mapping, with its range and takeover, are in the Controllers window.</p><div class="st5btns"><button type="button" id="st5CtlB" title="Close Settings and open the Controllers window">Controllers…</button></div>'))}
+  /* the pages that become card grids */
+  for(const t of['general','appearance','layout','nav','editing','mixer','audio','dac','recording','files'])S0(t)&&S0(t).classList.add('st5g');
+  /* the sidebar: four groups, today's icons kept */
+  {const old=[...nav.querySelectorAll('[data-tab]')],ic={};for(const b of old){const i=b.querySelector('.nic');if(i)ic[b.dataset.tab]=i.outerHTML}
+   ic.appearance=ic.colors||ic.appearance;for(const b of old)b.remove();for(const h of[...nav.querySelectorAll('.navh')])h.remove();
+   const atom=nav.querySelector('.navAtom');let g='',html='';
+   for(const[id,n,grp,col,svg]of ST5P){if(grp!==g){html+=`<small class="navh${g?' navsep':''}">${grp}</small>`;g=grp}
+    const i=svg||!ic[id]?`<i class="nic" style="--ic:${col||'#cfd3db'}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg||''}</svg></i>`:ic[id];
+    html+=`<button type="button" data-tab="${id}"${grp==='Project'?' class="navex"':''} title="${esc(n)}">${i}${esc(n)}</button>`}
+   const f=document.createElement('div');f.id='st5Nav';f.innerHTML=html;(atom?atom.before(...f.childNodes):nav.append(...f.childNodes))}
+  /* the live read-outs */
+  {const sh=document.querySelector('#set .setw>.sh');if(sh&&!document.getElementById('st5Strip')){sh.parentNode.classList.add('st5s');const s=document.createElement('div');s.id='st5Strip';s.setAttribute('role','group');s.setAttribute('aria-label','Live read-outs');
+    const B=(k,u,pg,tip)=>`<button type="button" data-st5r="${k}" data-tab5="${pg}" title="${tip}"><i>${u}</i><span>–</span></button>`;
+    s.innerHTML=B('rate','Engine','audio','The sample rate the audio engine runs at now. Opens Audio.')+B('buf','Buffer','audio','The buffer the browser reports for the engine, in samples and milliseconds. Smaller reacts faster, bigger plays steadier. Opens Audio.')+
+     B('cpu','CPU','perf','How busy the audio engine is (the same number as the CPU read-out in the transport bar). Opens Performance.')+B('fps','Frame','perf','Pictures a second that AudioLab draws now. Opens Performance.')+
+     B('glass','Glass','perf','The glass level now: Glass, Light or Solid. Opens Performance.')+B('out','Out','dac','The output device AudioLab plays through now. Opens DAC and audio interface.');sh.after(s)}}
+  {const h=document.createElement('div');h.id='st5Head';h.innerHTML='<b id="st5T"></b><small id="st5Sub"></small>';body.prepend(h)}
+  /* the table knows where each row lives now; the old page name stays a search word */
+  try{for(const r of STT){const el=SETT.ctl(r.id),s=el&&el.closest('#setBody>section[data-page]');if(!s)continue;const np=s.dataset.page;if(np!==r.pg){const on={audio:'Audio system',dac:'Interface and DAC',layout:'Interface',glass:'Glass & light',colors:'Colours & clips',nav:'Zoom and playhead',files:'Project file',export:'Export audio'}[r.pg];if(on&&!(r.w||'').includes(on.toLowerCase()))r.w=(r.w||'')+' '+on.toLowerCase();r.p0=r.pg;r.pg=np}}}catch(e){}
+  /* one click handler for the sidebar (it replaces today's: same work for Export and Layout) */
+  nav.onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;ST5.show(b.dataset.tab)};
+  document.getElementById('set').addEventListener('click',e=>{const r=e.target.closest&&e.target.closest('[data-tab5]');if(r){ST5.go(r.dataset.tab5);return}
+   if(e.target.closest&&e.target.closest('#st5ShowMix')){ST5.close();try{if(!document.getElementById('mixWin')||document.getElementById('mixWin').hidden)openMixer()}catch(err){}return}
+   if(e.target.closest&&e.target.closest('#st5Mset')){const m=document.getElementById('mpat');if(m)m.click();return}
+   if(e.target.closest&&e.target.closest('#st5CtlB')){ST5.close();setTimeout(()=>{try{ctlPage()}catch(err){}},60);return}
+   if(e.target.closest&&e.target.closest('#st5CapB')){ST5.close();setTimeout(()=>{try{if(typeof CAPP==='undefined'||!CAPP)capOpen()}catch(err){}},60)}});
+  ST5.show(ST5.cur,true)},
+ close(){const x=document.getElementById('setX');if(x)x.click();else{const s=document.getElementById('set');if(s)s.hidden=true}},
+ show(t,quiet){const[pg]=ST5.alias(t);if(!ST5.sec(pg))return;ST5.cur=pg;
+  for(const b of document.querySelectorAll('#setNav [data-tab]'))b.classList.toggle('on',b.dataset.tab===pg);
+  for(const s of document.querySelectorAll('#setBody>section[data-page]'))s.hidden=s.dataset.page!==pg;
+  if(!quiet){if(pg==='export'){try{ensureCtx();exUI()}catch(e){}}if(pg==='layout'){try{renderMini()}catch(e){}}}
+  const p=ST5P.find(x=>x[0]===pg),n=STT.filter(r=>r.pg===pg&&!r.same).length;
+  const T=document.getElementById('st5T'),Sb=document.getElementById('st5Sub');if(T&&p){T.textContent=p[1];Sb.textContent=p[2]+(n?' · '+n+' setting'+(n>1?'s':''):'')}
+  const bd=document.getElementById('setBody');if(bd&&!quiet)bd.scrollTop=0;ST5.tick()},
+ go(t,focus){/* used by the strip, the old page ids and the quick routes */const[pg,card]=ST5.alias(t);const b=document.querySelector('#setNav [data-tab="'+pg+'"]');if(b)b.click();else ST5.show(pg);
+  const sel=focus||card;if(sel){requestAnimationFrame(()=>{const c=document.querySelector(sel),el=c&&(c.closest('.sbox')||c);if(!el)return;el.scrollIntoView({block:'start'});el.classList.remove('sflash');void el.offsetWidth;el.classList.add('sflash');setTimeout(()=>el.classList.remove('sflash'),1800)})}},
+ tick(){const st=document.getElementById('set'),s=document.getElementById('st5Strip');if(!st||st.hidden||!s||document.hidden)return;
+  const put=(k,v,tip)=>{const b=s.querySelector('[data-st5r="'+k+'"] span');if(b&&b.textContent!==v)b.textContent=v;if(tip!=null){const bb=b&&b.parentNode;if(bb&&bb.dataset.full!==tip){bb.dataset.full=tip}}};
+  const c=typeof ctx!=='undefined'?ctx:null,sr=c?c.sampleRate:0;
+  put('rate',c?(sr/1000)+' kHz'+(c.state!=='running'?' · '+(c.state==='suspended'?'paused':c.state):''):'not started');
+  {const bl=c&&c.baseLatency?c.baseLatency:0;put('buf',c?(bl?Math.round(bl*sr)+' smp · '+(bl*1000).toFixed(1)+' ms':'not reported'):'–')}
+  {const v=document.getElementById('cpuV');put('cpu',v&&/\d/.test(v.textContent)?v.textContent.replace(/\s*%$/,'')+' %':'–')}
+  put('fps',typeof FPS==='object'&&FPS.fps?FPS.fps+' fps':'–');
+  {let lv='';try{lv=GLE.lv}catch(e){}put('glass',{glass:'Glass',light:'Light',solid:'Solid'}[lv]||'–')}
+  {let n='';const nm=document.getElementById('ifdName');if(nm&&nm.textContent.trim()&&nm.textContent.trim()!=='–')n=nm.textContent.trim();
+   if(!n){const o=document.getElementById('outSel');if(o&&o.selectedOptions&&o.selectedOptions[0])n=o.selectedOptions[0].textContent.trim()}
+   if(!n)n='System default';put('out',n.length>30?n.slice(0,29)+'…':n,n)}}};
+{const _o5=openSettings;openSettings=function(tab){try{ST5.build()}catch(e){console.error('AudioLab settings pages (ST-S5)',e)}
+  const[pg,card]=tab?ST5.alias(tab):[null,null];const r=_o5.call(this,pg||undefined);if(!pg){try{ST5.show(ST5.cur,true)}catch(e){}}
+  if(card)ST5.go(pg,card);try{ST5.tick()}catch(e){}return r}}
+setTimeout(()=>{try{ST5.build()}catch(e){console.error('AudioLab settings pages (ST-S5)',e)}},1500);
+ST5.tmr=setInterval(()=>{try{ST5.tick()}catch(e){}},500);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

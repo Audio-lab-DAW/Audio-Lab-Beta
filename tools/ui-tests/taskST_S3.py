@@ -92,7 +92,8 @@ with sync_playwright() as p:
         for q,exp in (('look ahead','Zoom and playhead'),('push at the edge','Zoom and playhead'),('follow again','Zoom and playhead'),('swap','Interface and DAC'),('mono','Interface and DAC')):
             pg.evaluate("q=>{const e=document.getElementById('setQ');e.value=q;e.dispatchEvent(new Event('input'))}",q);pg.wait_for_timeout(250)
             h=pg.evaluate("()=>[...document.querySelectorAll('#setQR button')].map(b=>b.textContent)")
-            ck(f'{L}: search "{q}" finds {exp}',any(exp in t for t in h),h[:4])
+            NEWN={'Zoom and playhead':'Navigation','Interface and DAC':'DAC and audio interface'}  # v0.250 (ST-S5): the pages have new names
+            ck(f'{L}: search "{q}" finds {exp}',any(exp in t or NEWN.get(exp,'@')in t for t in h),h[:4])
         pg.evaluate("()=>{const e=document.getElementById('setQ');e.value='';e.dispatchEvent(new Event('input'))}")
         # E. stored after restart
         R(pg,"(()=>{try{saveUINow()}catch(e){}return 1})()");pg.wait_for_timeout(500);pg.reload();pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(2500)

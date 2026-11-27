@@ -40,9 +40,9 @@ with sync_playwright() as p:
         ck(f'{L}: old profile kept (dac, meters, mixer, buffer, offset, keep awake, autosave)',st['dac']=='gryphon' and st['mtr']['spd']=='smooth' and st['mtr']['alg']=='rms' and st['mtr']['hold']=='3' and st['mtr']['col']=='heat' and st['w']==120 and st['fd']==3 and st['buf']==-1 and st['recOff']==7 and st['ka'] is True and st['asMin']==5,st)
         ck(f'{L}: Light level as asked',st['lite']==lite,st)
         # 1. level meters once
-        R(pg,"openSettings('layout')");pg.wait_for_timeout(700)
+        R(pg,"openSettings(typeof ST5==='object'?'mixer':'layout')");pg.wait_for_timeout(700)  # v0.250 (ST-S5): Mixer and meters has its own page
         g=pg.evaluate("""()=>({set:document.querySelectorAll('#mxsSet [data-mxm]').length,setH5:[...document.querySelectorAll('#mxsSet h5')].map(h=>h.textContent),
-          mtr:document.querySelectorAll('#setBody #mtrSet').length,mtrH4:[...document.querySelectorAll('#setBody section[data-page=layout] h4')].filter(h=>h.textContent.trim()==='Level meters').length,
+          mtr:document.querySelectorAll('#setBody #mtrSet').length,mtrH4:[...document.querySelectorAll('#setBody>section:not([hidden]) h4')].filter(h=>h.textContent.trim()==='Level meters').length,
           cols:[...document.querySelectorAll('#mtrSet .mgcol h5')].map(h=>h.textContent.trim()),on:[...document.querySelectorAll('#mtrSet [data-mset]')].map(m=>{const o=m.querySelector('.on');return m.dataset.mset+'='+(o?o.dataset.v:'-')})})""")
         ck(f'{L}: Settings Mixer block has no Level meters list',g['set']==0 and 'Level meters' not in g['setH5'],g)
         ck(f'{L}: one Level meters block with its four columns',g['mtr']==1 and g['mtrH4']==1 and len(g['cols'])==4,g)
@@ -84,7 +84,7 @@ with sync_playwright() as p:
         ck(f'{L}: Save, Save as, Open appear once in Settings',pg.evaluate("()=>[...document.querySelectorAll('#setBody .pfbtns button')].filter(b=>/^(Save|Save as|Open)/.test(b.textContent.trim())&&!/template/.test(b.textContent)).length")==3)
         # 4. search still finds the moved names
         for q,want in [('peak hold','Interface'),('speed','Interface'),('level meters','Interface'),('audio devices','Audio'),('change output','Interface and DAC'),('profile','Interface and DAC'),('save as','Project'),('open','Project'),('gryphon','Interface and DAC')]:
-            h=search(pg,q);ck(f'{L}: search "{q}" finds it ({want})',any(want.lower() in x.lower() for x in h),h[:4])
+            h=search(pg,q);W2={'Interface':'Mixer and meters','Interface and DAC':'DAC and audio interface'}.get(want,'@');ck(f'{L}: search "{q}" finds it ({want})',any(want.lower() in x.lower() or W2.lower() in x.lower() for x in h),h[:4])  # v0.250 (ST-S5): new page names
         # 5. errors
         ck(f'{L}: no console errors',not errs,errs[:3])
         cx.close()
