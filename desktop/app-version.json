@@ -1,7 +1,7 @@
 {
-  "version": "0.220",
-  "sha256": "0d4ad33178d158936d6d8fb4c572d226adbadb1f294bef4dc25c923b208de9a8",
-  "size": 5811713,
+  "version": "0.221",
+  "sha256": "e18fb6d4134ce26e1066d3b9085d2ec0d77f54a48217549ef3c6c9231d9e1dfa",
+  "size": 5812606,
   "minShell": "0.147.0",
-  "notes": "Starts with the Fractals song as the only open song, 10 dB quieter on the master."
+  "notes": "The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected."
 }

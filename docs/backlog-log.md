@@ -3168,3 +3168,32 @@ Three changes to what a fresh install and every start look like. The audio engin
 ### Release
 - v0.220: commit 0b0a8de on main (rebased twice on other sessions' doc and glass-lab commits; `index.html` was not touched by them).
 - v0.220. App copy synced, update note written ("Starts with the Fractals song as the only open song, 10 dB quieter on the master."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-fixes-run-AI.md`. Next in the chain: D2.
+
+## 27 November 2026, v0.221: sidechain outline only when the sender or receiver is selected (task D2)
+> Plan `docs/glass-engine-plan.md`, section 1: "the sidechain outline (sender and receiver strips light up) should show only when the sender or the receiver is the selected channel. Cables stay visible as now, unless 'Selected only' is on."
+
+Started after task AI (v0.220) was in the log. Only the mixer's outline code changed; the audio engine and the cables are not touched; no desktop file changed (no desktop build needed).
+
+### What was there before
+- `abxLights` (run once per mixer frame from `drawMixer`) lit the strips of every sidechain link (Sidechain effect with a source, and Sidechain modulators) all the time, whatever was selected.
+
+### Built
+- `abxLights` now skips a link unless one of its two ends is selected: the focused channel (`selT`) or a member of the multi-selection (`TSEL`), which the mixer and the track headers share since task AE. The check sits before the link's meter is read, so unselected links cost less per frame than before, not more.
+- Block "v0.221 (task D2)" before `askChoice`: `selectTrack`, `hdrMark` and `selMaster` call the lights once right after the selection changes, so the outline appears or goes in the same step and does not wait for the next frame. No CSS changed; strips that lose the outline are cleaned by the existing code (classes and the two style values removed), so nothing flickers.
+- What counts as "nothing selected": AudioLab always has a focused channel except when the master is selected, so "no outline with nothing selected" is the master case. At a start the first track is focused; if that track is a sender or receiver, its links are outlined.
+- Edit script `tools/edits/taskD2.py` (every replacement asserted unique).
+
+### Tested (`tools/ui-tests/taskD2.py`, headless Chromium, Kick to Pad sidechain made by dragging the cable socket)
+- Master selected (no channel): no outline. Kick selected: Kick and Pad outlined (sender mark on Kick, receiver mark on Pad). Pad selected: both outlined. Bass selected: none.
+- Same step: reading the strips directly after `selectTrack` gives 0, 2, 0 outlined strips for Bass, Kick, Bass, with no frame drawn in between. Over 90 frames each state stayed the same, stopped and playing (no flicker).
+- Shared selection: Bass and Kick selected together with Ctrl-click: outlined; Kick taken out again: none. Pad clicked in the arrangement header: outlined; Clap clicked there: none.
+- Cables: the 86 cable paths are identical in every selection state. "Selected only": 9, 13, 5, 5 paths for Kick, Pad, Bass, master, and 86 again when turned off; the same numbers on v0.220.
+- The same test on v0.220 fails exactly the "no outline" checks, as expected.
+- No console or page errors. Existing tests pass on this build: `taskAE.py`, `taskAB.py`, `taskAG.py`, `taskAI.py` (32 checks), `taskAF.py`, `taskAN.py`, `taskAK.py`, `cables3.py`, `mix.py`, `mixstrip.py`, `play.py`.
+- Levels (`tools/engine-tests/export_same.py`, beats 64 to 96): measured after task AI's master change, Fractals as it opens (master -10 dB): Kick -19.05560 dB, Bass -35.48685 dB; with the master put back to 0 dB: Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e). All four are the v0.220 figures.
+
+### Not verified
+- On the user's Mac with a real GPU. The light level of the outline while playing read 0.00 in the headless run on both v0.220 and v0.221 (no live sidechain meter there), so the moving glow was not seen, only that the outline is on or off.
+
+### Release
+- v0.221. App copy synced, update note written ("The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected."). MIN_SHELL not raised, no desktop build. Project doc `claude/audiolab-task-D2.md`. Next in the chain: D1.

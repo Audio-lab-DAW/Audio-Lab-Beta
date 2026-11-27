@@ -6105,7 +6105,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.220',BUILD='26 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.221',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17300,10 +17300,10 @@ function abxTick(force){const w=document.getElementById('mixWin'),open=w&&!w.hid
  if(ABXW.size){for(const W of ABXW.values()){const F=abxFind(W.fid);if(!F){abxClose(W.fid);continue}if(!open){W.el.hidden=true;if(W.ln)W.ln.setAttribute('d','');continue}abxPos(W,abxAnchor(F.f,F.t));
    const cv=W.cv;if(cv&&!W.el.hidden){const dp=Math.min(2,(devicePixelRatio||1)*(ZOOM||1)),cw=cv.clientWidth,ch=cv.clientHeight;if(cw&&ch){if(cv.width!==Math.round(cw*dp)){cv.width=Math.round(cw*dp);cv.height=Math.round(ch*dp)}const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);agPaint(g,cw,ch,F.f,abxX(F.t,F.f))}}}}
  if(!open)return;abxLights(w)}
-function abxLights(w){const now=performance.now(),L=new Map(),put=(id,v,c,role)=>{const o=L.get(id)||{v:0,c,r:''};if(v>=o.v){o.v=v;o.c=c}o.r=o.r.includes(role)?o.r:o.r+role;L.set(id,o)};
- for(const t of S.tracks){for(const f of t.fx||[]){if(f.type!=='duck'||!f.on)continue;const s=abxSrc(f);if(!s)continue;const X=abxX(t,f),live=X&&now-X.m.t<300,gr=live?clamp(1-X.m.g,0,1):0,kv=live&&X.m.k>1e-5?clamp((20*Math.log10(X.m.k)+48)/48,0,1):0;
+function abxLights(w){const now=performance.now(),L=new Map(),sel=id=>id===selT||TSEL.has(id),put=(id,v,c,role)=>{const o=L.get(id)||{v:0,c,r:''};if(v>=o.v){o.v=v;o.c=c}o.r=o.r.includes(role)?o.r:o.r+role;L.set(id,o)};
+ for(const t of S.tracks){for(const f of t.fx||[]){if(f.type!=='duck'||!f.on)continue;const s=abxSrc(f);if(!s||!(sel(t.id)||sel(s.id)))continue;const X=abxX(t,f),live=X&&now-X.m.t<300,gr=live?clamp(1-X.m.g,0,1):0,kv=live&&X.m.k>1e-5?clamp((20*Math.log10(X.m.k)+48)/48,0,1):0;
     put(t.id,gr,s.color||'#ff7a7a','t');put(s.id,kv*.8,s.color||'#ff7a7a','s')}
-  for(const m of t.mods||[]){if(m.type!=='side'||m.off||!m.p||typeof m.p.src!=='string')continue;const s=trkById(m.p.src);if(!s||s===t)continue;const st=MOD.st.get(m.id),v=st?clamp(Math.abs(st.v||0),0,1):0;put(t.id,v,s.color||'#ff7a7a','t');put(s.id,v*.8,s.color||'#ff7a7a','s')}}
+  for(const m of t.mods||[]){if(m.type!=='side'||m.off||!m.p||typeof m.p.src!=='string')continue;const s=trkById(m.p.src);if(!s||s===t||!(sel(t.id)||sel(s.id)))continue;const st=MOD.st.get(m.id),v=st?clamp(Math.abs(st.v||0),0,1):0;put(t.id,v,s.color||'#ff7a7a','t');put(s.id,v*.8,s.color||'#ff7a7a','s')}}
  for(const[id,o] of ABXL2)if(!L.has(id)){const el=w.querySelector(`.mx[data-id="${id}"]`);if(el){el.classList.remove('abxl','abxt','abxs');el.style.removeProperty('--abxp');el.style.removeProperty('--abxc')}ABXL2.delete(id)}
  for(const[id,o] of L){const el=w.querySelector(`.mx[data-id="${id}"]`);if(!el)continue;const pv=ABXL2.get(id),v=Math.round(o.v*50)/50,k=v+'|'+o.c+'|'+o.r;if(pv&&pv.k===k&&el.classList.contains('abxl'))continue;ABXL2.set(id,{k});
   el.classList.add('abxl');el.classList.toggle('abxt',o.r.includes('t'));el.classList.toggle('abxs',o.r.includes('s'));el.style.setProperty('--abxp',v.toFixed(2));el.style.setProperty('--abxc',o.c)}}
@@ -19560,6 +19560,13 @@ async function frxBoot(old){const hold=PJ.list.find(p=>p.frxHold);let J=null,sta
   S={bpm:145,loop:false,click:false,master:0,tracks:[],sections:[]};
   PJ={cur:'frx0',list:[{id:'frx0',name:FRX_NAME,S,frxHold:true}],win:[]};renderTabs();FRX.ready=frxBoot(old)}}
 
+/* ---------- v0.221 (task D2): the sidechain outline follows the selection ----------
+   abxLights lights the sender and receiver strips only when one of them is selected (selT, or part of the shared selection TSEL of mixer and arrangement).
+   It already runs once per mixer frame; here it also runs right when the selection changes, so the outline appears or goes in the same step. Cables are not touched. */
+function abxSelNow(){try{const w=document.getElementById('mixWin');if(w&&!w.hidden)abxLights(w)}catch(e){}}
+{const _s=selectTrack;selectTrack=function(){const r=_s.apply(this,arguments);abxSelNow();return r}}
+{const _h=hdrMark;hdrMark=function(){const r=_h.apply(this,arguments);abxSelNow();return r}}
+{const _m=selMaster;selMaster=function(){const r=_m.apply(this,arguments);abxSelNow();return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
