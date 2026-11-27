@@ -10,6 +10,8 @@ glass engine at Glass (SwiftShader WebGL2, so the engine is on as on the Mac).
 Scenes
   idle       nothing moves, nothing plays
   scroll     the arrangement is scrolled sideways on every frame (what a trackpad does, through the same V.x / dirty path)
+  pinch      a trackpad pinch over the arrangement: one ctrlKey wheel event per frame (deltaY 4, in for 60 frames, then out), through the
+             app's own wheel listener (task UV-1)
   scrollset  the same with Settings open over it (Performance page)
   play       playing from beat 128, Follow off
   playmix    playing with the mixer open
@@ -68,6 +70,9 @@ WRAP = "if(!window.__ftapp){window.__ftapp={t:0,n:0};const o=frame0;frame0=funct
 # scroll driver: sideways, a few px a frame, back and forth, through the same path the wheel uses (V.x, clampV, dirty)
 SCROLL_ON = "window.__ftsc={on:true,k:0};(function f(){if(!__ftsc.on)return;__ftsc.k++;const d=(Math.floor(__ftsc.k/90)%2?-1:1)*6;V.x+=d/V.ppb;clampV();dirty=true;requestAnimationFrame(f)})()"
 SCROLL_OFF = "if(window.__ftsc)__ftsc.on=false"
+# pinch driver (task UV-1): a trackpad pinch over the middle of the arrangement, one wheel event with ctrlKey (no Control key down) per frame, in and out
+PINCH_ON = "window.__ftpi={on:true,k:0};(function f(){if(!__ftpi.on)return;__ftpi.k++;const r=arr.getBoundingClientRect(),d=(Math.floor(__ftpi.k/60)%2?1:-1)*4;arr.dispatchEvent(new WheelEvent('wheel',{deltaY:d,ctrlKey:true,clientX:r.left+r.width*.55,clientY:r.top+r.height*.45,bubbles:true,cancelable:true}));requestAnimationFrame(f)})()"
+PINCH_OFF = "if(window.__ftpi)__ftpi.on=false"
 
 def swaps(buf, wall):
     """frames the compositor really put on the screen per second (each one is the whole window put together again on the Mac)"""
@@ -108,8 +113,10 @@ def main():
             if sc == 'playmix': R("openMixer()"); pg.wait_for_timeout(1200)
             if sc in ('play', 'playmix'): R("UI.follow=false;if(play.on)stop();pos=128;start()"); pg.wait_for_timeout(1200)
             if sc in ('scroll', 'scrollset'): R(SCROLL_ON); pg.wait_for_timeout(400)
+            if sc == 'pinch': R(PINCH_ON); pg.wait_for_timeout(400)
         def scene_off(sc):
             if sc in ('scroll', 'scrollset'): R(SCROLL_OFF)
+            if sc == 'pinch': R(PINCH_OFF); pg.wait_for_timeout(300)
             if sc in ('play', 'playmix'): R("stop()")
             if sc == 'scrollset': R("closeSet()")
             if sc == 'playmix': R("{const w=document.getElementById('mixWin');if(w)w.hidden=true}")

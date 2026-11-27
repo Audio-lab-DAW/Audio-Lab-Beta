@@ -58,9 +58,11 @@ chk('  anchored within a pixel (%.4f px)'%((u1['b']-u0['b'])*b['ppb']),abs((u1['
 setv();a=Vw();u0=under();wheel(['Control'],0,-2.5,n=20,gap=8);b=Vw();u1=under();chk('trackpad Ctrl + scroll: smooth zoom, anchored (%.4f px)'%((u1['b']-u0['b'])*b['ppb']),b['ppb']>a['ppb']*1.3 and abs((u1['b']-u0['b'])*b['ppb'])<1)
 setv();a=Vw();wheel(['Alt'],0,-2.5,n=20,gap=8);b=Vw();chk('trackpad Option + scroll: track height',b['th']>a['th']*1.1 and eq(b['ppb'],a['ppb']))
 # frames of one wheel step: eased, several frames
-setv();pg.mouse.move(PX,PY);pg.keyboard.down('Shift');pg.mouse.wheel(0,-100)
-fr=JL(pg.evaluate("()=>new Promise(res=>{const o=[];let n=0;const f=()=>{o.push(window.AudioLab.run('V.ppb'));if(++n<25)requestAnimationFrame(f);else res(JSON.stringify(o))};requestAnimationFrame(f)})"));pg.keyboard.up('Shift')
-d=sorted(set(round(v,4) for v in fr));chk('one wheel step is eased over several frames (%d different widths), never backwards'%len(d),len(d)>=3 and all(fr[i+1]>=fr[i]-1e-9 for i in range(len(fr)-1)))
+# (task UV-1: the easing is 15 ms now, so on a slow test machine it can finish within two frames; its steps are counted inside szStep, not per frame)
+setv();pg.mouse.move(PX,PY);p0=Vw()['ppb'];R("window.__anS=[];window.__anO=szStep;szStep=function(t){const r=__anO.apply(this,arguments);__anS.push(V.ppb);return r};0")
+pg.keyboard.down('Shift');pg.mouse.wheel(0,-100);pg.wait_for_timeout(700);pg.keyboard.up('Shift')
+fr=[p0]+JL(R("JSON.stringify(__anS)"));R("szStep=window.__anO;0")
+d=sorted(set(round(v,4) for v in fr));chk('one wheel step is eased over several steps (%d different widths), never backwards'%len(d),len(d)>=3 and all(fr[i+1]>=fr[i]-1e-9 for i in range(len(fr)-1)))
 # ---- 3 plain scrolling and sideways
 setv();a=Vw();wheel([],60,0);b=Vw();chk('two fingers sideways (no key): scrolls time, no zoom',b['x']>a['x'] and eq(b['ppb'],a['ppb']) and eq(b['th'],a['th']),round(b['x']-a['x'],3))
 setv();a=Vw();wheel([],0,60);b=Vw();chk('plain scroll: up and down, no zoom',b['y']>a['y'] and eq(b['ppb'],a['ppb']) and eq(b['x'],a['x']))
