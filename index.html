@@ -1904,6 +1904,17 @@ body.fx-top #fx.dsh.collapsed .fxbtns{top:auto!important;bottom:-28px}
 /* v0.218 (task AO): while AudioLab is in the background every CSS animation stands still (the class sits on the root element) */
 html.aobg *,html.aobg *::before,html.aobg *::after{animation-play-state:paused!important}
 #setBody .aoinf{margin:2px 2px 8px 46px;font-size:10.5px;line-height:1.35;color:#8a8d99}
+/* v0.223 (task GS1): the glass engine draws the docked panels. Its canvas sits under the arrangement canvas; the docked panels carry no backdrop-filter at any level.
+   Their see-through tint has its own value (--gad), so they are glass at the level Light too; .glsol = no engine face behind this panel, so it is solid. */
+#glassCv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none}
+#hglass,#tr,#fxglass,#fxband{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;--ga:var(--gad,.5)}
+#hglass.glsol,#tr.glsol,#fxglass.glsol,#fxband.glsol{--ga:1}
+/* the playhead layer over the arrangement */
+#arrPhW{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;pointer-events:none}
+#arrPhC,#arrPhJ{position:absolute;left:0;top:0;display:block;pointer-events:none;will-change:transform}
+/* Settings, Performance: docked panels */
+#glBox .glseg button:disabled{opacity:.38;cursor:default}
+.glnote{margin:7px 2px 2px;font-size:11px;line-height:1.45;color:#8f95a5}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:600 9.5px Inter,system-ui,sans-serif;letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:600 10px ui-monospace,Menlo,monospace;color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:9px;color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5456,9 +5467,9 @@ function fwin(id,title,geo,onClose){let w=document.getElementById(id);const ovs=
   const g=(UI.win&&UI.win[id])||geo;Object.assign(w.style,{left:g.x+'px',top:g.y+'px',width:g.w+'px',height:g.h+'px'});
   const save=()=>{if(w.hidden)return;UI.win=UI.win||{};UI.win[id]={x:w.offsetLeft,y:w.offsetTop,w:w.offsetWidth,h:w.offsetHeight};saveUI()};
   w.addEventListener('pointerdown',e=>{if(e.target!==w)return;const r=w.getBoundingClientRect();if(r.right-e.clientX<20&&r.bottom-e.clientY<20){UI.winSized=UI.winSized||{};UI.winSized[id]=true;saveUI()}});
-  let d=null;w.querySelector('.fwh').addEventListener('pointerdown',e=>{if(e.target.closest('button,select,input,.seg'))return;d={x0:e.clientX,y0:e.clientY,l:w.offsetLeft,t:w.offsetTop};w.style.zIndex=++FWZ;w.classList.add('mv');e.preventDefault()});
-  addEventListener('pointermove',e=>{if(!d)return;const z=ZOOM,dx=(e.clientX-d.x0)/z,dy=Math.max(-d.t,(e.clientY-d.y0)/z);d.dx=dx;d.dy=dy;w.style.translate=dx.toFixed(1)+'px '+dy.toFixed(1)+'px';w._onDrag&&w._onDrag(e)});
-  addEventListener('pointerup',e=>{if(d){if(d.dx!=null){w.style.left=d.l+d.dx+'px';w.style.top=Math.max(0,d.t+d.dy)+'px'}w.style.translate='';w.classList.remove('mv');const mv=Math.abs(e.clientX-d.x0)+Math.abs(e.clientY-d.y0)>3;d=null;if(w._onDrop&&w._onDrop(e))return;if(mv){UI.winMoved=UI.winMoved||{};UI.winMoved[id]=true}save()}});
+  let d=null;w.querySelector('.fwh').addEventListener('pointerdown',e=>{if(e.target.closest('button,select,input,.seg'))return;d={x0:e.clientX,y0:e.clientY,l:w.offsetLeft,t:w.offsetTop,pid:e.pointerId,hd:e.currentTarget};w.style.zIndex=++FWZ;w.classList.add('mv');e.preventDefault()});
+  addEventListener('pointermove',e=>{if(!d)return;/* v0.223: once the window really moves it keeps the pointer, so the page under it is not searched on every step and the drag cannot be lost */if(d.hd&&!d.cap&&Math.abs(e.clientX-d.x0)+Math.abs(e.clientY-d.y0)>3){d.cap=1;try{d.hd.setPointerCapture(d.pid)}catch(x){}}const z=ZOOM,dx=(e.clientX-d.x0)/z,dy=Math.max(-d.t,(e.clientY-d.y0)/z);d.dx=dx;d.dy=dy;w.style.translate=dx.toFixed(1)+'px '+dy.toFixed(1)+'px';w._onDrag&&w._onDrag(e)});
+  const fwUp=e=>{if(d){if(d.cap)try{d.hd.releasePointerCapture(d.pid)}catch(x){}if(d.dx!=null){w.style.left=d.l+d.dx+'px';w.style.top=Math.max(0,d.t+d.dy)+'px'}w.style.translate='';w.classList.remove('mv');const mv=Math.abs(e.clientX-d.x0)+Math.abs(e.clientY-d.y0)>3;d=null;if(w._onDrop&&w._onDrop(e))return;if(mv){UI.winMoved=UI.winMoved||{};UI.winMoved[id]=true}save()}};addEventListener('pointerup',fwUp);addEventListener('pointercancel',fwUp);
   w._grab=(e,ox,oy)=>{d={x0:e.clientX,y0:e.clientY,l:e.clientX/ZOOM-ox,t:e.clientY/ZOOM-oy};w.classList.add('mv');w.style.translate='';w.style.left=d.l+'px';w.style.top=d.t+'px';w.style.zIndex=++FWZ};w.addEventListener('pointerdown',()=>w.style.zIndex=++FWZ,true);
   new ResizeObserver(()=>{save();if(id==='devWin')drawChain()}).observe(w);
   w.querySelector('.fwc').onclick=()=>{w.hidden=true;onClose&&onClose()};return w}
@@ -6105,7 +6116,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.222',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.223',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -13418,7 +13429,7 @@ function sbsInit(){PRESETS.sbass={name:'Sub',cat:'Bass',desc:'A sub bass built f
    layers (blurred picture, the copy behind the glass, the refraction maps) leave the page. Automatic never picks Lightest. */
 const PM={busy:false,undo:null,rep:'',steps:[],ext:null,hw:''};
 const PMN=['Lightest','Lighter','Optimised','Full effects'];
-const PMD=['Fastest and lightest: no transparency, no blur, no shadows, no animations.','Solid panels, no animations. Pictures redraw 30 times a second.','Glass with blur from a ready-made picture. Smooth on most computers.','Refraction, live blur, edge light and every animation.'];
+const PMD=['Fastest and lightest: no transparency, no blur, no shadows, no animations.','Light glass on the docked panels, solid windows and menus, no animations. Pictures redraw 30 times a second.','Glass on the docked panels. Windows and menus with blur from a ready-made picture. Smooth on most computers.','Glass on the docked panels. Windows and menus with refraction, live blur, edge light and every animation.'];
 function pmInit(){if(UI.pm&&typeof UI.pm==='object'&&UI.pm.st>=0&&UI.pm.st<=3)return;
   /* first start with this version: the old three levels and the old Light mode become a stop */
   const lv=UI.fx&&typeof UI.fx==='object'?fxLevel():(UI.refr===0?'opt':'full'),man=!!UI.lite&&UI.liteMan===true;let on=false,st=2;
@@ -13486,20 +13497,20 @@ function pmBuild(){const body=document.getElementById('setBody'),nav=document.ge
   sec.innerHTML=`<div class="pmhero"><div class="pmtop"><span class="pmic">${pmSvg('bolt')}</span><div class="pmtt"><b class="pmq">Light mode</b><small id="pmSub"></small></div><span id="pmSwH"></span></div>
 <div class="pmsl" id="pmSl" role="slider" tabindex="0" aria-label="How light" aria-valuemin="0" aria-valuemax="3">
 <button type="button" class="pmz" data-st="0" title="Lightest: fastest and lightest. No transparency, no blur, no shadows, no animations. Automatic never goes here."><i></i><b class="pmq">Lightest</b></button><span class="pmgap" aria-hidden="true"></span>
-<div class="pmtrk" id="pmTrk"><span class="pmln"><u id="pmFill"></u></span><button type="button" data-st="1" title="Lighter: solid panels, no animations, pictures 30 times a second"><i></i><b class="pmq">Lighter</b></button><button type="button" data-st="2" title="Optimised: glass with blur from a ready-made picture"><i></i><b class="pmq">Optimised</b></button><button type="button" data-st="3" title="Full effects: refraction, live blur, edge light, all animations"><i></i><b class="pmq">Full effects</b></button></div></div>
+<div class="pmtrk" id="pmTrk"><span class="pmln"><u id="pmFill"></u></span><button type="button" data-st="1" title="Lighter: light glass on the docked panels, solid windows and menus, no animations, pictures 30 times a second"><i></i><b class="pmq">Lighter</b></button><button type="button" data-st="2" title="Optimised: glass on the docked panels, windows and menus with blur from a ready-made picture"><i></i><b class="pmq">Optimised</b></button><button type="button" data-st="3" title="Full effects: glass on the docked panels, windows and menus with refraction, live blur, edge light, all animations"><i></i><b class="pmq">Full effects</b></button></div></div>
 <p class="pmcap" id="pmCap"></p>
 <div class="pmauto"><button type="button" id="pmAuto" class="pmq" title="Measures this computer (screen rate, frame times while the visuals run, cores, memory, audio load), then moves the slider up while the screen keeps its full rate. Never picks Lightest.">${pmSvg('auto')}<span>Automatic</span></button><button type="button" id="pmUndo" hidden>Undo</button><span id="pmRep" role="status"></span></div>
 <div class="pmtrail" id="pmTrail"></div></div>
 <div class="pmfps" title="Pictures a second that AudioLab draws, next to your screen's rate. Only measured while this tab is open."><div class="pmfn"><b id="pmFpsN">–</b><span id="pmHz"></span><small class="pmq">Frame rate</small></div><canvas id="pmFpsC" aria-hidden="true"></canvas><div class="pmfl"><span>Lowest 10 s</span><b id="pmLow">–</b><span>Work a frame</span><b id="pmMs">–</b></div></div>
 <div class="pmlim" id="pmLim"><span class="pmq">Frame limit</span></div>
-<div class="pmh">What each effect costs</div><div class="pmlist">`+
+<div class="pmh">Windows, sheets and menus: what each effect costs</div><div class="pmlist">`+
   row('refr','refr','Refraction','Bends the picture near the edges of glass, like a thick pane. The most expensive effect.',sw('pmRefr'))+
   row('blur','blur','Blur','Live: the browser blurs what is behind each panel whenever anything changes. Picture: the arrangement is blurred once into a small picture. Off: solid panels.','<div class="seg" id="pmBlur"><button type="button" data-bm="off">Off</button><button type="button" data-bm="copy">Picture</button><button type="button" data-bm="live">Live</button></div>')+
   row('edge','edge','Edge light','The rim gets brighter next to bright clips. Worked out about 10 times a second from a tiny picture, only while the background changes.',sw('pmEdge'))+
   row('anim','anim','Animations','The moving logo, glows and soft fades.',sw('pmAnim'))+`</div>
 <div class="pmh">Savers</div><div class="pmlist">`+
   row('glPlay','play','Softer blur while playing','Halves the live blur during playback. Only matters with live blur.','<span data-mv="glPlay"></span>',1)+
-  row('glBack','back','Half-size picture behind glass','What shows through live glass is a half-size copy of the arrangement. Only matters with live blur.','<span data-mv="glBack"></span>',1)+
+  row('glBack','back','Half-size picture behind glass','Not needed any more: the glass engine draws what is behind the docked panels itself, so this switch changes nothing now.','<span data-mv="glBack"></span>',1)+
   row('ncOn','note','Note cache','Notes that repeat are made once and played back as audio. Saves a lot of processor in dense songs. Exports are not affected.','<span data-mv="ncOn"></span>',1)+
   row('slpOn','slp','Sleeping tracks','Tracks with nothing to play are unplugged: while the song plays until just before their next clip, when it is stopped once their sound has died away. Playing a track wakes it at once.','<span data-mv="slpOn"></span>',1)+`</div>`;
   body.appendChild(sec);
@@ -19573,6 +19584,997 @@ function abxSelNow(){try{const w=document.getElementById('mixWin');if(w&&!w.hidd
    A profile that never ran the old move keeps what it saved. Flat bars 2 picked after this step stays (UI.fd7 is set). UI.fd7: 1 nothing to do, 2 moved back. */
 if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object.assign({},UI.mxs,{fd:7});UI.fd7=back?2:1;UI.fd22=1;try{saveUI()}catch(e){}
   if(back){try{fdCssUp(true);mxsApply();mxsSync();hfdCss()}catch(e){}}}
+/* ====================== v0.223 (task GS1, glass step 1): the glass engine draws the docked panels ======================
+   Plan: docs/glass-engine-plan.md (sections 3.2 to 3.5 are binding), module: docs/glass-engine-module.md, engine source: tools/glass-lab/glass-engine.js (pasted below unchanged).
+   One WebGL2 canvas (#glassCv) sits where the old pictures behind the glass sat (before #arr). It draws the finished glass for the docked panels:
+   track headers (#hglass), transport (#tr), tab band (#fxband, when it shows) and device panel (#fxglass). Those elements carry no backdrop-filter at any level,
+   only their tint, border and content.
+   The backdrop is drawn by the engine on the graphics card: lane backgrounds, clips as flat rectangles (body and title band, in the track colour), the playhead.
+   The rectangle list is made from the same values drawArr uses and is sent again only after an edit (gleSig notices it); scroll and zoom are one uniform (setView),
+   the playhead is one uniform (setPlayhead). No canvas is ever copied or uploaded on this path, so #arrBack is only an empty layer that passes clicks on and
+   #arrBlur is not made any more.
+   Levels (UI.gl.lv, else from the Light mode slider: Full and Optimised = Glass, Lighter = Light, Lightest = Solid):
+     Glass = the engine with the lens; Light = the same engine, lens off, smaller backdrop refreshed 30 times a second; Solid = no engine, solid panels.
+   Solid is also what a computer without WebGL2 gets. Lens presets Off, Fine, Apple, Wide (default Wide 45 px), blur presets Light (default), Regular, Heavy.
+   The docked panels have square corners, so they get the engine's square lens (2.2), and only on the edges that have the open arrangement beyond them (gleEdges).
+   The old glass code (rfAttach, rfBuild, rfMap, rfStyle, the feImage lens) is still there for windows, sheets and menus (glass step 2 replaces it); it no longer runs for the docked panels.
+   The engine is drawn from the app's frame loop, so the background freeze (task AO) stops it together with everything else.
+   Same step, from the plan's quick wins: the playhead is its own layer (#arrPhW: a thin canvas moved with a transform), so a frame in which only the playhead moved
+   draws nothing on the arrangement canvas and needs no snapshot of it; Follow centre no longer redraws the arrangement in frames where the view did not move. */
+/* ---- the engine: tools/glass-lab/glass-engine.js, pasted unchanged ---- */
+/* AudioLab glass engine (tasks G2, G2b, G2c, G2d and G2e). Plain JS, no build step, no dependencies.
+   One WebGL2 canvas. The engine draws its own backdrop on the GPU: lane backgrounds, clips as flat rectangles, the playhead,
+   straight into a quarter-size target (one instanced draw call), then one dual-Kawase pyramid, then every glass surface as one quad in one shader.
+   No canvas is uploaded on this path. A small (quarter-size) copy of a canvas is the fallback and the route for other sources (piano roll, device displays).
+   Glass never samples glass.
+   Use: const g = AudioLabGlass.create(canvas, opts); g.setScene({lanes, clips, playheadX, scrollX, zoom, rect}); g.addPanel({id, rect, radius, kind}); g.render();
+        per frame: g.setPlayhead(x) / g.setView({scrollX, zoom}) / g.updatePanel(id, {rect}); g.render(t);
+        small canvas: g.setOrigin(x, y) when the canvas does not start at the top left of the space the rectangles are given in (2.1)
+        corners and edges (2.2): a panel with square corners gets a square lens; a docked panel bends only along its free edges (panel option edges)
+        the real outline (2.3): the lens follows the panel's own corner radius (same centre, same radius at the edge); a square panel is radius 0
+   Docs: docs/glass-engine-module.md */
+(function (root) {
+  'use strict';
+  var VERSION = '2.3.0';
+  /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
+  var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
+  /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
+  var BLUR = { light: 2, regular: 3, heavy: 4 };
+  /* levels. base = size of the backdrop target (4 = quarter, 8 = an eighth of the canvas in CSS px); cut = pyramid levels left out;
+     rate = backdrop refreshes per second (0 = every change; canvas copies have their own cap, copyRate) */
+  var LEVELS = { glass: { base: 4, cut: 1, lens: true, rate: 0 }, light: { base: 8, cut: 2, lens: false, rate: 30 }, solid: { base: 4, cut: 1, lens: false, rate: 0, st: true } };
+  var QCOMPAT = { 3: 'glass', 2: 'glass', 1: 'light', 0: 'solid', high: 'glass', medium: 'glass', low: 'light', 'static': 'solid' };
+  /* kinds: shadow = strength (0 none), tint = how much panel colour is mixed in, fixed = does not move (lets the blur skip the area not under glass) */
+  /* edges (2.2) = which edges carry the lens: 'all', 'none', any of the letters t r b l, or 'auto' = only the free edges: not the ones that lie on the
+     border of the window or against another fixed panel (a rim there bends content the user never sees enter) */
+  var KINDS = {
+    docked: { shadow: 0, tint: 0.5, fixed: true, edges: 'auto' },
+    window: { shadow: 1, tint: 0.5 },
+    sheet: { shadow: 1, tint: 0.6 },
+    menu: { shadow: 1, tint: 0.6 },
+    pill: { shadow: 1, tint: 0.45 }
+  };
+
+  var VS_FULL = '#version 300 es\nout vec2 v;void main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);v=p;gl_Position=vec4(p*2.-1.,0.,1.);}';
+  /* one quad per surface: rc = x,y,w,h in canvas pixels (y down), mg = margin for the shadow */
+  var VS_QUAD = '#version 300 es\nuniform vec2 res;uniform vec4 rc;uniform float mg;out vec2 p;' +
+    'void main(){vec2 c=vec2(gl_VertexID&1,gl_VertexID>>1);p=rc.xy-mg+c*(rc.zw+2.*mg);gl_Position=vec4(p.x/res.x*2.-1.,1.-p.y/res.y*2.,0.,1.);}';
+  /* down pass: cw 4 = dual-Kawase step to half size; cw 0 with a quarter-texel offset = exact 4x4 box straight to quarter size */
+  var FS_DOWN = '#version 300 es\nprecision highp float;in vec2 v;uniform sampler2D t;uniform vec2 px;uniform float flip,cw;out vec4 o;' +
+    'void main(){vec2 u=vec2(v.x,mix(v.y,1.-v.y,flip));o=texture(t,u)*cw;o+=texture(t,u-px);o+=texture(t,u+px);o+=texture(t,u+vec2(px.x,-px.y));o+=texture(t,u-vec2(px.x,-px.y));o/=cw+4.;}';
+  var FS_UP = '#version 300 es\nprecision highp float;in vec2 v;uniform sampler2D t;uniform vec2 px;out vec4 o;' +
+    'void main(){o=texture(t,v+vec2(-px.x*2.,0.));o+=texture(t,v+vec2(-px.x,px.y))*2.;o+=texture(t,v+vec2(0.,px.y*2.));o+=texture(t,v+px)*2.;o+=texture(t,v+vec2(px.x*2.,0.));o+=texture(t,v+vec2(px.x,-px.y))*2.;o+=texture(t,v+vec2(0.,-px.y*2.));o+=texture(t,v-px)*2.;o/=12.;}';
+  var SDF = 'float sd(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}';
+  /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
+     shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity */
+  /* THE LENS FIELD (2.2). Two shapes, chosen per panel by the uniform sq (one branch on a uniform, the same for every pixel of a panel):
+     sq 0, ROUNDED panels: as before. The lens has its own distance field with a corner radius of at least the band, so the bending direction turns
+       smoothly around the corner and never flips along the corner diagonal.
+     sq 1, SQUARE panels (and panels that bend only along some edges): no arc. dp = how far the pixel is from its nearer vertical and its nearer horizontal
+       edge; e = 1 where that edge carries the lens (ed = top, right, bottom, left). Three ways to join two edges in a corner, picked when the program is built:
+       square: each edge bends along its own axis by the usual profile, and in the corner square the two bends simply add. The band runs straight into the
+               corner on both edges, and because x is moved only by the vertical edge and y only by the horizontal one, nothing can jump on the diagonal.
+       blend:  the nearest edge bends; its direction turns to the other edge's across the diagonal within 4 px (a smooth minimum of the two distances).
+       fade:   the nearest edge bends; the bend goes to nothing on the diagonal (within a third of the band on either side).
+     One texture lookup per pixel in every case, as before; the square shapes need no length() and no division by it. */
+  var KF = 'float kf(float t){float u=1.-clamp(t,0.,1.);return 1.-sqrt(max(0.,1.-u*u));}';
+  var CORNER = {
+    square: 'dv=sg*e*vec2(kf(dp.x/band),kf(dp.y/band));',
+    blend: 'vec2 a=mix(vec2(1e5),dp,e);float s=4.*dpr,h=clamp(.5+.5*(a.y-a.x)/s,0.,1.);dv=sg*normalize(vec2(h,1.-h))*kf((mix(a.y,a.x,h)-s*h*(1.-h))/band);',
+    fade: 'vec2 a=mix(vec2(1e5),dp,e);float f=smoothstep(0.,band/3.,abs(a.x-a.y));dv=a.x<a.y?vec2(sg.x*kf(a.x/band)*f,0.):vec2(0.,sg.y*kf(a.y/band)*f);'
+  };
+  CORNER.round = CORNER.square;   /* 'round' = every panel takes the rounded shape (engine 2.1's look); the program is the same, sq is never set */
+  /* THE REAL OUTLINE (2.3, the default, corner model 'outline'). ONE field for every panel; lr = the panel's own corner radius (0 = square).
+     Up to 2.2 a rounded panel's lens had a corner radius of at least the band (45 px on Wide), so inside a 20 px corner the bend turned over a 45 px arc
+     and the glass looked rounder than its outline. Now:
+       dp = distance to the nearer vertical and the nearer horizontal edge; m = how far the pixel is out from the corner's own centre (lr - dp, not below 0).
+       rv = the true rounded-rectangle field: in the corner square the bend points away from the corner centre and its depth is counted from the panel's own
+            arc (arcs with the panel's centre, radius lr at the edge, shrinking inward); beside the corner it is the plain edge.
+       kv = the square corner of 2.2 (K7): each edge bends along its own axis, the two add.
+     rv alone would pinch at the corner centre (every direction meets there) and crease along the diagonal behind it wherever the band is deeper than the
+     radius. So the field is rv AT the outline and turns into kv on the way in: all of kv at the corner centre and behind it, the change spread over the
+     radius (over band - lr when that is less). A radius of 0 leaves kv alone = 2.2's square lens, exactly. A radius of at least the band (pills, round
+     buttons) leaves rv alone = the lens of 2.1 and 2.2, exactly. In between, nothing curved reaches further in than the panel's own radius.
+     ed still switches single edges off (x belongs to the vertical edges, y to the horizontal ones). The rim light's direction (lit) is taken from the
+     panel's own corner as well, not from a larger one. One texture lookup per pixel as before; one length() and at most three square roots. */
+  var OUTLINE = 'vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l),m=max(lr-dp,0.),kv=vec2(kf(dp.x/band),kf(dp.y/band));float L=length(m);' +
+    'if(L>0.)dv=mix(m/L*kf((lr-L)/band),kv,1.-smoothstep(0.,max(min(lr,band-lr),1e-4),min(L,lr)));else dv=kv;dv*=sg*e;' +
+    'vec2 qr=rad-dp;if(rad>.5&&qr.x>0.&&qr.y>0.)lit=abs(dot(qr/length(qr)*sg,vec2(-.7071,-.7071)));';
+  CORNER.outline = OUTLINE;
+  /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
+     shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity; sq, ed = the lens field (above) */
+  function fsGlass(model) {
+    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;in vec2 p;out vec4 o;' + SDF + KF +
+    'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.),sh=0.;' +
+    'if(shd.z>0.){float ds=sd(l-vec2(0.,shd.x),hb,rad);sh=shd.z*(1.-smoothstep(-shd.y,shd.y,ds));}' +
+    'if(a<=0.){if(sh<.003)discard;o=vec4(0.,0.,0.,sh*md.y);return;}' +
+    'vec2 sg=vec2(l.x<0.?-1.:1.,l.y<0.?-1.:1.),dv;float lit=.7071;' +
+    (model === 'outline' ? OUTLINE : 'if(sq>.5){vec2 e=vec2(l.x<0.?ed.w:ed.y,l.y<0.?ed.x:ed.z),dp=hb-abs(l);' + CORNER[model] + '}else{' +
+    'float R=min(max(rad,band),min(hb.x,hb.y));vec2 q=abs(l)-hb+R,n;float dl;' +
+    'if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}' +
+    'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}') +
+    'vec3 c;if(md.x>.5){c=tint.rgb+(fract(sin(dot(floor(p),vec2(12.9898,78.233)))*43758.5453)-.5)*.022;}else{' +
+    'vec2 sp=p-dv*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
+    'float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,face.x)*face.y+face.z;c=mix(c,tint.rgb,tint.a);}' +
+    'float rim=1.-smoothstep(0.,rimp.x,-d);c+=rim*(rimp.y+rimp.z*lit);' +
+    'c=mix(c,vec3(1.),rimp.w*(1.-smoothstep(dpr-.5,dpr+.5,-d)));' +
+    'float al=a*md.y;o=vec4(c*al,al+sh*md.y*(1.-a));}';
+  }
+  /* a flat picture (a colour or a canvas) put on top of the backdrop before blurring: what a floating glass sees where it covers DOM */
+  var FS_FLAT = '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec4 rc,col;uniform float rad,aa,useT;in vec2 p;out vec4 o;' + SDF +
+    'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float a=clamp(.5-sd(l,hb,rad)/aa,0.,1.);vec4 c=useT>.5?vec4(texture(t,(p-rc.xy)/rc.zw).rgb,col.a):col;o=vec4(c.rgb*c.a*a,c.a*a);}';
+
+  /* the backdrop drawn on the GPU: one instance per rectangle. r = x,y,w,h; c = colour; m = how the rectangle follows the view:
+     0 clip (x and w in scene units, scrolled and zoomed; y scrolled), 1 lane (x, w in view px; y scrolled), 2 playhead (x from the uniform ph),
+     3 fixed (view px), 4 clip title band (as 0, height in px). view = scrollX, scrollY, zoomX, zoomY; org = view rectangle x,y and the scene origin x,y (CSS px);
+     sc = CSS px to target px. The quad is grown by half a target pixel (gr) and the fragment shader computes how much of each pixel the rectangle covers:
+     arithmetic on the rectangle's own edges, ONE result per pixel, no texture lookup and no extra samples. A small target so gets the same picture as a
+     full-size one reduced with a box filter (thin lines and slow scrolling do not shimmer) at the price of a few multiplications.
+     FS_SCENE0 is the same without coverage (hard edges), only for the test page's "anti-aliasing off" row.
+     The background colour is not a rectangle: it is the clear of the view rectangle (2.1). */
+  var VS_SCENE = '#version 300 es\nlayout(location=0) in vec4 r;layout(location=1) in vec4 c;layout(location=2) in float m;uniform vec4 view,org;uniform vec2 sc,tsz;uniform float ph,gr;flat out vec4 col;flat out vec4 box;' +
+    'void main(){bool cl=m<.5||m>3.5,pl=m>1.5&&m<2.5,ys=m<1.5||m>3.5;float X=cl?org.z+(r.x-view.x)*view.z:pl?org.z+(ph-view.x)*view.z+r.x:org.x+r.x,Wd=cl?r.z*view.z:r.z,' +
+    'Y=ys?org.w+(r.y-view.y)*view.w:org.y+r.y,Ht=m<1.5?r.w*view.w:r.w;box=vec4(X,Y,X+Wd,Y+Ht)*sc.xyxy;vec2 k=vec2(gl_VertexID&1,gl_VertexID>>1),p=mix(box.xy-gr,box.zw+gr,k);' +
+    'col=c;gl_Position=vec4(p.x/tsz.x*2.-1.,1.-p.y/tsz.y*2.,0.,1.);}';
+  var FS_SCENE = '#version 300 es\nprecision highp float;flat in vec4 col;flat in vec4 box;uniform vec2 tsz;out vec4 o;' +
+    'void main(){vec2 f=vec2(gl_FragCoord.x,tsz.y-gl_FragCoord.y);float a=clamp(min(f.x+.5,box.z)-max(f.x-.5,box.x),0.,1.)*clamp(min(f.y+.5,box.w)-max(f.y-.5,box.y),0.,1.)*col.a;o=vec4(col.rgb*a,a);}';
+
+  var FS_SCENE0 = '#version 300 es\nprecision highp float;flat in vec4 col;flat in vec4 box;out vec4 o;void main(){o=vec4(col.rgb*col.a,col.a);}';
+
+  var HEX = {};
+  /* colour as [r,g,b] or [r,g,b,a] (0..1), or '#rgb', '#rrggbb', '#rrggbbaa', 'rgb(r,g,b)', 'rgba(r,g,b,a)' */
+  function colOf(c) {
+    if (!c) return [0, 0, 0, 1];
+    if (typeof c !== 'string') return c;
+    var v = HEX[c], h, n;
+    if (v) return v;
+    if (c.indexOf('rgb') === 0) { h = c.slice(c.indexOf('(') + 1).split(/[,\s\/]+/).map(parseFloat); return (HEX[c] = [(h[0] || 0) / 255, (h[1] || 0) / 255, (h[2] || 0) / 255, h[3] >= 0 ? h[3] : 1]); }
+    h = c.charAt(0) === '#' ? c.slice(1) : c;
+    if (h.length === 3 || h.length === 4) h = h.replace(/./g, '$&$&');
+    n = parseInt(h.slice(0, 6), 16); if (isNaN(n)) n = 0;
+    v = [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255, h.length >= 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1];
+    return (HEX[c] = v);
+  }
+  function rectOf(r) {
+    if (!r) return { x: 0, y: 0, w: 0, h: 0 };
+    if (r.length === 4) return { x: +r[0], y: +r[1], w: +r[2], h: +r[3] };
+    return { x: +(r.x != null ? r.x : r.left) || 0, y: +(r.y != null ? r.y : r.top) || 0, w: +(r.w != null ? r.w : r.width) || 0, h: +(r.h != null ? r.h : r.height) || 0 };
+  }
+  function mq(q) { try { return root.matchMedia ? root.matchMedia(q) : null; } catch (e) { return null; } }
+
+  function create(canvas, o) {
+    o = o || {};
+    var opt = {
+      lens: o.lens in LENS ? o.lens : 'wide',
+      blur: o.blur in BLUR ? o.blur : 'light',
+      copyRate: o.copyRate != null ? +o.copyRate : 60,          /* canvas copies per second at level Glass, at most (0 = every markDirty) */
+      copyQuality: o.copyQuality || 'low',                     /* imageSmoothingQuality used when a canvas is reduced before the upload */
+      maxDpr: o.maxDpr || 2,
+      dpr: o.dpr || 0,                                         /* 0 = follow the screen */
+      tint: o.tint || [0.086, 0.11, 0.165],                    /* panel colour mixed into the face (rgb 22 28 42) */
+      solid: o.solid || [0.086, 0.11, 0.165],                  /* the plain tint used by Static, Reduce Transparency and the fallback */
+      backdropColor: o.backdropColor || [0.039, 0.039, 0.047], /* where the backdrop picture does not reach */
+      face: { sat: 1.3, mul: 1, add: 0 },
+      rim: { width: 1.6, base: 0.06, lit: 0.3 },
+      corners: o.corners in CORNER ? o.corners : 'outline',      /* the lens field: 'outline' (default, 2.3: the panel's real outline), or the older ones: 'square' (2.2), 'blend', 'fade', 'round' (2.1) */
+      squareBelow: o.squareBelow != null ? +o.squareBelow : 8,  /* only for the older corner models: panels with a corner radius under this many px count as square */
+      bounds: o.bounds ? rectOf(o.bounds) : null,              /* the window, for edges:'auto' (default: the canvas) */
+      regionCull: o.regionCull !== false,
+      allowSoftware: !!o.allowSoftware,
+      autoResize: o.autoResize !== false,
+      onFallback: o.onFallback || null,
+      requestRender: o.requestRender || null
+    }, k;
+    if (o.face) for (k in o.face) opt.face[k] = o.face[k];
+    if (o.rim) for (k in o.rim) opt.rim[k] = o.rim[k];
+    var kinds = {};
+    for (k in KINDS) kinds[k] = KINDS[k];
+    if (o.kinds) for (k in o.kinds) kinds[k] = o.kinds[k];
+
+    var gl = null, prog = null, vao = null, mode = 'none', reason = '', destroyed = false;
+    var W = 0, H = 0, D = 1, OX = 0, OY = 0, level = 'glass', LV = LEVELS.glass;
+    var userRate = o.backdropRate != null ? +o.backdropRate : null, dbg = { aa: true, freeze: false };
+    var panels = new Map(), order = [], seq = 0, flats = new Map(), edDirty = true, iv = [];
+    var kind = 'none';   /* where the backdrop comes from: 'scene' (drawn on the GPU), 'copy' (a small copy of a canvas), 'none' */
+    var scene = null, sVao = null, sBuf = null, geomDirty = false, sceneDirty = false, lastScene = -1e9;
+    var src = null, srcRect = null, srcH = { tex: null, q: null, qx: null }, srcReady = false, lastUp = -1e9;
+    var srcDirty = false, pyrDirty = true, bDirty = true, panelsDirty = true, lastFlat = -1e9, flatWait = false;
+    var pyrA = null, pyrB = null, regs = null, regKey = '', regDirty = true, blank = null;
+    var acc = { rt: o.reduceTransparency, ic: o.increaseContrast };
+    var mRT = mq('(prefers-reduced-transparency: reduce)'), mIC = mq('(prefers-contrast: more)');
+    var fb = null;   /* fallback: {c, x, own, vis} */
+    /* sceneSends = rectangle lists sent to the GPU, sceneDraws = backdrop drawn on the GPU, uploads = canvas copies of the backdrop (stays 0 on the scene path),
+       uploadPixels = size of the largest copy so far */
+    var stats = { renders: 0, skipped: 0, draws: 0, sceneSends: 0, sceneDraws: 0, uploads: 0, uploadPixels: 0, pyramids: 0, flatPyramids: 0, flatUploads: 0, lost: 0, restored: 0 };
+
+    function ask() { if (opt.requestRender) try { opt.requestRender(); } catch (e) { } }
+    function reduceT() { return acc.rt != null ? !!acc.rt : !!(mRT && mRT.matches); }
+    function moreC() { return acc.ic != null ? !!acc.ic : !!(mIC && mIC.matches); }
+    function isStatic() { return !!LV.st || reduceT() || kind === 'none'; }
+    /* refreshes per second: the app's own cap (setBackdropRate) wins, never faster than the level's */
+    function capOf(copy) { var r = LV.rate || (copy ? opt.copyRate : 0); return userRate > 0 ? (r ? Math.min(r, userRate) : userRate) : r; }
+    function onMq() { panelsDirty = regDirty = edDirty = true; ask(); }
+
+    /* ---------- GL set-up ---------- */
+    function mk(vs, fs) {
+      var p = gl.createProgram(), i, n, a, u = {};
+      [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(function (x) {
+        var sh = gl.createShader(x[0]); gl.shaderSource(sh, x[1]); gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS) && !gl.isContextLost()) throw new Error(gl.getShaderInfoLog(sh));
+        gl.attachShader(p, sh);
+      });
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(p));
+      n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS) || 0;
+      for (i = 0; i < n; i++) { a = gl.getActiveUniform(p, i); u[a.name] = gl.getUniformLocation(p, a.name); }
+      return { p: p, u: u };
+    }
+    function tex(w, h) {
+      var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+      if (w) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return t;
+    }
+    function target(w, h) {
+      var t = tex(w, h), f = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      return { t: t, f: f };
+    }
+    function glInit() {
+      prog = { d: mk(VS_FULL, FS_DOWN), u: mk(VS_FULL, FS_UP), g: {}, f: mk(VS_QUAD, FS_FLAT), s: mk(VS_SCENE, FS_SCENE), s0: null };
+      /* the rectangles of the scene: 24 bytes each (x,y,w,h floats, colour 4 bytes, mode float), one instance per rectangle */
+      sVao = gl.createVertexArray(); sBuf = gl.createBuffer(); gl.bindVertexArray(sVao); gl.bindBuffer(gl.ARRAY_BUFFER, sBuf);
+      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 24, 0); gl.vertexAttribDivisor(0, 1);
+      gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.UNSIGNED_BYTE, true, 24, 16); gl.vertexAttribDivisor(1, 1);
+      gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 24, 20); gl.vertexAttribDivisor(2, 1);
+      vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+      gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.activeTexture(gl.TEXTURE0);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      srcH.tex = tex(0, 0); blank = tex(1, 1); srcReady = false; pyrA = pyrB = null;
+      flats.forEach(function (f) { f.tex = null; f.dirty = !!f.source; });
+      srcDirty = !!src; geomDirty = sceneDirty = !!scene; lastScene = lastUp = -1e9; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; regKey = '';
+    }
+    /* level plan: sizes as divisors of the canvas in CSS pixels, so the blur looks the same on a 1x and a 2x screen (and a 2x screen pays no more).
+       Glass: 4,(8),(16); "light" is one level plus a same-size pass. Light: 8,(16). The first level is the target the backdrop is drawn into. */
+    function plan() {
+      var m = Math.max(1, BLUR[opt.blur] - LV.cut), a = [], i;
+      for (i = 0; i < m; i++) a.push(LV.base << i);
+      return a;
+    }
+    function freePyr(P) {
+      if (!P || !gl) return;
+      P.lev.forEach(function (L) { gl.deleteTexture(L.t); gl.deleteFramebuffer(L.f); if (L.t2) { gl.deleteTexture(L.t2); gl.deleteFramebuffer(L.f2); } });
+    }
+    function makePyr() {
+      var pl = plan(), lev = [], i, L, a, b;
+      for (i = 0; i < pl.length; i++) {
+        L = { div: pl[i] * D, w: Math.max(2, Math.round(W / (pl[i] * D))), h: Math.max(2, Math.round(H / (pl[i] * D))) };
+        a = target(L.w, L.h); L.t = a.t; L.f = a.f;
+        if (i < pl.length - 1 || pl.length === 1) { b = target(L.w, L.h); L.t2 = b.t; L.f2 = b.f; }
+        lev.push(L);
+      }
+      return { lev: lev, ready: false };
+    }
+    function dropPyr() { freePyr(pyrA); freePyr(pyrB); pyrA = pyrB = null; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; regKey = ''; }
+
+    /* ---------- which part of the screen is under glass (only when nothing can move) ---------- */
+    function regions() {
+      if (!opt.regionCull) return null;
+      var pl = plan(), M = 8 * pl[pl.length - 1] * D, out = [], area = 0, i, p, x0, y0, x1, y1;
+      for (i = 0; i < order.length; i++) {
+        p = order[i]; if (!p.visible) continue;
+        if (!p.K.fixed) return null;
+        x0 = Math.max(0, (p.x - OX) * D - M); y0 = Math.max(0, (p.y - OY) * D - M); x1 = Math.min(W, (p.x - OX + p.w) * D + M); y1 = Math.min(H, (p.y - OY + p.h) * D + M);
+        if (x1 <= x0 || y1 <= y0) continue;
+        out.push([Math.floor(x0), Math.floor(y0), Math.ceil(x1), Math.ceil(y1)]);
+      }
+      /* cut into rectangles that do not overlap: one row per band between two horizontal edges, joined intervals inside it */
+      var ys = [], res = [], j, a, b, iv, cur, last;
+      for (i = 0; i < out.length; i++) { ys.push(out[i][1], out[i][3]); }
+      ys.sort(function (m, n) { return m - n; });
+      for (j = 0; j < ys.length - 1; j++) {
+        a = ys[j]; b = ys[j + 1]; if (b <= a) continue;
+        iv = []; for (i = 0; i < out.length; i++) if (out[i][1] <= a && out[i][3] >= b) iv.push([out[i][0], out[i][2]]);
+        iv.sort(function (m, n) { return m[0] - n[0]; }); cur = null;
+        for (i = 0; i < iv.length; i++) {
+          if (cur && iv[i][0] <= cur[2]) { cur[2] = Math.max(cur[2], iv[i][1]); continue; }
+          cur = [iv[i][0], a, iv[i][1], b]; res.push(cur);
+        }
+      }
+      /* join a rectangle to the one right above it when both span the same columns */
+      out = [];
+      for (i = 0; i < res.length; i++) {
+        a = res[i]; last = null;
+        for (j = 0; j < out.length; j++) if (out[j][3] === a[1] && out[j][0] === a[0] && out[j][2] === a[2]) last = out[j];
+        if (last) last[3] = a[3]; else out.push(a);
+      }
+      for (i = 0; i < out.length; i++) { a = out[i]; area += (a[2] - a[0]) * (a[3] - a[1]); out[i] = [a[0], a[1], a[2] - a[0], a[3] - a[1]]; }
+      return area > 0.8 * W * H ? null : out;
+    }
+    function each(rs, L, fn) {
+      if (!rs) { gl.disable(gl.SCISSOR_TEST); fn(); return; }
+      gl.enable(gl.SCISSOR_TEST);
+      var sx = L.w / W, sy = L.h / H, i, r, x, y, x1, y1;
+      for (i = 0; i < rs.length; i++) {
+        r = rs[i]; x = Math.floor(r[0] * sx); x1 = Math.ceil((r[0] + r[2]) * sx); y = Math.floor((H - r[1] - r[3]) * sy); y1 = Math.ceil((H - r[1]) * sy);
+        gl.scissor(x, y, x1 - x, y1 - y); fn();
+      }
+      gl.disable(gl.SCISSOR_TEST);
+    }
+    function tri() { gl.drawArrays(gl.TRIANGLES, 0, 3); }
+
+    /* ---------- the backdrop drawn on the GPU ---------- */
+    function grow(sc, n) {
+      if (sc.buf && sc.buf.byteLength >= n * 24) return;
+      var nb = new ArrayBuffer(Math.max(n * 24, sc.buf ? sc.buf.byteLength * 2 : 24 * 256)), u = new Uint8Array(nb);
+      if (sc.buf) u.set(sc.u8);
+      sc.buf = nb; sc.f32 = new Float32Array(nb); sc.u8 = u;
+    }
+    function put(sc, x, y, w, h, c, a, m) {
+      grow(sc, sc.n + 1);
+      var o = sc.n * 6, f = sc.f32, u = sc.u8, k = sc.n * 24 + 16;
+      f[o] = x; f[o + 1] = y; f[o + 2] = w; f[o + 3] = h; f[o + 5] = m;
+      u[k] = c[0] * 255 + 0.5; u[k + 1] = c[1] * 255 + 0.5; u[k + 2] = c[2] * 255 + 0.5; u[k + 3] = (c[3] == null ? 1 : c[3]) * a * 255 + 0.5;
+      sc.n++;
+    }
+    /* the rectangle list: lanes, clips (body, title band, selection tint), then the playhead as the last one. The background is the clear in drawScene. */
+    function listScene() {
+      var sc = scene, BIG = 1e6, i, c, col, th, L = sc.lanes || [], C = sc.clips || [], sel = colOf(sc.selColor);
+      sc.n = 0;
+      for (i = 0; i < L.length; i++) { c = L[i]; put(sc, c.x || 0, c.y, c.w != null ? c.w : BIG, c.h, colOf(c.color), 1, 1); }
+      for (i = 0; i < C.length; i++) {
+        c = C[i]; col = colOf(c.color);
+        put(sc, c.x, c.y, c.w, c.h, col, c.alpha != null ? c.alpha : sc.bodyAlpha, 0);
+        th = c.titleH != null ? c.titleH : sc.titleH; if (th > 0) put(sc, c.x, c.y, c.w, Math.min(th, c.h), col, 1, 4);
+        if (c.selected) put(sc, c.x, c.y, c.w, c.h, sel, 1, 0);
+      }
+      put(sc, -sc.playheadW / 2, 0, sc.playheadW, BIG, colOf(sc.playheadColor), 1, 2);
+      geomDirty = sceneDirty = true;
+    }
+    function sendScene() {
+      gl.bindBuffer(gl.ARRAY_BUFFER, sBuf); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(scene.buf, 0, scene.n * 24), gl.DYNAMIC_DRAW);
+      geomDirty = false; stats.sceneSends++;
+    }
+    function drawScene(l0, rs) {
+      var sc = scene, P = dbg.aa ? prog.s : (prog.s0 || (prog.s0 = mk(VS_SCENE, FS_SCENE0))), u = P.u, cw = W / D, ch = H / D, R = sc.rect, v = R ? { x: R.x - OX, y: R.y - OY, w: R.w, h: R.h } : { x: 0, y: 0, w: cw, h: ch }, sx = l0.w / cw, sy = l0.h / ch;
+      var bg = colOf(sc.bg || opt.backdropColor), ba = bg[3] == null ? 1 : bg[3], b0 = opt.backdropColor;
+      var n = sc.n - (sc.playheadX == null ? 1 : 0), i, r, x0, y0, x1, y1;
+      /* the view rectangle in target pixels (y up for the scissor) */
+      var vx0 = Math.max(0, Math.floor(v.x * sx)), vx1 = Math.min(l0.w, Math.ceil((v.x + v.w) * sx)), vy0 = Math.max(0, l0.h - Math.ceil((v.y + v.h) * sy)), vy1 = Math.min(l0.h, l0.h - Math.floor(v.y * sy));
+      /* one clear per pixel: where the view rectangle covers the whole target, the clear with the scene's background is the only one */
+      if (vx0 > 0 || vy0 > 0 || vx1 < l0.w || vy1 < l0.h) each(rs, l0, function () { gl.clear(gl.COLOR_BUFFER_BIT); });
+      if (vx1 <= vx0 || vy1 <= vy0) return;
+      gl.viewport(0, 0, l0.w, l0.h); gl.useProgram(P.p); gl.bindVertexArray(sVao);
+      gl.clearColor(bg[0] * ba + b0[0] * (1 - ba), bg[1] * ba + b0[1] * (1 - ba), bg[2] * ba + b0[2] * (1 - ba), 1);
+      gl.uniform4f(u.view, sc.scrollX, sc.scrollY, sc.zoom, sc.zoomY); gl.uniform4f(u.org, v.x, v.y, v.x + sc.originX, v.y + sc.originY);
+      gl.uniform2f(u.sc, sx, sy); gl.uniform2f(u.tsz, l0.w, l0.h); gl.uniform1f(u.ph, sc.playheadX == null ? 0 : sc.playheadX); gl.uniform1f(u.gr, dbg.aa ? 0.5 : 0);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.SCISSOR_TEST);
+      if (!rs) { gl.scissor(vx0, vy0, vx1 - vx0, vy1 - vy0); gl.clear(gl.COLOR_BUFFER_BIT); if (n > 0) gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n); }
+      else for (i = 0; i < rs.length; i++) {
+        r = rs[i]; x0 = Math.max(vx0, Math.floor(r[0] * l0.w / W)); x1 = Math.min(vx1, Math.ceil((r[0] + r[2]) * l0.w / W)); y0 = Math.max(vy0, Math.floor((H - r[1] - r[3]) * l0.h / H)); y1 = Math.min(vy1, Math.ceil((H - r[1]) * l0.h / H));
+        if (x1 > x0 && y1 > y0) { gl.scissor(x0, y0, x1 - x0, y1 - y0); gl.clear(gl.COLOR_BUFFER_BIT); if (n > 0) gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n); }
+      }
+      gl.disable(gl.SCISSOR_TEST); gl.disable(gl.BLEND); gl.bindVertexArray(vao);
+      stats.sceneDraws++;
+    }
+
+    /* ---------- the blur pyramid ---------- */
+    function build(P, withFlats) {
+      var L = P.lev, m = L.length, rs = withFlats ? null : regs, i, t, l0 = L[0], bc = opt.backdropColor;
+      gl.disable(gl.BLEND);
+      /* 1: the backdrop into the first level, which is already the small target: the scene is drawn there directly, a canvas copy arrives at that size */
+      gl.bindFramebuffer(gl.FRAMEBUFFER, l0.f); gl.viewport(0, 0, l0.w, l0.h); gl.clearColor(bc[0], bc[1], bc[2], 1);
+      if (kind === 'scene') drawScene(l0, rs);
+      else {
+        each(rs, l0, function () { gl.clear(gl.COLOR_BUFFER_BIT); });
+        var sr = srcRect ? { x: srcRect.x - OX, y: srcRect.y - OY, w: srcRect.w, h: srcRect.h } : { x: 0, y: 0, w: W / D, h: H / D }, sx = l0.w * D / W, sy = l0.h * D / H;
+        var vx = Math.round(sr.x * sx), vw = Math.max(1, Math.round(sr.w * sx)), vh = Math.max(1, Math.round(sr.h * sy)), vy = l0.h - Math.round(sr.y * sy) - vh;
+        gl.viewport(vx, vy, vw, vh); gl.useProgram(prog.d.p); gl.bindTexture(gl.TEXTURE_2D, srcH.tex);
+        gl.uniform2f(prog.d.u.px, 0, 0); gl.uniform1f(prog.d.u.flip, 1); gl.uniform1f(prog.d.u.cw, 4);
+        each(rs, l0, tri);
+      }
+      if (withFlats) drawFlats(l0);
+      /* 2: down */
+      gl.useProgram(prog.d.p); gl.uniform1f(prog.d.u.flip, 0); gl.uniform1f(prog.d.u.cw, 4);
+      for (i = 1; i < m; i++) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, L[i].f); gl.viewport(0, 0, L[i].w, L[i].h); gl.bindTexture(gl.TEXTURE_2D, L[i - 1].t);
+        gl.uniform2f(prog.d.u.px, 1 / L[i].w, 1 / L[i].h); each(rs, L[i], tri);
+      }
+      /* 3: up (with one level: a single pass at the same size) */
+      gl.useProgram(prog.u.p); t = L[m - 1].t;
+      for (i = m === 1 ? 0 : m - 2; i >= 0; i--) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, L[i].f2); gl.viewport(0, 0, L[i].w, L[i].h); gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.uniform2f(prog.u.u.px, 1 / L[i].w, 1 / L[i].h); each(rs, L[i], tri); t = L[i].t2;
+      }
+      P.out = L[0].t2; P.ready = true;
+      if (withFlats) stats.flatPyramids++; else stats.pyramids++;
+    }
+    function drawFlats(l0) {
+      var u = prog.f.u;
+      gl.viewport(0, 0, l0.w, l0.h); gl.useProgram(prog.f.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.uniform2f(u.res, W, H); gl.uniform1f(u.mg, 0); gl.uniform1f(u.aa, l0.div);
+      flats.forEach(function (fl) {
+        if (fl.hidden) return;
+        var c = fl.color || [0, 0, 0, 1];
+        gl.uniform4f(u.rc, (fl.x - OX) * D, (fl.y - OY) * D, fl.w * D, fl.h * D); gl.uniform1f(u.rad, fl.radius * D);
+        gl.uniform4f(u.col, c[0], c[1], c[2], c[3] == null ? 1 : c[3]); gl.uniform1f(u.useT, fl.tex && fl.ok ? 1 : 0);
+        /* a plain colour still needs some texture bound that is not the target being drawn into */
+        gl.bindTexture(gl.TEXTURE_2D, fl.tex && fl.ok ? fl.tex : blank);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      });
+      gl.disable(gl.BLEND);
+    }
+    /* a canvas goes to the GPU as a small copy: reduced on a 2D canvas to the size of the first pyramid level (a quarter, at Light an eighth, of its size on screen)
+       and only that is uploaded. A source that is already that small is uploaded as it is. Never a full-size upload. */
+    function upload(h, s, cssW, cssH) {
+      try {
+        var sw = s.width || s.videoWidth, sh = s.height || s.videoHeight, tw, th;
+        if (!sw || !sh) return 0;
+        tw = Math.max(2, Math.round(cssW / LV.base)); th = Math.max(2, Math.round(cssH / LV.base));
+        if (!h.tex) h.tex = tex(0, 0);
+        gl.bindTexture(gl.TEXTURE_2D, h.tex);
+        if (sw * sh <= tw * th * 1.5) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, s); tw = sw; th = sh; }
+        else {
+          if (!h.q) { h.q = document.createElement('canvas'); h.qx = h.q.getContext('2d', { alpha: false }); }
+          if (h.q.width !== tw || h.q.height !== th) { h.q.width = tw; h.q.height = th; }
+          h.qx.imageSmoothingEnabled = true; h.qx.imageSmoothingQuality = opt.copyQuality; h.qx.drawImage(s, 0, 0, tw, th);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, h.q);
+        }
+        if (tw * th > stats.uploadPixels) stats.uploadPixels = tw * th;
+        return tw * th;
+      } catch (e) { return 0; }
+    }
+
+    /* ---------- the glass faces ---------- */
+    /* which edges of a panel carry the lens, as bits (top 1, right 2, bottom 4, left 8) */
+    function maskOf(e) {
+      if (e == null || e === true || e === 'all') return 15;
+      if (!e || e === 'none') return 0;
+      return (e.indexOf('t') >= 0 ? 1 : 0) | (e.indexOf('r') >= 0 ? 2 : 0) | (e.indexOf('b') >= 0 ? 4 : 0) | (e.indexOf('l') >= 0 ? 8 : 0);
+    }
+    /* edges:'auto'. An edge is closed when it lies on (or beyond) the border of the window, or when other fixed panels reach it from outside along its
+       whole length. side 0 top, 1 right, 2 bottom, 3 left. Runs only after a panel, the size or the origin changed. */
+    function closed(p, side) {
+      var T = 1.01, B = opt.bounds, bx = B ? B.x : OX, by = B ? B.y : OY, bw = B ? B.w : W / D, bh = B ? B.h : H / D, hz = side === 0 || side === 2;
+      var at = side === 0 ? p.y : side === 1 ? p.x + p.w : side === 2 ? p.y + p.h : p.x, a0 = hz ? p.x : p.y, a1 = hz ? p.x + p.w : p.y + p.h, i, q, lo, hi, s, e, cov, end;
+      if (bw > 0 && (side === 0 ? at <= by + T : side === 1 ? at >= bx + bw - T : side === 2 ? at >= by + bh - T : at <= bx + T)) return true;
+      iv.length = 0;
+      for (i = 0; i < order.length; i++) {
+        q = order[i]; if (q === p || !q.visible || !q.K.fixed || q.opacity <= 0) continue;
+        lo = hz ? q.y : q.x; hi = lo + (hz ? q.h : q.w);
+        /* q reaches the edge and lies (at least partly) on its outer side */
+        if (side === 0 || side === 3 ? !(hi >= at - T && lo < at - T) : !(lo <= at + T && hi > at + T)) continue;
+        s = Math.max(a0, hz ? q.x : q.y); e = Math.min(a1, hz ? q.x + q.w : q.y + q.h); if (e > s) iv.push(s, e);
+      }
+      if (!iv.length) return false;
+      /* length of the edge that is covered (few intervals: a simple sweep, start by start) */
+      for (cov = 0, end = a0; ;) {
+        s = 1e9; e = 0;
+        for (i = 0; i < iv.length; i += 2) if (iv[i + 1] > end && iv[i] < s) { s = iv[i]; e = iv[i + 1]; }
+        if (s > 1e8) break;
+        if (s > end + T) return false;
+        end = e;
+      }
+      return end >= a1 - T;
+    }
+    function edges() {
+      var i, p, e, m, sqr, round = opt.corners === 'round', outl = opt.corners === 'outline';
+      for (i = 0; i < order.length; i++) {
+        p = order[i]; e = p.edges != null ? p.edges : p.K.edges;
+        if (round) { p.em = 15; p.sq = 0; continue; }
+        if (e === 'auto') m = (closed(p, 0) ? 0 : 1) | (closed(p, 1) ? 0 : 2) | (closed(p, 2) ? 0 : 4) | (closed(p, 3) ? 0 : 8); else m = maskOf(e);
+        sqr = p.corners === 'square' || (p.corners !== 'round' && p.radius < opt.squareBelow);
+        p.em = m; p.sq = outl ? (p.corners === 'square' || (p.corners !== 'round' && !(p.radius > 0)) ? 1 : 0) : sqr || m !== 15 ? 1 : 0;
+      }
+      edDirty = false;
+    }
+    /* the corner radius of a panel's lens in the 'outline' model: the panel's own; corners:'square' on a panel = 0, corners:'round' = at least the band (2.1's look) */
+    function lensR(p, band) {
+      var h = Math.min(p.w, p.h) / 2, r = Math.max(0, Math.min(p.radius, h));
+      return p.corners === 'square' ? 0 : p.corners === 'round' ? Math.min(Math.max(r, band), h) : r;
+    }
+    function drawPanels() {
+      var G = prog.g[opt.corners] || (prog.g[opt.corners] = mk(VS_QUAD, fsGlass(opt.corners))), u = G.u, hc = moreC(), st = isStatic(), ln = LENS[opt.lens], i, p, K, sh, band, amt, tA, bound = null, t, tt, tin, mg, sm, useB, m;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H); gl.disable(gl.SCISSOR_TEST);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      stats.draws++;
+      if (!order.length) return;
+      if (edDirty) edges();
+      gl.useProgram(G.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.uniform2f(u.res, W, H); gl.uniform1f(u.dpr, D); gl.uniform3f(u.face, opt.face.sat, opt.face.mul, opt.face.add);
+      for (i = 0; i < order.length; i++) {
+        p = order[i]; if (!p.visible || p.opacity <= 0 || p.w <= 0 || p.h <= 0) continue;
+        K = p.K; sh = Math.min(p.w, p.h);
+        useB = p.over === 'flats' && flats.size && pyrB && pyrB.ready;
+        t = st ? null : useB ? pyrB.out : pyrA && pyrA.ready ? pyrA.out : null;
+        if (t && t !== bound) { gl.bindTexture(gl.TEXTURE_2D, t); bound = t; }
+        /* lens: band follows the panel's size; no lens with Increase Contrast or when the panel asks for none */
+        if (ln[0] && LV.lens && !hc && p.lens !== false) { band = Math.max(0.5, Math.min(ln[1], sh / ln[0])); amt = Math.min(sh / 2, Math.max(24, band * 1.2)); } else { band = 0.5; amt = 0; }
+        tin = t ? (p.tint || opt.tint) : (p.solid || opt.solid);
+        tA = p.tintAmount != null ? p.tintAmount : K.tint; if (hc) tA = Math.max(tA, 0.82);
+        /* shadow (Apple's numbers): offset 8, radius 4 + 20t, opacity 0.04 + 0.56t, t from the short side between 64 and 160 */
+        sm = p.shadow != null ? +p.shadow : K.shadow; tt = Math.max(0, Math.min(1, (sh - 64) / 96)); mg = sm > 0 ? (4 + 20 * tt + 8) * D + 1 : 1;
+        gl.uniform4f(u.rc, (p.x - OX) * D, (p.y - OY) * D, p.w * D, p.h * D); gl.uniform1f(u.mg, mg);
+        gl.uniform1f(u.rad, Math.min(p.radius, sh / 2) * D); gl.uniform1f(u.band, band * D); gl.uniform1f(u.amt, amt * D);
+        if (u.lr) gl.uniform1f(u.lr, lensR(p, band) * D);
+        gl.uniform4f(u.tint, tin[0], tin[1], tin[2], tA);
+        gl.uniform4f(u.rimp, opt.rim.width * D, hc ? 0 : opt.rim.base, hc ? 0 : opt.rim.lit, hc ? 0.6 : 0);
+        gl.uniform3f(u.shd, 8 * D, (4 + 20 * tt) * D, sm > 0 ? sm * (0.04 + 0.56 * tt) : 0);
+        gl.uniform1f(u.sq, p.sq); m = p.em; gl.uniform4f(u.ed, m & 1, m >> 1 & 1, m >> 2 & 1, m >> 3 & 1);
+        gl.uniform2f(u.md, t ? 0 : 1, p.opacity);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+      gl.disable(gl.BLEND);
+    }
+
+    /* ---------- fallback: plain tint with noise on a 2D canvas (WebGL2 missing or lost) ---------- */
+    var noise = null;
+    function noiseTile() {
+      if (noise) return noise;
+      var c = document.createElement('canvas'), x, d, i, v; c.width = c.height = 64; x = c.getContext('2d'); d = x.createImageData(64, 64);
+      for (i = 0; i < d.data.length; i += 4) { v = Math.random() * 255 | 0; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+      x.putImageData(d, 0, 0); return (noise = c);
+    }
+    function fallbackOn(why) {
+      mode = 'fallback'; reason = why; panelsDirty = true;
+      var c = null, x = null, own = false, cs;
+      if (!gl) { try { x = canvas.getContext('2d'); if (x) c = canvas; } catch (e) { } }
+      if (!x) {
+        c = o.fallbackCanvas || document.createElement('canvas'); own = !o.fallbackCanvas;
+        if (own) {
+          cs = root.getComputedStyle ? getComputedStyle(canvas) : {};
+          c.className = canvas.className; c.setAttribute('aria-hidden', 'true');
+          c.style.cssText = 'position:' + (cs.position === 'fixed' ? 'fixed' : 'absolute') + ';left:' + canvas.offsetLeft + 'px;top:' + canvas.offsetTop + 'px;width:' + canvas.clientWidth + 'px;height:' + canvas.clientHeight + 'px;pointer-events:none;z-index:' + (cs.zIndex || 'auto');
+          if (canvas.parentNode) canvas.parentNode.insertBefore(c, canvas.nextSibling);
+        }
+        x = c.getContext('2d');
+        fb = { c: c, x: x, own: own, vis: canvas.style.visibility }; canvas.style.visibility = 'hidden';
+      } else fb = { c: c, x: x, own: false, vis: null };
+      if (opt.onFallback) try { opt.onFallback(true, why); } catch (e) { }
+    }
+    function fallbackOff() {
+      if (!fb) return;
+      if (fb.own && fb.c.parentNode) fb.c.parentNode.removeChild(fb.c);
+      else if (fb.c !== canvas) fb.x.clearRect(0, 0, fb.c.width, fb.c.height);
+      if (fb.vis != null) canvas.style.visibility = fb.vis;
+      fb = null;
+      if (opt.onFallback) try { opt.onFallback(false, ''); } catch (e) { }
+    }
+    function rgb(c, a) { return 'rgba(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ',' + a + ')'; }
+    function draw2d() {
+      var c = fb.c, x = fb.x, hc = moreC(), i, p, r, pat;
+      if (c.width !== W || c.height !== H) { c.width = W; c.height = H; if (fb.own) { c.style.width = W / D + 'px'; c.style.height = H / D + 'px'; } }
+      x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, W, H);
+      pat = x.createPattern(noiseTile(), 'repeat'); x.setTransform(D, 0, 0, D, -OX * D, -OY * D);
+      for (i = 0; i < order.length; i++) {
+        p = order[i]; if (!p.visible || p.opacity <= 0) continue;
+        r = Math.min(p.radius, Math.min(p.w, p.h) / 2);
+        x.beginPath(); x.moveTo(p.x + r, p.y); x.arcTo(p.x + p.w, p.y, p.x + p.w, p.y + p.h, r); x.arcTo(p.x + p.w, p.y + p.h, p.x, p.y + p.h, r); x.arcTo(p.x, p.y + p.h, p.x, p.y, r); x.arcTo(p.x, p.y, p.x + p.w, p.y, r); x.closePath();
+        x.globalAlpha = p.opacity; x.fillStyle = rgb(p.solid || opt.solid, 1); x.fill();
+        x.globalAlpha = p.opacity * 0.035; x.fillStyle = pat; x.fill();
+        x.globalAlpha = p.opacity; x.lineWidth = 1; x.strokeStyle = hc ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.12)'; x.stroke();
+      }
+      x.globalAlpha = 1; stats.draws++;
+    }
+
+    /* ---------- context ---------- */
+    function onLost(e) {
+      e.preventDefault(); stats.lost++;
+      srcReady = false; pyrA = pyrB = null; prog = null; srcH.tex = null;
+      fallbackOn('lost'); ask();
+    }
+    function onRestored() {
+      stats.restored++;
+      try { glInit(); } catch (err) { reason = 'restore failed'; return; }
+      fallbackOff(); mode = 'gl'; reason = '';
+      if (W && (canvas.width !== W || canvas.height !== H)) { canvas.width = W; canvas.height = H; }
+      ask();
+    }
+    function start() {
+      if (!o.forceFallback) {
+        var at = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: !opt.allowSoftware };
+        try { gl = canvas.getContext('webgl2', at); } catch (e) { gl = null; }
+      }
+      if (gl) {
+        canvas.addEventListener('webglcontextlost', onLost, false); canvas.addEventListener('webglcontextrestored', onRestored, false);
+        try { glInit(); mode = 'gl'; } catch (e) { if (root.console) console.warn('AudioLabGlass: ' + e.message); fallbackOn('shader'); }
+      } else fallbackOn(o.forceFallback ? 'forced' : 'no webgl2');
+    }
+
+    /* ---------- public ---------- */
+    function sortOrder() {
+      order = Array.from(panels.values()).sort(function (a, b) { return a.z - b.z || a.seq - b.seq; });
+    }
+    function setP(p, d) {
+      var ch = false, r, k;
+      if (d.rect) { r = rectOf(d.rect); if (r.x !== p.x || r.y !== p.y || r.w !== p.w || r.h !== p.h) { p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h; ch = true; } }
+      if (d.kind != null && d.kind !== p.kind) { p.kind = d.kind; p.K = kinds[d.kind] || kinds.window; ch = true; }
+      if (d.z != null && d.z !== p.z) { p.z = +d.z; ch = true; sortOrder(); }
+      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners'].forEach(function (k) {
+        if (k in d && d[k] !== p[k]) { p[k] = d[k]; ch = true; if (k === 'over') bDirty = true; }
+      });
+      return ch;
+    }
+    var api = {
+      version: VERSION, canvas: canvas, stats: stats,
+      get gl() { return gl; },
+      get mode() { return mode; },            /* 'gl' or 'fallback' */
+      get reason() { return reason; },        /* why the fallback is on */
+      get pending() { return mode === 'gl' && ((kind === 'scene' ? sceneDirty : srcDirty) || flatWait) && !isStatic(); },   /* a capped backdrop refresh is waiting: call render() again next frame */
+      get info() { return { mode: mode, reason: reason, width: W, height: H, dpr: D, origin: [OX, OY], level: level, source: kind, lens: LV.lens ? opt.lens : 'off', blur: opt.blur, corners: opt.corners, levels: plan(), rate: capOf(kind === 'copy'), copyRate: capOf(true), sceneRects: scene ? scene.n : 0, isStatic: isStatic(), reduceTransparency: reduceT(), increaseContrast: moreC(), regions: regs ? regs.length : 0, panels: panels.size, flats: flats.size }; },
+
+      addPanel: function (d) {
+        var p = panels.get(d.id);
+        if (!p) { p = { id: d.id, x: 0, y: 0, w: 0, h: 0, radius: 0, kind: 'window', K: kinds.window, z: 0, seq: seq++, visible: true, opacity: 1, over: 'backdrop' }; panels.set(d.id, p); }
+        setP(p, d); sortOrder(); panelsDirty = regDirty = edDirty = true; return api;
+      },
+      updatePanel: function (id, d) {
+        if (id && typeof id === 'object') { d = id; id = d.id; }
+        var p = panels.get(id); if (!p) return false;
+        if (setP(p, d || {})) panelsDirty = regDirty = edDirty = true; return true;
+      },
+      removePanel: function (id) { if (panels.delete(id)) { sortOrder(); panelsDirty = regDirty = edDirty = true; return true; } return false; },
+      hasPanel: function (id) { return panels.has(id); },
+
+      /* THE BACKDROP, DRAWN ON THE GPU. Everything is optional; what is left out keeps its value.
+         lanes: [{y, h, color}]                       track lane backgrounds (y in scene px, scrolls with scrollY; full width)
+         clips: [{x, y, w, h, color, titleH, selected}]  x and w in scene units (for example beats), y and h in px; body = colour at bodyAlpha, title band = full colour
+         playheadX (scene units, null = none), scrollX (scene units), scrollY (px), zoom (px per scene unit), zoomY (1),
+         rect [x,y,w,h] = where the arrangement shows on the engine canvas in CSS px (or viewW, viewH; default the whole canvas),
+         originX, originY = where scene x = scrollX and y = scrollY land inside rect (0, 0), bg, titleH (14), bodyAlpha (0.533), selColor, playheadColor, playheadW (1).
+         Passing lanes or clips sends the rectangle list to the GPU again; everything else is a uniform (bg is the clear colour). */
+      setScene: function (d) {
+        if (!d) { scene = null; kind = src ? 'copy' : 'none'; geomDirty = sceneDirty = false; pyrDirty = bDirty = panelsDirty = true; return api; }
+        var first = !scene, k;
+        if (first) scene = { n: 0, buf: null, f32: null, u8: null, lanes: [], clips: [], rect: null, originX: 0, originY: 0, scrollX: 0, scrollY: 0, zoom: 1, zoomY: 1, playheadX: null, playheadW: 1, playheadColor: [0.243, 0.812, 0.557], bg: null, titleH: 14, bodyAlpha: 0.533, selColor: [1, 1, 1, 0.25] };
+        var geo = first || 'lanes' in d || 'clips' in d;
+        for (k in { titleH: 1, bodyAlpha: 1, selColor: 1, playheadColor: 1, playheadW: 1 }) if (k in d && d[k] !== scene[k]) { scene[k] = d[k]; geo = true; }
+        if ('bg' in d && d.bg !== scene.bg) { scene.bg = d.bg; sceneDirty = true; }
+        if ('lanes' in d) scene.lanes = d.lanes || []; if ('clips' in d) scene.clips = d.clips || [];
+        if (geo) listScene();
+        api.setView(d); if ('playheadX' in d) api.setPlayhead(d.playheadX);
+        if (kind !== 'scene') { kind = 'scene'; sceneDirty = panelsDirty = true; lastScene = -1e9; }
+        return api;
+      },
+      /* scroll and zoom: uniforms only, the rectangles stay on the GPU */
+      setView: function (d) {
+        if (!scene || !d) return api;
+        var ch = false, r, o, k;
+        for (k in { scrollX: 1, scrollY: 1, zoom: 1, zoomY: 1, originX: 1, originY: 1 }) if (d[k] != null && +d[k] !== scene[k]) { scene[k] = +d[k]; ch = true; }
+        if ('rect' in d || d.viewW != null) {
+          r = d.rect ? rectOf(d.rect) : d.viewW != null ? { x: 0, y: 0, w: +d.viewW, h: +d.viewH } : null; o = scene.rect;
+          if (!r !== !o || (r && (r.x !== o.x || r.y !== o.y || r.w !== o.w || r.h !== o.h))) { scene.rect = r; ch = true; }
+        }
+        if (ch) sceneDirty = true;
+        return api;
+      },
+      /* the playhead: one rectangle, placed by one uniform. x in scene units, null hides it */
+      setPlayhead: function (x) {
+        if (!scene) return api;
+        x = x == null ? null : +x;
+        if (x !== scene.playheadX) { scene.playheadX = x; sceneDirty = true; }
+        return api;
+      },
+
+      /* THE SMALL-COPY ROUTE: a canvas as the backdrop (fallback, and for glass over a piano roll or a display). It is reduced to a quarter of its size on screen
+         before it is uploaded, only after markDirty(), at most copyRate times per second. rect = where it sits on the engine canvas in CSS px (default: it covers the canvas).
+         The last of setScene and setBackdrop decides the source; setBackdrop(null) goes back to the scene. */
+      setBackdrop: function (source, d) {
+        src = source || null; srcRect = d && d.rect ? rectOf(d.rect) : null; srcDirty = !!src; srcReady = false; lastUp = -1e9;
+        kind = src ? 'copy' : scene ? 'scene' : 'none'; if (kind === 'scene') { sceneDirty = true; lastScene = -1e9; }
+        pyrDirty = bDirty = panelsDirty = true; return api;
+      },
+      markDirty: function () { if (src) srcDirty = true; },
+
+      /* flat pictures over the backdrop, seen only by panels with over:'flats' (glass that floats over DOM). color = [r,g,b,a] 0..1, or source = a canvas */
+      setFlat: function (id, d) {
+        var f = flats.get(id), r; if (!f) { f = { id: id, x: 0, y: 0, w: 0, h: 0, radius: 0, color: null, source: null, tex: null, q: null, qx: null, ok: false, dirty: false, hidden: false }; flats.set(id, f); }
+        if (d.rect) { r = rectOf(d.rect); f.x = r.x; f.y = r.y; f.w = r.w; f.h = r.h; }
+        if (d.radius != null) f.radius = +d.radius; if (d.color) f.color = d.color; if ('hidden' in d) f.hidden = !!d.hidden;
+        if ('source' in d) { f.source = d.source || null; f.dirty = !!f.source; if (!f.source) f.ok = false; }
+        bDirty = true; return api;
+      },
+      markFlatDirty: function (id) { var f = flats.get(id); if (f && f.source) f.dirty = true; },
+      removeFlat: function (id) { var f = flats.get(id); if (!f) return false; if (f.tex && gl) gl.deleteTexture(f.tex); flats.delete(id); bDirty = panelsDirty = true; return true; },
+
+      /* CORNERS AND EDGES. edges (panel option, default by kind: docked 'auto', the others 'all') says which edges bend.
+         setCorners picks the lens field. 'outline' (default, 2.3): the lens follows each panel's own corner radius, a square panel is radius 0;
+         corners:'square' on a panel gives it the square lens whatever its radius, corners:'round' a lens corner of at least the band (2.1's look).
+         The older fields, kept for comparison: 'square' (2.2: square lens for a radius under squareBelow, 8 px, or corners:'square'; rounded panels get a
+         lens corner of at least the band), 'blend', 'fade' (two other ways to join the edges of a square panel), 'round' (2.1: the rounded lens on every
+         edge of every panel, edges is ignored). */
+      setCorners: function (n) { if (!(n in CORNER) || n === opt.corners) return api; opt.corners = n; panelsDirty = edDirty = true; return api; },
+      /* the window in the space the rectangles are given in, for edges:'auto'. null = the canvas (right unless the canvas is smaller than the window). */
+      setBounds: function (r) { opt.bounds = r ? rectOf(r) : null; panelsDirty = edDirty = true; return api; },
+      /* what a panel got: {edges: the letters of the edges that bend, square: true when it has the square lens, band: the lens width in px,
+         lensRadius: the corner radius of its lens in px ('outline': the panel's own; older models: at least the band on rounded panels)} */
+      panelInfo: function (id) {
+        var p = panels.get(id), ln = LENS[opt.lens], m; if (!p) return null;
+        if (edDirty) edges(); m = p.em;
+        var bd = ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0, h = Math.min(p.w, p.h) / 2;
+        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
+          lensRadius: opt.corners === 'outline' ? lensR(p, bd) : p.sq ? 0 : Math.min(Math.max(Math.min(p.radius, h), bd), h) };
+      },
+      setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
+      setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },
+      /* 'glass': lens, quarter-size backdrop, refreshed on every change. 'light': the same engine with the lens off, a backdrop half that size, refreshed 30 times per second.
+         'solid': no glass, plain tint with noise (also what Reduce Transparency and a missing WebGL2 give). */
+      setLevel: function (n) { if (!(n in LEVELS) || n === level) return api; level = n; LV = LEVELS[n]; if (mode === 'gl') dropPyr(); srcDirty = !!src; sceneDirty = !!scene; lastScene = lastUp = -1e9; panelsDirty = true; return api; },
+      /* older name: 3 and 2 = glass, 1 = light, 0 = solid */
+      setQuality: function (q) { if (q in QCOMPAT) api.setLevel(QCOMPAT[q]); },
+      /* true / false to force, null to follow the system setting */
+      setAccessibility: function (d) { if ('reduceTransparency' in d) acc.rt = d.reduceTransparency; if ('increaseContrast' in d) acc.ic = d.increaseContrast; panelsDirty = regDirty = edDirty = true; },
+      setFace: function (d) { for (var k in d) opt.face[k] = d[k]; panelsDirty = true; },
+      /* (added by task GS1, version number unchanged) the colour where the backdrop picture does not reach (outside the scene's rectangle); the app sets it to its arrangement background when the theme changes */
+      setBackdropColor: function (c) { var v = colOf(c), b = opt.backdropColor; if (v[0] === b[0] && v[1] === b[1] && v[2] === b[2]) return api; opt.backdropColor = [v[0], v[1], v[2]]; pyrDirty = bDirty = true; return api; },
+      /* A SMALL CANVAS (2.1). By default the canvas starts at the top left of the space all rectangles are given in (panels, scene rect, backdrop rect, flats).
+         A canvas that is only as large as the glass it draws (a floating window plus 34 px for its shadow) sits somewhere inside that space: say where its
+         top left corner is, in CSS px (whole device pixels), and keep giving every rectangle in the same space as before. Moving the canvas with its window is
+         then: move it with CSS, call setOrigin(x, y), render(). The size stays, so nothing is allocated again. All work shrinks with the canvas. */
+      setOrigin: function (x, y) { x = +x || 0; y = +y || 0; if (x === OX && y === OY) return api; OX = x; OY = y; pyrDirty = bDirty = panelsDirty = regDirty = edDirty = true; return api; },
+      /* the backdrop is drawn again at most n times per second (panels still move on every frame). 0 or null = the level decides (Glass: on every change). */
+      setBackdropRate: function (n) { userRate = n > 0 ? +n : null; return api; },
+
+      /* call when the canvas changed size (done automatically with a ResizeObserver unless autoResize:false) */
+      resize: function (cw, ch, dpr) {
+        var d = dpr || opt.dpr || Math.min(opt.maxDpr, root.devicePixelRatio || 1), w, h;
+        cw = cw || canvas.clientWidth; ch = ch || canvas.clientHeight; if (!cw || !ch) return false;
+        w = Math.round(cw * d); h = Math.round(ch * d);
+        if (w === W && h === H && d === D) return false;
+        W = w; H = h; D = d;
+        if (mode === 'gl') { canvas.width = W; canvas.height = H; dropPyr(); }
+        panelsDirty = regDirty = edDirty = true; return true;
+      },
+
+      /* draws only what changed. Returns true when the canvas was redrawn. now = the frame time (performance.now() if left out). */
+      render: function (now) {
+        if (destroyed) return false;
+        stats.renders++;
+        if (!W) api.resize();
+        if (mode !== 'gl') { if (mode === 'fallback' && panelsDirty && W) { draw2d(); panelsDirty = false; return true; } stats.skipped++; return false; }
+        if (gl.isContextLost()) { stats.skipped++; return false; }
+        var rebuilt = false, any = false, needA = false, needB = false, ready = false, i, p, rate, rk;
+        for (i = 0; i < order.length; i++) { p = order[i]; if (p.visible && p.opacity > 0) { any = true; if (p.over === 'flats' && flats.size) needB = true; else needA = true; } }
+        if (any && !isStatic()) {
+          if (now == null) now = performance.now();
+          if (kind === 'scene') {
+            /* the rectangles go to the GPU only when the app passed new ones; the backdrop is drawn again only when something in it changed */
+            if (geomDirty) sendScene();
+            rate = capOf(false);
+            if (sceneDirty && (!rate || now - lastScene >= 1000 / rate - 2)) { if (dbg.freeze && (pyrA || pyrB)) panelsDirty = true; else pyrDirty = bDirty = true; sceneDirty = false; lastScene = now; }
+            ready = true;
+          } else {
+            rate = capOf(true);
+            if (srcDirty && (!srcReady || !rate || now - lastUp >= 1000 / rate - 2)) {
+              if (upload(srcH, src, srcRect ? srcRect.w : W / D, srcRect ? srcRect.h : H / D)) { srcReady = true; stats.uploads++; pyrDirty = bDirty = true; lastUp = now; }
+              srcDirty = false;
+            }
+            ready = srcReady;
+          }
+          if (ready) {
+            /* the area under glass is worked out again only after a panel, the size or the blur changed, not on every frame */
+            if (regDirty) { regs = regions(); rk = regs ? regs.join(';') : 'all'; regDirty = false; if (rk !== regKey) { regKey = rk; pyrDirty = true; } }
+            if (needA && (pyrDirty || !pyrA)) { if (!pyrA) pyrA = makePyr(); build(pyrA, false); pyrDirty = false; rebuilt = true; }
+            if (needB) {
+              /* fed canvases (device displays) go the small-copy route with the same cap */
+              rate = capOf(true);
+              var fdue = !rate || now - lastFlat >= 1000 / rate - 2, fup = false; flatWait = false;
+              flats.forEach(function (f) { if (f.source && f.dirty) { if (fdue || !f.tex) { f.ok = !!upload(f, f.source, f.w, f.h); f.dirty = false; stats.flatUploads++; bDirty = fup = true; } else flatWait = true; } });
+              if (fup) lastFlat = now;
+              if (bDirty || !pyrB) { if (!pyrB) pyrB = makePyr(); build(pyrB, true); bDirty = false; rebuilt = true; }
+            }
+          }
+        }
+        if (!panelsDirty && !rebuilt) { stats.skipped++; return false; }
+        drawPanels(); panelsDirty = false; return true;
+      },
+
+      /* for tests and the bench page. set({aa:false}) = rectangles with hard edges; set({freeze:true}) = a change of the backdrop redraws the faces but not the backdrop */
+      debug: {
+        set: function (d) { for (var k in d) if (k in dbg) dbg[k] = !!d[k]; if (scene) sceneDirty = true; return dbg; },
+        upload: function () { if (mode === 'gl' && src) upload(srcH, src, srcRect ? srcRect.w : W / D, srcRect ? srcRect.h : H / D); },
+        send: function () { if (mode === 'gl' && scene) sendScene(); },
+        rebuild: function () { if (mode === 'gl' && (kind === 'scene' || srcReady)) { if (pyrA) build(pyrA, false); if (pyrB) build(pyrB, true); } },
+        draw: function () { if (mode === 'gl') drawPanels(); },
+        lose: function () { loseExt = gl && !gl.isContextLost() && gl.getExtension('WEBGL_lose_context'); if (loseExt) loseExt.loseContext(); return !!loseExt; },
+        restore: function () { if (loseExt && gl.isContextLost()) loseExt.restoreContext(); return !!loseExt; }
+      },
+
+      destroy: function () {
+        if (destroyed) return; destroyed = true;
+        canvas.removeEventListener('webglcontextlost', onLost, false); canvas.removeEventListener('webglcontextrestored', onRestored, false);
+        if (mRT && mRT.removeEventListener) mRT.removeEventListener('change', onMq); if (mIC && mIC.removeEventListener) mIC.removeEventListener('change', onMq);
+        if (ro) ro.disconnect();
+        if (fb) { opt.onFallback = null; fallbackOff(); }
+        if (gl && !gl.isContextLost()) { freePyr(pyrA); freePyr(pyrB); if (srcH.tex) gl.deleteTexture(srcH.tex); if (sBuf) gl.deleteBuffer(sBuf); flats.forEach(function (f) { if (f.tex) gl.deleteTexture(f.tex); });
+          /* give the context back at once (browsers allow only a handful per page) */
+          var le = gl.getExtension('WEBGL_lose_context'); if (le) le.loseContext(); }
+        panels.clear(); flats.clear(); order = []; src = null; scene = null; kind = 'none';
+      }
+    };
+
+    start();
+    if (mRT && mRT.addEventListener) mRT.addEventListener('change', onMq);
+    if (mIC && mIC.addEventListener) mIC.addEventListener('change', onMq);
+    var ro = null, loseExt = null;
+    if (opt.autoResize && root.ResizeObserver) { ro = new ResizeObserver(function () { if (api.resize()) ask(); }); ro.observe(canvas); }
+    api.resize();
+    if (o.level != null) api.setLevel(o.level); else if (o.quality != null) api.setQuality(o.quality);
+    return api;
+  }
+
+  root.AudioLabGlass = { create: create, version: VERSION, LENS: LENS, BLUR: BLUR, KINDS: KINDS, LEVELS: LEVELS, CORNERS: Object.keys(CORNER) };
+})(typeof window !== 'undefined' ? window : this);
+/* ---- end of the engine ---- */
+const GLE={g:null,cv:null,on:false,lv:'solid',fail:'',sig:null,lay:'',n:{scene:0,view:0,ph:0,sync:0,made:0}};
+const GLIDS=['hglass','tr','fxglass','fxband'];
+function gleOpt(){const o=UI.gl;return o&&typeof o==='object'?o:{}}
+/* the level for the docked panels: a choice made by hand, else what the Light mode slider says. Lightest keeps everything solid. */
+function gleLevel(){if(GLE.fail)return'solid';const e=pmEff();if(e===0)return'solid';const l=gleOpt().lv;return l==='glass'||l==='light'||l==='solid'?l:e>=2?'glass':'light'}
+function gleLens(){const l=gleOpt().lens;return l==='off'||l==='fine'||l==='apple'||l==='wide'?l:'wide'}
+function gleBlur(){const b=gleOpt().blur;return b==='light'||b==='regular'||b==='heavy'?b:'light'}
+function gleSet(k,v){UI.gl={...gleOpt(),[k]:v};saveUI();gleApply()}
+/* any CSS colour as [r,g,b,a] from 0 to 1 (the theme colours are hsl() texts); the same text gives the same array, so the engine can tell that nothing changed */
+const GLC=new Map();let GLCX=null;
+function gleCol(c){let v=GLC.get(c);if(v)return v;if(!GLCX)GLCX=document.createElement('canvas').getContext('2d');GLCX.fillStyle='#000';GLCX.fillStyle=c;const s=String(GLCX.fillStyle);
+  if(s[0]==='#'){const n=parseInt(s.slice(1,7),16);v=[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255,1]}else{const m=(s.match(/[\d.]+/g)||[0,0,0]).map(Number);v=[m[0]/255,m[1]/255,m[2]/255,m[3]==null?1:m[3]]}
+  if(GLC.size>600)GLC.clear();GLC.set(c,v);return v}
+function gleStr(h,s){s=String(s);for(let i=0;i<s.length;i++)h=(Math.imul(h^s.charCodeAt(i),0x9E3779B1)+0x7F4A7C15)|0;return h}
+/* one number that changes whenever the rectangle list would: tracks, rows, clips, colours, mute, selection, theme. One pass over the clips, no texts made. */
+function gleSig(){let h=0x2545F491;const mix=x=>{h=(Math.imul(h^(x|0),0x9E3779B1)+0x7F4A7C15)|0},P=phCfg();
+  mix(V.th*16);mix(TOTH);mix(UI.clipA??36);mix(UI.lite?1:2);mix(S.tracks.length);mix(Math.max(songEnd(),loopEnd())*256);mix(BOOTF==null?-1:BOOTF*4096);mix(P.w*16);
+  h=gleStr(h,P.c);h=gleStr(h,TH.bg);h=gleStr(h,TH.lane0);h=gleStr(h,TH.lane1);h=gleStr(h,TH.laneSel);h=gleStr(h,(TH.cmix||'')+'|'+(TH.hd||'')+'|'+(TH.hdk??''));
+  for(let i=0;i<S.tracks.length;i++){const t=S.tracks[i];if(HIDT.has(t)){mix(-7);continue}mix(TRY[i]);mix(t.id===selT?5:6);mix(t.mute&&!t.solo?3:4);h=gleStr(h,t.color);
+    const pm=PREVMAP&&(!PREVT||PREVT.has(t.id));for(const c of t.clips){mix((pm?PREVMAP(c.start):c.start)*1024);mix(c.len*1024);mix((c.mute?1:0)|(c.id===selC||SELCS.has(c.id)?2:0))}}
+  return h}
+/* the rectangle list, from the same values drawArr and drawClip use. Clip x and width are in beats and y in the unscrolled track stack, so scroll and zoom never need a new list. */
+function gleBuild(){const lanes=[],clips=[],CA=(UI.clipA??36)/100,th=V.th,top=th>=40?14:0,BIG=1e6,dk=[8/255,9/255,12/255];
+  for(let i=0;i<S.tracks.length;i++){const t=S.tracks[i];if(HIDT.has(t))continue;const y=TRY[i],tm=t.mute&&!t.solo,pm=PREVMAP&&(!PREVT||PREVT.has(t.id));
+    lanes.push({y,h:th,color:gleCol(t.id===selT?TH.laneSel:(i%2?TH.lane1:TH.lane0))});
+    for(const c of t.clips){if(BOOTF!=null&&hashU(c.id)>=BOOTF)continue;const mu=c.mute||tm,sel=c.id===selC||SELCS.has(c.id),col=mu?'#5b5f66':(TH.cmix?thMix(t.color):t.color),q=gleCol(col),x=pm?PREVMAP(c.start):c.start,a=mu?CA*.45:Math.min(1,CA+(sel?.12:0));
+      /* body: the dark underlay and the colour on top of it, worked out as one rectangle */
+      if(UI.lite)clips.push({x,y:y+2,w:c.len,h:th-5,color:q,alpha:a,titleH:0});
+      else{const A=1-.7*(1-a),k=.3*(1-a);clips.push({x,y:y+2,w:c.len,h:th-5,color:[(dk[0]*k+q[0]*a)/A,(dk[1]*k+q[1]*a)/A,(dk[2]*k+q[2]*a)/A,1],alpha:A,titleH:0})}
+      if(top&&TH.hd!=='none')clips.push({x,y:y+2,w:c.len,h:14,color:gleCol(sel?shade(col,-.08):shade(col,TH.hdk??-.3)),alpha:mu?.5:.92,titleH:0})}}
+  /* below the last track and after the end of the song the arrangement is darker */
+  lanes.push({y:TOTH,h:BIG,color:[0,0,0,.25]});
+  clips.push({x:Math.max(songEnd(),loopEnd()),y:-BIG,w:BIG,h:2*BIG,color:[0,0,0,1],alpha:.42,titleH:0});
+  return{lanes,clips}}
+/* after a full drawing of the arrangement: a new list only when something in it changed, else just the view */
+function gleFeed(){const g=GLE.g;if(!g||!GLE.on)return;const dz=(window.devicePixelRatio||1)*ZOOM,w=arr.width/dz,h=arr.height/dz,sig=gleSig();
+  if(sig!==GLE.sig){GLE.sig=sig;const L=gleBuild(),P=phCfg();g.setBackdropColor(gleCol(TH.bg));g.setScene({lanes:L.lanes,clips:L.clips,bg:gleCol(TH.bg),titleH:0,bodyAlpha:1,playheadColor:gleCol(P.c),playheadW:P.w});GLE.n.scene++}
+  g.setView({scrollX:V.x,scrollY:V.y,zoom:V.ppb,rect:[0,AY,w,Math.max(1,h-AY)],originX:X0});GLE.n.view++;glePh();
+  /* the header glass follows the track rows: its place comes from the numbers drawArr just worked out, without asking the page */
+  {const on=HGR.on&&!GLE.hgOff&&!document.body.classList.contains('ovw'),x=UI.tracksRight?w-HDRW:0,R=[x-1,HGR.t-1,HDRW+2,HGR.b-HGR.t+2];
+   if(g.hasPanel('hglass'))g.updatePanel('hglass',on?{rect:R,visible:true,edges:gleEdges('hglass')}:{visible:false});else if(on)g.addPanel({id:'hglass',rect:R,radius:0,kind:'docked',tintAmount:0,edges:gleEdges('hglass')})}}
+/* which edges of a docked panel bend the picture: only those that have the open arrangement beyond them (engine 2.2, plan 3.7). The track headers: the edge towards the arrangement.
+   The panels across the window: the top or bottom edge that borders the part of the arrangement canvas that is not cut away (GB.t and GB.b from gbLayout). */
+function gleEdges(id,y,h){if(id==='hglass')return UI.tracksRight?'l':'r';const T=GB.t||0,Bt=(GB.ah||0)-(GB.b||0);let e='';if(y>T+1&&y<=Bt+1)e+='t';if(y+h>=T-1&&y+h<Bt-1)e+='b';return e||'none'}
+/* the playhead under the glass: one uniform. It is frosted there, so it moves in steps of 2 px (4 px at Light) and the backdrop is not redrawn for less. */
+function glePh(){const g=GLE.g;if(!g||!GLE.on)return;const q=(GLE.lv==='light'?4:2)/V.ppb;g.setPlayhead(Math.round(curDisp()/q)*q);GLE.n.ph++}
+/* is something else than the arrangement behind this panel? Then the engine has no picture for it and the panel is solid (glass over the piano roll comes with glass step 2). */
+function gleCovered(id){const B=document.body.classList;if(B.contains('prfull'))return true;if(id==='fxglass'||id==='fxband'){const fx=document.getElementById('fx');if(!fx||fx.classList.contains('popped')||fx.classList.contains('prdev')||B.contains('split'))return true}return false}
+/* where the docked panels are: one face per panel, 1 px larger than the element so that no seam shows where the arrangement canvas is cut away */
+function gleSync(){const g=GLE.g,on=GLE.on&&!!g&&!!GLE.cv,m=on?GLE.cv.getBoundingClientRect():null,z=ZOOM,r2=v=>Math.round(v*100)/100;GLE.n.sync++;
+  for(const id of GLIDS){const el=document.getElementById(id);if(!el)continue;let face=false;const can=on&&m.width>4&&m.height>4&&!gleCovered(id)&&!(id==='hglass'&&document.body.classList.contains('ovw'));
+    if(id==='hglass')GLE.hgOff=!can;
+    if(can&&el.offsetHeight>2&&el.offsetWidth>2){const r=el.getBoundingClientRect(),x0=Math.max(r.left,m.left),y0=Math.max(r.top,m.top),x1=Math.min(r.right,m.right),y1=Math.min(r.bottom,m.bottom);
+      if(x1-x0>2&&y1-y0>2){face=true;const R=[r2((x0-m.left)/z)-1,r2((y0-m.top)/z)-1,r2((x1-x0)/z)+2,r2((y1-y0)/z)+2],E=gleEdges(id,R[1]+1,R[3]-2);if(g.hasPanel(id))g.updatePanel(id,{rect:R,visible:true,edges:E});else g.addPanel({id,rect:R,radius:0,kind:'docked',tintAmount:0,edges:E})}}
+    if(!face&&g&&g.hasPanel(id))g.updatePanel(id,{visible:false});
+    /* no engine face behind it: the panel is solid */
+    if(el.classList.contains('glsol')===face)el.classList.toggle('glsol',!face)}}
+function gleKill(){if(GLE.g){try{GLE.g.destroy()}catch(e){}GLE.g=null}if(GLE.cv){GLE.cv.remove();GLE.cv=null}}
+function gleMake(){if(GLE.g||GLE.fail)return;const c=document.createElement('canvas');c.id='glassCv';c.setAttribute('aria-hidden','true');arr.parentElement.prepend(c);let g=null;
+  try{g=AudioLabGlass.create(c,{level:'glass',lens:gleLens(),blur:gleBlur(),maxDpr:2,kinds:{docked:{shadow:0,tint:0,fixed:true,edges:'auto'}},
+    onFallback:(on,why)=>{GLE.lost=!!on&&why==='lost'}})}catch(e){console.warn('AudioLab glass engine: '+(e&&e.message||e))}
+  /* no WebGL2 (or the shaders did not build): no engine at all, the docked panels are solid */
+  if(!g||g.mode!=='gl'){GLE.fail=(g&&g.reason)||'no webgl2';try{if(g)g.destroy()}catch(e){}c.remove();return}
+  GLE.g=g;GLE.cv=c;GLE.n.made++}
+function gleApply(){let lv=gleLevel();const B=document.body.classList;
+  if(lv==='solid')gleKill();else{gleMake();const g=GLE.g;if(g){g.setLevel(lv);g.setLensPreset(gleLens());g.setBlurPreset(gleBlur());g.setBackdropColor(gleCol(TH.bg||'#0b0c10'))}else lv='solid'}
+  const on=!!GLE.g&&lv!=='solid',ch=on!==GLE.on||lv!==GLE.lv;GLE.on=on;GLE.lv=lv;B.toggle('gle',on);B.toggle('gls',!on);
+  document.documentElement.style.setProperty('--gad',(1-(UI.trans??50)/100).toFixed(3));
+  if(ch){GLE.sig=null;GLE.lay='';GLE.ovw=0}
+  try{gleSync();GB.lt=0;gbCopy()}catch(e){}dirty=true;try{gleUi()}catch(e){}}
+
+/* ---- the old pictures behind the glass are not made any more ---- */
+/* the arrangement canvas is still cut away under the docked glass (gbLayout, gbClip, #arrCol), now so that the engine's canvas shows there */
+gbOn=function(){return GLE.on};
+{const _fp=fxPic;fxPic=function(el){if(el&&(el.id==='tr'||el.id==='hglass'))return GLE.on&&!el.classList.contains('glsol');return _fp.apply(this,arguments)}}
+{const _gl=gbLayout;gbLayout=function(){try{gleSync()}catch(e){}const r=_gl.apply(this,arguments);/* again after the layout: which edges are free depends on what was cut away */try{if(GLE.on)gleSync()}catch(e){}return r}}
+/* #arrBack stays as an empty 2 x 2 layer that passes clicks on to the arrangement; nothing is copied into it */
+gbCopy=function(fast){const n=performance.now();GB.last=n;GB.stale=false;let ok;if(fast&&n-(GB.lt||0)<250)ok=GB.ok;else{ok=gbLayout();GB.lt=n;GB.ok=ok}
+  if(ok&&GB.cv&&GB.cv.width!==2){GB.cv.width=2;GB.cv.height=2}abDraw();elSoon()};
+/* #arrBlur (the blurred picture) is gone */
+abDraw=function(){const c=ABL.cv;if(c&&c.width){c.width=0;c.height=0;c.style.display='none'}if(ABL.q&&ABL.q.width){ABL.q.width=0;ABL.q.height=0}ABL.w=0;const B=document.body.classList;if(B.contains('fxpic'))B.remove('fxpic')};
+/* the SVG lens never runs for the docked panels (they have no backdrop-filter at any level) */
+{const _ru=rfUpdate;rfUpdate=function(el){if(el&&(el.id==='hglass'||el.id==='tr'||el.id==='fxband'||el.id==='fxglass')){const o=RFX.get(el);if(o){clearTimeout(o.tm);o.tm=0;if(o.v){o.v='';el.style.backdropFilter='';el.style.webkitBackdropFilter=''}}return}return _ru.apply(this,arguments)}}
+/* live edge light for windows, sheets and menus: it used to read the blurred picture. Now it reads a tiny copy of the arrangement, made only while such a panel is open (at most 11 times a second).
+   The docked panels get their rim light from the engine. */
+elTick=function(){EL.t=performance.now();const f=fxGet(),e=(UI.edge??60)/100;if(!f.edge||e<=0||document.hidden||arr.width<8||arr.height<8){elClear();return}
+  const L=[];for(const el of document.querySelectorAll('.lg,.fwin,#ctxm,.modal>div')){if(el.id==='gpPane'||el.id==='hglass'||el.id==='tr'||!el.getClientRects().length)continue;const r=el.getBoundingClientRect();if(r.width<8||r.height<8)continue;L.push([el,r])}
+  if(!L.length){elClear();return}
+  if(!EL.cv){EL.cv=document.createElement('canvas');EL.cv.width=EL.w;EL.cv.height=EL.h;EL.g=EL.cv.getContext('2d',{willReadFrequently:true})}
+  /* two steps, so that only the small picture is read back from the graphics card, never the arrangement itself */
+  const s=EL.sm||(EL.sm=document.createElement('canvas'));if(s.width!==384){s.width=384;s.height=216}const sg=s.getContext('2d');sg.imageSmoothingEnabled=true;sg.imageSmoothingQuality='low';sg.drawImage(arr,0,0,384,216);
+  EL.g.clearRect(0,0,EL.w,EL.h);EL.g.imageSmoothingEnabled=true;EL.g.imageSmoothingQuality='medium';EL.g.drawImage(s,0,0,EL.w,EL.h);
+  const Sm=elSampler(EL.g.getImageData(0,0,EL.w,EL.h).data,EL.w,EL.h,arr.getBoundingClientRect()),seen=new Set();
+  for(const[el,r] of L){const st=elGrad(r,Sm,e);if(st){seen.add(el);EL.set.add(el);if(el._elb!==st){el._elb=st;el.style.setProperty('--elb',st)}}}
+  for(const el of[...EL.set])if(!seen.has(el)){el.style.removeProperty('--elb');el._elb='';EL.set.delete(el)}};
+{const _at=applyTrans;applyTrans=function(){const r=_at.apply(this,arguments);try{gleApply()}catch(e){console.error('AudioLab glass engine',e)}return r}}
+/* moving the Light mode slider or its switch puts the docked panels back on the slider's own level */
+{const _ss=pmSetStop;pmSetStop=function(){if(UI.gl&&UI.gl.lv)UI.gl={...UI.gl,lv:null};return _ss.apply(this,arguments)}}
+{const _so=pmSetOn;pmSetOn=function(){if(UI.gl&&UI.gl.lv)UI.gl={...UI.gl,lv:null};return _so.apply(this,arguments)}}
+/* the engine draws once per screen frame from the app's own loop: free when nothing changed, and stopped by the background freeze like every other frame */
+{const _f0=frame0;frame0=function(now){const r=_f0.apply(this,arguments);const g=GLE.g;if(g)try{g.render(now)}catch(e){if(!GLE.err){GLE.err=1;console.error('AudioLab glass engine',e)}}return r}}
+
+/* ---- the playhead as its own layer ----
+   #arrPhW lies over the arrangement canvas with the same cut-out. #arrPhC holds the playhead line and the Follow button; it is painted only when their look changes
+   and moved with a transform, in whole screen pixels so that it stays sharp. #arrPhJ is the small arrow at the edge when the playhead is out of view.
+   The arrangement canvas itself no longer contains the playhead, so a frame in which only the playhead moved leaves that canvas alone (before: the whole canvas was
+   copied back from a snapshot on every such frame, and the snapshot was made after every full drawing). The overview keeps the old way. */
+const PHL={on:true,w:null,c:null,j:null,k:'',tx:'',jk:'',jt:'',cp:null,wh:'',pad:80,n:{fast:0,paint:0,move:0}};
+function phlMake(){if(PHL.w&&PHL.w.isConnected)return;const w=document.createElement('div');w.id='arrPhW';w.setAttribute('aria-hidden','true');w.innerHTML='<canvas id="arrPhC" width="1" height="1"></canvas><canvas id="arrPhJ" width="1" height="1"></canvas>';arr.after(w);PHL.w=w;PHL.c=w.firstChild;PHL.j=w.lastChild;PHL.k=PHL.tx=PHL.jk=PHL.jt='';PHL.cp=null}
+{const _ph=arrPH;arrPH=function(g,w,h){
+  if(!PHL.on||OVW.on||OVW.a||PHL.keep||(g&&g.canvas!==arr)){if(PHL.w&&PHL.w.style.display!=='none')PHL.w.style.display='none';PHL.wh='';return _ph.apply(this,arguments)}
+  phlMake();const W=PHL.w,c=PHL.c,j=PHL.j,P=phCfg(),px=X0+(curDisp()-V.x)*V.ppb,fe=performance.now()-PHF,fl=(fe<55)||(fe>=115&&fe<170),bw=FBW(),vis=px>=X0-1&&px<=w+2,d=(window.devicePixelRatio||1)*ZOOM;
+  if(W.style.display==='none')W.style.display='';
+  if(PHL.cp!==GB.clip){PHL.cp=GB.clip;W.style.clipPath=GB.clip||''}
+  if(vis&&fe<200)dirty=true;
+  FB=px>=X0-6&&px<=X0+arrW-4?{x:Math.min(px+P.w+4,X0+arrW-bw-2),y:TY+3,w:bw,h:17}:null;FBJ=null;
+  if(!FB){const left=px<X0,xx=left?X0+3:X0+arrW-17;FBJ={x:xx,y:TY+4,w:14,h:15,left}}
+  if(vis||FB){const pad=PHL.pad,H=Math.max(1,Math.round(h-TY)),Wc=Math.ceil(pad+Math.max(P.w+6+bw,14)+8),rel=FB?Math.round((FB.x-px)*4)/4:0,k=[Wc,H,d,P.s,P.c,P.w,vis?1:0,FB?rel:'n',UI.follow?1:0,fl?1:0].join('|');
+    if(k!==PHL.k){PHL.k=k;const bw2=Math.max(1,Math.round(Wc*d)),bh2=Math.max(1,Math.round(H*d));if(c.width!==bw2||c.height!==bh2){c.width=bw2;c.height=bh2}c.style.width=Wc+'px';c.style.height=H+'px';
+      const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,Wc,H);
+      if(vis){if(fl){x.fillStyle='rgba(120,255,190,.55)';x.fillRect(pad-1.5,0,4.5+P.w,H)}phDraw(x,pad,0,H,fl?'#ffffff':P.c,P.s,P.w)}
+      if(FB)fbDraw(x,{x:pad+rel,y:3,w:bw,h:17},P);PHL.n.paint++}
+    const tx=Math.round((px-pad-(SUBAP||0))*d)/d,ts='translate3d('+tx+'px,'+TY+'px,0)';
+    if(ts!==PHL.tx){PHL.tx=ts;c.style.transform=ts;PHL.n.move++}
+    if(c.style.display==='none')c.style.display=''}
+  else if(c.style.display!=='none')c.style.display='none';
+  if(FBJ){const jk=FBJ.left+'|'+d;if(jk!==PHL.jk){PHL.jk=jk;j.width=Math.round(14*d);j.height=Math.round(15*d);j.style.width='14px';j.style.height='15px';const x=j.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,14,15);
+      x.fillStyle='rgba(62,207,142,.85)';rr(x,0,0,14,15,3);x.fill();x.fillStyle='#04140c';x.beginPath();if(FBJ.left){x.moveTo(3,7.5);x.lineTo(9.5,3);x.lineTo(9.5,12)}else{x.moveTo(11,7.5);x.lineTo(4.5,3);x.lineTo(4.5,12)}x.fill()}
+    const js='translate3d('+FBJ.x+'px,'+FBJ.y+'px,0)';if(js!==PHL.jt){PHL.jt=js;j.style.transform=js}if(j.style.display==='none')j.style.display=''}
+  else if(j.style.display!=='none')j.style.display='none';
+  if(g)PHL.wh=arr.width+'x'+arr.height}}
+/* no snapshot of the arrangement is needed while the playhead has its own layer (the overview still uses one) */
+{const _as=arrSnap;arrSnap=function(){if(PHL.on&&!OVW.on&&!OVW.a&&!PHL.keep){ARRWH=null;return}return _as.apply(this,arguments)}}
+/* the overview fades from and to a picture of the arrangement: it gets that picture when it is entered and left, as before */
+{const _oe=ovwEnter;ovwEnter=function(){if(!OVW.on&&PHL.on)try{ARRC=snapTo(arr,ARRC);ARRWH=arr.width+'x'+arr.height}catch(e){}return _oe.apply(this,arguments)}}
+{const _ol=ovwLeave;ovwLeave=function(){PHL.keep=1;try{return _ol.apply(this,arguments)}finally{PHL.keep=0}}}
+{const _d=drawArr;drawArr=function(ph){
+  if(ph&&PHL.on&&PHL.wh===arr.width+'x'+arr.height&&!REC.on&&!OVW.on&&!OVW.a){/* only the playhead moved: its layer and one uniform for the glass, nothing else */
+    DPX=(window.devicePixelRatio||1)*ZOOM;const ww=arr.width/DPX;arrPH(null,ww,arr.height/DPX);tmFlag(X0+(curDisp()-V.x)*V.ppb+phCfg().w/2,ww);glePh();PHL.n.fast++;return}
+  const g=GLE.g,ov=OVW.on||!!OVW.a,f0=OVW.full,r=_d.apply(this,arguments);
+  try{if(OVW.on||OVW.a||ov){/* the overview is another picture than the track rows: the glass takes a small (quarter-size) copy of it, only when it was painted again */
+      if(PHL.w&&PHL.w.style.display!=='none'&&(OVW.on||OVW.a)){PHL.w.style.display='none';PHL.wh=''}
+      if(g&&GLE.on){if(OVW.on||OVW.a){if(!GLE.ovw){GLE.ovw=1;g.setBackdrop(arr)}if(OVW.full!==f0||!ph)g.markDirty()}}}
+    if(!OVW.on&&!OVW.a){if(GLE.ovw){GLE.ovw=0;if(g)g.setBackdrop(null);GLE.sig=null}gleFeed()}}
+  catch(e){if(!GLE.err){GLE.err=1;console.error('AudioLab glass engine',e)}}return r}}
+
+/* ---- Settings, Performance: the level for the docked panels, the lens and the blur ---- */
+const GLTX={lv:[['glass','Glass','Glass: the docked panels (track headers, transport bar, devices) are frosted glass with a lens at the edges, drawn by the glass engine on the graphics card.'],['light','Light','Light: the same glass without the lens, from a smaller picture behind it that is refreshed 30 times a second. Costs less.'],['solid','Solid','Solid: no glass on the docked panels. Costs nothing. Also used when this computer cannot run the glass engine.']],
+ lens:[['off','Off','No bending at the edges.'],['fine','Fine','A thin band, up to 12 px.'],['apple','Apple','The width Apple uses, up to 20 px.'],['wide','Wide','A wide band, up to 45 px. The standard.']],
+ blur:[['light','Light','Light frosting. The standard, and the cheapest.'],['regular','Regular','Stronger frosting.'],['heavy','Heavy','The strongest frosting.']]};
+function gleUi(){const sec=document.querySelector('#setBody section[data-page=perf]');if(!sec)return;let box=sec.querySelector('#glBox');
+  if(!box){const seg=k=>`<div class="seg glseg" data-k="${k}" role="group">`+GLTX[k].map(([v,n,t])=>`<button type="button" data-v="${v}" title="${t}">${n}</button>`).join('')+'</div>',
+      row=(k,ic,t,tip)=>`<div class="pmr glr" data-pr="gl_${k}" title="${tip}"><span class="pic">${fxSvg(ic)}</span><b class="pmq">${t}</b>${seg(k)}</div>`,first=sec.querySelector('.pmh');if(!first)return;
+    const h=document.createElement('div');h.className='pmh';h.textContent='Docked panels: track headers, transport bar, devices';
+    box=document.createElement('div');box.className='pmlist';box.id='glBox';
+    box.innerHTML=row('lv','back','Glass level','How the docked panels are drawn. It follows the Light mode slider (Full effects and Optimised: Glass, Lighter: Light, Lightest: Solid) until you pick one here.')+
+      row('lens','refr','Lens','How wide the band at the edge of the glass is that bends the picture behind it. Only at the level Glass.')+
+      row('blur','blur','Frosting','How strongly the glass frosts what is behind it.')+'<p class="glnote" id="glNote" role="status"></p>';
+    first.before(h,box);
+    box.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b||b.disabled)return;gleSet(b.parentElement.dataset.k,b.dataset.v);try{pmSync()}catch(x){}})}
+  const lv=GLE.lv,min=pmEff()===0,cur={lv,lens:gleLens(),blur:gleBlur()};
+  for(const s of box.querySelectorAll('.glseg')){const k=s.dataset.k;for(const b of s.children){b.classList.toggle('on',b.dataset.v===cur[k]);b.setAttribute('aria-pressed',b.dataset.v===cur[k]);
+    b.disabled=k==='lv'?(b.dataset.v!=='solid'&&(min||!!GLE.fail)):k==='lens'?lv!=='glass':lv==='solid'}}
+  for(const r of box.querySelectorAll('.glr')){const k=r.dataset.pr.slice(3);r.classList.toggle('on',k==='lv'?lv!=='solid':k==='lens'?lv==='glass'&&cur.lens!=='off':lv!=='solid');r.classList.remove('dis')}
+  const hand=!!gleOpt().lv&&!min&&!GLE.fail;
+  box.querySelector('#glNote').textContent=GLE.fail?'Solid: this computer cannot run the glass engine (no WebGL2 graphics), so the docked panels are solid.':min?'Lightest keeps every panel solid. Move the slider up to use the glass.':
+    (lv==='solid'?'Solid: no glass on the docked panels.':lv==='light'?'Light: the glass engine without the lens.':'Glass: the glass engine with the lens.')+(hand?' Picked here; moving the Light mode slider puts it back on the slider.':' Follows the Light mode slider.')}
+{const _ps=pmSync;pmSync=function(){const r=_ps.apply(this,arguments);try{gleUi()}catch(e){}return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
