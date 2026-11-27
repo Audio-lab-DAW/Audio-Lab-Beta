@@ -148,3 +148,7 @@ X8 bounce with a tap point (lane C, through `MX_HOOKS.tap`), X9, X10, X11 routin
 ## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels)
 
 S18: export renders in slices (renderMixChunked) so the screen answers within 100 ms; lane F shows the progress line.
+
+## MX-5: the user said yes (28 November, 00:27 Brussels)
+
+Build MX-5 after MX-4, with the user's conditions at the end of docs/research-mixing.md: off by default, turned on in Settings, a subtle "Only in AudioLab" tag, one first-use card, an About entry; working name "Instant Play" until the user picks a name.
