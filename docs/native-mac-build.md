@@ -157,6 +157,8 @@ The report: `tools/native-lab/reports/2026-11-27-test-app-0.5-report-7.txt` (the
 - **Mojibake again** in strings that come from the plug-in itself ("17.1‚ÄØms": Phase Plant's narrow no-break space): the ASCII clean-up does not reach parameter value texts. NL6: run every plug-in string through the same clean-up.
 - Empty lines between summaries still there (NL6 item 4).
 
+**The user's decision (20:20 Brussels): skip test app 0.6 for testing.** NL6 finishes and publishes as planned, but the user only tests the next version: task NL7 builds test app 0.7 on top of NL6 with the three findings above (the warning past 0 dBFS with a red meter, the worst block tied to its cause, plug-in strings cleaned) plus anything from NL6's list not finished, and that is the version the user is given.
+
 ## Stage N1: what was built (27 November 2026)
 
 - **`alengine`** (`native/engine/`, about 500 lines of C++ with the bridge): a native program that owns the audio output. The app starts it as a helper and talks to it in one JSON object per line.
