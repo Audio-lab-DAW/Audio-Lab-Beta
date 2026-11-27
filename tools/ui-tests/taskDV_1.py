@@ -116,7 +116,8 @@ with sync_playwright() as p:
     ok(J("(()=>{const t=curT();return[t.inst.kOpen,t.fx[3].kOpen,JSON.parse(JSON.stringify(S)).tracks[0].fx[3].kOpen]})()") == [False, False, False], 'a render never leaves kOpen changed (instrument and effect)')
     ok(J("JSON.parse(JSON.stringify(S)).tracks[0].fx.find(q=>q.id==='%s').kMode" % cid) == 'picture', 'kMode is saved with the project')
     # no cost at rest: all closed, mouse away
-    R("(()=>{const t=curT();t.inst.kOpen=false;t.fx.forEach(f=>f.kOpen=false);renderFx();return 1})()"); pg.mouse.move(5, 5); pg.wait_for_timeout(1200)
+    # (from DV-3 the Pro EQ really shows On the picture, its default: its chips cover its graph; set to hover reveal here, DV-3's test covers the picture)
+    R("(()=>{const t=curT();t.inst.kOpen=false;t.fx.forEach(f=>{f.kOpen=false;if(f.type==='eq')f.kMode='hover'});renderFx();return 1})()"); pg.mouse.move(5, 5); pg.wait_for_timeout(1200)
     a = J("{s:DVG.n.sync,f:DVG.n.flatDirty,d:DVG.g?DVG.g.stats.flatUploads:0,v:DV.n.vals}"); pg.wait_for_timeout(1500)
     b2 = J("{s:DVG.n.sync,f:DVG.n.flatDirty,d:DVG.g?DVG.g.stats.flatUploads:0,v:DV.n.vals}")
     ok(a == b2, 'rail closed, at rest: no page reads, no picture refreshes, no uploads, no value updates', (a, b2))

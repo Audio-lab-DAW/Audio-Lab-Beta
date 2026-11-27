@@ -1,4 +1,4 @@
-"""Device layout with side headers (v0.196, task T): python3 tools/ui-tests/sideheaders.py [index.html] [out dir]
+"""Device layout with side headers (v0.196, task T; from DV-3 a closed device On the picture keeps its preset row visible, floating on the picture): python3 tools/ui-tests/sideheaders.py [index.html] [out dir]
 Fractals demo, headless. For every device of several tracks and the master: a strip on the left (on/off or logo at the top, the name, remove at the bottom),
 a strip on the right (pin at the top, the show and hide parameters button; since v0.262, task DV-1: the pill with the eye and the pin at the top right of the display), the preset row on top of the parameters, nothing clipped, at two panel heights,
 parameters open and shut. Mouse tests: on/off, show and hide parameters, next preset, Change (Escape), pin and unpin (and the layout in the window), remove
@@ -32,7 +32,7 @@ GEO = r"""(root=>{const out=[];const R0=root.getBoundingClientRect();for(const D
  const first=L&&L.firstElementChild,rm=L&&L.querySelector(':scope>.dsrm'),pin=Rs&&Rs.querySelector(':scope>.pinbtn'),ar=Rs&&Rs.querySelector(':scope>.duar'),row=D.querySelector('.dspr');
  const bad=[];for(const el of D.querySelectorAll('.kn,.vb,.hb,button,select,canvas,label')){const q=el.getBoundingClientRect();if(!q.width||!el.offsetParent)continue;if(el.closest('.kscroll,.gridwrap,.pzscroll,[data-scroll],.gwrap'))continue;if(D.classList.contains('dvshut')&&el.closest('.dfs,.eqside,.dug'))continue;
    if(q.left<R.left-1||q.right>R.right+1||q.top<R.top-1||q.bottom>R.bottom+1)bad.push((el.title||el.textContent||el.className||el.tagName).toString().trim().slice(0,18))}
- const nm=L&&L.querySelector(':scope>span');out.push({d:D.dataset.d,name:nm?(nm.title||nm.textContent).trim():'?',ds:D.classList.contains('ds'),shut:D.classList.contains('dushut')||D.classList.contains('dvshut'),
+ const nm=L&&L.querySelector(':scope>span');out.push({d:D.dataset.d,name:nm?(nm.title||nm.textContent).trim():'?',ds:D.classList.contains('ds'),shut:D.classList.contains('dushut')||D.classList.contains('dvshut'),pic:D.classList.contains('dvpic'),
   left:l?Math.round(l.left-R.left):-1,lw:l?Math.round(l.width):0,right:r?Math.round(R.right-r.right):-1,
   top:first?(first.classList.contains('pw')?'onoff':first.tagName.toLowerCase()==='svg'?'logo':first.className):'-',
   rmBottom:rm?Math.round(R.bottom-rm.getBoundingClientRect().bottom):-1,rmLeft:rm?Math.round(rm.getBoundingClientRect().left-R.left):-1,
@@ -46,7 +46,7 @@ def check(pg, tag, root='fxin'):
         m = '%s %-18s %4dx%-3d' % (tag, d['name'][:18], d['w'], d['h'])
         good = d['ds'] and 0 <= d['left'] <= 2 and 0 <= d['right'] <= 8 and d['top'] in ('onoff', 'logo') and 0 <= d['rmBottom'] <= 8 and d['rmLeft'] <= 4 \
             and 0 <= d['pinTop'] <= 10 and 0 <= d['pinRight'] <= 8 and not d['bad'] and d['inPanel'] \
-            and (d['shut'] and not d['rowVis'] or not d['shut'] and (d['row'] != 'none' and d['rowVis'] and d['rowTop'] <= 10))
+            and (d['shut'] and (not d['rowVis'] or d.get('pic')) or not d['shut'] and (d['row'] != 'none' and d['rowVis'] and d['rowTop'] <= 10))
         ok(good, m + ' strips L%d R%d top %s remove %d from bottom, pin %d from top, row %s at %d%s%s' % (d['left'], d['right'], d['top'], d['rmBottom'], d['pinTop'],
             d['row'] if not d['shut'] else 'hidden (shut)', d['rowTop'], '' if d['inPanel'] else ' NOT IN PANEL', (' clipped: ' + ', '.join(d['bad'])) if d['bad'] else ''))
     return rows
