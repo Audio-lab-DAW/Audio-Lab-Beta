@@ -6122,3 +6122,30 @@ DL3 advanced settings list and DL4 safe mode (both need ST-S4, which is logged);
 - Effect: the gate that is running tests v0.289, and main no longer holds that build, so it cannot promote when it finishes. Installed apps are not affected (they keep the promoted build). The gate needs another run after the freeze lifts; the scheduling chat decides when.
 - Not reverted: removing only v0.291 would not give main back v0.289 (v0.290 sits on top), and reverting lane E's release is not this lane's to do.
 - This run (fired 21:58) did not start DL3: it changes `index.html`, and the freeze is still on. From now on every XT run checks `desktop/release-freeze.json` on a fresh `git pull` right before pushing, as CLAUDE.md says.
+
+## 27 November 2026: task NB-N3f (the Compressor: Chromium's DynamicsCompressorNode, bit for bit)
+
+Fired by the scheduler at about 21:35 UTC. N2c still waits for the design chain (the user's order: the design first; v0.287 SC-A was the last design release), so the next stage not done is stage 3's devices, in the order the built-in song needs them: after the Pro EQ (N3e) the compressor (Fractals: Kick & Bass, Drums and the master). No other NB run had pushed since 20:50. `index.html`, `desktop/` (also `desktop/app-version.json`), `native/host/` and `native/testapp/` (task NL8) untouched; no version.
+
+### Built
+- `native/engine/core/dyncomp.h`: Chromium 158.0.8127.36's DynamicsCompressor (platform/audio/dynamics_compressor.cc, which now holds the old kernel too), the handler's once-per-quantum parameters (dynamics_compressor_handler.cc) and audio_utilities' DecibelsToLinear, LinearToDecibels and DiscreteTimeConstantForSampleRate. Every maths call goes where Chromium's goes: `fdlibm::asinf` and `fdlibm::powf` where the source names fdlibm; the system's `powf` and `log10f` in audio_utilities (called unqualified there), the system's double `exp` in the knee and double `sin` in the gain warp. The 32-frame divisions sit on a fixed grid from the first frame, with the envelope of a division kept across calls, so any call size gives the same bits (Chromium starts them at each quantum, and 128 and 512 are multiples of 32). AudioParams: float, clamped to their ranges. Reusable for the Sidechain device's two compressors.
+- `native/engine/core/dev_comp.h`: the app's `comp` (input GainNode at 1, the compressor with knee 6 dB, make-up GainNode at `Math.pow(10, makeup/20)` rounded to float); a mono input comes out with two channels, as from the browser node. Meters: reduction (dB) and latency (frames). Registered as `comp`.
+- `make_ref_core.py`: `comp` in TYPES; extras: Fractals' three settings (`frx-kickbass`, `frx-drums`, `frx-master`, read from the song's own project in v0.287), the ends of every range, values past the AudioParams' ranges (`x-past-ranges`: the browser clamps them, and its own make-up at a -100 dB threshold gives a peak of 988, which the port matches), no compression, odd values; chains `chain-comp-bus` (EQ, compressor preset, limiter) and `chain-comp-crush` (two compressors around a Bitcrusher and a chorus). `make_bus_ref.py`: scenes `compbus` and `compbus128`; refs in `ref/bus` (made with app v0.287; the other scenes' entries kept).
+
+### Proven (Linux, this machine, headless Chromium 158.0.8127.36)
+- Devices: **49 of 49 compressor cases bit for bit** (every preset, the extras, the two chains) at 1, 7, 33, 64, 128, 512 and 4,096 frames per call; the first build matched at once.
+- The export's quantum (512) references for comp, eq, limit, crush and chorus: **172 of 172** at 512, 128 and 7 frames per call.
+- Buses: **18 of 18 identical** (new: the compressor on a group, on a mono source, on a return and on the master before its limiter, with 288 frames of compensation on the other tracks; at 512 and 128).
+- Cost: 5.2 µs (Fractals' master setting) to 6.7 µs (hard settings) per 128 stereo frames, 400 to 510 times real time on one core.
+- **GitHub, native-ci run 46072672120 (dispatched with the Mac job), every job green.** Apple Silicon (macos-latest, against the Mac's own Chromium, so Apple's powf, log10f, exp and sin on both sides): **340 of 340 device cases bit for bit** (every ported device and preset, the 49 compressor cases among them), **18 of 18 bus scenes** with the Mac's own references (compbus and compbus128 included), N3b's mixer identical. Linux: 340 of 340 in Release and under ASan+UBSan at 128 frames, 339 of 340 at 7 frames (the known two-random-device chain, review A2); buses, mixer, the engine on the null device, the edit protocol, TSan, the bridge, the Electron feeder: all green.
+
+### Found on the way (for lane K, mixing engine)
+- At 44.1 kHz the app's `fxLat` says the compressor is `Math.round(.006 * 44100)` = 265 frames late, but Chromium's pre-delay is `unsigned(0.006f * 44100.f)` = 264 (truncated). So at 44.1 kHz the web engine's delay compensation puts a track with a compressor (and OTT, whose dry path is built the same way) one frame off against the others. At 48 kHz both are 288. The native engine will compensate with the compressor's own figure (`latencyFrames`); lane K may want `Math.floor(Math.fround(.006) * sr)` in `fxLat`. Not changed here (not this lane's code).
+
+### Left
+- The rest of Fractals' devices: the sidechain pump (two of these compressors, a sawtooth OscillatorNode synced to the beat, a WaveShaperNode without oversampling, a ConstantSourceNode), the clipper (WaveShaperNode at 4x: Chromium's up and down samplers, a DelayNode, a highpass biquad), the tempo delay, the plate reverb (ConvolverNode: measure).
+- The compressor's parameters automated, and its tail after the input is disconnected (it matters with clips as sources).
+
+### Assumptions
+- The first call of a device is the start of its 32-frame grid (in the app the node starts at a quantum boundary, so the grid is the same).
+- Chromium 158's source stands for the Electron the app ships for these files, as in N3e.
