@@ -73,3 +73,5 @@ Picks line format: `Start screen picks: W1 T1 D1 P1` (★ = W1 T1 D1 P1).
 2. **The dipole particles corrected:** today's next to the corrected version(s), with the research and sources in this doc.
 3. **The hand-over animation:** 3 to 4 variants of the one fluid motion (drawing up, logo and text to the left, recent projects up from the bottom), each with a duration slider (for example 300 ms to 2 s) and an easing choice, played on a mock at the user's size, with a Replay button; the picks bar gives one line such as 'Start screen round 2: R2 R5 R7 | dipole F2 | motion M3 900 ms'.
 Then WS-1 builds W1 T1 D3 P1 with the round 2 picks.
+
+**task WS-0b step claimed** (28 November 2026, 00:57 Brussels): the round 2 pick page (drawings R, dipole flow F, hand-over motion M).
