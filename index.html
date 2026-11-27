@@ -2319,6 +2319,13 @@ body.lite #ctxm .ovcrow svg{color:#e6e7ee}
 #niJour .njd.up{color:#ffb547;font-weight:var(--fw6)}#niJour .njd.dn{color:#4cc9f0;font-weight:var(--fw6)}
 #niJour .njnote{font-size:var(--fs1);color:var(--mut);line-height:1.35}
 .mxme .mxco .mxbar{background-image:repeating-linear-gradient(135deg,rgba(255,77,109,.32) 0 1px,transparent 1px 4px);background-size:50% 100%;background-repeat:no-repeat}/* IN-O: the negative half hatched */
+/* v0.282 (task ST-S9): the help line at the foot of the Settings window (D4c), in the LOOK colours (ink, mut, lab) */
+#set .st9h{flex:1 1 auto;min-width:0;margin:0 6px;color:#8b8b97;font-size:var(--fs1,11px);line-height:1.4;text-align:left;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#set .st9h b{color:#ececf1;font-weight:var(--fw6,600)}
+#set .st9h[data-on]{color:#c4c7d2}
+#set .st9h .st9m{color:#b7b7c2;font-variant-numeric:tabular-nums;white-space:nowrap}
+#set .st9h .st9m::before{content:"";display:inline-block;width:1px;height:.9em;margin:0 7px -1px 2px;background:rgba(255,255,255,.18)}
+#set .setsf .setrst,#set .setsf #setDone{flex:none;white-space:nowrap}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6594,7 +6601,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.281',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.282',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -24258,6 +24265,137 @@ function sndWL(){return '/* ===== AudioLab shared DSP kit (task SND-0) ===== */\
   "registerProcessor('al-snd-kit',class extends AudioWorkletProcessor{constructor(o){super();const q=(o&&o.processorOptions)||{};this.b=SNDK.make(q.name,q.p||[],sampleRate)}"+
   "process(ins,outs){const i=ins[0]&&ins[0][0],o=outs[0];if(!o||!o[0])return true;const n=o[0].length,b=this.b;for(let k=0;k<n;k++){const y=b?b.tick(i?i[k]:0):0;for(let c=0;c<o.length;c++)o[c][k]=y}return true}});\n"}
 const SND_HOOKS={kit:1};
+/* ===== settings step S9 (task ST-S9), v0.282: the help line at the foot of the window =====
+   docs/settings-round-1.md (D4c): pointing at a setting, or moving to it with Tab, shows at once (no hover delay) in a line at the foot of
+   the Settings window what it does, its default and where it is kept (this song, this computer, a starting value for new projects, or the
+   same in every project). Pages do not get longer. Every setting of the settings table that had no help line gets one (ST9H, written into the
+   table, so search reads it too), and every other control in the window (buttons, links, read-outs) gets one (ST9C, then TIPS, then its
+   title). Tooltips stay as they are. ST_HOOKS.helpFor(element) gives {label, text, def, scope} for lane F's window-wide help line (OV6).
+   Nothing runs while Settings is closed; one delegated mouseover and focusin listener, the line is only rewritten when the target changes. */
+const STS9={v:'0.282'};
+/* help lines for the settings that had none (task ST-S9): id of the settings table row: the line */
+const ST9H={
+ tips:'Shows a short explanation when you rest the pointer on a button or control anywhere in AudioLab. The help line at the foot of this window works either way.',
+ splash:'Shows the AudioLab logo and the loading bar while the app starts. Off: the window appears as soon as it is ready.',
+ tourBtn:'Shows the ? button in the top bar that starts the guided tour. The tour also starts with F1.',
+ askClose:'Asks before a project tab with unsaved changes is closed, so nothing is lost by a stray click.',
+ outDev:'The device AudioLab plays through: built-in speakers, headphones, a USB DAC or an audio interface. System default follows what the computer uses.',
+ headroom:'A fixed trim on the master output, so a loud mix keeps some room below full scale before the safety limiter. Bit-perfect mode leaves it out.',
+ recOffset:'Moves recorded audio and notes earlier by this many milliseconds, to make up for the delay of the sound system. Measure it on DAC and audio interface.',
+ keepAwake:'If the audio engine falls asleep while nothing plays, AudioLab wakes it again within two seconds, so the first note is not cut off. Uses a little more power.',
+ ttFreq:'The pitch of the test tone in hertz. Low tones show whether the bass reaches you, high tones whether the treble does.',
+ ttVol:'How loud the test tone plays, in dB below full scale. Start low: −24 dB is already clear on most headphones.',
+ ttKind:'Sine: one pure pitch. Sweep: glides from 20 Hz to 20 kHz. Pink and white noise: every pitch at once, for checking balance and speakers.',
+ ifMode:'DAC mode is for listening (clean path, no inputs). Interface mode adds inputs, monitoring and the latency offset for recording. Automatic chooses from the device.',
+ devProfile:'Tells AudioLab which DAC or interface this is, so it can suggest the right rate and buffer and name its sockets. Automatic reads it from the device name.',
+ bitPerfect:'Sends the mix to the DAC untouched: no trim, no limiter and no monitor processing after the master. The DAC volume does the work instead.',
+ dacRate:'The sample rate the audio engine runs at, the same setting as on Audio. Automatic follows the device, so nothing is converted.',
+ balance:'Moves what you hear to the left or right to make up for uneven headphones or ears. Only your listening; not in the export.',
+ scale:'Makes everything in AudioLab bigger or smaller: text, buttons and panels together. Useful on very large or very small screens.',
+ zsPreset:'Which keys do what while you scroll: zoom, track height, clip width and sideways. Pick the style of the DAW you know.',
+ zsAnchor:'Where a zoom stays put: under the mouse pointer, or at the playhead.',
+ layout:'Where the arrangement, the devices panel, the transport and the map sit. Drag the blocks in the picture or pick a preset.',
+ dawLook:'Gives AudioLab the colours, clip style, faders and meters of another DAW in one click. AudioLab is the standard look.',
+ dawRecol:'When a theme is applied, the tracks of the open project get that theme’s colours too. This changes the song, so it is off unless you want it.',
+ mixer:'What each mixer channel and the master show: effect slots, sends, the display, pan, buttons, the scale and the numbers.',
+ meters:'How every level meter in AudioLab moves and what it reads: speed, peak or loudness, the peak hold line and the colours.',
+ glassTrans:'How much of the arrangement shows through the glass panels. Part of the glass settings.',
+ bg:'How light the background behind the arrangement is.',
+ tintHue:'The colour mixed into the background.',
+ tintAmt:'How strongly the tint colours the background. 0 is neutral grey.',
+ grid:'How bright the bar and beat lines in the arrangement are.',
+ subTicks:'Draws thin lines between the beats when you are zoomed in far enough to use them.',
+ bars4:'Draws a stronger line every 4 bars, so phrases are easy to count.',
+ asMin:'How often autosave keeps a copy of the project while you work.',
+ asFile:'Autosave also writes into the project’s own .audiolab file when it was opened from one. Off: only a backup copy in this browser.',
+ exFmt:'WAV: lossless and opens everywhere. FLAC: lossless at about half the size. MP3: small, for sharing, not for mastering.',
+ exSr:'The sample rate of the exported file. Same as the engine avoids converting; 44.1 kHz suits CDs and most streaming.',
+ exBit:'16-bit for CDs and sharing, 24-bit for studio work and mastering, 32-bit float when the file goes on into another program.',
+ exKbps:'The quality of an MP3: more kilobits per second, better sound and a bigger file. 320 is the highest.',
+ exFlac:'Best makes a slightly smaller file and takes a little longer. The sound is identical either way.',
+ exRange:'Whole song, or from where the playhead stands to the end.',
+ exTail:'Extra seconds after the last note so reverbs and delays can ring out instead of being cut off.',
+ exSeedOn:'With a fixed seed the random parts (noise, grains, round robin, dither) come out the same every export, so two exports of one project match.',
+ exSeed:'The number the random parts start from. Same project and same seed give the same sound. Kept with the song.',
+ exFolder:'Asks for a folder once where the browser allows it, then saves exports there. Otherwise a save window opens each time.',
+ scSet:'A ready set of keyboard shortcuts: AudioLab’s own or those of another DAW. You can change single keys in the list.',
+ keys:'Every keyboard shortcut. Click a key to change it, ✕ to clear it; search by name or by pressing the key.',
+ zoomStyle:'Picture: pinch, ⌘-scroll or pull the map box’s edges, and time and track height zoom together. Ableton: zooming changes the time only.',
+ follow:'How the view moves while the song plays: keep the playhead centred, turn the page, look ahead, push at the edge, or stay in place.',
+ phShape:'The shape of the playhead line in the arrangement.',
+ phColour:'The colour of the playhead.',
+ phWidth:'How thick the playhead line is, in pixels.',
+ phTime:'Shows the current time in a small label above the playhead.',
+ fpsCap:'The highest number of pictures a second AudioLab draws. A lower limit saves power and leaves more of the computer for sound.',
+ fpsHud:'Shows the frame rate in a corner of the window, to see how smoothly AudioLab draws.',
+ noteCache:'Keeps rendered notes ready so they start faster. Only does something when the pooled voice engine is off.',
+ fxSleep:'Tracks with nothing to play are unplugged from the engine until they have something again. Saves CPU; the sound is the same.',
+ bgFreeze:'Tracks that do not change are rendered once in the background and played back from that. Saves CPU; the sound is the same.',
+ aoFreeze:'Stops drawing while AudioLab is not the front window, so other programs get the computer. Sound keeps playing.',
+ aoVisuals:'Keeps meters and pictures moving even when AudioLab is behind other windows. Uses more power.'};
+/* controls that are not settings (buttons and a few others): id or [data attribute]: the line */
+const ST9C={
+ genTour:'Starts the guided tour of AudioLab (also F1).',
+ genKeys:'Opens the list of keyboard shortcuts (also ⌘/).',
+ '[data-pmgo=perf]':'Opens Performance: the glass level, the frame limit and the audio savers.',
+ '[data-pmgo=export]':'Opens Export, where the file format and the seed are set.',
+ '[data-pmgo=files]':'Opens Project, with Save, Save as and Open.',
+ '[data-pmgo=audio]':'Opens Audio: output device, buffer and sample rate.',
+ '[data-pmgo=dac]':'Opens DAC and audio interface.',
+ presBtn:'Ready layouts: where the arrangement, devices, transport and map sit. Pick one, then drag the blocks to fine-tune it.',
+ phRst:'Puts the playhead’s shape, colour, thickness and time label back to the standard.',
+ cpBtn:'Opens the Control Panel of the audio driver: buffer, sample rate, processing block and what the engine runs at now.',
+ findDev:'Opens Audio devices: every input and output with its rate, latency, channels and volume, to pick, test or refresh.',
+ ttOn:'Plays or stops the test tone. It stops by itself when Settings closes.',
+ '[data-hz]':'Sets the test tone to this pitch.',
+ ifdProfSel:'Tells AudioLab which DAC or interface this is, so it can suggest the right rate and buffer and name its sockets. Automatic reads it from the device name.',
+ pfSave:'Saves the project into its .audiolab file (⌘S). A new project asks for a name and place first.',
+ pfSaveAs:'Saves the project as a new .audiolab file with a name and place you choose (⇧⌘S).',
+ pfOpen:'Opens an .audiolab project file in a new tab (⌘O).',
+ exFastB:'Fast render uses every CPU core and the app waits until it is done. Off: a gentle render in the background while you keep working.',
+ exGo:'Exports the mix as one file with the choices above.',
+ exStems:'Exports one file per track with the choices above, all the same length so they line up.',
+ genReset:'Lists what goes back to how it came, saves a backup of every setting first, then resets and reloads. Projects, files and shortcuts stay.',
+ setDone:'Closes Settings. Changes are already applied and stored.',
+ pmEdge:'Edge light: the glass rim gets brighter next to bright clips. Part of the glass settings.',
+ pmAnim:'Animations: the moving logo, glows and soft fades. Off makes AudioLab calmer and lighter on the computer.',
+ '[data-zk]':el=>{try{const I=HCZI[el.dataset.zk];return I?I.l+': '+I.d+'. Drag it to place it in every track header, or out to remove it.':''}catch(e){return ''}}};
+const ST9={last:null,
+ clean:t=>String(t||'').split('|')[0].replace(/\s+/g,' ').trim(),
+ fill(){for(const r of STT){if(!ST9.clean(r.h)&&ST9H[r.id])r.h=ST9H[r.id]}},
+ SC:{project:'Kept with this song',computer:'Belongs to this computer',new:'Starting value for new projects'},
+ scope(r){let k='';try{k=ST8.kind(r)}catch(e){}if(k&&ST9.SC[k])return ST9.SC[k];if(r.sc==='session')return 'Only until AudioLab closes';if(r.sc==='project')return ST9.SC.project;return 'The same in every project'},
+ def(r){if(!('d' in r)||r.t==='list'||r.d===''||r.d==null)return '';try{const t=ST7.vtxt(r,r.d);return t?'Default: '+t:''}catch(e){return ''}},
+ tip(el){for(const sel of Object.keys(ST9C)){try{if(el.matches(sel)||(sel[0]!=='['&&el.id===sel)){const v=ST9C[sel],t=typeof v==='function'?v(el):v;if(t)return t}}catch(e){}}
+  if(typeof TIPS==='object'){for(const sel of Object.keys(TIPS)){try{if(el.matches(sel)){const p=String(TIPS[sel]).split('|');return(p[1]||p[0]||'').trim()}}catch(e){}}}
+  const t=el.getAttribute('title')||el.dataset.tip||'';return ST9.clean(t)},
+ name(el){const a=el.getAttribute('aria-label');if(a)return a.trim();const b=el.querySelector&&el.querySelector('b,strong');let t=(b?b.textContent:el.textContent)||'';
+  t=t.replace(/[⌘⇧⌥⌃]+\S*/g,'').replace(/\s+/g,' ').trim();if(!t&&el.closest('label'))t=el.closest('label').textContent.replace(/\s+/g,' ').trim();return t.length>40?t.slice(0,39)+'…':t},
+ /* what the line says about an element of the Settings window (null: nothing to say) */
+ helpFor(el){if(!el||!el.closest)return null;
+  const small=el.closest('.st7rs,.st8t');if(small)return{label:'',text:ST9.clean(small.title||small.dataset.tip),def:'',scope:''};
+  const row=el.closest('[data-stid]'),r=row&&STX.get(row.dataset.stid);
+  if(r){const text=ST9.clean(r.h)||ST9H[r.id]||ST9.tip(el);return{label:r.l,text,def:ST9.def(r),scope:r.own?'':ST9.scope(r)}}
+  const c=el.closest('button,input,select,textarea,a,label,[title],[data-tip]');if(!c||!c.closest('#set'))return null;
+  const ctl=c.matches('label')?(c.querySelector('input,select')||c):c;
+  if(ctl!==c&&ctl.closest('[data-stid]'))return ST9.helpFor(ctl);
+  const up=c.parentElement&&c.parentElement.closest('[title]'),text=ST9.tip(ctl)||ST9.tip(c)||(up&&up.closest('#set')?ST9.clean(up.title):'');if(!text)return null;return{label:ST9.name(ctl),text,def:'',scope:''}},
+ IDLE:'Changes apply right away. Point at a setting, or move to it with Tab, to read what it does.',
+ show(el){const h=document.getElementById('st9Help');if(!h)return;const tgt=el&&el.closest?el.closest('[data-stid],.st7rs,.st8t,button,input,select,textarea,a,label,[title],[data-tip]'):null;
+  if(tgt===ST9.last)return;ST9.last=tgt;const x=tgt?ST9.helpFor(tgt):null;
+  if(!x||!x.text){if(h.dataset.on){delete h.dataset.on;h.textContent=ST9.IDLE;h.title=''}return}
+  h.dataset.on=1;h.textContent='';if(x.label&&!x.text.toLowerCase().startsWith(x.label.toLowerCase())){const b=document.createElement('b');b.textContent=x.label;h.append(b,' ')}
+  h.append(x.text);const m=[x.def,x.scope].filter(Boolean).join(' · ');if(m){const s=document.createElement('span');s.className='st9m';s.textContent=m;h.append(' ',s)}
+  h.title=h.textContent},
+ build(){if(document.getElementById('st9Help'))return;const f=document.querySelector('#set .setsf');if(!f)return;const sp=[...f.children].find(e=>e.tagName==='SPAN'&&/apply right away/.test(e.textContent));
+  const h=document.createElement('span');h.id='st9Help';h.className='st9h';h.textContent=ST9.IDLE;if(sp){sp.hidden=true;sp.after(h)}else{const d=document.getElementById('setDone');d?d.before(h):f.appendChild(h)}
+  const st=document.getElementById('set');
+  st.addEventListener('mouseover',e=>{if(e.target.closest&&e.target.closest('.setsf'))return;ST9.show(e.target)});
+  st.addEventListener('mouseleave',()=>ST9.show(null));
+  st.addEventListener('focusin',e=>{const t=e.target;ST9.show(t);if(t&&t.matches&&t.matches('input,select,button,textarea')&&!t.getAttribute('aria-describedby'))t.setAttribute('aria-describedby','st9Help')})}};
+const ST_HOOKS={helpFor:el=>{try{return ST9.helpFor(el)}catch(e){return null}}};
+try{ST9.fill()}catch(e){console.warn('settings help line (ST-S9)',e)}
+{const _o9=openSettings;openSettings=function(){const x=_o9.apply(this,arguments);try{ST9.fill();ST9.build();ST9.last=undefined;ST9.show(null)}catch(e){console.warn('settings help line (ST-S9)',e)}return x}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
