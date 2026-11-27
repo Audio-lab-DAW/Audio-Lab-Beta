@@ -1,1 +1,1 @@
-One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown.
+Windows, sheets and menus now get their glass from the new glass engine too, and the browser's own blur is no longer used anywhere in AudioLab. Please open the mixer, play a song and tell us the frame rate you see in Settings, Performance.

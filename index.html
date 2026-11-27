@@ -2001,6 +2001,18 @@ body #splash.ab.ab2 .abB button:focus-visible,body #splash.ab.ab2 .abx:focus-vis
 .pg-lv .vb+.vb{margin-left:5px}
 /* the tempo field keeps its 13 px row now that it is no longer mono */
 .lcd.tempo input{line-height:13px}
+/* v0.227 (task GS2, glass step 2): backdrop-filter is used nowhere in the app, at no level. Windows, sheets and menus get their glass from the engine
+   (canvases .glfCv in the page's stacking order directly under them); the element itself keeps only its tint, border, shadow and content. */
+*,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.glfCv{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;display:block;margin:0;padding:0;border:0;transform-origin:0 0}
+.glfCv[hidden]{display:none!important}
+/* no engine face behind a floating element (Solid, no WebGL2, a fourth level of overlap): it is solid */
+body.gls :is(.fwin,.abxw,.pinw>.pinb,#mixWin>.fwh,.modal>.sheet,#uywM .uyww,#ctxm,.pop,#w9m),body.gls .spov>.spgl,.glfsol,.spov.glfsol>.spgl{background:rgb(var(--gtr2))!important}
+.spov.glfsol{background:none!important}
+/* small things that had a blur of their own (inside glass, over a display, or with nothing to frost): a little more opaque instead */
+#toast{background:rgba(36,36,46,.95)}#presWin{background:rgba(30,31,40,.97)}#vizp{background:rgba(var(--gtr2),max(var(--ga),.9))}
+#fxin .dev.eq2 .eqov2{background:rgba(10,11,15,.9)}.dev.gridd>.devh .kpre,.dev.gridd>.devh>button{background:rgba(10,11,15,.92)}
+.w9gd{background:color-mix(in srgb,var(--c) 16%,rgba(22,24,31,.96))}#exFz{background:rgba(14,15,19,.93)}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6277,7 +6289,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.226',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.227',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -13658,19 +13670,19 @@ function pmBuild(){const body=document.getElementById('setBody'),nav=document.ge
   sec.innerHTML=`<div class="pmhero"><div class="pmtop"><span class="pmic">${pmSvg('bolt')}</span><div class="pmtt"><b class="pmq">Light mode</b><small id="pmSub"></small></div><span id="pmSwH"></span></div>
 <div class="pmsl" id="pmSl" role="slider" tabindex="0" aria-label="How light" aria-valuemin="0" aria-valuemax="3">
 <button type="button" class="pmz" data-st="0" title="Lightest: fastest and lightest. No transparency, no blur, no shadows, no animations. Automatic never goes here."><i></i><b class="pmq">Lightest</b></button><span class="pmgap" aria-hidden="true"></span>
-<div class="pmtrk" id="pmTrk"><span class="pmln"><u id="pmFill"></u></span><button type="button" data-st="1" title="Lighter: light glass on the docked panels, solid windows and menus, no animations, pictures 30 times a second"><i></i><b class="pmq">Lighter</b></button><button type="button" data-st="2" title="Optimised: glass on the docked panels, windows and menus with blur from a ready-made picture"><i></i><b class="pmq">Optimised</b></button><button type="button" data-st="3" title="Full effects: glass on the docked panels, windows and menus with refraction, live blur, edge light, all animations"><i></i><b class="pmq">Full effects</b></button></div></div>
+<div class="pmtrk" id="pmTrk"><span class="pmln"><u id="pmFill"></u></span><button type="button" data-st="1" title="Lighter: light glass without the lens on panels, windows and menus, no animations, pictures 30 times a second"><i></i><b class="pmq">Lighter</b></button><button type="button" data-st="2" title="Optimised: glass with the lens on panels, windows and menus"><i></i><b class="pmq">Optimised</b></button><button type="button" data-st="3" title="Full effects: glass with the lens on panels, windows and menus, edge light, all animations"><i></i><b class="pmq">Full effects</b></button></div></div>
 <p class="pmcap" id="pmCap"></p>
 <div class="pmauto"><button type="button" id="pmAuto" class="pmq" title="Measures this computer (screen rate, frame times while the visuals run, cores, memory, audio load), then moves the slider up while the screen keeps its full rate. Never picks Lightest.">${pmSvg('auto')}<span>Automatic</span></button><button type="button" id="pmUndo" hidden>Undo</button><span id="pmRep" role="status"></span></div>
 <div class="pmtrail" id="pmTrail"></div></div>
 <div class="pmfps" title="Pictures a second that AudioLab draws, next to your screen's rate. Only measured while this tab is open."><div class="pmfn"><b id="pmFpsN">–</b><span id="pmHz"></span><small class="pmq">Frame rate</small></div><canvas id="pmFpsC" aria-hidden="true"></canvas><div class="pmfl"><span>Lowest 10 s</span><b id="pmLow">–</b><span>Work a frame</span><b id="pmMs">–</b></div></div>
 <div class="pmlim" id="pmLim"><span class="pmq">Frame limit</span></div>
-<div class="pmh">Windows, sheets and menus: what each effect costs</div><div class="pmlist">`+
-  row('refr','refr','Refraction','Bends the picture near the edges of glass, like a thick pane. The most expensive effect.',sw('pmRefr'))+
-  row('blur','blur','Blur','Live: the browser blurs what is behind each panel whenever anything changes. Picture: the arrangement is blurred once into a small picture. Off: solid panels.','<div class="seg" id="pmBlur"><button type="button" data-bm="off">Off</button><button type="button" data-bm="copy">Picture</button><button type="button" data-bm="live">Live</button></div>')+
+<div class="pmh">Windows, sheets and menus: other effects</div><div class="pmlist">`+
+  row('refr','refr','Refraction','Not used any more: windows, sheets and menus get their lens from the glass engine (Lens, above), so this switch changes nothing now.',sw('pmRefr'))+
+  row('blur','blur','Blur','Not used any more: the frosting of windows, sheets and menus comes from the glass engine (Frosting, above), so this choice changes nothing now.','<div class="seg" id="pmBlur"><button type="button" data-bm="off">Off</button><button type="button" data-bm="copy">Picture</button><button type="button" data-bm="live">Live</button></div>')+
   row('edge','edge','Edge light','The rim gets brighter next to bright clips. Worked out about 10 times a second from a tiny picture, only while the background changes.',sw('pmEdge'))+
   row('anim','anim','Animations','The moving logo, glows and soft fades.',sw('pmAnim'))+`</div>
 <div class="pmh">Savers</div><div class="pmlist">`+
-  row('glPlay','play','Softer blur while playing','Halves the live blur during playback. Only matters with live blur.','<span data-mv="glPlay"></span>',1)+
+  row('glPlay','play','Softer blur while playing','Not needed any more: there is no live blur in the app, so this switch changes nothing now.','<span data-mv="glPlay"></span>',1)+
   row('glBack','back','Half-size picture behind glass','Not needed any more: the glass engine draws what is behind the docked panels itself, so this switch changes nothing now.','<span data-mv="glBack"></span>',1)+
   row('ncOn','note','Note cache','Notes that repeat are made once and played back as audio. Saves a lot of processor in dense songs. Exports are not affected.','<span data-mv="ncOn"></span>',1)+
   row('slpOn','slp','Sleeping tracks','Tracks with nothing to play are unplugged: while the song plays until just before their next clip, when it is stopped once their sound has died away. Playing a track wakes it at once.','<span data-mv="slpOn"></span>',1)+`</div>`;
@@ -20715,15 +20727,15 @@ function phlMake(){if(PHL.w&&PHL.w.isConnected)return;const w=document.createEle
   catch(e){if(!GLE.err){GLE.err=1;console.error('AudioLab glass engine',e)}}return r}}
 
 /* ---- Settings, Performance: the level for the docked panels, the lens and the blur ---- */
-const GLTX={lv:[['glass','Glass','Glass: the docked panels (track headers, transport bar, devices) are frosted glass with a lens at the edges, drawn by the glass engine on the graphics card.'],['light','Light','Light: the same glass without the lens, from a smaller picture behind it that is refreshed 30 times a second. Costs less.'],['solid','Solid','Solid: no glass on the docked panels. Costs nothing. Also used when this computer cannot run the glass engine.']],
+const GLTX={lv:[['glass','Glass','Glass: the docked panels, windows, sheets and menus are frosted glass with a lens at the edges, drawn by the glass engine on the graphics card.'],['light','Light','Light: the same glass without the lens, from a smaller picture behind it that is refreshed 30 times a second. Costs less.'],['solid','Solid','Solid: no glass on panels, windows and menus. Costs nothing. Also used when this computer cannot run the glass engine.']],
  lens:[['off','Off','No bending at the edges.'],['fine','Fine','A thin band, up to 12 px.'],['apple','Apple','The width Apple uses, up to 20 px.'],['wide','Wide','A wide band, up to 45 px. The standard.']],
  blur:[['light','Light','Light frosting. The standard, and the cheapest.'],['regular','Regular','Stronger frosting.'],['heavy','Heavy','The strongest frosting.']]};
 function gleUi(){const sec=document.querySelector('#setBody section[data-page=perf]');if(!sec)return;let box=sec.querySelector('#glBox');
   if(!box){const seg=k=>`<div class="seg glseg" data-k="${k}" role="group">`+GLTX[k].map(([v,n,t])=>`<button type="button" data-v="${v}" title="${t}">${n}</button>`).join('')+'</div>',
       row=(k,ic,t,tip)=>`<div class="pmr glr" data-pr="gl_${k}" title="${tip}"><span class="pic">${fxSvg(ic)}</span><b class="pmq">${t}</b>${seg(k)}</div>`,first=sec.querySelector('.pmh');if(!first)return;
-    const h=document.createElement('div');h.className='pmh';h.textContent='Docked panels: track headers, transport bar, devices';
+    const h=document.createElement('div');h.className='pmh';h.textContent='Glass: docked panels, windows, sheets and menus';
     box=document.createElement('div');box.className='pmlist';box.id='glBox';
-    box.innerHTML=row('lv','back','Glass level','How the docked panels are drawn. It follows the Light mode slider (Full effects and Optimised: Glass, Lighter: Light, Lightest: Solid) until you pick one here.')+
+    box.innerHTML=row('lv','back','Glass level','How the glass is drawn: docked panels, windows, sheets and menus. It follows the Light mode slider (Full effects and Optimised: Glass, Lighter: Light, Lightest: Solid) until you pick one here.')+
       row('lens','refr','Lens','How wide the band at the edge of the glass is that bends the picture behind it. Only at the level Glass.')+
       row('blur','blur','Frosting','How strongly the glass frosts what is behind it.')+'<p class="glnote" id="glNote" role="status"></p>';
     first.before(h,box);
@@ -20733,8 +20745,8 @@ function gleUi(){const sec=document.querySelector('#setBody section[data-page=pe
     b.disabled=k==='lv'?(b.dataset.v!=='solid'&&(min||!!GLE.fail)):k==='lens'?lv!=='glass':lv==='solid'}}
   for(const r of box.querySelectorAll('.glr')){const k=r.dataset.pr.slice(3);r.classList.toggle('on',k==='lv'?lv!=='solid':k==='lens'?lv==='glass'&&cur.lens!=='off':lv!=='solid');r.classList.remove('dis')}
   const hand=!!gleOpt().lv&&!min&&!GLE.fail;
-  box.querySelector('#glNote').textContent=GLE.fail?'Solid: this computer cannot run the glass engine (no WebGL2 graphics), so the docked panels are solid.':min?'Lightest keeps every panel solid. Move the slider up to use the glass.':
-    (lv==='solid'?'Solid: no glass on the docked panels.':lv==='light'?'Light: the glass engine without the lens.':'Glass: the glass engine with the lens.')+(hand?' Picked here; moving the Light mode slider puts it back on the slider.':' Follows the Light mode slider.')}
+  box.querySelector('#glNote').textContent=GLE.fail?'Solid: this computer cannot run the glass engine (no WebGL2 graphics), so panels, windows and menus are solid.':min?'Lightest keeps every panel solid. Move the slider up to use the glass.':
+    (lv==='solid'?'Solid: no glass on panels, windows and menus.':lv==='light'?'Light: the glass engine without the lens.':'Glass: the glass engine with the lens.')+(hand?' Picked here; moving the Light mode slider puts it back on the slider.':' Follows the Light mode slider.')}
 {const _ps=pmSync;pmSync=function(){const r=_ps.apply(this,arguments);try{gleUi()}catch(e){}return r}}
 /* --- v0.224 (task SP1): the splash pictures and the last stretch. The pictures themselves are drawn by SPLBG (right after the splash at the top of the body, so the first one is painted before this code is read). Here: every loading splash gets the picture (the atom is no longer drawn on it), and the timing. The splash stays for as long as the app is loading (bootRun, v0.195, unchanged: the bar follows the real steps). When loading is done the app behind is ready at once, the splash stays SP1.hold more milliseconds and then fades by itself; during that stretch a click or a key closes it at once, and a short line at the bottom says so. Before loading is done nothing closes it. --- */
 const SP1={hold:1500,/* how long the splash stays after loading is done at the start of the app (between 1000 and 2000) */holdOpen:0,/* the same for the splash shown while a project is opened inside the running app: 0 = leaves right after loading, as before */busy:null,rdy:null,tm:0,h:0,t1:0,key:null,clk:null};
@@ -20935,6 +20947,137 @@ const AB1=(()=>{const TAU=Math.PI*2,D=Math.PI/180,ATOM=116,KINDS=['corner','shee
 /* About opens the new window; the loading splash and its preview are untouched. Closing stops the drawing at once */
 {const _ss=showSplash;showSplash=function(about){if(about!==true)return _ss.apply(this,arguments);return AB1.open()}}
 {const _hs=hideSplash;hideSplash=function(){const a=AB1.state(),r=_hs.apply(this,arguments);if(a&&(!SPL||SPL.el!==a.el))AB1.stop();return r}}
+/* ====================== v0.227 (task GS2, glass step 2): windows, sheets and menus on the glass engine ======================
+   Plan: docs/glass-engine-plan.md (3.1 "Step 2", 2.4 option a; 3.2 to 3.5 are binding), module: docs/glass-engine-module.md section 4 "Step 2".
+   backdrop-filter is used nowhere in the app any more, at no level (one CSS rule: *,*::before,*::after{backdrop-filter:none!important}).
+   The floating glass (floating windows such as the mixer and the sidechain window, the spectrum windows, pinned devices, sheets such as Settings,
+   askChoice and the audio to MIDI pop-up, the update window, menus and pop-ups) gets its frosted, bent backdrop from the glass engine:
+   - A LAYER is one more engine on one full-window canvas (.glfCv), put into the page's stacking order directly under the floating elements it serves
+     (same z-index, just before them in the page), above the docked panels' DOM. Its backdrop is the same rectangle scene as the docked engine's
+     (sent once per edit; scroll, zoom and playhead are uniforms), drawn on the graphics card. Nothing is uploaded on this path.
+   - Each floating element is one face (one quad) in its layer. Moving a window is one quad redraw: no rectangle list, no backdrop, no blur pyramid.
+   - GLASS NEVER SAMPLES GLASS. The engine reads only its own backdrop picture, never a canvas it draws to. Where floating glass covers DOM, the engine is fed
+     a flat picture of what is underneath (plan 2.4 option a): the docked panels as their colour, the device displays and the piano roll as small copies
+     of their canvases (the engine reduces them to a quarter before the upload; refreshed only where a face covers them, at most 20 times a second),
+     and floating elements of a lower layer as their colour. An element that overlaps another floating element goes into the next layer up, so its face
+     covers the lower element's DOM instead of showing it through. At most three layers; a fourth level of overlap is drawn solid.
+   - The element on top keeps its own tint, border, shadow and content. Opaque elements need no face (they are only what is underneath for others).
+   - Levels follow the docked panels (Glass, Light, Solid; Solid or no WebGL2: the floating elements are solid too). Lens and frosting presets are shared.
+   - The mixer: the tab above the window gets a face too (it reaches under the window, so the window's square corner is glass as well); the nested blurs
+     of the tab and of the pan handles are gone with the rule above.
+   The old lens code (rfAttach, rfBuild, rfMap, rfStyle, the feImage lens) stays in the file but is not used: rfAttach makes nothing any more. Step 3 deletes it
+   after the user's frame-rate check on the Mac.
+   Debug and bench only: GLF.mode='face' gives every floating element its own engine on a canvas only as large as the element (setOrigin), the other way
+   the task asked to measure; it rebuilds the backdrop whenever a window moves. glfReset() applies a change of mode. */
+const GLF={L:[],mode:'layer',max:3,act:false,fail:'',seq:0,cand:null,candT:0,slowT:0,dispT:0,sig:0,src:'scene',srcT:0,off:null,vw:null,items:[],st:'',err:0,
+  n:{tick:0,regroup:0,made:0,scene:0,view:0,ph:0,flatSet:0,flatDirty:0,solid:0,move:0}};
+/* what is floating glass, and what kind of face it gets ('tab' = the mixer's tab: a window face that reaches under its window) */
+const GLFSEL=[['.fwin','window'],['.abxw','window'],['.spov','window'],['.pinw>.pinb','window'],['#mixWin>.fwh','tab'],['.modal>.sheet','sheet'],['#uywM .uyww','sheet'],['#ctxm','menu'],['.pop','menu'],['#w9m','menu']];
+const GLFDOCK=['hglass','tr','fxglass','fxband'];
+function glfCands(n){if(GLF.cand&&n-GLF.candT<400)return GLF.cand;GLF.candT=n;const L=[],seen=new Set();for(const[s,k] of GLFSEL)for(const el of document.querySelectorAll(s))if(!seen.has(el)){seen.add(el);L.push([el,k])}return GLF.cand=L}
+/* shown at all? hidden attributes first (no layout needed), then the box */
+function glfShown(el){if(!el.isConnected)return false;for(let t=el;t&&t!==document.body;t=t.parentElement)if(t.hidden)return false;return el.getClientRects().length>0}
+/* the element's place in the page's stacking order: the z-index of its outermost ancestor that has one, and the child of <body> it sits in */
+function glfInfo(el,n){let c=el._glfI;if(c&&n-c.t<250)return c;let z=0,top=el;for(let t=el;t&&t!==document.body;t=t.parentElement){top=t;const s=getComputedStyle(t).zIndex;if(s!=='auto')z=parseInt(s)||0}
+  const cs=getComputedStyle(el),tc=el.classList.contains('spov')&&el.querySelector('.spgl')||el,bs=tc===el?cs:getComputedStyle(tc),bg=gleCol(bs.backgroundColor||'transparent'),img=bs.backgroundImage&&bs.backgroundImage!=='none';
+  c=el._glfI={t:n,z,top,cs,tcs:top!==el?getComputedStyle(top):null,rad:Math.max(parseFloat(cs.borderTopLeftRadius)||0,parseFloat(cs.borderBottomLeftRadius)||0),bg,opaque:!img&&bg[3]>=.985};return c}
+const glfOvl=(a,b)=>a[0]<b[0]+b[2]-1&&b[0]<a[0]+a[2]-1&&a[1]<b[1]+b[3]-1&&b[1]<a[1]+a[3]-1;
+/* one layer: an engine on its own canvas */
+function glfLayer(i){let L=GLF.L[i];if(L)return L;if(GLF.fail)return null;const c=document.createElement('canvas');c.className='glfCv';c.setAttribute('aria-hidden','true');c.hidden=true;document.body.prepend(c);let g=null;
+  try{g=AudioLabGlass.create(c,{level:GLE.lv==='light'?'light':'glass',lens:gleLens(),blur:gleBlur(),maxDpr:2,
+    kinds:{window:{shadow:0,tint:0},sheet:{shadow:0,tint:0},menu:{shadow:0,tint:0},pill:{shadow:0,tint:0}}})}catch(e){console.warn('AudioLab glass engine (floating): '+(e&&e.message||e))}
+  if(!g||g.mode!=='gl'){GLF.fail=(g&&g.reason)||'no webgl2';try{if(g)g.destroy()}catch(e){}c.remove();return null}
+  L=GLF.L[i]={i,cv:c,g,z:null,before:null,ids:new Set(),flats:new Map(),vis:false,sig:-1,src:'',fit:null,view:'',ph:null};GLF.n.made++;return L}
+function glfKill(){for(const L of GLF.L)if(L){try{L.g.destroy()}catch(e){}L.cv.remove()}GLF.L=[];GLF.act=false;GLF.st='';for(const it of GLF.items)if(it.el.classList.contains('glfsol'))it.el.classList.remove('glfsol');GLF.items=[]}
+function glfReset(){glfKill();GLF.fail='';GLF.cand=null}
+/* the scene of a layer: the same rectangle list as the docked engine's (made by gleBuild), shifted to where the arrangement is on the page */
+function glfFeed(L,full){const g=L.g,v=GLF.vw;if(!g||!v||!GLF.LL)return;
+  if(GLF.src==='scene'){if(L.src!=='scene'){L.src='scene';g.setBackdrop(null);L.sig=-1;L.view=''}
+    if(full||L.sig!==GLF.sig){L.sig=GLF.sig;g.setBackdropColor(gleCol(TH.bg||'#0b0c10'));g.setScene({lanes:GLF.LL.lanes,clips:GLF.LL.clips,bg:gleCol(TH.bg),titleH:0,bodyAlpha:1,playheadColor:gleCol(v.pc),playheadW:v.pw});GLF.n.scene++}
+    const o=GLF.off||[0,0],k=[v.x,v.y,v.z,v.w,v.h,v.ay,v.x0,o[0],o[1]].join(',');
+    if(k!==L.view){L.view=k;g.setView({scrollX:v.x,scrollY:v.y,zoom:v.z,rect:[o[0],o[1]+v.ay,v.w,Math.max(1,v.h-v.ay)],originX:v.x0});GLF.n.view++}
+    if(L.ph!==v.ph){L.ph=v.ph;g.setPlayhead(v.ph);GLF.n.ph++}}}
+/* where the arrangement canvas and the docked engine's canvas are on the page (in CSS px of the zoomed page); read only now and then, never per frame */
+function glfOff(){const c=GLE.cv;if(!c)return;const m=c.getBoundingClientRect(),z=ZOOM,o=[Math.round(m.left/z*100)/100,Math.round(m.top/z*100)/100];if(!GLF.off||o[0]!==GLF.off[0]||o[1]!==GLF.off[1])GLF.off=o}
+/* the page rectangle of an element in the engine's units */
+function glfR(r){const z=ZOOM,q=v=>Math.round(v/z*100)/100;return[q(r.left),q(r.top),q(r.width),q(r.height)]}
+/* flat pictures for one layer: what its faces may cover that is not the arrangement. Only changes are passed on (each change rebuilds the flats' blur). */
+function glfFlat(L,key,d,sig,seen){seen.add(key);if(L.flats.get(key)===sig)return;L.flats.set(key,sig);L.g.setFlat(key,d);GLF.n.flatSet++}
+function glfFlats(L,items,disp,dock){const seen=new Set(),g=L.g;
+  for(const f of dock)glfFlat(L,f.k,{rect:f.R,radius:0,color:f.c},f.s,seen);
+  for(const f of disp)glfFlat(L,f.k,{rect:f.R,radius:2,source:f.cv},f.s,seen);
+  for(const it of items)if(it.lv<L.i){const c=it.bg,a=Math.max(c[3],.85),col=[c[0],c[1],c[2],a];glfFlat(L,'w:'+it.id,{rect:it.R,radius:it.rad,color:col},it.R.join(',')+'|'+it.rad+'|'+col.join(','),seen)}
+  for(const k of [...L.flats.keys()])if(!seen.has(k)){L.flats.delete(k);g.removeFlat(k)}}
+/* the docked panels and the canvases under the floating glass (read a few times a second, not per frame) */
+function glfSlow(n){GLF.slowT=n;glfOff();const dock=[],disp=[],vw=innerWidth,vh=innerHeight,base='rgb('+(getComputedStyle(document.documentElement).getPropertyValue('--gtr2').trim()||'22,28,42')+')';
+  for(const id of GLFDOCK){const el=document.getElementById(id);if(!el||!el.getClientRects().length)continue;const r=el.getBoundingClientRect();if(r.width<4||r.height<4||r.right<0||r.bottom<0||r.left>vw||r.top>vh)continue;
+    const c=gleCol(el.classList.contains('glsol')?getComputedStyle(el).backgroundColor:base),col=[c[0],c[1],c[2],el.classList.contains('glsol')?1:.85],R=glfR(r);dock.push({k:'d:'+id,R,c:col,s:R.join(',')+'|'+col.join(',')})}
+  const cvs=[...document.querySelectorAll('#fxin canvas')];const pr=document.getElementById('prc');if(pr&&!document.body.classList.contains('prfull'))cvs.push(pr);
+  for(const cv of cvs){if(!cv.width||!cv.height||!cv.getClientRects().length)continue;const r=cv.getBoundingClientRect();if(r.width<24||r.height<16||r.right<0||r.bottom<0||r.left>vw||r.top>vh)continue;
+    const R=glfR(r);if(!cv._glfS)cv._glfS='s:'+(++GLF.seq);disp.push({k:cv._glfS,R,cv,s:R.join(',')+'|'+cv.width+'x'+cv.height,a:R[2]*R[3]})}
+  /* at most 12 displays, the largest */
+  disp.sort((a,b)=>b.a-a.a);if(disp.length>12)disp.length=12;GLF.dock=dock;GLF.disp=disp}
+/* where the backdrop comes from: the rectangle scene; in the overview a small copy of the arrangement canvas; with the piano roll in full screen a small copy of it */
+function glfSrc(){return GLE.ovw?'ovw':document.body.classList.contains('prfull')?'pr':'scene'}
+function glfSetSrc(L){const s=GLF.src;if(s==='scene'){glfFeed(L,false);return}const cv=s==='ovw'?arr:document.getElementById('prc');if(!cv)return;
+  const R=glfR(cv.getBoundingClientRect()),k=s+'|'+R.join(',');if(L.src!==k){L.src=k;L.sig=-1;L.view='';L.g.setBackdrop(cv,{rect:R})}}
+/* once per screen frame, from the app's frame loop */
+function glfTick(now){const on=GLE.on&&!!GLE.g&&!GLF.fail;if(!on){if(GLF.act||GLF.L.length)glfKill();return}
+  const C=glfCands(now),items=[];let vis=0;
+  for(const[el,k] of C){if(!glfShown(el))continue;const r=el.getBoundingClientRect();if(r.width<8||r.height<8||r.right<0||r.bottom<0||r.left>innerWidth||r.top>innerHeight)continue;
+    const I=glfInfo(el,now);if(I.cs.visibility==='hidden')continue;const op=(+I.cs.opacity)*(I.tcs?+I.tcs.opacity:1);if(!(op>.01))continue;
+    if(!el._glf)el._glf='f'+(++GLF.seq);const R=glfR(r);if(k==='tab')R[3]+=14;items.push({el,k,id:el._glf,R,z:I.z,top:I.top,rad:I.rad,op:Math.min(1,op),bg:I.bg,opaque:I.opaque&&k!=='tab',lv:0});vis++}
+  GLF.n.tick++;
+  if(!vis&&!GLF.act)return;
+  if(now-GLF.slowT>250||!GLF.dock)glfSlow(now);
+  /* stacking order: z-index, then place in the page */
+  items.sort((a,b)=>a.z-b.z||(a.top===b.top?(a.k==='tab')-(b.k==='tab'):(a.top.compareDocumentPosition(b.top)&4?-1:1)));
+  /* levels: an element that overlaps an element below it goes one layer above that one. Face mode: one layer per element. */
+  const face=GLF.mode==='face',tl=new Map();let nx=0;
+  for(let i=0;i<items.length;i++){const it=items[i];if(tl.has(it.top)){it.lv=tl.get(it.top);continue}let k=0;
+    if(face)k=it.opaque?-1:nx++;else for(let j=0;j<i;j++){const o=items[j];if(o.top!==it.top&&glfOvl(o.R,it.R))k=Math.max(k,o.lv+1)}
+    it.lv=k;tl.set(it.top,k)}
+  const max=face?8:GLF.max;GLF.src=glfSrc();
+  /* per layer: which faces, where the canvas goes in the page */
+  const want=[];for(const it of items){const sol=!it.opaque&&it.lv>=max;if(it.el.classList.contains('glfsol')!==sol){it.el.classList.toggle('glfsol',sol);if(sol)GLF.n.solid++}
+    if(it.opaque||it.lv<0||it.lv>=max)continue;(want[it.lv]||(want[it.lv]=[])).push(it)}
+  if(GLF.items.length){const now2=new Set(items.map(x=>x.el));for(const it of GLF.items)if(!now2.has(it.el)&&it.el.classList.contains('glfsol'))it.el.classList.remove('glfsol')}
+  const st=items.map(it=>it.id+':'+it.lv).join(' ');if(st!==GLF.st){GLF.st=st;GLF.n.regroup++}
+  GLF.items=items;let any=false;
+  for(let i=0;i<Math.max(want.length,GLF.L.length);i++){const W=want[i]||[];let L=GLF.L[i];
+    if(!W.length){if(L&&L.vis){L.vis=false;L.cv.hidden=true;for(const id of L.ids)L.g.removePanel(id);L.ids.clear()}continue}
+    if(!L){L=glfLayer(i);if(!L)break}
+    any=true;const g=L.g,lo=W[0];
+    if(String(lo.z)!==L.z){L.z=String(lo.z);L.cv.style.zIndex=L.z}
+    if(L.before!==lo.top||L.cv.nextSibling!==lo.top){L.before=lo.top;if(lo.top.parentElement===document.body)document.body.insertBefore(L.cv,lo.top)}
+    /* face mode: the canvas is only as large as its element (plus a margin), moved with it; the backdrop then has to be drawn again on every move */
+    if(face){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const it of W){x0=Math.min(x0,it.R[0]);y0=Math.min(y0,it.R[1]);x1=Math.max(x1,it.R[0]+it.R[2]);y1=Math.max(y1,it.R[1]+it.R[3])}const x=Math.floor(x0)-2,y=Math.floor(y0)-2,w=Math.ceil((x1-x0+6)/8)*8,h=Math.ceil((y1-y0+6)/8)*8,fk=x+','+y+','+w+','+h;
+      if(L.fit!==fk){const o=L.fit;L.fit=fk;L.cv.classList.add('fit');L.cv.style.width=w+'px';L.cv.style.height=h+'px';L.cv.style.transform='translate('+x+'px,'+y+'px)';g.setOrigin(x,y);g.setBounds([0,0,innerWidth/ZOOM,innerHeight/ZOOM]);if(o)GLF.n.move++}}
+    else if(L.fit){L.fit=null;L.cv.classList.remove('fit');L.cv.style.width=L.cv.style.height=L.cv.style.transform='';g.setOrigin(0,0);g.setBounds(null)}
+    if(!L.vis){L.vis=true;L.cv.hidden=false;L.sig=-1;L.view='';L.ph=null}
+    glfSetSrc(L);
+    const ids=new Set();W.forEach((it,j)=>{ids.add(it.id);const d={rect:it.R,radius:Math.min(it.rad,Math.min(it.R[2],it.R[3])/2),kind:it.k==='tab'?'window':it.k,opacity:it.op,z:it.k==='tab'?-1:j,visible:true,over:'flats'};
+      if(L.ids.has(it.id))g.updatePanel(it.id,d);else{d.id=it.id;g.addPanel(d)}});
+    for(const id of L.ids)if(!ids.has(id))g.removePanel(id);L.ids=ids;
+    glfFlats(L,items,GLF.disp||[],GLF.dock||[]);
+    /* the displays and the piano roll under a face are copied again at most 20 times a second while playing, twice a second when stopped (most displays stand still then);
+       the overview and full-screen piano roll backdrop likewise */
+    if(now-(L.dT||0)>=(play.on?50:500)){L.dT=now;for(const f of GLF.disp||[])if(L.flats.has(f.k)&&W.some(it=>glfOvl(it.R,f.R))){g.markFlatDirty(f.k);GLF.n.flatDirty++}if(GLF.src!=='scene')g.markDirty()}}
+  GLF.act=any}
+/* the frame: after the docked engine, each layer draws what changed (free when nothing did) */
+function glfRender(now){if(!GLF.act)return;for(const L of GLF.L)if(L&&L.vis)try{L.g.render(now)}catch(e){if(!GLF.err){GLF.err=1;console.error('AudioLab glass engine (floating)',e)}}}
+/* the docked engine's scene feed also feeds the layers: the list once per edit, the view and the playhead as uniforms */
+{const _gb=gleBuild;gleBuild=function(){const L=_gb.apply(this,arguments);GLF.LL=L;GLF.sig++;return L}}
+{const _gf=gleFeed;gleFeed=function(){const r=_gf.apply(this,arguments);try{if(GLE.g&&GLE.on){const dz=(window.devicePixelRatio||1)*ZOOM,P=phCfg(),q=(GLE.lv==='light'?4:2)/V.ppb;
+    GLF.vw={x:V.x,y:V.y,z:V.ppb,w:arr.width/dz,h:arr.height/dz,ay:AY,x0:X0,pc:P.c,pw:P.w,ph:Math.round(curDisp()/q)*q};if(GLF.act)for(const L of GLF.L)if(L&&L.vis)glfFeed(L,false)}}catch(e){if(!GLF.err){GLF.err=1;console.error('AudioLab glass engine (floating)',e)}}return r}}
+{const _gp=glePh;glePh=function(){const r=_gp.apply(this,arguments);if(GLF.act&&GLF.vw&&GLE.on){const q=(GLE.lv==='light'?4:2)/V.ppb,x=Math.round(curDisp()/q)*q;if(x!==GLF.vw.ph){GLF.vw.ph=x;for(const L of GLF.L)if(L&&L.vis&&GLF.src==='scene'&&L.ph!==x){L.ph=x;L.g.setPlayhead(x);GLF.n.ph++}}}return r}}
+/* level, lens and frosting follow the docked panels */
+{const _ga=gleApply;gleApply=function(){const r=_ga.apply(this,arguments);try{if(!GLE.on)glfKill();else for(const L of GLF.L)if(L){L.g.setLevel(GLE.lv==='light'?'light':'glass');L.g.setLensPreset(gleLens());L.g.setBlurPreset(gleBlur())}GLF.off=null;GLF.slowT=0}catch(e){console.error('AudioLab glass engine (floating)',e)}return r}}
+{const _f0=frame0;frame0=function(now){const r=_f0.apply(this,arguments);try{glfTick(now);glfRender(now)}catch(e){if(!GLF.err){GLF.err=1;console.error('AudioLab glass engine (floating)',e)}}return r}}
+addEventListener('resize',()=>{GLF.slowT=0;GLF.off=null});
+/* the old SVG lens is not used any more: it makes no filter and no map (the code stays until step 3) */
+rfAttach=function(){};
+{const _ru=rfUpdate;rfUpdate=function(el){const o=RFX.get(el);if(o){clearTimeout(o.tm);o.tm=0;if(o.v){o.v='';el.style.backdropFilter='';el.style.webkitBackdropFilter=''}}}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

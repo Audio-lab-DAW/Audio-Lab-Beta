@@ -1,7 +1,7 @@
 {
-  "version": "0.226",
-  "sha256": "4a9e056922d886375146d1e018bf351e2eb2d04b5a4f0aa3526b4d298a9ddef2",
-  "size": 5965560,
+  "version": "0.227",
+  "sha256": "de5d0f21376df65212e52608a0c1d4959b9f51878ee6bad94104c05ff3c26f04",
+  "size": 5983935,
   "minShell": "0.147.0",
-  "notes": "One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown."
+  "notes": "Windows, sheets and menus now get their glass from the new glass engine too, and the browser's own blur is no longer used anywhere in AudioLab. Please open the mixer, play a song and tell us the frame rate you see in Settings, Performance."
 }
