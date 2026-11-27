@@ -4859,3 +4859,31 @@ Step IN-M of `docs/design-round-4-instruments.md`, the user's pick **M2** (peak 
 
 ### Left
 IN-L next: loudness (L2, the loudness history) in the top-bar box, `#lufsPop`, the `.mxme` master box, `ND('loud')` and `ND('measure')`. Then IN-S (S2), IN-E (E3), IN-G (G1 G3 G4), IN-O (O0 kept, O1, O4), IN-V (V1, viridis), IN-C and IN-D. Open: the track taps' size (IN-S); M1's standard peak fall as a Speed choice if the user wants it; the crowded fader scale labels at the Light level (the mixer's own `.fsc` scale, not changed here).
+
+## 27 November 2026: task NB-R4b (the engine never waits on the app; alengine 0.6; review RN5 C9, and gaps in C6 and C7)
+
+Fired by the scheduler. This run started on NB-R4 while a parallel NB run was doing the same stage; that run pushed NB-R4a first (alengine 0.5, the bulk of R4). This run's own version of R4 (branch `nb-r4-mine`, not pushed) was dropped rather than merged, and the run did NB-R4b on top of R4a, carrying over only what R4a lacked. `index.html` untouched.
+
+### Built
+- **Output through one writer thread (C9).** `say()` puts the line in a queue; one thread writes and flushes. The socket thread, the system's listener and the volume ramp never wait on the pipe. Answers are never dropped; events beyond 4,096 waiting lines are dropped and counted (`status.output`: `waiting`, `waitingMax`, `eventsDropped`). The queue is drained before the engine exits.
+- **`std::cin.tie(nullptr)`.** Found by the new test: `std::cin` is tied to `std::cout`, so each `getline` flushed stdout, and with the shell not reading, the command thread waited on the stdio lock and stopped reading commands.
+- **Format restart through a worker.** The listener only sets a request (`fmtReq`) and returns; `formatWorker` restarts under the device lock. In 0.5 the listener joined the previous restart thread, which waited on the device lock the command thread may hold (a possible hang on the Mac, where removing a listener may wait for the listener in flight).
+- **A race fixed.** `isOpen` is atomic and `status` reads under the device lock (ThreadSanitizer: the restart wrote `isOpen` and the stream's format text while `status` read them; present since 0.5).
+- **Files at another rate than the device are refused** (both rates named), unless `anyRate: true`.
+- **The shell (`desktop/native-engine.js`)**: drops `confirm` and `req` from what the page sends; on `needsConfirm` asks the person in its own dialog (Electron's `dialog.showMessageBox`, "Make it louder" / "Keep it") and only then sends `confirm: true`; no dialog means no. `format` events reach the page. `setup()` takes an optional `dialog` (tests).
+- Tests: `engine_null_test.py` (a reader that can stop reading: `Engine.hold`), `bridge_unit.js`, `fake-alengine.js` (volume ceiling, `FAKE_FORMAT_EVENT_MS`).
+
+### Proven
+- Here: `engine_null_test.py` 50 of 50 in Release, ASan + UBSan and TSan (each twice). New: the engine still takes 3,000 commands while its output is unread; a new sender connects and 1.5 s of sound goes in at its own pace (1.40 s); every frame reached the ring (72,064, nothing dropped); all 3,000 answers arrive once read again (4,205 lines waited, 248 events dropped and counted); 40 format changes during 40 opens, all answered (0.7 s); a 44.1 kHz file on a 48 kHz device refused. Against alengine 0.5 the same test fails 6 checks: commands stop being read, only 12,032 of 72,064 frames go in within 6 s.
+- `bridge_unit.js` 55 of 55 (5 new): the dialog says yes (sent with confirm, 80 % set), no (refused, level kept), or there is none (refused); the page's own confirm never reaches the engine (4 sends of 0.8, one with confirm); the format event reaches the page. Electron feeder test 13 of 13 (real Electron 45.4.1, real shell, engine 0.6). Mixer 10 of 10 identical.
+- GitHub: the push run for 542df25 (46038865376) was cancelled after 50 s by the workflow's own rule (a newer push, the user's fifth test-app report c882e6d, touched `tools/native-lab`); that newer run, 46038950323, contains this commit and is **green on every Linux job** (linux with sanitizers and the 240 device cases, tsan, node, electron). A run with the Apple Silicon box ticked was started afterwards; as in every run since NB-R1 a Mac machine is not expected to start (D9).
+
+### Left
+- The Mac (D9): no macOS runner has started a job since NB-R1; the Core Audio format listener and the writer thread on macOS are compiled by no machine yet.
+- Next: NB-R5 (follower quality: per-rate kernel, bypass at speed 1, 19 to 21 kHz test points, production targets, a bursty sender), then N2c when the design chain allows; N3d in parallel.
+
+### Assumptions
+- Two NB runs at once: the first to push owns the stage name; the later one does the next part on top and drops its duplicate.
+- Events (not answers) may be dropped past 4,096 waiting lines: the page reads state again with `status` anyway, and a queue without limit would grow while the shell is hung.
+- The confirmation dialog belongs to the shell, not the page, because the page comes through an update channel that is not signed (RN6 1.4); the words of the dialog can change with the settings page (S11).
+- A file source must match the device's rate, like the page (NB-R2); `anyRate` exists for tests.
