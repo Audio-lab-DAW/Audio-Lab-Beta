@@ -85,6 +85,8 @@ The Gryphon was set to 48 kHz, 32-bit integer, in Audio MIDI Setup; its buffer r
 ### The plug-in window, the same day (screenshot from the user)
 Serum 2's own window opened at 1190 x 740, drawn in full, next to the main window. Clicking the piano in Serum's window makes sound through the Gryphon at 32 frames. The two layout fixes made blind before the published build (the plug-in window placed on the screen, the key hint in full) are both seen working in this picture. The read-out showed "moves in its window 0": piano clicks are notes, not parameter moves, so whether a knob turned in the window reaches the host is not shown yet.
 
+A later report with the window open: 254,554 blocks at 32 frames (about 170 seconds), average 10.0 µs per block (1.5 %), worst 217.5 µs (32.6 % of the block), 0 failed blocks, 0 overloads. So with the window drawing, the worst block rose from 20.8 % to 32.6 % and nothing dropped.
+
 ### Still open from the Mac
 - A knob turned in a plug-in window (the read-out "moves in its window" should count up), and the computer keys A to K.
 - The Zoom AMS-24, once macOS lists it.
