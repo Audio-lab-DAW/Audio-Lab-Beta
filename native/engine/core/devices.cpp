@@ -1,6 +1,7 @@
 // The devices the engine core has so far (task NB-N3a). Each line: the app's device type, the ported processor.
 #include "dev_crush.h"
 #include "dev_dynamics.h"
+#include "dev_modulation.h"
 
 namespace al {
 template <class T> static ProcessorFactory mk() { return [](RenderContext& c) { return std::unique_ptr<Processor>(new T(c)); }; }
@@ -13,5 +14,11 @@ void registerCoreDevices() {
     deviceRegistry()["trans"] = mk<dyn::Trn>();
     deviceRegistry()["deess"] = mk<dyn::Dss>();
     deviceRegistry()["crush"] = mk<fx::Crush>();
+    // task NB-N3c: modulation and time
+    deviceRegistry()["chorus"] = mk<mod::Cho>();
+    deviceRegistry()["imager"] = mk<mod::Img>();
+    deviceRegistry()["fshift"] = mk<mod::FSh>();
+    deviceRegistry()["vocoder"] = mk<mod::Voc>();
+    deviceRegistry()["tstop"] = mk<mod::Tps>();
 }
 }  // namespace al

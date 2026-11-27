@@ -37,11 +37,24 @@ else()
 endif()
 
 # ---- the engine core (task NB-N3a): ported devices, chains, offline render; no sound card needed ---------
+# The browser's maths functions (LLVM libc, header only), so ported devices give the browser's bits everywhere.
+add_library(al_jsmath INTERFACE)
+target_include_directories(al_jsmath INTERFACE third_party/llvm-libc third_party/llvm-libc/include)
+target_compile_definitions(al_jsmath INTERFACE LIBC_NAMESPACE=__llvm_libc_al)
 add_executable(alrender engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender PRIVATE -ffp-contract=off)
+target_link_libraries(alrender PRIVATE al_jsmath)
+add_executable(almathprobe engine/math_probe.cpp)
+target_compile_options(almathprobe PRIVATE -ffp-contract=off)
+target_link_libraries(almathprobe PRIVATE al_jsmath)
+# the control: the system's own maths library instead (shows what the vendored functions change)
+add_executable(alrender_sysmath engine/alrender.cpp engine/core/devices.cpp)
+target_compile_options(alrender_sysmath PRIVATE -ffp-contract=off)
+target_compile_definitions(alrender_sysmath PRIVATE AL_MATH_SYSTEM)
 # the control: fusing allowed, to show on each machine whether the rule matters for these devices
 add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
+target_link_libraries(alrender_fused PRIVATE al_jsmath)
 # ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
 add_executable(almix engine/mix/almix.cpp)
 target_compile_options(almix PRIVATE -ffp-contract=off)   # the same bits as JavaScript and Chromium: no fused multiply-add

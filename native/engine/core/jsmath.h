@@ -6,6 +6,15 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#ifndef LIBC_NAMESPACE
+#define LIBC_NAMESPACE __llvm_libc_al
+#endif
+#ifndef AL_MATH_SYSTEM
+#include "shared/math/cos.h"  // native/third_party/llvm-libc (the include path is set by CMake)
+#include "shared/math/exp.h"
+#include "shared/math/log10.h"
+#include "shared/math/sin.h"
+#endif
 
 namespace al {
 namespace js {
@@ -48,10 +57,38 @@ inline int32_t toInt32(double x) {
 }
 inline double shr(double x, int s) { return (double)(toInt32(x) >> (s & 31)); }
 
+// The maths functions JavaScript calls. Every device calls these, never std::, so the engine has one
+// implementation of its own on every system (found in task NB-N3c, measured against Chromium 158):
+//   Math.sin, cos, exp, log10: V8 takes them from LLVM's libc, correctly rounded. glibc differs on about 0.15 %
+//     of arguments, Node's older V8 on about 3 %. The engine carries the same LLVM functions
+//     (native/third_party/llvm-libc), so they give the browser's bits on Linux, macOS and Windows alike.
+//   Math.pow: V8 handles y == 2 (x*x) and y == 0.5 (sqrt(x+0)) itself and otherwise calls the system's own pow
+//     (flag use_std_math_pow). So the engine calls std::pow too: Apple's on the Mac, as the desktop app does there.
+// AL_MATH_SYSTEM (a test switch) uses the system library for everything, to show what the vendored code changes.
+#ifdef AL_MATH_SYSTEM
+inline double sin(double x) { return std::sin(x); }
+inline double cos(double x) { return std::cos(x); }
+inline double exp(double x) { return std::exp(x); }
+inline double log10(double x) { return std::log10(x); }
+#else
+inline double sin(double x) { return LIBC_NAMESPACE::shared::sin(x); }
+inline double cos(double x) { return LIBC_NAMESPACE::shared::cos(x); }
+inline double exp(double x) { return LIBC_NAMESPACE::shared::exp(x); }
+inline double log10(double x) { return LIBC_NAMESPACE::shared::log10(x); }
+#endif
+inline double pow(double x, double y) {
+    if (std::isnan(y)) return NAN;
+    if (std::isinf(y) && (x == 1 || x == -1)) return NAN;
+    if (std::isnan(x)) x = NAN;
+    if (y == 2) return x * x;
+    if (y == 0.5) return std::isinf(x) ? INFINITY : std::sqrt(x + 0);
+    return std::pow(x, y);
+}
+
 // The worklet bundle's own helpers (WLSRC in index.html):
 //   dB = x => Math.pow(10, x/20),  lg = x => 20*Math.log10(Math.max(1e-9, x))
-inline double dB(double x) { return std::pow(10.0, x / 20); }
-inline double lg(double x) { return 20 * std::log10(max(1e-9, x)); }
+inline double dB(double x) { return js::pow(10.0, x / 20); }
+inline double lg(double x) { return 20 * js::log10(max(1e-9, x)); }
 
 // Float32Array store: round to float.
 inline float f32(double v) { return (float)v; }

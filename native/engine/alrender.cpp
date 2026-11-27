@@ -1,6 +1,7 @@
 // alrender: offline renders through the native engine core (task NB-N3a).
 //   alrender list                                   the device types the core has
-//   alrender cases <cases.json> <in.wav> <outdir>    one output WAV per case, timing as JSON lines
+//   alrender cases <cases.json> <in.wav> <outdir> [block]   one output WAV per case, timing as JSON lines;
+//                                                    block: frames per call (default 128, the web engine's)
 // cases.json: {"cases":[{"name":"limit-trans","chain":[{"type":"limit","p":{...}}]}, ...]}
 // The settings "p" are those the page posts to the worklet (see tools/native-lab/make_ref_core.py).
 #include <chrono>
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
         const size_t N = in.frames();
         std::vector<float> iL(N), iR(N);
         for (size_t i = 0; i < N; i++) { iL[i] = in.data[i * in.ch]; iR[i] = in.data[i * in.ch + (in.ch > 1 ? 1 : 0)]; }
+        const int block = argc >= 6 ? atoi(argv[5]) : kQuantum;
         int bad = 0;
         for (auto& c : cj["cases"].a) {
             RenderContext ctx; ctx.sampleRate = in.sr;
@@ -56,9 +58,9 @@ int main(int argc, char** argv) {
             if (!ok) { printf("{\"name\":%s,\"ok\":false,\"error\":%s}\n", jstr(name).c_str(), jstr(err).c_str()); bad++; continue; }
             std::vector<float> oL, oR;
             auto t0 = std::chrono::steady_clock::now();
-            renderChain(ch, iL, iR, oL, oR);
+            renderChain(ch, iL, iR, oL, oR, block);
             double us = std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count();
-            const double blocks = (double)((N + kQuantum - 1) / kQuantum);
+            const double blocks = (double)(N + kQuantum - 1) / kQuantum;  // time per 128 frames
             wavWrite(std::string(argv[4]) + "/" + name + ".wav", in.sr, oL, oR);
             printf("{\"name\":%s,\"ok\":true,\"usPerBlock\":%.4f,\"realtimeX\":%.1f}\n", jstr(name).c_str(), us / blocks,
                    (N / (double)in.sr) / (us / 1e6));

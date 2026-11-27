@@ -12,7 +12,9 @@ namespace al {
 
 void registerCoreDevices();
 
+
 constexpr int kQuantum = 128;  // the web engine's render quantum
+constexpr int kMaxBlock = 4096;
 
 struct ChainSlot {
     std::string type;
@@ -31,15 +33,16 @@ public:
         ChainSlot s; s.type = type;
         s.dev.reset(new WorkletShell(it->second(ctx_), ctx_));
         // processorOptions.p: the settings the worklet is created with
-        if (params.t == JValue::Object) s.dev->set(params);
+        if (params.t == JValue::Object) s.dev->proc().init(params);
         slots_.push_back(std::move(s));
         return true;
     }
     size_t size() const { return slots_.size(); }
+    RenderContext& ctx() { return ctx_; }
     ChainSlot& slot(size_t i) { return slots_[i]; }
-    // One block in place (n <= kQuantum).
+    // One block in place (n <= kMaxBlock).
     void process(float* L, float* R, int n) {
-        float tL[kQuantum], tR[kQuantum];
+        float tL[kMaxBlock], tR[kMaxBlock];
         for (auto& s : slots_) {
             if (!s.on) continue;
             s.dev->process(L, R, tL, tR, n);
@@ -52,16 +55,22 @@ private:
     std::vector<ChainSlot> slots_;
 };
 
-// Offline render of planar stereo through a chain, in whole render quanta (like an OfflineAudioContext, the
-// last quantum is padded with silence and the output cut to the input's length).
-inline void renderChain(Chain& ch, const std::vector<float>& inL, const std::vector<float>& inR, std::vector<float>& outL, std::vector<float>& outR) {
+// Offline render of planar stereo through a chain, in whole blocks (like an OfflineAudioContext, the last
+// block is padded with silence and the output cut to the input's length). The web engine always uses 128;
+// other sizes are for the block-size test (task NB-N3c): a device that gives the same bits at 32, 64 and 512
+// can run at the audio device's own buffer with no 128-frame adapter.
+inline void renderChain(Chain& ch, const std::vector<float>& inL, const std::vector<float>& inR, std::vector<float>& outL, std::vector<float>& outR, int block = kQuantum) {
     const size_t N = inL.size();
+    if (block < 1) block = 1;
+    if (block > kMaxBlock) block = kMaxBlock;
     outL.assign(N, 0); outR.assign(N, 0);
-    float L[kQuantum], R[kQuantum];
-    for (size_t pos = 0; pos < N; pos += kQuantum) {
-        const size_t m = std::min((size_t)kQuantum, N - pos);
-        for (size_t i = 0; i < (size_t)kQuantum; i++) { L[i] = i < m ? inL[pos + i] : 0.f; R[i] = i < m ? inR[pos + i] : 0.f; }
-        ch.process(L, R, kQuantum);
+    std::vector<float> Lv(block), Rv(block);
+    float* L = Lv.data(); float* R = Rv.data();
+    for (size_t pos = 0; pos < N; pos += block) {
+        const size_t m = std::min((size_t)block, N - pos);
+        for (size_t i = 0; i < (size_t)block; i++) { L[i] = i < m ? inL[pos + i] : 0.f; R[i] = i < m ? inR[pos + i] : 0.f; }
+        ch.ctx().currentFrame = (double)pos;
+        ch.process(L, R, block);
         for (size_t i = 0; i < m; i++) { outL[pos + i] = L[i]; outR[pos + i] = R[i]; }
     }
 }

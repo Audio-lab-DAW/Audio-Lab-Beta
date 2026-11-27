@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -33,10 +33,22 @@ EXTRA = {
               "x-high": {"freq": 30000, "att": 0.05, "rel": 0.5, "range": 0}},
     "crush": {"x-fold-dither": {"shape": "fold", "bits": 5, "rate": 4, "jit": 30, "dith": 50, "drive": 9},
               "x-trunc": {"shape": "trunc", "bits": 3, "rate": 7.5}, "x-floor": {"shape": "floor", "bits": 12, "mix": 40}},
+    # task NB-N3c
+    "chorus": {"x-flanger-tri": {"mode": "flanger", "shape": "triangle", "fb": 60, "depth": 80},
+               "x-dimension": {"mode": "dimension", "width": 100}, "x-ensemble-fb": {"mode": "ensemble", "fb": 40, "lowcut": 200, "highcut": 6000}},
+    "imager": {"x-solo2": {"solo": 2}, "x-bmono": {"bmono": True, "w4": 180, "sg": 3, "x1": 10, "x2": 50}},
+    "fshift": {"x-ring": {"mode": "ring", "shift": 300}, "x-both-down-lfo": {"mode": "both", "dir": "down", "lfoRate": 2, "lfoDepth": 50, "fb": 40},
+               "x-negative": {"shift": -120, "mix": 60}},
+    "vocoder": {"x-pulse8": {"carrier": "pulse", "bands": 8, "formant": 5}, "x-noise-sib": {"carrier": "sine", "noise": 40, "sib": 60, "detune": 15},
+                "x-square32": {"carrier": "square", "bands": 32, "oct": -1, "bw": 0.5}},
+    "tstop": {"x-hold-rev": {"hold": True, "fx": "rev"}, "x-hold-stutter": {"hold": True, "fx": "stutter"},
+              "x-hold-half": {"hold": True, "fx": "half"}, "x-hold-double": {"hold": True, "fx": "double"}, "x-hold-tape": {"hold": True, "fx": "tape", "stop": 900}},
 }
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
+    "chain-space": [("fshift", None), ("chorus", None), ("imager", None), ("limit", "trans")],
+    "chain-robot": [("vocoder", None), ("tstop", None), ("crush", "8bit")],
 }
 
 
@@ -124,7 +136,7 @@ def main():
             jobs.append((t + "-" + k, [{"type": t, "extra": e}]))
     for name, ch in CHAINS.items():
         if all(d in types for d, _ in ch):
-            jobs.append((name, [{"type": d, "pre": k} for d, k in ch]))
+            jobs.append((name, [({"type": d, "pre": k} if k else {"type": d}) for d, k in ch]))
     b64 = base64.b64encode(np.ascontiguousarray(x).tobytes()).decode()
     cases, info = [], {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
                        "input_sha256": hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest(), "cases": {}}

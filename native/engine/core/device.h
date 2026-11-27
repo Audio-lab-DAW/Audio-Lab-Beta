@@ -11,6 +11,8 @@
 // Design rule from the picks (U-questions, NM1): the engine keeps all state and the interface is a view on it.
 // So a device exposes its settings (set) and its meter values (meters) and nothing about drawing.
 #pragma once
+#include <algorithm>
+#include <cmath>
 #include <functional>
 #include <map>
 #include <memory>
@@ -24,6 +26,8 @@ namespace al {
 struct RenderContext {
     double sampleRate = 48000;
     WorkletRandom random;  // Math.random of the worklet scope: one per audio context
+    double currentFrame = 0;  // first frame of the block being rendered; currentTime = currentFrame / sampleRate
+    double currentTime() const { return currentFrame / sampleRate; }
 };
 
 // What a ported processor implements. process() is the body of the worklet's process(); flushTiny() zeroes the
@@ -32,44 +36,91 @@ struct RenderContext {
 struct Processor {
     virtual ~Processor() = default;
     Params p;  // this.p
-    virtual void set(const JValue& np) { p.assign(np); }
+    int pv = 0;  // this.pv: counts settings that arrived as messages after the device was made
+    // processorOptions.p: the settings the worklet is made with (no message, pv stays)
+    void init(const JValue& np) { p.assign(np); }
+    // port.onmessage {p}: Object.assign(this.p, d.p); this.pv++
+    virtual void set(const JValue& np) { p.assign(np); pv++; }
     virtual void process(const float* L, const float* R, float* oL, float* oR, int n) = 0;
     virtual void flushTiny() = 0;
     virtual std::vector<std::pair<std::string, double>> meters() const { return {}; }
     // A worklet whose dnGuard has run=true (the meter, tape stop) keeps running on silence.
     virtual bool runsOnSilence() const { return false; }
+    // Where the current call sits on the web engine's 128-frame grid (set by WorkletShell before each call):
+    // currentTime in the worklet is winStart / sampleRate, and the call's first frame is frame winOff of it.
+    double winStart = 0;
+    int winOff = 0;
     static void z(double& v) { if (v < 1e-30 && v > -1e-30 && v != 0) v = 0; }
 };
 
+// WorkletShell runs a ported processor the way the web engine runs the worklet, on the web engine's grid of
+// 128-frame windows, whatever the size of the calls it is given (task NB-N3c): a call may be 32 or 64 frames
+// (the audio device's own buffer) or longer (offline render); the bundle's rules still apply per window:
+//   - the silence rule looks at a whole window: when the window can be skipped (more than 3 s of silence before
+//     it) and its first frames are silent, they are output as zeros; if sound arrives later in the same window,
+//     the silent frames are run through the device first (their output discarded: the web engine computed them,
+//     and after 3 s of silence they come out as zeros), so the device's state is exactly the web engine's;
+//   - the tiny-value guard runs after every 16th window that ran, at its last frame;
+//   - the processor is told where in its window each call starts (Processor::winStart, winOff), for the devices
+//     that read currentTime.
+// So a call size that is not 128 adds no latency and changes no bits.
 class WorkletShell {
 public:
-    WorkletShell(std::unique_ptr<Processor> proc, const RenderContext& ctx) : p_(std::move(proc)), sr_(ctx.sampleRate) {}
+    WorkletShell(std::unique_ptr<Processor> proc, const RenderContext& ctx) : p_(std::move(proc)), ctx_(ctx), sr_(ctx.sampleRate) {}
     Processor& proc() { return *p_; }
     void set(const JValue& np) { p_->set(np); }
-    // n is the render quantum (128 in the web engine).
+    // ctx.currentFrame must be the frame of L[0].
     void process(const float* L, const float* R, float* oL, float* oR, int n) {
-        if (!p_->runsOnSilence()) {
-            bool sil = true;
-            for (int i = 0; i < n && sil; i++) if (L[i] != 0) sil = false;
-            for (int i = 0; i < n && sil; i++) if (R[i] != 0) sil = false;
-            if (sil) {
-                q_ += n;
-                if (q_ > sr_ * 3) {
-                    for (int i = 0; i < n; i++) { oL[i] = 0; oR[i] = 0; }
-                    return;
-                }
-            } else q_ = 0;
+        int done = 0;
+        while (done < n) {
+            const double frame = ctx_.currentFrame + done;
+            const int off = (int)std::fmod(frame, (double)kWin);
+            const int m = std::min(n - done, kWin - off);
+            piece(L + done, R + done, oL + done, oR + done, m, frame - off, off);
+            done += m;
         }
-        p_->process(L, R, oL, oR, n);
-        if (++c_ >= 16) { c_ = 0; p_->flushTiny(); }
     }
     bool skipping() const { return q_ > sr_ * 3; }
+    long catchUpFrames() const { return catchUp_; }
+    long catchUpNonZero() const { return catchUpNZ_; }
+    static constexpr int kWin = 128;
 
 private:
+    void piece(const float* L, const float* R, float* oL, float* oR, int m, double winStart, int off) {
+        if (off == 0) { winSilent_ = true; winRan_ = false; pend_ = 0; mayskip_ = !p_->runsOnSilence() && (q_ + kWin > sr_ * 3); }
+        bool sil = true;
+        for (int i = 0; i < m && sil; i++) if (L[i] != 0 || R[i] != 0) sil = false;
+        if (!sil) winSilent_ = false;
+        if (mayskip_ && winSilent_) {
+            for (int i = 0; i < m; i++) { oL[i] = 0; oR[i] = 0; pL_[pend_ + i] = L[i]; pR_[pend_ + i] = R[i]; }
+            pend_ += m;
+        } else {
+            if (pend_ > 0) {  // sound arrived inside a window that started silent: run the silent frames first
+                float tL[kWin], tR[kWin];
+                p_->winStart = winStart; p_->winOff = off - pend_;
+                p_->process(pL_, pR_, tL, tR, pend_);
+                catchUp_ += pend_;
+                for (int i = 0; i < pend_; i++) if (tL[i] != 0 || tR[i] != 0) catchUpNZ_++;
+                pend_ = 0;
+            }
+            p_->winStart = winStart; p_->winOff = off;
+            p_->process(L, R, oL, oR, m);
+            winRan_ = true;
+        }
+        if (off + m == kWin) {  // end of the window
+            if (!p_->runsOnSilence()) { if (winSilent_) q_ += kWin; else q_ = 0; }
+            if (winRan_ && ++c_ >= 16) { c_ = 0; p_->flushTiny(); }
+        }
+    }
     std::unique_ptr<Processor> p_;
+    const RenderContext& ctx_;
     double sr_;
     double q_ = 0;
     int c_ = 0;
+    bool winSilent_ = true, winRan_ = false, mayskip_ = false;
+    int pend_ = 0;
+    float pL_[kWin] = {0}, pR_[kWin] = {0};  // the silent frames held back in this window (they may be -0)
+    long catchUp_ = 0, catchUpNZ_ = 0;
 };
 
 // The registry: device type (FXDEF name in the app) -> factory.

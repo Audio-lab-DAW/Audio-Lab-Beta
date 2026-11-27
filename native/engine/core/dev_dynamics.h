@@ -54,8 +54,8 @@ struct Lim : Processor {
         if (st == "aggressive") look = js::max(1, js::shr(look, 2));
         if (look != L) reset((int)look);
         const int lk = (int)look;
-        const double rel = js::max(5, p.orNum("rel", 120)) / 1000, rc1 = 1 - std::exp(-1 / (rel * .12 * sr)),
-                     rc2 = 1 - std::exp(-1 / (rel * sr));
+        const double rel = js::max(5, p.orNum("rel", 120)) / 1000, rc1 = 1 - js::exp(-1 / (rel * .12 * sr)),
+                     rc2 = 1 - js::exp(-1 / (rel * sr));
         const int Q = D * 2;
         const bool smooth2 = (st == "transparent" || st == "clean");
         for (int i = 0; i < n; i++) {
@@ -123,13 +123,13 @@ struct Gate : Processor {
     void process(const float* L, const float* R, float* oL, float* oR, int n) override {
         const double thr = p.nnNum("thr", -40), hy = p.nnNum("hyst", 4), fl = dB(p.nnNum("floor", -80)),
                      lookd = js::round(p.orNum("look", 0) * sr / 1000),
-                     ca = 1 - std::exp(-1 / (js::max(.05, p.orNum("att", 1)) / 1000 * sr)),
-                     cr = 1 - std::exp(-1 / (js::max(1, p.orNum("rel", 120)) / 1000 * sr)),
+                     ca = 1 - js::exp(-1 / (js::max(.05, p.orNum("att", 1)) / 1000 * sr)),
+                     cr = 1 - js::exp(-1 / (js::max(1, p.orNum("rel", 120)) / 1000 * sr)),
                      holdv = p.orNum("hold", 40) / 1000 * sr,
-                     hpc = 1 - std::exp(-TAU * p.orNum("hpf", 20) / sr),
-                     lpc = 1 - std::exp(-TAU * js::min(sr * .45, p.orNum("lpf", 20000)) / sr);
+                     hpc = 1 - js::exp(-TAU * p.orNum("hpf", 20) / sr),
+                     lpc = 1 - js::exp(-TAU * js::min(sr * .45, p.orNum("lpf", 20000)) / sr);
         const bool ex = p.is("mode", "expander"), listen = p.truthy("listen");
-        const double ra = p.orNum("ratio", 2), dec = std::exp(-1 / (.005 * sr));
+        const double ra = p.orNum("ratio", 2), dec = js::exp(-1 / (.005 * sr));
         const int look = (int)lookd;
         for (int i = 0; i < n; i++) {
             double d = ((double)L[i] + (double)R[i]) * .5;
@@ -171,9 +171,9 @@ struct Trn : Processor {
     void process(const float* L, const float* R, float* oL, float* oR, int n) override {
         const double sp = js::max(.2, p.orNum("speed", 1)), A = p.orNum("attack", 0) / 100, S = p.orNum("sustain", 0) / 100,
                      go = dB(p.orNum("out", 0)),
-                     fa = 1 - std::exp(-1 / (.0008 * sr / sp)), fr = 1 - std::exp(-1 / (.02 * sr / sp)),
-                     sa = 1 - std::exp(-1 / (.012 * sr / sp)), sr2 = 1 - std::exp(-1 / (.14 * sr / sp)),
-                     gc = 1 - std::exp(-1 / (.0006 * sr));
+                     fa = 1 - js::exp(-1 / (.0008 * sr / sp)), fr = 1 - js::exp(-1 / (.02 * sr / sp)),
+                     sa = 1 - js::exp(-1 / (.012 * sr / sp)), sr2 = 1 - js::exp(-1 / (.14 * sr / sp)),
+                     gc = 1 - js::exp(-1 / (.0006 * sr));
         for (int i = 0; i < n; i++) {
             const double a = js::max(js::abs(L[i]), js::abs(R[i]));
             f += (a > f ? fa : fr) * (a - f);
@@ -206,8 +206,8 @@ struct Dss : Processor {
     struct K { double b0, b2, a1, a2; };
     explicit Dss(RenderContext& ctx) : sr(ctx.sampleRate) {}
     K bp(double f, double q) const {
-        const double w = TAU * f / sr, al = std::sin(w) / (2 * q), a0 = 1 + al;
-        return {al / a0, -al / a0, -2 * std::cos(w) / a0, (1 - al) / a0};
+        const double w = TAU * f / sr, al = js::sin(w) / (2 * q), a0 = 1 + al;
+        return {al / a0, -al / a0, -2 * js::cos(w) / a0, (1 - al) / a0};
     }
     double bq(int ch, double x, const K& k) {
         const int o = ch * 2;
@@ -219,8 +219,8 @@ struct Dss : Processor {
     void process(const float* L, const float* R, float* oL, float* oR, int n) override {
         const K k = bp(js::min(sr * .45, p.orNum("freq", 6500)), js::max(.3, p.orNum("q", 1.5)));
         const double thr = p.nnNum("thr", -30), rt = p.orNum("ratio", 4), rg = p.nnNum("range", 12),
-                     ca = 1 - std::exp(-1 / (js::max(.1, p.orNum("att", 1)) / 1000 * sr)),
-                     cr = 1 - std::exp(-1 / (js::max(1, p.orNum("rel", 60)) / 1000 * sr)),
+                     ca = 1 - js::exp(-1 / (js::max(.1, p.orNum("att", 1)) / 1000 * sr)),
+                     cr = 1 - js::exp(-1 / (js::max(1, p.orNum("rel", 60)) / 1000 * sr)),
                      go = dB(p.orNum("out", 0));
         const bool split = p.is("mode", "split"), listen = p.truthy("listen");
         double* z = zst;

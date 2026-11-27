@@ -37,7 +37,7 @@ jobs:
       - name: Build the core (alrender, and the fused control)
         run: |
           cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
-          cmake --build build --target alrender alrender_fused -j 4
+          cmake --build build --target alrender alrender_fused alrender_sysmath almathprobe -j 4
           build/alrender list | tee out/types.json
 
       - name: Python, Playwright and Chromium (to run the app's own engine)
@@ -56,6 +56,31 @@ jobs:
           mkdir -p out/core/native
           build/alrender cases out/core/cases.json out/core/in.wav out/core/native > out/core/native.jsonl
           python3 tools/native-lab/compare_core.py out/core | tee out/compare.txt
+
+      - name: 'The browser''s maths functions against the engine''s (sin, cos, exp, log10 from LLVM libc; pow from the system)'
+        if: always()
+        run: |
+          python3 tools/native-lab/math_probe.py out/math
+          build/almathprobe out/math/math_vals.bin | tee out/math-probe.json
+
+      - name: 'Other call sizes (the audio device''s buffer): 32 and 64 frames per call against the web engine''s 128'
+        if: always()
+        continue-on-error: true
+        run: |
+          for bs in 32 64; do
+            mkdir -p out/blk$bs/native; cp -r out/core/web out/core/cases.json out/blk$bs/
+            build/alrender cases out/core/cases.json out/core/in.wav out/blk$bs/native $bs > /dev/null
+            echo "block $bs: $(python3 tools/native-lab/compare_core.py out/blk$bs | tail -1)" | tee -a out/compare-blocks.txt
+            python3 tools/native-lab/compare_core.py out/blk$bs | grep -v 'bit for bit$' | tee -a out/compare-blocks.txt || true
+          done
+
+      - name: 'Control: the system''s own maths library'
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p out/sysmath/native; cp -r out/core/web out/core/cases.json out/sysmath/
+          build/alrender_sysmath cases out/core/cases.json out/core/in.wav out/sysmath/native > /dev/null
+          python3 tools/native-lab/compare_core.py out/sysmath | tail -1 | tee out/compare-sysmath.txt
 
       - name: 'Control: the same with fused multiply-add allowed'
         if: always()

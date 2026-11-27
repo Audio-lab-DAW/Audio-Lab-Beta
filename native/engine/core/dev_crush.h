@@ -14,12 +14,12 @@ struct Crush : Processor {
     double ph = 1, hl[2] = {0, 0}, pl[2] = {0, 0}, po[2] = {0, 0}, rndField = 1;
     explicit Crush(RenderContext& ctx) : sr(ctx.sampleRate), rnd(&ctx.random) {}
     void process(const float* L, const float* R, float* oL, float* oR, int n) override {
-        const double bits = js::max(1, js::min(24, p.orNum("bits", 8))), q = std::pow(2.0, bits - 1),
+        const double bits = js::max(1, js::min(24, p.orNum("bits", 8))), q = js::pow(2.0, bits - 1),
                      rt = js::max(1, p.orNum("rate", 1)), jt = p.orNum("jit", 0) / 100, dith = p.orNum("dith", 0) / 100 / q,
                      dr = dB(p.orNum("drive", 0)), mix = p.nnNum("mix", 100) / 100, go = dB(p.orNum("out", 0));
         const double pre = p.num("pre"), post = p.num("post");
-        const double pc = pre > 0 ? 1 - std::exp(-TAU * js::min(sr * .45, pre) / sr) : 1,
-                     oc = post > 0 ? 1 - std::exp(-TAU * js::min(sr * .45, post) / sr) : 1;
+        const double pc = pre > 0 ? 1 - js::exp(-TAU * js::min(sr * .45, pre) / sr) : 1,
+                     oc = post > 0 ? 1 - js::exp(-TAU * js::min(sr * .45, post) / sr) : 1;
         const std::string mode = p.orStr("shape", "round");
         const int md = mode == "floor" ? 1 : mode == "trunc" ? 2 : mode == "fold" ? 3 : 0;
         const bool dithOn = !(dith == 0 || std::isnan(dith));
