@@ -1,0 +1,424 @@
+<meta charset="utf-8">
+<title>AudioLab start screen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Task WS-0: the start screen pick page. Same family as the DR5, UX2 and UX3 pick pages.
+   Layout: a page of four live mocks of AudioLab's start screen, each drawn at the user's window (2194 x 1139 at 1.75x = 1254 x 651 points) and scaled to fit,
+   then the option families, the research, and the picks bar. The drawings are the splash's own code (SPLBG, copied unchanged from index.html). */
+:root{color-scheme:dark;
+ --bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#ffb547;--blue:#4c8dff;--bar:#0e0e12f2;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2}}
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);margin:0;padding-block:28px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 14px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--mut)}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#1a1200}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--fm);color:var(--mut)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--bg)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:14px;max-width:82ch}
+.how{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--mut)}
+.bar2{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;font-size:12px}
+.lab{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+section.fam{display:flex;flex-direction:column;gap:14px}
+.famh{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.famh .tag{font:500 12px var(--fm);color:var(--acc)}
+/* layout cards with their mock */
+.lay{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:14px;display:flex;flex-direction:column;gap:12px}
+.lay.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ch .id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px}
+.ch .star{color:var(--acc);font-size:14px}
+.ch .sp{flex:1}
+.pk{font:500 12px var(--fm);color:var(--mut);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--ln2);border-radius:7px;padding:3px 9px}
+.picked .pk,.card.picked .pk{color:var(--acc);border-color:var(--acc)}
+.lay ul,.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;max-width:90ch}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.picked{border-color:var(--acc)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.tbl{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:760px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.05em;background:var(--pn2)}
+tr:last-child td{border-bottom:0}
+.note{border-left:2px solid var(--acc);padding:2px 0 2px 12px;font-size:12.5px;max-width:90ch}
+
+/* ===== the mocks: AudioLab at 1254 x 651 points, scaled. They follow their own Dark / Light switch, as the app does ===== */
+.mkw{position:relative;width:100%;aspect-ratio:1254/651;max-width:100%;border-radius:8px;overflow:hidden;border:1px solid var(--ln2);background:#000}
+.scr{position:absolute;left:0;top:0;width:1254px;height:651px;transform-origin:0 0;transform:scale(var(--s,1));overflow:hidden;
+ --m-bg:#08090d;--m-pn:#101116;--m-pn2:#15161c;--m-ln:rgba(255,255,255,.075);--m-ln2:rgba(255,255,255,.13);--m-ink:#e6e8ee;--m-mut:#8c8f9b;--m-unit:#ffb547;--m-sel:#f5c84c;--m-hov:rgba(255,255,255,.045);--m-grid:rgba(140,170,255,.05);--m-grid2:rgba(140,170,255,.022);--m-a:#4cc9f0;--m-b:#6096ff;--m-p:#a8d8ff;
+ background:var(--m-bg);color:var(--m-ink);font:13px/1.4 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.scr.light{--m-bg:#eceef2;--m-pn:#ffffff;--m-pn2:#f5f6f8;--m-ln:rgba(20,24,40,.10);--m-ln2:rgba(20,24,40,.18);--m-ink:#16181d;--m-mut:#5c606b;--m-unit:#9a6200;--m-sel:#b98a00;--m-hov:rgba(20,24,40,.045);--m-grid:rgba(40,60,120,.07);--m-grid2:rgba(40,60,120,.03);--m-a:#1d7fb0;--m-b:#2f5fd0;--m-p:#2f5fd0}
+.scr *{box-sizing:border-box}
+.scr button{font:inherit;color:inherit;background:none;border:0;padding:0;text-align:left}
+.scr .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--m-grid) 1px,transparent 1px),linear-gradient(90deg,var(--m-grid) 1px,transparent 1px),linear-gradient(var(--m-grid2) 1px,transparent 1px),linear-gradient(90deg,var(--m-grid2) 1px,transparent 1px);background-size:208px 208px,208px 208px,52px 52px,52px 52px;background-position:-1px -1px}
+.scr canvas.pic{position:absolute;display:block}
+.scr .nm{font:600 30px/1 'Space Grotesk',Inter,sans-serif;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.scr .nm i{font-style:normal;background:linear-gradient(90deg,var(--m-a),var(--m-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.scr .nm s{text-decoration:none;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;border:1px solid var(--m-p);color:var(--m-p);border-radius:4px;padding:3px 5px 2px}
+.scr .ver{font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--m-mut);text-transform:uppercase}
+.scr .hd{font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--m-mut)}
+.scr .q{display:flex;align-items:center;gap:8px;border:1px solid var(--m-ln2);border-radius:6px;height:30px;padding:0 10px;background:var(--m-pn2);color:var(--m-mut)}
+.scr .q input{all:unset;flex:1;color:var(--m-ink);font:13px Inter,sans-serif}
+.scr .q input::placeholder{color:var(--m-mut)}
+.scr .q kbd{font:500 10px 'JetBrains Mono',monospace;color:var(--m-mut);border:1px solid var(--m-ln2);border-radius:4px;padding:1px 4px}
+.scr .rl{display:flex;flex-direction:column}
+.scr .rr{display:grid;grid-template-columns:var(--rc,64px minmax(0,1fr) auto);align-items:center;gap:12px;height:var(--rh,44px);padding:0 10px;border-radius:5px;border:1px solid transparent;cursor:pointer;width:100%}
+.scr .rr:hover{background:var(--m-hov)}
+.scr .rr.on{border-color:var(--m-sel);background:color-mix(in srgb,var(--m-sel) 8%,transparent)}
+.scr .rr .tn{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scr .rr .dt{font-size:11.5px;color:var(--m-mut);white-space:nowrap}
+.scr .rr .mt{font:500 11.5px 'JetBrains Mono',monospace;white-space:nowrap;text-align:right;color:var(--m-ink)}
+.scr .u{color:var(--m-unit)}
+.scr .th{position:relative;height:28px;border:1px solid var(--m-ln);border-radius:3px;overflow:hidden;background:color-mix(in srgb,var(--m-bg) 70%,transparent)}
+.scr .th canvas{position:absolute;inset:0;width:100%;height:100%}
+.scr .th .cs{position:absolute;left:0;top:0;bottom:0;width:3px;display:flex;flex-direction:column}
+.scr .th .cs b{flex:1}
+.scr .tile{display:flex;flex-direction:column;gap:3px;border:1px solid var(--m-ln2);border-radius:6px;padding:10px 12px;cursor:pointer;background:color-mix(in srgb,var(--m-pn) 80%,transparent)}
+.scr .tile:hover{border-color:var(--m-mut)}
+.scr .tile b{font-weight:500}
+.scr .tile small{font-size:11.5px;color:var(--m-mut);line-height:1.35}
+.scr .tile.pri{border-color:color-mix(in srgb,var(--m-sel) 55%,transparent)}
+.scr .tile kbd,.scr .chip kbd{font:500 10px 'JetBrains Mono',monospace;color:var(--m-mut);margin-left:auto}
+.scr .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--m-ln2);border-radius:6px;height:32px;padding:0 12px;cursor:pointer;background:color-mix(in srgb,var(--m-pn) 70%,transparent);white-space:nowrap}
+.scr .chip:hover{border-color:var(--m-mut)}
+.scr .sub{font-size:11px;color:var(--m-mut)}
+.scr .keys{font:500 11px 'JetBrains Mono',monospace;color:var(--m-mut);display:flex;gap:16px;white-space:nowrap}
+.scr .keys b{color:var(--m-ink);font-weight:500}
+.scr .sw{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--m-mut);cursor:pointer;white-space:nowrap}
+.scr .sw i{width:26px;height:14px;border-radius:7px;background:var(--m-ln2);position:relative;transition:background 80ms}
+.scr .sw i::after{content:"";position:absolute;left:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--m-mut);transition:transform 80ms}
+.scr .sw.on i{background:color-mix(in srgb,var(--m-sel) 45%,transparent)}
+.scr .sw.on i::after{transform:translateX(12px);background:var(--m-sel)}
+.scr .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--m-pn);border:1px solid var(--m-ln2);border-radius:6px;padding:7px 14px;font-size:12.5px;opacity:0;transition:opacity 120ms;pointer-events:none;white-space:nowrap;z-index:9}
+.scr .toast.on{opacity:1}
+.scr .empty{color:var(--m-mut);font-size:12.5px;padding:10px}
+.scr .hl{position:absolute;background:var(--m-ln)}
+/* the splash replay */
+.scr .spl{position:absolute;left:50%;top:50%;width:577px;height:427px;margin:-213px 0 0 -288px;border-radius:12px;background:radial-gradient(ellipse at 50% 35%,var(--sg,#0f1830),var(--sbg,#070910) 70%,var(--se,#040508));z-index:8;overflow:hidden;transition:all 260ms cubic-bezier(.2,.7,.2,1)}
+.scr .spl canvas{position:absolute;inset:0;width:100%;height:100%}
+.scr .spl .sb{position:absolute;left:30%;right:30%;bottom:46px;height:2px;background:rgba(255,255,255,.08)}
+.scr .spl .sb b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--m-a),var(--m-b))}
+.scr .spl .nm{position:absolute;left:0;right:0;bottom:80px;justify-content:center;color:#eaf1ff}
+.scr .spl.out{opacity:0}
+
+/* picks bar */
+.pbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);border-top:1px solid var(--ln2);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:50}
+.pbar .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pbar .line{font:500 13px var(--fm);flex:1;min-width:240px;background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:5px 10px;user-select:all;overflow-wrap:anywhere}
+.pbar .fams{display:flex;flex-wrap:wrap;gap:4px}
+.pbar .fams a{font:500 11px var(--fm);color:var(--mut);text-decoration:none;border:1px solid var(--ln2);border-radius:6px;padding:2px 6px}
+.pbar .fams a.set{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.pbar input{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 8px;color:var(--ink);font:12px var(--f);min-width:160px;flex:0 1 220px}
+@media (max-width:760px){h1{font-size:25px}.cards{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · start screen · task WS-0 · lane Q · 28 November 2026</div>
+ <h1>AudioLab start screen</h1>
+ <p class="lede">Your answer to D6: a fresh install opens with <b>no song</b>. You choose or open your own project from a start screen, drawn in the same scientific style as the splash. Below are four layouts, each a live mock at your window size (2194 x 1139 at 1.75x, so 1254 x 651 points) using the splash's own five drawings, unchanged. Every mock works: type to search, use the arrow keys, press Enter, click a template, flip <i>Show at start-up</i>, switch Dark and Light, and replay the start to see how the splash hands over.</p>
+ <div class="how"><span><b>1.</b> Try each mock (click inside it first, then type or use the arrows).</span><span><b>2.</b> Pick one per family; ★ is the recommendation.</span><span><b>3.</b> Copy the line in the bar at the bottom and paste it in the chat.</span></div>
+ <div class="bar2"><span class="lab">Page</span><div class="seg" id="theme"><button data-v="">Auto</button><button data-v="dark">Dark</button><button data-v="light">Light</button></div><span class="mut">The mocks have their own Dark and Light switch, as the app does. Project rows are examples.</span></div>
+</header>
+
+<section class="fam" id="fam-W">
+ <div class="famh"><span class="tag">W</span><h2>Layout</h2><span class="mut sm">Same content in each: recent projects, a new empty project, templates (built-in and yours), open a file, the keyboard line, the Show at start-up switch.</span></div>
+ <div id="lays" style="display:flex;flex-direction:column;gap:18px"></div>
+</section>
+
+<section class="fam" id="fam-T">
+ <div class="famh"><span class="tag">T</span><h2>When it shows</h2><span class="mut sm">Every option keeps the Show at start-up switch on the screen itself and in Settings (lane B's row). File menu, Start screen opens it any time.</span></div>
+ <div class="cards" id="cards-T"></div>
+</section>
+
+<section class="fam" id="fam-D">
+ <div class="famh"><span class="tag">D</span><h2>Where the demo songs live</h2><span class="mut sm">Shrine Legion and the short Psytrance demo are made in code, no outside recordings. Fractals is never offered on a fresh install (QL1); the release gate opens it by its own path.</span></div>
+ <div class="cards" id="cards-D"></div>
+</section>
+
+<section class="fam" id="fam-P">
+ <div class="famh"><span class="tag">P</span><h2>How the splash hands over</h2><span class="mut sm">Press Replay start-up on any mock to see it. Motion is ambient (M3): only at Motion Ambient, never in Light mode, stopped while the window is hidden, one still picture with Reduce motion.</span></div>
+ <div class="cards" id="cards-P"></div>
+</section>
+
+<section class="fam" id="research">
+ <div class="famh"><span class="tag">R</span><h2>What other apps do</h2></div>
+ <div class="tbl"><table>
+  <thead><tr><th>App</th><th>At start</th><th>What makes it fast</th><th>Setting</th></tr></thead>
+  <tbody id="rtab"></tbody>
+ </table></div>
+ <div class="two">
+  <div class="note"><b>The pattern.</b> The apps people call fast all have one key or one click to get back to the last project, and none make you look through a dialog to get to an empty one. Blender's splash is the closest to what you described: the splash itself holds recent files and new-file templates, and a click outside closes it. Logic and Cubase let you choose what happens at start, with the chooser or hub as one option.</div>
+  <div class="note"><b>Taken into all four layouts.</b> Enter opens the most recent project (Blender, Logic's Open most recent). Typing goes straight into search (Figma, Bitwig). Arrows move through the list. ⌘N makes an empty project, ⌘O opens a file. With no projects yet, Enter makes an empty project, so a new user is never stuck.</div>
+ </div>
+</section>
+
+<section class="fam" id="builds">
+ <div class="famh"><span class="tag">WS-1</span><h2>What WS-1 builds after your pick</h2></div>
+ <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:96ch">
+  <li>The picked layout in its own block of <code>index.html</code> (prefix <code>ws</code>), shown after the loading splash, as lane F's dialog with its motion tokens (0, 50, 80, 120 ms).</li>
+  <li>A fresh install opens the start screen with <b>no demo song</b> and no demo message. Today every start opens Fractals_remake (task AI); that stops. Old projects are untouched: whoever has projects sees them listed as recent.</li>
+  <li>Recent projects come from your open tabs, Saved projects and the files you opened, newest first, with the tempo and key, the length and a track-colour strip; templates from the New project dialog's data (read, not rewritten).</li>
+  <li>The Show at start-up switch, and a row in Settings for lane B (<code>ST_HOOKS</code>). Glass from the engine only, no <code>backdrop-filter</code>. No drawing and no frames while the start screen is closed.</li>
+  <li>Tests in <code>tools/ui-tests/taskWS_1.py</code>: fresh profile (start screen, no demo, Enter, search, every template, a saved project), old profile (projects listed), screenshots dark and Light at 2194 x 1139 at 1.75x. The release gate's smoke test keeps loading its Fractals reference explicitly.</li>
+ </ul>
+</section>
+
+</div>
+
+<div class="pbar" role="region" aria-label="Your picks"><div class="in">
+ <div class="fams" id="pfams"></div>
+ <div class="line" id="pline"></div>
+ <input id="pnote" type="text" placeholder="Add a note (optional)" aria-label="Note">
+ <button class="btn" id="rec">Use the ★ picks</button>
+ <button class="btn ok" id="copy">Copy line</button><span id="copied" class="mut sm" aria-live="polite"></span>
+</div></div>
+
+<script>
+/*SPLBG*/
+</script>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('ws0-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ws0-'+k,JSON.stringify(v))}catch(e){}}};
+/* page theme */
+function setTheme(v){if(v)document.documentElement.dataset.theme=v;else delete document.documentElement.dataset.theme;$$('#theme button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));store.set('theme',v)}
+$('#theme').onclick=e=>{const b=e.target.closest('button');if(b)setTheme(b.dataset.v)};setTheme(store.get('theme',''));
+let REDUCE=false;try{REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+
+/* ---------- example data (not your projects) ---------- */
+const C=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'];
+const REC=[
+ {n:'Night bus sketch',d:'Today, 23:12',bpm:124,k:['A','minor'],len:'3:48',tr:[0,1,2,5,6]},
+ {n:'Shrine Legion edit',d:'Yesterday, 18:40',bpm:145,k:['F','minor'],len:'7:02',tr:[3,4,2,0,6,5,1,7,2,0]},
+ {n:'Vocal comp, take 3',d:'25 Nov, 21:05',bpm:98,k:['D','major'],len:'4:12',tr:[1,1,1,6]},
+ {n:'Kick and bass study',d:'24 Nov, 16:30',bpm:142,k:['F♯','minor'],len:'1:20',tr:[3,0]},
+ {n:'Ambient pad ideas',d:'21 Nov, 09:48',bpm:80,k:['E♭','major'],len:'5:31',tr:[5,6,7]},
+ {n:'Untitled 4',d:'19 Nov, 22:17',bpm:120,k:null,len:'0:16',tr:[0]}];
+const TPL=[{n:'Beat starter',s:'Drums and a bassline, ready to build on.'},{n:'Audio tracks',s:'Vocals, guitar, bass and drums tracks to drop files into.'}];
+const MY=[{n:'My psy start',s:'Kick, Psy Bass, 2 buses, Limiter.'},{n:'Two mics',s:'2 audio tracks, Gate, Compressor.'}];
+const DEMO=[{n:'Shrine Legion',s:'145 BPM in F, 10 tracks.'},{n:'Psytrance demo',s:'The first short psy demo.'}];
+const KINDS=['moons','harm','dipole','chart','spec'],KN={moons:'Moons',harm:'Harmonograph',dipole:'Dipole',chart:'Orbit chart',spec:'Spectrogram'};
+const PICK=Object.assign({W:null,T:null,D:null,P:null},store.get('picks',{}));
+const RECP={W:'W1',T:'T1',D:'D1',P:'P1'};
+
+/* light versions of the palettes: the same drawing in ink on paper, still */
+const LPAL={L:'40,62,130',T:'29,127,176',O:'170,104,0'};
+function pal(k,light){const P=SPLBG.PAL[k];return light?Object.assign({},P,LPAL):P}
+
+/* small waveform thumb, drawn once per render */
+function wave(cv,i,col){const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;const d=Math.min(2,devicePixelRatio||1);cv.width=w*d;cv.height=h*d;const c=cv.getContext('2d');c.scale(d,d);
+ let s=(i+1)*9301;const r=()=>((s=(s*48271)%2147483647)/2147483647);c.fillStyle=col;const n=Math.floor(w/2);
+ for(let x=0;x<n;x++){const sec=Math.floor(x/n*8),env=.35+.65*Math.abs(Math.sin(sec*1.7+i)),a=(r()*.6+.4)*env*(h*.42);c.globalAlpha=.75;c.fillRect(6+x*2*(w-6)/w/1.0,h/2-a,1,a*2)}}
+function strip(tr){return `<div class="cs">${tr.slice(0,8).map(t=>`<b style="background:${C[t]}"></b>`).join('')}</div>`}
+function meta(p){return `<span>${p.bpm}<span class="u"> BPM</span></span>${p.k?`&nbsp;&nbsp;<span>${esc(p.k[0])}<span class="u"> ${p.k[1]}</span></span>`:''}`}
+
+/* ---------- the four layouts ---------- */
+const LAY={
+ W1:{t:'Card over the drawing',star:true,
+  p:'The loading card grows into the start screen. The drawing keeps running in the top band, the name sits where the splash has it, and the choices fill the lower part: recent projects on the left, starting something new on the right. The window behind stays the quiet drafting grid.',
+  ul:['Continuity: the splash and the start screen are one object, so the start feels like one step.','The smallest change to what you already like; the card is 72 % of the window, so it never feels like a dialog.','Fits 6 recent projects and every template without scrolling at your size.'],
+  html:()=>`<div class="gridbg"></div>
+   <div style="position:absolute;left:117px;top:22px;width:1020px;height:607px;border-radius:12px;border:1px solid var(--m-ln2);background:var(--m-pn);overflow:hidden">
+    <div style="position:absolute;left:0;top:0;right:0;height:172px;overflow:hidden;border-bottom:1px solid var(--m-ln)"><canvas class="pic" style="left:0;top:-8px;width:1020px;height:300px"></canvas>
+     <div style="position:absolute;left:28px;bottom:18px;display:flex;flex-direction:column;gap:6px"><div class="nm">Audio<i>Lab</i><s>PRO</s></div><div class="ver">Digital audio workstation · v0.300</div></div></div>
+    <div style="position:absolute;left:24px;top:188px;width:560px;bottom:52px;display:flex;flex-direction:column;gap:8px">
+     <div style="display:flex;align-items:center;gap:10px"><span class="hd" style="flex:1">Recent projects</span><label class="q" style="width:230px">⌕<input class="qi" placeholder="Type to search"></label></div>
+     <div class="rl" style="--rc:64px minmax(0,1fr) 110px 122px;--rh:42px"></div></div>
+    <div style="position:absolute;left:608px;top:188px;right:24px;bottom:52px;display:flex;flex-direction:column;gap:8px">
+     <span class="hd">Start something new</span><div class="newc" style="display:flex;flex-direction:column;gap:6px"></div></div>
+    <div style="position:absolute;left:24px;right:24px;bottom:0;height:44px;border-top:1px solid var(--m-ln);display:flex;align-items:center;gap:16px"><div class="keys"></div><span style="flex:1"></span><span class="sw"><i></i>Show at start-up</span></div>
+   </div>`,
+  newc:st=>`<button class="tile pri" data-a="empty"><span style="display:flex;gap:8px"><b>New empty project</b><kbd>⌘N</kbd></span><small>One audio and one instrument track, 120 BPM.</small></button>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${TPL.map(t=>`<button class="tile" data-a="tpl" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}</div>
+   <span class="sub" style="margin-top:2px">My templates</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${MY.map(t=>`<button class="tile" data-a="tpl" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}</div>
+   <button class="tile" data-a="open"><span style="display:flex;gap:8px"><b>Open a file…</b><kbd>⌘O</kbd></span><small>A .audiolab project, or audio files into a new project.</small></button>
+   ${PICK.D==='D2'?`<div class="sub">Demo songs: ${DEMO.map(d=>`<button data-a="demo" data-n="${esc(d.n)}" style="color:var(--m-ink);text-decoration:underline;text-underline-offset:2px">${esc(d.n)}</button>`).join(', ')}</div>`:''}`},
+ W2:{t:'Drawing in a side panel',
+  p:'The window splits: the drawing lives in a tall panel on the left with the name, the version and the Show at start-up switch; the right side is a calm list of recent projects with larger waveforms, and a row of ways to start under it. Close to Logic\'s Project Chooser and Cubase\'s Hub, in AudioLab\'s style.',
+  ul:['The recent list gets the most room: 6 rows with a 180 point waveform each.','The drawing is framed like a figure in a paper, so it reads as a picture and not as decoration.','A full window, so it also works as the File, Start screen page later.'],
+  html:()=>`<div style="position:absolute;left:0;top:0;bottom:0;width:430px;overflow:hidden;border-right:1px solid var(--m-ln);background:radial-gradient(ellipse at 50% 32%,color-mix(in srgb,var(--m-b) 10%,var(--m-bg)),var(--m-bg) 70%)"><canvas class="pic" style="left:0;top:40px;width:430px;height:560px"></canvas>
+    <div style="position:absolute;left:32px;bottom:76px;display:flex;flex-direction:column;gap:6px"><div class="nm">Audio<i>Lab</i><s>PRO</s></div><div class="ver">Digital audio workstation · v0.300</div></div>
+    <div style="position:absolute;left:32px;bottom:26px"><span class="sw"><i></i>Show at start-up</span></div></div>
+   <div style="position:absolute;left:466px;right:40px;top:40px;bottom:30px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px"><span class="hd" style="flex:1">Recent projects</span><label class="q" style="width:280px">⌕<input class="qi" placeholder="Type to search"><kbd>⌘F</kbd></label></div>
+    <div class="rl" style="--rc:180px minmax(0,1fr) 120px 130px;--rh:46px"></div>
+    <span style="flex:1"></span>
+    <span class="hd">Start something new</span>
+    <div class="newc" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px"></div>
+    <div class="keys" style="margin-top:6px"></div></div>`,
+  newc:st=>`<button class="tile pri" data-a="empty"><span style="display:flex;gap:8px"><b>Empty project</b><kbd>⌘N</kbd></span><small>One audio, one instrument track.</small></button>
+   ${TPL.map(t=>`<button class="tile" data-a="tpl" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}
+   <button class="tile" data-a="mine"><b>My templates</b><small>${MY.map(t=>esc(t.n)).join(', ')}${PICK.D==='D2'?'; Demo songs':''}</small></button>
+   <button class="tile" data-a="open"><span style="display:flex;gap:8px"><b>Open a file…</b><kbd>⌘O</kbd></span><small>.audiolab or audio files.</small></button>`},
+ W3:{t:'Search first, drawing behind',
+  p:'The drawing fills the whole window, faint, like the splash\'s figure seen through paper. In the middle a single column: a large search field that already has the focus, the recent projects under it, and one row of chips to start something new. Built for the keyboard: most starts are Enter, or two letters and Enter.',
+  ul:['Fastest with the keyboard; the mouse path is just as short.','The most of the drawing you will see, without it fighting the list (it sits at about a third of its splash brightness).','Feels like Spotlight or Figma\'s search more than like a dialog.'],
+  html:()=>`<canvas class="pic" style="left:0;top:0;width:1254px;height:651px;opacity:.55"></canvas>
+   <div style="position:absolute;inset:0;background:radial-gradient(ellipse 420px 330px at 50% 52%,color-mix(in srgb,var(--m-bg) 92%,transparent),transparent)"></div>
+   <div style="position:absolute;left:337px;width:580px;top:46px;bottom:24px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center"><div class="nm" style="font-size:24px">Audio<i>Lab</i><s>PRO</s></div><span class="ver">v0.300</span></div>
+    <label class="q" style="height:42px;font-size:15px;border-color:var(--m-ln2)">⌕<input class="qi" placeholder="Open a project, or type to search" style="font-size:15px"><kbd>↵</kbd></label>
+    <div class="rl" style="--rc:64px minmax(0,1fr) 108px 120px;--rh:44px"></div>
+    <span style="flex:1"></span>
+    <div class="newc" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 -110px"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:24px"><div class="keys"></div></div></div>
+   <div style="position:absolute;right:24px;bottom:20px"><span class="sw"><i></i>Show at start-up</span></div>`,
+  newc:st=>`<button class="chip" data-a="empty">＋ Empty project<kbd>⌘N</kbd></button>${TPL.map(t=>`<button class="chip" data-a="tpl" data-n="${esc(t.n)}">${esc(t.n)}</button>`).join('')}${MY.map(t=>`<button class="chip" data-a="tpl" data-n="${esc(t.n)}">${esc(t.n)}</button>`).join('')}${PICK.D==='D2'?`<button class="chip" data-a="demo" data-n="Shrine Legion">Demo songs</button>`:''}<button class="chip" data-a="open">Open a file…<kbd>⌘O</kbd></button>`},
+ W4:{t:'Dashboard with tabs',
+  p:'A band of the drawing across the top with the name, then a rail on the left (Recent, Templates, Open a file) and a grid of project cards with large waveforms. Close to Bitwig\'s Dashboard and Studio One\'s Start page. The richest, and the one that looks most like a separate app.',
+  ul:['Big thumbnails help when names are alike ("Untitled 4").','Room to grow later: Learn (lane M\'s lessons) could be a tab.','One more click to reach templates than the other three.'],
+  html:()=>`<div style="position:absolute;left:0;right:0;top:0;height:170px;overflow:hidden;border-bottom:1px solid var(--m-ln)"><canvas class="pic" style="left:0;top:-40px;width:1254px;height:420px"></canvas>
+    <div style="position:absolute;left:32px;bottom:22px;display:flex;flex-direction:column;gap:6px"><div class="nm">Audio<i>Lab</i><s>PRO</s></div><div class="ver">Digital audio workstation · v0.300</div></div>
+    <div style="position:absolute;right:32px;bottom:22px"><label class="q" style="width:300px">⌕<input class="qi" placeholder="Type to search"></label></div></div>
+   <div class="rail" style="position:absolute;left:0;top:170px;bottom:0;width:210px;border-right:1px solid var(--m-ln);padding:18px 14px;display:flex;flex-direction:column;gap:4px"></div>
+   <div class="main" style="position:absolute;left:210px;right:0;top:170px;bottom:0;padding:18px 28px;display:flex;flex-direction:column;gap:12px"></div>`}};
+
+function rail(st){const it=[['rec','Recent'],['tpl','Templates'],['open','Open a file…']].concat(PICK.D==='D2'?[['demo','Demo songs']]:[]);
+ return it.map(([k,n])=>`<button data-tab="${k}" style="height:32px;padding:0 10px;border-radius:5px;${st.tab===k?'background:var(--m-hov);color:var(--m-ink);box-shadow:inset 2px 0 0 var(--m-sel)':'color:var(--m-mut)'}">${n}</button>`).join('')+`<span style="flex:1"></span><span class="sw${st.show?' on':''}"><i></i>Show at start-up</span>`}
+
+/* ---------- one mock ---------- */
+const MOCKS=[];
+function filt(st){const q=st.q.trim().toLowerCase();return REC.map((p,i)=>({p,i})).filter(x=>!q||x.p.n.toLowerCase().includes(q))}
+function rowsHtml(st,big){const L=filt(st);if(!L.length)return `<div class="empty">No project matches “${esc(st.q)}”. Enter makes a new empty project with that name.</div>`;
+ return L.map(({p,i},j)=>`<button class="rr${j===st.sel?' on':''}" data-i="${i}"><div class="th">${strip(p.tr)}<canvas data-w="${i}"></canvas></div><span style="min-width:0;display:flex;flex-direction:column"><span class="tn">${esc(p.n)}</span><span class="dt">${esc(p.d)}</span></span><span class="mt">${meta(p)}</span><span class="dt" style="text-align:right">${p.tr.length} track${p.tr.length>1?'s':''} · ${p.len}</span></button>`).join('')}
+function keysHtml(st){const L=filt(st),f=L[st.sel];return `<span><b>↵</b> ${f?'opens '+esc(f.p.n):'new empty project'}</span><span><b>↑ ↓</b> choose</span><span><b>type</b> to search</span><span><b>⌘N</b> empty</span><span><b>⌘O</b> open a file</span>`}
+function mainW4(st){if(st.tab==='rec'){const L=filt(st);return `<span class="hd">Recent projects</span><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">${L.map(({p,i},j)=>`<button class="tile rr4${j===st.sel?' on':''}" data-i="${i}" style="padding:0;overflow:hidden;${j===st.sel?'border-color:var(--m-sel)':''}"><div class="th" style="height:92px;border:0;border-bottom:1px solid var(--m-ln);border-radius:0">${strip(p.tr)}<canvas data-w="${i}"></canvas></div><span style="padding:8px 12px 10px;display:flex;flex-direction:column;gap:2px"><b>${esc(p.n)}</b><span class="mt" style="text-align:left">${meta(p)}<span class="dt">&nbsp;·&nbsp;${esc(p.d)}</span></span></span></button>`).join('')||`<div class="empty">No project matches.</div>`}</div><span style="flex:1"></span><div class="keys"></div>`}
+ if(st.tab==='tpl')return `<span class="hd">Built-in</span><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px"><button class="tile pri" data-a="empty"><span style="display:flex"><b>Empty project</b><kbd>⌘N</kbd></span><small>One audio and one instrument track.</small></button>${TPL.map(t=>`<button class="tile" data-a="tpl" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}</div><span class="hd">My templates</span><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${MY.map(t=>`<button class="tile" data-a="tpl" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}</div>`;
+ if(st.tab==='demo')return `<span class="hd">Demo songs</span><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${DEMO.map(t=>`<button class="tile" data-a="demo" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${esc(t.s)}</small></button>`).join('')}</div>`;
+ return `<span class="hd">Open a file</span><button class="tile" data-a="open" style="max-width:420px"><span style="display:flex"><b>Choose a file…</b><kbd>⌘O</kbd></span><small>A .audiolab project, or audio files into a new project. You can also drop files anywhere on this screen.</small></button>`}
+
+function buildMock(id,host){const L=LAY[id];const card=document.createElement('div');card.className='lay';card.dataset.id=id;
+ card.innerHTML=`<div class="ch"><span class="id">${id}</span>${L.star?'<span class="star" title="Recommended">★</span>':''}<h3>${esc(L.t)}</h3><span class="sp"></span><label class="pk"><input type="radio" name="pk-W"${PICK.W===id?' checked':''}> pick</label></div>
+  <p>${esc(L.p)}</p><ul>${L.ul.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <div class="ctl"><div class="seg sk">${['dark','light'].map(v=>`<button data-v="${v}">${v==='dark'?'Dark':'Light'}</button>`).join('')}</div>
+   <div class="seg skind">${KINDS.map(k=>`<button data-k="${k}">${KN[k]}</button>`).join('')}</div>
+   <button class="btn rp">Replay start-up</button><span class="mut sm">Click inside, then type or use the arrows.</span></div>
+  <div class="mkw"><div class="scr" tabindex="0" aria-label="Mock of layout ${id}"></div></div>`;
+ host.appendChild(card);
+ const st={id,q:'',sel:0,light:false,kind:KINDS[MOCKS.length%4],show:true,tab:'rec',t0:performance.now(),d:{},vis:false,el:card,scr:$('.scr',card)};
+ MOCKS.push(st);render(st);
+ $('.sk',card).onclick=e=>{const b=e.target.closest('button');if(!b)return;st.light=b.dataset.v==='light';render(st)};
+ $('.skind',card).onclick=e=>{const b=e.target.closest('button');if(!b)return;st.kind=b.dataset.k;st.d={};render(st)};
+ $('.rp',card).onclick=()=>replay(st);
+ $('input[name=pk-W]',card).onchange=()=>{PICK.W=id;store.set('picks',PICK);syncPicks()};
+ const s=st.scr;
+ s.addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r){const L=filt(st),j=L.findIndex(x=>x.i==r.dataset.i);st.sel=j;upd(st);toast(st,'Opens '+REC[+r.dataset.i].n);return}
+  const a=e.target.closest('[data-a]');if(a){const k=a.dataset.a,n=a.dataset.n;toast(st,k==='empty'?'New empty project, in a new tab':k==='tpl'?'New project from '+n:k==='open'?'The file picker opens (.audiolab or audio)':k==='mine'?'Your templates open in a small list':'Opens the demo song '+n);return}
+  const tb=e.target.closest('[data-tab]');if(tb){st.tab=tb.dataset.tab;st.sel=0;render(st);return}
+  const sw=e.target.closest('.sw');if(sw){st.show=!st.show;$$('.sw',s).forEach(x=>x.classList.toggle('on',st.show));toast(st,st.show?'The start screen shows at start-up':'Next start opens your last project. File, Start screen brings this back.');return}});
+ s.addEventListener('input',e=>{if(e.target.classList.contains('qi')){st.q=e.target.value;st.sel=0;upd(st)}});
+ s.addEventListener('keydown',e=>{const L=filt(st),q=$('.qi',s);
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(L.length)st.sel=(st.sel+(e.key==='ArrowDown'?1:-1)+L.length)%L.length;upd(st);return}
+  if(e.key==='Enter'){e.preventDefault();const f=L[st.sel];toast(st,f?'Opens '+f.p.n:'New empty project'+(st.q?' named “'+st.q+'”':''));return}
+  if(e.key==='Escape'){if(st.q){st.q='';if(q)q.value='';st.sel=0;upd(st)}else toast(st,'Esc closes the start screen; you see the empty app');return}
+  if((e.metaKey||e.ctrlKey)&&(e.key==='n'||e.key==='o')){e.preventDefault();toast(st,e.key==='n'?'New empty project, in a new tab':'The file picker opens');return}
+  if(e.key.length===1&&!e.metaKey&&!e.ctrlKey&&q&&document.activeElement!==q){q.focus()}});}
+
+function render(st){const L=LAY[st.id],s=st.scr;s.classList.toggle('light',st.light);s.innerHTML=L.html(st)+'<div class="toast"></div>';
+ $$('.sk button',st.el).forEach(b=>b.classList.toggle('on',(b.dataset.v==='light')===st.light));$$('.skind button',st.el).forEach(b=>b.classList.toggle('on',b.dataset.k===st.kind));
+ const P=pal(st.kind,st.light);s.style.setProperty('--m-a',st.light?'':P.a);s.style.setProperty('--m-b',st.light?'':P.b);s.style.setProperty('--m-p',st.light?'':P.p);
+ const q=$('.qi',s);if(q)q.value=st.q;upd(st);st.cv=$('canvas.pic',s);st.d={};st.fitW=0;drawPic(st,performance.now(),true)}
+function upd(st){const s=st.scr;if(st.id==='W4'){$('.rail',s).innerHTML=rail(st);$('.main',s).innerHTML=mainW4(st)}else{const rl=$('.rl',s);if(rl)rl.innerHTML=rowsHtml(st);const n=$('.newc',s);if(n&&!n.dataset.f){n.innerHTML=LAY[st.id].newc(st);n.dataset.f=1}}
+ const k=$('.keys',s);if(k)k.innerHTML=keysHtml(st);$$('.sw',s).forEach(x=>x.classList.toggle('on',st.show));
+ $$('canvas[data-w]',s).forEach(cv=>{const p=REC[+cv.dataset.w];wave(cv,+cv.dataset.w,st.light?'#4a5470':C[p.tr[0]])})}
+function toast(st,t){const el=$('.toast',st.scr);if(!el)return;el.textContent=t;el.classList.add('on');clearTimeout(st.tt);st.tt=setTimeout(()=>el.classList.remove('on'),1700)}
+
+/* ---------- the drawing: SPLBG.FN, as the splash draws it ---------- */
+function scaleOf(st){const w=st.el.querySelector('.mkw').clientWidth;return w/1254}
+function fitPic(st){const cv=st.cv;if(!cv)return false;const w=parseFloat(cv.style.width),h=parseFloat(cv.style.height),sc=Math.min(2,(devicePixelRatio||1)*scaleOf(st),Math.sqrt(2.2e6/(w*h)));
+ if(st.kind==='spec'&&!st.light){cv.width=SPLBG.BW;cv.height=Math.max(60,Math.round(SPLBG.BW*h/w));st.sc=1}else{cv.width=Math.round(w*sc);cv.height=Math.round(h*sc);st.sc=sc}st.w=w;st.h=h;st.fitW=1;return true}
+function drawPic(st,ts,force){if(!st.cv)return;if(!st.fitW&&!fitPic(st))return;const c=st.cv.getContext('2d'),still=REDUCE||st.light;const k=st.light&&st.kind==='spec'?'chart':st.kind;
+ const t=still?(k==='harm'?8:40):Math.max(0,(ts-st.t0)/1000)+(k==='harm'||k==='spec'?0:20);
+ if(k==='spec'&&!st.light){c.setTransform(1,0,0,1,0,0)}else{c.setTransform(st.sc,0,0,st.sc,0,0);c.clearRect(0,0,st.w,st.h)}
+ SPLBG.FN[k](c,st.w,st.h,t,pal(k,st.light),st.d)}
+/* one frame loop for all mocks: at most 30 pictures a second, only mocks on screen, never in Light, never with Reduce motion, stopped while the page is hidden */
+let last=0,raf=0;
+function loop(ts){raf=0;if(document.hidden)return;if(ts-last>=32){last=ts;for(const st of MOCKS)if(st.vis&&!st.light&&!REDUCE)drawPic(st,ts);for(const r of REPL)r.f(ts)}raf=requestAnimationFrame(loop)}
+function kick(){if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
+document.addEventListener('visibilitychange',kick);
+const io=new IntersectionObserver(es=>{for(const e of es){const st=MOCKS.find(m=>m.el.querySelector('.mkw')===e.target);if(st)st.vis=e.isIntersecting}kick()});
+const ro=new ResizeObserver(es=>{for(const e of es){const st=MOCKS.find(m=>m.el.querySelector('.mkw')===e.target);if(!st)continue;st.scr.style.setProperty('--s',e.contentRect.width/1254);st.fitW=0;drawPic(st,performance.now(),true);upd(st)}});
+
+/* ---------- replay the start: the loading card, then the hand-over picked in family P ---------- */
+const REPL=[];
+function replay(st){const s=st.scr;$$('.spl',s).forEach(x=>x.remove());const P=pal(st.kind==='spec'?'spec':st.kind,false),el=document.createElement('div');el.className='spl';
+ el.style.cssText+=`;--sg:${P.g};--sbg:${P.bg};--se:${P.e}`;el.innerHTML='<canvas></canvas><div class="nm" style="font-size:26px">Audio<i style="background:linear-gradient(90deg,'+P.a+','+P.b+');-webkit-background-clip:text;background-clip:text">Lab</i><s style="border-color:'+P.p+';color:'+P.p+'">PRO</s></div><div class="sb"><b></b></div>';s.appendChild(el);
+ const cv=$('canvas',el),k=st.kind,d={},t0=performance.now(),sc=Math.min(2,devicePixelRatio||1);if(k==='spec'){cv.width=SPLBG.BW;cv.height=Math.round(SPLBG.BW*427/577)}else{cv.width=577*sc;cv.height=427*sc}
+ const bar=$('.sb b',el),mode=PICK.P||'P1';
+ const r={f(ts){const u=(ts-t0)/1000,c=cv.getContext('2d');if(k==='spec')c.setTransform(1,0,0,1,0,0);else{c.setTransform(sc,0,0,sc,0,0);c.clearRect(0,0,577,427)}SPLBG.FN[k](c,577,427,REDUCE?40:u+20,P,d);bar.style.width=Math.min(100,u/1.4*100)+'%';
+  if(u>1.6&&!r.done){r.done=1;
+   if(mode==='P1'){const target=st.id==='W1'?{l:117,t:22,w:1020,h:607}:{l:0,t:0,w:1254,h:651};Object.assign(el.style,{left:target.l+'px',top:target.t+'px',width:target.w+'px',height:target.h+'px',margin:'0',borderRadius:st.id==='W1'?'12px':'0'});st.t0=t0-0;setTimeout(()=>el.classList.add('out'),260)}
+   else if(mode==='P3'){el.classList.add('out')}
+   else{el.classList.add('out');st.kind=KINDS.filter(x=>x!==k)[Math.random()*4|0];render(st)}
+   setTimeout(()=>{el.remove();REPL.splice(REPL.indexOf(r),1)},600)}}};
+ if(mode==='P3'){/* still: the start screen does not move */}
+ REPL.push(r);kick()}
+
+/* ---------- option families ---------- */
+const FAMS={W:'Layout',T:'When it shows',D:'Demo songs',P:'Hand-over'};
+const OPT={
+ T:[['T1','Every start',true,'The start screen shows at every start, as you described: "to start up, you have to choose or open your own project". Enter opens the last project, so getting back to work is one key.',['Turn it off with Show at start-up; then each start opens the project you had open last.']],
+    ['T2','Only when nothing was open at quit',false,'If a project was open when you quit, the next start opens it straight away (as today, without Fractals). If you closed every tab, or this is a fresh install, the start screen shows.',['Fewest steps when you work on one song for days.','Harder to predict: the screen sometimes shows and sometimes not.']],
+    ['T3','Never at start, only from the menu',false,'Starts always reopen the last project (a fresh install opens the start screen once). File, Start screen and the logo open it any time.',['The quickest start.','A new user without projects still sees it once.']]],
+ D:[['D1','Only in New project, Demo songs',true,'The start screen shows your own work and templates only. The two demo songs stay where they are today, under New project, Demo songs.',['Matches "Empty, no songs" on the screen you see at start.','Nothing is taken away for anyone who likes them.']],
+    ['D2','A quiet line on the start screen too',false,'Same as D1, plus a small "Demo songs" link under the templates (shown in the mocks when you pick D2).',['Easier to find for a new user who wants to hear what the app can do.']],
+    ['D3','Nowhere in the app',false,'The demo songs are taken out of the menus and the New project dialog. The release gate keeps its own reference song.',['The cleanest native install; a demo could come back later as a download.']]],
+ P:[['P1','The splash grows into the start screen',true,'When loading ends, the loading card grows into the start screen and the same drawing keeps running without a cut (120 ms, lane F\'s longest motion token). With Reduce motion it simply appears.',['Feels like one step; the drawing you saw while loading is the one you keep.']],
+    ['P2','The splash closes, the start screen opens',false,'The splash fades as today, then the start screen fades in with a different drawing (never the same one twice in a row).',['Two pictures per start; a clear "loaded" moment.']],
+    ['P3','A still start screen',false,'The splash runs while loading; the start screen shows its drawing as one still picture, no motion at all.',['Zero frames once loaded, on every look.','Quieter, but the start screen feels less alive.']]]};
+function buildCards(f){const box=$('#cards-'+f);box.innerHTML='';for(const [id,t,star,p,ul] of OPT[f]){const c=document.createElement('div');c.className='card';c.dataset.id=id;
+ c.innerHTML=`<div class="ch"><span class="id">${id}</span>${star?'<span class="star" title="Recommended">★</span>':''}<h3>${esc(t)}</h3><span class="sp"></span><label class="pk"><input type="radio" name="pk-${f}"${PICK[f]===id?' checked':''}> pick</label></div><p>${esc(p)}</p>${ul.length?`<ul>${ul.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}`;
+ $('input',c).onchange=()=>{PICK[f]=id;store.set('picks',PICK);syncPicks();if(f==='D')for(const st of MOCKS)render(st)};box.appendChild(c)}}
+
+/* ---------- research table ---------- */
+const RT=[
+ ['Ableton Live','No start screen. Opens the Default Set (your saved template), or the last Set if the setting says so.','Nothing between you and the arrangement.','Default Set saved from File, Save Live Set As Default.','https://help.ableton.com/hc/en-us/articles/209067189'],
+ ['Bitwig Studio','The Dashboard: Recent projects, Templates, Demo packages, and Open; with tabs for Packages, Help and Settings.','Search box, tabs, the same window later from the logo button.','Shows at start; the project list keeps recent and pinned projects.','https://www.bitwig.com/userguide/latest/the_dashboard/'],
+ ['Logic Pro','Project Chooser: New Project, Recent, Templates, Open.','Startup Action: Show the Project Chooser, Open most recent project, Create new empty project, and more.','Settings, General, Project Handling, Startup Action.','https://support.apple.com/en-mo/guide/logicpro/lgcp43defb63/12.2/mac/15.6'],
+ ['Cubase','Steinberg Hub: Recent projects, templates by category, Create Empty, Open Other.','Recent list first; Create Empty is one click.','Preferences, General, Startup: Show Hub, Open last project, Open default template, Do nothing.','https://steinberg.help/cubase_ai/v13/en/cubase_nuendo/topics/project_handling/project_handling_steinberg_hub_r.html'],
+ ['Studio One','Start page: Create a new song or project, Open, Recent files, demos and tutorials, audio device and news.','Recent files on the first screen; audio device set-up right there.','Can be skipped by opening the last song.','https://support.presonus.com/hc/en-us/articles/210050353-Studio-One-3-Start-Page'],
+ ['FL Studio','No start screen. Opens a new project from the default template (or a startup template you choose).','Straight into the playlist.','File, Templates; startup template in the settings.','https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/menu_file.htm'],
+ ['Blender','The splash itself: Recent files, New file templates (General, 2D Animation, Sculpting...), Open, Recover last session. A click outside closes it.','The splash is the start screen; recent files are one click; an empty file is behind the splash already.','Preferences, Interface, Splash Screen on or off.','https://docs.blender.org/manual/en/4.5/interface/window_system/splash.html'],
+ ['Figma','Home: Recents with thumbnails, search at the top, Drafts and teams in a side rail.','Search is focused, thumbnails tell files apart.','Always shows; the last file reopens from Recents.','https://help.figma.com/hc/en-us/articles/14381406380183']];
+$('#rtab').innerHTML=RT.map(r=>`<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}<br><a href="${r[4]}" target="_blank" rel="noopener">source</a></td></tr>`).join('');
+
+/* ---------- picks bar ---------- */
+function syncPicks(){const note=$('#pnote').value.trim();$('#pline').textContent='Start screen picks: '+Object.keys(FAMS).map(f=>PICK[f]||f+'?').join(' ')+(note?' | note: '+note:'');
+ $('#pfams').innerHTML=Object.keys(FAMS).map(f=>`<a href="#fam-${f}" class="${PICK[f]?'set':''}" title="${FAMS[f]}">${PICK[f]||f+' ·'}</a>`).join('');
+ $$('.lay').forEach(c=>{c.classList.toggle('picked',PICK.W===c.dataset.id);$('input',c).checked=PICK.W===c.dataset.id});
+ for(const f of ['T','D','P'])$$(`#cards-${f} .card`).forEach(c=>{c.classList.toggle('picked',PICK[f]===c.dataset.id);$('input',c).checked=PICK[f]===c.dataset.id})}
+$('#pnote').oninput=syncPicks;
+$('#rec').onclick=()=>{Object.assign(PICK,RECP);store.set('picks',PICK);syncPicks();for(const st of MOCKS)render(st)};
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ function sel(){const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(e){}}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{sel();ok()});else{sel();ok()}};
+
+for(const id of ['W1','W2','W3','W4'])buildMock(id,$('#lays'));
+for(const f of ['T','D','P'])buildCards(f);
+for(const st of MOCKS){const w=st.el.querySelector('.mkw');io.observe(w);ro.observe(w)}
+MOCKS[1].kind='harm';MOCKS[2].kind='dipole';MOCKS[3].kind='chart';for(const st of MOCKS)render(st);
+syncPicks();kick();
+</script>

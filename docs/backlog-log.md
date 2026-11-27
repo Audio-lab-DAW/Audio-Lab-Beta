@@ -6373,3 +6373,11 @@ The user (27 Nov, 23:04 Brussels), on "AudioLab app icon, round 4": "I like J3, 
 - Browser (Chromium, the site served locally): stored M3 at start gives `small/field-edge-32.png` as the tab icon, picking J8 Chart paper gives its small picture, Sputnik its thumbnail, the default the favicons; no page errors.
 - Release gate lint clean; start-up smoke test (`smoke_electron.js`, all 14 scenarios at 20 s, the mouse over the window): every scenario clean on v0.292 with the picker edit applied (no state change, no synthetic event, no console error).
 - Not promoted (only the gate promotes); `desktop/app-version.json` untouched.
+
+## 28 November 2026, task WS-0 (lane Q): the start screen pick page, no index.html change
+> D6: "Empty, no songs. To start up, you have to choose or open your own project ... there should probably be a splash screen to choose your previous projects, or maybe open a template. And let's use the same scientific style that we have on the actual splash screen."
+
+- Read: SP1 (SPLBG, five drawings and palettes), AB1, the New project dialog (#np: templates, My templates in IndexedDB, Saved projects, Demo songs), PJ storage, `firstRun` and `demo()`, task AI's every-start Fractals (`frxBoot` wrapping `initProjects`), the release gate's use of Fractals, LK tokens, DR5 D3 and the motion tokens, the glass plan section 1.
+- Research with sources (Ableton, Bitwig, Logic, Cubase, Studio One, FL Studio, Blender, Figma) in `docs/start-screen.md`.
+- Pick page "AudioLab start screen": https://claude.ai/artifact/WTti2BsZN4ZvzGrE9GpQ8S, source `tools/design-lab/ws/start.src.html` (build.py inlines an unchanged copy of SPLBG). Four live mocks at 1254 x 651 points (2194 x 1139 at 1.75x), dark and Light, with search, arrows, Enter, templates, the Show at start-up switch and a replay of the start; families W (layout), T (when it shows), D (demo songs), P (hand-over); ★ W1 T1 D1 P1. Checked headless: no console errors, no sideways scroll at 400 px.
+- WS-1 waits for the user's pick (the end of `docs/start-screen.md`).
