@@ -1,0 +1,36 @@
+/* v0.225 (task AB1): the About window (class ab2 on #splash.ab). One canvas behind everything (it stays put while the list scrolls), the content column on top. All colours come from the picture: night blue ground, field-line blue for rules, the outer belt's cyan for values, blue-tinted greys for text. The warm tone of the inner belt is used by the atom only. */
+body #splash.ab.ab2{--abfg:#e8eef9;--abmut:#a3b3cd;--abdim:#8fa0bb;--abline:rgba(122,170,255,.22);--abacc:#6ed0ee;--abfield:#7aaaff;--abmono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto;place-items:start center;align-content:start;background:#05080e;border-color:rgba(122,170,255,.18);color:var(--abfg);scrollbar-color:rgba(122,170,255,.3) transparent;font-family:Inter,system-ui,sans-serif}
+body #splash.ab.ab2>canvas.abBg{grid-area:1/1;position:sticky;top:0;left:0;justify-self:stretch;align-self:start;width:100%!important;height:var(--abh,100%)!important;aspect-ratio:auto!important;object-fit:fill;margin:0!important;display:block;pointer-events:none;background:none}
+body #splash.ab.ab2>.abC{grid-area:1/1;position:relative;z-index:1;width:100%;min-height:var(--abh,0);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;padding:clamp(22px,5vh,48px) 16px 20px}
+body #splash.ab.ab2 .abx{background:rgba(10,15,24,.85)!important;border:1px solid var(--abline)!important;border-radius:8px!important;color:#c9d6ea!important;box-shadow:none!important;font-size:13px}
+body #splash.ab.ab2 .abx:hover{border-color:rgba(122,170,255,.5)!important;color:#fff!important}
+#splash.ab2 .abAtom{width:116px;height:116px;flex:none;display:block;aspect-ratio:auto}
+#splash.ab2 .abW{font-size:44px;line-height:1;margin-top:4px}
+#splash.ab2 .abW .wm .wmL{background:linear-gradient(95deg,#6ed0ee,#7aaaff);-webkit-background-clip:text;background-clip:text}
+#splash.ab2 .abW .wm .wmP{border-color:rgba(122,170,255,.7);border-width:1px;color:#b9d2ff;-webkit-text-fill-color:#b9d2ff}
+#splash.ab2 .abS{font:500 10px var(--abmono);letter-spacing:.2em;text-transform:uppercase;color:var(--abdim);margin-top:12px}
+#splash.ab2 .abBy{margin-top:18px;font-size:13px;color:var(--abmut)}
+#splash.ab2 .abBy span{font-weight:600;font-size:15px;color:var(--abfg);margin-left:6px}
+#splash.ab2 .abI{margin-top:18px;width:min(540px,100%);display:grid;grid-template-columns:repeat(4,auto);justify-content:space-between;gap:9px 0;font-variant-numeric:tabular-nums}
+#splash.ab2 .abI div,#splash.ab2 .abT,#splash.ab2 .abR{border-left:1px solid rgba(122,170,255,.4);padding:0 9px;text-align:left;min-width:0}
+#splash.ab2 .abI div{white-space:nowrap}
+#splash.ab2 .abI span{display:block;font:500 9px var(--abmono);letter-spacing:.16em;text-transform:uppercase;color:var(--abdim)}
+#splash.ab2 .abI span.v{font:500 12px Inter,system-ui,sans-serif;letter-spacing:0;text-transform:none;color:var(--abfg);margin-top:1px}
+#splash.ab2 .abH{font:500 10px var(--abmono);letter-spacing:.22em;text-transform:uppercase;color:var(--abacc);margin-top:22px}
+#splash.ab2 .abF{margin-top:10px;width:min(540px,100%);display:grid;grid-template-columns:1fr 1fr;gap:10px 0}
+#splash.ab2 .abT .n,#splash.ab2 .abR .n{display:block;font:500 12.5px Inter,system-ui,sans-serif;color:var(--abfg)}
+#splash.ab2 .abT .v,#splash.ab2 .abR .v{display:block;font:500 10.5px var(--abmono);color:var(--abacc);margin-top:2px;font-variant-numeric:tabular-nums}
+#splash.ab2 .abT .v{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#splash.ab2 .abB{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+body #splash.ab.ab2 .abB button{font:500 12px Inter,system-ui,sans-serif!important;color:#dbe6f6!important;background:rgba(10,15,24,.6)!important;border:1px solid rgba(122,170,255,.3)!important;border-radius:8px!important;padding:0 13px!important;min-height:28px!important;box-shadow:none!important;text-shadow:none!important;cursor:pointer}
+body #splash.ab.ab2 .abB button:hover{border-color:rgba(122,170,255,.6)!important;background:rgba(18,28,46,.8)!important;color:#fff!important}
+body #splash.ab.ab2 .abB button:focus-visible,body #splash.ab.ab2 .abx:focus-visible{outline:2px solid var(--abfield);outline-offset:2px}
+#splash.ab2 .abAll{width:min(620px,100%);margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
+#splash.ab2 .abAll[hidden]{display:none}
+#splash.ab2 .abCol{display:flex;flex-direction:column;gap:20px;min-width:0}
+#splash.ab2 .abG{display:flex;flex-direction:column;gap:10px}
+#splash.ab2 .abGh{display:flex;justify-content:space-between;font:500 9.5px var(--abmono);letter-spacing:.18em;text-transform:uppercase;color:var(--abdim);text-align:left;padding-bottom:5px;border-bottom:1px solid var(--abline)}
+#splash.ab2 .abR .d{display:block;font-size:11.5px;line-height:1.4;color:var(--abmut);margin-top:2px}
+#splash.ab2 .abNote{grid-column:1/-1;margin-top:18px;font-size:11px;color:var(--abdim);text-align:center}
+#splash.ab2 .abCr{font-size:10.5px;color:var(--abdim);margin-top:12px}
+@media (max-width:640px){#splash.ab2 .abI{grid-template-columns:repeat(2,auto)}#splash.ab2 .abF,#splash.ab2 .abAll{grid-template-columns:1fr}#splash.ab2 .abCol{margin-bottom:20px}}

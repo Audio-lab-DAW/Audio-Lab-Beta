@@ -1,7 +1,7 @@
 {
-  "version": "0.224",
-  "sha256": "959197a43b585d5b2d19ee9315e02a09fd25933b841dc3055e805d38059ec5ba",
-  "size": 5921358,
+  "version": "0.225",
+  "sha256": "fb7b044e471ac3ab79e1f7f490675d56cb7c9fbc413d5822e285e2e67d067dee",
+  "size": 5956242,
   "minShell": "0.147.0",
-  "notes": "New splash screen: five science drawings that change from start to start (moons in resonance, harmonograph, magnetic field, orbit chart, spectrogram), with the name and the loading bar in the drawing's colours. It stays about 1.5 seconds after loading; a click or a key closes it sooner."
+  "notes": "New About window: Earth with its radiation belts drawn in code behind the text, one of two pictures at random each time it opens, a finer animated atom as the logo, and the features as a quiet spec list in the colours of the picture."
 }
