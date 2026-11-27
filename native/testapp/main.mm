@@ -101,7 +101,14 @@ static void renderCb(void*, float** out, int, int frames) {
 struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok = false, instrument = false; };
 
 @interface App : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
+- (void)outside:(NSString*)what;
 @end
+static __weak App* gApp;
+// something changed outside the app (a device was plugged in, the volume was turned, the rate was switched)
+static void watchCb(void*, const char* what, uint32_t) {
+    NSString* w = [NSString stringWithUTF8String:what];
+    dispatch_async(dispatch_get_main_queue(), ^{ [gApp outside:w]; });
+}
 
 @implementation App {
     NSWindow* _win; NSWindow* _plugWin;
@@ -114,6 +121,8 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     uint32_t _dev;
     std::string _report, _loaded, _selfOut, _selfName;
     std::vector<ScanResult> _scan;
+    NSPopUpButton* _ratePop; NSButton* _exclBtn; NSSlider* _vol; NSTextField* _volLbl;
+    Watcher _watch; BOOL _hog;
     NSMutableSet* _down;
     BOOL _selftest;
     int _bundles, _bundlesOk;
@@ -172,7 +181,13 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     _scanBtn = [self button:@"Scan again" action:@selector(scan:) frame:NSMakeRect(W - 130, H - 46, 114, 30)];
     _status = [self label:@"Starting" frame:NSMakeRect(570, H - 40, W - 710, 20)];
 
-    NSScrollView* sv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 250, W - 32, H - 306)]; sv.hasVerticalScroller = YES; sv.borderType = NSBezelBorder;
+    [self label:@"Rate" frame:NSMakeRect(16, H - 74, 50, 20)];
+    _ratePop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(66, H - 78, 130, 26) pullsDown:NO]; _ratePop.target = self; _ratePop.action = @selector(rateChanged:); [_win.contentView addSubview:_ratePop];
+    _exclBtn = [NSButton checkboxWithTitle:@"Exclusive use of the device" target:self action:@selector(exclChanged:)]; _exclBtn.frame = NSMakeRect(214, H - 76, 210, 22); [_win.contentView addSubview:_exclBtn];
+    [self label:@"Device volume" frame:NSMakeRect(440, H - 74, 96, 20)];
+    _vol = [NSSlider sliderWithValue:1 minValue:0 maxValue:1 target:self action:@selector(volChanged:)]; _vol.frame = NSMakeRect(536, H - 76, 220, 22); _vol.continuous = YES; [_win.contentView addSubview:_vol];
+    _volLbl = [self label:@"" frame:NSMakeRect(764, H - 74, W - 780, 20)];
+    NSScrollView* sv = [[NSScrollView alloc] initWithFrame:NSMakeRect(16, 250, W - 32, H - 340)]; sv.hasVerticalScroller = YES; sv.borderType = NSBezelBorder;
     _table = [[NSTableView alloc] initWithFrame:sv.bounds]; _table.dataSource = self; _table.delegate = self; _table.usesAlternatingRowBackgroundColors = YES; _table.doubleAction = @selector(load:); _table.target = self;
     for (NSArray* c in @[@[@"name", @"Plug-in", @270], @[@"vendor", @"Maker", @170], @[@"kind", @"Kind", @90], @[@"status", @"Found / problem", @380]]) {
         NSTableColumn* col = [[NSTableColumn alloc] initWithIdentifier:c[0]]; col.title = c[1]; col.width = [c[2] doubleValue]; col.editable = NO; [_table addTableColumn:col];
@@ -197,6 +212,8 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown | NSEventMaskKeyUp handler:^NSEvent*(NSEvent* e) { return [me key:e] ? nil : e; }];
     [NSTimer scheduledTimerWithTimeInterval:0.25 repeats:YES block:^(NSTimer* t) { [me tick]; }];
 
+    gApp = self;
+    _watch.start(watchCb, nullptr);
     [self machineInfo];
     [self loadDevices];
     [self scan:nil];
@@ -204,7 +221,7 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
 
 - (void)machineInfo {
     char model[128] = {0}, cpu[128] = {0}; size_t l = sizeof model; sysctlbyname("hw.model", model, &l, nullptr, 0); l = sizeof cpu; sysctlbyname("machdep.cpu.brand_string", cpu, &l, nullptr, 0);
-    [self say:@"AudioLab VST3 test 0.1 (task NM1). Report file: paste all of it back."];
+    [self say:@"AudioLab VST3 test 0.2 (tasks NM1 and NB-N1). Report file: paste all of it back."];
     [self say:[NSString stringWithFormat:@"[machine] %s, %s, macOS %@, this app runs as %s", model, cpu, NSProcessInfo.processInfo.operatingSystemVersionString, hostArch().c_str()]];
 }
 
@@ -229,6 +246,7 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
 }
 - (void)startDevice:(const DeviceInfo&)d {
     _stream.stop();
+    if (_hog && _dev && _dev != d.id) { int o; std::string e; setHog(_dev, false, o, e); _hog = NO; }
     { std::lock_guard<std::mutex> g(G.lock); G.sr = d.rate > 0 ? d.rate : 48000; if (G.plug) { std::string e; G.ready = G.plug->prepare(G.sr, G.maxBlock, false, e); } }
     _dev = d.id;
     std::string err;
@@ -237,6 +255,60 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
     NSString* item = [NSString stringWithFormat:@"%u", now.buffer]; if ([_bufPop itemWithTitle:item]) [_bufPop selectItemWithTitle:item];
     [self say:[NSString stringWithFormat:@"[output] %s: %s, %.0f Hz, buffer %u frames (%.2f ms), device latency %u + safety %u + stream %u frames%s", d.name.c_str(), ok ? "opened" : "COULD NOT BE OPENED", now.rate, now.buffer,
                now.rate ? now.buffer / now.rate * 1000 : 0, now.latency, now.safetyOffset, now.streamLatency, ok ? "" : (" (" + err + ")").c_str()]];
+    _watch.watchDevice(d.id);
+    [self fillControls:now];
+}
+- (void)fillControls:(const DeviceInfo&)d {
+    [_ratePop removeAllItems];
+    std::vector<double> rates = d.rates;
+    for (auto& rr : d.rateRanges) for (double r : {44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0}) if (r >= rr.first && r <= rr.second) rates.push_back(r);
+    for (double r : rates) { NSString* t = [NSString stringWithFormat:@"%.0f Hz", r]; if (![_ratePop itemWithTitle:t]) [_ratePop addItemWithTitle:t]; }
+    NSString* cur = [NSString stringWithFormat:@"%.0f Hz", d.rate]; if (![_ratePop itemWithTitle:cur]) [_ratePop addItemWithTitle:cur];
+    [_ratePop selectItemWithTitle:cur]; _ratePop.enabled = d.rateSettable;
+    _exclBtn.enabled = d.hogSettable; _exclBtn.state = (d.hogPid == (int)getpid()) ? NSControlStateValueOn : NSControlStateValueOff;
+    double v = -1; bool has = getVolume(d.id, v);
+    _vol.enabled = has && d.volumeSettable; if (has) _vol.doubleValue = v;
+    _volLbl.stringValue = has ? [NSString stringWithFormat:@"%.0f %%%s", v * 100, d.volumeSettable ? "" : " (fixed)"] : @"this device has none";
+}
+- (void)rateChanged:(id)s {
+    double want = _ratePop.titleOfSelectedItem.doubleValue, now = 0; std::string err;
+    _stream.stop();
+    bool ok = setDeviceRate(_dev, want, now, err);
+    [self say:[NSString stringWithFormat:@"[rate] asked for %.0f Hz: %s, the device now runs %.0f Hz%s", want, ok ? "switched" : "NOT switched", now, err.empty() ? "" : (" " + err).c_str()]];
+    [self startDevice:deviceInfo(_dev)];
+}
+- (void)exclChanged:(id)s {
+    bool on = _exclBtn.state == NSControlStateValueOn; int owner = -1; std::string err;
+    bool ok = setHog(_dev, on, owner, err); _hog = on && ok;
+    [self say:[NSString stringWithFormat:@"[exclusive] %s: %s (the device is now held by process %d, this app is %d)%s. While it is on, no other program can play through this device.", on ? "asked for exclusive use" : "gave exclusive use back", ok ? "done" : "NOT done", owner, (int)getpid(), err.empty() ? "" : (" " + err).c_str()]];
+    [self fillControls:deviceInfo(_dev)];
+}
+- (void)volChanged:(id)s {
+    std::string err; setVolume(_dev, _vol.doubleValue, err);
+    double v = -1; getVolume(_dev, v);
+    _volLbl.stringValue = [NSString stringWithFormat:@"%.0f %%", v * 100];
+}
+- (void)outside:(NSString*)what {
+    if ([what isEqualToString:@"volume"] || [what isEqualToString:@"mute"]) {
+        double v = -1; if (getVolume(_dev, v)) { _vol.doubleValue = v; _volLbl.stringValue = [NSString stringWithFormat:@"%.0f %%", v * 100]; }
+    } else if ([what isEqualToString:@"rate"]) {
+        DeviceInfo d = deviceInfo(_dev);
+        if (d.rate > 0 && d.rate != G.sr) { [self say:[NSString stringWithFormat:@"[rate] the device was switched to %.0f Hz from outside this app; following it", d.rate]]; [self startDevice:d]; }
+    } else if ([what isEqualToString:@"devices"] || [what isEqualToString:@"alive"]) {
+        std::vector<DeviceInfo> outs; bool here = false; int sel = -1;
+        for (auto& d : listDevices()) { if (d.outChannels < 1) continue; if (d.id == _dev) { here = true; sel = (int)outs.size(); } outs.push_back(d); }
+        if (outs.size() == _devs.size() && here) { bool same = true; for (size_t i = 0; i < outs.size(); i++) if (outs[i].id != _devs[i].id) same = false; if (same) return; }
+        _devs = outs; [_devPop removeAllItems];
+        for (auto& d : _devs) [_devPop addItemWithTitle:S(d.name + "  (" + std::to_string((int)d.rate) + " Hz)")];
+        std::string names; for (auto& d : _devs) names += (names.empty() ? "" : ", ") + d.name;
+        [self say:[NSString stringWithFormat:@"[devices] the list changed: %zu output(s) now: %s", _devs.size(), names.c_str()]];
+        if (here) [_devPop selectItemAtIndex:sel];
+        else if (!_devs.empty()) {
+            uint32_t def = defaultOutputDevice(); int k = 0; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].id == def) k = i;
+            [self say:@"[devices] the device in use is gone; moving to the default output"];
+            _hog = NO; [_devPop selectItemAtIndex:k]; [self startDevice:_devs[k]];
+        }
+    }
 }
 - (void)deviceChanged:(id)s { NSInteger i = _devPop.indexOfSelectedItem; if (i >= 0 && i < (NSInteger)_devs.size()) [self startDevice:_devs[i]]; }
 - (void)bufferChanged:(id)s {
@@ -365,14 +437,17 @@ struct Row { std::string name, vendor, kind, status, path, uid, archs; bool ok =
 - (void)applicationWillTerminate:(NSNotification*)n {
     [self writeReport];
     _stream.stop();
+    _watch.stop();
+    if (_hog && _dev) { int o; std::string e; setHog(_dev, false, o, e); }
     [self closePlugWindow];
     { std::lock_guard<std::mutex> g(G.lock); G.ready = false; G.plug.reset(); }
 }
 
 - (void)togglePattern:(id)s {
+    if (!G.plug && !G.pattern.load()) { [self say:@"[pattern] nothing to play yet: click a plug-in in the list and Load first"]; _status.stringValue = @"Load a plug-in first"; return; }
     bool on = !G.pattern.load(); G.pattern = on;
     _patBtn.title = on ? @"Stop test pattern" : @"Play test pattern";
-    [self say:on ? @"[pattern] test pattern on" : [@"[pattern] test pattern off." stringByAppendingString:[[self liveFigures] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet]]];
+    [self say:on ? @"[pattern] test pattern on" : [@"[pattern] test pattern off. " stringByAppendingString:[[self liveFigures] stringByTrimmingCharactersInSet:NSCharacterSet.newlineCharacterSet]]];
 }
 - (BOOL)key:(NSEvent*)e {
     if (e.modifierFlags & (NSEventModifierFlagCommand | NSEventModifierFlagControl | NSEventModifierFlagOption)) return NO;

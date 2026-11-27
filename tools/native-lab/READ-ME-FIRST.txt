@@ -1,4 +1,4 @@
-AudioLab VST3 test (task NM1)
+AudioLab VST3 test 0.2 (tasks NM1 and NB-N1)
 
 This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
 find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.
@@ -18,6 +18,10 @@ WHAT TO DO
 1. The list shows every VST3 plug-in found in /Library/Audio/Plug-Ins/VST3 and in your own
    Library/Audio/Plug-Ins/VST3. Lines that start with PROBLEM could not be read; the reason is next to them.
 2. Pick your output at the top left (iFi Gryphon, Zoom AMS-24, ...). Try the Buffer menu: 64 or 32.
+   New in 0.2, second row: Rate switches the device's sample rate from inside the app. "Exclusive use" takes
+   the device for this app alone (other programs go silent on it until you untick it). "Device volume" is the
+   device's own volume: move it here and watch it in Audio MIDI Setup, or turn it there and watch it here.
+   Plugging a device in or out updates the list by itself.
 3. Click a plug-in, then Load. Then "Open its window". Then "Play test pattern", or play the keys
    A W S E D F T G Y H U J K (click the main window first). Sound comes out at half level.
 4. Try several plug-ins: an instrument, an effect (the pattern is then a plucked sound that runs through it),
