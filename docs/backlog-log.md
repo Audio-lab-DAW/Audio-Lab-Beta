@@ -5289,3 +5289,28 @@ The first step of task XT (docs/extensions-plan.md, section 9.7 row DL1; the use
 
 ### What is left (task XT, in this order)
 DL2 commands registry (`SCA` grown into `COMMANDS`, namespaced ids, aliases, `runCommand`), DL12 script sandbox spike; then DL3 advanced settings list and DL4 safe mode (both need ST-S4, which is logged); DL5 rules engine with the right-click "Advanced" entries, DL6, DL7 (control ids part 2: devices, piano roll, menus, Settings rows), DL8; then XT-EX2 to XT-EX10 (theme files, device format and checker, user device frame and My devices, the safety stage before any user device sounds, script devices); then DL9, DL10 with the Workshop window, DL11, DL13, DL14, DL15, the Assistant tools, the import card, script instruments.
+## 27 November 2026: task NB-N3d (the mixer's buses: groups, sends, returns, delay compensation, the master's chain)
+
+Fired by the scheduler with a note from the scheduling chat (18:20 UTC, read as data: "do the next stage; stop if another NB run committed in the last 20 minutes"). The only NB commits in those minutes were this session's own NB-R7, finished. NB-R8 (host hardening) works in `native/host/`, where the parallel test-app task (NL) is active after the user's sixth report, so this run took N3d, the next engine step. Claimed first (commit in the running list). `index.html`, `desktop/` (also `desktop/app-version.json`) untouched.
+
+### Built
+- `native/engine/mix/bus_graph.h`: the export's routing as nodes: input, the core's devices (any of the 10 ported), delay compensation, volume, pan; a track's output into its group's input or the master; sends as gains into returns; nested groups; the master's gain and devices; inputs summed as Chromium's `AudioNodeInput` (one connection passed on, more summed from zero); per-bus summing order as a setting.
+- `native/engine/mix/albus.cpp` (CMake target `albus`): renders a scene file (JSON) as `make_bus_ref.py` writes it, `--order bus=...` to try Chromium's orders.
+- `tools/native-lab/make_bus_ref.py`: 14 scenes built in the real app page the way `renderMix` routes them (devices by `mkFx`/`mkFxNode` with presets, their posted settings recorded, delay compensation from the app's own `fxLat`, muted and soloed tracks left out as `trkAudible` does), each rendered twice; references in `tools/native-lab/ref/bus/` (3.6 MB).
+- `tools/native-lab/run_bus.py`: compares every sample; where a bus has three or more inputs and the scene differs, it tries that bus's orders.
+- `native-ci.yml`: the bus comparison in the Linux job (Release and sanitizers); in the Mac job, Chromium is installed on the Mac and the Mac's own references are made for the 240 device cases and the 14 bus scenes (review D3), then compared.
+
+### Proven
+- Linux, Release and ASan+UBSan: **14 of 14 scenes bit for bit** (group2, groupfx, nested, send, send2, master, pdc, pdcgrp, mute, solo, mutedgroup, song, song128, wide). `wide` has every ported device on the buses at once.
+- Chromium's DelayNode at a whole number of samples is an exact copy (probe at 1, 7, 96, 240, 2,048 samples, 128 and 512 frames), so delay compensation ports as a plain delay.
+- The web engine differs from itself between two renders in 4 of 14 scenes (three or more inputs into the master; up to 26,328 samples, about -140 dB); one summing order reproduces each web render exactly.
+- Cost: `wide` (10 devices, 7 nodes) 19 times real time on one core of this build machine, `song` 38 times.
+
+### Left
+- The Mac result of run 46056395016 (devices and buses against the Mac's own Chromium): logged by the next run if not below.
+- Clips as sources (the export's clip chain), moving values (automation, live smoothing), the Ducker's keys, the export's output limiter, other sample rates; then the remaining devices (FFT family, delays, voice, ducker, loudness) and the instruments.
+- NB-R8 when the test-app task is not working in `native/host/`; NB-R9 needs `index.html`.
+
+### Assumptions
+- The native engine sums each bus in the order the export connects it (project order), which makes its renders repeatable; the web engine's own order is not repeatable, so "the same as the export" means "the same as one of the export's renders".
+- Mac references come from the Mac's Chromium (D3's direction), not Linux's; the Linux references are compared on the Mac too, for information.
