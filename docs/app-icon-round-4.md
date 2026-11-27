@@ -88,3 +88,14 @@ Regenerate: `node render4.js && python3 shrink.py && python3 build_page.py`.
 3. **Small**: the chosen S replaces IC4's small master everywhere at 32 px and below: `icon.icns` (16 and 32 pt at 1x and 2x), `icon.ico` (16, 20, 24, 32; 48 and up from Main), `doc.icns`/`doc.ico` small tiers, the favicons `web-16`, `web-32` (and `web-48` from Main). `tools/icon-lab/ic4/svgs.js` and `ship.py` take `small4.js` instead of `ic4/small.js`.
 4. Regenerate `icon.icns`, `icon.ico`, `Assets.car`, `dock-icon.png`, `icon.png` and the favicons; run the "Mac icon proof" job on macOS 26 (Default and Dark both navy) and `tools/ui-tests/taskAH_electron.js`.
 5. Raise the app version, one line in `desktop/update-notes.txt`, and run the desktop build. Promotion to installed apps goes through the release gate (`AL_PROMOTE=1`), never by editing `desktop/app-version.json`.
+
+## The user's picks (27 November 2026, 23:04 Brussels)
+
+"I like J3, the original, basically. And I like both colors, P8 and P2 is good. And then I like M3 and also M5. To the small icons, I think S1 is good for the small icons."
+
+- **Default app icon: J3 as shipped in v0.270** (unchanged), in P2 Orbit night; J3 in **P8 Chart paper** added to the icon picker.
+- **Added to the icon picker: M3** (field to the edge) and **M5** (depth, macOS 26 style), each in P2 and P8.
+- **Small icon (32 px and below, menu bar, favicon, Windows small sizes): S1** (thin field), replacing IC4's small master; each picker icon keeps its own small version drawn the S1 way.
+- J4, J6, J8, J10 stay in the picker. K1 to K5, the other M variants and the hybrids are not used. Animated particles: later.
+- Built by task IC6; the new icons reach the Dock with the next desktop build (the final builds after the UI lanes, or an earlier interim build).
+
