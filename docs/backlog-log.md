@@ -5778,3 +5778,43 @@ Step OV2 of `docs/design-round-5-overlays.md` section 5 with the user's pick **R
 ### What is left
 - **OV2b** (next run): the tab menu, the logo (Quick actions) menu, the mixer menus and the other long menus get their command rows and groups.
 - Then OV8 (palette K1), OV6 (T3, needs ST-S9), OV4 (D3, needs MD1), OV5 (N1, needs MD1), OV7 (X1, needs MD1's caliper), OV3 (K12 Advanced group: the `{g:'Advanced',adv:1}` label is ready; needs XT-DL3 or the hook).
+
+## 27 November 2026, v0.279: task NI-7, the level journey (lane D, idea I13)
+
+Idea I13 is complete. Edit script `tools/feature-lab/ni/ni_7.py` (anchored; needs NI-6), test `tools/ui-tests/taskNI_7.py` (24 checks, all pass). The step was claimed in the plan before it started. (This run's trigger still named NI-5b as the last release; the plan's rule is the next step not yet logged, so this run did NI-7.)
+
+### Built
+- **A window "Level journey"** (the app's floating window: moves, resizes, remembers its place), from the main menu (right-click the logo: Level journey…) and the command `ni.levelJourney`. For the selected track, one row per step, top to bottom:
+  - the clips (audio) or the instrument
+  - each device (a switched-off device is shown struck through and "off", not measured)
+  - the fader and pan
+  - "Into Master" or "Into <group>"
+- **Each row**: a level bar on a dBFS scale (-60 to +6, a graticule every 6 dB, 0 dBFS marked) in the track's colour, RMS as the bar and the peak as a tick, the level and the peak in dB, and the change from the step before. The biggest rise (amber ▲) and the biggest drop (cyan ▼) of 3 dB or more are marked; a peak above 0 dBFS is shown in amber with a tooltip.
+- **How it is measured**: its own offline render of that one track, with the same steps as the app's one-track render (clips with their gain and fades, the instrument, the devices, the fader with its automation, pan, Vector Map). Every step's output also goes to its own pair of output channels, so **nothing is added to the live path or to exports**. Up to 15 steps per render, more in further renders. Over the loop when it is on, otherwise the 8 bars around the playhead (at most 16 bars), with up to 2 bars of pre-roll so tails are in it.
+- **It follows** the selected track ("Follow the selection", on by default). It measures again 0.8 s after an edit or a move of the playhead settles, only while the song is stopped. A 300 ms check runs only while the window is open, and does work only when the track, the range or the project changed. Closing stops it.
+- Groups and returns are not measured (their sound comes from other tracks; the window says so). The master chain, sends and sidechains are not in it (said under the rows).
+- `NI_HOOKS.levelJourney` (`open(id)`, `measure(id, b0, b1)`) for a button on a mixer strip or the device frame (lanes A, I).
+
+### Checked
+- **Test song** (audio, 120 BPM): Tone, a 0.25 sine at 1 kHz, with a Pro EQ at Output +6 dB, a switched-off Pro EQ and its fader at 0.5.
+  - Clips -15.05 dB RMS, -12.04 dB peak.
+  - Pro EQ **+6.00 dB** (marked as the biggest rise); the switched-off EQ shown as off with no change.
+  - Fader **-6.02 dB** (marked as the biggest drop); Into Master equal to the fader's level.
+  - Range bars 3 to 10 at beat 24; the loop (beats 32 to 48) when it is on.
+- **Selection and edits**:
+  - selecting Other measures it (Clips, Fader and pan, Into Bus)
+  - selecting the group says to pick one of its tracks
+  - an EQ edit to +3 dB is not measured for 0.4 s, then shows +3.00
+  - with Follow off another selection keeps Tone
+  - idle for 2 s: nothing measured
+- **Final rebase** onto v0.278 (lane C's step sequencer clips, lane F's right-click menus OV2a): the edit script re-run, lint clean, `taskNI_7.py` 24 of 24 again; the gate was not run a third time on this last file, main moved faster than one gate run.
+- **Live path and exports**: a render of Tone is bit-identical before and after the journey measured it. **Fractals levels unchanged** (`tools/engine-tests/export_same.py` on this build after the rebase onto v0.271, and the gate's export step again on the final v0.277 file): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB.
+- **Also**: `taskNI_6.py` 33 of 33. After the rebase onto v0.276 (lane E's dynamics displays, lane B's S8, lane I's device frame DV-1, lane H's commands registry) the edit script re-run: `taskNI_7.py` 24 of 24, `taskNI_6.py` 33 of 33 again, and the release gate on that working copy (`gate.py --here --skip-ui --quick`, never promotes) passes every step it ran: lint; the start-up smoke test (14 scenarios, every one clean); frame times idle with Fractals (p50 16.7 ms, p95 50.0 ms, as the reference); windows (19 checks); Fractals levels and exports (the 9 repeatable lines bit-identical to v0.250). Tooltips on every control, step and column; no em dashes; no console errors.
+- **Screenshots looked at**: the test song, and the Fractals Kick (normal and Light level). The Kick reads instrument -16.1 dB, Pro EQ +4.3 dB with its peak at +3.2 dBFS (amber), fader -1.9 dB, into the Kick & Bass group.
+
+### Limits and what only the user can judge
+- RMS over the whole range treats quiet gaps as part of the level, so a sparse part reads lower than it sounds. The peak is the sample peak (no oversampling).
+- What to try: select a bass or a lead in a drop, open Level journey and look for a device that adds or takes away a lot. On the Fractals Kick the Pro EQ adds 4.3 dB and peaks at +3.2 dBFS inside the track, which the master's -10 dB hides. Say whether a button on each mixer strip or device would be more useful than the menu entry.
+
+### Left
+Group U, next: NI-8, the mono-loss map (I4).
