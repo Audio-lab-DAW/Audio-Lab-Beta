@@ -1,0 +1,28 @@
+== Today (AudioLab theme): ['#4c8dff', '#3ecf8e', '#f5c84c', '#ff6b6b', '#ff9a3c', '#b583ff', '#4cc9f0', '#ff7ac8']  worst edge 1.0, worst body 0.4
+   protan/edge    min   1.0 ['#4c8dff', '#b583ff']  under 10: 3
+   protan/body    min   0.4 ['#4c8dff', '#b583ff']  under 10: 10
+   deutan/edge    min   5.8 ['#f5c84c', '#ff9a3c']  under 10: 4
+   deutan/body    min   3.0 ['#4c8dff', '#b583ff']  under 10: 8
+   tritan/edge    min   5.9 ['#3ecf8e', '#4cc9f0']  under 10: 4
+   tritan/body    min   3.0 ['#3ecf8e', '#4cc9f0']  under 10: 7
+== Okabe-Ito as published: ['#56B4E9', '#009E73', '#F0E442', '#D55E00', '#E69F00', '#CC79A7', '#0072B2', '#BBBBBB']  worst edge 10.9, worst body 5.1
+   protan/edge    min  12.2 ['#CC79A7', '#0072B2']  under 10: 0
+   protan/body    min   5.9 ['#CC79A7', '#0072B2']  under 10: 8
+   deutan/edge    min  11.6 ['#F0E442', '#E69F00']  under 10: 0
+   deutan/body    min   5.5 ['#CC79A7', '#BBBBBB']  under 10: 7
+   tritan/edge    min  10.9 ['#E69F00', '#CC79A7']  under 10: 0
+   tritan/body    min   5.1 ['#009E73', '#0072B2']  under 10: 6
+== Okabe-Ito lifted for a dark ground: ['#56b4e9', '#14b386', '#f0e442', '#e2661c', '#eea52b', '#d78fb8', '#3f7fd9', '#c8c8d0']  worst edge 7.4, worst body 3.7
+   protan/edge    min   9.7 ['#56b4e9', '#d78fb8']  under 10: 1
+   protan/body    min   4.9 ['#56b4e9', '#d78fb8']  under 10: 8
+   deutan/edge    min   8.7 ['#d78fb8', '#c8c8d0']  under 10: 2
+   deutan/body    min   4.4 ['#d78fb8', '#c8c8d0']  under 10: 7
+   tritan/edge    min   7.4 ['#56b4e9', '#14b386']  under 10: 2
+   tritan/body    min   3.7 ['#56b4e9', '#14b386']  under 10: 5
+== Today tuned (hues within 16°, lightness within 0.09): ['#7075ff', '#40ad81', '#ffec39', '#f3413f', '#e8ab4b', '#afabff', '#8de6f1', '#d867a7']  worst edge 12.3, worst body 7.4
+   protan/edge    min  14.2 ['#7075ff', '#d867a7']  under 10: 0
+   protan/body    min   7.4 ['#7075ff', '#afabff']  under 10: 6
+   deutan/edge    min  12.3 ['#ffec39', '#e8ab4b']  under 10: 0
+   deutan/body    min   7.4 ['#afabff', '#8de6f1']  under 10: 7
+   tritan/edge    min  13.4 ['#f3413f', '#d867a7']  under 10: 0
+   tritan/body    min   7.5 ['#e8ab4b', '#d867a7']  under 10: 6

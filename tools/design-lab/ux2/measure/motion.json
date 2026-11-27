@@ -1,0 +1,36 @@
+{
+ "meta": {
+  "version": "0.263",
+  "viewport": [
+   2194,
+   1139
+  ],
+  "dpr": 1.75
+ },
+ "motion": {
+  "stopped": {
+   "mean_changed_share_per_step": 0.00014765219936444223,
+   "max": 0.00032692548921224286,
+   "union_share": 0.0005912621257735407,
+   "step_ms": 125
+  },
+  "playing": {
+   "mean_changed_share_per_step": 0.0021316114553109797,
+   "max": 0.002414701455092825,
+   "union_share": 0.019240126902492057,
+   "step_ms": 125
+  },
+  "playing_mixer": {
+   "mean_changed_share_per_step": 0.06298500821716589,
+   "max": 0.09717095772704466,
+   "union_share": 0.4173086270697441,
+   "step_ms": 125
+  },
+  "playing_lite": {
+   "mean_changed_share_per_step": 0.08885670726164768,
+   "max": 0.1035477034203044,
+   "union_share": 0.391859921182472,
+   "step_ms": 125
+  }
+ }
+}

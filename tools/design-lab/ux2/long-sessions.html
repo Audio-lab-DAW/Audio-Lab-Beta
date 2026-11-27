@@ -1,0 +1,630 @@
+<title>AudioLab for long sessions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a pick sheet in AudioLab's own dark look, like the earlier pick pages. A live stage (the arrangement and the docked mixer at the
+   user's 2194 x 1139 points, every pick wired in), the measurements of today's app, then 22 options in six groups, each a live before/after
+   at 1:1 with its measured number, the research with sources, and the picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#9a9eab;--acc:#3ecf8e;--blue:#4c8dff;--amber:#ffb547;--sel:#f5c84c;--bad:#ff6b6b;--disp:#050507;--bar:#0e0e12f0;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#fffffff0}}
+:root[data-theme="light"]{color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#fffffff0}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);padding-block:28px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1260px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 21px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px}
+.btn:hover{border-color:var(--mut)}
+.btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:15px;line-height:1.6}
+.facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12px;color:var(--mut)}
+.facts b{color:var(--ink);font-weight:500}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--ln2);border-radius:7px;overflow:hidden}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--f)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--blue);color:#fff}
+.lab{font:500 10.5px var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+/* stage */
+.stage{background:var(--disp);border:1px solid var(--ln);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.stage .tb{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:#c9ccd6}
+.stage .tb .lab{color:#8b8b97}
+.stage .seg{border-color:#33333d}.stage .seg button{background:#15151a;color:#d7d9e0;border-color:#33333d}.stage .seg button.on{background:#4c8dff;color:#fff}
+.cvwrap{position:relative;width:100%;min-width:0}
+.cvwrap canvas{display:block;width:100%;height:auto;border-radius:6px;background:#0a0a0c}
+.stage .note{font:500 11px var(--fm);color:#8b8b97;display:flex;flex-wrap:wrap;gap:4px 18px}
+.stage .note b{color:#ececf1;font-weight:500}
+/* measurements */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,370px),1fr));gap:14px}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.box h3{font-size:14px}
+.big{font:600 26px/1 var(--h);font-variant-numeric:tabular-nums}
+.big small{font:500 12px var(--fm);color:var(--amber);margin-left:3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12px}
+.kv span:nth-child(odd){color:var(--mut)}
+.kv span:nth-child(even){font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:12px;width:100%}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--ln);white-space:nowrap;font-variant-numeric:tabular-nums}
+th{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+td.bad{color:var(--bad)} td.ok{color:var(--acc)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:1px}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.shots figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.shots img{width:100%;border-radius:6px;border:1px solid var(--ln);display:block}
+.shots figcaption{font-size:11.5px;color:var(--mut)}
+/* groups and option cards */
+.grp{display:flex;flex-direction:column;gap:16px}
+.grp>header{display:flex;flex-direction:column;gap:6px}
+.opt{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.opt.picked{border-color:var(--sel);box-shadow:0 0 0 1px var(--sel) inset}
+.oh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.oid{font:600 13px var(--fm);color:var(--amber);min-width:30px}
+.stars{font-size:13px;letter-spacing:1px;color:var(--sel)}
+.stars i{font-style:normal;color:var(--ln2)}
+.oh .pick{margin-left:auto}
+.otxt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:6px 22px;font-size:12.5px}
+.otxt p{max-width:none}
+.otxt b{font-weight:600}
+.ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:10px}
+.ba figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.ba figcaption{display:flex;justify-content:space-between;gap:8px;font:500 11px var(--fm);color:var(--mut)}
+.ba figcaption b{color:var(--ink);font-weight:500}
+.ro{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 11.5px var(--fm);color:var(--mut);font-variant-numeric:tabular-nums}
+.ro b{color:var(--ink);font-weight:500}
+.ro .up{color:var(--acc)} .ro .dn{color:var(--bad)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.lane{font-size:11.5px;color:var(--mut)}
+.lane b{color:var(--ink);font-weight:500}
+.mockset{background:#1b1d23;border:1px solid #2c2f37;border-radius:10px;padding:12px 14px;color:#e6e8ee;font:12px/1.5 var(--f);display:flex;flex-direction:column;gap:8px;min-height:100%}
+.mockset h4{margin:0;font:600 13px var(--f);color:#ececf1}
+.mockset .r{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #2a2d35;padding-top:6px}
+.mockset .r span{color:#b9bcc8}
+.mockset .r small{display:block;color:#9a9eab;font-size:11px}
+.mockset select,.mockset .tg{background:#101115;border:1px solid #33363f;border-radius:5px;color:#e6e8ee;font:500 11px var(--f);padding:2px 6px}
+.mockset .tg.on{background:#4c8dff;border-color:#4c8dff;color:#fff}
+.mockset .u{color:#ffb547}
+.mockset.old{opacity:.95}
+/* research */
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.res .box ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:12.5px}
+/* picks bar */
+.picks{position:fixed;left:0;right:0;bottom:0;background:var(--bar);border-top:1px solid var(--ln2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:20;
+ padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picks .in{max-width:1260px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:4px;flex:1 1 420px;min-width:0}
+.chip{font:500 11px var(--fm);padding:2px 6px;border-radius:5px;border:1px solid var(--ln2);background:var(--pn2);color:var(--mut)}
+.chip.on{background:var(--sel);border-color:var(--sel);color:#1a1405}
+#line{font:500 12px var(--fm);background:var(--pn);border:1px solid var(--ln2);border-radius:6px;padding:4px 8px;flex:1 1 360px;min-width:0;overflow-x:auto;white-space:nowrap;user-select:all}
+@media (max-width:560px){.chips{flex-wrap:nowrap;overflow-x:auto;flex-basis:100%}.picks .in>.lab{display:none}}
+@media (prefers-reduced-motion:reduce){.picks{backdrop-filter:none;-webkit-backdrop-filter:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <!-- Machado, Oliveira and Fernandes 2009, severity 1.0, applied in linear RGB (the same matrices as tools/design-lab/ux2/cvd.py) -->
+ <filter id="cvd-protan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-deutan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.011820 0.042940 0.968881 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-tritan" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.303900 0 0  0 0 0 1 0"/></filter>
+</svg>
+
+<div class="wrap">
+<header class="top">
+ <span class="eyebrow">Task UX2 · interface research · long sessions · 27 November 2026</span>
+ <h1>AudioLab for long sessions</h1>
+ <p class="lede">Hours of mixing on a 32-inch OLED in a dim room. This page measures today's app at your size (v0.263, Fractals demo, 2194 × 1139 points at 1.75×) and proposes 22 refinements and settings that keep today's look: colours, buttons, icons, Inter 11/12/13/15, the glass, and the picks G3, W1, L2, A1, M3, N3. Every option below is live on a mock of the real arrangement and docked mixer at 1:1, with today on the left and the option on the right. Pick with the buttons; the bar at the bottom gives the line to paste.</p>
+ <div class="facts"><span><b>Screen</b> Samsung Odyssey OLED G8 G80SD, QD-OLED, 3840 × 2160, 240 Hz</span><span><b>Mac</b> mini M4, 1.75× (1 point = 0.32 mm)</span><span><b>Mode</b> mostly Dark</span><span><b>Measured</b> headless Chromium, the app's own code</span></div>
+ <div class="ctl"><span class="lab">Animation</span><div class="seg" id="anim"><button type="button" data-v="1" class="on">Playing</button><button type="button" data-v="0">Stopped</button></div><span class="sm mut">The mocks play the song so meters, the playhead and displays move as they would.</span></div>
+</header>
+
+<section class="stage" aria-label="Live stage: today's app with your picks">
+ <div class="tb">
+  <span class="lab">Stage</span>
+  <div class="seg" id="stView"><button type="button" data-v="picks" class="on">Your picks</button><button type="button" data-v="today">Today</button></div>
+  <div class="seg" id="stZoom"><button type="button" data-v="fit" class="on">Whole screen</button><button type="button" data-v="1">1:1 corner</button></div>
+  <span class="lab">See as</span>
+  <div class="seg" id="stSim"><button type="button" data-v="normal" class="on">Normal</button><button type="button" data-v="protan">Protan</button><button type="button" data-v="deutan">Deutan</button><button type="button" data-v="tritan">Tritan</button></div>
+ </div>
+ <div class="cvwrap"><canvas id="stage" aria-label="Mock of AudioLab's arrangement and docked mixer"></canvas></div>
+ <div class="note" id="stNote"></div>
+</section>
+
+<section class="grp" id="measured">
+ <header><span class="eyebrow">What was measured</span><h2>Today's app, at your size</h2>
+ <p class="mut">Scripts in <code>tools/design-lab/ux2/</code>: <code>shoot_measure.py</code> (screenshots, every visible text with its colour and size, animated pixels), <code>contrast.py</code> (WCAG 2 and APCA), <code>cvd.py</code> (colour-vision simulation and palettes), <code>oled.py</code> (picture level and static bright parts). Backgrounds were read from the screenshots, so glass and transparency count.</p></header>
+ <div class="grid2" id="mGrid"></div>
+ <div class="tbl box"><h3>The weakest text today (Dark, AudioLab theme)</h3><table id="worst"><thead><tr><th>Text</th><th>Where</th><th>Size</th><th>Colour on background</th><th>WCAG</th><th>APCA Lc</th></tr></thead><tbody></tbody></table>
+ <p class="sm mut">WCAG 2 asks 4.5:1 for small text. APCA asks about Lc 75 for body text, Lc 60 for other content text and Lc 45 as a floor for small labels at 11 to 12 px; negative Lc means light text on dark. 90 % of AudioLab's text is 11 px.</p></div>
+ <div class="tbl box"><h3>Track colours under colour-vision deficiency</h3><table id="cvdT"><thead><tr><th>Palette</th><th>Colours</th><th>Normal</th><th>Protan</th><th>Deutan</th><th>Tritan</th><th>Closest pair</th></tr></thead><tbody></tbody></table>
+ <p class="sm mut">Smallest CIEDE2000 distance between any two of the eight track colours, as the clip's edge (full colour) / the clip's body (36 % over the lane). Under 10 two tracks are hard to tell apart at a glance; under 3 they look the same. Simulation: Machado et al. 2009 at full severity (dichromacy, the worst case). Red-green deficiencies affect about 1 in 12 men.</p></div>
+ <div class="shots" id="shots">
+  <figure><img src="img/today-arr.jpg" alt="Today's arrangement, Fractals demo, at 2194 by 1139 points" loading="lazy"><figcaption>Today, arrangement (v0.263)</figcaption></figure>
+  <figure><img src="img/today-mix.jpg" alt="Today's mixer window over the arrangement" loading="lazy"><figcaption>Today, mixer open</figcaption></figure>
+  <figure><img src="img/oled-static.jpg" alt="Bright parts that do not move while playing, in amber" loading="lazy"><figcaption>OLED: bright parts that never move while playing (amber)</figcaption></figure>
+  <figure><img src="img/motion-mixer.jpg" alt="Pixels that changed in 3 seconds of playback with the mixer open, in blue" loading="lazy"><figcaption>Motion: pixels that changed in 3 s of playback, mixer open (blue)</figcaption></figure>
+  <figure><img src="img/cvd-normal.jpg" alt="Track headers and clips, normal vision" loading="lazy"><figcaption>Track colours, normal vision</figcaption></figure>
+  <figure><img src="img/cvd-protan.jpg" alt="The same, simulated protanopia" loading="lazy"><figcaption>The same, protan: Bass (blue) and the violet tracks become one colour</figcaption></figure>
+  <figure><img src="img/cvd-deutan.jpg" alt="The same, simulated deuteranopia" loading="lazy"><figcaption>Deutan: yellow and orange merge, red and green go olive</figcaption></figure>
+  <figure><img src="img/cvd-tritan.jpg" alt="The same, simulated tritanopia" loading="lazy"><figcaption>Tritan: green and cyan merge</figcaption></figure>
+ </div>
+</section>
+
+<div id="groups"></div>
+
+<section class="grp" id="research">
+ <header><span class="eyebrow">Research</span><h2>What the evidence says</h2><p class="mut">Short findings with their sources. The full write-up is <code>docs/research-ux-long-sessions.md</code>.</p></header>
+ <div class="res" id="resGrid"></div>
+</section>
+</div>
+
+<div class="picks" role="region" aria-label="Your picks">
+ <div class="in">
+  <span class="lab">Picks</span>
+  <div class="chips" id="chips"></div>
+  <code id="line">UX2 picks: (none)</code>
+  <button type="button" class="btn" id="copy">Copy</button>
+  <button type="button" class="btn" id="clear">Clear</button>
+ </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+/* ---------------- colour maths: WCAG 2, APCA-W3 0.0.98G-4g (the same as contrast.py) ---------------- */
+const hx=h=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
+const lin=v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4};
+const rl=c=>.2126*lin(c[0])+.7152*lin(c[1])+.0722*lin(c[2]);
+const wcag=(a,b)=>{const x=rl(a),y=rl(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+function apca(t,b){const Y=c=>.2126729*(c[0]/255)**2.4+.7151522*(c[1]/255)**2.4+.072175*(c[2]/255)**2.4,cl=v=>v>.022?v:v+(.022-v)**1.414;
+ const yt=cl(Y(t)),yb=cl(Y(b));if(Math.abs(yb-yt)<.0005)return 0;
+ if(yb>yt){const s=(yb**.56-yt**.57)*1.14;return s<.1?0:(s-.027)*100}const s=(yb**.65-yt**.62)*1.14;return s>-.1?0:(s+.027)*100}
+const fmtLc=(f,b)=>{const a=apca(hx(f),hx(b));return'Lc '+a.toFixed(0)+' · '+wcag(hx(f),hx(b)).toFixed(1)+':1'};
+
+/* ---------------- the measurements (from tools/design-lab/ux2/measure/*.json, v0.263) ---------------- */
+const M={text:{dark:{n:496,w45:97,lc60:240,lc45:136,lc30:4,med:69.7},lite:{n:346,w45:9,lc60:133,lc45:47,lc30:5,med:74.4},bright:{n:329,w45:27,lc60:135,lc45:51,lc30:12,med:74.4},
+  sizes:[[7,4],[9.5,8],[11,445],[11.5,2],[12,28],[13,7],[15,2]],topGrey:'#80838f'},
+ motion:{stopped:.015,playing:.21,playingUnion:1.9,mixer:6.3,mixerUnion:41.7,pageTurn:8.9,pageTurnUnion:39.2},
+ oled:{dark:{apl:4.84,over50:1.57,staticBright:4.31},bright:{apl:32.0,over50:31.9,staticBright:47.8},lite:{apl:4.09}},
+ worst:[['▸ (folder arrow)','yellow track strip','11 px / 600','#e6e8ee','#f5c84c',1.29,-14.9],['max -∞','transport, peak read-out','11 px / 500','#6d7384','#090a0d',4.18,-28.7],
+  ['Arrows point where the sound goes…','mixer, cable legend','11 px / 600','#6f7482','#101215',4.02,-28.7],['Selected only','mixer, cable legend','11 px / 600','#777b85','#101215',4.43,-31.8],
+  ['Sends','mixer strip label','11 px / 600','#7d8292','#29261f',3.94,-32.7],['+6, 0, -6, -12, -24','mixer fader scale','11 px / 600','#80838f','#242629',4.01,-33.3],
+  ['Group: its tracks play through this bus','group lanes','11 px / 400','(transparent white)','lane',null,null],['ruler bar numbers (canvas)','ruler','11 px / 500','#b0b4ba','#272b31',6.63,-55.9],
+  ['LOOK.tick labels (canvas)','display scales','9 px / 500','rgba(255,255,255,.32)','#0b0c10',2.83,-17.8]],
+ cvd:{today:{pal:['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'],n:[18.6,11.1],p:[1.0,.4],d:[5.8,3.0],t:[5.9,3.0],pair:'blue and violet (protan)'},
+  tuned:{pal:['#7075ff','#40ad81','#ffec39','#f3413f','#e8ab4b','#afabff','#8de6f1','#d867a7'],n:[16.8,8.1],p:[14.2,7.4],d:[12.3,7.4],t:[13.4,7.5],pair:'yellow and amber (deutan)'},
+  okabe:{pal:['#56b4e9','#14b386','#f0e442','#e2661c','#eea52b','#d78fb8','#3f7fd9','#c8c8d0'],n:[17.8,9.4],p:[9.7,4.9],d:[8.7,4.4],t:[7.4,3.7],pair:'sky blue and green (tritan)'},
+  okabe0:{pal:['#56B4E9','#009E73','#F0E442','#D55E00','#E69F00','#CC79A7','#0072B2','#BBBBBB'],n:[21.1,8.1],p:[12.2,5.9],d:[11.6,5.5],t:[10.9,5.1],pair:'Okabe-Ito as published, for reference'}}};
+
+/* ---------------- the mock: AudioLab's window at 2194 x 1139 points ---------------- */
+const W=2194,H=1139;
+const TODAY={mut:'#80838f',mut2:'#8b8b97',ink:'#ececf1',lab:'#a9afbd',mutW:400,base:11,pal:M.cvd.today.pal,cue:'none',strip:'full',white:'#ffffff',bodyA:.36,
+ bright:1,warm:0,focus:false,ears:false,disp:'live',idle:false,follow:'jump',session:false,brk:false,sim:'normal',fix:false,hc:false,autoMap:false,rm:false,zoom:7.7,speed:1,hint:'rgba(255,255,255,.2)'};
+const TR=[['Kick & Bass',1],['Kick'],['Bass'],['Drums',1],['Clap'],['Snare'],['Hat'],['Open hat'],['Percussion'],['Shaker'],['Toms'],['Crash'],['Snare roll'],['Lead'],['Lead low'],['Pad']];
+const SEC=[['Intro',1,24],['Break',25,8],['Theme A',33,17],['Theme A²',50,16],['Theme B',66,16],['Theme B²',82,16],['Breakdown',98,8],['Groove',106,24],['Build-up',130,16],['Climax',146,16],['Peak',162,16],['Final drop',178,16],['Outro',194,18]];
+const hash=(a,b)=>{let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296};
+const lane=(i)=>i%2?'#1e2227':'#1b1f24';
+function rr(g,x,y,w,h,r){g.beginPath();g.roundRect?g.roundRect(x,y,w,h,r):g.rect(x,y,w,h)}
+function mix(a,b,k){const A=hx(a),B=hx(b);return'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*k)).join(',')+')'}
+function rgba(h,a){const c=hx(h);return`rgba(${c[0]},${c[1]},${c[2]},${a})`}
+function inkOn(h){const c=hx(h);return Math.abs(apca([16,18,22],c))>Math.abs(apca([240,240,244],c))?'#121419':'#f4f5f8'}
+const F=(w,s)=>`${w} ${s}px Inter, system-ui, sans-serif`,FM=(w,s)=>`${w} ${s}px "JetBrains Mono", ui-monospace, Menlo, monospace`;
+
+/* level of a track at time t (seconds): a pulse per beat (145 bpm) with a per-track character, in dBFS */
+function lvl(i,t){const bp=145/60,ph=(t*bp*(i%3===0?1:i%3===1?2:.5)+i*.37)%1,e=Math.exp(-ph*(3+i%4*2));return -48+44*e*(.6+.4*hash(i,7))+3*Math.sin(t*9+i)}
+
+function draw(g,c,t,st){
+ const s=c.base/11,ink=c.hc?'#f6f6f9':c.ink,mut=c.hc?'#c4c7d1':c.mut,lab=c.hc?'#d4d7e0':c.lab,white=c.white;
+ const top=72,bot=c.focus?1036:615,th=61,hw=208,lx=212,zoom=c.zoom;
+ /* window ground */
+ g.fillStyle='#0a0a0c';g.fillRect(0,0,W,H);
+ /* tab bar */
+ g.fillStyle='#0f1014';g.fillRect(0,0,W,28);rr(g,8,3,150,24,6);g.fillStyle='#1c1e24';g.fill();g.fillStyle=c.pal[0];g.fillRect(14,3,138,2);
+ g.font=F(500,12*s);g.fillStyle=ink;g.fillText('Fractals_remake',20,20);g.fillStyle=mut;g.fillText('×',138,20);
+ g.font=FM(400,11*s);g.fillStyle=mut;g.fillText('00:00',190,20);
+ /* playhead and follow */
+ const bars=1+(t*c.speed)*145/60/4+38,vis=(W-lx)/zoom;let off=0;
+ if(c.follow==='jump'){off=Math.floor((bars-1)/(vis*.98))*vis*.98}else if(c.follow==='calm'){const pg=vis*.8;off=Math.max(0,Math.floor((bars-1-vis*.1)/pg)*pg)}
+ const X=b=>lx+(b-1-off)*zoom;
+ /* ruler and sections */
+ g.fillStyle='#1d2228';g.fillRect(0,28,W,44);g.fillStyle='#14171b';g.fillRect(0,54,W,18);
+ g.font=F(500,11*s);g.fillStyle='#b0b4ba';const step=zoom<12?8:4;
+ for(let b=1;b<300;b+=step){const x=X(b);if(x<lx||x>W)continue;g.fillText(String(b),x+3,46);g.fillStyle='#3a4049';g.fillRect(x,30,1,24);g.fillStyle='#b0b4ba'}
+ g.font=F(500,10.5*s);
+ for(const[n,b,l] of SEC){const x=X(b),w=l*zoom-2;if(x>W||x+w<lx)continue;const col=c.pal[(b*7)%8];rr(g,Math.max(lx,x),56,w,15,3);g.fillStyle=rgba(col,.22);g.fill();g.strokeStyle=rgba(col,.8);g.lineWidth=1;g.stroke();g.save();g.beginPath();g.rect(Math.max(lx,x),56,w,15);g.clip();g.fillStyle=ink;g.fillText(n,Math.max(lx,x)+5,67.5);g.restore()}
+ g.font=F(600,11*s);g.fillStyle=lab;g.fillText('Tracks',8,66);
+ /* lanes and grid */
+ const nT=Math.floor((bot-top)/th)+1;
+ g.save();g.beginPath();g.rect(0,top,W,bot-top);g.clip();
+ for(let i=0;i<nT;i++){const y=top+i*th;g.fillStyle=lane(i);g.fillRect(lx,y,W-lx,th);g.fillStyle='#121418';g.fillRect(lx,y+th-1,W-lx,1)}
+ for(let b=1;b<300;b+=4){const x=X(b);if(x<lx||x>W)continue;g.fillStyle=(b-1)%16===0?'rgba(255,255,255,.09)':'rgba(255,255,255,.04)';g.fillRect(Math.round(x),top,1,bot-top)}
+ /* clips */
+ for(let i=0;i<nT;i++){const T=TR[i%TR.length],y=top+i*th,col=c.pal[i%8],grp=T[1];
+  if(grp){g.font=F(400,11*s);g.fillStyle=c.fix?mut:c.hint;g.fillText('Group: its tracks play through this bus',lx+30,y+34);
+   for(let b=17;b<260;b+=8){if(hash(i,b)<.25)continue;const x=X(b);if(x>W||x+8*zoom<lx)continue;g.fillStyle=rgba(c.pal[(i+1)%8],.55);g.fillRect(x,y+8,8*zoom-1,4);g.fillStyle=rgba(c.pal[(i+2)%8],.5);g.fillRect(x,y+14,8*zoom-1,4)}continue}
+  for(let b=17;b<260;b+=8){if(hash(i,b)<.18||(b>=25&&b<33)||(b>=98&&b<106))continue;const x=X(b),w=8*zoom-2;if(x>W||x+w<lx)continue;
+   rr(g,x,y+3,w,th-8,3);g.fillStyle=rgba(col,c.bodyA);g.fill();g.fillStyle=col;g.fillRect(x,y+3,w,2);
+   if(c.cue==='both'){g.save();rr(g,x,y+3,w,th-8,3);g.clip();g.strokeStyle=rgba(col,.32);g.lineWidth=1.2;const k=i%8,sp=6+(k%3)*2;
+    if(k%4===0){/* plain */}else if(k%4===1){for(let q=-th;q<w;q+=sp){g.beginPath();g.moveTo(x+q,y+th);g.lineTo(x+q+th,y);g.stroke()}}
+    else if(k%4===2){for(let q=-th;q<w;q+=sp){g.beginPath();g.moveTo(x+q,y);g.lineTo(x+q+th,y+th);g.stroke()}}
+    else{g.fillStyle=rgba(col,.4);for(let q=4;q<w;q+=8)for(let r=y+22;r<y+th-6;r+=8)g.fillRect(x+q,r,1.6,1.6)}g.restore()}
+   if(w>40){g.save();g.beginPath();g.rect(x,y,w,th);g.clip();g.font=F(600,11*s);g.fillStyle=c.hc?'#ffffff':mix(col,'#ffffff',.55);
+    let tx=x+5;if(c.cue!=='none'){g.font=FM(500,10*s);const nb=String(i+1);rr(g,x+4,y+8,g.measureText(nb).width+6,13,2);g.fillStyle=col;g.fill();g.fillStyle=inkOn(col);g.fillText(nb,x+7,y+18);tx=x+g.measureText(nb).width+14;g.font=F(600,11*s);g.fillStyle=c.hc?'#ffffff':mix(col,'#ffffff',.55)}
+    g.fillText(T[0]+' '+b,tx,y+18);g.restore()}
+   /* mini waveform */
+   g.fillStyle=rgba(col,.85);for(let q=3;q<w-3;q+=3){const a=c.ears&&c.earsWave?1.5:2+5*Math.abs(Math.sin(q*.7+i))*(q%24<6?1:.45);g.fillRect(x+q,y+th/2+6-a/2,1.4,a)}
+  }}
+ /* playhead */
+ const px=X(bars);if(px>=lx&&px<=W){g.fillStyle=c.pal[1];g.fillRect(px,28,1.5,bot-28)}
+ g.restore();
+ /* follow pill */
+ if(px>=lx&&px<=W){rr(g,px+2,31,70,20,5);g.fillStyle=c.oled?'#2f9e6e':'#3ecf8e';g.fill();g.font=F(600,11*s);g.fillStyle='#04130c';g.fillText('▸ Follow',px+10,45)}
+ /* track headers */
+ for(let i=0;i<nT;i++){const T=TR[i%TR.length],y=top+i*th,col=c.pal[i%8],sel=i===0;if(y>bot)break;
+  g.save();g.beginPath();g.rect(0,top,hw+4,bot-top);g.clip();
+  g.fillStyle=sel?'#2b2817':'#23262c';g.fillRect(0,y,hw,th-1);if(sel){g.fillStyle='rgba(245,200,76,.5)';g.fillRect(0,y,hw,1);g.fillRect(0,y+th-2,hw,1)}
+  const sw=c.strip==='slim'?5:22;g.fillStyle=col;g.fillRect(0,y,sw,th-1);
+  if(c.strip==='slim'){g.fillStyle='#1a1c21';g.fillRect(5,y,17,th-1);g.font=F(600,11*s);g.fillStyle=col;g.fillText(String(i+1),8,y+16)}
+  else{g.font=F(600,11*s);g.fillStyle='rgba(0,0,0,.75)';g.fillText(String(i+1),7,y+16)}
+  if(T[1]){g.font=F(600,11*s);g.fillStyle=c.fix?(c.strip==='slim'?col:inkOn(col)):'#e6e8ee';g.fillText('▾',c.strip==='slim'?8:6,y+32)}
+  rr(g,27,y+6,34,34,5);g.fillStyle='#2e3138';g.fill();g.strokeStyle='#3b3f47';g.stroke();g.strokeStyle='#9da2ae';g.lineWidth=1.4;g.beginPath();g.moveTo(36,y+23);g.lineTo(41,y+23);g.lineTo(44,y+16);g.lineTo(48,y+30);g.lineTo(51,y+23);g.stroke();g.lineWidth=1;
+  g.font=F(600,12*s);g.fillStyle=ink;g.fillText(T[0],68,y+18);
+  rr(g,68,y+25,68,14,3);g.fillStyle='#0e0f13';g.fill();g.font=F(500,11*s);g.fillStyle=ink;g.fillText('-1.9',74,y+36);
+  g.fillStyle=c.oled?'#c9ccd4':white;g.fillRect(110,y+24,3,16);
+  for(const[k,lt] of[[0,'M'],[1,'S']]){rr(g,148+k*19,y+24,16,15,3);g.fillStyle='#3a3d45';g.fill();g.font=F(600,11*s);g.fillStyle='#dcdee6';g.fillText(lt,151.5+k*19,y+35.5)}
+  rr(g,68,y+43,16,14,3);g.fillStyle='#3a3d45';g.fill();g.fillStyle='#dcdee6';g.font=F(600,10*s);g.fillText('e',73,y+54);
+  rr(g,88,y+43,16,14,3);g.fillStyle='#27a052';g.fill();g.fillStyle='#071a0d';g.fillText('R',92,y+54);
+  rr(g,110,y+43,72,14,3);g.fillStyle='#0b0c10';g.fill();g.fillStyle=c.oled?'#c9ccd4':white;g.fillRect(146,y+44,1.5,12);g.font=F(600,10*s);g.fillStyle=ink;g.fillText('C',143,y+54);
+  g.restore()}
+ g.fillStyle='#0c0d10';g.fillRect(hw,top,4,bot-top);
+ /* docked mixer and the spectrum device */
+ if(!c.focus){
+  g.fillStyle='#14161b';g.fillRect(0,615,W,375);g.fillStyle='#24272e';g.fillRect(0,615,W,1);
+  g.font=F(600,11*s);g.fillStyle=lab;g.fillText('Mixer',10,632);g.fillStyle=mut;g.font=F(c.mutW,11*s);g.fillText('Arrows point where the sound goes. Click a cable to change it.',64,632);
+  const sx0=8,swd=96;
+  for(let i=0;i<13;i++){const x=sx0+i*swd,y=642,col=c.pal[i%8],T=TR[i%TR.length];
+   rr(g,x,y,swd-6,340,6);g.fillStyle='#1b1d22';g.fill();g.fillStyle=col;g.fillRect(x,y,swd-6,3);
+   g.font=F(600,11*s);g.fillStyle=ink;g.save();g.beginPath();g.rect(x,y,swd-8,30);g.clip();g.fillText((i+1)+' '+T[0],x+6,y+18);g.restore();
+   g.font=F(c.mutW>400?600:600,11*s);g.fillStyle=c.fix?mut:'#7d8292';g.fillText('Sends',x+6,y+44);
+   rr(g,x+6,y+50,swd-18,40,3);g.fillStyle='#101115';g.fill();
+   /* meter pair */
+   const L=st.lv(i,t),mx=x+swd-34,my=y+100,mh=180;
+   for(const k of[0,1]){const v=Math.max(0,Math.min(1,(L[k]+60)/60));g.fillStyle='#0b0c10';g.fillRect(mx+k*8,my,6,mh);
+    if(c.ears){g.fillStyle='rgba(120,124,136,.25)';g.fillRect(mx+k*8,my+mh-6,6,6)}else{const hgt=v*mh;const gr=g.createLinearGradient(0,my+mh,0,my);gr.addColorStop(0,'#2fbf6f');gr.addColorStop(.75,'#c9d84a');gr.addColorStop(.92,'#ff9a3c');g.fillStyle=gr;g.fillRect(mx+k*8,my+mh-hgt,6,hgt);
+     if(c.disp==='calm'){const p=Math.max(0,Math.min(1,(L[2+k]+60)/60));g.fillStyle='#ececf1';g.fillRect(mx+k*8,my+mh-p*mh,6,1.5)}}}
+   /* fader and scale */
+   g.font=F(c.mutW>400?600:600,11*s);g.fillStyle=mut;for(const[j,d] of['+6','0','-6','-12','-24','-48'].entries()){g.fillText(d,x+6,my+8+j*32)}
+   g.fillStyle='#0b0c10';g.fillRect(x+38,my,4,mh);g.fillStyle=c.oled?'#c9ccd4':white;rr(g,x+31,my+44,18,10,2);g.fill();
+   g.font=F(500,11*s);g.fillStyle=ink;g.fillText('-1.9',x+30,my+mh+18);
+   for(const[k,lt] of[[0,'M'],[1,'S']]){rr(g,x+6+k*20,y+312,17,15,3);g.fillStyle='#3a3d45';g.fill();g.fillStyle='#dcdee6';g.fillText(lt,x+10+k*20,y+323.5)}}
+  /* spectrum device (INS.spec look: graticule, REF, trace, max hold) */
+  const dx=1268,dy=642,dw=910,dh=340;rr(g,dx,dy,dw,dh,6);g.fillStyle='#1b1d22';g.fill();
+  g.font=F(600,11*s);g.fillStyle=ink;g.fillText('Spectrum',dx+10,dy+18);
+  const bx=dx+10,by=dy+28,bw=dw-20,bh=dh-40;g.fillStyle='#050507';g.fillRect(bx,by,bw,bh);
+  for(let k=0;k<=10;k++){g.fillStyle=k%5===0?'rgba(255,255,255,.13)':'rgba(255,255,255,.05)';g.fillRect(bx+k*bw/10,by,1,bh);g.fillRect(bx,by+k*bh/10,bw,1)}
+  g.font=FM(500,10*s);g.fillStyle=c.hc?'#c4c7d1':'#8b8b97';g.fillText('REF 0',bx+6,by+14);g.fillStyle='#ffb547';g.fillText('dBFS',bx+46,by+14);g.fillStyle=c.hc?'#c4c7d1':'#8b8b97';g.fillText('10',bx+92,by+14);g.fillStyle='#ffb547';g.fillText('dB/div',bx+110,by+14);
+  g.fillStyle=c.hc?'#c4c7d1':c.tickLab||'rgba(255,255,255,.32)';g.font=FM(500,9*s);for(const[f,lb] of[[.1,'50'],[.3,'200'],[.5,'1k'],[.7,'5k'],[.9,'15k']])g.fillText(lb,bx+f*bw,by+bh-5);
+  const sp=st.spec(t);g.lineWidth=1.4;
+  if(!c.ears){g.strokeStyle='#5ec8e5';g.beginPath();sp.hold.forEach((v,k)=>{const xx=bx+k/(sp.hold.length-1)*bw,yy=by+bh*(1-v);k?g.lineTo(xx,yy):g.moveTo(xx,yy)});g.stroke();
+   g.strokeStyle='#f5c84c';g.beginPath();sp.cur.forEach((v,k)=>{const xx=bx+k/(sp.cur.length-1)*bw,yy=by+bh*(1-v);k?g.lineTo(xx,yy):g.moveTo(xx,yy)});g.stroke()}
+  else{g.fillStyle='rgba(5,5,7,.6)';g.fillRect(bx,by,bw,bh);g.font=F(500,12*s);g.fillStyle='#9a9eab';g.fillText('Listening: displays rest. Press L to see them again.',bx+bw/2-150,by+bh/2)}
+ }
+ /* transport */
+ g.fillStyle='#16181d';g.fillRect(0,990,W,46);g.fillStyle='#25282f';g.fillRect(0,990,W,1);
+ for(let k=0;k<6;k++){rr(g,330+k*26,1001,22,22,5);g.fillStyle=k===3?'#2a2d34':'#22252b';g.fill();g.strokeStyle='#3a3d45';g.stroke()}
+ g.font=FM(500,12*s);g.fillStyle=ink;g.fillText(' 1. 1. 1.   0',16,1017);g.fillText('290. 1. 1.   0',170,1017);g.fillText('145',560,1017);g.font=F(500,11*s);g.fillStyle=mut;g.fillText('4/4',610,1017);
+ const tb=(bars).toFixed(2).split('.');g.font=FM(500,12*s);g.fillStyle=ink;g.fillText(Math.floor(bars)+'. '+(1+Math.floor((bars%1)*4))+'. '+(1+Math.floor((bars*16)%4))+'.  '+String(Math.floor((bars*480)%120)).padStart(3,' '),770,1017);
+ /* master meter + peak */
+ const ML=st.lv(99,t);for(const k of[0,1]){const v=Math.max(0,Math.min(1,(ML[k]+60)/60));g.fillStyle='#0b0c10';g.fillRect(1420,1003+k*9,220,6);if(!c.ears){g.fillStyle='#2fbf6f';g.fillRect(1420,1003+k*9,220*v,6)}}
+ g.font=F(600,11*s);g.fillStyle=ink;g.fillText('Mixer',1360,1017);g.font=FM(500,11*s);g.fillStyle=ink;g.fillText('-∞ dB',1660,1010);g.fillStyle=c.fix?mut:'#6d7384';g.font=FM(500,10*s);g.fillText('max -1.0',1660,1024);
+ g.font=FM(500,11*s);g.fillStyle=ink;g.fillText('-14.2',1760,1017);g.fillStyle='#ffb547';g.fillText('LUFS',1802,1017);
+ if(c.session){const mins=118+Math.floor(t/60);g.font=FM(500,11*s);g.fillStyle=lab;g.fillText('Session',1890,1017);g.fillStyle=ink;g.fillText(Math.floor(mins/60)+'',1948,1017);g.fillStyle='#ffb547';g.fillText('h',1958,1017);g.fillStyle=ink;g.fillText(String(mins%60).padStart(2,'0'),1972,1017);g.fillStyle='#ffb547';g.fillText('min',1990,1017);
+  g.fillStyle=mut;g.font=F(c.mutW,11*s);g.fillText('break in 2 min',2030,1017)}
+ /* help line and map */
+ if(!c.autoMap){g.fillStyle='#0d0e11';g.fillRect(0,1036,W,20);g.font=F(600,11*s);g.fillStyle=ink;g.fillText('Map',8,1050);g.font=F(c.mutW,11*s);g.fillStyle=c.mut2&&!c.hc?(c.mutFix||'#8b8b97'):mut;g.fillText('· drag the box to move · pull its edges to zoom (sides = time, top/bottom = tracks) · pinch or ⌘-scroll to zoom both ways',36,1050);
+  g.fillStyle='#08090b';g.fillRect(0,1056,W,83);
+  for(const[n,b,l] of SEC){g.fillStyle=rgba(c.pal[(b*7)%8],.8);g.fillRect(b*8.3,1057,l*8.3-2,3)}
+  for(let i=0;i<8;i++)for(let b=17;b<260;b+=8){if(hash(i,b)<.3)continue;g.fillStyle=rgba(c.pal[i%8],.35);g.fillRect(b*8.3,1064+i*8,8*8.3-2,2)}
+  g.strokeStyle=c.oled?'rgba(255,255,255,.55)':white;g.lineWidth=1.5;g.strokeRect(1+off*8.3,1062,vis*8.3-2,18);
+ }else{g.fillStyle='#0a0b0d';g.fillRect(0,1036,W,103);g.fillStyle='#2a2d34';g.fillRect(W/2-40,1134,80,2)}
+ /* break card */
+ if(c.brk){const x=W-430,y=bot-150;rr(g,x,y,400,120,10);g.fillStyle='rgba(28,30,37,.97)';g.fill();g.strokeStyle='#33363f';g.stroke();
+  g.font=F(600,13*s);g.fillStyle=ink;g.fillText('60 minutes of listening',x+16,y+28);g.font=F(400,11*s);g.fillStyle=c.hc?'#c4c7d1':'#a4a8b5';
+  g.fillText('Ears and eyes recover with a short break away from the',x+16,y+50);g.fillText('screen. Playback keeps your place.',x+16,y+66);
+  rr(g,x+16,y+80,110,24,6);g.fillStyle='#4c8dff';g.fill();g.fillStyle='#fff';g.font=F(600,11*s);g.fillText('Pause for 5 min',x+26,y+96);
+  rr(g,x+136,y+80,70,24,6);g.fillStyle='#2a2d34';g.fill();g.fillStyle=ink;g.fillText('Later',x+155,y+96)}
+ /* warm tone and idle dim */
+ if(c.warm>0){g.save();g.globalCompositeOperation='multiply';g.fillStyle=`rgba(255,${Math.round(255-45*c.warm)},${Math.round(255-95*c.warm)},1)`;g.fillRect(0,0,W,H);g.restore()}
+ if(c.idle){g.fillStyle='rgba(0,0,0,.72)';g.fillRect(0,0,W,H);g.font=F(500,12*s);g.fillStyle='#6f7380';g.fillText('Dimmed after 10 min without input · move the pointer to wake · playback is not affected',W/2-260,H/2)}
+}
+
+/* per-canvas state: meters with the chosen ballistics, the spectrum's trace and max hold */
+function State(c){this.c=c;this.m=new Map();this.lastT=-1;this.sp=null;this.spT=-1}
+State.prototype.lv=function(i,t){const c=this.c;let s=this.m.get(i);if(!s){s={v:[-60,-60],pk:[-60,-60],pt:[0,0],t:t,q:-1};this.m.set(i,s)}
+ const raw=[lvl(i,t),lvl(i,t+.013)-1];if(c.disp!=='calm'){for(const k of[0,1])s.v[k]=raw[k]+(Math.random()-.5)*3;return[s.v[0],s.v[1],0,0]}
+ const q=Math.floor(t*30);if(q!==s.q){const dt=Math.max(0,Math.min(.2,t-s.t));for(const k of[0,1]){const fall=s.v[k]-dt*11.8;/* IEC 60268-10 type I: 20 dB in 1.7 s */s.v[k]=Math.max(raw[k],fall);
+  if(s.v[k]>s.pk[k]||t-s.pt[k]>1.5){s.pk[k]=s.v[k];s.pt[k]=t}}s.q=q;s.t=t}
+ return[s.v[0],s.v[1],s.pk[0],s.pk[1]]};
+State.prototype.spec=function(t){const c=this.c,N=96;if(!this.sp)this.sp={cur:new Array(N).fill(0),hold:new Array(N).fill(0),q:-1,t:t};const S=this.sp;
+ if(c.disp==='calm'){const q=Math.floor(t*30);if(q===S.q)return S;S.q=q}
+ const dt=Math.max(.001,Math.min(.2,t-S.t));S.t=t;const a=c.disp==='calm'?1-Math.exp(-dt/.3):1;
+ for(let k=0;k<N;k++){const f=k/N,base=.72-.45*f+.12*Math.sin(f*9)+.18*Math.exp(-((f-.12)**2)/.002)*(lvl(0,t)+48)/44,v=Math.max(0,Math.min(1,base+(c.disp==='calm'?0:(Math.random()-.5)*.09)+(Math.random()-.5)*.03));
+  S.cur[k]+=(v-S.cur[k])*a;S.hold[k]=Math.max(S.cur[k],S.hold[k]-dt*.04)}return S};
+
+/* views: a canvas showing a region of the window at a scale that fits its width */
+const VIEWS=[];let ANIM=!matchMedia('(prefers-reduced-motion: reduce)').matches;const T0=performance.now();
+function makeView(cv,getCfg,region,opts){const v={cv,getCfg,region,opts:opts||{},vis:true,st:null,key:''};VIEWS.push(v);
+ if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{for(const e of es)v.vis=e.isIntersecting});io.observe(cv)}
+ size(v);return v}
+function size(v){const r=v.region,cw=v.cv.clientWidth||v.cv.parentElement.clientWidth||600,dpr=Math.min(2,devicePixelRatio||1);v.k=cw/r.w;v.cv.width=Math.round(cw*dpr);v.cv.height=Math.round(r.h*v.k*dpr);v.cv.style.aspectRatio=r.w+' / '+r.h;v.dpr=dpr}
+function render(v,t){const c=v.getCfg();const key=JSON.stringify(c);if(key!==v.key){v.key=key;v.st=new State(c);
+  const f=[];if(c.bright<1)f.push(`brightness(${c.bright})`);if(c.sim&&c.sim!=='normal')f.push(`url(#cvd-${c.sim})`);v.cv.style.filter=f.join(' ')}
+ const g=v.cv.getContext('2d'),r=v.region,k=v.k*v.dpr;g.setTransform(k,0,0,k,-r.x*k,-r.y*k);draw(g,c,t,v.st)}
+let last=0;
+function frame(now){requestAnimationFrame(frame);const t=ANIM?(now-T0)/1000:6;if(!ANIM&&last===-1)return;
+ for(const v of VIEWS){if(!v.vis)continue;if(!ANIM&&v.drawn&&v.key===JSON.stringify(v.getCfg()))continue;
+  if(ANIM&&v.opts.slow&&now-(v.lastDraw||0)<66)continue;v.lastDraw=now;render(v,t);v.drawn=1}}
+addEventListener('resize',()=>{for(const v of VIEWS){size(v);v.key=''}});
+
+/* measurement inside the mock: picture level, bright share, animated share (rendered at quarter size, the same method as oled.py and shoot_measure.py) */
+function measure(c,what){const k=.25,cv=document.createElement('canvas');cv.width=Math.round(W*k);cv.height=Math.round(H*k);const g=cv.getContext('2d',{willReadFrequently:true});
+ const st=new State(c),shot=t=>{g.setTransform(k,0,0,k,0,0);draw(g,c,t,st);return g.getImageData(0,0,cv.width,cv.height).data};
+ if(what==='lum'){const d=shot(6);let s=0,b=0,n=d.length/4;const L=v=>lin(v);for(let i=0;i<d.length;i+=4){const y=(.2126*L(d[i])+.7152*L(d[i+1])+.0722*L(d[i+2]))*c.bright;s+=y;if(y>.25)b++}return{apl:s/n*100,bright:b/n*100}}
+ let prev=shot(6),sum=0,steps=8;const u=new Uint8Array(prev.length/4);for(let j=1;j<=steps;j++){const d=shot(6+j*.125);let ch=0;for(let i=0,p=0;i<d.length;i+=4,p++){if(Math.max(Math.abs(d[i]-prev[i]),Math.abs(d[i+1]-prev[i+1]),Math.abs(d[i+2]-prev[i+2]))>12){ch++;u[p]=1}}sum+=ch/(d.length/4);prev=d}
+ let un=0;for(const x of u)un+=x;return{step:sum/steps*100,union:un/u.length*100}}
+
+/* ---------------- the options ---------------- */
+const R={headers:{x:0,y:28,w:600,h:300},clips:{x:200,y:28,w:620,h:300},mixer:{x:0,y:615,w:620,h:375},mixerR:{x:1240,y:615,w:620,h:375},transport:{x:1300,y:960,w:894,h:179},map:{x:0,y:985,w:900,h:154},whole:{x:0,y:0,w:W,h:H},spec:{x:1260,y:620,w:640,h:370}};
+const G=[
+ {id:'contrast',t:'Contrast and text',d:'The quiet grey #80838f is the single most used text colour (84 of 496 text runs) and reads at Lc 33 to 40. Light text on dark needs more contrast than WCAG 2 suggests: APCA puts the floor for small labels at Lc 45 and content text at Lc 60.'},
+ {id:'cvd',t:'Colour-blind safe track colours',d:'With protanopia, today\'s blue (#4c8dff) and violet (#b583ff) tracks are the same colour (ΔE 1.0). With deuteranopia yellow and orange merge (5.8), with tritanopia green and cyan (5.9). About 1 in 12 men has a red-green deficiency.'},
+ {id:'oled',t:'OLED care',d:'Dark AudioLab is kind to the panel: 4.8 % average picture level, 1.6 % of the screen above half white. What remains are a few bright parts that never move: the full-colour number strips, white fader caps and pan marks, the map box, the help line. QD-OLED wears its subpixels by how long they are driven bright.'},
+ {id:'night',t:'Night and focus modes',d:'Dim rooms favour a lower screen luminance matched to the room, fewer things on screen, and breaks. Live 12, Premiere and Bitwig have brightness or contrast controls; VS Code and Figma hide the chrome; engineers rest their ears about once an hour.'},
+ {id:'motion',t:'Motion and visual noise',d:'Stopped, 0.015 % of the screen changes per 125 ms. Playing, 0.21 % (the playhead and meters); with the mixer docked or open, 6.3 % per step and 42 % of the screen within 3 s; a Follow page turn changes 39 % at once. Motion in the corner of the eye takes attention even when you do not look.'},
+ {id:'set',t:'Settings to add',d:'Where the picks live. Today Settings › Appearance has Theme, Interface size, Glass, Background and tint, Clips, Grid, App icon, and Layout has Density and Motion. A small Comfort group keeps the new switches in one place.'}];
+const P=(o)=>o;
+const OPTS=[
+ /* contrast */
+ {id:'E1',g:'contrast',t:'Quiet grey one step lighter',s:3,ex:'grey',reg:'mixer',a:{mut:'#9a9eab',mutFix:'#9a9eab'},
+  what:'The quiet grey (#80838f, #8b8b97) becomes <b>#9a9eab</b> everywhere it is used for words: mixer scales, legends, hints, help line. Hierarchy stays: values and names keep today\'s near-white.',
+  why:'Moves 11 px labels from Lc 33-40 to Lc 47-50, just over APCA\'s small-label floor of Lc 45. The smallest change that clears it.',
+  ro:()=>`grey on mixer strip: <b>${fmtLc('#80838f','#1f2126')}</b> → <b class="up">${fmtLc('#9a9eab','#1f2126')}</b> · on panel: ${fmtLc('#80838f','#121216')} → <b class="up">${fmtLc('#9a9eab','#121216')}</b>`,lane:'<b>LK tokens</b> (a new token --mut2 read by every lane) and lane A for the canvas greys'},
+ {id:'E2',g:'contrast',t:'Quiet grey at the APCA content floor, weight 500',s:5,ex:'grey',reg:'mixer',a:{mut:'#adb1bd',mutFix:'#adb1bd',mutW:500},
+  what:'The quiet grey becomes <b>#adb1bd</b> and 11 px grey text uses weight 500 (Medium). Names and values stay #ececf1, so the step between the two is still clear (Lc 60 against Lc 93).',
+  why:'Lc 58-60 is APCA\'s level for content text that is not body copy; weight 500 thickens strokes at 11 px, where Apple advises against light weights. Recommended for hours of reading at 1.75x.',
+  ro:()=>`grey on mixer strip: <b>${fmtLc('#80838f','#1f2126')}</b> → <b class="up">${fmtLc('#adb1bd','#1f2126')}</b> · ink: ${fmtLc('#ececf1','#1f2126')}`,lane:'<b>LK tokens</b> (--mut2, a weight token) and lane A for the canvas greys'},
+ {id:'E3',g:'contrast',t:'Text size: 12 px base as a setting',s:4,reg:'headers',a:{base:12},
+  what:'Settings › Appearance › <b>Text size</b>: Standard (Inter 11/12/13/15, today) or Large (12/13/15/17). Only text grows; rows, buttons and the grid stay, unlike Interface scale, which grows everything.',
+  why:'At your size 11 px has an x-height of 1.94 mm, 9.5 arcmin at 70 cm. Contrast for small text matters most below 12 pt (Piepenbrock 2014); one pixel more adds 9 %.',
+  ro:()=>`x-height at 70 cm: <b>11 px 9.5′</b> → <b class="up">12 px 10.4′</b> (cap 2.58 → 2.82 mm)`,lane:'<b>lane B</b> (ST, the setting) and every lane that draws text on a canvas reads one size token'},
+ {id:'E4',g:'contrast',t:'Fix the four failing texts',s:5,reg:'headers',a:{fix:true},
+  what:'The folder arrow and number on a light strip (yellow, cyan) pick dark ink by contrast; the group lanes\' hint, the mixer\'s "Sends", the cable legend and the peak "max" read-out move to the quiet grey; canvas tick labels use LOOK.mut, never LOOK.tick.',
+  why:'Measured today: white arrow on the yellow strip Lc 15 (1.3:1), "max" Lc 29, legend Lc 29, tick labels 9 px Lc 18. Each is below every guideline.',
+  ro:()=>`folder arrow: <b class="dn">${fmtLc('#e6e8ee','#f5c84c')}</b> → <b class="up">${fmtLc('#121419','#f5c84c')}</b> · max read-out ${fmtLc('#6d7384','#090a0d')} → <b class="up">${fmtLc('#adb1bd','#090a0d')}</b>`,lane:'lane A (strips, lanes), lane E (read-outs and tick labels), lane C or the mixer owner for "Sends"'},
+ {id:'E5',g:'contrast',t:'Contrast: High, as a setting',s:3,reg:'mixerR',a:{hc:true},
+  what:'Settings › Appearance › <b>Contrast</b>: Standard or High. High lifts ink to #f6f6f9, the quiet grey to #c4c7d1 (Lc 70+), clip titles to white and display labels to the same grey. For tired eyes late at night or a bright room.',
+  why:'Live 12 has a High contrast theme option; Bitwig a Contrast slider; Premiere a Brightness slider. Off by default: more contrast also means more glare in a dark room.',
+  ro:()=>`grey: <b>${fmtLc('#80838f','#1f2126')}</b> → <b class="up">${fmtLc('#c4c7d1','#1f2126')}</b>`,lane:'<b>LK tokens</b> (a high set of the same names) and lane B (setting)'},
+ /* cvd */
+ {id:'E6',g:'cvd',t:'Today\'s eight colours, tuned apart',s:5,ex:'pal',reg:'clips',sim:1,a:{pal:M.cvd.tuned.pal},
+  what:'The same eight hues, each moved at most 16° in hue and 0.09 in lightness (OKLCH), chosen by search to spread apart for normal, protan, deutan and tritan vision at once: blue goes indigo, violet lighter, cyan paler, pink deeper, red stronger.',
+  why:'Worst pair of edges under any deficiency goes from ΔE 1.0 to 12.3. Normal-vision spread stays about the same (18.6 → 16.8). It still looks like AudioLab. The yellow #ffec39 moves away from the selection yellow #f5c84c.',
+  ro:()=>`smallest ΔE (edge): normal 18.6 → <b>16.8</b> · protan <b class="dn">1.0</b> → <b class="up">14.2</b> · deutan 5.8 → <b class="up">12.3</b> · tritan 5.9 → <b class="up">13.4</b>`,lane:'lane A (PAL, new projects\' colours) and lane B (THEMES palette for the AudioLab theme)'},
+ {id:'E7',g:'cvd',t:'Okabe-Ito, lifted for a dark ground',s:3,ex:'pal',reg:'clips',sim:1,a:{pal:M.cvd.okabe.pal},
+  what:'The widely used Okabe-Ito set as a palette choice ("Colour-blind safe" next to Today in the colour picker): sky blue, bluish green, yellow, vermilion, orange, reddish purple, blue and grey, with the two dark ones lightened so they read on dark lanes.',
+  why:'A recognised, published set. On a dark ground it spreads less than E6 (worst 7.4) and it changes AudioLab\'s look more: muted, with a grey track.',
+  ro:()=>`smallest ΔE (edge): protan <b>9.7</b> · deutan <b>8.7</b> · tritan <b>7.4</b> · normal 17.8`,lane:'lane A (palette) and lane B (the choice in Settings)'},
+ {id:'E8',g:'cvd',t:'A second cue: number and texture on clips',s:4,reg:'clips',sim:1,a:{cue:'both'},
+  what:'Clips carry their track number in a small chip and one of four textures by colour slot (plain, two hatches, dots) at low strength. Works with any palette, including a project\'s own colours.',
+  why:'WCAG 1.4.1: colour must not be the only cue. Clip bodies at 36 % stay under ΔE 10 for some pairs with any palette, so a non-colour cue is what makes them certain.',
+  ro:()=>`clip bodies, smallest ΔE with today\'s colours: protan <b class="dn">0.4</b> · with E6 <b>7.4</b> · plus number and texture: told apart without colour`,lane:'lane A (clip drawing)'},
+ {id:'E9',g:'cvd',t:'"See as" colour-vision preview',s:3,reg:'clips',sim:1,a:{sim:'deutan'},
+  what:'Settings › Appearance › Clips: a <b>See as</b> switch (Normal, Protan, Deutan, Tritan) that shows the whole app through the simulation, to check a project\'s colours or a mix-down screenshot for a collaborator. One CSS filter, nothing else changes.',
+  why:'The same Machado 2009 matrices as the measurements here; cheap (one filter on the window).',
+  ro:()=>`what you see on the right: deuteranopia at full severity`,lane:'lane B (setting) and lane F (applies the filter)'},
+ /* oled */
+ {id:'E10',g:'oled',t:'Static brights at 70 %',s:5,reg:'headers',a:{strip:'slim',oled:true},
+  what:'The number strip becomes a 5 px colour edge with the number in the track colour on dark; white fader caps and pan marks go to #c9ccd4; the map box to 55 % white; the Follow pill one step darker. Colour stays where it says something.',
+  why:'These parts sit in the same place for hours. Lowering the bright static share is the one thing an app can do against uneven wear; the Monitors Unboxed desktop test showed burn-in exactly where static UI sat.',
+  ro:(b,a)=>{const x=measure(b,'lum'),y=measure(a,'lum');return`screen above 25 % luminance: <b>${x.bright.toFixed(2)} %</b> → <b class="up">${y.bright.toFixed(2)} %</b> · average picture level ${x.apl.toFixed(2)} → ${y.apl.toFixed(2)} %`},lane:'lane A (strips, map, Follow pill), lane I (DV) for device frames, the mixer owner for fader caps'},
+ {id:'E11',g:'oled',t:'Dim when idle',s:4,reg:'whole',slow:1,a:{idle:true},
+  what:'After 10 minutes without input and not playing or recording, AudioLab fades to 28 % (two seconds); any pointer move or key wakes it at once. Settings: Off, 5, 10, 20 minutes. Never during playback or recording.',
+  why:'The G80SD\'s own screen saver dims after 10 minutes idle, but only on full-screen still images, and other screens have none. The panel cannot tell a paused DAW from an active one.',
+  ro:(b,a)=>{const x=measure(b,'lum'),y=measure(a,'lum');return`average picture level when idle: <b>${x.apl.toFixed(2)} %</b> → <b class="up">${y.apl.toFixed(2)} %</b>`},lane:'lane F (overlays) with a hook from the transport (lane A) for "playing or recording"'},
+ {id:'E12',g:'oled',t:'Help line and map hide until needed',s:3,reg:'map',a:{autoMap:true},
+  what:'The help line and the map slide away and come back when the pointer reaches the bottom edge or the view is zoomed in (like macOS "Automatically hide and show the Dock"). A 2 px handle shows they are there.',
+  why:'The help line is the same sentence for hours in the same pixels; the map box is pure white. Also gives the arrangement 103 points more.',
+  ro:(b,a)=>{const x=measure(b,'lum'),y=measure(a,'lum');return`average picture level ${x.apl.toFixed(2)} → <b class="up">${y.apl.toFixed(2)} %</b> · one line of fixed text and the 100 % white map box off screen · arrangement +103 pt`},lane:'lane A (map) and lane F (help line)'},
+ {id:'E13',g:'oled',t:'An OLED care card in Settings',s:4,reg:null,html:'oledcard',
+  what:'A short card under Settings › Appearance when the screen is likely OLED (or always, folded): what the monitor already does (Pixel Shift on by default, Screen Optimization after 4 h of use while in standby, Pixel Refresh by hand), what macOS offers (auto-hide Dock and menu bar), and AudioLab\'s own switches (E10, E11, E12).',
+  why:'Samsung\'s 10-15 minute optimisation runs only when the monitor sits in standby with power: switching the wall socket off at night skips it. Users rarely know this.',
+  ro:()=>`no runtime cost · text only`,lane:'lane B (ST, a card on the Appearance page)'},
+ /* night and focus */
+ {id:'E14',g:'night',t:'Night: brightness and warmth',s:4,reg:'clips',a:{bright:.72,warm:.35},
+  what:'Settings › Appearance › <b>Night</b>: a Brightness slider (100 to 50 %, everything but the playhead and clip warnings) and Warmth (neutral to warm), with an optional schedule that follows macOS Night Shift times. Contrast ratios stay, the whole window is darker and warmer.',
+  why:'Matching screen luminance to a dim room is the comfort lever with the best support; warmth is preference, since blue-light filtering showed no benefit for eye strain (Cochrane 2023). Live 12 has Brightness and Tone, Premiere a Brightness slider.',
+  ro:(b,a)=>{const x=measure(b,'lum'),y=measure(a,'lum');return`average picture level: <b>${x.apl.toFixed(2)} %</b> → <b class="up">${y.apl.toFixed(2)} %</b> · text contrast ratio unchanged`},lane:'lane B (setting) and lane F (one filter on the window, outside the glass engine\'s backdrop)'},
+ {id:'E15',g:'night',t:'Focus mode: only the arrangement',s:4,reg:'whole',slow:1,a:{focus:true},
+  what:'One key and View › Focus hide the docked mixer and devices; the arrangement, transport and map stay. The same key brings everything back exactly as it was. Like VS Code\'s Zen mode and Figma\'s Minimize UI.',
+  why:'Fewer moving and bright things in view while arranging or editing; more tracks on screen (15 instead of 9).',
+  ro:(b,a)=>{const x=measure(b,'mot'),y=measure(a,'mot');return`animated pixels while playing: <b>${x.step.toFixed(2)} %</b> per 125 ms → <b class="up">${y.step.toFixed(2)} %</b>`},lane:'lane H (XT commands registry for the key) and lane A (layout)'},
+ {id:'E16',g:'night',t:'Listen mode: displays rest',s:4,reg:'spec',a:{ears:true},
+  what:'One key (and a button by the master meter): meters, spectra, scopes and gain-reduction graphs go still and dim, with a line saying how to bring them back; clip and over warnings still light up. The playhead keeps moving.',
+  why:'"Mix with your ears": Sound On Sound and Production Expert both advise less looking at meters while judging a mix; it also removes most of the motion on screen.',
+  ro:(b,a)=>{const x=measure(b,'mot'),y=measure(a,'mot');return`animated pixels while playing: <b>${x.step.toFixed(2)} %</b> → <b class="up">${y.step.toFixed(2)} %</b> per 125 ms`},lane:'lane E (IN, every meter and display reads one flag) and lane H (key)'},
+ {id:'E17',g:'night',t:'Session clock and a break reminder',s:3,reg:'transport',a:{session:true,brk:true},
+  what:'An optional session clock in the transport ("Session 1 h 58 min", units in amber per L2) and, if switched on, a quiet card every 60 minutes (or 90) suggesting a 5 minute break. Never during recording; "Later" waits 15 minutes.',
+  why:'Engineers take about 10 minutes every hour (iZotope) or leave the room hourly (Dom Morley); AAO advises 20-20-20 for eyes. Off by default.',
+  ro:()=>`no runtime cost · one timer`,lane:'lane F (card, notifications) and lane A (transport read-out)'},
+ /* motion */
+ {id:'E18',g:'motion',t:'Calm displays: 30 fps, proper ballistics',s:4,reg:'mixer',a:{disp:'calm'},
+  what:'Meters fall at the IEC peak-meter rate (20 dB in 1.7 s) with a 1.5 s peak hold, and update 30 times a second; spectra average over 300 ms. Settings › Performance or Appearance: Displays Live or Calm. Clip lights are unchanged.',
+  why:'Jitter at 240 Hz is motion the eye cannot use; slower falls are easier to read and are what hardware meters do. Also cheaper to draw.',
+  ro:(b,a)=>{const x=measure(b,'mot'),y=measure(a,'mot');return`animated pixels (mixer docked): <b>${x.step.toFixed(2)} %</b> → <b class="up">${y.step.toFixed(2)} %</b> per 125 ms`},lane:'lane E (IN: meters, spectrum, the shared formatter)'},
+ {id:'E19',g:'motion',t:'Calmer Follow page turns',s:3,reg:'whole',slow:1,a:{follow:'calm',zoom:26,speed:10},ba:{zoom:26,speed:10},
+  what:'With Follow on, the page turns when the playhead reaches 90 % and the new page keeps the last fifth of the old one in view, so the eye keeps its place; and no turns while the pointer is in the arrangement or you edited in the last 3 seconds.',
+  why:'A page turn changes 39 % of the screen at once, the largest single visual event in a session; an onset in the periphery captures attention (Abrams and Christ 2003).',
+  ro:()=>`measured today: a page turn changes <b>39 %</b> of the screen in one frame · shown at 10× speed`,lane:'lane A (arrangement, transport)'},
+ {id:'E20',g:'motion',t:'Follow macOS Reduce motion and Dim flashing lights',s:5,reg:null,html:'rmcard',
+  what:'When macOS Reduce motion is on, Motion starts at "Signal only" (no transitions, no ambient), and with Dim flashing lights the record button and clip lights stay lit instead of blinking. The app\'s own Motion setting still wins once changed.',
+  why:'WCAG 2.3.3; about a third of adults over 40 show some vestibular dysfunction. The app already reads prefers-reduced-motion in places (the settings spotlight); this makes it one rule.',
+  ro:()=>`no runtime cost`,lane:'<b>LK</b> (lkm1, the motion token) and lane F (transitions)'},
+ /* settings */
+ {id:'E21',g:'set',t:'A Comfort group in Settings › Appearance',s:5,reg:null,html:'comfort',
+  what:'One group with the switches picked here: Text size, Contrast, Track colours, Night (brightness, warmth, schedule), Displays, Dim when idle, Break reminder, and the OLED card. Each is also findable by the settings search.',
+  why:'The settings audit found the look spread over Interface, Glass and Layout; a small, named group keeps the long-session switches together without moving today\'s settings.',
+  ro:()=>`about 8 rows · uses the existing settings table and search`,lane:'lane B (ST)'},
+ {id:'E22',g:'set',t:'Comfort presets: Day, Night, Focus',s:3,reg:'whole',slow:1,a:{bright:.72,warm:.3,disp:'calm',mut:'#adb1bd',mutW:500,strip:'slim',oled:true},
+  what:'Three buttons at the top of the Comfort group: Day (today), Night (brightness 72 %, warm, calm displays, idle dim on), Focus (Night plus Focus mode). Each only sets the switches below it; nothing hidden.',
+  why:'One click at the start of a late session instead of five. Ableton and Logic users build the same thing by hand with themes and screensets.',
+  ro:(b,a)=>{const x=measure(b,'lum'),y=measure(a,'lum');return`Night preset: average picture level ${x.apl.toFixed(2)} → <b class="up">${y.apl.toFixed(2)} %</b>`},lane:'lane B (ST)'}];
+
+/* HTML mocks for settings cards */
+const HTML={
+ oledcard:(after)=>after?`<div class="mockset"><h4>OLED care</h4><p class="sm" style="color:#b9bcc8">Your screen looks like an OLED. It ages where bright things stay still for hours.</p>
+  <div class="r"><span>Monitor: Pixel Shift<small>Moves the picture a few pixels; on by default on the G80SD</small></span><span class="u">monitor menu</span></div>
+  <div class="r"><span>Monitor: Screen Optimization<small>Runs 10-15 min after 4 h of use, with the monitor in standby. Keep it powered at night.</small></span><span class="u">automatic</span></div>
+  <div class="r"><span>macOS: hide Dock and menu bar<small>System Settings › Desktop &amp; Dock, Control Center</small></span><button type="button" class="tg">Open</button></div>
+  <div class="r"><span>Static brights at 70 %<small>E10</small></span><span class="tg on">On</span></div>
+  <div class="r"><span>Dim when idle<small>E11</small></span><select aria-label="Dim when idle"><option>10 min</option></select></div></div>`
+  :`<div class="mockset old"><h4>Appearance</h4><div class="r"><span>Theme</span><span>AudioLab</span></div><div class="r"><span>Interface scale</span><span>100 %</span></div><div class="r"><span>Glass</span><span>Wide · Light</span></div><div class="r"><span>Background and tint</span><span>40 %</span></div><p class="sm" style="color:#9a9eab">Nothing about the screen itself today.</p></div>`,
+ rmcard:(after)=>after?`<div class="mockset"><h4>Motion</h4><div class="r"><span>Motion<small>Follows macOS: Reduce motion is on</small></span><select aria-label="Motion"><option>Signal only</option></select></div>
+  <div class="r"><span>Blinking lights<small>Follows macOS: Dim flashing lights is on. Record and clip lights stay lit.</small></span><span class="u">steady</span></div><div class="r"><span>Transitions</span><span>none</span></div></div>`
+  :`<div class="mockset old"><h4>Motion</h4><div class="r"><span>Motion</span><select aria-label="Motion"><option>Ambient</option></select></div><div class="r"><span>Blinking lights</span><span>blink</span></div><p class="sm" style="color:#9a9eab">The macOS settings are only read by the settings spotlight today.</p></div>`,
+ comfort:(after)=>after?`<div class="mockset"><h4>Comfort</h4>
+  <div class="r"><span>Preset</span><span><button type="button" class="tg on">Day</button> <button type="button" class="tg">Night</button> <button type="button" class="tg">Focus</button></span></div>
+  <div class="r"><span>Text size</span><select aria-label="Text size"><option>Standard</option></select></div><div class="r"><span>Contrast</span><select aria-label="Contrast"><option>Standard</option></select></div>
+  <div class="r"><span>Track colours<small>for new tracks; See as: Normal</small></span><select aria-label="Track colours"><option>Tuned for all eyes</option></select></div>
+  <div class="r"><span>Night<small>Brightness 100 %, warmth neutral, schedule off</small></span><button type="button" class="tg">Set</button></div>
+  <div class="r"><span>Displays</span><select aria-label="Displays"><option>Calm</option></select></div><div class="r"><span>Dim when idle</span><select aria-label="Dim"><option>10 min</option></select></div>
+  <div class="r"><span>Break reminder</span><select aria-label="Break"><option>Off</option></select></div><div class="r"><span>OLED care</span><span class="u">›</span></div></div>`
+  :`<div class="mockset old"><h4>Appearance today</h4><div class="r"><span>Theme</span><span>8 cards</span></div><div class="r"><span>Interface scale</span><span>75-200 %</span></div><div class="r"><span>Glass</span><span>presets</span></div><div class="r"><span>Clips, grid, app icon</span><span>…</span></div><p class="sm" style="color:#9a9eab">Density and Motion are under Layout.</p></div>`};
+
+/* ---------------- picks ---------------- */
+let PK=[];try{PK=JSON.parse(localStorage.getItem('ux2picks')||'[]')}catch(e){}
+const save=()=>{try{localStorage.setItem('ux2picks',JSON.stringify(PK))}catch(e){}};
+function cfgOf(ids){const c=Object.assign({},TODAY);for(const id of ids){const o=OPTS.find(x=>x.id===id);if(o&&o.a&&o.id!=='E9'&&o.id!=='E11'&&o.id!=='E19')Object.assign(c,o.a)}return c}
+function toggle(id){const o=OPTS.find(x=>x.id===id);if(PK.includes(id))PK=PK.filter(x=>x!==id);else{if(o.ex)PK=PK.filter(x=>{const p=OPTS.find(y=>y.id===x);return!p||p.ex!==o.ex});PK.push(id)}
+ PK.sort((a,b)=>+a.slice(1)-+b.slice(1));save();syncPicks()}
+function syncPicks(){for(const o of OPTS){const card=document.getElementById('o'+o.id),b=card&&card.querySelector('.pick');const on=PK.includes(o.id);if(card)card.classList.toggle('picked',on);if(b){b.classList.toggle('on',on);b.textContent=on?'Picked':'Pick '+o.id;b.setAttribute('aria-pressed',on)}}
+ for(const ch of document.querySelectorAll('.chip'))ch.classList.toggle('on',PK.includes(ch.dataset.id));
+ document.getElementById('line').textContent='UX2 picks: '+(PK.length?PK.join(' '):'(none)');stageNote()}
+
+/* ---------------- build ---------------- */
+const $=s=>document.querySelector(s);
+const stars=n=>'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i>';
+function build(){
+ /* measurement boxes */
+ const T=M.text.dark,box=(h,big,kv,note)=>`<div class="box"><h3>${h}</h3><div class="big">${big}</div><div class="kv">${kv}</div>${note?`<p class="sm mut">${note}</p>`:''}</div>`;
+ $('#mGrid').innerHTML=
+  box('Text contrast, Dark',`${Math.round(T.lc60/T.n*100)}<small>%</small>`,`<span>text runs</span><span>${T.n} (arrangement + mixer)</span><span>below Lc 60</span><span>${T.lc60} (${Math.round(T.lc60/T.n*100)} %)</span><span>below Lc 45</span><span>${T.lc45} (${Math.round(T.lc45/T.n*100)} %)</span><span>below 4.5:1</span><span>${T.w45} (${Math.round(T.w45/T.n*100)} %)</span><span>median</span><span>|Lc| ${T.med}</span><span>Light mode</span><span>${M.text.lite.lc45} of ${M.text.lite.n} below Lc 45</span><span>Pro Tools style (bright)</span><span>${M.text.bright.lc45} of ${M.text.bright.n} below Lc 45</span>`,'Share of text below APCA Lc 60. AudioLab has no light colour theme; Light mode (lighter graphics) and the bright Pro Tools style theme were measured as the other two.')+
+  box('Text sizes on screen',`11<small>px</small>`,`<span>11 px</span><span>445 of 496 runs (90 %)</span><span>12 px</span><span>28</span><span>13 / 15 px</span><span>7 / 2</span><span>9.5 px</span><span>8 (amber "dB" units)</span><span>7 px</span><span>4 (▲▼ steppers)</span><span>11 px at your screen</span><span>19.2 device px, x-height 1.94 mm, 9.5′ at 70 cm</span><span>9 px canvas labels</span><span>x-height 1.59 mm, 7.8′</span>`,'Apple\'s macOS minimum is 10 pt (default 13); 11 pt is its Subheadline. Comfortable reading needs about 2 to 3 times the acuity limit (5′), so 9.5′ is fine for labels, tight for long reading.')+
+  box('Moving pixels',`${M.motion.mixer}<small>%</small>`,`<span>stopped</span><span>${M.motion.stopped} % per 125 ms</span><span>playing, arrangement</span><span>${M.motion.playing} % per step, ${M.motion.playingUnion} % in 3 s</span><span>playing, mixer open</span><span>${M.motion.mixer} % per step, ${M.motion.mixerUnion} % in 3 s</span><span>Follow page turn</span><span>${M.motion.pageTurnUnion} % at once</span>`,'Share of screen pixels that change between frames 125 ms apart (threshold 12 of 255), 24 frames.')+
+  box('OLED load',`${M.oled.dark.apl}<small>% APL</small>`,`<span>Dark, average picture level</span><span>${M.oled.dark.apl} % of full white</span><span>above half white</span><span>${M.oled.dark.over50} % of the screen</span><span>bright and never moving</span><span>${M.oled.dark.staticBright} %</span><span>Pro Tools style (bright)</span><span>APL ${M.oled.bright.apl} %, ${M.oled.bright.staticBright} % bright and static</span>`,'Average picture level: mean linear luminance. The largest static bright parts: the number strips (45 % luminance, full height), the map box and help line (75 %), clip title rows.');
+ /* worst table */
+ $('#worst tbody').innerHTML=M.worst.map(w=>`<tr><td>${w[0]}</td><td>${w[1]}</td><td>${w[2]}</td><td>${w[3].startsWith('#')?`<span class="sw" style="background:${w[3]}"></span>`:''}${w[3]} on ${w[4].startsWith('#')?`<span class="sw" style="background:${w[4]}"></span>`:''}${w[4]}</td><td class="${w[5]&&w[5]<4.5?'bad':''}">${w[5]?w[5].toFixed(2)+':1':'about 1.8:1'}</td><td class="${w[6]!=null&&Math.abs(w[6])<45?'bad':''}">${w[6]!=null?w[6]:'about -15'}</td></tr>`).join('');
+ /* cvd table */
+ const cv=[['Today (AudioLab theme)',M.cvd.today],['E6 Today tuned',M.cvd.tuned],['E7 Okabe-Ito, dark',M.cvd.okabe],['Okabe-Ito as published',M.cvd.okabe0]],cl=v=>v<3?'bad':v>=10?'ok':'';
+ $('#cvdT tbody').innerHTML=cv.map(([n,v])=>`<tr><td>${n}</td><td>${v.pal.map(c=>`<span class="sw" style="background:${c}"></span>`).join('')}</td>${['n','p','d','t'].map(k=>`<td class="${cl(v[k][0])}">${v[k][0]} / ${v[k][1]}</td>`).join('')}<td>${v.pair}</td></tr>`).join('');
+ /* groups and cards */
+ const gh=$('#groups');
+ for(const grp of G){const sec=document.createElement('section');sec.className='grp';sec.id='g-'+grp.id;
+  gh.appendChild(sec);
+  sec.innerHTML=`<header><span class="eyebrow">${OPTS.filter(o=>o.g===grp.id).map(o=>o.id).join(' · ')}</span><h2>${grp.t}</h2><p class="mut">${grp.d}</p></header>`;
+  for(const o of OPTS.filter(x=>x.g===grp.id)){const card=document.createElement('article');card.className='opt';card.id='o'+o.id;
+   card.innerHTML=`<div class="oh"><span class="oid">${o.id}</span><h3>${o.t}</h3><span class="stars" aria-label="${o.s} of 5">${stars(o.s)}</span>${o.ex?`<span class="sm mut">${o.ex==='grey'?'one of E1, E2':'one of E6, E7'}</span>`:''}<button type="button" class="btn pick" aria-pressed="false">Pick ${o.id}</button></div>
+    <div class="otxt"><p>${o.what}</p><p class="mut">${o.why}</p></div>
+    ${o.sim?`<div class="ctl"><span class="lab">See as</span><div class="seg csim">${['normal','protan','deutan','tritan'].map((k,i)=>`<button type="button" data-v="${k}" class="${(o.a.sim||'normal')===k||(i===0&&!o.a.sim)?'on':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`:''}
+    <div class="ba"><figure><figcaption><b>Today</b><span>1:1 at your size</span></figcaption><div class="cvwrap b"></div></figure><figure><figcaption><b>${o.id}</b><span>${o.html?'':'1:1 at your size'}</span></figcaption><div class="cvwrap a"></div></figure></div>
+    <div class="ro"></div><div class="lane">Built by: ${o.lane}</div>`;
+   sec.appendChild(card);
+   if(o.html){card.querySelector('.cvwrap.b').innerHTML=HTML[o.html](0);card.querySelector('.cvwrap.a').innerHTML=HTML[o.html](1)}
+   else{const reg=R[o.reg],cb=document.createElement('canvas'),ca=document.createElement('canvas');cb.setAttribute('aria-label','Today');ca.setAttribute('aria-label',o.id+': '+o.t);
+    card.querySelector('.cvwrap.b').appendChild(cb);card.querySelector('.cvwrap.a').appendChild(ca);
+    const loc={sim:o.a.sim||'normal'};const base=()=>Object.assign({},TODAY,o.ba||{},{sim:loc.sim==='normal'&&o.id==='E9'?'normal':(o.id==='E9'?'normal':loc.sim)});
+    const aft=()=>Object.assign({},TODAY,o.ba||{},o.a,{sim:loc.sim});
+    makeView(cb,o.id==='E9'?()=>Object.assign({},TODAY,{sim:'normal'}):base,reg,{slow:o.slow});makeView(ca,aft,reg,{slow:o.slow});
+    const seg=card.querySelector('.csim');if(seg)seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;loc.sim=b.dataset.v;for(const x of seg.children)x.classList.toggle('on',x===b);if(o.id!=='E9')ro()})}
+   const rol=card.querySelector('.ro');const ro=()=>{try{rol.innerHTML=o.ro(Object.assign({},TODAY,o.ba||{}),Object.assign({},TODAY,o.ba||{},o.a,{sim:'normal'}))}catch(e){rol.textContent=''}};
+   setTimeout(ro,50+Math.random()*400);
+   card.querySelector('.pick').addEventListener('click',()=>toggle(o.id))}
+ }
+ /* chips */
+ $('#chips').innerHTML=OPTS.map(o=>`<button type="button" class="chip" data-id="${o.id}" title="${o.t}">${o.id}</button>`).join('');
+ $('#chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)toggle(b.dataset.id)});
+ $('#copy').addEventListener('click',()=>{const s=$('#line').textContent,b=$('#copy');const ok=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1400)};
+  try{navigator.clipboard.writeText(s).then(ok,()=>{selectLine();b.textContent='Selected: press ⌘C'})}catch(e){selectLine()}});
+ $('#clear').addEventListener('click',()=>{PK=[];save();syncPicks()});
+ /* research */
+ $('#resGrid').innerHTML=RES.map(([h,items])=>`<div class="box"><h3>${h}</h3><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('');
+}
+function selectLine(){const r=document.createRange();r.selectNodeContents($('#line'));const s=getSelection();s.removeAllRanges();s.addRange(r)}
+
+/* stage */
+const ST={view:'picks',zoom:'fit',sim:'normal'};let stV;
+function stageCfg(){const c=ST.view==='today'?Object.assign({},TODAY):cfgOf(PK);c.sim=ST.sim;return c}
+function stageNote(){const c=stageCfg();$('#stNote').innerHTML=`<span><b>${ST.view==='today'?'Today':'With your picks'}</b> ${ST.view==='today'?'':(PK.length?PK.join(' '):'(none picked yet: same as today)')}</span><span>quiet grey <b>${c.hc?'#c4c7d1':c.mut}</b> ${fmtLc(c.hc?'#c4c7d1':c.mut,'#1f2126')}</span><span>text <b>${c.base} px</b></span><span>palette <b>${c.pal===M.cvd.tuned.pal?'tuned':c.pal===M.cvd.okabe.pal?'Okabe-Ito':'today'}</b></span><span>brightness <b>${Math.round(c.bright*100)} %</b></span>`}
+function seg(id,key,after){const el=$(id);el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ST[key]=b.dataset.v;for(const x of el.children)x.classList.toggle('on',x===b);if(after)after();stageNote()})}
+
+const RES=[
+ ['Eyes, screens and light',[
+  'Blue-light-filtering lenses may give no short-term benefit for eye strain (17 trials, low certainty). <a href="https://www.cochrane.org/CD013244/EYES_do-blue-light-filtering-spectacle-lenses-reduce-digital-eye-strain" target="_blank" rel="noopener">Cochrane 2023</a>',
+  'The AAO does not recommend blue-blocking glasses; it advises blinking, 20-20-20, arm\'s-length distance and adjusting brightness to the room. <a href="https://aao.org/newsroom/news-releases/detail/protect-your-eyes-in-home-office" target="_blank" rel="noopener">AAO</a>',
+  'Blink rate drops about five-fold at a screen, which dries the eye. <a href="https://pubmed.ncbi.nlm.nih.gov/1766652/" target="_blank" rel="noopener">Optom Vis Sci 1991</a>, <a href="https://eyewiki.aao.org/Computer_Vision_Syndrome_(Digital_Eye_Strain)" target="_blank" rel="noopener">AAO EyeWiki</a>',
+  'Soft, diffuse room light and a monitor lamp eased fatigue in long studio sessions (anecdotal). <a href="https://www.soundonsound.com/people/why-love-mood-lighting" target="_blank" rel="noopener">Sound On Sound 2024</a>']],
+ ['Flicker and your G80SD',[
+  'The G80SD is flicker-free (no PWM); the small refresh-synchronous ripple was not visible. <a href="https://tftcentral.co.uk/reviews/samsung-odyssey-g80sd" target="_blank" rel="noopener">TFTCentral</a>',
+  'VRR flicker can show in near-black areas when the frame rate swings; a steady frame rate avoids it. AudioLab\'s frame cap (Settings › Performance) helps here. <a href="https://tftcentral.co.uk/articles/helping-avoid-oled-burn-in-and-flicker-exploring-the-latest-asus-oled-technologies-for-2025" target="_blank" rel="noopener">TFTCentral</a>',
+  'Typical SDR brightness about 250 nits, minimum 19 nits, no ABL in SDR. <a href="https://tftcentral.co.uk/reviews/samsung-odyssey-g80sd" target="_blank" rel="noopener">TFTCentral</a>']],
+ ['Dark mode',[
+  'Dark text on light is read better, most of all at small sizes; the advantage comes from higher luminance (smaller pupil). <a href="https://madoc.bib.uni-mannheim.de/26118/" target="_blank" rel="noopener">Piepenbrock et al. 2014</a>',
+  'At night-time lighting light mode won for glance reading; by day polarity made no difference. NN/g: offer dark, do not force it. <a href="https://www.nngroup.com/articles/dark-mode/" target="_blank" rel="noopener">NN/g</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/28166901/" target="_blank" rel="noopener">Dobres 2017</a>',
+  'Which polarity works better varies by person, and preference often does not match performance. <a href="https://arxiv.org/html/2409.10841v1" target="_blank" rel="noopener">While and Sarvghad 2024</a>',
+  'For AudioLab: dark stays (dim studios, OLED), with off-white text, enough contrast for small text, and a brightness control.']],
+ ['OLED burn-in',[
+  'Samsung: Screen Optimization runs automatically after 4 h of use with the monitor in standby (10-15 min, cannot be disabled); Pixel Refresh by hand (over an hour); Pixel Shift on by default; logo brightness adjustable. <a href="https://www.samsung.com/us/support/troubleshoot/TSG10003240/" target="_blank" rel="noopener">Samsung support</a>',
+  'Samsung\'s OLED Safeguard+ cools the panel and lowers brightness by predicted temperature; burn-in at normal use is covered by warranty. <a href="https://www.samsung.com/us/monitors/gaming/odyssey-oled-g8-g80sd-32-inch-240hz-oled-uhd-ls32dg800snxza/" target="_blank" rel="noopener">Samsung</a>',
+  'RTINGS\' torture test (static news feed, max brightness, 126 h a week) showed burn-in on QD-OLED at 2,000 h and on all OLEDs by two years. <a href="https://www.tomshardware.com/monitors/large-scale-simulated-10-year-torture-test-confirms-burn-in-haunts-all-oled-monitors-testing-also-reveals-edge-lit-tvs-are-insanely-failure-prone" target="_blank" rel="noopener">Tom\'s Hardware</a>',
+  'A 32-inch 4K QD-OLED used for desktop work (6,000 h, light mode) showed faint marks of the taskbar and window edges; green subpixels wore most. <a href="https://www.pcgamer.com/hardware/gaming-monitors/after-two-years-and-over-6-000-hours-monitors-unboxeds-long-term-oled-gaming-monitor-test-shows-increasing-burn-in" target="_blank" rel="noopener">PC Gamer</a>',
+  'Vendor advice for productivity: auto-hide the taskbar, moderate brightness, keep pixel shift and panel care on. <a href="https://www.msi.com/blog/how-to-use-msi-oled-monitors-for-productivity-essential-tips-to-prevent-burn-In" target="_blank" rel="noopener">MSI</a>; macOS can auto-hide the Dock and menu bar. <a href="https://support.apple.com/en-gb/guide/mac-help/-mchlp1119/mac" target="_blank" rel="noopener">Apple</a>']],
+ ['Type and contrast',[
+  'macOS: default text 13 pt, minimum 10 pt; avoid light weights at small sizes; more tracking below 12 pt. <a href="https://developer.apple.com/design/human-interface-guidelines/typography" target="_blank" rel="noopener">Apple HIG</a>',
+  'APCA: Lc 90 preferred for body text, 75 minimum, 60 for other content text, 45 for large or small non-body labels, 30 for spot text; WCAG 2 contrast is "largely meaningless for dark mode". <a href="https://github.com/Myndex/apca-introduction" target="_blank" rel="noopener">APCA introduction</a>',
+  'WCAG 2.2: 4.5:1 text, 3:1 large text (1.4.3), 3:1 for controls and states (1.4.11). <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" target="_blank" rel="noopener">W3C</a>',
+  'Inter\'s text cut has a tall x-height for small sizes; tabular figures (tnum) and the disambiguation sets (cv05, cv08, zero) help read values. <a href="https://rsms.me/inter/" target="_blank" rel="noopener">rsms.me/inter</a>']],
+ ['Colour vision',[
+  'Red-green deficiency: 2-8 % of men, about 0.5 % of women; tritan about 1 in 500 by recent estimates. <a href="https://www.nature.com/articles/eye2009251" target="_blank" rel="noopener">Simunovic 2010</a>',
+  'Okabe-Ito: #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7 and black. <a href="https://siegal.bio.nyu.edu/color-palette/" target="_blank" rel="noopener">NYU</a>; cividis keeps brightness rising linearly for all viewers. <a href="https://www.pnnl.gov/publications/optimizing-colormaps-consideration-color-vision-deficiency-enable-accurate" target="_blank" rel="noopener">PNNL</a>',
+  'Simulation model: one 3×3 matrix per deficiency and severity. <a href="https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html" target="_blank" rel="noopener">Machado et al. 2009</a>',
+  'Colour must not be the only cue. <a href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html" target="_blank" rel="noopener">WCAG 1.4.1</a>']],
+ ['Motion',[
+  'Motion from interaction should be possible to turn off; it can cause dizziness and nausea. <a href="https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html" target="_blank" rel="noopener">WCAG 2.3.3</a>',
+  'macOS: Reduce motion, Dim flashing lights, Prefer non-blinking cursor. <a href="https://support.apple.com/guide/mac-help/mchla3c4f1da/mac" target="_blank" rel="noopener">Apple</a>; pages read it as prefers-reduced-motion. <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion" target="_blank" rel="noopener">MDN</a>',
+  'Motion onset captures attention; moving items are found first. <a href="https://pubmed.ncbi.nlm.nih.gov/12930472/" target="_blank" rel="noopener">Abrams and Christ 2003</a>, <a href="https://link.springer.com/content/pdf/10.3758/BF03193623.pdf" target="_blank" rel="noopener">Franconeri and Simons 2005</a>']],
+ ['Quiet modes in other apps',[
+  'Live 12: theme follows the OS, warm/cool/neutral tone, high contrast, brightness, colour intensity, grid line opacity. <a href="https://www.ableton.com/en/live-manual/12/first-steps/" target="_blank" rel="noopener">Ableton</a>',
+  'Logic Pro: track background grey level and grid line visibility; control bar can be hidden; screensets. <a href="https://support.apple.com/guide/logicpro/lgcp8e0207b2/mac" target="_blank" rel="noopener">Apple</a>',
+  'VS Code Zen Mode (⌘K Z); Figma Minimize UI (⌘⇧\\); Premiere Appearance Brightness; Bitwig Contrast. <a href="https://code.visualstudio.com/docs/configure/custom-layout" target="_blank" rel="noopener">VS Code</a>, <a href="https://help.figma.com/hc/en-us/articles/41414918021271-Hide-or-minimize-the-UI" target="_blank" rel="noopener">Figma</a>, <a href="https://helpx.adobe.com/premiere-pro-next/learn-the-basics/configure-preferences/appearance-preferences.html" target="_blank" rel="noopener">Adobe</a>, <a href="https://www.bitwig.com/userguide/latest/the_dashboard/" target="_blank" rel="noopener">Bitwig</a>']],
+ ['Long mixing nights',[
+  'Mix at about 70 dB, break every hour away from the screen; turning up is a sign of fatigue (Dom Morley). <a href="https://www.production-expert.com/production-expert-1/ear-fatigue-top-mixer-gives-advice-on-how-to-deal-with-it" target="_blank" rel="noopener">Production Expert</a>',
+  '10 minutes off every hour, or 20 every 90. <a href="https://www.izotope.com/en/learn/how-to-prevent-ear-fatigue-when-mixing-audio" target="_blank" rel="noopener">iZotope</a>; NIOSH: 85 dBA for 8 h, 3 dB exchange. <a href="https://www.cdc.gov/niosh/noise/prevent/understand.html" target="_blank" rel="noopener">CDC</a>',
+  'Colourful waveform screens pull attention from listening: show less, or close your eyes. <a href="https://www.soundonsound.com/people/sounding-focus-listening" target="_blank" rel="noopener">Sound On Sound</a>; decide by ear, confirm with meters. <a href="https://www.production-expert.com/production-expert-1/mixing-with-eyes-or-ears-which-is-best" target="_blank" rel="noopener">Production Expert</a>']]];
+
+build();
+stV=makeView($('#stage'),stageCfg,R.whole);
+seg('#stView','view');seg('#stSim','sim');seg('#stZoom','zoom',()=>{stV.region=ST.zoom==='fit'?R.whole:{x:0,y:28,w:1240,h:640};size(stV);stV.key=''});
+$('#anim').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ANIM=b.dataset.v==='1';for(const x of $('#anim').children)x.classList.toggle('on',x===b);for(const v of VIEWS)v.key=''});
+for(const x of $('#anim').children)x.classList.toggle('on',(x.dataset.v==='1')===ANIM);
+syncPicks();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{for(const v of VIEWS){v.key='';v.drawn=0}});
+requestAnimationFrame(frame);
+})();
+</script>

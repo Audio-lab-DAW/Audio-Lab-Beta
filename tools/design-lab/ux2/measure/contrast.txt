@@ -1,0 +1,56 @@
+== dark: 496 text runs; WCAG <4.5: 97 (20%), <3: 2; |Lc|<60: 240 (48%), <45: 136, <30: 4; median |Lc| 69.7
+   sizes (px: count): [(7.0, 4), (9.5, 8), (11.0, 445), (11.5, 2), (12.0, 28), (13.0, 7), (15.0, 2)]
+   Lc  -14.9   1.29:1  11px/600  fg[230, 232, 238] bg[245, 200, 76]  "▸" # .gfold open
+   Lc  -28.7   4.18:1  11px/500  fg[109, 115, 132] bg[9, 10, 13]  "max -∞" #pkMax .
+   Lc  -28.7   4.02:1  11px/600  fg[111, 116, 130] bg[16, 18, 21]  "Arrows point where the sound goes. Click" # .
+   Lc  -31.8   4.43:1  11px/600  fg[119, 123, 133] bg[16, 18, 21]  "Selected only" # .cl2
+   Lc  -32.7   3.94:1  11px/600  fg[125, 130, 146] bg[41, 38, 31]  "Sends" # .mxsh
+   Lc  -33.3   4.01:1  11px/600  fg[128, 131, 143] bg[36, 38, 42]  "+6" # .
+   Lc  -33.3   4.02:1  11px/600  fg[128, 131, 143] bg[36, 38, 41]  "0" # .
+   Lc  -33.5   4.08:1  11px/600  fg[128, 131, 143] bg[34, 37, 40]  "-6" # .
+   Lc  -33.6   4.12:1  11px/600  fg[128, 131, 143] bg[37, 36, 30]  "+6" # .
+   Lc  -33.6   4.12:1  11px/600  fg[128, 131, 143] bg[37, 36, 31]  "0" # .
+   Lc  -33.6   4.12:1  11px/600  fg[128, 131, 143] bg[34, 36, 40]  "-12" # .
+   Lc  -33.6   4.12:1  11px/600  fg[128, 131, 143] bg[34, 36, 39]  "-24" # .
+== lite: 346 text runs; WCAG <4.5: 9 (3%), <3: 5; |Lc|<60: 133 (38%), <45: 47, <30: 5; median |Lc| 74.4
+   sizes (px: count): [(7.0, 4), (9.5, 8), (11.0, 290), (11.5, 2), (12.0, 34), (13.0, 6), (15.0, 2)]
+   Lc    0.0   1.12:1  11px/600  fg[125, 130, 146] bg[201, 84, 84]  "Sends" # .mxsh
+   Lc  -14.9   1.29:1  11px/600  fg[230, 232, 238] bg[245, 200, 76]  "▸" # .gfold open
+   Lc  -28.7   4.18:1  11px/500  fg[109, 115, 132] bg[9, 10, 13]  "max -1.0" #pkMax .
+   Lc  -34.8   4.65:1  11px/500  fg[125, 130, 146] bg[21, 24, 26]  "01" # .
+   Lc  -38.6   4.65:1  11px/400  fg[139, 142, 151] bg[34, 38, 42]  "✕" # .
+   Lc  -40.0   5.58:1  11px/400  fg[139, 139, 151] bg[16, 18, 20]  "· drag the box to move · pull its edges " # .cap2
+   Lc  -40.9   4.89:1  11px/600  fg[141, 147, 161] bg[38, 38, 43]  "Parameters" # .
+   Lc   41.6   4.88:1  11px/600  fg[19, 35, 64] bg[76, 141, 255]  "3" # .
+   Lc   42.5   5.42:1  11px/600  fg[7, 26, 13] bg[40, 161, 81]  "R" # .rd on
+   Lc   42.5   5.43:1  11px/600  fg[7, 26, 13] bg[41, 161, 81]  "R" # .rd on
+   Lc  -42.6   5.70:1  11px/400  fg[141, 146, 163] bg[24, 24, 29]  "Add an LFO, envelope, sidechain or step " # .mhint
+   Lc  -43.0   2.27:1  11px/600  fg[230, 232, 238] bg[255, 107, 107]  "▸" # .gfold open
+== bright: 329 text runs; WCAG <4.5: 27 (8%), <3: 9; |Lc|<60: 135 (41%), <45: 51, <30: 12; median |Lc| 74.4
+   sizes (px: count): [(7.0, 4), (9.5, 8), (11.0, 273), (11.5, 2), (12.0, 34), (13.0, 6), (15.0, 2)]
+   Lc  -14.9   1.29:1  11px/600  fg[230, 232, 238] bg[245, 200, 76]  "▸" # .gfold open
+   Lc  -27.8   2.63:1  11px/400  fg[139, 142, 151] bg[74, 76, 80]  "✕" # .
+   Lc  -28.7   4.18:1  11px/500  fg[109, 115, 132] bg[9, 10, 13]  "max -1.0" #pkMax .
+   Lc  -29.8   3.26:1  11px/500  fg[125, 130, 146] bg[50, 52, 54]  "02" # .
+   Lc   30.2   3.66:1  11px/600  fg[48, 20, 20] bg[193, 80, 80]  "1" # .
+   Lc  -31.9   2.72:1  11px/600  fg[154, 157, 169] bg[84, 86, 91]  "Tracks" # .cap
+   Lc   33.3   3.98:1  11px/600  fg[51, 21, 21] bg[205, 85, 85]  "2" # .
+   Lc  -33.9   2.96:1  11px/600  fg[154, 157, 169] bg[78, 81, 84]  "Tracks" # .cap
+   Lc   35.9   4.27:1  11px/600  fg[17, 32, 58] bg[69, 128, 233]  "3" # .
+   Lc  -36.5   4.21:1  11px/400  fg[139, 139, 151] bg[42, 43, 45]  "· drag the box to move · pull its edges " # .cap2
+   Lc  -40.9   4.89:1  11px/600  fg[141, 147, 161] bg[38, 38, 43]  "Parameters" # .
+   Lc   41.6   4.88:1  11px/600  fg[19, 35, 64] bg[76, 141, 255]  "3" # .
+== canvas pairs
+   Lc  -55.9   6.63:1  11px  ruler bar numbers (TH.rulerTxt on TH.ruler)
+   Lc  -40.3   5.81:1  10px  LOOK.mut on display black #0b0c10
+   Lc  -63.7   9.84:1  10px  LOOK.lab on display black
+   Lc  -17.8   2.83:1  9px  LOOK.tick (rgba 255 .32) labels on display black
+   Lc  -70.6  11.13:1  10px  LOOK.unit amber on display black
+   Lc  -95.1  15.87:1  12px  LOOK.ink on panel #121216
+   Lc  -40.0   5.55:1  11px  --mut on panel #121216
+   Lc  -39.4   5.25:1  11px  --mut on --pn2 #18181d
+   Lc  -38.8   5.00:1  11px  --ov-mut on menu glass (about #1b1d24)
+   Lc  -95.4   9.20:1  11px  clip title white on clip (blue at clipA 36 over lane)
+   Lc  -74.5  10.25:1  11px  selection yellow #f5c84c on lane
+   Lc  -48.9   7.04:1  10px  over red #ff6b6b on display black
+== physical size at 70 cm: {"9": {"device_px": 15.8, "cap_mm": 2.11, "xheight_mm": 1.59, "xheight_arcmin": 7.8}, "9.5": {"device_px": 16.6, "cap_mm": 2.23, "xheight_mm": 1.67, "xheight_arcmin": 8.2}, "10": {"device_px": 17.5, "cap_mm": 2.35, "xheight_mm": 1.76, "xheight_arcmin": 8.7}, "11": {"device_px": 19.2, "cap_mm": 2.58, "xheight_mm": 1.94, "xheight_arcmin": 9.5}, "12": {"device_px": 21.0, "cap_mm": 2.82, "xheight_mm": 2.12, "xheight_arcmin": 10.4}, "13": {"device_px": 22.8, "cap_mm": 3.05, "xheight_mm": 2.29, "xheight_arcmin": 11.3}, "15": {"device_px": 26.2, "cap_mm": 3.52, "xheight_mm": 2.64, "xheight_arcmin": 13.0}}
