@@ -5550,3 +5550,23 @@ The rules file (`ui-rules.json`, hide and rename) comes with DL5, after DL12, DL
 
 ### What is left (task XT, in this order)
 DL12 script sandbox spike; DL3 advanced settings list, DL4 safe mode; DL5 rules engine with the right-click "Advanced" entries, DL6, DL7, DL8; then XT-EX2 to XT-EX10; then DL9, DL10 with the Workshop window, DL11, DL13, DL14, DL15, the Assistant tools, the import card, script instruments.
+
+## 27 November 2026: task MX-0 (lane K, mixing engine: the plan), docs only
+
+The user's AE3 picks (27 Nov, 21:07 Brussels): `X1 X3 X4 X5 X6 X8 X11 X12 X13 X14 X15 X16 X17 X18 X19 X20 X21 X22 X23 X25 X26 X27`. Lane K builds the audio-graph part, one step per run.
+
+### Built
+- `docs/mixing-build.md`: steps MX-1 (X12 pre or post per send with blue and yellow rings; X13 output to any group, return or track; one loop check `mxReach` for outputs, sends and keys), MX-2 (X5 compensation solved as a longest path over every link: outputs, sends, Ducker and sidechain keys, live and in export, re-aligned with a short fade when a latency changes; X6 as the user asked: a small read-out in the track's first device on the left, then the device hover through lane I and the routing map through lane C, nowhere else), MX-3 (X1 `mxScPick` on Compressor, Gate, Multiband, OTT and the EQ's dynamic bands with tap points; the Compressor switches to a keyed worklet only when a source is set; X4 the tails Ducker as a switch on each return and as a choice in the cable menu), MX-4 (X3 the Ducker's Spectral focus, 32 bands, STFT, latency compensated; X19 Bass mono with a Linkwitz-Riley split; `MX_HOOKS.bandFilter` for lane E), MX-5 (the play-through idea, only after the user's yes), each with what it touches and its tests.
+- The rules each step keeps (new fields optional, today's nodes unchanged without them, Fractals bit-identical: Kick -19.05560 dB, Bass -35.48685 dB at master -10 dB from the newest entries, not re-measured here since `index.html` is unchanged; export equals playback within 0.1 dB), the code anchors at v0.273, and the hooks `MX_HOOKS` offers (`links`, `canLink`, `outOf`, `setOut`, `tap`, `lat`, `devLat`, `pathLat`, `scBadge`, `duckTails`, `bandFilter`, `bassMono`) and asks of lanes C, D, E, I.
+- `tools/engine-lab/mx/README.md`: where the edit scripts go.
+
+### Found while reading the code
+- `renderMix` does not build the track utility (width, phase, trim) that the live graph has (`N.pdc → N.ut → N.vol`), so a track with width, phase or trim set may export differently from playback. MX-1 checks it and, if true, adds the utility only where those differ from neutral (old projects that never touched them stay bit-identical).
+- The Compressor is a browser `DynamicsCompressorNode`, which has no key input: X1 needs a keyed worklet for it, used only when a source is set.
+
+### Not changed
+`index.html`, `desktop/` and `native/` untouched; no version bump, nothing to publish.
+
+### Left
+MX-1, MX-2, MX-3, MX-4; MX-5 waits for the user's yes on the play-through idea. Then "mixing engine complete".
+
