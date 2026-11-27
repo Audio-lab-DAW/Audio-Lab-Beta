@@ -1,0 +1,173 @@
+name: Native CI (task NB)
+
+# Checks of the native engine on every push that touches it (task NB-R1, review RN5). Linux machines only on a
+# push (they start at once); the Apple Silicon job runs when started by hand with "mac" ticked, because the hosted
+# macOS queue can take hours (review decision D9). Nothing here builds or changes the app.
+#   linux:  Release and AddressSanitizer + UndefinedBehaviorSanitizer builds of every native target; alengine
+#           selftest, the ring under two threads, the mixer (10 scenes) and every ported device (all presets, at
+#           128 and 7 frames per call) against the web engine rendered in headless Chromium, bit for bit
+#   tsan:   the ring under two threads with ThreadSanitizer (exact and follow modes)
+#   node:   syntax of every bridge file, and the shell's side of the bridge against a stand-in engine
+#           (crash recovery, gave-up, a hung engine, the worklet port, what the page may send)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - 'desktop/native-engine.js'
+      - 'desktop/preload.js'
+      - 'tools/native-lab/**'
+      - '.github/workflows/native-ci.yml'
+  workflow_dispatch:
+    inputs:
+      mac:
+        description: 'Also build and check on the Apple Silicon runner'
+        type: boolean
+        default: false
+      runner:
+        description: 'macOS runner label'
+        type: string
+        default: 'macos-15'
+
+concurrency:
+  group: native-ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Machine
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; uname -a; c++ --version | head -1; python3 --version; } | tee out/machine.txt
+      - name: Release build (every native target without the plug-in SDK)
+        run: |
+          cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
+          cmake --build build -j 4 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true
+          test -x build/alengine && test -x build/alrender && test -x build/almix && test -x build/alringstress
+      # shift-base is left out: the vendored LLVM libc shifts negative values (defined behaviour from C++20, and in
+      # every compiler we use), see native/third_party/llvm-libc/src/__support/math/log_range_reduction.h
+      - name: AddressSanitizer + UndefinedBehaviorSanitizer build
+        run: |
+          cmake -S native -B build-asan -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize=shift-base -fno-sanitize-recover=undefined -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" > out/cmake-asan.txt 2>&1 || { tail -40 out/cmake-asan.txt; exit 1; }
+          cmake --build build-asan -j 4 2>&1 | grep -E ' error' || true
+          test -x build-asan/alrender
+      - name: 'alengine selftest (Release, then sanitizers)'
+        run: |
+          build/alengine selftest | tee out/selftest.json
+          build-asan/alengine selftest | tee out/selftest-asan.json
+          python3 -c "import json;[exit(1) for f in ('out/selftest.json','out/selftest-asan.json') if not json.load(open(f))['ok']]"
+      - name: The ring under two threads (Release, then sanitizers)
+        run: |
+          build/alringstress 5 | tee out/ringstress.json
+          build-asan/alringstress 3 | tee out/ringstress-asan.json
+      - name: 'The mixer against the web engine (10 scenes, Release and sanitizers)'
+        run: |
+          python3 tools/native-lab/run_mix.py build/almix out/mix | tail -1 | tee out/mix.txt
+          python3 tools/native-lab/run_mix.py build-asan/almix out/mix-asan | tail -1 | tee out/mix-asan.txt
+          grep -q 'ALL IDENTICAL' out/mix.txt && grep -q 'ALL IDENTICAL' out/mix-asan.txt
+      - name: Python, Playwright and Chromium (to run the app's own engine)
+        run: |
+          python3 -m pip install --quiet --break-system-packages playwright numpy || python3 -m pip install --quiet playwright numpy
+          python3 -m playwright install --with-deps chromium > out/playwright.txt 2>&1 || { tail -20 out/playwright.txt; exit 1; }
+      - name: Web engine references (every ported device, every preset)
+        run: |
+          T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
+          python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
+      - name: 'Every ported device against the web engine, bit for bit (Release; sanitizers at 128 and 7 frames per call)'
+        run: |
+          run() { # build blocksize dir
+            mkdir -p "$3/native"; [ "$3" = out/core ] || cp -r out/core/web out/core/cases.json "$3/"
+            "$1"/alrender cases out/core/cases.json out/core/in.wav "$3/native" $2 > "$3/native.jsonl"
+            echo "$1 at $2 frames: $(python3 tools/native-lab/compare_core.py "$3" | tail -1)" | tee -a out/core-compare.txt
+          }
+          run build 128 out/core
+          run build-asan 128 out/core-asan
+          run build-asan 7 out/core-asan-7
+          grep -q '^build at 128 frames: \([0-9]*\) of \1 cases' out/core-compare.txt
+          grep -q '^build-asan at 128 frames: \([0-9]*\) of \1 cases' out/core-compare.txt
+      - name: Summary
+        if: always()
+        run: |
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/mix.txt out/mix-asan.txt out/core-compare.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; }; done; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-ci-linux
+          path: |
+            out/*.txt
+            out/*.json
+          retention-days: 14
+
+  tsan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: The ring under two threads with ThreadSanitizer
+        run: |
+          g++ -std=c++17 -O1 -g -fsanitize=thread -ffp-contract=off -fno-fast-math native/tests/ring_stress.cpp -o ringstress-tsan -lpthread
+          TSAN_OPTIONS="halt_on_error=1 second_deadlock_stack=1" ./ringstress-tsan 10 | tee ringstress-tsan.json
+          echo '```' >> "$GITHUB_STEP_SUMMARY"; cat ringstress-tsan.json >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  node:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax of every bridge file
+        run: for f in desktop/native-engine.js desktop/preload.js native/bridge/*.js tools/native-lab/*.js tools/native-lab/bridge-unit/*.js; do node --check "$f" || exit 1; echo "ok $f"; done
+      - name: The shell's side of the bridge against a stand-in engine
+        run: node tools/native-lab/bridge-unit/bridge_unit.js | tee bridge-unit.txt
+      - name: Summary
+        if: always()
+        run: |
+          { echo '```'; cat bridge-unit.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  mac:
+    if: github.event_name == 'workflow_dispatch' && inputs.mac
+    runs-on: ${{ inputs.runner || 'macos-15' }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - name: Machine
+        run: |
+          mkdir -p out
+          { echo "arch: $(uname -m)"; sw_vers; clang --version | head -1; node --version; } | tee out/machine.txt
+      - name: Build every native target without the plug-in SDK (arm64)
+        run: |
+          cmake -S native -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
+          cmake --build build -j 4 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true
+          file build/alengine build/alrender build/almix build/alringstress | tee out/file.txt
+      - name: alengine selftest, the ring, the mixer
+        run: |
+          build/alengine selftest | tee out/selftest.json
+          build/alringstress 5 | tee out/ringstress.json
+          python3 tools/native-lab/run_mix.py build/almix out/mix | tail -1 | tee out/mix.txt
+      - name: ThreadSanitizer (clang) on the ring
+        run: |
+          clang++ -std=c++17 -O1 -g -fsanitize=thread -ffp-contract=off -fno-fast-math native/tests/ring_stress.cpp -o build/ringstress-tsan
+          TSAN_OPTIONS=halt_on_error=1 build/ringstress-tsan 5 | tee out/ringstress-tsan.json
+      - name: The shell's side of the bridge against a stand-in engine
+        run: node tools/native-lab/bridge-unit/bridge_unit.js | tee out/bridge-unit.txt
+      - name: Summary
+        if: always()
+        run: |
+          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/bridge-unit.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; }; done; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-ci-mac
+          path: out
+          retention-days: 14

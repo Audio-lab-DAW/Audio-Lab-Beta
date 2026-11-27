@@ -22,9 +22,9 @@ class EngineBridge extends EventEmitter {
 
   start() {
     return new Promise((resolve, reject) => {
-      let done = false;
+      let done = false, timer = null;
       this.proc = spawn(this.exe, [], { stdio: ['pipe', 'pipe', 'ignore'] });
-      this.proc.on('error', e => { if (!done) { done = true; reject(e); } });
+      this.proc.on('error', e => { if (!done) { done = true; clearTimeout(timer); reject(e); } });
       this.proc.on('exit', code => { this.proc = null; for (const w of this.waiting) w.resolve({ ok: false, error: 'the engine stopped' }); this.waiting = []; this.emit('stopped', { code }); });
       this.proc.stdout.setEncoding('utf8');
       this.proc.stdout.on('data', chunk => {
@@ -34,7 +34,7 @@ class EngineBridge extends EventEmitter {
           const line = this.buf.slice(0, i); this.buf = this.buf.slice(i + 1);
           let m; try { m = JSON.parse(line); } catch (e) { continue; }
           if (m.ev) {
-            if (m.ev === 'ready') { this.pid = m.pid; if (!done) { done = true; resolve(m); } }
+            if (m.ev === 'ready') { this.pid = m.pid; if (!done) { done = true; clearTimeout(timer); resolve(m); } }
             this.emit(m.ev, m);
           } else if (m.re !== undefined) {
             const k = this.waiting.findIndex(w => w.cmd === m.re);
@@ -42,7 +42,9 @@ class EngineBridge extends EventEmitter {
           }
         }
       });
-      setTimeout(() => { if (!done) { done = true; reject(new Error('the engine did not answer')); } }, 8000);
+      // a helper that never says ready is killed, not left running behind the app (task NB-R1, found by bridge_unit.js)
+      const p = this.proc;
+      timer = setTimeout(() => { if (!done) { done = true; try { p.kill('SIGKILL'); } catch (e) { /* gone */ } reject(new Error('the engine did not answer')); } }, 8000);
     });
   }
 

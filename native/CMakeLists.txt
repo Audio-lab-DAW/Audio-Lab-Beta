@@ -38,6 +38,11 @@ if(APPLE)
 else()
   target_link_libraries(alengine PRIVATE pthread)
 endif()
+# the ring under two real threads (task NB-R1); CI builds it with -fsanitize=thread as well
+add_executable(alringstress tests/ring_stress.cpp)
+if(NOT APPLE)
+  target_link_libraries(alringstress PRIVATE pthread)
+endif()
 
 # ---- the engine core (task NB-N3a): ported devices, chains, offline render; no sound card needed ---------
 # The browser's maths functions (LLVM libc, header only), so ported devices give the browser's bits everywhere.
