@@ -88,6 +88,15 @@ jobs:
           python3 tools/native-lab/stream_compare.py out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav out/bridge/bridge_compare.json | tee -a out/bridge.txt
           rm -f out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav
 
+      - name: 'Stage N2, first proof: the desktop shell (Electron) sends a page'"'"'s sound to the engine'
+        continue-on-error: true
+        run: |
+          ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
+          desktop/node_modules/.bin/electron tools/native-lab/electron-tap/main.js "$PWD/build/alengine" "$PWD/build/alnative" "$PWD/out/tap" 20 > out/tap.txt 2>&1 || true
+          tail -3 out/tap.txt
+          python3 tools/native-lab/stream_compare.py out/tap/tap_sent.raw out/tap/tap_loopback.wav out/tap/tap_compare.json | tee -a out/tap.txt
+          rm -f out/tap/tap_sent.raw out/tap/tap_loopback.wav
+
       # ---------------- test B ----------------
       - name: Build the SDK's own example plug-ins (fallback and extra subjects)
         continue-on-error: true
