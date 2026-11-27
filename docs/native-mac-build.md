@@ -45,7 +45,8 @@ Paste the report as before. The lines to look for start with `[rate]`, `[exclusi
 - **Pulled out and put back twice** (the Zoom, then a change to the Gryphon): each time the app moved to the default output, said so, and opened the device again when it returned.
 - **The 0.3 fix holds:** after each re-plug the block length in the report matches the rate the device was opened at (11,610 µs at 44.1 kHz, 333 µs at 192 kHz and 64 frames).
 - **Gryphon at 192 kHz and 64 frames** (0.33 ms): 0 failed blocks. At 48 kHz and 64 frames with exclusive use, the device reported 1 overload in about 38,000 blocks.
-- Not in the report: the Zoom's own line with channels, rates and formats. The app writes those lines once at start, and the Zoom arrived later. A small gap in the test app, not in the engine.
+- **The Zoom's own line** (from a later start with it connected): "ZOOM AMS-24 Driver" by ZOOM Corporation, USB; 2 outputs and 2 inputs; rates 44.1, 48, 88.2 and 96 kHz, and the rate can be set; buffer 27 to 4096 frames; 24-bit integer on the wire, 16 formats offered; exclusive use can be taken; **no volume the computer can set**.
+- **What the two devices differ in**, which the engine and the app's settings must respect: the Gryphon has a volume the computer can set, the Zoom has none (its volume is the knob on the unit, so a "device volume" control must show "this device has none" there, as the test app does). The Gryphon goes to 768 kHz and 32-bit, the Zoom to 96 kHz and 24-bit. The Zoom has 2 inputs, the Gryphon none. The smallest buffer is 15 frames on the Gryphon at 48 kHz and 27 on the Zoom.
 
 ## Stage N1: what was built (27 November 2026)
 
