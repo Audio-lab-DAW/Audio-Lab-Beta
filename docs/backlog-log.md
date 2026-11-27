@@ -3337,7 +3337,10 @@ Reading: on the user's Mac in dark mode the app icon had a black background (whi
 3. Settings > App icon: another icon, then Ocean Yellow again: the Dock is blue again.
 
 ### Release
-- Commit on main (no version change, `index.html` untouched, `update-notes.txt` left alone: the note belongs to the program version and there is no new one). Desktop build: see the line below.
+- Commit d4f8378 on main (no version change, `index.html` untouched, `update-notes.txt` left alone: the note belongs to the program version and there is no new one).
+- Desktop build run 45933179423 dispatched with the GitHub tools at 03:16 UTC (the last release commit, v0.223, was 22 minutes old; no other build was running). All four jobs passed: release, Mac build (the icon compiled on `macos-15-intel`), Windows build, and "Mac icon proof" on macOS 26. It made the release **v0.223.0** (the newest desktop app before it was 0.219.0): `AudioLab-Pro-0.223.0-arm64.dmg` and the Windows installer.
+- The proof job on the published DMG: `CFBundleIconName = AppIcon`, `icon.icns` byte for byte the file in the repository, `Assets.car` with the three appearances and the blue tile in each, signature valid, and the icon macOS draws for the app is blue in Default and in Dark (checked by the tile colour; its pictures are in the run's artifact `mac-icon-proof` and were not looked at by eye, the pictures in `docs/app-icon-mac-styles/` are from the same code built an hour earlier on the test branch).
+- The test branches `ic1-test` and `ic1-proof` are left over if this session may not delete branches; nothing on them is needed.
 
 ## 27 November 2026: task NM1 (a truly native Mac app: plan, plug-in hosting, first tests)
 
