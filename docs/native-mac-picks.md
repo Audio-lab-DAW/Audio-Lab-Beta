@@ -106,3 +106,13 @@ What this means for the plan (answered in the scheduling chat, from docs/researc
 - The native engine speaks **WASAPI** (built into Windows: every device, shared and exclusive, bit-perfect in exclusive) directly, so a fresh install plays on any device with nothing else to install. This is the default path.
 - **ASIO** is used in addition when a device's own driver is installed (interface makers ship it with the device, for example Zoom for the AMS-24, iFi for the Gryphon); AudioLab cannot bundle other makers' drivers. Talking to ASIO needs Steinberg's free licence agreement (decision D7).
 - Everything AudioLab itself needs (engine, helpers, the WASAPI path, plug-in hosting) ships inside the one installer.
+
+## The user's wish: moving from the Electron app to the native app (27 November 2026, 19:36 Brussels)
+
+"Can we have it so that the people that are on Electron can just update from inside the app and then it just starts installing the native version? And can we have a special window popping up explaining that we are going to an actual native version? And then they can press OK or do it later or something. And it should pop up in the center and be persistent until someone clicks something or clicks it away."
+
+So, binding for the native packaging stage (N7) and built ahead of it by task MG1:
+- The Electron app offers the native app through its own updater, from inside the app, on Mac and Windows.
+- A special window in the centre explains that AudioLab is moving to a real native version (what changes, that projects and settings come along), with "Install now" and "Later" (and a close button that counts as Later). It stays until the user clicks something; it never disappears by itself.
+- "Install now" downloads, checks and installs the native app and opens it; the user's projects, settings, presets and the app icon choice come along (today projects live in the Electron app's browser storage, see research RN3, so they must be exported to files the native app reads).
+- "Later" asks again at a sensible interval, and the offer also stays in the update window and the main menu.
