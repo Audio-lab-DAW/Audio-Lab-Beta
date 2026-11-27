@@ -93,7 +93,7 @@ with sync_playwright() as p:
     # right-click menu
     eye = pg.locator('#fxin .dev[data-id="%s"] .dveye' % cid)
     eye.click(button='right'); pg.wait_for_timeout(300)
-    m = J("{shown:!ctxm.hidden,t:ctxm.innerText}")
+    m = J("{shown:!ctxm.hidden,t:ctxm.innerText+' '+ctxm.textContent}")
     ok(m['shown'] and 'Open the glass rail' in m['t'] and 'Hover reveal' in m['t'] and 'On the picture' in m['t'], 'right-click on the eye: the menu', m['t'].replace('\n', ' | ')[:160])
     ok('Not ready on this device yet' in m['t'], 'On the picture says when a device has no positions yet')
     R("[...ctxm.querySelectorAll('button[data-i]')].find(b=>b.textContent.includes('On the picture')).click();1"); pg.wait_for_timeout(400)
