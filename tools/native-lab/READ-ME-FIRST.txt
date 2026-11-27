@@ -42,7 +42,7 @@ WHAT TO DO
    device's own volume: move it here and watch it in Audio MIDI Setup, or turn it there and watch it here.
    Plugging a device in or out updates the list by itself.
 3. Click a plug-in, then Load. Then "Open its window". Then "Play test pattern", or play the keys
-   A W S E D F T G Y H U J K (click the main window first). Sound comes out at half level.
+   A W S E D F T G Y H U J K (click the list first, not the search field). Sound comes out at half level.
 4. Try several plug-ins: an instrument, an effect (the pattern is then a plucked sound that runs through it),
    the ones you use most, and anything old.
 5. Click "Copy report" and paste it back into the chat (or send the file

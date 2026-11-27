@@ -682,7 +682,7 @@ static void watchCb(void*, const char* what, uint32_t) {
         [o appendFormat:@"\n[notes] %s: %u notes sent (%u from the test pattern, %u from the keys), output peak %.3f", nm, np + nk, np, nk, pk];
         if (np + nk == 0) [o appendString:@": no notes were sent to it"];
         else if (pk <= 0) {
-            if (G.sr < 44100) [o appendFormat:@": SILENT although the notes reached it. The output runs at %.0f Hz; many instruments make no sound below 44.1 kHz (Pigments played at 44.1 kHz in an earlier report and was silent at 16 kHz). Choose an output at 44.1 kHz or more and play again", G.sr];
+            if (G.sr < 44100) [o appendFormat:@": SILENT although the notes reached it. The output runs at %.0f Hz; some instruments make no sound at such a low rate (Pigments played at 44.1 kHz in an earlier report and was silent at 16 kHz; Surge XT and mda JX10 do sound at 16 kHz). Choose an output at 44.1 kHz or more and play again", G.sr];
             else [o appendString:@": SILENT although the notes reached it. Check its patch (an empty start patch makes no sound) and its own volume"];
         } else [o appendString:@": it sounded"];
     } else {
@@ -747,8 +747,12 @@ static void watchCb(void*, const char* what, uint32_t) {
         for (int k = 1; k <= 4; k++) ev(NSEventTypeLeftMouseDragged, NSMakePoint(p.x, p.y + 6 * k));
         ev(NSEventTypeLeftMouseUp, NSMakePoint(p.x, p.y + 24));
     }
-    int after = G.plug ? G.plug->editStats().performs : 0;
-    [self say:[NSString stringWithFormat:@"[selftest] 24 drags in the plug-in's window: %d parameter move(s) reached the host", after - before]];
+    // JUCE hands the moves to the host a moment later, from its message loop: count after half a second
+    __weak App* me = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        int after = G.plug ? G.plug->editStats().performs : 0;
+        [me say:[NSString stringWithFormat:@"[selftest] 24 drags in the plug-in's window: %d parameter move(s) reached the host", after - before]];
+    });
 }
 - (void)writeMarker:(NSString*)name { [@"1" writeToFile:[S(_selfOut) stringByAppendingPathComponent:name] atomically:YES encoding:NSUTF8StringEncoding error:nil]; }
 - (void)selftestEnd { [self say:@"[selftest] end"]; [self writeMarker:@"done"]; [NSApp terminate:nil]; }
