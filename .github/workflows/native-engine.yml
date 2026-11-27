@@ -10,13 +10,17 @@ on:
         description: 'Length of the follow-mode run in seconds'
         type: string
         default: '90'
+      runner:
+        description: 'macOS runner label (Apple Silicon)'
+        type: string
+        default: 'macos-15'
 
 permissions:
   contents: read
 
 jobs:
   mac:
-    runs-on: macos-15          # Apple Silicon runner
+    runs-on: ${{ inputs.runner || 'macos-15' }}          # Apple Silicon runner
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
