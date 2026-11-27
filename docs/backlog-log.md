@@ -5180,3 +5180,30 @@ Step IN-S of `docs/design-round-4-instruments.md`, the user's pick **S2** (the a
 
 ### Left
 IN-E next: the EQ displays (E3, bandwidth calipers) in `vizEQ2()`, `vizFilter()` and Auto Filter. Then IN-G (G1 G3 G4), IN-O (O0 kept, O1, O4; the track taps' size), IN-V (V1, viridis; the spectrum laid sideways), IN-C and IN-D. Open: the device's Smoothing dot sits on the START label when Smoothing is near 0.
+## 27 November 2026: task NB-R7 (the project's state and its edit protocol; review RN5 A10)
+
+Fired by the scheduler. Next step after NB-R5 by its own "Left" list: NB-R6 waits for decision D2 (and its other parts were done in N3c), so NB-R7. Claimed in the running list first (commit 679e83c). No NB commit in the 20 minutes before. `index.html` and `desktop/` untouched.
+
+### Built
+- `docs/native-state-protocol.md`: the design. The document is the app's project `S` as JSON (no view, transport or audio samples). The page owns it until the end of stage 3, the engine from N4; one protocol for both. Edits are the difference between `S` and the copy last sent (`set`, `del`, `ins`, `rm`, each with the old value: its own undo, checked by the engine). `seq` and `base`, stale edits refused, one edit in flight and a queue per undo step, rebase when the engine changed first (the engine wins at the same place), the whole project again on a lost line, a refusal or a restart. Undo by step in the engine, 64 MB, whole steps dropped. A half-native song: one document, the engine decides where each track sounds. Saves: atomic, five older copies, `minReader`, hash. Costs, the messages, the four-place hook for N2c.
+- `native/engine/doc/doc.h`: the engine's document (its own JSON reader and writer that round-trip any JS string, also unpaired surrogates, and any double; the operations, all-or-nothing edits, undo and redo by step, the structural hash, `saveAtomic`). `native/engine/doc/aldoc.cpp`: the commands `doc.load`, `doc.edit`, `doc.undo`, `doc.redo`, `doc.hash`, `doc.snapshot`, `doc.save`, `doc.open`, `doc.stats`, and `aldoc selftest` (22 checks). CMake target `aldoc`. They go into `alengine` when the bridge carries edits (N2c).
+- `native/bridge/doc-sync.js`: the page's side (diff, apply, inverse, the same hash, `DocMirror` with commit, queue, replies, `remote` and rebase, timeout).
+- `tools/native-lab/doc_sync_test.js` with the three built-in songs as the app holds them (`tools/native-lab/ref/doc/*.json.gz`, taken from v0.261 in headless Chromium).
+- `native-ci.yml`: the selftest and the protocol test on every push (Release 1,000 steps, sanitizers 150 steps) and in the Mac job (300 steps).
+
+### Proven
+- Here (Linux, Release): `doc_sync_test.js --steps 1000` PASS on Fractals, the Psytrance demo and Shrine Legion: phase A (page owns, about 850 edits of 34 kinds and 100 snapshot undos per song: engine hash equal after every step), B (engine undo and redo: every undo exactly the state before its step, all undone = the song as loaded), C (200 overtaken edits: refused, rebased, equal), D (lost line, stale base, wrong old value, engine restart), E (saves, crash before rename, half file, one changed number, newer `minReader`), F (3,000 shuffled arrays). Under AddressSanitizer + UndefinedBehaviorSanitizer, 1,000 steps per song with another seed (3): PASS, no report.
+- GitHub push run 46052350883 (the first version): green on every job (linux with the new step: Release 1,000 steps and sanitizers 150, tsan, node, electron).
+- Measured on Fractals (514 KB): edits median 176 bytes, 90 % under 1.3 KB; engine hash 2 ms; page compare of an unchanged project about 10 ms (Node 22); a save 23 ms with the flush to disk.
+- Found by the first sanitizer run with 1,000 steps and fixed: the 64 MB history limit dropped single edits and could leave half an undo step (now whole steps, a selftest check, and the test accepts dropped steps); moving one track made the diff resend all tracks (now the longest in-order run stays and only the moved one travels: 0.7 KB instead of 1 MB).
+
+### Left
+- N2c: the hook in `index.html` (four places, section 10 of the design), the commands inside `alengine`, the cost in the real page; the hash check at idle and before saves.
+- **The Mac got a machine** (native-ci run 46052838752, `macos-latest`: macOS 26.7.2, Apple clang 21, arm64), the first since NB-R1 (D9). `alengine` built and its selftest passed on Apple Silicon (follower flat to 20 kHz, the four clock offsets steered within 2 ppm, cost 15.7 us per block), the ring under two threads passed. `alrender`, `almix` and so `aldoc` (built after them) did not build: the vendored LLVM maths had only its Intel branches (`aarch64/nearest_integer.h` missing). Fixed in this run: 13 ARM files from the same LLVM commit (found by compiling for aarch64 here until nothing was missing), and the Mac job now builds with `-k` so one target cannot hide the others. Dispatched again; the next run reads it (bit-for-bit devices on Apple Silicon is the open question it answers).
+- The electron job of run 46050316476 (another task's push, 18:33) failed once: case A recorded from sent frame 512, so 959,488 of 960,000 frames matched; it passed in 46052350883. A start-alignment flake in `feeder_test.py`; for NB-R10.
+- Next NB steps: NB-R8 (host hardening, N4's ground), NB-R9 (file safety: `minReader` in the app's loader; it needs `index.html`), N3d (sends, groups, returns, master chain; it starts from section 8's rule: parameters to the running graph without rebuilds). D2, D3, D6, D9 still wait for you.
+
+### Assumptions
+- Diffs at `changed()` instead of rewriting the 327 `pushUndo` sites (they belong to the design chain's lanes).
+- The engine's change wins when both changed the same place; the app's own undo stays until N4.
+- 64 MB of history, five older copies, commit once per frame, autosave 2 s after the last edit and every 2 minutes, hash check after 2 s idle and before saving; plug-in blobs over 64 KB into a side store by content hash.
