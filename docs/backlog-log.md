@@ -6279,7 +6279,8 @@ Fired by the scheduler at about 22:35 UTC. N2c still waits for the design chain 
 - Export quantum 512: **182 of 182** (clip, drive, comp, eq, limit) at 512 and 7 frames per call. With the chains (clip, drive, comp, limit, crush, chorus): **186 of 186**. Part 2's Sidechain after the merge: 38 of 38.
 - Buses: **22 of 22 identical** (new clipbus and clipbus128; part 2's sidebus too). ASan+UBSan build: 61 of 61 at 128 and 7, buses identical, no reports.
 - Cost: 19 µs per 128 stereo frames for Fractals' master clipper (4x), 11 µs at 2x, 4 µs without oversampling: about 0.7 % of one core at 48 kHz.
-- The full reference set (every device) did not fit this machine's memory in one browser; CI's Linux machine runs it. The Mac (Apple's vDSP on both sides) is in the native-ci run dispatched with this push.
+- The full reference set (every device) did not fit this machine's memory in one browser; CI's Linux machine runs it.
+- **GitHub, native-ci run 46083204586 (commit 2d6586d, which carries this part and part 2's last fix), every job green.** Linux: every device case bit for bit at 128 frames in Release and under ASan+UBSan, the shapers built; Apple Silicon (macos-latest, against the Mac's own Chromium, so Apple's vDSP on both sides): every device case bit for bit, the bus scenes ALL IDENTICAL (clipbus and clipbus128 included), the mixer identical, the nodes 52 of 52. The run before (46081605979, this part's own commit) already had all 61 shaper cases bit for bit on the Mac; only part 2's 40 pump cases differed there, which 2d6586d fixed.
 
 ### Left
 - Fractals' last two: the tempo delay (`tdelay`) and the plate reverb (`reverb`, a ConvolverNode: Chromium's FFT convolver on part 1's FFTFrame).
