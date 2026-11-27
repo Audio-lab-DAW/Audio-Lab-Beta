@@ -346,3 +346,7 @@ Each task is one session: build, headless test, release, and a log entry in `doc
 **What to trust in these tables**
 - **Old features may be unchecked.** Some cells for long-standing features (comping, freeze, Mackie Control and others) came from the researchers' general knowledge and were not checked against a page in this run. Treat a "yes" there as likely, not confirmed.
 - **No sources on Electric Universe's studio.** The sources say nothing about Electric Universe's studio setup. The psytrance cards rest on general full-on practice.
+
+## The user's picks (27 November 2026, 14:04 Brussels)
+
+`RF1 picks: F1 to F40` (all forty cards), plus: "Let's also add MIDI controller support, I have an Ableton Push I want to link and set up in AudioLab, and also support for other MIDI controllers." The user's Push is a Push 1. Built by task FT (lane C, one step per run; plan in docs/features-build.md).
