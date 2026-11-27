@@ -3831,3 +3831,17 @@ No app changes: `index.html` was not touched (task AB2 had work in progress ther
 ### Next
 - Dispatch `native-engine.yml` and read cases A to D (fix the Mac build first if it fails).
 - N2c, when the design chain allows `index.html` work: the hook (copy `alNativeTap`, the "Native output" settings: device, rate, buffer, exclusive use, device volume both ways, switch back to the web engine), and shipping `alengine` in the desktop build (`desktop.yml` builds `alvol` the same way; that workflow may only be changed with the user's leave or through `afterPack`).
+
+## 27 November 2026: task FT-0 (the plan for building the picked features, lane C)
+
+No app changes: `index.html` and `desktop/` untouched, no version. The plan is `docs/features-build.md`.
+
+- The user's picks: all forty cards F1 to F40 of "AudioLab: features you might be missing", plus MIDI controller support with the user's Ableton Push 1 first.
+- Read for it: `docs/research-features-gap.md`, the backlog headings, glass plan section 1, the design language research, the science picks, settings round 1 (the S4 settings table, lane B's pages) and the extensions plan (the `SCA` list that DL2 grows into the commands registry).
+- Found in the app (v0.229): `initMidi` asks for Web MIDI without SysEx and treats every input alike (a Push would play its pads as raw notes, its display stays blank); MIDI learn is `UI.midiMap` "channel:cc" to a control id, global only, absolute jump, no list, not in pinned windows; the desktop shell already allows `midi` and `midiSysex`; there are no clips to launch (F8 is not built), so Push's session mode starts with sections as scenes.
+- Order: controllers C1a (layer, takeover, feedback, scopes), C1b (mappings page), C2a to C2c (Push 1: display and pads, encoders and transport, sections as scenes), C3a to C3c (generic templates, Mackie Control and HUI, Launchpad and APC); then the starred cards F1, F2, F9, F16, F18, F20, F25, F31, F36 (F36 gated on the native track); then groups automation, key and notes, sound tools, mix and master, workflow, engine and hardware, and the big ones (F8 with Push clip launching, F7, F35). 64 runs in all.
+- Rules written into the plan: anchored edit scripts in `tools/feature-lab/ft/`, new actions as namespaced `SCA` entries, settings in the S4 table shape, hooks `FT_HOOKS.<name>` for lane B's Settings pages, optional versioned project fields, Fractals levels checked every run, a fake MIDI device with SysEx in the tests.
+- Push 1 facts the plan relies on (ports, pads 36 to 99, relative encoders CC 71 to 78, display SysEx `F0 47 7F 15`) are listed with sources in section 3, to be checked line by line in FT-C2a.
+
+Left: everything in the plan. Next: FT-C1a, the controller layer.
+
