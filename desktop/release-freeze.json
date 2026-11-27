@@ -1,5 +1,5 @@
 {
  "by": "release gate (tools/release-gate/gate.py)",
- "since": "2026-11-27 21:58:58 UTC",
+ "since": "2026-11-27 22:10:01 UTC",
  "rule": "CLAUDE.md, release channel: while this file is on main, do not push changes to index.html; push other work, or wait"
 }
