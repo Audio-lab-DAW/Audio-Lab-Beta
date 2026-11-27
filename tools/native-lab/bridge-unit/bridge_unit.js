@@ -41,13 +41,13 @@ function fakeUtility() {
 }
 
 // one fake Electron main process per scenario (the shell keeps its state inside setup())
-function makeShell(utilityProcess) {
+function makeShell(utilityProcess, dialog) {
   const handlers = {}, listeners = {}, quit = [];
   const ipcMain = { handle: (n, f) => { handlers[n] = f; }, on: (n, f) => { listeners[n] = f; } };
   const app = { isPackaged: false, on: (n, f) => { if (n === 'will-quit') quit.push(f); } };
   const events = [];
   const sender = { send: (ch, d) => { if (ch === 'al:native-ev') events.push(d); }, isDestroyed: () => false };
-  shell.setup(utilityProcess ? { ipcMain, app, utilityProcess } : { ipcMain, app });
+  shell.setup(Object.assign(utilityProcess ? { ipcMain, app, utilityProcess } : { ipcMain, app }, { dialog: dialog === undefined ? null : dialog }));
   const call = (n, ...a) => handlers[n]({ sender }, ...a);
   const port = () => { const p = new EventEmitter(); p.start = () => {}; p.close = () => { p.emit('close'); }; listeners['al:native-port']({ ports: [p] }); return p; };
   return { call, events, port, quit: () => quit.forEach(f => f()), handlers };
@@ -242,6 +242,36 @@ function makeShell(utilityProcess) {
     delete process.env.FAKE_SLOW_FIRST_STATUS_MS;
     await c.stop();
     check(await until(() => !alive(c.pid), 4000), 'stop ends the engine');
+  }
+
+  // task NB-R4b (review C6, RN6 1.4): the page cannot confirm a louder DAC volume itself; the shell's own dialog does
+  {
+    const asked = [];
+    const yes = { showMessageBox: async o => { asked.push(o.message); return { response: 0 }; } };
+    const no = { showMessageBox: async o => { asked.push(o.message); return { response: 1 }; } };
+    const n0 = logLines().length;
+    for (const [dlg, name] of [[yes, 'yes'], [no, 'no'], [null, 'none']]) {
+      const S = makeShell(undefined, dlg);
+      await S.call('al:native-start');
+      await S.call('al:native-cmd', 'open', { uid: 'fake-dac', rate: 48000 });
+      const low = await S.call('al:native-cmd', 'volume', { value: 0.4 });
+      const a0 = asked.length;
+      const hi = await S.call('al:native-cmd', 'volume', { value: 0.8, confirm: true, req: 1 });
+      if (name === 'yes') check(low.ok && hi.ok && hi.value === 0.8 && asked.length === a0 + 1 && /from 40 % to 80 %/.test(asked[a0]), 'the page asks for 80 % (with a confirm of its own): the shell asks the person, who allows it', { hi, asked });
+      if (name === 'no') check(hi.ok === false && hi.needsConfirm && hi.declined && asked.length === a0 + 1, 'the person keeps the level: refused, the level stays', hi);
+      if (name === 'none') check(hi.ok === false && hi.needsConfirm && hi.declined && asked.length === a0, 'no dialog to ask in: refused', hi);
+      await S.call('al:native-stop');
+    }
+    const lg = logLines().slice(n0).filter(l => l.cmd && l.cmd.cmd === 'volume' && l.cmd.value === 0.8);
+    // the engines got 0.8 four times: twice in "yes" (asked, then confirmed after the dialog), once in "no", once in "none"
+    check(lg.length === 4 && lg.filter(l => l.cmd.confirm === true).length === 1 && new Set(lg.map(l => l.pid + ':' + l.cmd.req)).size === 4,
+      "the page's own confirm never reaches the engine: only the send after the person said yes carries it", lg.map(l => l.cmd));
+    process.env.FAKE_FORMAT_EVENT_MS = '150';
+    const S = makeShell();
+    await S.call('al:native-start');
+    check(await until(() => S.events.some(e => e.ev === 'format' && e.restarted === true), 2000), "the engine's format event (the stream restarted in a new layout) reaches the page", S.events);
+    delete process.env.FAKE_FORMAT_EVENT_MS;
+    await S.call('al:native-stop');
   }
 
   try { fs.unlinkSync(LOG); } catch (e) { /* none */ }

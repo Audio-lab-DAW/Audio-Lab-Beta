@@ -10,6 +10,9 @@
 // Protocol 1 (task NB-R4): "ready" says "protocol":1; a command may carry "req":<number>, its answer carries the same.
 // The device volume moves in a ramp, and above the loudest level the device has had it needs "confirm":true.
 // Things that change outside the program arrive as {"ev":"volume","value":0.4}, {"ev":"devices"}, ...
+// alengine 0.6 (task NB-R4b): everything it says goes out through one writer thread, so no thread waits on a shell
+// that stops reading; a format change is restarted by a worker, never on the system's listener thread; a file source at
+// another rate than the device is refused unless "anyRate":true.
 // Sound reaches it through a local socket as plain 32-bit float stereo at the device's rate and is handed to
 // the device untouched (see ring.h).
 #include "../common/json.h"
@@ -20,7 +23,9 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <cstdio>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <mutex>
@@ -36,11 +41,39 @@
 
 using namespace al;
 
-static std::mutex outLock;
+// Task NB-R4b (review C9): what the engine says goes into a queue and one writer thread writes it, so no thread that
+// says something (the socket thread on connect, the system's listener, the volume ramp) ever waits on a full output
+// pipe: if the shell stops reading, the sound keeps flowing. Order is kept (one queue, one writer). Answers are never
+// dropped; events are dropped and counted only beyond OUT_MAX lines waiting. Before run() starts the writer (the
+// selftest from the command line) lines are written directly.
+namespace out {
+std::mutex m; std::condition_variable cv; std::deque<std::string> q; bool run = false, started = false; std::thread t;
+std::atomic<uint64_t> dropped{0}; std::atomic<size_t> waiting{0}, waitingMax{0};
+const size_t OUT_MAX = 4096;
+void writer() {
+    std::unique_lock<std::mutex> lk(m);
+    for (;;) {
+        cv.wait(lk, [] { return !run || !q.empty(); });
+        if (q.empty() && !run) break;
+        std::deque<std::string> batch; batch.swap(q); waiting = 0;
+        lk.unlock();
+        for (auto& l : batch) { fputs(l.c_str(), stdout); fputc('\n', stdout); }
+        fflush(stdout);   // may block while the shell does not read: only this thread waits
+        lk.lock();
+    }
+}
+void start() { std::lock_guard<std::mutex> g(m); if (started) return; run = true; started = true; t = std::thread(writer); }
+void stop() { { std::lock_guard<std::mutex> g(m); if (!started) return; run = false; cv.notify_all(); } if (t.joinable()) t.join(); std::lock_guard<std::mutex> g(m); started = false; }
+}  // namespace out
 static void say(const std::string& line0) {
     std::string line = line0;                       // one answer is one line: text inside strings is escaped, so any line break here is layout only
     for (auto& c : line) if (c == '\n' || c == '\r') c = ' ';
-    std::lock_guard<std::mutex> g(outLock); fputs(line.c_str(), stdout); fputc('\n', stdout); fflush(stdout);
+    std::lock_guard<std::mutex> g(out::m);
+    if (!out::started) { fputs(line.c_str(), stdout); fputc('\n', stdout); fflush(stdout); return; }
+    if (out::q.size() >= out::OUT_MAX && line.compare(0, 6, "{\"ev\":") == 0) { out::dropped++; return; }
+    out::q.push_back(std::move(line));
+    size_t n = out::q.size(); out::waiting = n; if (n > out::waitingMax.load()) out::waitingMax = n;
+    out::cv.notify_one();
 }
 static const char* tf(bool b) { return b ? "true" : "false"; }
 
@@ -107,7 +140,7 @@ static int selftest() {
 // same code is tested on every push.
 struct Eng {
     OutputStream stream; Watcher watcher;
-    std::atomic<uint32_t> dev{0}; bool isOpen = false, hog = false, fallback = true;   // dev is read by the listener thread (review C5)
+    std::atomic<uint32_t> dev{0}; std::atomic<bool> isOpen{false}; bool hog = false, fallback = true;   // isOpen: the format worker writes it (task NB-R4b, found by TSan)   // dev is read by the listener thread (review C5)
     std::atomic<int> source{0};     // 0 silence, 1 tone, 2 file, 3 socket
     std::atomic<double> rate{48000};  // the device's rate; written by the listener thread, read by the device's thread (review C5)
     double tonePhase = 0;
@@ -125,7 +158,8 @@ struct Eng {
     // task NB-R4: output protection (C6), the stream restarted on a format change (C7), the device volume's ramp and ceiling
     std::atomic<uint64_t> nonFinite{0}, clipped{0}, formatRestarts{0};
     std::mutex devLock;                      // open, close and the format restart
-    std::thread fmtThread;
+    // task NB-R4b: the system's listener only asks for a restart; this thread does it (the listener never waits on a lock)
+    std::thread fmtThread; std::mutex fmtM; std::condition_variable fmtCv; bool fmtReq = false, fmtRun = false; std::atomic<uint64_t> fmtAsked{0};
     std::thread rampThread; std::atomic<bool> ramping{false}, rampStop{false};
     std::map<uint32_t, double> ceiling;      // per device: the loudest level it has had (command thread only)
     std::mutex ceilLock;
@@ -239,7 +273,7 @@ static std::string statusJson() {
     DeviceInfo d = E.dev ? deviceInfo(E.dev) : DeviceInfo();
     uint64_t cb = E.stream.callbacks.load();
     double vol = -1; getVolume(E.dev, vol); bool mute = false; getMute(E.dev, mute);
-    std::string s = std::string("\"open\":") + tf(E.isOpen) + ",\"device\":" + jstr(d.name) + ",\"uid\":" + jstr(d.uid) + ",\"rate\":" + jnum(d.rate) + ",\"buffer\":" + std::to_string(d.buffer) +
+    std::string s = std::string("\"open\":") + tf(E.isOpen.load()) + ",\"device\":" + jstr(d.name) + ",\"uid\":" + jstr(d.uid) + ",\"rate\":" + jnum(d.rate) + ",\"buffer\":" + std::to_string(d.buffer) +
         ",\"exclusive\":" + tf(d.hogPid == (int)getpid()) + ",\"exclusiveOwner\":" + std::to_string(d.hogPid) + ",\"onTheWire\":" + jstr(d.physicalFormat) + ",\"handedToUs\":" + jstr(E.stream.formatText) +
         ",\"volume\":" + jnum(vol) + ",\"mute\":" + tf(mute) + ",\"latencyFrames\":" + std::to_string(d.latency + d.safetyOffset + d.streamLatency + d.buffer) +
         // task NB-R4 (review C8): the figure above is the device's part only; sound from the page also waits in the ring
@@ -247,7 +281,8 @@ static std::string statusJson() {
         ",\"ringLatencyFrames\":" + std::to_string(E.source.load() == 3 && E.ring.frames ? E.ring.fill() : 0) +
         ",\"latencyNote\":" + jstr("device part (buffer, device, safety and stream latency) plus, for sound from the page, the ring; the page's own output buffering is not included") +
         ",\"protect\":{\"nonFinite\":" + std::to_string(E.nonFinite.load()) + ",\"clipped\":" + std::to_string(E.clipped.load()) + "}" +
-        ",\"dither\":" + tf(E.stream.dither16) + ",\"formatRestarts\":" + std::to_string(E.formatRestarts.load()) + ",\"volumeCeiling\":" + jnum(ceilingOf(E.dev)) + ",\"ramping\":" + tf(E.ramping.load()) +
+        ",\"dither\":" + tf(E.stream.dither16) + ",\"formatRestarts\":" + std::to_string(E.formatRestarts.load()) +
+        ",\"output\":{\"waiting\":" + std::to_string(out::waiting.load()) + ",\"waitingMax\":" + std::to_string(out::waitingMax.load()) + ",\"eventsDropped\":" + std::to_string(out::dropped.load()) + "}" + ",\"volumeCeiling\":" + jnum(ceilingOf(E.dev)) + ",\"ramping\":" + tf(E.ramping.load()) +
         ",\"callbacks\":" + std::to_string(cb) + ",\"framesPerCallbackMin\":" + std::to_string(cb ? E.stream.minFrames.load() : 0) + ",\"framesPerCallbackMax\":" + std::to_string(E.stream.maxFrames.load()) +
         ",\"overloads\":" + std::to_string(E.stream.overloads.load()) + ",\"renderAvgMicroseconds\":" + jnum(cb ? E.stream.sumNs.load() / 1000.0 / cb : 0) + ",\"renderWorstMicroseconds\":" + jnum(E.stream.worstNs.load() / 1000.0) +
         ",\"source\":" + std::to_string(E.source.load()) + ",\"peak\":" + jnum(E.peak.load()) +
@@ -306,6 +341,30 @@ static std::string openDevice(const Msg& m) {
     return std::string("\"ok\":") + tf(ok) + ",\"error\":" + jstr(err) + ",\"notes\":" + jstr(notes) + ",\"tookMilliseconds\":" + jnum(ms) + "," + statusJson();
 }
 
+// task NB-R4 (review C7), as a worker since NB-R4b: start the stream again so it writes the new layout (never the old
+// bytes into a new format). Several changes in a row give one restart once the device lock is free.
+static void formatWorker() {
+    std::unique_lock<std::mutex> lk(E.fmtM);
+    for (;;) {
+        E.fmtCv.wait(lk, [] { return !E.fmtRun || E.fmtReq; });
+        if (!E.fmtRun) break;
+        E.fmtReq = false; lk.unlock();
+        {
+            std::lock_guard<std::mutex> g(E.devLock);
+            if (E.isOpen) {
+                std::string now = virtualFormatText(E.dev);
+                if (now == E.stream.formatText) say("{\"ev\":\"format\",\"handedToUs\":" + jstr(now) + ",\"restarted\":false}");
+                else {
+                    bool d16 = E.stream.dither16; E.stream.stop(); E.stream.dither16 = d16;
+                    std::string err; bool ok = E.stream.start(E.dev, render, nullptr, err); E.isOpen = ok; E.formatRestarts++;
+                    say("{\"ev\":\"format\",\"handedToUs\":" + jstr(E.stream.formatText) + ",\"restarted\":" + tf(ok) + ",\"error\":" + jstr(err) + "}");
+                }
+            }
+        }
+        lk.lock();
+    }
+}
+
 static void onWatch(void*, const char* what, uint32_t dev) {
     std::string w = what;
     if (w == "volume" || w == "mute") {
@@ -317,16 +376,8 @@ static void onWatch(void*, const char* what, uint32_t dev) {
     else if (w == "format") {
         // task NB-R4 (review C7): another program, Audio MIDI Setup or a re-plug changed the format: start the stream
         // again so it writes the new layout (never the old bytes into a new format). Not on the listener's thread.
-        if (E.fmtThread.joinable()) E.fmtThread.join();
-        E.fmtThread = std::thread([] {
-            std::lock_guard<std::mutex> g(E.devLock);
-            if (!E.isOpen) return;
-            std::string now = virtualFormatText(E.dev);
-            if (now == E.stream.formatText) { say("{\"ev\":\"format\",\"handedToUs\":" + jstr(now) + ",\"restarted\":false}"); return; }
-            bool d16 = E.stream.dither16; E.stream.stop(); E.stream.dither16 = d16;
-            std::string err; bool ok = E.stream.start(E.dev, render, nullptr, err); E.isOpen = ok; E.formatRestarts++;
-            say("{\"ev\":\"format\",\"handedToUs\":" + jstr(E.stream.formatText) + ",\"restarted\":" + tf(ok) + ",\"error\":" + jstr(err) + "}");
-        });
+        E.fmtAsked++;
+        { std::lock_guard<std::mutex> g(E.fmtM); E.fmtReq = true; } E.fmtCv.notify_one();   // task NB-R4b: never waits here
     }
     else if (w == "rate") {
         // task NB-R2: the device changed rate (the user, Audio MIDI Setup, another program). While the page sends at the
@@ -348,13 +399,19 @@ static void onWatch(void*, const char* what, uint32_t dev) {
 
 static int run() {
     SincTable::get();   // built here, not on the device's thread the first time follow mode reads (review C2)
+    out::start();       // task NB-R4b: the writer thread (review C9)
+    // task NB-R4b: std::cin is tied to std::cout, so every getline flushed stdout and the command thread waited on the
+    // stdio lock whenever the writer was stuck on a full pipe (found by engine_null_test.py's unread-pipe case)
+    std::cin.tie(nullptr);
+    { std::lock_guard<std::mutex> g(E.fmtM); E.fmtRun = true; }
+    E.fmtThread = std::thread(formatWorker);
     E.watcher.start(onWatch, nullptr);
 #ifdef __APPLE__
     const char* backend = "coreaudio";
 #else
     const char* backend = "null";
 #endif
-    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.5\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"protocol\":1,\"pid\":" + std::to_string((int)getpid()) + "}");
+    say("{\"ev\":\"ready\",\"engine\":\"alengine 0.6\",\"devices\":\"" + std::string(backend) + "\",\"rateContract\":true,\"protocol\":1,\"pid\":" + std::to_string((int)getpid()) + "}");
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
@@ -407,7 +464,12 @@ static int run() {
             // render (quiesce), so nothing touches the ring or the file while they are replaced (review C1)
             std::string t = m.str("type"), err, extra; bool ok = true;
             if (t == "tone") { stopSocket(); E.source = 1; }
-            else if (t == "file") { Wav w; ok = wavRead(m.str("path"), w, err) && w.ch == 2; if (ok) { stopSocket(); quiesce(); E.file = w; E.filePos = 0; E.source = 2; } else if (err.empty()) err = "needs a stereo 32-bit float WAV"; }
+            else if (t == "file") {
+                Wav w; ok = wavRead(m.str("path"), w, err) && w.ch == 2;
+                // task NB-R4b: a file at another rate than the device would play at the wrong speed and pitch; refused unless anyRate
+                if (ok && !m.flag("anyRate") && (double)w.sr != E.rate.load()) { ok = false; err = "the file is at " + std::to_string(w.sr) + " Hz but the device runs " + jnum(E.rate.load()) + " Hz"; }
+                if (ok) { stopSocket(); quiesce(); E.file = w; E.filePos = 0; E.source = 2; } else if (err.empty()) err = "needs a stereo 32-bit float WAV";
+            }
             else if (t == "socket") {
                 double dr = E.rate.load(); if (!(dr > 0)) dr = 48000;
                 double pr = m.num("pageRate", 0), pf = 30, hm = 120, lp = 2000; std::string be;
@@ -433,7 +495,7 @@ static int run() {
             say(re + "\"ok\":" + tf(ok) + ",\"error\":" + jstr(err) + ",\"type\":" + jstr(t) + extra + "}");
         }
         else if (c == "clock") { std::string mo = m.str("mode"); bool ok = mo == "follow" || mo == "exact"; if (ok) { E.ring.requestSteerReset(); E.ring.follow = mo == "follow"; } say(re + "\"ok\":" + tf(ok) + ",\"mode\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + "}"); }
-        else if (c == "status") say(re + statusJson() + "}");
+        else if (c == "status") { std::lock_guard<std::mutex> g(E.devLock); say(re + statusJson() + "}"); }   // the stream's format text may be rewritten by the format worker (task NB-R4b)
         else if (c == "reset") { resetCounters(); say(re + "\"ok\":true}"); }
         else if (c == "selftest") selftest();
 #ifndef __APPLE__
@@ -448,8 +510,10 @@ static int run() {
     stopRamp();
     stopSocket();
     E.watcher.stop();
+    { std::lock_guard<std::mutex> g(E.fmtM); E.fmtRun = false; } E.fmtCv.notify_all();
     if (E.fmtThread.joinable()) E.fmtThread.join();
     closeDevice(true);
+    out::stop();   // every line said so far is written before the engine exits
     return 0;
 }
 

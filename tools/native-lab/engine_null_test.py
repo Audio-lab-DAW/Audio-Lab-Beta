@@ -14,6 +14,8 @@ Checks:
   source switching under load (review C1): 300 switches between socket, tone, file and silence while a sender writes,
     and clock-mode flips: the engine answers every command and does not hang;
   a sender that stopped sending and never closes (a frozen feeder, task NB-R3) does not hold a source switch;
+  task NB-R4b (review C9): with the engine's output unread (a full pipe) it still takes commands and sound; 40 format
+    changes against 40 opens; a file at another rate refused;
   task NB-R4 (review C6 to C10, A10): protocol 1 and request numbers (also on a parse error); bad numbers refused
   without harm; the device volume ramps and needs a confirmation above the loudest level the device has had; NaN,
   infinity and samples past full scale never reach the device (counted), legal samples untouched; dither off by
@@ -43,8 +45,11 @@ class Engine:
         self.stderr = []
         threading.Thread(target=lambda: self.stderr.extend(self.p.stderr), daemon=True).start()
 
+    hold = threading.Event()   # task NB-R4b: set = this side stops reading the engine's output (the pipe fills up)
+
     def _read(self):
         for line in self.p.stdout:
+            while self.hold.is_set(): time.sleep(0.01)
             try: m = json.loads(line)
             except Exception: continue
             with self.cv:
@@ -300,6 +305,51 @@ bw = os.path.join(out, "broken.wav")
 open(bw, "wb").write(b"RIFF" + struct.pack("<I", 30) + b"WAVEfmt " + struct.pack("<I", 1000) + b"\x03\x00\x02\x00")
 r = e.cmd(cmd="source", type="file", path=bw)
 check(not r.get("ok") and e.cmd(cmd="status").get("open") is True, "a broken WAV file is refused, the engine keeps running", r)
+
+# ---- task NB-R4b: what the engine says never holds the sound (review C9); the format restart never waits in the listener ----
+check(ready and ready.get("engine") == "alengine 0.6", "ready says alengine 0.6", ready)
+o = e.cmd(cmd="open", uid="al-null-1", rate=48000, buffer=128)
+r = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, prefillMs=30, highMs=600)
+with e.cv: na = len(e.answers)
+e.hold.set()                                       # the shell stops reading (busy, hung): the output pipe fills
+def flood():
+    for k in range(3000):
+        e.p.stdin.write(json.dumps({"cmd": "null", "change": "volume", "value": 0.3 + (k % 2) * 0.01, "id": 1}) + "\n")
+    e.p.stdin.flush()
+thF = threading.Thread(target=flood, daemon=True); thF.start(); thF.join(4)
+check(not thF.is_alive(), "with its output unread the engine still takes every command (3,000 written)")   # before NB-R4b it stopped reading here
+time.sleep(0.8)
+stopH = threading.Event(); sentH = []
+t3 = time.time()
+thH = threading.Thread(target=sender, args=(sock, blocks(72000), 48000, stopH, sentH), daemon=True); thH.start()   # connecting makes the socket thread say "sound-connected"
+thH.join(6); tookH = time.time() - t3; doneH = not thH.is_alive()
+check(r.get("ok") and doneH and tookH < 2.5, "with the output pipe full and unread, a new sender connects and 1.5 s of sound goes in at its own pace (%.2f s)" % tookH, {"done": doneH, "took": tookH})
+e.hold.clear(); stopH.set(); thH.join(3); thF.join(10)
+time.sleep(0.5)
+with e.cv: nulls = [a for a in e.answers[na:] if a.get("re") == "null"]
+st = e.cmd(cmd="status")
+outq = st.get("output", {})
+check(st.get("ring", {}).get("received") == 72064 and st.get("ring", {}).get("droppedFrames", 1) == 0 and st.get("ring", {}).get("ranEmpty", 9) <= 1, "every frame of it reached the ring (563 blocks), nothing dropped, empty only when the sender stopped", st.get("ring"))
+check(len(nulls) == 3000 and outq.get("waitingMax", 0) > 1000, "once read again, all 3,000 answers arrive (none dropped; up to %d lines waited, %d events dropped and counted)" % (outq.get("waitingMax", 0), outq.get("eventsDropped", 0)), {"answers": len(nulls), "output": outq})
+with e.cv:
+    for a in nulls: e.answers.remove(a)
+e.cmd(cmd="source", type="silence")
+# format changes while the command thread opens the device again and again: every command answered, no deadlock
+t4 = time.time(); okc = 0
+for k in range(40):
+    e.cmd(cmd="null", change="format", value=24 if k % 2 == 0 else 32, id=1)
+    if e.cmd(cmd="open", uid="al-null-1", rate=48000, buffer=128, timeout=5).get("ok"): okc += 1
+time.sleep(0.5); st = e.cmd(cmd="status")
+check(okc == 40 and st.get("open") is True and time.time() - t4 < 20, "40 format changes from outside while the device is opened 40 times: every open answered (%.1f s), restarts %d" % (time.time() - t4, st.get("formatRestarts", 0)), {"ok": okc, "st": st.get("formatRestarts")})
+e.cmd(cmd="null", change="format", value=32, id=1); time.sleep(0.2)
+# a file at another rate than the device would play at the wrong speed: refused (anyRate lets it)
+wav441 = os.path.join(out, "tone441.wav")
+fr = struct.pack("<%df" % 8820, *([0.1, -0.1] * 4410))
+with open(wav441, "wb") as f:
+    f.write(b"RIFF" + struct.pack("<I", 36 + len(fr)) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 3, 2, 44100, 44100 * 8, 8, 32) + b"data" + struct.pack("<I", len(fr)) + fr)
+f1 = e.cmd(cmd="source", type="file", path=wav441); f2 = e.cmd(cmd="source", type="file", path=wav441, anyRate=True)
+check(f1.get("ok") is False and "44100" in f1.get("error", "") and "48000" in f1.get("error", "") and f2.get("ok"), "a 44.1 kHz file on a 48 kHz device is refused with both rates named (anyRate plays it)", [f1.get("error"), f2.get("ok")])
+e.cmd(cmd="source", type="silence")
 
 q = e.cmd(cmd="quit")
 try: e.p.wait(5)

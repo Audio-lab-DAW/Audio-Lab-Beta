@@ -52,10 +52,29 @@ function findUtility(given) {
 // the Mac, or any machine when a test asks for it (the engine runs on the null device off the Mac, task NB-R2)
 const osOk = () => process.platform === 'darwin' || process.env.AL_ENGINE_TEST === '1';
 
-const EVENTS = ['volume', 'rate', 'buffer', 'exclusive', 'devices', 'default-output', 'sound-connected', 'sound-disconnected', 'stopped', 'restarted', 'gave-up'];
+const EVENTS = ['volume', 'rate', 'buffer', 'exclusive', 'devices', 'default-output', 'format', 'sound-connected', 'sound-disconnected', 'stopped', 'restarted', 'gave-up'];
 const COMMANDS = new Set(['devices', 'formats', 'open', 'close', 'volume', 'mute', 'status', 'clock']);
 
-function setup({ ipcMain, app, utilityProcess }) {
+// task NB-R4b (review C6, RN6 1.4): the engine refuses a device volume louder than the device has been unless the
+// command says confirm. Only the person at the Mac may give that: the page arrives through an update channel that is
+// not signed, so the shell drops a confirm the page sends and asks in its own dialog, then sends confirm itself.
+function findDialog(given) {
+  if (given !== undefined) return given;
+  try { const d = require('electron').dialog; return d && typeof d.showMessageBox === 'function' ? d : null; } catch (e) { return null; }
+}
+async function askRaise(dialog, from, to, name) {
+  if (!dialog) return false;
+  const pc = x => Math.round(x * 1000) / 10 + ' %';
+  try {
+    const a = await dialog.showMessageBox({ type: 'warning', buttons: ['Make it louder', 'Keep it'], defaultId: 1, cancelId: 1, noLink: true,
+      message: 'Raise ' + (name || 'the device') + "'s own volume from " + pc(from) + ' to ' + pc(to) + '?',
+      detail: 'This is the volume of the DAC itself, before your amplifier, speakers or headphones. It is louder than this device has been, so AudioLab asks first.' });
+    return !!a && a.response === 0;
+  } catch (e) { return false; }
+}
+
+function setup({ ipcMain, app, utilityProcess, dialog }) {
+  const DLG = findDialog(dialog);
   let eng = null, owner = null, port = null, starting = null;
   const UP = findUtility(utilityProcess);
   let feeder = null, feederId = 0, dog = null, engMissed = 0, engPinging = false; const feederRestarts = [];
@@ -190,7 +209,14 @@ function setup({ ipcMain, app, utilityProcess }) {
   ipcMain.handle('al:native-cmd', async (e, name, o) => {
     if (!COMMANDS.has(name)) return { ok: false, error: 'unknown command' };
     if (!eng) return { ok: false, error: 'the engine is not running' };
-    const r = await eng.send(Object.assign({}, o && typeof o === 'object' ? o : {}, { cmd: name }));
+    const oo = Object.assign({}, o && typeof o === 'object' ? o : {});
+    delete oo.req; delete oo.confirm;   // task NB-R4b: the bridge numbers requests; only the shell's own dialog confirms a louder volume
+    let r = await eng.send(Object.assign({}, oo, { cmd: name }));
+    if (name === 'volume' && r.needsConfirm && eng) {
+      const st = await eng.send({ cmd: 'status' });
+      if (await askRaise(DLG, r.value, +oo.value, st && st.device)) r = eng ? await eng.send(Object.assign({}, oo, { cmd: 'volume', confirm: true })) : r;
+      else r = Object.assign({}, r, { declined: true });
+    }
     if (name === 'open' && r.ok) lastOpen = Object.assign({}, o, r.uid ? { uid: r.uid } : {});
     if (name === 'close') lastOpen = null;
     if (name === 'status') {
