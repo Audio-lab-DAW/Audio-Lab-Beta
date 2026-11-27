@@ -103,7 +103,7 @@ with sync_playwright() as p:
             pg.evaluate("q=>{const e=document.getElementById('setQ');e.focus();e.value=q;e.dispatchEvent(new Event('input'))}",q);pg.wait_for_timeout(200)
             return pg.evaluate("()=>[...document.querySelectorAll('#setQR button')].map(b=>b.querySelector('b').textContent+' ['+b.querySelector('small').textContent+']')")
         for q,w in [('colours & clips','Appearance'),('glass & light','Appearance'),('zoom and playhead','Navigation'),('interface and dac','DAC and audio interface'),('audio system','Audio'),('project file','Project'),('export audio','Export'),('metronome','Recording and metronome'),('tint','Appearance'),('pick up notes','Editing'),('level meters','Mixer and meters'),('safety limiter','DAC and audio interface')]:
-            h=search(q);ck(f'{L}: search "{q}" finds {w}',any(('['+w+']') in x or (' ['+w+' ›') in x or x.startswith(w+' [') for x in h),h[:5])
+            h=search(q);ck(f'{L}: search "{q}" finds {w}',any(('['+w+']') in x or (' ['+w+' ›') in x or ('› '+w+']') in x or ('› '+w+' ›') in x or x.startswith(w+' [') for x in h),h[:5])  # from v0.251 (ST-S6) the path starts with the group
         h=search('pick up notes');i=next((n for n,x in enumerate(h) if 'Editing' in x),0)
         pg.click('#setQR button >> nth=%d'%i);pg.wait_for_timeout(300)
         ck(f'{L}: choosing a search result opens its new page and flashes the row',pg.evaluate("()=>document.querySelector('#setNav [data-tab].on').dataset.tab==='editing'&&!!document.querySelector('#setBody .sflash')"))

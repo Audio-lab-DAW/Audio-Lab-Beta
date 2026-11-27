@@ -1,0 +1,9 @@
+/* settings step S6 (task ST-S6): search results with the path, marks and "Show me" for in-place options */
+#setQR{width:380px;max-width:calc(100vw - 40px);max-height:min(520px,70vh);overflow:auto}
+#setQR mark{background:rgba(255,181,71,.3);color:inherit;border-radius:2px;padding:0 1px}
+#setQR small{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+#setQR .st6show{font-style:normal;font-weight:var(--fw6);color:#ffb547;margin-left:auto}
+#st6Spot{position:fixed;z-index:100000;pointer-events:none;border-radius:7px;border:2px solid #ffb547;box-shadow:0 0 0 0 rgba(255,181,71,0);opacity:0}
+#st6Spot.on{animation:st6spot 2s ease-out forwards}
+@keyframes st6spot{0%{opacity:1;box-shadow:0 0 0 4px rgba(255,181,71,.35),0 0 22px rgba(255,181,71,.55)}60%{opacity:1;box-shadow:0 0 0 2px rgba(255,181,71,.2),0 0 12px rgba(255,181,71,.3)}100%{opacity:0;box-shadow:0 0 0 0 rgba(255,181,71,0)}}
+@media (prefers-reduced-motion:reduce){#st6Spot.on{animation:none;opacity:1}}
