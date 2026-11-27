@@ -338,6 +338,70 @@ static int cmdNl7(int argc, char** argv) {
     return fails ? 1 : 0;
 }
 
+// alvst3 nl8 --plugin AL-STRICT-SYNTH-BUNDLE [--sr 48000] [--outdir DIR --tag TAG]
+// task NL8: 1 the symbols of report 8 (degree sign, micro, plus-minus, times, infinity, squared, cubed) as the plug-in gives
+// them and as Mac Roman mojibake, 2 the silence flags of a plug-in with 33 output buses (HALion 7 in report 9) counted
+// per block, with the main bus on its own
+static int cmdNl8(int argc, char** argv) {
+    auto o = opts(argc, argv, 2);
+    double sr = atof(opt(o, "sr", "48000").c_str()); int block = 512;
+    std::string out; int fails = 0;
+    auto line = [&](bool ok, const std::string& s) { out += std::string("[nl8] ") + (ok ? "PASS " : "FAIL ") + s + "\n"; if (!ok) fails++; };
+    std::string err;
+    // 1. strings
+    {
+        PluginInfo want; want.format = "vst3"; want.path = opt(o, "plugin"); want.name = "AL Strict Synth";
+        auto p = vst3Format()->create(want, err);
+        if (!p) { fprintf(stderr, "could not load: %s\n", err.c_str()); return 1; }
+        if (!p->prepare(sr, block, false, err)) { fprintf(stderr, "could not start: %s\n", err.c_str()); return 1; }
+        int64_t spread = -1, sym = -1; std::string spreadUnit;
+        for (auto& q : p->params()) { if (q.name == "Spread") { spread = q.id; spreadUnit = q.units; } if (q.name == "Symbols") sym = q.id; }
+        if (spread < 0 || sym < 0) line(false, "strings: the test instrument has no \"Spread\" or \"Symbols\" (an older build?)");
+        else {
+            std::string a = p->paramText((uint32_t)spread, 21.0 / 360.0), b = p->paramText((uint32_t)sym, 0.0), c = p->paramText((uint32_t)sym, 1.0);
+            line(a == "21 deg" && spreadUnit == "deg", "degree sign: Spread = \"" + a + "\", unit \"" + spreadUnit + "\" (the plug-in sends \"21<U+00B0>\" and the unit \"<U+00B0>\"; report 8 showed \"21<U+00AC>inf\")");
+            const std::string want8 = "us +/-3 x2 inf m2 m3 21 deg";
+            line(b == want8 && isAscii(b), "symbols as the plug-in sends them (U+00B5 s U+00B1 3 U+00D7 2 U+221E m U+00B2 m U+00B3 21 U+00B0): \"" + b + "\"");
+            line(c == want8 && isAscii(c), "the same symbols already turned into Mac Roman letters by the plug-in (\"21<U+00AC><U+221E>\" and so on): \"" + c + "\"");
+        }
+    }
+    // 2. 33 output buses and silence flags
+    {
+        PluginInfo want; want.format = "vst3"; want.path = opt(o, "plugin"); want.name = "AL Strict Synth 33 outs";
+        auto p = vst3Format()->create(want, err);
+        if (!p) line(false, "33 outs: could not load \"AL Strict Synth 33 outs\": " + err);
+        else if (!p->prepare(sr, block, false, err)) line(false, "33 outs: could not start: " + err);
+        else {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));     // the loader thread's message
+            std::vector<float> L(block), R(block), z(block, 0);
+            ProcessContext ctx; ctx.sampleRate = sr;
+            const int blocks = 400;
+            for (int b = 0; b < blocks; b++) {
+                NoteEvent ne[1]; int nn = 0;
+                if (b >= 40 && b % 40 == 0) { ne[0].on = true; ne[0].pitch = 60 + (b / 40) % 12; nn = 1; }     // the first 40 blocks silent
+                if (b >= 40 && b % 40 == 20) { ne[0].on = false; ne[0].pitch = 60 + (b / 40) % 12; nn = 1; }
+                const float* in[2] = {z.data(), z.data()}; float* oo[2] = {L.data(), R.data()};
+                ctx.samplePos = (int64_t)b * block;
+                p->process(in, 2, oo, 2, block, ne, nn, ctx);
+            }
+            HostDiag d = p->diag();
+            std::string txt = diagText(p->info().name, d);
+            size_t k = txt.rfind("[diag]"); std::string last = k == std::string::npos ? txt : txt.substr(k);
+            while (!last.empty() && last.back() == '\n') last.pop_back();
+            bool ok = d.outBuses == 33 && d.blocks == (uint64_t)blocks && d.blocksSilenceFlag <= d.blocks && d.blocksSilenceFlag == d.blocks
+                      && d.silenceFlagBusBlocks >= 32ull * d.blocks && d.blocksSilenceFlagMain >= 40 && d.blocksSilenceFlagMain < d.blocks && d.silenceFlagMainWithSound > 0 && d.silenceFlagMainWithSound < d.blocksSilenceFlagMain && d.blocksMainNonZero > 0;
+            char b[300];
+            snprintf(b, sizeof b, "33 outs: %llu blocks, a silence flag in %llu of them (never more than the blocks), on the main bus in %llu (the 40 silent blocks at the start, and %llu while it held sound: the instrument's deliberate wrong flag), %llu bus-blocks summed (0.7 printed this sum). The line: ",
+                     (unsigned long long)d.blocks, (unsigned long long)d.blocksSilenceFlag, (unsigned long long)d.blocksSilenceFlagMain, (unsigned long long)d.silenceFlagMainWithSound, (unsigned long long)d.silenceFlagBusBlocks);
+            line(ok, b + last);
+        }
+    }
+    fputs(out.c_str(), stdout);
+    std::string outdir = opt(o, "outdir");
+    if (!outdir.empty()) { FILE* f = fopen((outdir + "/" + opt(o, "tag", "nl8") + "_nl8.txt").c_str(), "wb"); if (f) { fputs(out.c_str(), f); fclose(f); } }
+    return fails ? 1 : 0;
+}
+
 int main(int argc, char** argv) {
     int code = 0;
     if (scannerChildMain(argc, argv, code)) return code;
@@ -347,6 +411,7 @@ int main(int argc, char** argv) {
     if (c == "run") return cmdRun(argc, argv);
     if (c == "diag") return cmdDiag(argc, argv);
     if (c == "nl7") return cmdNl7(argc, argv);
+    if (c == "nl8") return cmdNl8(argc, argv);
     fprintf(stderr, "usage: alvst3 scan [--folder DIR]... [--json FILE] | alvst3 run --plugin BUNDLE [--name NAME] --outdir DIR --tag TAG [--in FILE.wav]\n");
     return 2;
 }

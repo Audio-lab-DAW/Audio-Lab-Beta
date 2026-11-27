@@ -9,8 +9,8 @@
   <key>CFBundleName</key><string>AudioLab VST3 test</string>
   <key>CFBundleDisplayName</key><string>AudioLab VST3 test</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.7</string>
-  <key>CFBundleVersion</key><string>7</string>
+  <key>CFBundleShortVersionString</key><string>0.8</string>
+  <key>CFBundleVersion</key><string>8</string>
   <key>LSMinimumSystemVersion</key><string>12.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.music</string>
   <key>NSHighResolutionCapable</key><true/>

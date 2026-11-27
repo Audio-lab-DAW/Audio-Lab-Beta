@@ -15,7 +15,15 @@
 // of events); every string from a plug-in cleaned like the app's own text (0.5 decoded them as Mac Roman: "17.1\u201a\u00c4\u00d8ms");
 // the DAC's bit depth with a warning and a menu item "Use the deepest format"; a device that appears without a name waits
 // up to 2 s; [param] lines for values that change without the host being told; the report without empty lines.
+// 0.8 (task NL8): the output stays where the user put it. Every [output] line says why the app opened that device (chosen in
+// the menu with the mouse or a key, the device went away, it came back, the default output changed while nothing was chosen,
+// the rate or format changed on the same device). A device chosen in the menu (or by turning on exclusive use) is never left
+// unless it goes away, and the app goes back to it (exclusive use too) when it returns. The default output changing, another
+// program taking exclusive use and format changes are logged and never move the output. The Output menu takes no keyboard
+// focus. The silence flags are counted per block (report 9: HALion 7's 33 buses gave 126,176 for 3,858 blocks), the main bus
+// on its own. The degree sign and other symbols of plug-in texts (report 8: "21\u00ac\u221e") come out as " deg" and so on.
 #import <Cocoa/Cocoa.h>
+#import <CoreAudio/CoreAudio.h>
 #include "../common/coreaudio.h"
 #include "../host/plugin_api.h"
 #include "../host/live_tools.h"
@@ -34,7 +42,7 @@
 
 using namespace al;
 
-static const char* kVersion = "0.7";
+static const char* kVersion = "0.8";
 static NSString* S(const std::string& s) { return [NSString stringWithUTF8String:s.c_str()] ?: @""; }
 static std::string U(NSString* s) { return s ? std::string([s UTF8String]) : std::string(); }
 // Formatting for the report: printf into UTF-8 bytes. 0.5 used [NSString stringWithFormat:] whose %s reads a C string
@@ -230,6 +238,11 @@ static void watchCb(void*, const char* what, uint32_t) {
     std::map<uint32_t, std::string> _devNames;
     std::vector<std::string> _selfSets;                    // --set-param "name=value" (the build machine)
     BOOL _selfDeepest;
+    // 0.8: the output the user picked (by its UID, which survives a reconnect); empty: the app follows the system's default
+    std::string _chosenUid, _chosenName, _devUid, _lastWhy, _lastFormat;
+    BOOL _chosenExcl;                                      // exclusive use was on for the chosen device
+    uint32_t _lastDefault; int _lastHogPid; double _comebackAt;
+    BOOL _selfDevsim, _simMenu; std::string _simAggUid, _simSubUid; uint32_t _simAgg, _simDefault0; int _devsimFails, _devsimRun; BOOL _simHogBefore;
 }
 
 - (void)say:(NSString*)line {
@@ -357,6 +370,7 @@ static void watchCb(void*, const char* what, uint32_t) {
         if ([args[i] isEqualToString:@"--probe"]) _selfProbe = "1";
         if ([args[i] isEqualToString:@"--set-param"] && i + 1 < args.count) _selfSets.push_back(U(args[i + 1]));   // "name=value", after loading
         if ([args[i] isEqualToString:@"--deepest"]) _selfDeepest = YES;                                              // try "Use the deepest format"
+        if ([args[i] isEqualToString:@"--devsim"]) _selfDevsim = YES;                                                // 0.8: device changes simulated
     }
     _wall0 = [NSDate date].timeIntervalSince1970; _up0 = nowNs();
     _pendingDevs = [NSMutableSet set]; _formatLogged = [NSMutableSet set];
@@ -382,6 +396,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     _win.title = @"AudioLab VST3 test"; _win.delegate = self; [_win center];
     [self label:@"Output" frame:NSMakeRect(16, H - 40, 50, 20)];
     _devPop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(66, H - 44, 330, 26) pullsDown:NO]; _devPop.target = self; _devPop.action = @selector(deviceChanged:); [_win.contentView addSubview:_devPop];
+    _devPop.refusesFirstResponder = YES;      // 0.8: keys typed in the window never move the output; only a click does
     [self label:@"Buffer" frame:NSMakeRect(410, H - 40, 46, 20)];
     _bufPop = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(456, H - 44, 100, 26) pullsDown:NO]; _bufPop.target = self; _bufPop.action = @selector(bufferChanged:); [_win.contentView addSubview:_bufPop];
     for (NSString* b in @[@"32", @"64", @"128", @"256", @"512", @"1024"]) [_bufPop addItemWithTitle:b];
@@ -458,7 +473,7 @@ static void watchCb(void*, const char* what, uint32_t) {
 
 - (void)machineInfo {
     char model[128] = {0}, cpu[128] = {0}; size_t l = sizeof model; sysctlbyname("hw.model", model, &l, nullptr, 0); l = sizeof cpu; sysctlbyname("machdep.cpu.brand_string", cpu, &l, nullptr, 0);
-    [self say:NSF("AudioLab VST3 test %s (tasks NM1, NB-N1, NL4, NL5 and NL7). Report file: paste all of it back.", kVersion)];
+    [self say:NSF("AudioLab VST3 test %s (tasks NM1, NB-N1, NL4, NL5, NL7 and NL8). Report file: paste all of it back.", kVersion)];
     [self say:NSF("[machine] %s, %s, macOS %s, this app runs as %s", model, cpu, U(NSProcessInfo.processInfo.operatingSystemVersionString).c_str(), hostArch().c_str())];
 }
 
@@ -475,7 +490,9 @@ static void watchCb(void*, const char* what, uint32_t) {
     if (_devs.empty()) { [self say:@"[device] this Mac reports no output device"]; return; }
     if (sel < 0) sel = 0;
     [_devPop selectItemAtIndex:sel];
-    [self startDevice:_devs[sel]];
+    _lastDefault = def;
+    [self startDevice:_devs[sel] why:(_devs[sel].id == def ? "the system's default output, at the start; nothing chosen yet, so the app follows the default until you choose an output in the Output menu"
+                                                           : "the first output, at the start (the system reports no default output)")];
 }
 // One [device] line per device, the first time it is seen: at the start, and for a device plugged in or switched on later.
 // 0.7: a device that appears without a name or at 0 Hz (report 7: "(, unknown) ... now 0 Hz" during a Bluetooth
@@ -507,11 +524,16 @@ static void watchCb(void*, const char* what, uint32_t) {
     if ((!x.name.empty() && x.rate > 0) || n + 1 >= 8) { [_pendingDevs removeObject:@(devId)]; [self deviceLine:x later:YES waited:YES]; return; }
     [self waitForDevice:devId tries:n + 1];
 }
-- (void)startDevice:(const DeviceInfo&)d0 {
+- (void)startDevice:(const DeviceInfo&)d0 why:(const std::string&)why {
     // ask the device again: a list made when the device was plugged in can hold the rate it had for a moment only
     DeviceInfo d = deviceInfo(d0.id); if (!d.id) d = d0;
     _stream.stop();
-    if (_hog && _dev && _dev != d.id) { int o; std::string e; setHog(_dev, false, o, e); _hog = NO; }
+    if (_hog && _dev && _dev != d.id) {
+        int o; std::string e; bool ok = setHog(_dev, false, o, e); _hog = NO;
+        auto it = _devNames.find(_dev);
+        [self say:NSF("[exclusive] %s: gave exclusive use back (%s), because the output moves to %s", it != _devNames.end() ? it->second.c_str() : "the previous device", ok ? "done" : ("not needed: " + e).c_str(), d.name.c_str())];
+    }
+    _lastWhy = why; _devUid = d.uid;
     { std::lock_guard<std::mutex> g(G.lock); G.sr = d.rate > 0 ? d.rate : 48000; G.lim.setRate(G.sr); if (G.plug) { std::string e; G.ready = G.plug->prepare(G.sr, G.maxBlock, false, e); } }
     _dev = d.id;
     if (!d.name.empty()) _devNames[d.id] = d.name;
@@ -520,9 +542,17 @@ static void watchCb(void*, const char* what, uint32_t) {
     bool ok = _stream.start(d.id, renderCb, nullptr, err);
     DeviceInfo now = d; for (auto& x : listDevices()) if (x.id == d.id) now = x;
     NSString* item = [NSString stringWithFormat:@"%u", now.buffer]; if ([_bufPop itemWithTitle:item]) [_bufPop selectItemWithTitle:item];
-    [self say:NSF("[output] %s: %s, %.0f Hz, buffer %u frames (%.2f ms), device latency %u + safety %u + stream %u frames%s", d.name.c_str(), ok ? "opened" : "COULD NOT BE OPENED", now.rate, now.buffer,
-               now.rate ? now.buffer / now.rate * 1000 : 0, now.latency, now.safetyOffset, now.streamLatency, ok ? "" : (" (" + err + ")").c_str())];
+    [self say:NSF("[output] %s: %s, %.0f Hz, buffer %u frames (%.2f ms), device latency %u + safety %u + stream %u frames%s; why: %s", d.name.c_str(), ok ? "opened" : "COULD NOT BE OPENED", now.rate, now.buffer,
+               now.rate ? now.buffer / now.rate * 1000 : 0, now.latency, now.safetyOffset, now.streamLatency, ok ? "" : (" (" + err + ")").c_str(), why.c_str())];
     _watch.watchDevice(d.id);
+    _lastFormat = now.physicalFormat; _lastHogPid = now.hogPid;
+    for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].id == d.id && _devPop.indexOfSelectedItem != i) [_devPop selectItemAtIndex:i];
+    // back on the device the user chose with exclusive use on: take it again
+    if (_chosenExcl && !_chosenUid.empty() && d.uid == _chosenUid && !_hog) {
+        int owner = -1; std::string e; bool hk = setHog(d.id, true, owner, e); _hog = hk; _lastHogPid = owner;
+        [self say:NSF("[exclusive] %s: taken again, as you had it on (%s; held by process %d, this app is %d)%s", d.name.c_str(), hk ? "done" : "NOT done", owner, (int)getpid(), e.empty() ? "" : (" " + e).c_str())];
+        now = deviceInfo(d.id);
+    }
     [self fillControls:now];
     [self checkOutput:now];
     [self formatCheck:now];
@@ -564,7 +594,7 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
     std::string now, err;
     bool ok = setPhysicalFormat(_dev, d.rate, deep, mix, now, err);
     [self say:NSF("[format] %s: %s; after: %s%s", d.name.c_str(), ok ? "switched" : "NOT switched", now.c_str(), err.empty() ? "" : (" (" + err + ")").c_str())];
-    [self startDevice:deviceInfo(_dev)];
+    [self startDevice:deviceInfo(_dev) why:"Device > Use the deepest format, as you chose (the same device, opened again)"];
 }
 // A plain warning when the output runs at 16 kHz or less, most often a Bluetooth speaker in call mode.
 - (void)checkOutput:(const DeviceInfo&)d {
@@ -608,11 +638,14 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
     gEvents.push(evRateChanged, _dev);
     bool ok = setDeviceRate(_dev, want, now, err);
     [self say:NSF("[rate] asked for %.0f Hz: %s, the device now runs %.0f Hz%s", want, ok ? "switched" : "NOT switched", now, err.empty() ? "" : (" " + err).c_str())];
-    [self startDevice:deviceInfo(_dev)];
+    [self startDevice:deviceInfo(_dev) why:fmt("the rate you chose in the Rate menu (%.0f Hz; the same device, opened again)", now)];
 }
 - (void)exclChanged:(id)s {
     bool on = _exclBtn.state == NSControlStateValueOn; int owner = -1; std::string err;
-    bool ok = setHog(_dev, on, owner, err); _hog = on && ok;
+    bool ok = setHog(_dev, on, owner, err); _hog = on && ok; _lastHogPid = owner;
+    // 0.8: turning exclusive use on picks this device: the app stays on it and comes back to it, with exclusive use
+    if (on && ok) { DeviceInfo d = deviceInfo(_dev); if (!d.uid.empty()) { _chosenUid = d.uid; _chosenName = d.name; } _chosenExcl = YES; }
+    if (!on) _chosenExcl = NO;
     [self say:NSF("[exclusive] %s: %s (the device is now held by process %d, this app is %d)%s. While it is on, no other program can play through this device.", on ? "asked for exclusive use" : "gave exclusive use back", ok ? "done" : "NOT done", owner, (int)getpid(), err.empty() ? "" : (" " + err).c_str())];
     [self fillControls:deviceInfo(_dev)];
 }
@@ -626,27 +659,116 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
         double v = -1; if (getVolume(_dev, v)) { _vol.doubleValue = v; _volLbl.stringValue = [NSString stringWithFormat:@"%.0f %%", v * 100]; }
     } else if ([what isEqualToString:@"rate"]) {
         DeviceInfo d = deviceInfo(_dev);
-        if (d.rate > 0 && d.rate != G.sr) { [self say:[NSString stringWithFormat:@"[rate] the device was switched to %.0f Hz from outside this app; following it", d.rate]]; [self startDevice:d]; }
+        if (d.rate > 0 && d.rate != G.sr) { [self say:[NSString stringWithFormat:@"[rate] the device was switched to %.0f Hz from outside this app; following it", d.rate]]; [self startDevice:d why:fmt("its rate was changed from outside this app to %.0f Hz (the same device, opened again)", d.rate)]; }
+    } else if ([what isEqualToString:@"default-output"]) {
+        // 0.8: the system's default output changed (System Settings, a menu-bar app such as eqMac, a device plugged in, or
+        // macOS itself when this app takes exclusive use of the default). It moves this app only while nothing was chosen.
+        uint32_t def = defaultOutputDevice();
+        if (def == _lastDefault) return;
+        std::string was = _devNames.count(_lastDefault) ? _devNames[_lastDefault] : "(none)";
+        DeviceInfo dd = def ? deviceInfo(def) : DeviceInfo();
+        if (!dd.name.empty()) _devNames[def] = dd.name;
+        _lastDefault = def;
+        if (!_chosenUid.empty()) {
+            [self say:NSF("[default] the system's default output is now %s (was %s); this app stays on %s, which you chose", dd.name.empty() ? "(none)" : dd.name.c_str(), was.c_str(), _chosenName.c_str())];
+            return;
+        }
+        [self say:NSF("[default] the system's default output is now %s (was %s)", dd.name.empty() ? "(none)" : dd.name.c_str(), was.c_str())];
+        if (def && def != _dev && dd.outChannels > 0)
+            [self startDevice:dd why:fmt("the system's default output changed to %s (you have not chosen an output in the Output menu, so the app follows the default)", dd.name.c_str())];
+    } else if ([what isEqualToString:@"exclusive"]) {
+        DeviceInfo d = deviceInfo(_dev);
+        if (d.hogPid == _lastHogPid) return;
+        _lastHogPid = d.hogPid;
+        int me = (int)getpid();
+        std::string who = d.hogPid == -1 ? "nobody (shared)" : d.hogPid == me ? "this app" : fmt("another program (process %d)", d.hogPid);
+        if (d.hogPid != me) _hog = NO;
+        [self say:NSF("[exclusive] %s: exclusive use is now held by %s%s; the output stays on this device", d.name.c_str(), who.c_str(),
+                      (_chosenExcl && d.hogPid != me) ? ", although you had turned it on for this app (taken or released outside this app)" : "")];
+        _exclBtn.state = d.hogPid == me ? NSControlStateValueOn : NSControlStateValueOff;
+    } else if ([what isEqualToString:@"format"]) {
+        DeviceInfo d = deviceInfo(_dev);
+        if (d.physicalFormat == _lastFormat) return;
+        [self say:NSF("[format] %s: the format on the wire is now %s (was %s); the output stays on this device", d.name.c_str(), d.physicalFormat.empty() ? "(not given)" : d.physicalFormat.c_str(), _lastFormat.empty() ? "(not given)" : _lastFormat.c_str())];
+        _lastFormat = d.physicalFormat;
+        [self formatCheck:d];
     } else if ([what isEqualToString:@"devices"] || [what isEqualToString:@"alive"]) {
         std::vector<DeviceInfo> outs; bool here = false; int sel = -1;
         auto all = listDevices();
         for (auto& d : all) [self deviceLine:d later:YES];      // a device that appeared since the start gets its own line, with the same details
         for (auto& d : all) { if (d.outChannels < 1) continue; if (d.id == _dev) { here = true; sel = (int)outs.size(); } outs.push_back(d); }
-        if (_dev) [self checkOutput:deviceInfo(_dev)];
-        if (outs.size() == _devs.size() && here) { bool same = true; for (size_t i = 0; i < outs.size(); i++) if (outs[i].id != _devs[i].id) same = false; if (same) return; }
-        _devs = outs; [_devPop removeAllItems];
-        for (auto& d : _devs) [_devPop addItemWithTitle:S(d.name + "  (" + std::to_string((int)d.rate) + " Hz)")];
-        std::string names; for (auto& d : _devs) names += (names.empty() ? "" : ", ") + d.name;
-        [self say:NSF("[devices] the list changed: %zu output(s) now: %s", _devs.size(), names.c_str())];
-        if (here) [_devPop selectItemAtIndex:sel];
-        else if (!_devs.empty()) {
-            uint32_t def = defaultOutputDevice(); int k = 0; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].id == def) k = i;
-            [self say:@"[devices] the device in use is gone; moving to the default output"];
-            _hog = NO; [_devPop selectItemAtIndex:k]; [self startDevice:_devs[k]];
+        bool same = outs.size() == _devs.size();
+        if (same) for (size_t i = 0; i < outs.size(); i++) if (outs[i].id != _devs[i].id) same = false;
+        if (!same) {
+            _devs = outs; [_devPop removeAllItems];
+            for (auto& d : _devs) [_devPop addItemWithTitle:S(d.name + "  (" + std::to_string((int)d.rate) + " Hz)")];
+            std::string names; for (auto& d : _devs) names += (names.empty() ? "" : ", ") + d.name;
+            [self say:NSF("[devices] the list changed: %zu output(s) now: %s", _devs.size(), names.c_str())];
+            if (here) [_devPop selectItemAtIndex:sel];
         }
+        if (here) { if (_dev) [self checkOutput:deviceInfo(_dev)]; [self comeBack:NO]; return; }
+        if (!_dev) {
+            [self comeBack:NO];
+            if (!_dev && _chosenUid.empty() && !_devs.empty()) {
+                uint32_t def = defaultOutputDevice(); int k = 0; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].id == def) k = i;
+                [self startDevice:_devs[k] why:"an output is there again after none was left; the system's default output"];
+            }
+            return;
+        }
+        std::string gone = _devNames.count(_dev) ? _devNames[_dev] : "the device in use";
+        _hog = NO;
+        if (_devs.empty()) { [self say:NSF("[devices] %s went away and no output is left; the app waits for one", gone.c_str())]; _stream.stop(); _dev = 0; return; }
+        // the chosen device under a new id (a reconnect) first, then the system's default output
+        int k = -1;
+        if (!_chosenUid.empty()) for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].uid == _chosenUid && !_devs[i].name.empty() && _devs[i].rate > 0) k = i;
+        if (k >= 0) { [self say:NSF("[devices] %s went away; the device you chose is there under a new id", gone.c_str())]; [self startDevice:_devs[k] why:fmt("the device you chose (%s) came back under a new id", _chosenName.c_str())]; return; }
+        uint32_t def = defaultOutputDevice(); k = 0; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].id == def) k = i;
+        [self say:NSF("[devices] %s, the device in use, went away; moving to the default output", gone.c_str())];
+        [self startDevice:_devs[k] why:fmt("the device in use (%s) went away; the system's default output%s", gone.c_str(),
+                                           _chosenUid.empty() ? "" : fmt("; the app goes back to %s, which you chose, when it returns", _chosenName.c_str()).c_str())];
     }
 }
-- (void)deviceChanged:(id)s { NSInteger i = _devPop.indexOfSelectedItem; if (i >= 0 && i < (NSInteger)_devs.size()) [self startDevice:_devs[i]]; }
+// 0.8: back to the device the user chose, when it is there (again) and the app is somewhere else. Called when the device list
+// changes, and from the 4-per-second tick as a safety net whatever moved the output (at most one try every 2 s).
+// the device with this UID, asked of the system directly (cheap: no list of every device)
+static uint32_t uidToDevice(const std::string& uid) {
+    CFStringRef u = CFStringCreateWithCString(nullptr, uid.c_str(), kCFStringEncodingUTF8); if (!u) return 0;
+    AudioObjectPropertyAddress a = {kAudioHardwarePropertyTranslateUIDToDevice, kAudioObjectPropertyScopeGlobal, 0};
+    AudioObjectID d = kAudioObjectUnknown; UInt32 sz = sizeof d;
+    OSStatus st = AudioObjectGetPropertyData(kAudioObjectSystemObject, &a, sizeof u, &u, &sz, &d);
+    CFRelease(u);
+    return st == noErr && d != kAudioObjectUnknown ? d : 0;
+}
+- (void)comeBack:(BOOL)fromTick {
+    if (_chosenUid.empty() || _devUid == _chosenUid) return;
+    double t = (double)nowNs() / 1e9;
+    if (t - _comebackAt < 2.0) return;
+    uint32_t id = uidToDevice(_chosenUid);
+    if (!id) return;
+    DeviceInfo d = deviceInfo(id);
+    if (d.name.empty() || d.rate <= 0 || d.outChannels < 1) return;        // still waking up (a Bluetooth reconnect): the next tick
+    _comebackAt = t;
+    bool listed = false; for (auto& x : _devs) if (x.id == id) listed = true;
+    if (!listed) { [self outside:@"devices"]; if (_devUid == _chosenUid) return; }
+    [self startDevice:d why:fmt("the device you chose (%s) is there again%s", d.name.c_str(), fromTick ? " (found by the app's own check, not by a device-list change)" : "")];
+}
+- (void)deviceChanged:(id)s {
+    NSInteger i = _devPop.indexOfSelectedItem;
+    if (i < 0 || i >= (NSInteger)_devs.size()) return;
+    // how the menu was used: a mouse click, a key, or the self-test standing in for a click
+    NSEvent* e = NSApp.currentEvent; std::string how;
+    if (_simMenu) how = "by the self-test, standing in for a click";
+    else if (!e) how = "(no event)";
+    else if (e.type == NSEventTypeLeftMouseUp || e.type == NSEventTypeLeftMouseDown || e.type == NSEventTypeRightMouseUp || e.type == NSEventTypeRightMouseDown || e.type == NSEventTypeAppKitDefined) how = "with the mouse";
+    else if (e.type == NSEventTypeKeyDown || e.type == NSEventTypeKeyUp) how = fmt("with the keyboard (key code %u)", (unsigned)e.keyCode);
+    else how = fmt("(event type %d)", (int)e.type);
+    DeviceInfo d = _devs[i];
+    bool sameDev = d.id == _dev;
+    if (!sameDev) _chosenExcl = NO;          // exclusive use belonged to the device left behind
+    _chosenUid = d.uid; _chosenName = d.name;
+    if (sameDev) { [self say:NSF("[output] %s: chosen in the Output menu %s; already in use, nothing changed; the app now stays on it", d.name.c_str(), how.c_str())]; return; }
+    [self startDevice:d why:fmt("chosen in the Output menu %s; the app stays on it until it goes away, and comes back to it when it returns", how.c_str())];
+}
 - (void)bufferChanged:(id)s {
     uint32_t want = (uint32_t)_bufPop.titleOfSelectedItem.intValue, now = 0; std::string err;
     gEvents.push(evBufferChanged, _dev);
@@ -949,6 +1071,7 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
     return YES;
 }
 - (void)tick {
+    [self comeBack:YES];          // 0.8: the safety net: back to the chosen output whatever moved the app away from it
     // 0.7: the plug-in's own output past full scale: one [warning], and the red mark until it is clicked
     uint64_t ob = G.overBlocks.load();
     if (G.plug && ob > 0 && !_overWarned) {
@@ -1137,6 +1260,13 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
         [self say:NSF("[selftest] set \"%s\" = %.2f: %s", name.c_str(), v, id >= 0 ? "done" : "no such parameter")];
     }
     if (_selfDeepest) [self useDeepestFormat:nil];
+    // 0.8: the strings of the test instrument's "Spread" and "Symbols", as this report writes them
+    for (auto& pn : _paramNames) if (G.plug && (pn.second == "Spread" || pn.second == "Symbols"))
+        for (double v : {21.0 / 360.0, 1.0}) [self say:NSF("[selftest] %s at %.3f reads \"%s\"", pn.second.c_str(), v, G.plug->paramText(pn.first, v).c_str())];
+    if (_selfDevsim) { [self devsim:0]; return; }
+    [self selftestPlay];
+}
+- (void)selftestPlay {
     __weak App* me = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [me openEditor:nil]; [me togglePattern:nil];
@@ -1170,6 +1300,99 @@ static int deepestInteger(const DeviceInfo& d, bool mixable) {
         int after = G.plug ? G.plug->editStats().performs : 0;
         [me say:[NSString stringWithFormat:@"[selftest] 24 drags in the plug-in's window: %d parameter move(s) reached the host", after - before]];
     });
+}
+// ---- 0.8: device changes simulated on the build machine (task NL8) ------------------------------------------------
+// The build machine has one real output. The self-test makes a second one, an aggregate device around it with a fixed UID,
+// and then: makes it the system's default while nothing is chosen (the app follows), chooses it in the Output menu with
+// exclusive use, changes the system's default twice (the app must stay), destroys it (the app must move to the default:
+// "went away"), makes it again with the same UID (the app must come back, with exclusive use) and cleans up.
+static bool simSetDefault(uint32_t dev) {
+    AudioObjectPropertyAddress a = {kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeGlobal, 0};
+    AudioObjectID d = dev; return AudioObjectSetPropertyData(kAudioObjectSystemObject, &a, 0, nullptr, sizeof d, &d) == noErr;
+}
+static uint32_t simMakeAggregate(const std::string& uid, const std::string& sub, OSStatus& st) {
+    NSDictionary* desc = @{ @kAudioAggregateDeviceNameKey: @"AL test output (NL8)", @kAudioAggregateDeviceUIDKey: S(uid),
+                            @kAudioAggregateDeviceSubDeviceListKey: @[ @{ @kAudioSubDeviceUIDKey: S(sub) } ],
+                            @"master": S(sub), @kAudioAggregateDeviceIsPrivateKey: @0 };
+    AudioObjectID agg = 0; st = AudioHardwareCreateAggregateDevice((__bridge CFDictionaryRef)desc, &agg);
+    return st == noErr ? agg : 0;
+}
+- (void)devsimCheck:(BOOL)ok what:(const std::string&)what {
+    _devsimRun++; if (!ok) _devsimFails++;
+    [self say:NSF("[devsim] %s %s (now on %s; last why: %s)", ok ? "PASS" : "FAIL", what.c_str(), _devNames.count(_dev) ? _devNames[_dev].c_str() : "(nothing)", _lastWhy.c_str())];
+}
+- (void)devsimLater:(double)sec step:(int)n { __weak App* me = self; dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sec * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [me devsim:n]; }); }
+- (void)devsim:(int)step {
+    const double gap = 1.5;
+    switch (step) {
+    case 0: {
+        DeviceInfo cur = deviceInfo(_dev);
+        _simSubUid = cur.uid; _simDefault0 = defaultOutputDevice(); _simAggUid = "com.audiolab.test.nl8.output";
+        OSStatus st = 0; _simAgg = simMakeAggregate(_simAggUid, _simSubUid, st);
+        [self say:NSF("[devsim] made a test output \"AL test output (NL8)\" around %s: %s (OSStatus %d)", cur.name.c_str(), _simAgg ? "done" : "FAILED", (int)st)];
+        if (!_simAgg) { [self say:@"[devsim] no test output: the device checks are not run"]; [self selftestPlay]; return; }
+        if (!G.pattern.load()) [self togglePattern:nil];
+        [self devsimLater:gap step:1]; return;
+    }
+    case 1: {
+        bool ok = simSetDefault(_simAgg);
+        [self say:NSF("[devsim] the system's default output set to the test output: %s", ok ? "done" : "FAILED")];
+        [self devsimLater:gap step:2]; return;
+    }
+    case 2: {
+        [self devsimCheck:_devUid == _simAggUid && _lastWhy.find("default output changed") != std::string::npos what:"nothing chosen yet: the app followed the system's default output to the test output"];
+        simSetDefault(_simDefault0);
+        [self devsimLater:gap step:3]; return;
+    }
+    case 3: {
+        [self devsimCheck:_devUid == _simSubUid what:"nothing chosen yet: the app followed the default output back"];
+        // the user chooses the test output in the Output menu and turns on exclusive use
+        int k = -1; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].uid == _simAggUid) k = i;
+        if (k < 0) { [self devsimCheck:NO what:"the test output is in the Output menu"]; [self devsim:8]; return; }
+        [_devPop selectItemAtIndex:k]; _simMenu = YES; [self deviceChanged:_devPop]; _simMenu = NO;
+        _exclBtn.state = NSControlStateValueOn; [self exclChanged:_exclBtn];
+        [self devsimCheck:_devUid == _simAggUid && _lastWhy.find("chosen in the Output menu") != std::string::npos what:"chosen in the Output menu: the app is on the test output"];
+        // the system's default output changes while a device is chosen (to another output if there is one, else to the test output itself)
+        uint32_t other = 0; for (auto& d : _devs) if (d.uid != _simAggUid && d.id != _simDefault0) other = d.id;
+        bool ok = simSetDefault(other ? other : _simAgg);
+        [self say:NSF("[devsim] the system's default output set to %s: %s", other ? (_devNames.count(other) ? _devNames[other].c_str() : "another output") : "the test output", ok ? "done" : "FAILED")];
+        [self devsimLater:gap step:4]; return;
+    }
+    case 4: {
+        simSetDefault(_simDefault0);
+        [self devsimLater:gap step:5]; return;
+    }
+    case 5: {
+        [self devsimCheck:_devUid == _simAggUid what:"the system's default output changed twice while a device was chosen: the app stayed on the chosen one"];
+        _simHogBefore = _hog;
+        OSStatus st = AudioHardwareDestroyAggregateDevice(_simAgg);
+        [self say:NSF("[devsim] the test output destroyed (as if unplugged): OSStatus %d", (int)st)];
+        [self devsimLater:gap step:6]; return;
+    }
+    case 6: {
+        [self devsimCheck:_devUid == _simSubUid && _lastWhy.find("went away") != std::string::npos what:"the chosen device went away: the app moved to the default output and said why"];
+        OSStatus st = 0; _simAgg = simMakeAggregate(_simAggUid, _simSubUid, st);
+        [self say:NSF("[devsim] the test output made again with the same UID (as if plugged in again): %s (OSStatus %d)", _simAgg ? "done" : "FAILED", (int)st)];
+        [self devsimLater:gap + 1.0 step:7]; return;
+    }
+    case 7: {
+        [self devsimCheck:_devUid == _simAggUid && (_lastWhy.find("there again") != std::string::npos || _lastWhy.find("came back") != std::string::npos) what:"the chosen device came back: the app went back to it"];
+        if (_simHogBefore) [self devsimCheck:_hog && deviceInfo(_dev).hogPid == (int)getpid() what:"exclusive use taken again on the chosen device"];
+        else [self say:@"[devsim] exclusive use could not be taken on the test output in the first place: its return is not checked"];
+        [self devsim:8]; return;
+    }
+    case 8: {
+        _chosenUid.clear(); _chosenExcl = NO;      // clean-up: nothing chosen, so the app may follow the default again
+        if (_simAgg) { AudioHardwareDestroyAggregateDevice(_simAgg); _simAgg = 0; }
+        simSetDefault(_simDefault0);
+        [self devsimLater:gap step:9]; return;
+    }
+    default: {
+        [self say:NSF("[devsim] %d check(s), %d failed; every [output] line above says why", _devsimRun, _devsimFails)];
+        if (G.pattern.load()) [self togglePattern:nil];
+        [self selftestPlay]; return;
+    }
+    }
 }
 - (void)selftestProbeOrEnd { if (_selfProbe.empty()) [self selftestEnd]; else { [self flushPlugSummary]; [self probe:nil]; } }
 - (void)writeMarker:(NSString*)name { [@"1" writeToFile:[S(_selfOut) stringByAppendingPathComponent:name] atomically:YES encoding:NSUTF8StringEncoding error:nil]; }

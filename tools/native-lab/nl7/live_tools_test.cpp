@@ -18,6 +18,13 @@ int main() {
     check(asciiClean("a\xFF" "b\xE2\x80") == "a?b??", "bytes that are not UTF-8 become '?'");
     check(asciiClean("\xC0\xAF") == "??", "an overlong sequence is refused");
     check(asciiClean("x\xE2\x80\x94y\xE2\x80\xA6") == "x-y...", "em dash and ellipsis");
+    // task NL8: the symbols of report 8 (kHs Phase Distortion's Spread "21 deg"), as UTF-8 and as Mac Roman mojibake
+    check(asciiClean("21\xC2\xB0") == "21 deg", "NL8: U+00B0 degree sign -> ' deg' ('21 deg')");
+    check(asciiClean("\xC2\xB5s \xC2\xB1" "3 \xC3\x97" "2 \xE2\x88\x9E m\xC2\xB2 m\xC2\xB3") == "us +/-3 x2 inf m2 m3", "NL8: micro, plus-minus, times, infinity, squared, cubed");
+    check(asciiClean("21\xC2\xAC\xE2\x88\x9E") == "21 deg", "NL8: '21' + Mac Roman mojibake of the degree sign (what report 8 showed before the 0.5 clean-up) -> '21 deg'");
+    check(asciiClean("\xC2\xAC\xC2\xB5s \xC2\xAC\xC2\xB1" "3 \xE2\x88\x9A\xC3\xB3" "2 \xE2\x80\x9A\xC3\xA0\xC3\xBB m\xC2\xAC\xE2\x89\xA4 m\xC2\xAC\xE2\x89\xA5 17.1\xE2\x80\x9A\xC3\x84\xC3\x98ms") == "us +/-3 x2 inf m2 m3 17.1 ms", "NL8: the same symbols as Mac Roman mojibake are repaired");
+    check(asciiClean("\xC2\xAC") == "\xC2\xAC", "NL8: a lone 'not' sign stays");
+    check(isAscii(asciiClean("21\xC2\xB0 \xC2\xB5 \xC2\xB1 \xC3\x97 \xE2\x88\x9E \xC2\xB2 \xC2\xB3")), "NL8: after the clean-up the symbols are plain ASCII (no byte order mark needed)");
     // limiter: a +28 dBFS sine (Phase Plant's +27.9) after the half level never passes full scale
     {
         SafetyLimiter lim; lim.setRate(44100);

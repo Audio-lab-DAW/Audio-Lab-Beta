@@ -28,12 +28,19 @@ static const char* rcName(int r) {
 std::string diagText(const std::string& name, const HostDiag& d) {
     std::string o;
     for (auto& l : d.setup) o += "[diag] " + name + ": " + l + "\n";
-    char b[900];
+    char b[1400];
+    // task NL8: the silence flags per block (once per block, whatever the number of buses), then the main bus on its own
+    char sil[400];
+    if (d.outBuses > 1)
+        snprintf(sil, sizeof sil, "%llu of %llu (on any of its %d output buses; on the main bus: %llu, %llu of them although the main bus held sound; flags summed over all buses: %llu)",
+                 (unsigned long long)d.blocksSilenceFlag, (unsigned long long)d.blocks, d.outBuses, (unsigned long long)d.blocksSilenceFlagMain, (unsigned long long)d.silenceFlagMainWithSound, (unsigned long long)d.silenceFlagBusBlocks);
+    else
+        snprintf(sil, sizeof sil, "%llu of %llu (main bus; %llu of them although it held sound)", (unsigned long long)d.blocksSilenceFlag, (unsigned long long)d.blocks, (unsigned long long)d.silenceFlagMainWithSound);
     snprintf(b, sizeof b, "[diag] %s: %llu blocks processed; the plug-in's own main output held sound in %llu of them (peak %s, measured before this app copies or halves it); other output buses held sound in %llu (peak %s); "
-             "blocks with a silence flag set by the plug-in: %llu; process() not ok: %llu (last result: %s); notes handed over: %llu on, %llu off, %llu refused by the event list; parameter changes handed over: %llu; "
+             "blocks with a silence flag set by the plug-in: %s; process() not ok: %llu (last result: %s); notes handed over: %llu on, %llu off, %llu refused by the event list; parameter changes handed over: %llu; "
              "messages between its two parts: %d to the processor, %d to the controller, %d of them from a thread other than the main thread, %d dropped",
              name.c_str(), (unsigned long long)d.blocks, (unsigned long long)d.blocksMainNonZero, db(d.peakMain).c_str(), (unsigned long long)d.blocksOtherNonZero, db(d.peakOther).c_str(),
-             (unsigned long long)d.blocksSilenceFlag, (unsigned long long)d.processNotOk, rcName(d.lastProcessResult), (unsigned long long)d.noteOns, (unsigned long long)d.noteOffs, (unsigned long long)d.eventsRejected,
+             sil, (unsigned long long)d.processNotOk, rcName(d.lastProcessResult), (unsigned long long)d.noteOns, (unsigned long long)d.noteOffs, (unsigned long long)d.eventsRejected,
              (unsigned long long)d.paramChanges, d.msgToProcessor, d.msgToController, d.msgOffMainThread, d.msgDropped);
     o += b; o += "\n";
     return o;
@@ -136,7 +143,7 @@ std::string probeJson(const PluginInfo& info, double sr, int block, const std::v
         auto& x = v[i];
         s += std::string(i ? "," : "") + "\n {\"key\":" + jstr(x.key) + ",\"what\":" + jstr(x.what) + ",\"ran\":" + (x.ran ? "true" : "false") + ",\"error\":" + jstr(x.error) + ",\"peak\":" + jnum(x.peak) +
              ",\"firstSoundBlock\":" + std::to_string(x.firstSoundBlock) + ",\"blocks\":" + std::to_string(x.d.blocks) + ",\"blocksMainNonZero\":" + std::to_string(x.d.blocksMainNonZero) +
-             ",\"blocksOtherNonZero\":" + std::to_string(x.d.blocksOtherNonZero) + ",\"silenceFlagBlocks\":" + std::to_string(x.d.blocksSilenceFlag) + ",\"processNotOk\":" + std::to_string(x.d.processNotOk) +
+             ",\"blocksOtherNonZero\":" + std::to_string(x.d.blocksOtherNonZero) + ",\"silenceFlagBlocks\":" + std::to_string(x.d.blocksSilenceFlag) + ",\"silenceFlagMainBlocks\":" + std::to_string(x.d.blocksSilenceFlagMain) + ",\"silenceFlagBusBlocks\":" + std::to_string(x.d.silenceFlagBusBlocks) + ",\"outBuses\":" + std::to_string(x.d.outBuses) + ",\"processNotOk\":" + std::to_string(x.d.processNotOk) +
              ",\"msgToProcessor\":" + std::to_string(x.d.msgToProcessor) + ",\"msgToController\":" + std::to_string(x.d.msgToController) + ",\"msgOffMainThread\":" + std::to_string(x.d.msgOffMainThread) +
              ",\"msgDropped\":" + std::to_string(x.d.msgDropped) + ",\"setComponentState\":" + jstr(rcName(x.d.setComponentStateResult)) + ",\"setup\":[";
         for (size_t k = 0; k < x.d.setup.size(); k++) s += std::string(k ? "," : "") + jstr(x.d.setup[k]);

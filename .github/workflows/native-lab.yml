@@ -1,4 +1,4 @@
-name: Native lab (task NM1 tests; test app 0.7, task NL7)
+name: Native lab (task NM1 tests; test app 0.8, task NL8)
 
 # The first native tests for the Mac: Core Audio + one effect bit for bit (A), a command line VST3 host (B),
 # and the small "AudioLab VST3 test" app (C). Runs only when started by hand. Does not touch the desktop build.
@@ -12,11 +12,11 @@ on:
       release_tag:
         description: 'Tag for the pre-release'
         type: string
-        default: 'native-lab-7'
+        default: 'native-lab-8'
       release_title:
         description: 'Title of the pre-release'
         type: string
-        default: 'AudioLab VST3 test 0.7'
+        default: 'AudioLab VST3 test 0.8'
       runner:
         description: 'macOS runner label (task NL7: macos-latest; macos-15 got no machine in NL5)'
         type: choice
@@ -183,6 +183,15 @@ jobs:
           echo "--- live_tools.h on its own: normal, ASan+UBSan, TSan (the event ring with 4 writer threads)"
           tools/native-lab/nl7/run.sh "$RUNNER_TEMP/nl7-tools" 2>&1 | tee out/nl7/live_tools_test.txt
 
+      - name: 'Task NL8: the degree sign and other symbols in plug-in texts, silence flags counted per block with 33 output buses (no window, no sound card)'
+        continue-on-error: true
+        run: |
+          mkdir -p out/nl8
+          V="$HOME/Library/Audio/Plug-Ins/VST3"
+          build/alvst3 nl8 --plugin "$V/al-strict-synth.vst3" --outdir out/nl8 --tag strict | tee out/nl8/nl8.txt
+          build/alvst3 diag --plugin "$V/al-strict-synth.vst3" --name "AL Strict Synth 33 outs" --sr 44100 --outdir out/nl8 --tag strict33 > /dev/null || echo "(the 33-bus instrument was silent in a probe set-up, or not found)"
+          grep -h 'silence flag' out/nl8/strict33_diag.txt | head -3 || true
+
       # ---------------- test C ----------------
       - name: 'Test C: build the test app'
         id: app
@@ -217,7 +226,9 @@ jobs:
             for i in $(seq 1 240); do [ -f "$1/done" ] && break; kill -0 $PID 2>/dev/null || break; sleep 1; done
             kill $PID 2>/dev/null || true
             echo "=== $2: report"; cat "$1/AudioLab-VST3-test-report.txt" || true
-            echo "--- $2: the 0.5 and 0.7 lines"; grep -E '^\[(selftest|notes|probe|presets|clap|au|rosetta|broken|device|warning|level|format|audio|param|load)\]' "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- $2: the 0.5, 0.7 and 0.8 lines"; grep -E '^\[(selftest|notes|probe|presets|clap|au|rosetta|broken|device|devices|warning|level|format|audio|param|load|output|default|exclusive|devsim)\]' "$1/AudioLab-VST3-test-report.txt" || true
+            echo "--- $2: silence flags"; grep -o 'blocks processed.*process() not ok' "$1/AudioLab-VST3-test-report.txt" | tail -2 || true
+            echo "--- $2: [output] lines without a reason (must be 0): $(grep '^\[output\]' "$1/AudioLab-VST3-test-report.txt" | grep -Evc 'why: |chosen in the Output menu' || true)"
             echo "--- empty lines in the report: $(grep -c '^$' "$1/AudioLab-VST3-test-report.txt" || true)"
             echo "--- first bytes (a UTF-8 BOM is EF BB BF; plain ASCII has none)"; head -c 16 "$1/AudioLab-VST3-test-report.txt" | od -An -tx1 || true
             LC_ALL=C grep -c '[^[:print:][:space:]]' "$1/AudioLab-VST3-test-report.txt" | sed 's/^/lines with bytes outside ASCII: /' || true
@@ -230,6 +241,10 @@ jobs:
           # task NL7: the test instrument changing a parameter without telling the host, while its window is open
           runapp out/c-strict-sneaky "AL Strict Synth" --set-param "Sneaky drift=1"
           runapp out/c-jx10 "mda JX10"
+          # task NL8: the output stays where it was put: a test output made, chosen, the default changed, unplugged, plugged in again
+          runapp out/c-devsim "AL Strict Synth" --devsim
+          # task NL8: 33 output buses and silence flags, counted per block
+          runapp out/c-strict33 "AL Strict Synth 33 outs"
 
       - name: Summary
         if: always()

@@ -36,11 +36,21 @@ inline std::string asciiClean(const std::string& s) {
         {0x00B5, "u"}, {0x03BC, "u"}, {0x00B0, " deg"}, {0x2032, "'"}, {0x2033, "\""}, {0x221E, "inf"}, {0x2318, "Cmd"}, {0x26A0, "!"}, {0x00B1, "+/-"},
         {0x2192, "->"}, {0x2190, "<-"}, {0x00BD, "1/2"}, {0x00BC, "1/4"}, {0x00BE, "3/4"}, {0x2022, "*"}, {0x00B7, "."}, {0x2122, "(TM)"}, {0x00AE, "(R)"}, {0x00A9, "(C)"},
         {0x266F, "#"}, {0x266D, "b"}, {0x00B2, "2"}, {0x00B3, "3"}, {0x00B9, "1"}, {0x2030, " per mille"}};
+    // 0.8 (task NL8, report 8: kHs Phase Distortion's Spread "21°" came out "21¬inf"): text that was already turned into
+    // Mac Roman letters before it reached the host (a plug-in, or an older path of ours) is repaired first: the UTF-8 bytes
+    // of the degree sign (C2 B0) read as Mac Roman are "¬∞", and so on. These pairs never occur in real text.
+    static const struct { const char* from; const char* to; } moji[] = {
+        {"\xC2\xAC\xE2\x88\x9E", " deg"}, {"\xC2\xAC\xC2\xB5", "u"}, {"\xC2\xAC\xC2\xB1", "+/-"}, {"\xC2\xAC\xE2\x89\xA4", "2"},
+        {"\xC2\xAC\xE2\x89\xA5", "3"}, {"\xE2\x88\x9A\xC3\xB3", "x"}, {"\xE2\x80\x9A\xC3\xA0\xC3\xBB", "inf"},
+        {"\xE2\x80\x9A\xC3\x84\xC3\x98", " "}, {"\xE2\x80\x9A\xC3\xA0\xC3\xAD", "-"}, {"\xC2\xAC\xE2\x80\xA0", " "}};
     std::string o; o.reserve(s.size());
     size_t i = 0, n = s.size();
     while (i < n) {
         unsigned char c = (unsigned char)s[i];
         if (c < 0x80) { o += (char)c; i++; continue; }
+        bool rep = false;
+        for (auto& m : moji) { size_t l = strlen(m.from); if (s.compare(i, l, m.from) == 0) { o += m.to; i += l; rep = true; break; } }
+        if (rep) continue;
         int len = (c & 0xE0) == 0xC0 ? 2 : (c & 0xF0) == 0xE0 ? 3 : (c & 0xF8) == 0xF0 ? 4 : 0;
         bool ok = len > 0 && i + len <= n;
         uint32_t cp = len == 2 ? (c & 0x1F) : len == 3 ? (c & 0x0F) : (c & 0x07);

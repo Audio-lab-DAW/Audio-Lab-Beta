@@ -9,6 +9,12 @@
 //   strings outside ASCII, as Phase Plant's: value texts with U+2212 (minus) and U+202F (narrow no-break space) ("-8.0 dB"),
 //   U+00A0 (no-break space) ("12.5 ms"), a parameter title and a program name with an accented letter
 //   a program list (two programs) and a window of its own (empty), so the app can open it and poll while it is open
+// 0.8 (task NL8):
+//   "Spread"   unit U+00B0 and value texts "21°" (kHs Phase Distortion's Spread showed "21¬inf" in report 8)
+//   "Symbols"  value texts with U+00B5, U+00B1, U+00D7, U+221E, U+00B2, U+00B3 and U+00B0; at 1.0 the same text already
+//              turned into Mac Roman letters ("¬∞" for the degree sign), as a plug-in that made that mistake itself would send
+//   a second instrument, "AL Strict Synth 33 outs": 33 stereo output buses like HALion 7 (all main, all off until the host
+//   turns them on), silence flags on every bus it leaves silent, and a wrong flag on the main bus every 50th block
 #include "public.sdk/source/main/pluginfactory.h"
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "public.sdk/source/vst/vsteditcontroller.h"
@@ -30,16 +36,27 @@ using namespace Steinberg::Vst;
 
 static const FUID ProcUID(0x4A1C0D01, 0x5E3B4F21, 0x9A7C2B11, 0x7D30AA01);
 static const FUID CtrlUID(0x4A1C0D02, 0x5E3B4F21, 0x9A7C2B11, 0x7D30AA02);
-enum : ParamID { kLevel = 1, kLoud = 2, kSneaky = 3, kDrift = 4, kPrograms = 100 };
+static const FUID Proc33UID(0x4A1C0D03, 0x5E3B4F21, 0x9A7C2B11, 0x7D30AA03);
+enum : ParamID { kLevel = 1, kLoud = 2, kSneaky = 3, kDrift = 4, kSpread = 5, kSymbols = 6, kPrograms = 100 };
 
 class StrictProcessor : public AudioEffect {
 public:
-    StrictProcessor() { setControllerClass(CtrlUID); }
+    explicit StrictProcessor(int outs = 1) : nOuts(outs) { setControllerClass(CtrlUID); }
     static FUnknown* make(void*) { return (IAudioProcessor*)new StrictProcessor; }
+    static FUnknown* make33(void*) { return (IAudioProcessor*)new StrictProcessor(33); }
     tresult PLUGIN_API initialize(FUnknown* ctx) override {
         tresult r = AudioEffect::initialize(ctx);
         if (r != kResultOk) return r;
-        addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
+        if (nOuts == 1) addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
+        else {
+            // as HALion 7: "Master", "Out 2" ... "Out 33", every one a main bus and off until the host turns it on
+            addAudioOutput(STR16("Master"), SpeakerArr::kStereo, kMain, 0);
+            for (int b = 2; b <= nOuts; b++) {
+                String128 t; char nm[16]; snprintf(nm, sizeof nm, "Out %d", b);
+                int k = 0; for (; nm[k]; k++) t[k] = (TChar)nm[k]; t[k] = 0;
+                addAudioOutput(t, SpeakerArr::kStereo, kMain, 0);
+            }
+        }
         addEventInput(STR16("Notes"), 16);
         return kResultOk;
     }
@@ -79,10 +96,22 @@ public:
                 phase += freq / sr; if (phase >= 1) phase -= 1; env *= 0.99995;
             }
             for (int c = 0; c < d.outputs[0].numChannels; c++) d.outputs[0].channelBuffers32[c][i] = v;
+            if (v != 0) sounded = true;
         }
         d.outputs[0].silenceFlags = 0;
+        if (nOuts > 1) {
+            // the other buses stay silent and say so; the main bus says so when it is silent, and wrongly every 50th block
+            uint64 all0 = (d.outputs[0].numChannels >= 64) ? ~(uint64)0 : (((uint64)1 << d.outputs[0].numChannels) - 1);
+            if (!sounded || (++blockNo % 50) == 0) d.outputs[0].silenceFlags = all0;
+            for (int b = 1; b < d.numOutputs; b++) {
+                for (int c = 0; c < d.outputs[b].numChannels; c++) if (d.outputs[b].channelBuffers32 && d.outputs[b].channelBuffers32[c]) memset(d.outputs[b].channelBuffers32[c], 0, sizeof(float) * d.numSamples);
+                d.outputs[b].silenceFlags = (d.outputs[b].numChannels >= 64) ? ~(uint64)0 : (((uint64)1 << d.outputs[b].numChannels) - 1);
+            }
+        }
+        sounded = false;
         return kResultOk;
     }
+    int nOuts = 1; bool sounded = false; uint64 blockNo = 0;
     std::atomic<bool> armed{false};
     std::atomic<float> gain{0};
     float level = 1.0f; bool loud = false;
@@ -114,6 +143,8 @@ public:
         parameters.addParameter(STR16("Sneaky drift"), nullptr, 1, 0, ParameterInfo::kCanAutomate, kSneaky);
         put16(t, u"Dérive");                                   // "Derive" with an e acute
         parameters.addParameter(t, STR16("ms"), 0, 0.25, ParameterInfo::kCanAutomate, kDrift);
+        put16(t, u"°"); parameters.addParameter(STR16("Spread"), t, 0, 21.0 / 360.0, ParameterInfo::kCanAutomate, kSpread);
+        parameters.addParameter(STR16("Symbols"), nullptr, 1, 0, ParameterInfo::kCanAutomate, kSymbols);
         addUnit(new Unit(STR16("Root"), kRootUnitId, kNoParentUnitId, kPrograms));
         auto* list = new ProgramList(STR16("Factory"), kPrograms, kRootUnitId);
         put16(t, u"Café Init"); list->addProgram(t);
@@ -143,6 +174,16 @@ public:
         if (id == kDrift) {
             char b[32]; snprintf(b, sizeof b, "%.1f", v * 50.0);
             int at = 0; ascii16(out, at, b); out[at++] = (TChar)0x00A0; ascii16(out, at, "ms");
+            return kResultOk;
+        }
+        if (id == kSpread) {          // "21°", as kHs Phase Distortion's Spread
+            char b[32]; snprintf(b, sizeof b, "%.0f", v * 360.0);
+            int at = 0; ascii16(out, at, b); out[at++] = (TChar)0x00B0; out[at] = 0;
+            return kResultOk;
+        }
+        if (id == kSymbols) {         // the symbols to check; at 1.0 the same, already turned into Mac Roman letters
+            if (v < 0.5) put16(out, u"\u00B5s \u00B1" "3 \u00D7" "2 \u221E m\u00B2 m\u00B3 21\u00B0");
+            else put16(out, u"\u00AC\u00B5s \u00AC\u00B1" "3 \u221A\u00F3" "2 \u201A\u00E0\u00FB m\u00AC\u2264 m\u00AC\u2265 21\u00AC\u221E");
             return kResultOk;
         }
         return EditControllerEx1::getParamStringByValue(id, v, out);
@@ -178,6 +219,7 @@ public:
 };
 
 BEGIN_FACTORY_DEF("AudioLab test", "https://github.com/Audio-lab-DAW", "mailto:none@example.com")
-DEF_CLASS2(INLINE_UID_FROM_FUID(ProcUID), PClassInfo::kManyInstances, kVstAudioEffectClass, "AL Strict Synth", Vst::kDistributable, "Instrument|Synth", "0.7.0", kVstVersionString, StrictProcessor::make)
-DEF_CLASS2(INLINE_UID_FROM_FUID(CtrlUID), PClassInfo::kManyInstances, kVstComponentControllerClass, "AL Strict Synth Controller", 0, "", "0.7.0", kVstVersionString, StrictController::make)
+DEF_CLASS2(INLINE_UID_FROM_FUID(ProcUID), PClassInfo::kManyInstances, kVstAudioEffectClass, "AL Strict Synth", Vst::kDistributable, "Instrument|Synth", "0.8.0", kVstVersionString, StrictProcessor::make)
+DEF_CLASS2(INLINE_UID_FROM_FUID(Proc33UID), PClassInfo::kManyInstances, kVstAudioEffectClass, "AL Strict Synth 33 outs", Vst::kDistributable, "Instrument|Synth", "0.8.0", kVstVersionString, StrictProcessor::make33)
+DEF_CLASS2(INLINE_UID_FROM_FUID(CtrlUID), PClassInfo::kManyInstances, kVstComponentControllerClass, "AL Strict Synth Controller", 0, "", "0.8.0", kVstVersionString, StrictController::make)
 END_FACTORY

@@ -170,7 +170,7 @@ public:
     int64_t tail = 0;
     // diagnostics
     std::vector<std::string> createLines, prepareLines;
-    std::atomic<uint64_t> dBlocks{0}, dMainNZ{0}, dOtherNZ{0}, dSilFlag{0}, dNotOk{0}, dOn{0}, dOff{0}, dRej{0}, dParams{0};
+    std::atomic<uint64_t> dBlocks{0}, dMainNZ{0}, dOtherNZ{0}, dSilFlag{0}, dSilMain{0}, dSilBus{0}, dSilMainSound{0}, dNotOk{0}, dOn{0}, dOff{0}, dRej{0}, dParams{0};
     std::atomic<float> dPeakMain{0}, dPeakOther{0};
     std::atomic<int> dLastRes{0};
     std::atomic<int> mToProc{0}, mToCtrl{0}, mOff{0}, mDrop{0};
@@ -213,7 +213,7 @@ public:
             ParameterInfo pi{};
             if (controller->getParameterInfo(i, pi) != kResultOk) continue;
             ParamInfo p;
-            p.id = pi.id; p.name = asciiClean(VST3::StringConvert::convert(pi.title)); p.units = asciiClean(VST3::StringConvert::convert(pi.units));
+            p.id = pi.id; p.name = asciiClean(VST3::StringConvert::convert(pi.title)); p.units = asciiClean(VST3::StringConvert::convert(pi.units)); while (!p.units.empty() && p.units[0] == ' ') p.units.erase(0, 1);   // NL8: a unit of "°" becomes "deg", not " deg"
             p.defaultValue = pi.defaultNormalizedValue; p.steps = pi.stepCount;
             p.automatable = (pi.flags & ParameterInfo::kCanAutomate) != 0; p.readOnly = (pi.flags & ParameterInfo::kIsReadOnly) != 0;
             p.isBypass = (pi.flags & ParameterInfo::kIsBypass) != 0; p.hidden = (pi.flags & ParameterInfo::kIsHidden) != 0;
@@ -329,7 +329,7 @@ public:
         uint32 t = processor->getTailSamples();
         tail = t == kInfiniteTail ? -1 : (int64_t)t;
         handler.latencyChanged = false;
-        dBlocks = 0; dMainNZ = 0; dOtherNZ = 0; dSilFlag = 0; dNotOk = 0; dPeakMain = 0; dPeakOther = 0;
+        dBlocks = 0; dMainNZ = 0; dOtherNZ = 0; dSilFlag = 0; dSilMain = 0; dSilBus = 0; dSilMainSound = 0; dNotOk = 0; dPeakMain = 0; dPeakOther = 0;
         return true;
     }
 
@@ -380,16 +380,23 @@ public:
         tresult r = processor->process(data);
         // measure what the plug-in wrote, before the host touches it
         dBlocks++; dLastRes = (int)r; if (r != kResultOk) dNotOk++;
+        // task NL8 (report 9: HALion 7 with 33 output buses showed 126,176 "blocks with a silence flag" for 3,858 blocks):
+        // a block counts once when any bus carries a flag; the main bus and the bus-blocks are counted on their own
+        bool anyFlag = false;
         for (int b = 0; b < data.numOutputs; b++) {
             float pk = 0;
             for (int ch = 0; ch < data.outputs[b].numChannels; ch++) {
                 const float* d = data.outputs[b].channelBuffers32[ch]; if (!d) continue;
                 for (int i = 0; i < frames; i++) { float a = std::fabs(d[i]); if (a > pk) pk = a; }
             }
-            if (data.outputs[b].silenceFlags) dSilFlag++;
+            if (data.outputs[b].silenceFlags) {
+                anyFlag = true; dSilBus++;
+                if (b == 0) { dSilMain++; if (pk > 0) dSilMainSound++; }
+            }
             if (b == 0) { if (pk > 0) dMainNZ++; if (pk > dPeakMain.load()) dPeakMain = pk; }
             else { if (pk > 0) dOtherNZ++; if (pk > dPeakOther.load()) dPeakOther = pk; }
         }
+        if (anyFlag) dSilFlag++;
         if (data.numOutputs > 0) {
             int have = data.outputs[0].numChannels;
             for (int ch = 0; ch < outCh; ch++) {
@@ -406,7 +413,7 @@ public:
     HostDiag diag() const override {
         HostDiag d;
         d.setup = createLines; d.setup.insert(d.setup.end(), prepareLines.begin(), prepareLines.end());
-        d.blocks = dBlocks; d.blocksMainNonZero = dMainNZ; d.blocksOtherNonZero = dOtherNZ; d.blocksSilenceFlag = dSilFlag; d.processNotOk = dNotOk;
+        d.blocks = dBlocks; d.blocksMainNonZero = dMainNZ; d.blocksOtherNonZero = dOtherNZ; d.blocksSilenceFlag = dSilFlag; d.blocksSilenceFlagMain = dSilMain; d.silenceFlagBusBlocks = dSilBus; d.silenceFlagMainWithSound = dSilMainSound; d.outBuses = data.numOutputs; d.processNotOk = dNotOk;
         d.noteOns = dOn; d.noteOffs = dOff; d.eventsRejected = dRej; d.paramChanges = dParams;
         d.peakMain = dPeakMain; d.peakOther = dPeakOther; d.lastProcessResult = dLastRes;
         d.msgToProcessor = mToProc; d.msgToController = mToCtrl; d.msgOffMainThread = mOff; d.msgDropped = mDrop;

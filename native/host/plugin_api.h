@@ -66,6 +66,8 @@ struct HostOptions {
 struct HostDiag {
     std::vector<std::string> setup;    // plain lines: what the plug-in asked for, what the host gave, the result of every call
     uint64_t blocks = 0, blocksMainNonZero = 0, blocksOtherNonZero = 0, blocksSilenceFlag = 0, processNotOk = 0;
+    // task NL8: blocksSilenceFlag counts blocks with a flag on any bus (once per block); these split it up
+    uint64_t blocksSilenceFlagMain = 0, silenceFlagBusBlocks = 0, silenceFlagMainWithSound = 0; int outBuses = 0;
     uint64_t noteOns = 0, noteOffs = 0, eventsRejected = 0, paramChanges = 0;
     float peakMain = 0, peakOther = 0;  // the plug-in's own output buffers, before the host copies or scales anything
     int lastProcessResult = 0;

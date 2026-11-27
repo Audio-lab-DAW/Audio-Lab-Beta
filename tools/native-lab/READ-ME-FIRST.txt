@@ -1,4 +1,4 @@
-AudioLab VST3 test 0.7 (tasks NM1, NB-N1, NL4, NL5 and NL7)
+AudioLab VST3 test 0.8 (tasks NM1, NB-N1, NL4, NL5, NL7 and NL8)
 
 This is NOT the AudioLab app. It is a small native Mac program that tests one thing: can a native AudioLab
 find, load and play the VST3 plug-ins on your Mac, through your DAC or interface, straight on Core Audio.
@@ -13,6 +13,27 @@ HOW TO OPEN IT (it is not signed with an Apple Developer account, so macOS asks 
 4. From now on it opens normally.
 If the button does not appear, open Terminal and paste this line, with the path of the app at the end:
    xattr -dr com.apple.quarantine "/path/to/AudioLab VST3 test.app"
+
+NEW IN 0.8
+- The output stays where you put it. In report 9 the output went from the Gryphon back to "Bose Mini II SoundLink
+  (eqMac)" after HALion 7's window opened. In 0.7 such an [output] line, with no line before it, is only written when
+  the Output menu itself fires (a click in it, or a key while it had keyboard focus); 0.7 did not say which.
+  0.8: every [output] line ends with "why: ..." (chosen in the Output menu with the mouse or a key, the device went
+  away, it came back, the default output changed while you had chosen nothing, the rate or format changed).
+  An output you choose in the menu, or on which you turn on exclusive use, is never left unless it goes away; the
+  app goes back to it (and takes exclusive use again) when it returns. The system's default output changing,
+  another program taking exclusive use and format changes are logged ([default], [exclusive], [format]) and never
+  move the output. The Output menu no longer takes keys typed in the window.
+- The "blocks with a silence flag" count now counts blocks (HALion 7 with 33 output buses showed 126,176 for 3,858
+  blocks): "X of Y (on any of its 33 output buses; on the main bus: ...)".
+- Symbols in plug-in texts: the degree sign comes out as " deg" (kHs Phase Distortion's Spread showed "21" and two
+  odd signs in report 8), and micro, plus-minus, times, infinity, squared and cubed as u, +/-, x, inf, 2 and 3.
+
+TRY THIS FIRST (0.8)
+1. Choose the Gryphon in the Output menu and tick "Exclusive use of the device".
+2. Load HALion 7, "Open its window", Play test pattern for ten seconds, stop it.
+3. Load kHs Phase Distortion, "Open its window", turn Spread, play ten seconds, stop it.
+4. Copy the report and paste it back. Every [output] line says why; the Gryphon should stay all along.
 
 NEW IN 0.7 (there is no 0.6 to test: 0.7 holds everything)
 - Too loud: Phase Plant's own output reached +27.9 dBFS in report 7. When a plug-in's output passes 0 dBFS, the
@@ -32,7 +53,7 @@ NEW IN 0.7 (there is no 0.6 to test: 0.7 holds everything)
 - The report has no empty lines; "not played: play the pattern to test it" when no notes were sent; [load] gives
   the latency in samples and milliseconds.
 
-TRY THIS FIRST
+TRY THIS (0.7)
 1. Set the Gryphon to 32-bit: in Audio MIDI Setup > iFi (by AMR) HD USB Audio > Format choose 32-bit Integer
    at 44.1 kHz, or choose the Gryphon in the app and use the menu Device > Use the deepest format.
 2. Search "phase plant", Load, "Open its window", Play test pattern for ten seconds and turn a few knobs, stop it.
