@@ -574,3 +574,7 @@ The picks line gains a second half, for example: `EX1 picks: 1A 2B 3A 4A 5A 6A 7
 - The sandbox for scripts in Electron (worker in a sandboxed frame with a strict content security policy, or QuickJS) is designed from the documentation and Figma's account, not tried here; step DL12 is there to find out.
 - The 2 second and 50 millisecond limits are starting values.
 - Items marked "unverified" in 9.3 could not be opened in this run: Blender's factory start and its rule that scripts in a file do not run by themselves, REAPER's numeric and named command ids and zero-size hiding in WALTER, Bitwig's script API details, the Python remote scripts of Ableton Live, and the exact snippet folder path in Obsidian. None of them carries a design decision.
+
+## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels)
+
+Lane H builds **S7** in its commands registry: a single-key layer (S, M, Q, R, L, [ ], arrows by the grid, Enter), **K** toggles the keyboard piano, "G then M/P/B/D" jumps; plain letters yield to the keyboard piano when it is on; the palette K1 shows the keys. S8 was not picked.

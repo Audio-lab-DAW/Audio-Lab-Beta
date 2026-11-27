@@ -202,3 +202,7 @@ Small and visible first, the shared grid before the things drawn on it, the brow
 `A5 P4 B3 T3 | AC3 AW3 AG2 AP2 PN3 PV3 PS3 PK3 PG1 BR2 BP1 BM2 TT3 TB3 TM1 TC1 TS1 TL1`
 
 Built by the steps of section 6 (DR2-A1 to DR2-B2), only the picked items. The grid step (DR2-A1, AG2) is shared with the arrangement-lines round (docs/design-grid-lines.md, proposed task GL1): if the user's lines picks are in by then, GL1 and DR2-A1 are one step.
+
+## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels)
+
+Lane A builds **S3, the pop-up browser with search** where you click (arrows audition, Enter inserts, frecency per word) together with DS-B1 (the B3 look is how it opens and is searched), with lane F's sheet and focus code. Zoom, scroll, fling and the tile cache are lane O's (task UV): lane A keeps drawing what is in the arrangement, lane O decides when and how it is moved and redrawn.

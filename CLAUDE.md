@@ -14,7 +14,7 @@
 - Before every push that touches `index.html`, check that no top-level function name is defined twice (another lane may use the same name: v0.250 has two different `lkSel` functions). Use your task's own name prefix for new top-level functions.
 
 ## Parallel lanes: who owns what (the owner asked on 27 Nov, 19:20: "make sure it makes sense so we don't have any problems overlapping the tasks")
-Up to fourteen tasks edit `index.html` at the same time. Each one owns an area. Change only your own area; if you need something in another lane's area, add a small named hook (`<PREFIX>_HOOKS.<name>`) or a function of your own and write in your log which lane should pick it up. Never rewrite, rename or move another lane's code.
+Up to fifteen tasks edit `index.html` at the same time. Each one owns an area. Change only your own area; if you need something in another lane's area, add a small named hook (`<PREFIX>_HOOKS.<name>`) or a function of your own and write in your log which lane should pick it up. Never rewrite, rename or move another lane's code.
 
 | Lane | Task | Owns | Prefix |
 |---|---|---|---|
@@ -32,6 +32,7 @@ Up to fourteen tasks edit `index.html` at the same time. Each one owns an area. 
 | L | SND (built-in sounds, AE4 picks) | the worklet DSP of instruments and effects (the processors registered in `wlLoad`, their parameters in `FXDEF`), the shared DSP kit, new devices N1 to N6; not the device frame (lane I), not what is drawn in displays (lane E), not sidechain routing (lane K) | `snd` |
 | M | LM (lessons, UX3 picks) | the lesson runner and lessons: `LM_LESSONS`, `UI.lm`, `lm*` names, the Assistant's point_at and start_lesson tools; the guide engine, Help menu and What is this? are lane F's | `lm` |
 | N | SQ (sound quality, AE1 picks) | the Quality switch per device and per project (`q`), the sample resampler (built-in sounds, bounces, stems, export rate, pitched reads), the export post-processing (`postProc`: safety limiter, true peak, report, dither) and the Limiter's true-peak style; the device DSP itself is lane L's | `sq` |
+| O | UV (view engine, UX1 picks) | how and when the arrangement and editors move and redraw: zoom and scroll input (`zsWheel`, `szStep`, `zoomAround`, `smoothZoom`), header layout during a pinch, the tile cache, fling, coalesced and predicted pointer points; what is drawn stays lane A's | `uv` |
 | - | LK tokens (done) | the `LOOK` object: everybody reads it; only add tokens, never change another lane's values | `lk` |
 
 Before every push: `git pull --rebase`, re-run your edit script on the fresh file, run the lint and the start-up smoke test of `docs/release-gate.md`, and check that no other lane changed the same lines in the last hour (`git log -L` or `git log -S` on your anchors). If two lanes need the same function changed, the second one stops and writes what it needs in its log; the scheduling chat sorts it out.

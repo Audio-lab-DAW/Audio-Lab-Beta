@@ -215,3 +215,12 @@ Every task keeps to CLAUDE.md:
 - **The real rAF rate in Electron on the G80SD**, through the frame-rate read-out.
 - **S15:** whether the steady offset is felt on the Push 1 and on the computer keyboard while the mixer is open.
 - **S13 and S14:** the mock-ups measure in the viewer's own browser, so opening the page on the Mac gives the Mac's numbers.
+
+## The user's picks (27 November 2026, 22:02 Brussels)
+
+`UX1 picks: S1 S2 S3 S4 S7 S9 S10 S11 S13 S14 S15 S16 S18`, and for S16: "make it even faster. Like 100 milliseconds, I think. Or maybe even 75 or 80."
+
+- **S16 with the user's faster timings:** the four motion tokens become **0 / 50 / 80 / 120 ms** (instant; small things such as menus, tooltips and hovers 50 ms; panels, sheets and dialogs opening or closing **80 ms**; large moves such as a page turn or a view change 120 ms), one ease-out, every motion interruptible, reduced motion respected. They are LOOK tokens so they can be tuned later without code changes.
+- Not picked: S5, S6, S8, S12, S17.
+
+Who builds it: a new lane O, task **UV** (view engine: how and when the arrangement and the editors move and redraw, prefix `uv`): UV-1 = UX-A1 (S9 direct trackpad, S13 zoom without page layout), UV-2 = UX-A2 (S14 tiled arrangement with the glass engine reading tiles; the tiles cache what lane A draws, never change it), UV-3 S10 grab and fling, S11 coalesced and predicted points. Lane A (DS) builds S3, the pop-up browser with search, together with its browser step DS-B1. Lane C (FT) builds S1 time verbs and L for loop (with F2), S2 looping clips (with F1, F4), S4 automation across clips (with F3, F4), and its part of S18 (bounce and freeze in slices). Lane H (XT) builds S7, the single-key layer, K for the keyboard piano and "G then" jumps, in its commands registry. Lane J (LT) builds S15, steady timing for keys and MIDI (this also answers AE2's open L7), with lane E giving meters at half rate while a track is armed through a hook. Lane F (OV) builds S16 (the tokens above, applied to menus, dialogs, sheets and panels) and S18's progress line and the rule "an answer within 100 ms"; lane D runs analysis in its worker, lane K's export renders in slices.

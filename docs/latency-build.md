@@ -134,3 +134,7 @@ New JS goes before `function askChoice(title,text,btns,icon){`, new CSS before `
 - Task NB: L12 to L17 (native). L14 is a rule for both: never play through the bridge.
 - Desktop tasks MG1, IC4, MB1: LT adds only `desktop/lt-midi.js` and the smallest hooks in `main.js` and `preload.js`; never dispatches a desktop build while another runs.
 - Lane D (NI): its analysis worker also renders offline; render ahead (LT-5) shares Chromium's one offline thread with it, so LT-5 yields while the analysis runs during playback.
+
+## Added from the speed and feel picks (UX1, 27 Nov 2026, 22:02 Brussels)
+
+The user picked **S15 steady timing** (docs/research-ux-speed.md): notes at the event's time stamp plus a small fixed offset, no main-thread task over 2 ms while playing, and meters and mixer drawn at half rate while a track is armed (lane E gives the rate through a hook). This is AE2's L7, now picked: build it as an LT step after LT-3 (it uses the same timestamped note path).
