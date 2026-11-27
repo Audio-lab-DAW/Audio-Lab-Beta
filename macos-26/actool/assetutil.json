@@ -26,7 +26,7 @@
     "PlatformVersion" : "26.0",
     "SchemaVersion" : 2,
     "StorageVersion" : 17,
-    "Timestamp" : 1795747467
+    "Timestamp" : 1795747718
   },
   {
     "AssetType" : "Color",
@@ -57,32 +57,6 @@
     "SizeOnDisk" : 260
   },
   {
-    "AssetType" : "Color",
-    "Color components" : [
-      0.19200000166893005,
-      1
-    ],
-    "Colorspace" : "gray gamma 22",
-    "Name" : "AppIcon_Assets\/Color-3",
-    "NameIdentifier" : 34310,
-    "Scale" : 1,
-    "SHA1Digest" : "2F1E71EB245D10D20984505DF38A82DADCD8EDC2E56CFE7E9D9E5F6D38741B48",
-    "SizeOnDisk" : 244
-  },
-  {
-    "AssetType" : "Color",
-    "Color components" : [
-      0.078000001609325409,
-      1
-    ],
-    "Colorspace" : "gray gamma 22",
-    "Name" : "AppIcon_Assets\/Color-4",
-    "NameIdentifier" : 4711,
-    "Scale" : 1,
-    "SHA1Digest" : "E4437377A37EF87A8310402386E1C0745E294580077FA1A24003446BA441BAAA",
-    "SizeOnDisk" : 244
-  },
-  {
     "AssetType" : "Icon Image",
     "BitsPerComponent" : 8,
     "ColorModel" : "RGB",
@@ -95,9 +69,9 @@
     "Opaque" : false,
     "PixelHeight" : 32,
     "PixelWidth" : 32,
-    "RenditionName" : "AppIcon16x16_NSAppearanceNameSystem_AA6A545D-F7D6-4DCC-A0B6-2300B4B97A70-1400-000000008B3390B2.png",
+    "RenditionName" : "AppIcon16x16_NSAppearanceNameSystem_F49A9E49-EAAA-4654-940E-79539E9530C0-1421-0000000097450389.png",
     "Scale" : 2,
-    "SHA1Digest" : "C2052128B6B60488DCB5207242416248C5BE9454C68AC655186DCC77C7B8166B",
+    "SHA1Digest" : "7F144D288BF3B25A0107CA62BBFEF38A4957AA0F8F7940AB7816B518B55E6D45",
     "SizeOnDisk" : 330
   },
   {
@@ -113,9 +87,9 @@
     "Opaque" : false,
     "PixelHeight" : 64,
     "PixelWidth" : 64,
-    "RenditionName" : "AppIcon32x32_NSAppearanceNameSystem_4FF92B9D-464F-40EB-B9B8-0FB536C6F7C7-1400-000000008C65ACED.png",
+    "RenditionName" : "AppIcon32x32_NSAppearanceNameSystem_769183FE-1DCD-47AD-90AB-3FB398FD3C56-1421-00000000987863D2.png",
     "Scale" : 2,
-    "SHA1Digest" : "DDC906D0E7765F693F631A9057D75F5F9A248B82CC441124AB4DD0DBFDD6402D",
+    "SHA1Digest" : "E568A25C199823EEB76DE0995E259D25682714F41403377F0936C56942951984",
     "SizeOnDisk" : 330
   },
   {
@@ -131,9 +105,9 @@
     "Opaque" : false,
     "PixelHeight" : 128,
     "PixelWidth" : 128,
-    "RenditionName" : "AppIcon64x64_NSAppearanceNameSystem_B017FE40-5C1B-4719-A90D-FFC90CA5587C-1400-000000008C68A2D5.png",
+    "RenditionName" : "AppIcon64x64_NSAppearanceNameSystem_5804DD5E-8811-4ABD-965C-A373B104605D-1421-0000000098792811.png",
     "Scale" : 2,
-    "SHA1Digest" : "FACDFADB12D4FDAE36505643ECFC40A9E037A551858725D94994906EB7F02E15",
+    "SHA1Digest" : "6131DB88CD61D891F141DBA1DC1C1FB93EE979C5C92A1E252ACAC3722A243096",
     "SizeOnDisk" : 330
   },
   {
@@ -149,9 +123,9 @@
     "Opaque" : false,
     "PixelHeight" : 256,
     "PixelWidth" : 256,
-    "RenditionName" : "AppIcon128x128_NSAppearanceNameSystem_CEC4C7D8-F732-49E9-843D-8738CF036FDB-1400-000000008C6E650D.png",
+    "RenditionName" : "AppIcon128x128_NSAppearanceNameSystem_15DA2F88-BA8B-4B24-B398-91B59B2BC853-1421-00000000987ADE77.png",
     "Scale" : 2,
-    "SHA1Digest" : "3B7D285066E2A0BD3D903358C343640E49FCABCF3DCEFD40AB4EEBDCDD05B1CD",
+    "SHA1Digest" : "A5A522D18900307229A5415C8DDE236C5B3B20E82EB6F70FED2FE5D3A53631E5",
     "SizeOnDisk" : 52765
   },
   {
@@ -167,9 +141,9 @@
     "Opaque" : false,
     "PixelHeight" : 512,
     "PixelWidth" : 512,
-    "RenditionName" : "AppIcon256x256_NSAppearanceNameSystem_4ABC89DD-7796-4E73-8D55-5CC2487F0098-1400-000000008C75963A.png",
+    "RenditionName" : "AppIcon256x256_NSAppearanceNameSystem_89DDA8A7-8CBC-4052-B12B-C099545CE031-1421-000000009882303B.png",
     "Scale" : 2,
-    "SHA1Digest" : "F643F98F3A9CA1E739498B329243D47E55E57DA1AAA2F2951540B3FF10A3E26B",
+    "SHA1Digest" : "090852BA1A4B9B2B6C3A86BDCDBFB51E7E99B8DA1730F6D49876BC0F0CC7BAF3",
     "SizeOnDisk" : 163827
   },
   {
@@ -185,9 +159,9 @@
     "Opaque" : false,
     "PixelHeight" : 1024,
     "PixelWidth" : 1024,
-    "RenditionName" : "AppIcon512x512_NSAppearanceNameSystem_F7A86063-7902-473E-B47D-13739A2809E2-1400-000000008C8D5906.png",
+    "RenditionName" : "AppIcon512x512_NSAppearanceNameSystem_83BBC8D7-AAF0-4842-B314-E5C0369A02A2-1421-0000000098A1E44A.png",
     "Scale" : 2,
-    "SHA1Digest" : "9EEA990A329AA3A63435930E637C9E3EDCBD9A530266BCC717B95B2E0B67A082",
+    "SHA1Digest" : "9C5FB9E1292AB5F393304C50A03F3BF2007D8F47774C46CD7CCBFA13ED307F04",
     "SizeOnDisk" : 551056
   },
   {
@@ -203,9 +177,9 @@
     "Opaque" : false,
     "PixelHeight" : 1024,
     "PixelWidth" : 1024,
-    "RenditionName" : "AppIcon1024x1024_NSAppearanceNameSystem_916F0F48-C352-4085-A1B4-75BE4401E21F-1400-000000008CFD1FAB.png",
+    "RenditionName" : "AppIcon1024x1024_NSAppearanceNameSystem_A10F2E75-641D-4B9D-9B37-33229B22B7DC-1421-0000000098F690AA.png",
     "Scale" : 1,
-    "SHA1Digest" : "8838445E9984072EFE8956706F3B0C96ED97CC939D158398DC6EAEE4F4A15834",
+    "SHA1Digest" : "50A7B3B75CC1CA869922A75182302F507DB7BB0CA43C9D96AC321D296103DB0F",
     "SizeOnDisk" : 551056
   },
   {
@@ -326,15 +300,22 @@
     "LayerCount" : 2,
     "Layers" : [
       {
-        "Colorspace" : "generic",
+        "AssetType" : "Color",
+        "Color components" : [
+          0.078000001609325409,
+          0.31400001049041748,
+          0.6589999794960022,
+          1
+        ],
+        "Colorspace" : "srgb",
         "LayerOpacity" : 1,
         "LayerPosition" : "0,0",
         "LayerSize" : "0,0",
-        "Name" : "AppIcon_Assets\/Gradient-1",
-        "NameIdentifier" : 59377,
+        "Name" : "AppIcon_Assets\/Color-2",
+        "NameIdentifier" : 63909,
         "Scale" : 1,
-        "SHA1Digest" : "8474304F5A711613A0AB7502B1B9D48FBE437C384547F59EEE9FDC2559C10964",
-        "SizeOnDisk" : 306
+        "SHA1Digest" : "9E11EC0BD46DBB0133EF75BD054FC20E0DA48A9CBD326D0B92A3B0E0B9B50A0F",
+        "SizeOnDisk" : 260
       },
       {
         "Appearance" : "NSAppearanceNameDarkAqua",
@@ -386,7 +367,7 @@
     "NameIdentifier" : 6849,
     "RenditionName" : "AppIcon.iconstack",
     "Scale" : 1,
-    "SHA1Digest" : "EB37FFA91390BB36C14FABBD5C9CB9310B9A9F3725E1ACE57A0CFC6D80E43B1E",
+    "SHA1Digest" : "E9C9735BDA3ED358215BAA459B7673488689D337B49133C1F9634AB2D1349103",
     "SizeOnDisk" : 470
   },
   {
@@ -583,24 +564,6 @@
       "512x512 index:6 idiom:universal",
       "1024x1024 index:7 idiom:universal"
     ]
-  },
-  {
-    "AssetType" : "Named Gradient",
-    "Gradient Colors" : [
-      "AppIcon_Assets\/Color-3",
-      "AppIcon_Assets\/Color-4"
-    ],
-    "Gradient Start\/Stop" : "0.500,0.000 - 0.500,1.000",
-    "Gradient Stops" : [
-      0,
-      1
-    ],
-    "Gradient Type" : 1,
-    "Name" : "AppIcon_Assets\/Gradient-1",
-    "NameIdentifier" : 59377,
-    "Scale" : 1,
-    "SHA1Digest" : "8474304F5A711613A0AB7502B1B9D48FBE437C384547F59EEE9FDC2559C10964",
-    "SizeOnDisk" : 306
   },
   {
     "AssetType" : "PackedImage",
