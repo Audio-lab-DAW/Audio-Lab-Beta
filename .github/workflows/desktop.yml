@@ -49,8 +49,54 @@ jobs:
           swiftc -O -target arm64-apple-macos11 native/alvol.swift -o bin/alvol
           codesign --force --sign - bin/alvol
           file bin/alvol
+      # macOS 26 draws its own black icon under the Dark icon style unless the app brings an Icon Composer icon (task IC1).
+      # This writes build/Assets.car with the newest Xcode 26+ on the runner; package.json ships it and names it in Info.plist.
+      - name: Compile the Icon Composer app icon (Mac)
+        if: runner.os == 'macOS'
+        run: bash scripts/build-mac-icon.sh
       - name: Build and publish to the GitHub release
         run: npm run ${{ matrix.script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+  # Looks at the finished Mac app on macOS 26: the icon must be the blue square in the Default and the Dark icon style (task IC1).
+  # Reports only; the release is already published when this runs. Pictures: artifact "mac-icon-proof".
+  mac-icon-proof:
+    needs: build
+    if: always()
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+      - name: Fetch the DMG of this version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          V=$(node -p "require('./desktop/package.json').version")
+          mkdir -p /tmp/dmg && gh release download "v$V" --pattern '*arm64.dmg' -D /tmp/dmg && ls -la /tmp/dmg
+          hdiutil attach -nobrowse -readonly -mountpoint /tmp/dmgmnt /tmp/dmg/*.dmg >/dev/null
+          mkdir -p /tmp/app && cp -R "/tmp/dmgmnt/AudioLab Pro.app" /tmp/app/ && hdiutil detach /tmp/dmgmnt >/dev/null
+      - name: Check what is inside the app
+        run: |
+          A="/tmp/app/AudioLab Pro.app"; P="$A/Contents/Info.plist"; R="$A/Contents/Resources"
+          echo "version $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$P")"
+          N=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconName' "$P"); F=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$P")
+          echo "CFBundleIconName=$N CFBundleIconFile=$F"
+          [ "$N" = AppIcon ] || { echo "CFBundleIconName is not AppIcon"; exit 1; }
+          cmp "$R/icon.icns" desktop/build/icon.icns && echo "icon.icns is desktop/build/icon.icns, byte for byte"
+          mkdir -p icon-proof && xcrun assetutil --info "$R/Assets.car" > icon-proof/assetutil.json
+          python3 tools/mac-icon/check-car.py --strict icon-proof/assetutil.json
+          codesign --verify --deep --strict "$A" && echo "signature valid"
+      - name: Compile the icon here too (for the stand-in apps)
+        working-directory: desktop
+        run: bash scripts/build-mac-icon.sh
+      - name: Draw the icon in every style; Default and Dark must be blue
+        run: bash tools/mac-icon/proof.sh icon-proof "/tmp/app/AudioLab Pro.app"
+      - name: Photograph the Dock (app closed and app open, Default and Dark)
+        if: always()
+        run: bash tools/mac-icon/dock-shot.sh "/tmp/app/AudioLab Pro.app" icon-proof built || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mac-icon-proof
+          path: icon-proof

@@ -3296,3 +3296,45 @@ The app's own work per frame (`FPS.js`, same machine, Fractals song): playing wi
 ### Release
 - v0.223: commit b09d9c8 on main (rebased three times during the run: engine 2.1.0, 2.2.0 and 2.3.0 arrived from tasks G2c, G2d and G2e, and the app was rebuilt and tested again with each; `index.html` was not touched by other sessions). The engine method for the app is commit 868484a.
 - v0.223. App copy synced, update note written ("The docked panels (track headers, transport bar, devices) are now drawn by the new glass engine: Glass, Light or Solid in Settings, Performance. Please tell us the frame rate you see on your Mac."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-glass-step-1.md`. Next in the chain: the user's frame-rate check on the Mac, then GS2 (floating windows, sheets, menus).
+
+## 27 November 2026, desktop app: the Mac icon stays blue under the Dark icon style (task IC1)
+
+Reading: on the user's Mac in dark mode the app icon had a black background (white rings, yellow dots). Wanted: always the blue square with the Ocean Yellow W7 logo. `index.html` is not touched; only `desktop/`, `.github/workflows/`, `tools/` and `docs/`. Full write-up with sources: `docs/app-icon-mac-styles.md`.
+
+### Found
+- The black icon is drawn by macOS 26 itself. Under System Settings > Appearance > Icon & widget style > Dark it makes its own dark version of every app icon that has none: background colour out, black tile in, light parts kept. The app shipped only `icon.icns`, so it got that. **Reproduced** on GitHub's macOS 26.7.2 machine with the released app 0.222: kept in the Dock and closed, style Dark, the tile is black (`docs/app-icon-mac-styles/dock-macos26.png`, first row).
+- The released app while it is **open** is blue under Dark: the picture the app sets on the Dock (`dock-icon.png`) is left alone by macOS (second row). So the black one is what shows in Finder, Launchpad, Spotlight and on the Dock tile of the closed app.
+- No old build and no wrong file is involved: `icon.icns`, `dock-icon.png` and the picker pictures are as the scheduling chat said.
+
+### Built
+- An Icon Composer icon, written by hand: `desktop/icon-assets/mac-icon/AppIcon.icon` (`icon.json` + `Assets/mark.png`, made by `make_icon.py` from the W7 source). Fill = Ocean blue for the default, the dark and the tinted appearance; one layer with the white rings and the yellow dots; glass, shine, shadow and translucency off.
+- `desktop/scripts/build-mac-icon.sh` compiles it with `actool` (picks the newest Xcode 26 or later; the release runner `macos-15-intel` has one beside its default Xcode 16.4) into `build/Assets.car`. `package.json`: `CFBundleIconName = AppIcon` and `Assets.car` into `Contents/Resources`. `icon.icns` and `CFBundleIconFile` stay as they were. `afterPack.js` stops a release build before the DMG if either icon or either key is missing.
+- `desktop/main.js`: on macOS 26 and later with `Assets.car` in the bundle the default icon sets no Dock picture any more (the bundle icon shows, blue in Default and Dark); coming back from one of the other 48 icons hands the Dock back with `setIcon(null)`. The other 48 icons, and macOS 15 and older, work as before.
+- `.github/workflows/desktop.yml`: the Mac build compiles the icon first; new job "Mac icon proof" on `macos-26` takes the finished DMG, checks Info.plist, `icon.icns` byte for byte and `Assets.car` (the three appearances, each with the blue tile), lets macOS draw the icon in the four styles, photographs the Dock, uploads the pictures (artifact `mac-icon-proof`) and fails if Default or Dark is not blue. `.github/workflows/mac-icon-check.yml`: the same look without a build, run by hand.
+- Two traps, both seen on the build machine and written into the doc: a plain `fill` key beside `fill-specializations` makes the dark entry ignored (black again); and the first answer of the icon service for a new app can be the old automatic picture.
+
+### Proof (on GitHub's macOS 26.7.2 machine, no Mac here)
+- `assetutil --info Assets.car`: the layered AppIcon for `NSAppearanceNameAqua`, `NSAppearanceNameDarkAqua` and `ISAppearanceTintable`, the tile of each the colour 0.078, 0.314, 0.659.
+- macOS drawing the icon of the really built app (`NSWorkspace`, style set with `AppleIconAppearanceTheme`): Default blue, **Dark blue, 0.00 difference to Default** at 512 px, tile colour 21, 80, 168 (wanted 20, 80, 168). The app with `icon.icns` only: Dark black. Picture: `docs/app-icon-mac-styles/styles-macos26.png`.
+- A real Dock under Dark, both apps kept in it: released 0.222 black, new build blue, closed and open (`dock-macos26.png`, rows 3 and 4).
+- Default against today's `dock-icon.png` at 512 px: the tile box is the same (50 to 461 px, so no grey plate, same margin); mean difference inside the tile 1.6 of 255, 1.4 % of pixels off by more than 24, on ring edges and the thin light rim macOS 26 adds. The old `.icns` as macOS 26 draws it is further from the reference (3.2).
+- `tools/ui-tests/taskAH_electron.js`: 21 checks, all pass (4 new: macOS 26 start sets no Dock picture, another icon sets its picture, back to Ocean Yellow gives null, no page errors).
+- Windows: `desktop/build/icon.ico` not touched (sha256 62cbbba8..., the same as in v0.219); `icon.icns` not touched (23beac77...); the Windows part of `package.json` and the Windows path in `main.js` unchanged.
+
+### What macOS decides (cannot be blue)
+- **Tinted** and **Clear**: macOS removes every app's colours by design (one tint colour, or grey glass). The shape stays W7.
+- macOS 26 draws an Icon Composer icon at every size from the same layers, so the hand-drawn small versions in `icon.icns` (simple logo at 16 to 20 px) are not used there any more; small icons show W7 scaled down.
+- macOS 15 and older take flat pictures that `actool` also puts into `Assets.car` instead of `icon.icns` (seen on the macOS 15 machine: the same W7 with a faint light rim). The switch that should leave them out did nothing with Xcode 26.6.
+
+### Not verified without a real Mac
+- The user's Mac itself (Finder, Launchpad, Spotlight, Dock) and its icon cache after replacing the app.
+- `setIcon(null)` against a real Dock (tested against a recording stand-in; if Electron refused it the code sets the old blue picture).
+- Tinted and Clear in a real Dock.
+
+### For the user to check
+1. Install the newest DMG. With the style on Dark (or Automatic in dark mode) the icon in Applications, Launchpad and the Dock (app closed and open) is the blue square.
+2. Still black right after installing: log out and in once (icon cache).
+3. Settings > App icon: another icon, then Ocean Yellow again: the Dock is blue again.
+
+### Release
+- Commit on main (no version change, `index.html` untouched, `update-notes.txt` left alone: the note belongs to the program version and there is no new one). Desktop build: see the line below.

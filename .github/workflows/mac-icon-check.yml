@@ -1,0 +1,31 @@
+name: Mac icon check
+
+# Compiles the Icon Composer app icon and draws it in every macOS 26 icon style, without building or releasing the app (task IC1).
+# Run by hand (Actions > Mac icon check > Run workflow). The pictures are in the artifact of each job.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-26, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile the icon (actool)
+        working-directory: desktop
+        run: bash scripts/build-mac-icon.sh
+      - name: Draw the icon in every style
+        run: bash tools/mac-icon/proof.sh "icon-proof/${{ matrix.os }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mac-icon-check-${{ matrix.os }}
+          path: |
+            icon-proof
+            desktop/build/mac-icon
