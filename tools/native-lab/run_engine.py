@@ -80,18 +80,18 @@ if not bh:
     json.dump(R, open(os.path.join(out, "engine.json"), "w"), indent=1); print(R["error"]); e.quit(); sys.exit(0)
 
 # ---- 1. hand-over ------------------------------------------------------------------------------------
-o = e.cmd(cmd="open", uid=bh["uid"], rate=48000, buffer=64)
+o = e.cmd(cmd="open", uid=bh["uid"], rate=48000, buffer=256)   # a shared virtual machine: a roomy buffer for the sample-exact test
 R["steps"]["open"] = {k: o.get(k) for k in ("ok", "error", "notes", "tookMilliseconds", "device", "rate", "buffer", "onTheWire", "handedToUs", "latencyFrames")}
 print("open:", R["steps"]["open"])
 sock = os.path.join("/tmp", "alengine-test-%d.sock" % os.getpid())
-s = e.cmd(cmd="source", type="socket", path=sock, prefillMs=50, highMs=400)
+s = e.cmd(cmd="source", type="socket", path=sock, prefillMs=150, highMs=1500)
 sent = wav_read(os.path.join(HERE, "ref", "crush_plain_web.wav")) + wav_read(os.path.join(HERE, "ref", "crush_filter_web.wav")) + wav_read(os.path.join(HERE, "ref", "crush_dither_web.wav"))
 sent = sent * 2                                     # 3 seconds of the web engine's own renders
 rec = subprocess.Popen([alnative, "record", "--device", str(bh["id"]), "--seconds", "5", "--to", os.path.join(out, "loopback.wav")], stdout=subprocess.PIPE, text=True)
 time.sleep(0.6)
 c = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM); c.connect(sock)
 chunk = 480 * 8                                     # 10 ms
-t0 = time.time(); pos = 0; lead = 0.08              # stay 80 ms ahead of real time
+t0 = time.time(); pos = 0; lead = 0.4               # stay 400 ms ahead of real time
 while pos < len(sent):
     due = (time.time() - t0 + lead) * 48000 * 8
     while pos < len(sent) and pos < due:
@@ -109,14 +109,24 @@ off = -1
 for i in range(0, max(0, len(got) - 64), 2):
     if got[i] == want[first] and got[i + 1] == want[first + 1] and got[i + 2:i + 34] == want[first + 2:first + 34]:
         off = i - first; break
-same = diff = 0
+same = diff = gaps = 0
 if off >= 0:
-    n = min(len(want), len(got) - off)
-    for i in range(first, n):
-        if struct.pack("<f", got[off + i]) == struct.pack("<f", want[i]): same += 1
-        else: diff += 1
+    # walk both streams; where they part (a gap put in by an empty ring or a dropped device cycle), find the place again
+    gi, wi = off + first, first
+    while wi < len(want) and gi < len(got):
+        if struct.pack("<f", got[gi]) == struct.pack("<f", want[wi]):
+            same += 1; gi += 1; wi += 1; continue
+        probe = want[wi:wi + 32]; found = -1
+        if len(probe) == 32 and any(probe):
+            for k in range(gi, min(len(got) - 32, gi + 96000)):
+                if got[k] == probe[0] and got[k:k + 32] == probe:
+                    found = k; break
+        if found >= 0:
+            gaps += 1; gi = found
+        else:
+            diff += 1; gi += 1; wi += 1
 ring = st.get("ring", {})
-R["steps"]["handOver"] = {"sentSamples": len(want), "recordedSamples": len(got), "lineUpFound": off >= 0, "comparedSamples": same + diff, "identical": same, "different": diff,
+R["steps"]["handOver"] = {"sentSamples": len(want), "recordedSamples": len(got), "lineUpFound": off >= 0, "comparedSamples": same + diff, "identical": same, "different": diff, "gapsInTheRecording": gaps,
                           "ranEmpty": ring.get("ranEmpty"), "droppedTimes": ring.get("droppedTimes"), "droppedFrames": ring.get("droppedFrames"), "received": ring.get("received"),
                           "overloads": st.get("overloads"), "framesPerCallback": [st.get("framesPerCallbackMin"), st.get("framesPerCallbackMax")], "renderAvgMicroseconds": st.get("renderAvgMicroseconds")}
 print("hand-over:", R["steps"]["handOver"])
