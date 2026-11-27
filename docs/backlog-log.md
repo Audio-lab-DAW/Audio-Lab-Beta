@@ -4184,3 +4184,29 @@ Step FT-C2a of `docs/features-build.md` (the user's pick: MIDI controller suppor
 
 ### Left
 - FT-C2b: encoders on the selected device's parameters with names and values on the display, banks, track select and arm/mute/solo rows, transport, tempo, swing, master, metronome, undo, drum-rack 4x4 mode. Pressure reaches no instrument yet (FT-F14). Next: FT-C2b.
+
+
+## 27 November 2026, v0.239: task NI-2b, kick and bass tuning lab part 2: the view and the fixes (lane D, idea I2)
+
+The kick and bass lab is complete and visible. Edit script `tools/feature-lab/ni/ni_2b.py` (anchored, re-run after the rebase onto lane C's v0.238), test `tools/ui-tests/taskNI_2b.py` (36 checks, all pass; its screenshots go outside the repo).
+
+### Built
+- **The card** (`#niKB`, a `.pop`, so the glass engine draws it), opened from the main menu ("Kick and bass lab…", next to Undo) or the command `ni.kickBass`: Kick and Bass pickers (found by themselves, any track can be picked), the bar (‹ ›, At the playhead), read-outs with units (Kick note with Hz; Key; Clash: the fastest beating in Hz with the bass note, "overtone" when an octave apart; Gap: the shortest kick-to-bass time in ms), the result in words, a note when the kick is measured or the key comes from the piano roll.
+- **The picture**, one canvas drawn once per measurement (no animation, nothing while idle or closed): a note ruler C0 to C3 with the song key lit and the root brightest; the kick's pitch falling over its life (ms after the hit), brightness by its level, the end note as a dashed line across both panes with its name and Hz (a shaded band for a measured kick's range); the bar with beat lines, the kick's life on each hit, the bass notes as bars on the same ruler: green in tune, red with a hatch and a glow where they beat ("F♯1 beating at 2.8 Hz"; red never alone, rule 10 of round 4), blue further apart; notes beyond the ruler as arrows; the gap strip under it (kick lives and bass notes in time, gaps in ms where they fit).
+- **Fixes**, one undo step each, then a new measurement: "Tune the kick to F♯1" (the root nearest to where the kick settles that the kick can reach: the Kick designer's Pitch 21 to 45, or the drum pad's Tune -24 to +24; hidden for a measured sample, the note says why) and "Bass down an octave" (every note of the bass clips that play in this bar, offered only when all stay at C0 or above). "Play this bar" loops the bar.
+- **`NI_HOOKS.kickBassView`** for lane C's FT-F18: `open(o)`, `close()`, `refresh()`, `addRow(fn)` (fn(r, el) fills a row under the words: low-band correlation, phase rotation, shorten tail), `result()`.
+- Tooltips on every control, read-out and the picture; a real minus sign in read-outs; Escape or a click outside closes.
+
+### Checked
+- Kick designer at G1 with a rolling F♯1 bass in F♯ minor: Kick, Bass (not the Lead) and bar 3 found; read-outs G1 49.0 Hz, F♯ minor, clash 2.8 Hz F♯1, gap 125 ms; red clash bars and the lit key in the canvas pixels. "Tune the kick to F♯1" changes only the Pitch (31 to 30), one undo step, clash read-out "none", the button goes; Undo puts it back. "Bass down an octave" moves only the bass notes, all by 12, one undo step; Undo puts them back. Bar ‹ ›, the pickers and Play this bar (loop of the bar, playing) work. A drum machine kit kick: the fix changes only pad 1's Tune and the clash goes. An audio kick: measured (≈ G1), no tune button, the note says why. The canvas is not redrawn in 1.2 s idle; no animation loop, no audio nodes in the block. A hook row renders. Opens at the Light level too.
+- Screenshots looked at: the clash, the tuned state, the audio kick and the Light level. First version: the C labels sat on the keys and the kick's life band covered the bass row one semitone under it; now the labels sit left of the ruler, the life is a thin line, labels have a dark backing.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB, same hashes.
+- After the rebase onto v0.238: `taskNI_2b.py` 36 of 36, `taskNI_2a.py` 56 of 56, `taskNI_1b.py` 36 of 36, lane C's `taskFT_C2a.py` 46 of 46. No console errors.
+
+### Honest notes
+- **"Bass down an octave" does not remove a clash.** The note names stay the same, so the kick now beats against the bass's second harmonic at the same rate; it is quieter there and the bass sits under the kick instead of on it. The tooltip says so, and the read-out marks it "overtone". The tune fix is the one that removes a clash. (The plan's test line said both fixes remove it; only the tune fix can.)
+- Lane E (task IN, the instruments of design round 4) is building shared scale drawers and a number formatter. IN-A has not landed; this card draws its own small ruler and axis. When IN-A lands, the ruler, the ms axis and the read-out formatting move to lane E's pieces (one copy), in the next lane D run that touches it.
+- To try by ear (only the user can judge): open the lab on a psytrance project, tune the kick to the root, and listen with Play this bar whether the low end tightens; and whether a "tuned" reading on a measured kick sample sounds tuned.
+
+### Left
+NI-3: the analysis worker and the per-beat band cache (I1 frequency map, part 1).
