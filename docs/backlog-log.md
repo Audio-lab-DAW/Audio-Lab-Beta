@@ -5620,3 +5620,40 @@ Eighth step of the settings rebuild (`docs/settings-round-1.md`, S8, depends on 
 
 ### What is left
 S9 (the help line at the foot of the window with default and scope: lane F's overlays wait for it) next, then S10 to S19. S15 gives the HF1 controller switches ("Stop all controllers", per-port "Control surface") and the click pattern per project their homes. S18 writes the settings file with tick boxes (the project values are not in it: they travel with the song). Performance and the Glass block stay with the glass chain (G4).
+
+## 27 November 2026: task NL7 (VST3 test app 0.7: loud-output warning and safety limiter, slowest blocks tied to their cause, plug-in strings cleaned, the DAC's bit depth, unreported parameter changes)
+
+No app changes: `index.html`, `desktop/`, `native/engine/` and `native/bridge/` were not touched, no version. Touched: `native/host/` (new `live_tools.h`, `vst3_format.cpp`, `plugin_api.h`, `cli.cpp`), `native/testapp/` (the app, AL Strict Synth 0.7, Info.plist 0.7), `tools/native-lab/nl7/`, `tools/native-lab/READ-ME-FIRST.txt`, `.github/workflows/native-lab.yml`, `docs/native-mac-build.md`, this log. This task ran in parallel with the other lanes. 0.6 (NL6) never ran: 0.7 holds its list too.
+
+### From reports 6 and 7 (test app 0.5)
+- Phase Plant peaked at +27.9 dBFS inside the plug-in. The worst block was 5.4 ms of 11.6 ms (47 %) while plug-in windows were in use. Phase Plant's value texts were mojibake ("17.1‚ÄØms"). The Gryphon ran at 16-bit integer at 44.1 kHz (60 formats offered). A nameless 0 Hz device appeared during a Bluetooth reconnect. The report had empty lines between summaries.
+
+### Built
+See `docs/native-mac-build.md`, section "Test app 0.7". In short:
+- a `[warning]` and a red OVER mark when a plug-in passes 0 dBFS, a safety limiter on the app's output, and a `[level]` line;
+- an event ring and the 3 slowest blocks with what happened in the 100 ms before each;
+- report formatting in UTF-8 bytes, with every plug-in string through `asciiClean` (the cause of the mojibake: `stringWithFormat`'s `%s` reads Mac Roman);
+- a `[format]` line, a bit-depth warning and the menu item Device > Use the deepest format;
+- a 2 s wait for nameless devices;
+- no empty lines, "not played", latency in ms;
+- a `getParamNormalized` poll every 200 ms while the window is open, with `[param] changed without telling the host`;
+- AL Strict Synth with loud and sneaky modes and strings outside ASCII.
+
+### Tested
+GitHub `macos-latest`, run 46059753706 (commit f7081c5), the published build:
+- `alvst3 nl7`: 5 of 5 checks passed. `live_tools.h` checks: 13 of 13 passed, normally, under ASan+UBSan and under TSan.
+- The app in loud mode: `[warning]` at +20.0 dBFS, the limiter engaged once, output peak 0.980.
+- The app in sneaky mode: "Dérive" found, 43 changes.
+- Surge XT: no unreported changes; the 5.4 ms block was tied to the plug-in load 30 ms before.
+- mda JX10 sounds. The nine probe set-ups behave as in 0.5. 0 empty lines in every report.
+- Linux: `alvst3 nl7` and `diag` under ASan+UBSan, clean.
+- Pre-release `native-lab-7`, not latest. The latest release is v0.270.0, published earlier by the app's own release.
+
+### Not verified
+Phase Plant and Pigments. A real integer DAC: the warning and the format switch (the build machine only has a float device). A real Bluetooth reconnect.
+
+### For the native engine lane
+`alengine open` with bits/integer should choose the deepest integer physical format at the current rate. The note is in `docs/native-mac-build.md`.
+
+### Next
+The user: Gryphon at 32-bit, Phase Plant and Pigments 10 s each with a few knob turns, paste the report.
