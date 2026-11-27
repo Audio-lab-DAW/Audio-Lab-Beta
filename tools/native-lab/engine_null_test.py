@@ -351,6 +351,30 @@ f1 = e.cmd(cmd="source", type="file", path=wav441); f2 = e.cmd(cmd="source", typ
 check(f1.get("ok") is False and "44100" in f1.get("error", "") and "48000" in f1.get("error", "") and f2.get("ok"), "a 44.1 kHz file on a 48 kHz device is refused with both rates named (anyRate plays it)", [f1.get("error"), f2.get("ok")])
 e.cmd(cmd="source", type="silence")
 
+# ---- task NB-R5: the follower's default target and what it measures for the settings page -----------------------------------
+e.cmd(cmd="open", uid="al-null-1", rate=48000, buffer=128)
+r = e.cmd(cmd="source", type="socket", path=sock, pageRate=48000, clock="follow")
+e.cmd(cmd="reset")
+def paced_sender(path, total, lead, pause_at, pause_s):
+    """Like the shell's feeder: 128-frame blocks on the clock, lead seconds ahead, one stall of pause_s at block pause_at."""
+    c = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM); c.connect(path); t0 = time.time()
+    try:
+        for i, b in enumerate(blocks(total)):
+            if i == pause_at: time.sleep(pause_s)
+            d = t0 + i * 128 / 48000 - lead - time.time()
+            if d > 0: time.sleep(d)
+            c.sendall(b)
+    finally: c.close()
+thP = threading.Thread(target=paced_sender, args=(sock, 96000, 0.040, 300, 0.02)); thP.start()
+time.sleep(1.5)                                   # after the stall (block 300 is at 0.8 s), while the sender still sends
+st = e.cmd(cmd="status"); rg = st.get("ring", {})
+thP.join(10)
+check(r.get("ok") and rg.get("targetMs") == 40 and rg.get("clock") == "follow", "the default target is 40 ms (task NB-R5; it was 30)", rg)
+fm = rg.get("fillMinMs") if isinstance(rg.get("fillMinMs"), (int, float)) else -1
+check(rg.get("worstGapMs", 0) >= 15 and 5 < fm < 32 and rg.get("ranEmpty") == 0,
+      "the status tells the worst wait between arrivals (%.1f ms) and the smallest fill (%.1f ms): a 20 ms stall, following at 40 ms, never ran empty" % (rg.get("worstGapMs", -1), fm), rg)
+e.cmd(cmd="source", type="silence")
+
 q = e.cmd(cmd="quit")
 try: e.p.wait(5)
 except subprocess.TimeoutExpired: e.p.kill()

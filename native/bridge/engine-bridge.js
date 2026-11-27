@@ -7,7 +7,7 @@
 //   await eng.start();
 //   const list = await eng.devices();
 //   await eng.open({ uid, rate: 96000, buffer: 64, exclusive: true });
-//   await eng.startSound({ pageRate: 96000, prefillMs: 30, highMs: 120, clock: 'exact' });   // or clock: 'follow' (task NB-N2b)
+//   await eng.startSound({ pageRate: 96000, prefillMs: 40, highMs: 120, clock: 'exact' });   // or clock: 'follow' (task NB-N2b)
 //     pageRate (task NB-R2): the page's AudioContext rate; refused unless it equals the device's rate
 //   eng.feed(float32StereoInterleaved);            // as it arrives from the page
 //   eng.on('volume', e => ...); eng.on('devices', e => ...); eng.on('rate', e => ...);
@@ -94,7 +94,7 @@ class EngineBridge extends EventEmitter {
     this.stopSound();
     const p = path.join(os.tmpdir(), 'audiolab-engine-' + process.pid + '-' + Date.now() + '.sock');
     // task NB-R2: pageRate is the rate the page's AudioContext renders at; the engine refuses it unless it is the device's
-    const r = await this.send({ cmd: 'source', type: 'socket', path: p, prefillMs: o.prefillMs || 30, highMs: o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: +o.limitPpm || 2000, pageRate: +o.pageRate || 0 });
+    const r = await this.send({ cmd: 'source', type: 'socket', path: p, prefillMs: o.prefillMs || 40, highMs: o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: +o.limitPpm || 2000, pageRate: +o.pageRate || 0 });
     if (!r.ok) return r;
     if (how.connect === false) { this.fed = 0; return Object.assign({}, r, { path: p }); }
     await new Promise((resolve, reject) => { this.sock = net.connect(p, resolve); this.sock.on('error', reject); });

@@ -230,7 +230,7 @@ function setup({ ipcMain, app, utilityProcess, dialog }) {
     Object.assign(tap, { blocks: 0, frames: 0, firstAt: 0, lastAt: 0, worstGapMs: 0, notFloat: 0 });
     o = o || {};
     // task NB-R2: pageRate (the page's AudioContext rate) is required; the engine refuses a rate that is not the device's
-    const so = { prefillMs: +o.prefillMs || 30, highMs: +o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: Math.min(20000, Math.max(100, +o.limitPpm || 2000)), pageRate: +o.pageRate || 0, queueMs: Math.min(2000, Math.max(20, +o.queueMs || 250)) };
+    const so = { prefillMs: +o.prefillMs || 40, highMs: +o.highMs || 120, clock: o.clock === 'follow' ? 'follow' : 'exact', limitPpm: Math.min(20000, Math.max(100, +o.limitPpm || 2000)), pageRate: +o.pageRate || 0, queueMs: Math.min(2000, Math.max(20, +o.queueMs || 250)) };
     const r = await openSound(so); if (r.ok) lastSound = so;
     return r;
   });

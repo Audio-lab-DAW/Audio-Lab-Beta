@@ -79,7 +79,7 @@ function makeShell(utilityProcess, dialog) {
     check(!badRate.ok && badRate.deviceRate === 96000, 'sound at 16 kHz into a device at 96 kHz is refused (task NB-R2)', badRate);
     const snd = await S.call('al:native-sound', { prefillMs: 'x', clock: 'follow', limitPpm: 1e9, pageRate: 96000 });
     const srcCmd = logLines().filter(l => l.cmd && l.cmd.cmd === 'source').pop();
-    check(snd.ok && srcCmd && srcCmd.cmd.prefillMs === 30 && srcCmd.cmd.clock === 'follow' && srcCmd.cmd.limitPpm === 20000, 'sound: bad numbers fall back, the speed limit is capped at 20000 ppm', srcCmd);
+    check(snd.ok && srcCmd && srcCmd.cmd.prefillMs === 40 && srcCmd.cmd.clock === 'follow' && srcCmd.cmd.limitPpm === 20000, 'sound: bad numbers fall back (the 40 ms default of task NB-R5), the speed limit is capped at 20000 ppm', srcCmd);
     // the worklet port: 100 blocks of 128 stereo frames as Float32Array, ArrayBuffer and a typed view; one non-float message
     const p = S.port();
     for (let i = 0; i < 100; i++) {

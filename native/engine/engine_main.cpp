@@ -3,7 +3,7 @@
 // app (or a test) can run it as a helper:
 //   {"cmd":"devices"}                                    every device with rates, buffer range, volume, formats
 //   {"cmd":"open","uid":"...","rate":96000,"buffer":64,"exclusive":true,"bits":24,"integer":false}
-//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":30,"highMs":120,"clock":"exact"|"follow",
+//   {"cmd":"source","type":"tone"|"file"|"socket"|"silence","path":"...","prefillMs":40,"highMs":120,"clock":"exact"|"follow",
 //    "pageRate":48000}   (task NB-R2: a socket source must say its rate; refused unless it equals the device's)
 //   {"cmd":"clock","mode":"exact"|"follow"}   (task NB-N2b: follow the sender's clock smoothly, see follow.h)
 //   {"cmd":"volume","value":0.5,"confirm":false}   {"cmd":"mute","on":true}   {"cmd":"status"}   {"cmd":"close"}   {"cmd":"quit"}
@@ -101,34 +101,58 @@ static int selftest() {
       check(ok, "ring hands samples over in order");
       r.read(L.data(), R.data(), 256); check(r.underruns.load() == 1, "ring counts running empty");
       std::vector<float> big(6000 * 2, 1.f); r.write(big.data(), 6000); r.read(L.data(), R.data(), 256); check(r.skips.load() == 1 && r.fill() == 480 - 256, "ring drops back to its target when too full"); }
-    // task NB-N2b: the follower. (1) held at speed 1 it hands every sample over untouched; (2) between the samples it is clean;
-    // (3) against a sender whose clock is off by up to 1000 parts per million it never runs empty or drops, for 5 simulated minutes.
+    // task NB-N2b, NB-R5 (review C3, C4): the follower. (1) at speed 1 it hands every sample over untouched, -0.0 too;
+    // (2) between the samples it is flat and clean to 20 kHz at 44.1 kHz; (3) at the production target (40 ms) against
+    // a sender that sends in bursts (pauses of 25 ms about each second, 4 ms of jitter) whose clock is off by up to
+    // 1000 parts per million it never runs empty or drops and steers to the sender's clock; (4) what it costs.
     { Ring r; r.init(48000, 480, 24000); r.follow = true; r.rate = 48000; r.steer.fixed = true; r.steer.fixedU = 0;
       std::vector<float> in(4000 * 2), L(256), R(256); for (size_t i = 0; i < in.size(); i++) in[i] = (float)std::sin(0.001 * (double)i * (double)i) * 0.7f;
+      in[2 * 700] = -0.0f; in[2 * 701 + 1] = -0.0f;   // the bypass keeps the sign of zero (a sum would make it +0)
       r.write(in.data(), 4000); bool ok = true; size_t got = 0;
-      for (int k = 0; k < 10; k++) { r.read(L.data(), R.data(), 256); for (int i = 0; i < 256; i++, got++) if (L[i] != in[2 * got] || R[i] != in[2 * got + 1]) ok = false; }
-      check(ok && r.underruns.load() == 0, "follower at speed 1 is bit for bit"); }
-    for (double f : {997.0, 15000.0}) {
-      Ring r; r.init(96000, 480, 90000); r.follow = true; r.rate = 48000; r.steer.fixed = true; r.steer.fixedU = 100e-6;
-      size_t N = 60000; std::vector<float> in(N * 2); for (size_t i = 0; i < N; i++) in[2 * i] = in[2 * i + 1] = (float)(0.5 * std::sin(2 * M_PI * f * (double)i / 48000));
-      r.write(in.data(), N); std::vector<float> L(48000), R(48000); r.read(L.data(), R.data(), 48000);
-      double worst = 0; for (size_t i = 100; i < 48000; i++) { double want = 0.5 * std::sin(2 * M_PI * f * (double)i * (1 + 100e-6) / 48000); double e = std::fabs(L[i] - want); if (e > worst) worst = e; }
-      double db = 20 * std::log10(worst / 0.5 + 1e-30);
-      notesInfo += std::string(notesInfo.empty() ? "" : ", ") + "follower error at " + jnum(f) + " Hz " + jnum(std::round(db * 10) / 10) + " dB";
-      check(db < (f < 5000 ? -110 : -80), f < 5000 ? "follower is clean at 997 Hz (error below -110 dB)" : "follower is clean at 15 kHz (error below -80 dB)");
+      for (int k = 0; k < 10; k++) { r.read(L.data(), R.data(), 256); for (int i = 0; i < 256; i++, got++) if (memcmp(&L[i], &in[2 * got], 4) || memcmp(&R[i], &in[2 * got + 1], 4)) ok = false; }
+      check(ok && r.underruns.load() == 0, "follower at speed 1 is bit for bit (-0.0 kept)"); }
+    {   // the response at 44.1 kHz, the hardest common rate, read 100 parts per million fast
+        const double SR = 44100; std::string tab;
+        for (double f : {997.0, 10000.0, 15000.0, 18000.0, 19000.0, 20000.0, 21000.0}) {
+            Ring r; r.init(96000, 480, 90000); r.follow = true; r.rate = SR; r.steer.fixed = true; r.steer.fixedU = 100e-6;
+            size_t N = 60000; std::vector<float> in(N * 2); for (size_t i = 0; i < N; i++) in[2 * i] = in[2 * i + 1] = (float)(0.5 * std::sin(2 * M_PI * f * (double)i / SR));
+            r.write(in.data(), N); std::vector<float> L(44100), R(44100); r.read(L.data(), R.data(), 44100);
+            double worst = 0, so = 0, sw = 0;
+            for (size_t i = 300; i < 44100; i++) { double want = 0.5 * std::sin(2 * M_PI * f * (double)i * (1 + 100e-6) / SR); double e = std::fabs(L[i] - want); if (e > worst) worst = e; so += (double)L[i] * L[i]; sw += want * want; }
+            double lvl = 10 * std::log10(so / sw), err = 20 * std::log10(worst / 0.5 + 1e-30);
+            tab += std::string(tab.empty() ? "" : "; ") + jnum(f / 1000) + " kHz " + jnum(std::round(lvl * 1000) / 1000) + " dB (error " + jnum(std::round(err)) + " dB)";
+            if (f <= 20000) { char w[96]; snprintf(w, sizeof w, "follower at 44.1 kHz: %g Hz flat (within 0.01 dB) and clean (error below -100 dB)", f); check(std::fabs(lvl) < 0.01 && err < -100, w); }
+            else check(std::fabs(lvl) < 0.1, "follower at 44.1 kHz: 21 kHz within 0.1 dB");
+        }
+        notesInfo += std::string(notesInfo.empty() ? "" : ", ") + "follower response at 44.1 kHz: " + tab;
     }
-    for (double d : {250e-6, -250e-6, 1000e-6, -1000e-6}) {
-      const double SR = 48000; Ring r; r.init((size_t)SR * 2, (size_t)(SR * 0.05), (size_t)(SR * 0.5)); r.follow = true; r.rate = SR;
-      std::vector<float> blk(128 * 2), L(256), R(256); double tp = 0, tc = 0, ph = 0; size_t fmin = (size_t)-1, fmax = 0; double sumPpm = 0; int nPpm = 0;
-      const double total = 300;
-      while (tc < total) {
-        if (tp <= tc) { for (int i = 0; i < 128; i++) { float v = (float)(0.3 * std::sin(ph)); ph += 2 * M_PI * 440 / SR; blk[2 * i] = blk[2 * i + 1] = v; } r.write(blk.data(), 128); tp += 128 / (SR * (1 + d)); }
-        else { r.read(L.data(), R.data(), 256); tc += 256 / SR; if (tc > 120) { size_t fl = r.fill(); if (fl < fmin) fmin = fl; if (fl > fmax) fmax = fl; } if (tc > total - 60) { sumPpm += r.ppmMilli.load() / 1000.0; nPpm++; } }
-      }
-      double endPpm = nPpm ? sumPpm / nPpm : 0;
-      bool ok = r.underruns.load() == 0 && r.skips.load() == 0 && std::fabs(endPpm - d * 1e6) < 10 + 0.025 * std::fabs(d * 1e6) && fmin + 960 > r.target && fmax < r.target + 960;
-      notesInfo += ", sender off by " + jnum(d * 1e6) + " ppm: steered to " + jnum(std::round(endPpm * 10) / 10) + " ppm (mean of the last minute), fill " + std::to_string(fmin) + " to " + std::to_string(fmax) + " frames after two minutes (target " + std::to_string(r.target) + "), ran empty " + std::to_string(r.underruns.load()) + ", dropped " + std::to_string(r.skips.load());
-      check(ok, "follower keeps up with a sender whose clock is off");
+    for (double d : {50e-6, -250e-6, 1000e-6, -1000e-6}) {
+        const double SR = 48000, TG = 0.040; Ring r; r.init((size_t)SR * 2, (size_t)(SR * TG), (size_t)(SR * (TG + 0.09))); r.follow = true; r.rate = SR;
+        std::vector<float> blk(128 * 2), L(128), R(128); double tp = 0, tc = 0, ph = 0, hold = 0, nextPause = 1.0; std::vector<double> pend;
+        uint32_t rs = 12345; auto rnd = [&rs]() { rs = rs * 1664525u + 1013904223u; return (double)(rs >> 8) / 16777216.0; };
+        size_t fmin = (size_t)-1, fmax = 0; double sumPpm = 0; int nPpm = 0; const double total = 240;
+        while (tc < total) {
+            while (tp <= tc) { pend.push_back(tp + rnd() * 0.004); tp += 128 / (SR * (1 + d)); }   // made on the page's clock, handed over with jitter
+            if (tc >= nextPause) { hold = tc + 0.025; nextPause += 0.7 + rnd() * 0.6; }        // the sender stalls 25 ms about once a second
+            if (tc >= hold) { size_t k = 0; while (k < pend.size() && pend[k] <= tc) {
+                for (int i = 0; i < 128; i++) { float v = (float)(0.3 * std::sin(ph)); ph += 2 * M_PI * 440 / SR; blk[2 * i] = blk[2 * i + 1] = v; }
+                r.write(blk.data(), 128); k++; } pend.erase(pend.begin(), pend.begin() + k); }
+            r.read(L.data(), R.data(), 128); tc += 128 / SR;
+            if (tc > 60) { size_t fl = r.fill(); if (fl < fmin) fmin = fl; if (fl > fmax) fmax = fl; }
+            if (tc > total - 60) { sumPpm += r.ppmMilli.load() / 1000.0; nPpm++; }
+        }
+        double endPpm = nPpm ? sumPpm / nPpm : 0, tgt = SR * TG;
+        bool ok = r.underruns.load() == 0 && r.skips.load() == 0 && std::fabs(endPpm - d * 1e6) < 2 + 0.005 * std::fabs(d * 1e6) && fmin > SR * 0.004 && fmax < tgt + SR * 0.008;
+        notesInfo += ", bursty sender off by " + jnum(d * 1e6) + " ppm at the 40 ms target: steered to " + jnum(std::round(endPpm * 10) / 10) + " ppm (mean of the last minute), fill " + jnum(std::round(fmin / 4.8) / 10) + " to " + jnum(std::round(fmax / 4.8) / 10) + " ms after the first minute, ran empty " + std::to_string(r.underruns.load()) + ", dropped " + std::to_string(r.skips.load());
+        check(ok, "follower keeps up with a bursty sender whose clock is off (40 ms target)");
+    }
+    {   // the cost: one 128-frame block at 48 kHz while following
+        Ring r; r.init(480000, 4800, 400000); r.follow = true; r.rate = 48000; r.steer.fixed = true; r.steer.fixedU = 37e-6;
+        std::vector<float> in(240000 * 2, 0.25f), L(128), R(128); r.write(in.data(), 240000);
+        auto t0 = std::chrono::steady_clock::now(); int blocks = 0;
+        while (r.fill() > 4800) { r.read(L.data(), R.data(), 128); blocks++; }
+        double us = std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count() / blocks;
+        notesInfo += ", follower cost " + jnum(std::round(us * 10) / 10) + " us per 128-frame block at 48 kHz (" + jnum(std::round(us / 2666.7 * 1000) / 10) + " % of the block's time)";
     }
     { Msg m; check(parseMsg("{\"cmd\":\"open\",\"rate\":96000,\"exclusive\":true,\"uid\":\"a b\\\"c\"}", m) && m.str("cmd") == "open" && m.num("rate") == 96000 && m.flag("exclusive") && m.str("uid") == "a b\"c", "message reader"); }
     { Msg m; check(parseMsg("{\"uid\":\"caf\\u00e9 \\ud83d\\ude00\\n\"}", m) && m.str("uid") == "caf\xc3\xa9 \xf0\x9f\x98\x80\n", "message reader: \\u escapes to UTF-8 (task NB-R4)"); }
@@ -155,6 +179,7 @@ struct Eng {
     std::mutex clientLock; int clientFd = -1;   // task NB-R3: the connected sender, so stopSocket can end a read that would never return
     std::string sockPath;
     std::atomic<float> peak{0};
+    std::atomic<uint64_t> worstGapUs{0};   // task NB-R5: the longest wait between two arrivals on the socket since the last reset
     // task NB-R4: output protection (C6), the stream restarted on a format change (C7), the device volume's ramp and ceiling
     std::atomic<uint64_t> nonFinite{0}, clipped{0}, formatRestarts{0};
     std::mutex devLock;                      // open, close and the format restart
@@ -226,10 +251,14 @@ static bool startSocket(const std::string& path, std::string& err) {
             if (c < 0) break;
             { std::lock_guard<std::mutex> g(E.clientLock); if (!E.sockRun.load()) { close(c); break; } E.clientFd = c; }
             E.sockClient = true; carry = 0;
+            auto lastIn = std::chrono::steady_clock::time_point();   // task NB-R5: the longest wait between arrivals
             say("{\"ev\":\"sound-connected\"}");
             while (E.sockRun.load()) {
                 ssize_t n = read(c, buf.data() + carry, buf.size() - carry);
                 if (n <= 0) break;
+                { auto now = std::chrono::steady_clock::now();
+                  if (lastIn.time_since_epoch().count()) { uint64_t us = (uint64_t)std::chrono::duration_cast<std::chrono::microseconds>(now - lastIn).count(); if (us > E.worstGapUs.load()) E.worstGapUs = us; }
+                  lastIn = now; }
                 size_t have = carry + (size_t)n, frames = have / 8;
                 size_t done = 0;
                 while (done < frames && E.sockRun.load()) {          // if the ring is full, wait for the device to take some
@@ -288,6 +317,8 @@ static std::string statusJson() {
         ",\"source\":" + std::to_string(E.source.load()) + ",\"peak\":" + jnum(E.peak.load()) +
         ",\"pageRate\":" + jnum(E.pageRate.load()) + ",\"rateOk\":" + tf(E.source.load() != 3 || E.rateOk.load()) + ",\"framesAtWrongRate\":" + std::to_string(E.mismatchFrames.load()) +
         ",\"ring\":{\"fill\":" + std::to_string(E.ring.frames ? E.ring.fill() : 0) + ",\"received\":" + std::to_string(E.sockFrames.load()) + ",\"ranEmpty\":" + std::to_string(E.ring.underruns.load()) +
+        ",\"fillMinMs\":" + (E.ring.fillMin.load() == UINT64_MAX || E.ring.fillMinResetReq.load() ? std::string("null") : jnum(std::round(E.ring.fillMin.load() * 10000.0 / E.rate.load()) / 10)) +   // task NB-R5
+        ",\"targetMs\":" + jnum(std::round(E.ring.target * 10000.0 / E.rate.load()) / 10) + ",\"worstGapMs\":" + jnum(std::round(E.worstGapUs.load() / 100.0) / 10) +
         ",\"droppedTimes\":" + std::to_string(E.ring.skips.load()) + ",\"droppedFrames\":" + std::to_string(E.ring.skippedFrames.load()) + ",\"silentFrames\":" + std::to_string(E.ring.silentFrames.load()) + ",\"connected\":" + tf(E.sockClient.load()) +
         ",\"clock\":" + jstr(E.ring.follow.load() ? "follow" : "exact") + ",\"ppm\":" + jnum(E.ring.ppmMilli.load() / 1000.0) + ",\"ppmMin\":" + jnum(E.ring.ppmMinMilli.load() / 1000.0) + ",\"ppmMax\":" + jnum(E.ring.ppmMaxMilli.load() / 1000.0) + "}";
     return s;
@@ -301,6 +332,7 @@ static void closeDeviceLocked(bool releaseHog) {
 }
 static void resetCounters() {
     E.stream.callbacks = 0; E.stream.framesTotal = 0; E.stream.overloads = 0; E.stream.minFrames = 0xffffffffu; E.stream.maxFrames = 0; E.stream.worstNs = 0; E.stream.sumNs = 0; E.peak = 0;
+    E.worstGapUs = 0; E.ring.fillMinResetReq = true;   // task NB-R5
 }
 static std::string openDevice(const Msg& m) {
     auto t0 = std::chrono::steady_clock::now();
@@ -472,7 +504,7 @@ static int run() {
             }
             else if (t == "socket") {
                 double dr = E.rate.load(); if (!(dr > 0)) dr = 48000;
-                double pr = m.num("pageRate", 0), pf = 30, hm = 120, lp = 2000; std::string be;
+                double pr = m.num("pageRate", 0), pf = 40, hm = 120, lp = 2000; std::string be;
                 // task NB-R4 (review C10): the ring's sizes come from these, so they are checked first (the ring holds 2 s)
                 if (m.has("prefillMs") && !numArg(m, "prefillMs", 1, 1000, false, pf, be)) { ok = false; err = be; }
                 if (ok && m.has("highMs") && !numArg(m, "highMs", 2, 1900, false, hm, be)) { ok = false; err = be; }
