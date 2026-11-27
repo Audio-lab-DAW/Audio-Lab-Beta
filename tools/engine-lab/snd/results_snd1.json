@@ -1,0 +1,184 @@
+{
+ "version": "0.293",
+ "errors0": [],
+ "classic": {
+  "afilt lpslow": "-18.28868 dB  f16171f18f44",
+  "afilt hpriser": "-17.32847 dB  8228be333e49",
+  "afilt dj": "-20.28149 dB  05934a360be6",
+  "afilt bpwah": "-31.62612 dB  c9afd6b7e702",
+  "afilt autowah": "-28.95951 dB  707255bd05f2",
+  "afilt funk": "-15.73097 dB  4fe40d8d68bb",
+  "afilt wobble": "-15.67301 dB  1508dc14fcd2",
+  "afilt acid": "-11.76824 dB  5e5a7fd9548b",
+  "afilt vowel": "-27.84164 dB  399b7fe26c5f",
+  "afilt talk": "-26.93009 dB  b4a6706f85a3",
+  "afilt flangec": "-14.44772 dB  0872daf0c113",
+  "afilt negc": "-15.82261 dB  612d9bc0418e",
+  "afilt notch": "-16.77942 dB  006dedc2d6b5",
+  "afilt peak": "-15.29236 dB  c560ecdc4cad",
+  "afilt lofi": "-15.68978 dB  ded9f881b152",
+  "filter 2500 q1": "-21.79537 dB  06a4aae197ad",
+  "filter 400 q8": "-21.07257 dB  883fecc03cdc"
+ },
+ "response": {
+  "ladder": {
+   "max_dev_dB_30Hz_8kHz": 0.127637110097524,
+   "at_cutoff_dB": -1.266364471427914,
+   "analog_at_cutoff_dB": -1.2663519734228499
+  },
+  "diode": {
+   "max_dev_dB_30Hz_8kHz": 0.13239507384610505,
+   "at_cutoff_dB": -4.1608935864707774,
+   "analog_at_cutoff_dB": -4.160881805658528
+  },
+  "ms20": {
+   "max_dev_dB_30Hz_8kHz": 0.4000846393889077,
+   "at_cutoff_dB": -0.004247501444194164,
+   "analog_at_cutoff_dB": -0.004244261671197571
+  },
+  "svf12": {
+   "max_dev_dB_30Hz_8kHz": 0.40300069853483933,
+   "at_cutoff_dB": 10.964804929834003,
+   "analog_at_cutoff_dB": 10.964808261770468
+  },
+  "svf24": {
+   "max_dev_dB_30Hz_8kHz": 0.1161014997885701,
+   "at_cutoff_dB": 9.991370642798177,
+   "analog_at_cutoff_dB": 9.991377206553084
+  },
+  "comb": {
+   "max_dev_dB_30Hz_8kHz": 3.2185558913468433,
+   "at_cutoff_dB": -0.0020030990339584454,
+   "analog_at_cutoff_dB": -0.0004989343467928153
+  },
+  "formant": {
+   "max_dev_dB_30Hz_8kHz": 0.21408957591588518,
+   "at_cutoff_dB": -27.120302033795408,
+   "analog_at_cutoff_dB": -27.121575084384595
+  },
+  "svf12 bp": {
+   "max_dev_dB_30Hz_8kHz": 0.20445225068592165,
+   "at_cutoff_dB": -5.2106039829216496e-05,
+   "analog_at_cutoff_dB": -5.1746355830066396e-05
+  },
+  "svf12 hp": {
+   "max_dev_dB_30Hz_8kHz": 0.00618617159117818,
+   "at_cutoff_dB": 10.973291158617176,
+   "analog_at_cutoff_dB": 10.973288505666538
+  },
+  "svf24 hp": {
+   "max_dev_dB_30Hz_8kHz": 0.011366074160854112,
+   "at_cutoff_dB": 10.008343171430026,
+   "analog_at_cutoff_dB": 10.008337694345231
+  },
+  "ms20 bp": {
+   "max_dev_dB_30Hz_8kHz": 0.20153534348735036,
+   "at_cutoff_dB": -4.431381311081234e-06,
+   "analog_at_cutoff_dB": -4.139723165829021e-06
+  }
+ },
+ "alias": {
+  "afilt Classic lp24 drive 100": {
+   "alias_4k5_dB": -29.22,
+   "peak_dB": -4.63
+  },
+  "afilt Clean lp24 drive 100": {
+   "alias_4k5_dB": -56.23,
+   "peak_dB": -11.22
+  },
+  "filter2 ladder drive 100 2x": {
+   "alias_4k5_dB": -53.34,
+   "peak_dB": -17.95
+  },
+  "filter2 ladder drive 100 1x": {
+   "alias_4k5_dB": -30.16,
+   "peak_dB": -17.92
+  },
+  "filter2 diode drive 100 2x": {
+   "alias_4k5_dB": -49.61,
+   "peak_dB": -19.78
+  },
+  "filter2 diode drive 100 1x": {
+   "alias_4k5_dB": -28.74,
+   "peak_dB": -16.18
+  },
+  "filter2 ms20 drive 100 2x": {
+   "alias_4k5_dB": -55.56,
+   "peak_dB": -12.8
+  },
+  "filter2 ms20 drive 100 1x": {
+   "alias_4k5_dB": -32.37,
+   "peak_dB": -12.83
+  },
+  "filter2 svf12 drive 100 2x": {
+   "alias_4k5_dB": -55.56,
+   "peak_dB": -12.8
+  },
+  "filter2 svf12 drive 100 1x": {
+   "alias_4k5_dB": -32.37,
+   "peak_dB": -12.83
+  },
+  "ladder 220 Hz at -3 dBFS, drive 0: rms dB": -13.95,
+  "ladder 220 Hz at -3 dBFS, drive 50: rms dB": -16.83,
+  "ladder 220 Hz at -3 dBFS, drive 100: rms dB": -19.24,
+  "ladder 220 Hz at -20 dBFS, drive 0: rms dB": -30.95,
+  "ladder 220 Hz at -20 dBFS, drive 50: rms dB": -22.97,
+  "ladder 220 Hz at -20 dBFS, drive 100: rms dB": -22.36
+ },
+ "cost": {
+  "empty_s": 0.293,
+  "afilt Classic lp24": {
+   "s_per_s": 0.0234,
+   "pct_core": 2.34
+  },
+  "afilt Clean lp24": {
+   "s_per_s": 0.041,
+   "pct_core": 4.1
+  },
+  "afilt Clean lp24, LFO on": {
+   "s_per_s": 0.0498,
+   "pct_core": 4.98
+  },
+  "filter2 ladder 2x": {
+   "s_per_s": 0.0293,
+   "pct_core": 2.93
+  },
+  "filter2 diode 2x": {
+   "s_per_s": 0.0235,
+   "pct_core": 2.35
+  },
+  "filter2 ms20 2x": {
+   "s_per_s": 0.0241,
+   "pct_core": 2.41
+  },
+  "filter2 svf12 2x": {
+   "s_per_s": 0.0193,
+   "pct_core": 1.93
+  },
+  "filter2 svf24 2x": {
+   "s_per_s": 0.0197,
+   "pct_core": 1.97
+  },
+  "filter2 comb 2x": {
+   "s_per_s": 0.0316,
+   "pct_core": 3.16
+  },
+  "filter2 formant 2x": {
+   "s_per_s": 0.0251,
+   "pct_core": 2.51
+  },
+  "filter2 ladder 2x drive 50": {
+   "s_per_s": 0.0635,
+   "pct_core": 6.35
+  },
+  "filter2 ladder 1x": {
+   "s_per_s": 0.0077,
+   "pct_core": 0.77
+  },
+  "filter (old Low-pass)": {
+   "s_per_s": 0.0009,
+   "pct_core": 0.09
+  }
+ },
+ "errors": []
+}

@@ -6,3 +6,6 @@
 - `halfband_design.py`: the halfband coefficients (Valenzuela and Constantinides, as in HIIR, WTFPL; own implementation).
 - `renders.js`: A/B renders for listening, written to `renders/`.
 - `results_snd0.json`: SND-0's numbers (kit tests, exports before and after).
+- `snd1_src.js` + `snd1_edit.py`: SND-1 (Filter v2 `filter2`, the Auto Filter's Clean mode, the processor `al-snd-filter`); the edit script puts the block before `askChoice` and re-runs on a fresh file.
+- `snd1_measure.py`: SND-1's before and after numbers (Classic Auto Filter and Low-pass filter checksums, responses against the analog curves, aliasing with drive, cost); `results_snd1.json`.
+- `snd1_renders.py`: SND-1's A/B renders (`renders/snd1_*.wav`).
