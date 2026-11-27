@@ -1,0 +1,3 @@
+/* v0.287 (task SC-A): a science drawing behind a place: a canvas that fills its box and takes no clicks (the places come in later steps) */
+.sciv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
+body.lite .sciv{display:none}
