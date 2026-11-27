@@ -1,0 +1,356 @@
+<title>AudioLab sound quality: what to improve</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column in AudioLab's own dark look (single theme, as the earlier pick pages). Headline numbers, the listening setup,
+   the options in five groups (each with its A/B test and its measured plot), the numbers in tables, other DAWs, sources; picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--warn:#f5c84c;--bad:#ff6b6b;--disp:#050507;
+ --a:#ff8a5c;--b:#3ecf8e;--grid:#1d1d24;--harm:#4d4d59;--s3:#b583ff;
+ --f:Inter,system-ui,sans-serif;--fm:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);margin:0;padding-block:28px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 28px/1.15 var(--f);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--f);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0}
+p{margin:0;max-width:74ch}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+a{color:var(--blue)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:6px 12px;font-weight:500;font-size:12px;white-space:nowrap}
+.btn:hover{border-color:#3a3a45}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+section{display:flex;flex-direction:column;gap:16px}
+.head{display:flex;flex-direction:column;gap:6px}
+header.top{display:flex;flex-direction:column;gap:14px}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--ln);border:1px solid var(--ln);border-radius:10px;overflow:hidden}
+.nums>div{background:var(--pn);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.nums .big{font:600 22px/1.15 var(--f);font-variant-numeric:tabular-nums}
+.nums .big s{color:var(--bad);text-decoration:none}
+.nums .big b{color:var(--acc);font-weight:600}
+.nums .l{font:500 11px var(--fm);color:var(--mut)}
+.good{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px;border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:14px 16px}
+.good li{list-style:none;display:grid;grid-template-columns:16px minmax(0,1fr);gap:8px;font-size:12px}
+.good li::before{content:"✓";color:var(--acc);font-weight:600}
+.good ul{padding:0}
+.listen{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
+.listen label{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.listen input[type=range]{width:200px;max-width:100%;accent-color:var(--blue)}
+.listen output{font:500 12px var(--fm);min-width:64px;display:inline-block}
+.note{border-left:2px solid var(--warn);padding:2px 0 2px 10px;color:var(--mut);font-size:12px}
+.group{display:flex;flex-direction:column;gap:10px}
+.group>.gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.opt{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.opt.rec{border-color:color-mix(in srgb,var(--acc) 55%,var(--ln))}
+.opt.wide{grid-column:1/-1}
+.opt .top{display:flex;align-items:baseline;gap:10px}
+.opt .id{font:600 12px var(--fm);color:var(--acc);flex:none}
+.opt .stars{margin-left:auto;font:500 12px var(--fm);color:var(--warn);flex:none;letter-spacing:1px}
+.opt .stars.no{color:var(--mut);letter-spacing:0}
+.opt dl{margin:0;display:grid;grid-template-columns:86px minmax(0,1fr);gap:4px 10px;font-size:12px}
+.opt dt{color:var(--mut)}
+.opt dd{margin:0;min-width:0}
+.where{display:inline-flex;gap:4px;flex-wrap:wrap}
+.chip{font:500 10px var(--fm);border:1px solid var(--ln);border-radius:20px;padding:1px 7px;color:var(--mut)}
+.chip.web{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 50%,var(--ln))}
+.chip.nat{color:var(--s3);border-color:color-mix(in srgb,var(--s3) 50%,var(--ln))}
+.ba{display:flex;flex-direction:column;gap:3px}
+.ba .r{display:grid;grid-template-columns:60px minmax(0,1fr) 84px;gap:8px;align-items:center;font:400 11px var(--fm);color:var(--mut)}
+.ba .t{height:10px;background:var(--disp);border-radius:3px;position:relative;overflow:hidden}
+.ba .t i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.ba .r span:last-child{text-align:right;color:var(--ink)}
+.ab{display:flex;flex-direction:column;gap:6px;background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:10px}
+.ab .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ab button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;font:500 12px var(--fm)}
+.ab button.a[aria-pressed="true"]{border-color:var(--a);background:color-mix(in srgb,var(--a) 22%,var(--pn2))}
+.ab button.b[aria-pressed="true"]{border-color:var(--b);background:color-mix(in srgb,var(--b) 22%,var(--pn2))}
+.ab .what{font-size:12px;color:var(--mut)}
+.ab .st{font:400 11px var(--fm);color:var(--mut);margin-left:auto}
+.plot{width:100%;max-width:100%;height:170px;display:block;background:var(--disp);border:1px solid var(--ln);border-radius:8px}
+.key{display:flex;gap:14px;font:400 11px var(--fm);color:var(--mut);flex-wrap:wrap}
+.key i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.choose{display:flex;gap:4px;flex-wrap:wrap}
+.choose button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:4px 10px;font-size:12px}
+.choose button[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,var(--pn2))}
+.tw{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--pn)}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--ln);white-space:nowrap}
+td.w{white-space:normal;min-width:260px}
+th{font-weight:500;color:var(--mut);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+td.n{font-family:var(--fm);font-variant-numeric:tabular-nums;text-align:right}
+td.bad{color:var(--bad)} td.ok{color:var(--acc)}
+tr:last-child td{border-bottom:0}
+.src{font-size:12px;color:var(--mut)}
+.src li a{word-break:break-word}
+.picks{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--ln);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5}
+.picks>div{max-width:1180px;margin:0 auto;display:flex;gap:8px;align-items:center}
+.picks output{flex:1;min-width:0;font:400 12px var(--fm);background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:7px 10px;overflow-x:auto;white-space:nowrap;display:block}
+textarea.free{width:100%;min-height:52px;background:var(--disp);border:1px solid var(--ln);border-radius:8px;padding:8px 10px;resize:vertical}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label{font:500 11px var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+@media (max-width:860px){
+ .nums{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .opts,.good{grid-template-columns:minmax(0,1fr)}
+ .picks>div{flex-wrap:wrap} .picks output{flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+ <span class="eyebrow">Task AE1 · engine research · sound quality · 27 November 2026</span>
+ <h1>AudioLab sound quality: what to improve</h1>
+ <p>You listen on a Gryphon and Stax, so small faults are audible to you. I measured every part of today's engine that can colour the sound: oscillators, distortion, filters, summing, sample-rate conversion, the limiter, export dither. Every number on this page comes from the app's own render (v0.263) or from a port of its code that gives the same number. Each option has a short A/B test at a safe level and a measured plot. Nothing here changes an existing project: every change that alters the sound is a new <b>Clean</b> setting, and old projects stay on <b>Classic</b> until you switch them. Full write-up: <code>docs/research-engine-sound.md</code>.</p>
+ <div class="nums">
+  <div><span class="l">A 44.1 kHz sample in a 48 kHz engine</span><span class="big"><s>−20 dB</s> → <b>−117 dB</b></span><span class="mut sm">false tones next to a 10 kHz hat partial (linear interpolation today)</span></div>
+  <div><span class="l">Acid drive, A2 note, below 16 kHz</span><span class="big"><s>−49 dB</s> → <b>−102 dB</b></span><span class="mut sm">aliasing against the note (drive at 1x today)</span></div>
+  <div><span class="l">Synth saw at A5, below 16 kHz</span><span class="big"><s>−43 dB</s> → <b>−129 dB</b></span><span class="mut sm">aliasing of the pooled synth's saw</span></div>
+  <div><span class="l">Export "safety limiter", hot master</span><span class="big"><s>+1.4 dBFS</s> → <b>−1 dBTP</b></span><span class="mut sm">today's export option lets peaks through and the file clips</span></div>
+ </div>
+</header>
+
+<section>
+ <div class="head"><span class="eyebrow">What is already right</span><h2>Things that need no work</h2></div>
+ <div class="good"><ul>
+  <li>Summing: 64 tracks in Web Audio's 32-bit float differ from a 64-bit sum by −152 dBFS (rms), 136 dB under the mix. Nothing to gain from 64-bit summing.</li>
+  <li>The loudness meter's true peak is the exact BS.1770-5 filter (48 taps, 4x).</li>
+  <li>Psy Bass and Fractal already run at 2x with band-limited steps and ADAA. They are the model for the rest.</li>
+  <li>Sub is additive and band-limited; Bounce's modes stop below 0.45 of the rate.</li>
+ </ul><ul>
+  <li>Files you import are decoded by the browser's sinc resampler: images at −74 to −87 dB. That is fine.</li>
+  <li>Export dither is correct: TPDF ±1 LSB, and the first-order shaping works per channel.</li>
+  <li>The Soft Clipper at 4x keeps aliasing at −72 to −83 dB on a 2.5 to 5 kHz tone.</li>
+  <li>The Drive effect at low drive (30 %) is clean: −64 dB.</li>
+ </ul></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Listening setup</span><h2>Before you press play</h2></div>
+ <div class="listen">
+  <div class="field"><label for="lvl">Level</label><div><input type="range" id="lvl" min="-36" max="0" step="1" value="-12"> <output id="lvlO">−12 dB</output></div></div>
+  <p class="mut sm" style="flex:1;min-width:240px">Start low. Every pair is matched in loudness, so the louder one never wins. The tests run in a 48 kHz audio context. If your output runs at another rate, the browser converts once at the end, the same way for A and B. <b>A</b> is today's algorithm, <b>B</b> is the improved one. <b>A⇄B</b> switches between them while the loop keeps playing.</p>
+  <button class="btn" id="stopAll" type="button">Stop all</button>
+ </div>
+</section>
+
+<section id="optsec">
+ <div class="head"><span class="eyebrow">Options</span><h2>Eighteen options in six groups</h2>
+  <p class="mut">For each option, choose <b>Now</b>, <b>Later</b> or <b>No</b>. ★ marks what this research recommends. In the plots, <span style="color:var(--a)">orange</span> is today and <span style="color:var(--b)">green</span> is the improved version. Spectra are peak-calibrated: a full-scale sine reads 0 dB. CPU figures are from this task's unoptimised JavaScript on a 2.1 GHz cloud core (one core = 20.8 µs per sample at 48 kHz). An M4 core is estimated two to three times faster.</p></div>
+ <div id="groups"></div>
+ <div class="field"><label for="fNote">Anything else (optional)</label><textarea class="free" id="fNote" placeholder="For example: I mostly export 24-bit WAV at 44.1 kHz; the Gryphon runs at 96 kHz"></textarea></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Measured</span><h2>All the numbers</h2>
+  <p class="mut">"App" means the app's own render (v0.263, 48 kHz, through the AudioLab bridge). "Port" means today's algorithm copied from index.html into the lab, checked against the app. Aliasing is the power of everything that is not a harmonic of the note, against the harmonics, measured on 1 s with a Kaiser window (β 20). An ideal additive saw reads −165 dB. Scripts: <code>tools/engine-lab/ae1/</code>.</p></div>
+ <div class="tw"><table id="tOsc"></table></div>
+ <div class="tw"><table id="tAcid"></table></div>
+ <div class="tw"><table id="tMisc"></table></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">How others do it</span><h2>What other DAWs and plug-ins publish</h2></div>
+ <div class="tw"><table>
+  <thead><tr><th>Who</th><th>Topic</th><th>What they publish</th></tr></thead>
+  <tbody>
+   <tr><td>Ableton Live</td><td>summing</td><td class="w">64-bit summing wherever signals are mixed; the internal processing stays 32-bit</td></tr>
+   <tr><td>Ableton Live</td><td>non-linear devices</td><td class="w">Saturator, Pedal and Dynamic Tube have a Hi-Quality mode against aliasing. Glue Compressor and EQ Eight oversample 2x.</td></tr>
+   <tr><td>Ableton Live</td><td>oscillators</td><td class="w">Wavetable's raw oscillators are "perfectly band-limited"; Analog avoids aliasing by modelling; Operator has an Antialias mode, on by default</td></tr>
+   <tr><td>Ableton Live</td><td>sample-rate conversion</td><td class="w">exports convert with the SoX resampler; Hi-Q clip interpolation stays clean to about ±19 semitones</td></tr>
+   <tr><td>Bitwig</td><td>The Grid</td><td class="w">every Grid signal runs at 4x the project rate</td></tr>
+   <tr><td>Cubase</td><td>precision, distortion</td><td class="w">an optional 64-bit float engine; Distroyer has an oversampling switch and a separate DC filter for asymmetric settings</td></tr>
+   <tr><td>FabFilter</td><td>Saturn 2, Pro-L 2</td><td class="w">Saturn: 8x (Good) and 32x (Superb). Pro-L 2: 4x to 32x, linear-phase; 4x plus at least 0.1 ms look-ahead keeps inter-sample peaks within 0.1 dB</td></tr>
+   <tr><td>FabFilter</td><td>Pro-Q 4</td><td class="w">Zero Latency follows the analog curve except above about 18 kHz; Natural Phase follows magnitude and phase up to 20 kHz</td></tr>
+   <tr><td>u-he</td><td>Repro, Satin, Diva</td><td class="w">Repro-1's filter runs 8x at 44.1/48 kHz, minimum-phase so there is no latency; Satin runs at 352 to 384 kHz inside; Diva's best mode uses zero-delay-feedback filters</td></tr>
+   <tr><td>Vital (Matt Tytel)</td><td>oversampling</td><td class="w">1x to 2x is the biggest step; it matters most for distortion, driven filters and audio-rate modulation</td></tr>
+   <tr><td>REAPER</td><td>resampling</td><td class="w">modes from r8brain (stop band 49 to 218 dB) down to point sampling</td></tr>
+   <tr><td>Logic, Cubase</td><td>dither</td><td class="w">POW-r 1 to 3 (shaping gains 5 to 20 dB around 2 to 4 kHz), UV22HR; dither only once, at the very end</td></tr>
+   <tr><td>Kilohearts, Serum 2, Bitwig devices</td><td>oversampling factors</td><td class="w">not published (searched; not found)</td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+ <div class="head"><span class="eyebrow">Sources</span><h2>Where the facts come from</h2></div>
+ <ul class="src">
+  <li><a href="https://dafx.de/paper-archive/2016/dafxpapers/20-DAFx-16_paper_41-PN.pdf" target="_blank" rel="noopener">Parker, Zavalishin, Le Bivic: antiderivative anti-aliasing, DAFx-16</a>, <a href="https://ccrma.stanford.edu/~jatin/Notebooks/adaa.html" target="_blank" rel="noopener">Chowdhury: ADAA notes</a></li>
+  <li><a href="https://acris.aalto.fi/ws/portalfiles/portal/34665796/ELEC_Kahles2019_Oversampling_JAES.pdf" target="_blank" rel="noopener">Kahles, Esqueda, Välimäki: oversampling filters for waveshaping, JAES 2019</a></li>
+  <li><a href="https://mac.kaist.ac.kr/pubs/ValimakiPeknenNam-jasa2012.pdf" target="_blank" rel="noopener">Välimäki, Pekonen, Nam: polynomial BLEP, JASA 2012</a></li>
+  <li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf" target="_blank" rel="noopener">Zavalishin: The Art of VA Filter Design 2.1.0</a>, <a href="https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html" target="_blank" rel="noopener">RBJ Audio EQ Cookbook</a></li>
+  <li><a href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf" target="_blank" rel="noopener">ITU-R BS.1770-5 (true peak, Annex 2)</a>, <a href="https://tech.ebu.ch/docs/tech/tech3343.pdf" target="_blank" rel="noopener">EBU Tech 3343</a></li>
+  <li><a href="https://archimago.blogspot.com/2025/08/a-look-at-music-library-how-much.html" target="_blank" rel="noopener">Archimago: true peaks of 107k tracks (electronica: 99 % below +4.2 dBTP)</a>, <a href="https://cdn.mediavalet.com/aunsw/musictribe/2_NUqQYNUUWwJY6ZM2wn8w/RQNWR1o9v0S7uLbTbCNagg/Original/nielsen_lund_2003_overload.pdf" target="_blank" rel="noopener">Nielsen, Lund: overload in signal conversion (codec overshoot)</a></li>
+  <li><a href="https://hajim.rochester.edu/ece/sites/zduan/teaching/ece472/reading/Lipshitz_1992.pdf" target="_blank" rel="noopener">Lipshitz, Wannamaker, Vanderkooy: quantization and dither, JAES 1992</a></li>
+  <li><a href="https://www.ableton.com/en/live-manual/12/audio-fact-sheet/" target="_blank" rel="noopener">Ableton Live 12 audio fact sheet</a>, <a href="https://www.ableton.com/en/live-manual/12/live-audio-effect-reference/" target="_blank" rel="noopener">effect reference</a>, <a href="https://www.ableton.com/en/live-manual/12/live-instrument-reference/" target="_blank" rel="noopener">instrument reference</a></li>
+  <li><a href="https://www.bitwig.com/userguide/bws44-504/on_grid_signals" target="_blank" rel="noopener">Bitwig: Grid signals</a>, <a href="https://www.steinberg.help/r/cubase-9.5-64-bit-double-precision-audio-processing" target="_blank" rel="noopener">Steinberg: 64-bit processing</a>, <a href="https://archive.steinberg.help/nuendo_plugin_reference/v13/en/_shared/topics/plug_ref/distroyer_r.html" target="_blank" rel="noopener">Distroyer</a></li>
+  <li><a href="https://fabfilter.com/help/saturn/using/inputoutput" target="_blank" rel="noopener">FabFilter Saturn 2</a>, <a href="https://www.fabfilter.com/help/pro-l/using/oversampling" target="_blank" rel="noopener">Pro-L 2 oversampling</a>, <a href="https://www.fabfilter.com/help/pro-l/using/truepeaklimiting" target="_blank" rel="noopener">true peak limiting</a>, <a href="https://prod.fabfilter.com/help/pro-q/using/processingmode" target="_blank" rel="noopener">Pro-Q 4 processing modes</a></li>
+  <li><a href="https://www.kvraudio.com/forum/viewtopic.php?p=6736612" target="_blank" rel="noopener">Urs Heckmann on Repro-1</a>, <a href="https://www.kvraudio.com/forum/viewtopic.php?p=8846893" target="_blank" rel="noopener">on Satin</a>, <a href="https://forum.vital.audio/t/getting-best-audio-quality-from-vital/5852" target="_blank" rel="noopener">Vital forum</a></li>
+  <li><a href="https://github.com/avaneev/r8brain-free-src/" target="_blank" rel="noopener">r8brain-free-src</a>, <a href="https://www.meterplugs.com/blog/2017/02/03/does-64-bit-summing-sound-better.html" target="_blank" rel="noopener">MeterPlugs: 64-bit summing</a>, <a href="https://ccrma.stanford.edu/~jos/fp/DC_Blocker.html" target="_blank" rel="noopener">J. O. Smith: DC blocker</a></li>
+  <li>Chromium Web Audio: <a href="https://chromium.googlesource.com/chromium/blink/+/main/Source/platform/audio/UpSampler.cpp" target="_blank" rel="noopener">WaveShaper up-sampler</a>, <a href="https://chromium.googlesource.com/external/Webkit/+/master/Source/WebCore/Modules/webaudio/AudioBufferSourceNode.cpp" target="_blank" rel="noopener">AudioBufferSourceNode (linear interpolation)</a>, <a href="https://chromium.googlesource.com/chromium/blink/+/main/Source/platform/audio/Biquad.cpp" target="_blank" rel="noopener">Biquad</a>, <a href="https://www.w3.org/TR/WebAudio/" target="_blank" rel="noopener">Web Audio spec</a></li>
+  <li>AudioLab: <code>docs/native-mac-picks.md</code> (sound changes need your yes), <code>docs/review-native.md</code> (D2, D4), <code>docs/research-native-mac.md</code> (denormals)</li>
+ </ul>
+</section>
+</div>
+
+<div class="picks"><div><output id="pkLine" aria-label="Your picks line"></output><button class="btn" id="pkStar" type="button">Use the starred picks</button><button class="btn pri" id="pkCopy" type="button">Copy</button></div></div>
+
+<script>
+/*DSP*/
+</script>
+<script>
+var PL=/*PLOTS*/;
+var LAB=/*LAB*/;
+var APP=/*APP*/;
+(function(){
+'use strict';
+var SR=48000,BPM=145,STEP=60/BPM/4,hz=function(p){return 440*Math.pow(2,(p-69)/12)};
+function f2(v){return (v>0?'+':'')+v.toFixed(1)}
+/* ---------------- test signals: each returns {a:Float64Array, b:Float64Array} (or a promise of it) */
+function seqSaw(osc,notes,len,cut,dec){/* notes [step, midi, steps]; a plucked saw line through today's low-pass, mono */
+ var n=Math.round(len*SR),y=new Float64Array(n);
+ notes.forEach(function(q){var s0=Math.round(q[0]*STEP*SR),L=Math.round(q[2]*STEP*SR),r=Math.round(.03*SR),x=osc(hz(q[1]),SR,L+r);
+  for(var i=0;i<L+r&&s0+i<n;i++){var t=i/SR,a=Math.min(1,t/.002)*(Math.exp(-t/dec)*.75+.25);if(i>=L)a*=1-(i-L)/r;y[s0+i]+=x[i]*a}});
+ return AE.rbjLP16(y,SR,cut,0)}
+var LEAD=[];(function(){var m=[81,84,88,86,81,79,81,84,88,91,89,88,86,84,81,79];for(var bar=0;bar<4;bar++)for(var i=0;i<16;i++)LEAD.push([bar*16+i,m[(i+bar*3)%16]+(bar===3&&i>11?5:0),1])})();
+var TESTS={
+ sweep:{what:'A saw sweeping 40 Hz to 6 kHz over 6 s. Listen for whistles that fall while the note rises.',make:function(){var N=SR*6,f=function(i){return 40*Math.pow(150,i/N)};return{a:AE.rbjLP16(AE.sawPolyBlep(f,SR,N),SR,18000,0),b:AE.rbjLP16(AE.sawBlep(f,SR,N),SR,18000,0)}}},
+ lead:{what:'A 145 BPM psy lead from G5 to C7, one saw per note, filter at 9 kHz.',make:function(){var L=64*STEP;return{a:seqSaw(AE.sawPolyBlep,LEAD,L,9000,.12),b:seqSaw(AE.sawBlep,LEAD,L,9000,.12)}}},
+ acid:{what:'A 145 BPM rolling psy bass played by Acid: off the kick (K-B-B-B) on F2 with octave jumps; cut-off 600 Hz, envelope 70 %, resonance 18 dB, drive 65 %.',make:function(){var notes=[],pat=[41,41,53,41,41,44,41,53,41,41,48,41,46,41,53,44];for(var i=0;i<64;i++){if(i%4===0)continue;notes.push([Math.round(i*STEP*SR),Math.round(STEP*.8*SR),pat[i%16],(i%8===2)?1:.8])}
+   var n=Math.round(64*STEP*SR),o={sr:SR,n:n,notes:notes,cut:600,env:70,dec:.14,res:18,dist:65};return{a:AE.acidVoice(o),b:AE.acidVoice(Object.assign({},o,{hq:true}))}}},
+ kick:{what:'The Shrine Legion demo\'s kick (psyzap, tune F1, start 2.6 kHz, drive 45 %, click 60 %) on every beat, 4 bars.',make:function(){var K={len:.24,tune:29,start:2600,sweep:.055,bend:60,tail:14,click:60,drive:45},k1=AE.kick(K,SR,1),k4=AE.kick(K,SR,4),n=Math.round(16*4*STEP*SR),a=new Float64Array(n),b=new Float64Array(n);
+   for(var s=0;s<16;s++){var o=Math.round(s*4*STEP*SR);for(var i=0;i<k1.length&&o+i<n;i++)a[o+i]+=k1[i];for(i=0;i<k4.length&&o+i<n;i++)b[o+i]+=k4[i]}return{a:a,b:b}}},
+ drive:{what:'The psy lead (clean oscillators) through the Drive effect at 60 %. A is the real WaveShaperNode at 4x, as in the app.',make:function(){var x=seqSaw(AE.sawBlep,LEAD,64*STEP,9000,.12);for(var i=0;i<x.length;i++)x[i]*=.5;
+   var k=60*1.5,N=2048,cu=new Float32Array(N);for(var j=0;j<N;j++){var v=j/(N-1)*2-1;cu[j]=(1+k)*v/(1+k*Math.abs(v))}
+   var oc=new OfflineAudioContext(1,x.length,SR),bf=oc.createBuffer(1,x.length,SR);bf.copyToChannel(Float32Array.from(x),0);var s=oc.createBufferSource();s.buffer=bf;var ws=oc.createWaveShaper();ws.curve=cu;ws.oversample='4x';s.connect(ws);ws.connect(oc.destination);s.start();
+   var f=AE.driveCurve(60),F=AE.driveCurveF(60),b=AE.os(x,2,function(u){return AE.shapeADAA(u,f,F)});
+   return oc.startRendering().then(function(r){var a=Float64Array.from(r.getChannelData(0));/* the WaveShaperNode is 192 samples late; line B up with it */var bb=new Float64Array(b.length);bb.set(b.subarray(0,b.length-192),192);return{a:a,b:bb}})}},
+ filter:{what:'The acid line without drive: today\'s cookbook filter re-tuned every 16 samples against a zero-delay-feedback filter tuned every sample.',make:function(){var notes=[],pat=[41,41,53,41,41,44,41,53,41,41,48,41,46,41,53,44];for(var i=0;i<64;i++){if(i%4===0)continue;notes.push([Math.round(i*STEP*SR),Math.round(STEP*.8*SR),pat[i%16],.8])}
+   var n=Math.round(64*STEP*SR),o={sr:SR,n:n,notes:notes,cut:400,env:85,dec:.12,res:21,dist:0};return{a:AE.acidVoice(o),b:AE.acidVoice(Object.assign({},o,{flt:'svf'}))}}},
+ eq:{what:'Pink noise and the lead through a Pro EQ bell at 12 kHz, +6 dB, Q 1. B is the same bell computed at 4x the rate, which follows the analog curve.',make:function(){var n=SR*6,r=AE.rng(3),x=new Float64Array(n),b0=0,b1=0,b2=0;for(var i=0;i<n;i++){var w=r()*2-1;b0=.99765*b0+w*.099;b1=.963*b1+w*.2965;b2=.57*b2+w*1.0526;x[i]=(b0+b1+b2+w*.1848)*.05}
+   var ld=seqSaw(AE.sawBlep,LEAD,n/SR,12000,.12);for(i=0;i<n;i++)x[i]+=ld[i]*.25;
+   function peak(y,fs){var A=Math.pow(10,6/40),w0=2*Math.PI*12000/fs,al=Math.sin(w0)/2,c=Math.cos(w0),a0=1+al/A,B0=(1+al*A)/a0,B1=-2*c/a0,B2=(1-al*A)/a0,A1=-2*c/a0,A2=(1-al/A)/a0,o=new Float64Array(y.length),x1=0,x2=0,y1=0,y2=0;
+    for(var k=0;k<y.length;k++){var v=B0*y[k]+B1*x1+B2*x2-A1*y1-A2*y2;x2=x1;x1=y[k];y2=y1;y1=v;o[k]=v}return o}
+   return{a:peak(x,SR),b:AE.os(x,2,function(u){return peak(u,SR*4)})}}},
+ rs:{what:'A quiet sine sweep from 1 to 16 kHz recorded at 44.1 kHz, played in a 48 kHz engine. Listen for a second tone moving against the sweep.',make:function(){var n0=44100*6,x=new Float64Array(n0),ph=0;for(var i=0;i<n0;i++){var f=1000*Math.pow(16,i/n0);ph+=2*Math.PI*f/44100;x[i]=.3*Math.sin(ph)*Math.min(1,i/2000,(n0-i)/2000)}
+   var n=Math.floor(n0*SR/44100)-64;return{a:AE.resampleLinear(x,44100/SR,n),b:AE.resampleSinc(x,44100/SR,n)}}},
+ pitch:{what:'A bright stab sample (harmonics to 20 kHz) played 7 semitones up, as the Sampler and drum pads do.',make:function(){var n0=Math.round(SR*.5),st=new Float64Array(n0);[57,64,69,72].forEach(function(p){var f=hz(p);for(var k=1;k*f<20000;k++)for(var i=0;i<n0;i++)st[i]+=Math.sin(2*Math.PI*k*f*i/SR+k)/k*.08*Math.exp(-i/SR/.18)});
+   var rate=Math.pow(2,7/12),L=Math.floor(n0/rate)-40,a1=AE.resampleLinear(st,rate,L),b1=AE.resampleSinc(st,rate,L),n=Math.round(32*STEP*SR),a=new Float64Array(n),b=new Float64Array(n),hits=[0,3,6,10,12,14,16,19,22,26,28,30];
+   hits.forEach(function(h){var o=Math.round(h*STEP*SR);for(var i=0;i<L&&o+i<n;i++){a[o+i]+=a1[i];b[o+i]+=b1[i]}});return{a:a,b:b}}},
+ dith:{what:'A tone fading from −70 to −110 dBFS, written at 16 bits, then turned up 48 dB so the noise floor is audible. A is today\'s TPDF; B is the 9-tap shaped dither.',make:function(){var n=SR*6,x=new Float64Array(n);for(var i=0;i<n;i++){var t=i/SR;x[i]=Math.pow(10,(-70-40*t/6)/20)*Math.sin(2*Math.PI*440*t)}
+   var a=AE.quantize(x,16,'tpdf',AE.rng(1)),b=AE.quantize(x,16,'ns9',AE.rng(1));for(i=0;i<n;i++){a[i]*=251;b[i]*=251}return{a:a,b:b,noMatch:true}}}
+};
+/* ---------------- audio */
+var AC=null,MG=null,CUR=null,CACHE={};
+function ctx(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;try{AC=new C({sampleRate:SR})}catch(e){AC=new C()}MG=AC.createGain();MG.connect(AC.destination);setLvl()}if(AC.state!=='running')AC.resume();return AC}
+function setLvl(){var v=+document.getElementById('lvl').value;document.getElementById('lvlO').textContent=(v<0?'−'+(-v):v)+' dB';if(MG)MG.gain.value=Math.pow(10,v/20)}
+document.getElementById('lvl').addEventListener('input',setLvl);
+function rms(x){var s=0;for(var i=0;i<x.length;i++)s+=x[i]*x[i];return Math.sqrt(s/x.length)}
+function prep(k){if(CACHE[k])return Promise.resolve(CACHE[k]);return Promise.resolve(TESTS[k].make()).then(function(r){var c=ctx(),T=Math.pow(10,-22/20),ga=r.noMatch?1:T/Math.max(1e-9,rms(r.a)),gb=r.noMatch?1:T/Math.max(1e-9,rms(r.b)),pk=0;
+  for(var i=0;i<r.a.length;i++)pk=Math.max(pk,Math.abs(r.a[i]*ga));for(i=0;i<r.b.length;i++)pk=Math.max(pk,Math.abs(r.b[i]*gb));var lim=pk>.5?.5/pk:1;
+  function buf(x,g){var n=x.length,b=c.createBuffer(1,n,SR),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=x[i]*g*lim;var f=Math.min(480,n>>2);for(i=0;i<f;i++){d[i]*=i/f;d[n-1-i]*=i/f}return b}
+  CACHE[k]={a:buf(r.a,ga),b:buf(r.b,gb)};return CACHE[k]})}
+function stop(){if(!CUR)return;try{CUR.sa.stop();CUR.sb.stop()}catch(e){}var el=CUR.el;CUR=null;paintAB(el)}
+function play(k,which,el){var c=ctx();var same=CUR&&CUR.k===k;
+ if(same&&which!=='x'&&CUR.w===which){stop();return}
+ if(same){var w=which==='x'?(CUR.w==='a'?'b':'a'):which,t=c.currentTime;CUR.ga.gain.setTargetAtTime(w==='a'?1:0,t,.004);CUR.gb.gain.setTargetAtTime(w==='b'?1:0,t,.004);CUR.w=w;paintAB(el);return}
+ stop();var st=el.querySelector('.st');st.textContent='computing…';
+ setTimeout(function(){prep(k).then(function(B){var c=ctx(),t=c.currentTime+.05,sa=c.createBufferSource(),sb=c.createBufferSource(),ga=c.createGain(),gb=c.createGain();sa.buffer=B.a;sb.buffer=B.b;sa.loop=sb.loop=true;sa.connect(ga);sb.connect(gb);ga.connect(MG);gb.connect(MG);
+  var w=which==='x'?'a':which;ga.gain.value=w==='a'?1:0;gb.gain.value=w==='b'?1:0;sa.start(t);sb.start(t);CUR={k:k,w:w,sa:sa,sb:sb,ga:ga,gb:gb,el:el};paintAB(el)}).catch(function(e){st.textContent='could not compute: '+e.message})},20)}
+function paintAB(el){var on=CUR&&CUR.el===el;el.querySelector('.a').setAttribute('aria-pressed',on&&CUR.w==='a');el.querySelector('.b').setAttribute('aria-pressed',on&&CUR.w==='b');el.querySelector('.st').textContent=on?('playing '+(CUR.w==='a'?'A · today':'B · improved')):''}
+document.getElementById('stopAll').addEventListener('click',stop);
+/* ---------------- plots */
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function plot(cv,spec){var dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth||600,H=cv.clientHeight||170;cv.width=W*dpr;cv.height=H*dpr;var g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+ var L=40,R=8,T=8,B=20,pw=W-L-R,ph=H-T-B,x0=spec.x[0],x1=spec.x[1],y0=spec.y[0],y1=spec.y[1],lx=spec.log;
+ var X=function(v){return L+(lx?Math.log(v/x0)/Math.log(x1/x0):(v-x0)/(x1-x0))*pw},Y=function(v){return T+(1-(Math.max(y0,Math.min(y1,v))-y0)/(y1-y0))*ph};
+ g.font='10px '+css('--fm');g.fillStyle=css('--mut');g.strokeStyle=css('--grid');g.lineWidth=1;
+ spec.yt.forEach(function(v){var y=Y(v);g.beginPath();g.moveTo(L,y+.5);g.lineTo(L+pw,y+.5);g.stroke();g.textAlign='right';g.fillText(v,L-4,y+3)});
+ spec.xt.forEach(function(v){var x=X(v[0]);g.beginPath();g.moveTo(x+.5,T);g.lineTo(x+.5,T+ph);g.stroke();g.textAlign='center';g.fillText(v[1],x,H-6)});
+ if(spec.hline!=null){g.strokeStyle=css('--warn');g.setLineDash([4,3]);g.beginPath();g.moveTo(L,Y(spec.hline)+.5);g.lineTo(L+pw,Y(spec.hline)+.5);g.stroke();g.setLineDash([])}
+ spec.lines.forEach(function(s){g.strokeStyle=s.c;g.lineWidth=s.w||1.3;g.beginPath();s.p.forEach(function(q,i){var x=X(q[0]),y=Y(q[1]);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()})}
+function lin(d){return d.db.map(function(v,i){return[d.f0+(i+.5)*d.df,v]})}
+function lg(d){return d.f.map(function(f,i){return[f,d.db[i]]})}
+var KT=[[0,'0'],[4000,'4k'],[8000,'8k'],[12000,'12k'],[16000,'16k'],[20000,'20k'],[24000,'24k']];
+var PLOTS={
+ osc93:function(){return{x:[0,24000],y:[-160,0],yt:[0,-40,-80,-120,-160],xt:KT,lines:[{c:css('--harm'),w:1.2,p:lin(PL.osc93.harm)},{c:css('--a'),p:lin(PL.osc93.today)},{c:css('--b'),p:lin(PL.osc93.blep)}]}},
+ acid57:function(){return{x:[0,24000],y:[-160,0],yt:[0,-40,-80,-120,-160],xt:KT,lines:[{c:css('--harm'),w:1.2,p:lin(PL.acid57.harm)},{c:css('--a'),p:lin(PL.acid57.today)},{c:css('--b'),p:lin(PL.acid57.hq)}]}},
+ drive4057:function(){return{x:[0,24000],y:[-160,0],yt:[0,-40,-80,-120,-160],xt:KT,lines:[{c:css('--harm'),w:1.2,p:lin(PL.drive4057.harm)},{c:css('--a'),p:lin(PL.drive4057.today)},{c:css('--b'),p:lin(PL.drive4057.hq)}]}},
+ kick:function(){return{x:[0,24000],y:[-140,0],yt:[0,-35,-70,-105,-140],xt:KT,lines:[{c:css('--harm'),w:1.2,p:lin(PL.kick.harm)},{c:css('--a'),p:lin(PL.kick.today)},{c:css('--b'),p:lin(PL.kick.hq)}]}},
+ filter_fm:function(){return{x:[0,24000],y:[-140,0],yt:[0,-35,-70,-105,-140],xt:KT,lines:[{c:css('--a'),p:lin(PL.filter_fm.today)},{c:css('--b'),p:lin(PL.filter_fm.hq)}]}},
+ rs10k:function(){return{x:[0,24000],y:[-160,0],yt:[0,-40,-80,-120,-160],xt:KT,lines:[{c:css('--harm'),w:1.2,p:lin(PL.rs10k.harm)},{c:css('--a'),p:lin(PL.rs10k.today)},{c:css('--b'),p:lin(PL.rs10k.hq)}]}},
+ eq:function(){var f=PL.eq.f;return{log:true,x:[1000,24000],y:[-1,7],yt:[6,4,2,0],xt:[[1000,'1k'],[2000,'2k'],[5000,'5k'],[10000,'10k'],[15000,'15k'],[20000,'20k']],lines:[{c:css('--a'),p:f.map(function(v,i){return[v,PL.eq.rbj[i]]})},{c:css('--b'),p:f.map(function(v,i){return[v,PL.eq.analog[i]]})}]}},
+ lim:function(){var t=function(a){return a.map(function(v,i){return[i*.01,v]})};return{x:[0,4],y:[-3,.5],yt:[0,-1,-2,-3],xt:[[0,'0 s'],[1,'1'],[2,'2'],[3,'3'],[4,'4 s']],hline:-.3,lines:[{c:css('--a'),p:t(PL.lim.today)},{c:css('--b'),p:t(PL.lim.tp4clip)}]}},
+ dith:function(){return{log:true,x:[20,24000],y:[-180,-110],yt:[-110,-130,-150,-170],xt:[[100,'100'],[1000,'1k'],[5000,'5k'],[10000,'10k'],[20000,'20k']],lines:[{c:css('--a'),p:lg(PL.dith.tpdf)},{c:css('--b'),p:lg(PL.dith.ns9)},{c:css('--mut'),w:1,p:lg(PL.dith.ns)}]}}
+};
+var PKEY={osc93:['aliasing today: A6 saw (1760 Hz), 2-point PolyBLEP','aliasing clean: table BLEP'],acid57:['aliasing today: Acid A3, drive at 1x','aliasing clean: 2x, ADAA, BLEP, ZDF'],drive4057:['aliasing today: Drive 60 % on 4 kHz, WaveShaper 4x','aliasing clean: 4x + ADAA'],kick:['error today: demo kick, first 30 ms, tanh at 1x','error clean: tanh at 4x'],
+ filter_fm:['today: cut-off swept at 300 Hz, coefficients per 16','ZDF SVF per sample'],rs10k:['false tones today: 10 kHz at 44.1 kHz played at 48 kHz, linear','clean: sinc, 32 zero crossings'],eq:['today: bell 12 kHz +6 dB Q 1 at 48 kHz','the analog curve'],lim:['today: true peak per 10 ms after al-limit (−0.3 dB ceiling)','clean: BS.1770 4x detection + 4x clip'],dith:['today: TPDF noise floor','clean: 9-tap shaped (grey: today\'s first-order)']};
+/* ---------------- options */
+var G=[['keep','How old projects keep their sound','Your rule: the sound never changes without your yes. These two decide how every option below is switched on.'],['alias','Anti-aliasing','False tones from oscillators and distortion. They are worst on high notes and hard drive, and they are what makes a digital lead sound harsh or glassy.'],['filt','Filters and EQ','How the synth filter moves and how the EQ behaves near the top of the range.'],['sum','Summing, DC and denormals','Precision of the mix bus and the offsets that waste headroom.'],['rs','Sample-rate conversion','Every place where audio at one rate is played at another rate.'],['out','True peak, export and dither','What reaches your DAC and your files.']];
+/* [id, group, title, desc, stars, test, plot, measured, cpu, old, where[], who, [before, after, unit, worse-is-higher]] */
+var O=[
+ ['Q0a','keep','A Quality switch on each instrument and effect','Each device gets Quality: Classic (today\'s exact bits) or Clean. A project made before this keeps Classic everywhere; a device you add later starts in Clean. You can switch the whole project to Clean in one step and back with undo.',5,null,null,'—','none','none; old projects open unchanged and render the same bits',['web','nat'],'the engine lane (proposed, see the doc)'],
+ ['Q0b','keep','One project-wide engine quality instead','One setting per project: Classic or Clean for every device at once. Simpler, but you cannot keep one device\'s old character while cleaning the rest.',3,null,null,'—','none','none',['web','nat'],'lane B (Settings) + engine lane'],
+ ['Q1','alias','Clean oscillators in the pooled synth','Plant, the basic synths, Acid and Wavetable run in one engine (al-poly). It plays the demo\'s bass, lead, pads and plucks. Its saw and square use a 2-point PolyBLEP. A table BLEP (a band-limited step from a windowed sinc, 16 zero crossings) removes the aliasing; the triangle gets the matching BLAMP.',5,['sweep','lead'],'osc93','below 16 kHz: −55 dB (A1) to −39 dB (A7) → −142 to −123 dB; whole band −50 to −31 → −100 to −80 dB','the same at bass pitches (10.5 ns per sample); 2.4x for the oscillator at 3 kHz; one voice with its filter about 5 to 25 % more (estimate)','changes the sound: a high saw loses its glassy edge. Behind the Quality switch',['web','nat'],'engine lane, then NB port',[-43,-129,'dB','lo']],
+ ['Q2','alias','Acid drive at 2x with antiderivative anti-aliasing','Acid\'s drive is a hard clip and then tanh, at 8 to 9 times gain, at the engine rate. It is the loudest source of aliasing in the demo. Run the Acid voice at 2x, use first-order ADAA on the drive, and come back down through a 47-tap half-band, as Psy Bass already does.',5,'acid','acid57','below 16 kHz: −52 (A1), −49 (A2), −45 (A3), −43 dB (A4) → −104, −102, −99, −96 dB. ADAA alone at 1x gives about 10 dB.','2.9x the Acid voice: 73 → 211 ns per sample, which is 0.35 % → 1.0 % of a core per voice; latency 0.25 ms inside the voice','changes the sound: a smoother, less fizzy top on the squelch. Behind the Quality switch',['web','nat'],'engine lane, then NB port',[-49,-102,'dB','lo']],
+ ['Q3','alias','Kick and drum pads rendered at 4x','The kick designer bends a sine from 2.6 kHz down to F1 and drives it through tanh at 8x gain, at the engine rate. The first milliseconds alias, and that is the click you hear. The kick is rendered once into a buffer, so 4x costs nothing while the song plays. The same applies to percussion pads and Growl.',4,'kick','kick','first 30 ms against a 32x reference: −20 dB → −60 dB (4x), −51 dB (2x)','only when the sound is rendered: 1.3 → 11.5 ms per kick sound, once, then cached','changes the attack slightly. Behind the Quality switch',['web','nat'],'engine lane',[-20,-60,'dB','lo']],
+ ['Q4','alias','Drive effect: ADAA on top of 4x, and no hard edge','The Drive effect\'s curve (1+k)x/(1+k|x|) has a sharp knee at high drive, so 4x is not enough on leads. Add ADAA in a worklet. Also extend the curve beyond ±1, as the Soft Clipper does, so input above 0 dBFS no longer hits a hard clip.',3,'drive','drive4057','drive 60 %: 2.5 kHz −40 → −56 dB, 4 kHz −34 → −56 dB. Drive 100 % at +3 dBFS stays at −25 dB (the hard edge); with the curve extended it improves (estimate).','a worklet instead of the built-in node: 4x plus ADAA measured 575 ns per sample in this unoptimised lab; an optimised polyphase version is estimated at 60 to 120 ns','changes the sound at high drive. Behind the Quality switch',['web','nat'],'engine lane',[-34,-56,'dB','lo']],
+ ['Q5','alias','Oversample the remaining shapers','These shapers have no oversampling today: the Timeless delay\'s tanh in its feedback, the Auto Filter\'s drive, the Grid\'s crush, the tom kit, Acid\'s fallback path and the live safety limiter. On the Soft Clipper, the step from none to 4x is worth about 40 dB.',3,null,null,'Soft Clipper on a 2.5 kHz tone: none −40 dB, 2x −66 dB, 4x −83 dB','the browser\'s own 4x (native code); small. Not measured per device','changes the sound slightly. Behind the Quality switch',['web','nat'],'engine lane',[-40,-83,'dB','lo']],
+ ['Q6','filt','A zero-delay-feedback filter in the pooled synth','al-poly\'s low-pass is a cookbook biquad re-tuned every 16 samples. A trapezoidal state-variable filter (Simper, Zavalishin), tuned every sample, sweeps more smoothly and keeps its resonance under fast envelopes. Psy Bass and Sub already use one. At a fixed cut-off the two give the same response.',2,'filter','filter_fm','fast acid envelope: the two differ by −39 dB (mostly topology, not artefacts); cut-off modulated at 300 Hz: −8 dB, but al-poly cannot modulate that fast today','20 ns per sample per stage against 7 (2.8x for the filter alone)','changes the character of sweeps slightly. Behind the Quality switch',['web','nat'],'engine lane',null],
+ ['Q7','filt','Pro EQ: the analog curve up to 20 kHz','The cookbook bell squeezes towards Nyquist. A 12 kHz air boost of +6 dB is 1.4 dB short at 15 kHz and 2.3 dB short at 18 kHz, so it sounds narrower and duller than the curve you drew. A matched design (Vicanek 2016, or the bell computed at 2x) follows the analog curve with no latency, as Pro-Q\'s Zero Latency mode does.',3,'eq','eq','bell 12 kHz +6 dB Q 1 at 48 kHz: −1.4 dB at 15 kHz, −2.3 at 18 kHz; at 44.1 kHz −1.8 and −2.7; 16 kHz bell: −3.4 at 20 kHz → about 0 (matched)','the same multiplies per sample, but in a worklet instead of BiquadFilterNode (that node takes no coefficients)','changes existing high bands. Per-band or per-device Quality',['web','nat'],'engine lane (DSP), lane E (the drawn curve)',[2.3,0,'dB short','lo']],
+ ['Q8','filt','Pro EQ: true Butterworth slopes','The 24 and 48 dB/oct pass filters are stacked Q 0.707 stages. They read −6 and −12 dB at the drawn frequency, where a Butterworth reads −3 dB, and they start bending an octave earlier. That is a Linkwitz-Riley shape, which is a fine choice, but the handle sits in a different place. Either use Butterworth Q values or label the handle "−6 dB".',1,null,null,'24 dB/oct at its frequency −6.1 dB (Butterworth −3.0); an octave below −0.6 dB (−0.0); 48 dB/oct −12.1 dB','none','changes existing cuts. Behind the Quality switch, or only a label',['web','nat'],'engine lane, lane E',null],
+ ['Q9','sum','64-bit summing','Measured: a 64-track mix in Web Audio\'s 32-bit float differs from a 64-bit sum by −152 dBFS rms (peak −133 dBFS), against a −16 dBFS mix. That is 136 dB down and 14 dB under one 24-bit step. Ableton sums at 64-bit, but the gain here is not measurable at a DAC. In the native engine it would also break the bit-for-bit match with the web engine.',0,null,null,'error −152.5 dBFS rms; one float32 rounding of the exact result alone −168 dBFS','a double accumulator per bus (small) in the native engine only','would change the last bits of every project, for nothing audible',['nat'],'—',null],
+ ['Q10','sum','DC blocker after asymmetric shapers','The Soft Clipper\'s bias makes the output carry its own offset, a slow thump that follows the envelope. It eats headroom and pushes the limiter on one side. A 5 Hz DC blocker after the shaper fixes it, as Cubase\'s Distroyer does. It costs almost nothing. Native engine: flush-to-zero stays off for AudioLab\'s devices to keep the bits (research NB, E3).',3,null,null,'bias 25 %: DC −24 dBFS, bias 50 %: −18 dBFS (0 %: −80 dBFS) → under −90 dBFS','2 multiplies per sample','changes projects that use bias (more headroom, the same tone). Behind the Quality switch',['web','nat'],'engine lane',[-24,-90,'dBFS DC','lo']],
+ ['Q11','rs','Resample once, with a sinc, when a buffer is loaded','Chromium plays a buffer at another rate by linear interpolation. Today that happens to the built-in drum and sampler sounds (made at 44.1 kHz), bounce-in-place (rendered at 44.1 kHz), stem-splitter results (44.1 kHz), and every audio clip when you export at a rate other than the engine\'s. Convert each one once in a worker with a 32-zero-crossing Kaiser sinc and keep it. At 48 kHz the false tones fall in the audible band; at 96 kHz most of them are ultrasonic.',5,'rs','rs10k','44.1 → 48 kHz: a 1 kHz tone −62 dB, 5 kHz −34 dB, 10 kHz −20 dB, 15 kHz −11 dB → −120, −117, −117, −112 dB','none while playing; once per buffer in the background (334 ns per sample in this unoptimised lab, about 8 s for a 4-minute stereo file; an optimised worker an estimated 1 to 2 s)','cleaner hats and cymbals in every project that uses these buffers. Project-wide: Classic or Clean',['web','nat'],'engine lane; NB: the native engine resamples on load the same way',[-20,-117,'dB','lo']],
+ ['Q12','rs','Pitched samples with a proper interpolator','The Sampler, drum pads and the grain instruments (grain, emit, vgrain) read samples by linear interpolation. A polyphase windowed-sinc read (or at least 4-point cubic) in a worklet removes the false tones when you pitch up. Ableton calls this Hi-Q.',4,'pitch',null,'+7 semitones: a 1 kHz partial −64 dB, 5 kHz −36 dB, 10 kHz −22 dB → −121, −119, −113 dB (sinc). Cubic: estimated −50 to −60 dB (not measured)','a sinc read is roughly 30 times the work of a linear read per voice (estimate 60 to 100 ns per sample per voice); cubic about 2 times','changes pitched samples. Behind the Quality switch',['web','nat'],'engine lane',[-22,-113,'dB','lo']],
+ ['Q13','out','True-peak limiter: BS.1770 detection and an oversampled final clip','The Limiter\'s "true peak" mode estimates the peaks between samples with a 4-point cubic, then hard-clips at the sample level. That clip creates new peaks between samples. On the demo\'s Climax pushed into it, the output read +0.13 dBTP against a −0.3 dB ceiling, with 19 to 23 overs a second. Your DAC\'s reconstruction filter and every MP3 or AAC made from the file see those overs (an MP3 at 320 kbps adds about 1.7 dB). Use the meter\'s own BS.1770 filter for detection and a 4x oversampled clip at the end.',5,null,'lim','true peak +0.13 dBTP (19 overs/s; tp off +0.54; Aggressive +0.25 with 48/s) → −0.28 dBTP, 0.3 to 0.5 overs/s; 0.2 dB less loud (−7.0 → −7.2 dBFS rms)','detection 69 → 120 ns per sample; the oversampled clip is about 1 µs naive, estimated 150 ns optimised; latency +26 samples (0.5 ms), reported for delay compensation','changes the limiter\'s output. A new style "True peak 4x"; the old mode stays',['web','nat'],'engine lane; lane E (the meter shares the filter)',[0.13,-0.28,'dBTP','lo']],
+ ['Q14','out','The export safety limiter: a real limiter','The export option "Keeps the exported file from clipping" is on by default. It is a DynamicsCompressor (ratio 20, 1 ms attack), not a brickwall. Pushed 6 and 10 dB, the demo came out at +0.69 and +1.36 dBFS, and a 16 or 24-bit file then clips hard. Replace it with the true-peak limiter (Q13) at −1 dBTP, the EBU ceiling.',5,null,null,'sample peak +0.69 / +1.36 dBFS (true peak +0.88 / +1.43 dBTP) → at or below −1 dBTP','export only','changes exports only where today\'s file would clip',['web','nat'],'engine lane',[1.36,-1,'dBFS','lo']],
+ ['Q15','out','An export report: true peak, overs, clipped samples','After every export, measure the file as written: true peak (the meter\'s BS.1770 code), integrated loudness, the number of clipped samples, inter-sample overs. Show one line, with a warning when anything is over. The sound is not touched.',4,null,null,'today the export reports nothing about overs','one pass over the file (the meter already runs faster than real time)','none',['web','nat'],'lane E (meter) + lane F (the notice)',null],
+ ['Q16','out','Shaped dither for 16-bit files','Today\'s TPDF is correct. A 9-tap F-weighted shaper (Wannamaker 1992, the idea behind POW-r 3) moves the noise from 1 to 5 kHz, where hearing is most sensitive, to above 15 kHz. It is only for 16-bit exports. At 24 bits dither sits near −141 dBFS, under any DAC, and the choice does not matter.',2,'dith','dith','noise 1 to 5 kHz −143 → −162 dB per bin (19 dB lower); 15 to 20 kHz −143 → −127; total power higher','none','a new choice in the dither menu; old exports unchanged',['web','nat'],'lane B (export settings) + engine lane',[-143,-162,'dB/bin','lo']]
+];
+function stars(n){return n?('★★★★★'.slice(0,n)+'<span style="opacity:.25">'+'★★★★★'.slice(0,5-n)+'</span>'):'not recommended'}
+function rec(o){return o[4]>=4?'a':o[4]===3?'b':'c'}
+var st={},KEY='ae1-picks';try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){st={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function ba(o){var b=o[12];if(!b)return'';var a=b[0],c=b[1],u=b[2],lo=Math.min(a,c,-140)<0&&u.indexOf('dB')===0&&a<0;
+ var sc=function(v){if(u==='dB'||u==='dB/bin'||u==='dBFS DC')return Math.max(2,(v+170)/170*100);return Math.max(2,Math.min(100,(v+2)/4*100))};
+ return '<div class="ba"><div class="r"><span>today</span><div class="t"><i style="width:'+sc(a)+'%;background:var(--a)"></i></div><span>'+f2(a)+' '+u+'</span></div><div class="r"><span>clean</span><div class="t"><i style="width:'+sc(c)+'%;background:var(--b)"></i></div><span>'+f2(c)+' '+u+'</span></div></div>'}
+document.getElementById('groups').innerHTML=G.map(function(g){return '<div class="group"><div class="gh"><h3>'+g[1]+'</h3><span class="mut sm">'+g[2]+'</span></div><div class="opts">'+O.filter(function(o){return o[1]===g[0]}).map(function(o){
+  var ab=o[5]?[].concat(o[5]).map(function(t){return '<div class="ab" data-t="'+t+'"><span class="what">'+TESTS[t].what+'</span><div class="row"><button type="button" class="a" aria-pressed="false">A · today</button><button type="button" class="b" aria-pressed="false">B · clean</button><button type="button" class="x">A⇄B</button><span class="st"></span></div></div>'}).join(''):'';
+  var pl=o[6]?'<canvas class="plot" data-p="'+o[6]+'" role="img" aria-label="'+PKEY[o[6]][0]+' against '+PKEY[o[6]][1]+'"></canvas><div class="key"><span><i style="background:var(--a)"></i>'+PKEY[o[6]][0]+'</span><span><i style="background:var(--b)"></i>'+PKEY[o[6]][1]+'</span>'+(PL[o[6]]&&PL[o[6]].harm?'<span><i style="background:var(--harm)"></i>'+(o[6]==='kick'?'the kick itself':'the note itself')+'</span>':'')+'</div>':'';
+  return '<div class="opt'+(o[4]>=4?' rec':'')+'"><div class="top"><span class="id">'+o[0]+'</span><h3>'+o[2]+'</h3><span class="stars'+(o[4]?'':' no')+'">'+stars(o[4])+'</span></div><p>'+o[3]+'</p>'+ba(o)+ab+pl+
+   '<dl><dt>Measured</dt><dd>'+o[7]+'</dd><dt>CPU</dt><dd>'+o[8]+'</dd><dt>Old projects</dt><dd>'+o[9]+'</dd><dt>Engine</dt><dd><span class="where">'+o[10].map(function(w){return '<span class="chip '+w+'">'+(w==='web'?'web engine now':'native engine')+'</span>'}).join('')+'</span></dd><dt>Who</dt><dd>'+o[11]+'</dd></dl>'+
+   '<div class="choose" data-id="'+o[0]+'">'+[['a','Now'],['b','Later'],['c','No']].map(function(k){return '<button type="button" id="c_'+o[0]+k[0]+'" data-k="'+k[0]+'" aria-pressed="false">'+(rec(o)===k[0]?'★ ':'')+k[1]+'</button>'}).join('')+'</div></div>'}).join('')+'</div></div>'}).join('');
+function line(){var p=O.map(function(o){return o[0]+(st[o[0]]||'?')}).join(' ');var n=(st.note||'').trim().replace(/\s+/g,' ');return 'AE1 picks: '+p+(n?' | note: '+n:'')}
+function paint(){O.forEach(function(o){['a','b','c'].forEach(function(k){document.getElementById('c_'+o[0]+k).setAttribute('aria-pressed',st[o[0]]===k?'true':'false')})});document.getElementById('pkLine').textContent=line()}
+document.getElementById('groups').addEventListener('click',function(e){var b=e.target.closest('.choose button');if(b){st[b.parentNode.dataset.id]=b.dataset.k;save();paint();return}
+ var p=e.target.closest('.ab button');if(p){var el=p.closest('.ab');play(el.dataset.t,p.classList.contains('a')?'a':p.classList.contains('b')?'b':'x',el)}});
+var fn=document.getElementById('fNote');fn.value=st.note||'';fn.addEventListener('input',function(){st.note=fn.value;save();document.getElementById('pkLine').textContent=line()});
+document.getElementById('pkStar').addEventListener('click',function(){O.forEach(function(o){st[o[0]]=rec(o)});save();paint()});
+document.getElementById('pkCopy').addEventListener('click',function(){var t=line(),b=this,done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+ var fall=function(){var r=document.createRange();r.selectNodeContents(document.getElementById('pkLine'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Copy on your keyboard';setTimeout(function(){b.textContent='Copy'},2600)};
+ try{navigator.clipboard.writeText(t).then(done,fall)}catch(e){fall()}});
+paint();
+function drawAll(){[].forEach.call(document.querySelectorAll('canvas.plot'),function(cv){try{plot(cv,PLOTS[cv.dataset.p]())}catch(e){}})}
+drawAll();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(drawAll,120)});
+/* ---------------- tables */
+function tbl(id,head,rows){document.getElementById(id).innerHTML='<thead><tr>'+head.map(function(h){return '<th>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return i?'<td class="n'+(typeof c==='object'&&c&&c.cl?' '+c.cl:'')+'">'+(typeof c==='object'&&c?c.v:c)+'</td>':'<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>'}
+var NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],nm=function(p){return NN[p%12]+(Math.floor(p/12)-1)};
+tbl('tOsc',['Pooled-synth saw','Hz','App, whole band','App, below 16 kHz','Port','Table BLEP','BLEP below 16 kHz','2x PolyBLEP'],LAB.osc.map(function(r){return[nm(r.note),r.hz.toFixed(0),{v:r.app.toFixed(1),cl:'bad'},{v:r.app16.toFixed(1),cl:'bad'},r.today.toFixed(1),{v:r.blep.toFixed(1),cl:'ok'},{v:r.blep16.toFixed(1),cl:'ok'},r.pb2x.toFixed(1)]}));
+tbl('tAcid',['Acid (drive 55 %)','App','Port','ADAA 1x','2x','2x + ADAA','Clean (2x, BLEP, ZDF, ADAA)','below 16 kHz: today','below 16 kHz: clean'],LAB.acid.map(function(r){return[nm(r.note),{v:r.app.toFixed(1),cl:'bad'},r.today.toFixed(1),r.adaa1x.toFixed(1),r['2x'].toFixed(1),r['2xadaa'].toFixed(1),{v:r.hq.toFixed(1),cl:'ok'},{v:r.today16.toFixed(1),cl:'bad'},{v:r.hq16.toFixed(1),cl:'ok'}]}));
+var M=[];
+LAB.drive.forEach(function(r){M.push(['Drive '+r.drive+' %, '+r.f0+' Hz sine','app '+(r.app!=null?r.app.toFixed(1):'–'),'port 4x '+r['4x'].toFixed(1),'1x '+r['1x'].toFixed(1),{v:'4x+ADAA '+r['4xadaa'].toFixed(1),cl:'ok'},'8x '+r['8x'].toFixed(1)])});
+APP.clip.forEach(function(r){M.push(['Soft Clipper tanh +12 dB, '+r.f0+' Hz, '+r.os,'app '+r.alias_db.toFixed(1),'','','',''])});
+LAB.resample.forEach(function(r){M.push([r.case+', '+r.f0+' Hz','app '+(r.app!=null?r.app.toFixed(1):'–'),'linear port '+r.lin.toFixed(1),'',{v:'sinc '+r.sinc.toFixed(1),cl:'ok'},''])});
+APP.resample.filter(function(r){return r.case.indexOf('decode')===0}).forEach(function(r){M.push(['decodeAudioData 44.1 → 48 kHz, '+r.f0+' Hz',{v:'app '+r.alias_db.toFixed(1),cl:'ok'},'','','',''])});
+APP.limit.forEach(function(r){M.push(['Limiter push +'+r.push+' dB, '+r.style+(r.tp!=null?(r.tp?', tp on':', tp off'):''),'sample peak '+r.sample_peak.toFixed(2),{v:'true peak '+r.tp16.toFixed(2)+' dBTP',cl:r.tp16>-.3?'bad':''},r.overs_per_s!=null?r.overs_per_s.toFixed(1)+' overs/s':'','',''])});
+LAB.limit.forEach(function(r){M.push(['Lab limiter push +'+r.push+' dB, '+r.mode,'sample peak '+r.sample_peak.toFixed(2),{v:'true peak '+r.tp16.toFixed(2)+' dBTP',cl:r.tp16>-.3?'bad':'ok'},r.overs_per_s.toFixed(1)+' overs/s','rms '+r.rms_db.toFixed(2),''])});
+M.push(['Summing 64 tracks (app)','mix '+APP.sum.mix_rms_db.toFixed(1)+' dBFS rms',{v:'error '+APP.sum.err_rms_db.toFixed(1)+' dBFS rms',cl:'ok'},'peak '+APP.sum.err_peak_db.toFixed(1),'','']);
+APP.dc.forEach(function(r){M.push(['Soft Clipper bias '+r.bias+' %, 110 Hz','DC '+r.dc_db.toFixed(1)+' dBFS','','','',''])});
+LAB.dither.forEach(function(r){M.push(['Dither '+r.mode+', 16 bit','total '+r.total_db.toFixed(1)+' dBFS','1–5 kHz '+r.b1_5k.toFixed(1)+' dB/bin','15–20 kHz '+r.b15_20k.toFixed(1),'',''])});
+tbl('tMisc',['Case','','','','',''],M);
+})();
+</script>

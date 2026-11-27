@@ -1,0 +1,48 @@
+saw  33  app  -50.0  port  -50.0  | BLEP  -99.7  2x PolyBLEP  -70.2   (<16k: app  -54.9 BLEP -142.1)
+saw  45  app  -47.0  port  -47.0  | BLEP  -96.6  2x PolyBLEP  -67.1   (<16k: app  -51.9 BLEP -139.0)
+saw  57  app  -43.9  port  -43.9  | BLEP  -93.6  2x PolyBLEP  -64.0   (<16k: app  -49.0 BLEP -134.5)
+saw  69  app  -40.9  port  -40.9  | BLEP  -90.6  2x PolyBLEP  -61.0   (<16k: app  -45.7 BLEP -131.5)
+saw  81  app  -37.8  port  -37.8  | BLEP  -87.6  2x PolyBLEP  -57.9   (<16k: app  -43.0 BLEP -128.6)
+saw  88  app  -35.9  port  -35.9  | BLEP  -85.1  2x PolyBLEP  -56.1   (<16k: app  -41.5 BLEP -126.1)
+saw  93  app  -34.5  port  -34.5  | BLEP  -85.7  2x PolyBLEP  -54.8   (<16k: app  -40.6 BLEP -126.1)
+saw 100  app  -32.6  port  -32.6  | BLEP  -89.5  2x PolyBLEP  -52.7   (<16k: app  -39.5 BLEP -123.4)
+saw 105  app  -31.2  port  -31.2  | BLEP  -80.2  2x PolyBLEP  -52.1   (<16k: app  -39.0 BLEP -123.1)
+   <16k: today  -51.8 ADAA1x  -62.5 2x+ADAA -104.4 HQ -106.6
+acid 33 app  -45.3 port  -45.3 | ADAA 1x  -51.3  2x  -59.6  2x+ADAA  -60.6  HQ(2x,BLEP,SVF,ADAA)  -60.6  4x  -59.7
+   <16k: today  -48.8 ADAA1x  -59.6 2x+ADAA -101.5 HQ -103.8
+acid 45 app  -42.3 port  -42.3 | ADAA 1x  -48.3  2x  -56.5  2x+ADAA  -57.5  HQ(2x,BLEP,SVF,ADAA)  -57.5  4x  -56.7
+   <16k: today  -44.7 ADAA1x  -55.2 2x+ADAA  -98.5 HQ -100.7
+acid 57 app  -37.7 port  -37.7 | ADAA 1x  -43.5  2x  -50.5  2x+ADAA  -51.6  HQ(2x,BLEP,SVF,ADAA)  -51.5  4x  -50.7
+   <16k: today  -42.6 ADAA1x  -53.1 2x+ADAA  -95.8 HQ -101.3
+acid 69 app  -34.8 port  -34.8 | ADAA 1x  -40.5  2x  -49.6  2x+ADAA  -50.7  HQ(2x,BLEP,SVF,ADAA)  -50.6  4x  -49.9
+drive 2531 Hz d60: app(WaveShaper 4x) -39.8  1x  -18.3  4x  -40.1  4x+ADAA  -56.3  8x  -52.0
+drive 4057 Hz d60: app(WaveShaper 4x) -34.4  1x  -14.6  4x  -34.6  4x+ADAA  -56.1  8x  -46.2
+drive 5003 Hz d100: app(WaveShaper 4x) -26.2  1x  -10.3  4x  -22.6  4x+ADAA  -25.1  8x  -24.4
+drive 1013 Hz d30: app(WaveShaper 4x) -63.6  1x  -30.2  4x  -48.7  4x+ADAA  -49.1  8x  -48.9
+kick 2x -51.0
+kick: first 30 ms against a 32x reference: 1x -19.9 dB, 4x -59.5 dB, 8x -67.0 dB
+filter env sweep: RBJ per 16 vs SVF -38.6 dB, RBJ per sample vs SVF -43.3 dB; audio-rate cut-off FM: -7.7 dB
+bell 12000_6_1_48000: RBJ - analog at 15k -1.41 dB, 18k -2.28, 20k -2.32
+bell 16000_6_1_48000: RBJ - analog at 15k -0.40 dB, 18k -1.58, 20k -3.35
+bell 12000_6_1_44100: RBJ - analog at 15k -1.81 dB, 18k -2.70, 20k -2.62
+bell 10000_4_0.7_48000: RBJ - analog at 15k -0.98 dB, 18k -1.44, 20k -1.55
+Pro EQ low-pass 24 dB/oct at its frequency: -6.11 dB (Butterworth -3.01); one octave below -0.57 dB (Butterworth -0.02)
+Pro EQ low-pass 48 dB/oct at its frequency: -12.13 dB (Butterworth -3.01); one octave below -1.10 dB (Butterworth -0.00)
+44.1k->48k  1000 Hz: app -62.4  linear port  -62.4  sinc -119.9
+44.1k->48k  5000 Hz: app -33.9  linear port  -33.9  sinc -117.1
+44.1k->48k 10000 Hz: app -20.4  linear port  -20.4  sinc -117.4
+44.1k->48k 15000 Hz: app -11.1  linear port  -11.1  sinc -112.0
++7 st  1000 Hz: app -63.9  linear port  -63.9  sinc -121.2
++7 st  5000 Hz: app -35.5  linear port  -35.5  sinc -119.2
++7 st 10000 Hz: app -22.2  linear port  -22.2  sinc -113.2
+limiter push 6 today    sample  -0.30  TP16   0.13 dBTP  overs  19.4/s  rms  -6.98
+limiter push 6 tp4      sample  -0.40  TP16  -0.19 dBTP  overs   2.4/s  rms  -7.10
+limiter push 6 tp4clip  sample  -0.33  TP16  -0.28 dBTP  overs   0.3/s  rms  -7.20
+limiter push 10 today    sample  -0.30  TP16   0.13 dBTP  overs  23.4/s  rms  -6.81
+limiter push 10 tp4      sample  -0.40  TP16  -0.19 dBTP  overs   2.9/s  rms  -6.94
+limiter push 10 tp4clip  sample  -0.33  TP16  -0.26 dBTP  overs   0.5/s  rms  -7.04
+dither off  total -102.5 dBFS, noise density 1-5 kHz -150.0, 15-20 kHz -155.4 dB/bin
+dither tpdf total  -96.3 dBFS, noise density 1-5 kHz -143.1, 15-20 kHz -143.2 dB/bin
+dither ns   total  -93.3 dBFS, noise density 1-5 kHz -150.8, 15-20 kHz -137.9 dB/bin
+dither ns9  total  -77.9 dBFS, noise density 1-5 kHz -162.1, 15-20 kHz -127.1 dB/bin
+written; plots.json 47 kB
