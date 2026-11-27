@@ -83,3 +83,9 @@ Regenerate: `python3 extract_geom.py && node render.js && python3 shrink.py && p
 3. **Picker**: add every pick to `desktop/icon-assets/picker/` (512 px PNG plus a 128 px thumb) and to `icons.json` as a new group "Science style" with plain names (for example "Instrument dial, Chart amber"), default stays marked.
 4. Run the "Mac icon proof" job on macOS 26 with the new tile colour as the expected value (it checks Default and Dark), and `tools/ui-tests/taskAH_electron.js`.
 5. App version, update note ("New app icon ... log out and in once if the old one still shows"), desktop build.
+
+## The user's picks (27 November 2026, 18:09 Brussels)
+
+In the user's words: "For the logo, I like the I7 dipole field, and for the colors, I like P2 Orbit Night, and I like P8 Chart Paper. Just make sure that the field in the center ... should be centered with a circle. So you have the yellow circle of the logo, and the field should be perfectly around that as if it's the Earth. Let's also use the porthole. That's I4. And let's pick W7 with measurements [I5]. We're going to maybe use some elements from there as well. ... I do like the fine particles [I12]. We might use that later for an animated version."
+
+So: designs **I7** (dipole field, the field lines centred exactly on the yellow nucleus like Earth's field around the planet), **I4** (porthole) and **I5** (W7 with measurements, elements to borrow); palettes **P2** Orbit night and **P8** Chart paper; **I12** fine particles kept for a later animated icon. Next: a refinement round (task IC3) combining these before anything ships.
