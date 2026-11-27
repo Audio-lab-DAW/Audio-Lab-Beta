@@ -1,7 +1,7 @@
 {
-  "version": "0.235",
-  "sha256": "76ed7ad43ebae35476d33cb64433a08bd9e1eb7916374c1e75b18631483bb3d3",
-  "size": 6026624,
+  "version": "0.236",
+  "sha256": "27c6fd192cc4510f615694ab71f1a7779f01e7f7a78fe55292308eace1a4002e",
+  "size": 6030161,
   "minShell": "0.147.0",
   "notes": "MIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings."
 }

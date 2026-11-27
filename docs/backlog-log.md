@@ -4095,3 +4095,25 @@ No app changes: `index.html` and `desktop/` untouched, no version. Running list:
 
 ### Next
 - N3d (sends, groups, returns, the master's chain; joining the mixer and the core), or the FFT family (pitch shifter, pitch corrector, resonance suppressor: `atan2`, `hypot`, the FFT), whichever run comes first; N2c when the design chain allows `index.html` work.
+
+
+## 27 November 2026, v0.236: settings step S3, what was out of sync is in sync (task ST-S3)
+Third step of the settings rebuild (`docs/settings-round-1.md`, S3, no dependencies; audit `docs/settings-audit.md` section 6: "Mono check, swap: Settings to mixer changes the sound but the master strip buttons keep their old state", "Follow: the menu has 6 choices, Settings 4 ... the command does not refresh an open Settings window", "Visualizer: the header's X and select do not refresh Settings"). No other task had index.html work in progress: the last release was v0.235 of FT-C1b (14:13 UTC), this run started on top of it, so the version is 0.236.
+
+### Built
+- **Mono and L↔R**: `monSet` is wrapped once to call `monPaint`, so every change (Settings, the strip, a reset, an import) repaints the master strip buttons; the mixer to Settings direction already worked. In Settings the two ticks are now exclusive as on the strip (ticking Mono unticks swap and the other way round); before, both could be on and swap was silently ignored. Help lines: Mono mentions it is the same switch as the strip's Mono; Swap left and right got its first help line. The sound is the same: `monSet` sets the same gains as before.
+- **Follow, six ways in both places**: Settings › Zoom and playhead shows the six cards in the menu's order (Keep centred, Stay in place, Look ahead, Page by page, Push at the edge, Don't follow) with two new pictures, and the switch "Follow again 3 s after I stop scrolling" (`UI.followResume`, the same value as the menu's tick). A stored "Look ahead" or "Push at the edge" now lights its card. Each card has a tooltip (its name and description). The command "Follow the playhead" goes through `setFollow`, so an open Settings window shows the change; the menu's "Follow again" tick refreshes Settings too. The hint under the cards says the menu has the same six ways.
+- **Visualizer**: `vizApply` is wrapped once to call `pvSync` and `vizPaintBtns`, so the header X, the header place select, the floating window's close, the right-click menu and Settings › Interface › Layout all show the same on/off and place.
+- Search: Zoom and playhead page words add "look ahead push at the edge follow again stay in place page by page keep centred".
+- No stored key moved, no migration needed; the audio path is untouched (Fractals levels below). Mono and swap still remember their state over a restart; the audit's suggestion "off at every start" is a behaviour change left for the user (S14 or later, with the move of Mono and swap to the master strip).
+- Code: block `STS3` "v0.236 (task ST-S3)" before `askChoice`; edit script `tools/edits/taskST_S3.py` with `taskST_S3_block.js`, every replacement asserted unique. No CSS (one inline margin on the new switch).
+
+### Tested
+- `tools/ui-tests/taskST_S3.py` (headless Chromium, 62 checks, all pass), normal and Light level, with an older profile (Mono on, Follow "Look ahead", follow again off, visualizer on at the bottom): the values load and show on the strip and in Settings; unticking Mono in Settings darkens the strip button, ticking swap lights L↔R, Mono in Settings clears swap, the monitor gains follow, the strip's L↔R ticks Settings; six cards in menu order with tooltips, the stored Look ahead lit, the follow-again switch shows and sets the value; the Follow command lights "Don't follow" in the open window and back; the menu's switch and its "Look ahead" refresh Settings; the visualizer header select and X update Settings, Settings updates the header select; search finds "look ahead", "push at the edge", "follow again", "swap", "mono"; the choices stay after a restart; no console errors.
+- Screenshots looked at, normal and Light: Zoom and playhead with the six cards and the switch, Interface and DAC Monitoring, Interface Layout with the visualizer unticked.
+- `taskST_S1.py` 54/54, `taskST_S2.py` 40/40 and `setfind.py` pass (its only console line is the service worker file the test server does not serve).
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB, Bass -35.48685 dB with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums as before.
+
+### What is left
+S4 (one settings table in the code that draws the rows; no visible change) next, then S5 to S19. Performance and the Glass block stay with the glass chain (G4).
+

@@ -1,1 +1,2 @@
+Settings, step 3: the Mono and L↔R buttons on the master strip now light up when you change them in Settings; Settings shows all six ways to follow the playhead (Look ahead and Push at the edge too) and the 'Follow again 3 s' switch; the visualizer's own buttons and Settings stay in step.
 MIDI controllers, step 2: the Controllers window (menu) is now the full mappings page: see the last message a controller sent, filter by device, set a range, knob kind and speed per mapping, switch feedback, learn a mapping again, and choose the defaults for new mappings.
