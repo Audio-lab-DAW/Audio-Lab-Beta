@@ -702,6 +702,8 @@
       /* true / false to force, null to follow the system setting */
       setAccessibility: function (d) { if ('reduceTransparency' in d) acc.rt = d.reduceTransparency; if ('increaseContrast' in d) acc.ic = d.increaseContrast; panelsDirty = regDirty = edDirty = true; },
       setFace: function (d) { for (var k in d) opt.face[k] = d[k]; panelsDirty = true; },
+      /* (added by task GS1, version number unchanged) the colour where the backdrop picture does not reach (outside the scene's rectangle); the app sets it to its arrangement background when the theme changes */
+      setBackdropColor: function (c) { var v = colOf(c), b = opt.backdropColor; if (v[0] === b[0] && v[1] === b[1] && v[2] === b[2]) return api; opt.backdropColor = [v[0], v[1], v[2]]; pyrDirty = bDirty = true; return api; },
       /* A SMALL CANVAS (2.1). By default the canvas starts at the top left of the space all rectangles are given in (panels, scene rect, backdrop rect, flats).
          A canvas that is only as large as the glass it draws (a floating window plus 34 px for its shadow) sits somewhere inside that space: say where its
          top left corner is, in CSS px (whole device pixels), and keep giving every rectangle in the same space as before. Moving the canvas with its window is
