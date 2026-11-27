@@ -1,0 +1,42 @@
+name: Mac icon check
+
+# Compiles the Icon Composer app icon and draws it in every macOS 26 icon style, without building or releasing the app (task IC1).
+on:
+  workflow_dispatch:
+  push:
+    branches: ['ic1-test']
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-26, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile the icon (actool)
+        working-directory: desktop
+        run: bash scripts/build-mac-icon.sh
+      - name: Draw the icon in every style
+        run: bash tools/mac-icon/proof.sh "icon-proof/${{ matrix.os }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-icon-proof-${{ matrix.os }}
+          path: |
+            icon-proof
+            desktop/build/mac-icon
+      - name: Put the pictures on the branch ic1-proof (to look at them without a Mac)
+        if: github.ref == 'refs/heads/ic1-test'
+        run: |
+          mkdir -p /tmp/p && cp -R icon-proof/* /tmp/p/ && mkdir -p "/tmp/p/${{ matrix.os }}/actool" && cp desktop/build/mac-icon/* "/tmp/p/${{ matrix.os }}/actool/" || true
+          git config user.name ci && git config user.email ci@example.invalid
+          for i in 1 2 3; do
+            git fetch origin ic1-proof 2>/dev/null && git checkout -B ic1-proof FETCH_HEAD || git checkout --orphan ic1-proof
+            git rm -rq --cached . 2>/dev/null || true; git clean -fdxq
+            cp -R /tmp/p/* . && git add -A && git commit -qm "proof ${{ matrix.os }} ${{ github.sha }}" && git push origin ic1-proof && break
+            sleep 5
+          done
