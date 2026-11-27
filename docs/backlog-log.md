@@ -4751,3 +4751,33 @@ Step FT-C3c of `docs/features-build.md` (the user's pick: "support for other MID
 
 ### Left
 - Clip launching on these grids comes with the clip launcher (F8, then FT-C2d). Not built: the Launchpad Pro MK3's other buttons (its transport and left column), the APC40's other buttons (Device and Bank, Nudge, Tap tempo, Crossfader, Cue, Session record), older Launchpads (MK1, MK2, S, Pro MK1) and the APC40 MK1 (they stay generic and can use MIDI learn or the templates). Controller group C is complete except C2d. Next in lane C: **FT-F1** (linked clips).
+
+## 27 November 2026, v0.254: task DS-A4, audio clips in three bands (design round 2, lane A)
+
+Step 2 of the lane order for design round 2 (picks `A5 P4 B3 T3 | AC3 AW3 ...`): the waveform detail **AW3** (and look A5): lows, mids and highs in three muted colours, as the pick page's `arrWave` with `w:3`. Edit script `tools/design-lab/ds/ds_a4.py` (needs DS-A3; every anchor asserted; written on v0.252, re-run on the fresh v0.253 file), test `tools/ui-tests/taskDS_A4.py` (17 checks; `--shots DIR` saves the Dark and Light pictures).
+
+### What changed
+- **Three bands**: per audio buffer, the peak of each band per bin: lows through a 2-pole low-pass at 200 Hz, mids through a 2-pole high-pass at 200 Hz and a 2-pole low-pass at 2.5 kHz, highs through a 2-pole high-pass at 2.5 kHz (three separate filters; a first try that took mids as the difference of two low-passes let a kick leak into the mids through their different phase, the test caught it). Drawn from the clip's centre line, lows in `rgba(88,120,200,.62)`, mids in `rgba(206,156,84,.66)`, highs on top in `rgba(236,236,241,.75)` (the pick page's colours; blue only as a fill, never a hairline), a faint one-device-pixel centre line, stereo files in their two halves as before, clip gain applied, each pixel column the largest value of the bins under it.
+- **Cost**: the analysis runs once per buffer (and per warped buffer: it is keyed by the buffer's peaks object in a WeakMap and freed with it), at the peaks' resolution (2000 bins), in slices of about 6 ms with `setTimeout` between them, never inside a drawing; when it is done the clip pictures are redrawn once. Drawing goes into the existing per-clip cache (`drawClipC`, keyed by size and zoom), so a zoom or a clip edit redraws from the stored bands and nothing runs per frame. The test's 6.6 s stereo clip took 3 slices.
+- **Kept**: today's waveform is drawn until the bands are ready, in the other looks (Live, FL, Cubase, Logic, Bitwig and the rest) and for audio that is not loaded; fades, gain line and label, warp markers, envelopes and the DS-A3 clip body are unchanged. No audio nodes: playback and exports do not change.
+- What it looks like on Fractals' vocal: mostly amber and white (voice and air), gaps clear; the outline sits a little inside today's, because each band carries only part of the signal (the bands are not stacked).
+- Helpers `dsBands(view)`, `dsBandJob`, `dsBandCols`, `dsWaveDraw`, `dsBandMap()` (before `askChoice`). Lane D's NI analysis (frequency map) is a different thing (rendered tracks per beat, 61 bands) and is not used or duplicated here.
+
+### Tested
+- `tools/ui-tests/taskDS_A4.py`, 17 of 17 (2194x1139 at 1.75x, Fractals plus a made-up stereo clip: kick on the beats, a voice-like tone, a hat on the off-beats; Dark and Light): no analysis at the first ask, ready in slices with both channels at 2000 bins, lows lead at a kick, mids in the tone, highs at a hat, drawn in bands, nothing redrawn while idle, zoom redraws without a new analysis, blue at the kick and white at the hat in the pixels (Dark and Light), FL style draws today's waveform, an unloaded clip still draws its note, no console errors.
+- After the rebase: `taskDS_A4.py` 17/17. Before it: `taskDS_A3.py` 19/19, `taskLK.py` 32/32, `taskGS4.py` 42/42.
+- Screenshots: the test clip (Dark and Light) and Fractals' vocal clip before and after, compared with the pick page's A5 and AW3 drawings.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, this file): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) at master -10 dB; -9.75669 and -25.48699 dB at 0 dB.
+- Frame time (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, software renderer, alternating; main-thread ms per frame):
+
+  | Scene | v0.252 run 1 | DS-A4 run 1 | v0.252 run 2 | DS-A4 run 2 |
+  |---|---|---|---|---|
+  | idle | 9.46 | 7.85 | 8.95 | 7.80 |
+  | scroll | 133.65 | 131.57 | 129.04 | 131.91 |
+  | play | 24.86 | 22.83 | 22.14 | 21.56 |
+
+  Not worse.
+
+### What is left
+- Next run: **DS-P1** piano roll rows and keys (PS3 with chord names as part b if needed, PK3). Then DS-P2, DS-T2, DS-B1, DS-B2, DS-A1, then MD1, then DS-A2 and DS-T1.
+- The arrangement-lines picks (DR6: L5 R3 P1 S0 T2 Z2) are now in `docs/design-grid-lines.md`, so DS-A1 will be built together with GL1 following them.

@@ -4724,6 +4724,7 @@ function drawClip(g,t,c,G,w){
    if(!thin&&!DS3){g.fillStyle='rgba(255,255,255,.14)';g.fillRect(G.x,G.y,G.w,1)}}
   if(DS3)dsClipEdge(g,G,col,mu);
   if(c.notes)miniNotes(g,c,G.x+2,G.by+3,G.w-4,G.bh-6,ink);
+  else if(DS3&&dsWaveDraw(g,c,G,w,col)){}
   else if(srcView(c)){const P=srcView(c).peaks,st=P.ch&&P.ch.length===2&&G.bh>=30;
     if(st){const hh=(G.bh-4)/2;miniWave(g,c,G.x,G.by+1,G.w,hh,ink,0,w,P.ch[0]);miniWave(g,c,G.x,G.by+1+hh,G.w,hh,ink,0,w,P.ch[1]);g.fillStyle=shade(col,-.4);g.fillRect(G.x,G.by+1+hh/2,G.w,1);g.fillRect(G.x,G.by+1+hh*1.5,G.w,1)}
     else{miniWave(g,c,G.x,G.by+2,G.w,G.bh-4,ink,0,w);g.fillStyle=shade(col,-.4);g.fillRect(G.x,G.by+G.bh/2,G.w,1)}}
@@ -6424,7 +6425,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.253',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.254',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -22344,6 +22345,37 @@ function dsClipName(g,c,G,col,mu,lx){const ln=shade(col,.45),label=(mu?'muted ·
   if(c.notes&&vw>tw+30){const ix=G.x+G.w-(room?mw+20:12);for(let k=0;k<3;k++)g.fillRect(ix+k*3,G.y+5+(k%2)*3,2,5-(k%2)*3)}g.globalAlpha=1}
 function dsClipEdge(g,G,col,mu){const d=(window.devicePixelRatio||1)*ZOOM,hp=1/d,e2=Math.max(1,Math.round(2*d))/d;g.fillStyle=col;
   g.globalAlpha=mu?.3:.5;g.fillRect(G.x,G.y,hp,G.h);g.globalAlpha=mu?.5:1;g.fillRect(G.x,G.y,G.w,e2);g.globalAlpha=1}
+/* task DS-A4 (lane A, design round 2, AW3): audio clips in three bands, lows, mids and highs (peak of each band per bin).
+   dsBands(view) gives the analysis of the buffer behind a clip, or null while it is being worked out (once per buffer, in
+   slices of about 6 ms, never inside a drawing); dsWaveDraw draws it into the clip's cached picture. */
+const DSW_COL=['rgba(88,120,200,.62)','rgba(206,156,84,.66)','rgba(236,236,241,.75)'],DSW_FC=[200,2500];
+function dsBandMap(){return dsBandMap.m||(dsBandMap.m=new WeakMap())}
+function dsBands(V0){if(!V0||!V0.buf||!V0.peaks)return null;const M=dsBandMap(),P=V0.peaks;let e=M.get(P);if(e)return e.ok?e:null;
+  e={ok:false,t0:performance.now()};M.set(P,e);dsBandJob(V0.buf,P.length/2,e);return null}
+function dsBandJob(buf,N,e){const nc=Math.min(2,buf.numberOfChannels),ch=[];for(let k=0;k<nc;k++)ch.push(buf.getChannelData(k));
+  const len=buf.length,sr=buf.sampleRate,aL=1-Math.exp(-2*Math.PI*DSW_FC[0]/sr),aH=1-Math.exp(-2*Math.PI*DSW_FC[1]/sr),out=ch.map(()=>new Float32Array(N*3)),st=ch.map(()=>new Float64Array(7)),per=N/len;let j=0;e.n=0;
+  const run=()=>{const t0=performance.now();e.n++;
+    while(j<len&&performance.now()-t0<6){const end=Math.min(len,j+32768);
+      for(let k=0;k<nc;k++){const d=ch[k],o=out[k],s=st[k];let l1=s[0],l2=s[1],q1=s[2],m1=s[3],m2=s[4],h1=s[5],h2=s[6];
+        /* three separate 2-pole bands (no differences of filters with different phase): low-pass 200 Hz; high-pass 200 Hz then
+           low-pass 2.5 kHz; high-pass 2.5 kHz */
+        for(let i=j;i<end;i++){const x=d[i];l1+=aL*(x-l1);l2+=aL*(l1-l2);const p1=x-l1;q1+=aL*(p1-q1);const p2=p1-q1;m1+=aH*(p2-m1);m2+=aH*(m1-m2);
+          h1+=aH*(x-h1);const r1=x-h1;h2+=aH*(r1-h2);
+          const b=Math.min(N-1,(i*per)|0)*3,lo=Math.abs(l2),mi=Math.abs(m2),hi=Math.abs(r1-h2);if(lo>o[b])o[b]=lo;if(mi>o[b+1])o[b+1]=mi;if(hi>o[b+2])o[b+2]=hi}
+        s[0]=l1;s[1]=l2;s[2]=q1;s[3]=m1;s[4]=m2;s[5]=h1;s[6]=h2}j=end}
+    if(j<len){setTimeout(run,0);return}
+    e.ch=out;e.mono=nc===1?out[0]:out[0].map((v,i)=>Math.max(v,out[1][i]));e.ms=performance.now()-e.t0;e.ok=true;try{CLC.clear()}catch(_){}dirty=true};
+  setTimeout(run,0)}
+function dsBandCols(g,c,full,A,x,y,w,h,ga,xmax){const N=A.length/3,mid=y+h/2,i0=Math.max(0,Math.floor(-x)),i1=Math.min(Math.ceil(w),Math.ceil(xmax-x));if(i1<=i0)return;
+  for(let b=0;b<3;b++){g.fillStyle=DSW_COL[b];
+    for(let i=i0;i<i1;i++){const t0=(c.off+i/w*c.len)/full*N,t1=(c.off+(i+1)/w*c.len)/full*N;let k=Math.max(0,Math.floor(t0));const ke=Math.min(N,Math.max(k+1,Math.ceil(t1)));if(k>=N)break;
+      let v=0;for(;k<ke;k++){const q=A[3*k+b];if(q>v)v=q}const a=Math.min(1,v*ga);if(a>.002)g.fillRect(x+i,mid-a*h/2,1,Math.max(.5,a*h))}}}
+function dsWaveDraw(g,c,G,w,col){const V0=srcView(c);if(!V0)return false;const D=dsBands(V0);if(!D)return false;
+  const st=D.ch.length===2&&G.bh>=30,ga=Math.pow(10,(c.gain||0)/20),d=(window.devicePixelRatio||1)*ZOOM;g.fillStyle='rgba(255,255,255,.14)';
+  if(st){const hh=(G.bh-4)/2;g.fillRect(G.x,Math.round((G.by+1+hh/2)*d)/d,G.w,1/d);g.fillRect(G.x,Math.round((G.by+1+hh*1.5)*d)/d,G.w,1/d);
+    dsBandCols(g,c,V0.full,D.ch[0],G.x,G.by+1,G.w,hh,ga,w);dsBandCols(g,c,V0.full,D.ch[1],G.x,G.by+1+hh,G.w,hh,ga,w)}
+  else{g.fillRect(G.x,Math.round((G.by+G.bh/2)*d)/d,G.w,1/d);dsBandCols(g,c,V0.full,D.mono,G.x,G.by+2,G.w,G.bh-4,ga,w)}
+  return true}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
