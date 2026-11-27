@@ -1,1 +1,1 @@
-Starts with the Fractals song as the only open song, 10 dB quieter on the master.
+The sidechain outline on the mixer strips shows only when the sending or the receiving channel is selected.
