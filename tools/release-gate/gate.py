@@ -80,7 +80,7 @@ step('a lint', r.returncode == 0, r.stdout.strip().splitlines()[-1] if r.stdout.
 if r.returncode: say(r.stdout)
 
 # ---------- c, d) the start-up smoke test and the windows ----------
-SCEN = 'real,none,keyboard,push1,push1-loop,push1-loop-on,loopback,macnames,mackie-loop,mackie-loop-on'
+SCEN = 'real,none,keyboard,push1,push1-loop,push1-loop-on,iac-push,iac-push-short,loopback,loopback-maps,macnames,mackie-loop,mackie-loop-on,noise'   # every scenario of smoke_electron.js
 secs = 20 if A.quick else A.secs
 def smoke(tree, scen, secs, extra=(), tag=''):
     js = os.path.join(OUT, 'smoke-%s%s.json' % (os.path.basename(tree), tag))

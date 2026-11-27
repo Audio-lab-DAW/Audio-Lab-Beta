@@ -5095,9 +5095,9 @@ The user (18:13 Brussels, M4 Mac mini, 240 Hz, desktop app) opened v0.250 and it
 It tests a fresh worktree of origin/main against the build installed apps have:
 - a) lint, `lint.js` (acorn): a top-level function name declared twice, a function sharing a const's name, an id written twice
 - b) every UI test, with failures re-run on the reference to tell regressions from old failures (`ui-skip.json` lists 8 non-pass/fail tools)
-- c) `smoke_electron.js`, the real Electron app at 2194 × 1139 × 1.75 with the Fractals song:
+- c) `smoke_electron.js`, the real Electron app at 2194 × 1139 × 1.75 with the Fractals song (14 scenarios):
   - 60 s idle, then the mouse over the whole window
-  - 17 MIDI scenarios (none; keyboard; Push 1 plain, echoing, turned on; IAC loop; the user's IAC ports; Mac names; Mackie echoing; IAC with old learned mappings; random messages)
+  - the MIDI scenarios (none; keyboard; Push 1 plain, echoing, turned on; IAC loop; the user's IAC ports; Mac names; Mackie echoing; IAC with old learned mappings; random messages)
   - fails on any state change, synthetic event, command, `changed()` call, console error, duplicate id, or a loop left running
   - frame times against the reference
 - d) every main window opened and closed; the update window with 40 long lines at three sizes
