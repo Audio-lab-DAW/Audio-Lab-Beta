@@ -35,9 +35,17 @@ Paste the report as before. The lines to look for start with `[rate]`, `[exclusi
 - **Plugging:** the Gryphon was pulled out while in use. The app wrote "the device in use is gone; moving to the default output" and went on; when the Gryphon came back the list showed it again and it was opened again.
 - **Device volume:** not written into the report (it has no line of its own); the user reports it as working.
 - **A fault found in 0.2, fixed in 0.3:** twice the report shows "block lasts 11610 microseconds" while the Gryphon ran at 48 or 192 kHz. 11,610 µs is 512 frames at 44.1 kHz: after the device was plugged in, the app took its rate from a list made a moment earlier, when the device still said 44.1 kHz, and set the plug-in up at that rate. The plug-in then ran at the wrong rate (too high in pitch) until the rate was switched by hand. 0.3 asks the device again at the moment it opens it. The engine helper (`alengine`) always did.
-- **Zoom AMS-24:** never in the list, in any of the five reports, and not in the Audio MIDI Setup screenshot either. The list is everything Core Audio reports, so macOS itself does not see the unit. Open; it is a question of the connection, not of the app.
+- **Zoom AMS-24:** not in the list in the first five reports, because macOS itself did not see the unit then. It appeared in the next report (below).
 
 **AudioLab VST3 test 0.3**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-3
+
+## The user's report on test app 0.3 (27 November 2026): the Zoom AMS-24 works
+
+- **The AMS-24 appeared** as "ZOOM AMS-24 Driver" while the app was open, was opened, and played Serum 2: at 44.1 kHz with 512 and 128 frames, at 48 kHz with 128, at 88.2 kHz with 64 frames (0.73 ms). Exclusive use was taken on it. 0 failed blocks, 0 overloads on the Zoom.
+- **Pulled out and put back twice** (the Zoom, then a change to the Gryphon): each time the app moved to the default output, said so, and opened the device again when it returned.
+- **The 0.3 fix holds:** after each re-plug the block length in the report matches the rate the device was opened at (11,610 µs at 44.1 kHz, 333 µs at 192 kHz and 64 frames).
+- **Gryphon at 192 kHz and 64 frames** (0.33 ms): 0 failed blocks. At 48 kHz and 64 frames with exclusive use, the device reported 1 overload in about 38,000 blocks.
+- Not in the report: the Zoom's own line with channels, rates and formats. The app writes those lines once at start, and the Zoom arrived later. A small gap in the test app, not in the engine.
 
 ## Stage N1: what was built (27 November 2026)
 
@@ -71,7 +79,7 @@ On the user's Mac (stage 0, see `docs/native-mac-picks.md`): the same Core Audio
 
 ## Stage N1: what is not proven
 
-- 0.2's new controls were clicked by the user on the M4 (see the report above); the fix in 0.3 has not been tried by a hand yet.
+- 0.2's new controls were clicked by the user on the M4 (see the report above); the fix in 0.3 was confirmed in the user's next report.
 - **The integer path** (the engine writing the DAC's own bytes) has only its arithmetic tested. No device on the build machine offers a format the system does not mix, so it never ran with sound. Whether the Gryphon's 60 formats include such ones, the engine's `formats` answer will show; the test app does not use that path yet.
 - **Bit-perfect to a real DAC** cannot be shown without one. What was shown is that the engine's output equals its input sample for sample on a float loop-back device.
 - **Drift over a long time.** The test lasted 3 seconds. Over minutes the two clocks drift; the ring then drops or waits once and counts it. A smooth correction (a resampler that moves by parts per million) is not built; it belongs to N2, where the web engine's clock meets the device's.

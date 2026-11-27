@@ -3531,3 +3531,4 @@ Started from the drawing code of the pick page of task SR7 (`docs/about-round-2.
 - On the M4 with the Gryphon: the rate switched to 192 kHz from inside the app, exclusive use was taken, and pulling the Gryphon out and putting it back was followed correctly. Serum 2: 0 failed blocks, 0 overloads.
 - Fault found from the report: after a device was plugged in, the app could set the plug-in up at the rate the device had for a moment (44.1 kHz) while it ran at 48 or 192 kHz. Fixed in 0.3 (the device is asked again when it is opened). Release `native-lab-3`.
 - The Zoom AMS-24 is still not seen by macOS in any report: not an app matter.
+- Later the same day, test app 0.3 on the user's Mac: the Zoom AMS-24 appeared ("ZOOM AMS-24 Driver") and played at 44.1, 48 and 88.2 kHz down to 64 frames with exclusive use, 0 failed blocks; plugging out and in was followed twice; the stale-rate fix is confirmed. Both of the user's devices now work with the native layer.
