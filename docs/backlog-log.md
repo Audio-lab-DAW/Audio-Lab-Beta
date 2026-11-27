@@ -5732,3 +5732,25 @@ Step FT-F9a of `docs/features-build.md` (starred card F9 of `docs/research-featu
 
 ### Left
 - FT-F9b: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide played as a glide by Acid and Psy Bass, Push 1's step lane on these clips. Exports of a clip with chance below 100 % differ from export to export (a seed per export is part of F10, note chance). Lane A: a step badge on step clips through `FT_HOOKS.stepClip`. Next in lane C: **FT-F9b**.
+
+## 27 November 2026: task NB-N1c (the deepest integer format on the wire)
+
+Fired by the scheduler with a chain-check note (read as data) pointing at the user's reports 6 and 7: the iFi Gryphon ran at 16-bit integer on the wire. N3e had just finished in this session, so this run took that report fix (stage N1's "the real format", the plan's N8 kind of work) before the next device family. `index.html`, `desktop/`, `native/host/` and `native/testapp/` (task NL7) untouched.
+
+### Built
+- `native/common/coreaudio.cpp` / `.h`: `deepestIntegerBits(dev, rate, mixable)` and `setIntegerFormat(...)`: integer formats only, rate ranges accepted (the older `setPhysicalFormat` matches bits alone and could pick float at 32 bits; kept as it was for the test app).
+- `native/common/nulldevice.cpp`: the same two on the null device, which now also offers 16- and 24-bit integer formats the system mixes (as the Gryphon); setting one posts a format change, as the HAL would.
+- `native/engine/engine_main.cpp`: `open` takes `"bits":"deepest"` (or `"deepest":true`), with or without `"integer":true`; the choice is kept and applied again by the format worker after a rate change from outside (event `deepest`); status `deepestIntegerBits`, `keepsDeepest`.
+- `tools/native-lab/engine_deepest_test.py` (7 checks). `native-ci.yml`: runs it in Release, ASan+UBSan and TSan; the null-device steps use `pipefail`, so a failed check fails the job (it did not before).
+
+### Proven
+- Linux, this machine: 7 of 7 in Release, ASan+UBSan and TSan; `engine_null_test.py` 52 of 52.
+- GitHub: native-ci dispatched with the Mac job (compiles the Core Audio side on Apple Silicon); result below if it came in during this run.
+
+### Left
+- The Gryphon itself: its integer depths per rate and whether macOS keeps the format: only the user's Mac (test app 0.7's [format] line and its "Use the deepest format" menu, task NL7).
+- The setting and the warning in the app: N2c.
+
+### Assumptions
+- The engine changes the DAC's format only when asked (`"bits":"deepest"`); a plain `open` leaves the device as it is, since the format is a system-wide setting other apps share. The settings page will offer it (on by default is a decision for N2c's pick page).
+- "Deepest" means most bits among integer formats at the current rate, in the mixing mode asked; float formats are not considered, because the DAC receives integers.
