@@ -5339,3 +5339,25 @@ The user (19:36 Brussels): people on the Electron app update from inside the app
 ### Next
 - **MB1 / the next desktop build carries it:** no desktop build was dispatched (MB1 is packaging). `desktop/package.json` was not touched under MB1: `sync-app.js` copies `native-migrate.js` into `desktop/app/` (packed by every build) and main.js loads it from there when the build's file list does not name it. The next change to the build settings should add `"native-migrate.js"` to `build.files` next to `native-engine.js`.
 - QL4: set `NATIVE_PUBKEY` in `desktop/native-migrate.js` and sign native builds in CI.
+
+## 27 November 2026: task LT-0 (lane J, playing latency: the plan), docs only
+
+The user's AE2 picks (27 Nov, 20:41 Brussels): `L1a L2a L3b L4a L5a L6b L7? L8a L9a L10? L11b L12a ... L17a`. Lane J builds the web engine and desktop items, one step per run; L12 to L17 go to task NB.
+
+### Built
+- `docs/latency-build.md`: the plan from section 4 of `docs/research-engine-performance.md`: steps LT-1 (AE2-1: L1 output check, L2 playing buffer and Auto that comes back down), LT-2 (AE2-2: L4 the played track outside delay compensation, recorded notes on the compensated clock; L3 left for later as the user asked), LT-3a/b (AE2-3: L5 notes read outside the page in the desktop app and posted into the worklet through a MessagePort), LT-4 (AE2-5: L8 sleep idle tracks, live only so exports stay bit for bit), LT-5a/b/c (RA1 to RA3: L9 render ahead), each with what it touches, the design, its tests and what only the user's Mac can prove.
+- The baseline each step re-measures (AE2's numbers: key to sound 43.1 ms median at Auto 256, 17.4 ms at 128, 86.1 ms at 1,024; 6.0 ms delay compensation on the played Lead, 52.5 ms with a resonance suppressor; Fractals x4 894 dropouts in 9.5 s) and the export reference (Fractals Kick -9.75669 dB, Bass -25.48699 dB at master 0 dB, from the newest entries; not re-measured in this step since `index.html` is unchanged).
+- The code anchors (Auto buffer, `ensureCtx`, `pdcMap` and its live and export calls, `noteOn`, `liveTracks`, recording placement, Web MIDI in lane C's layer, the settings table `STT`) and the hooks for other lanes: `LT_HOOKS.audioRows` (lane B), `LT_HOOKS.notify` (lane F, which has no notification API yet), `LT_HOOKS.ownsNote` (lane C), `pdcMap(sr,live)` with `LT_HOOKS.pdcLive` (shared engine; AE3 may extend compensation to returns and sends).
+- `tools/engine-lab/lt/README.md`: where the edit scripts go.
+
+### Decisions to make by measurement in later steps
+- LT-1: whether switching to the playing buffer at Stop and back at Play is quick enough (it restarts the audio context); if not, the playing buffer stays until dropouts.
+- LT-3a: a hidden listening window with Web MIDI (no native module) or a native MIDI module in the shell's main process.
+- LT-5: Chromium runs every OfflineAudioContext of a page on one background thread, so render ahead gives one more core, not all of them; it shares that thread with lane D's analysis worker.
+
+### Not changed
+`index.html`, `desktop/` and `native/` untouched; no version bump.
+
+### Left
+LT-1, LT-2, LT-3a, LT-3b, LT-4, LT-5a, LT-5b, LT-5c. Then "live playing complete"; L3, L6, L11 wait for the user's later go.
+
