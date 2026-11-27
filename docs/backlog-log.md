@@ -3434,4 +3434,5 @@ Started from the drawing code of the pick page of task D6 (`docs/science-look.md
 - The harmonograph's figure differs a lot between the four intervals; some sit off-centre in the card.
 
 ### Release
+- v0.224: commit f2d766b on main (`index.html` was not touched by other sessions during the run).
 - v0.224. App copy synced, update note written ("New splash screen: five science drawings that change from start to start (moons in resonance, harmonograph, magnetic field, orbit chart, spectrogram), with the name and the loading bar in the drawing's colours. It stays about 1.5 seconds after loading; a click or a key closes it sooner."). MIN_SHELL not raised, no desktop shell file changed, no desktop build. Project doc `claude/audiolab-splash-science.md`.
