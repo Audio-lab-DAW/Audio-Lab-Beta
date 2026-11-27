@@ -3932,3 +3932,26 @@ No app changes: `index.html` and `desktop/` untouched, no version. Running list:
 ### Next
 - N3c: the mixer's tracks run N3a's `Chain`, quantum as a setting; sends, groups and returns; then the master chain.
 - Read the Mac results of `native-engine.yml` (N2b cases A to D, N3b mixer) and of `native-core.yml` (N3a) when a machine is given.
+
+## 27 November 2026, v0.231: settings step S2, export and piano roll options are remembered (task ST-S2)
+Second step of the settings rebuild (`docs/settings-round-1.md`, S2, no dependencies; audit sections 2.11, 3.3 and 4.4: "Export options are forgotten at every restart, and the piano roll forgets its snap, scale and ghost choice"). No other task had index.html work in progress (v0.230 of S1 was the last release); main had no index.html change since, so the version is 0.231.
+
+### Built
+- **Export options, last used, this computer** (`UI.exOpt`): format (WAV, FLAC, MP3), sample rate, bit depth, MP3 bitrate, FLAC compression, dither, normalize, range, tail, the export limiter and "Pick a folder first". Saved on every change on the Export audio page, read back once at start and checked against the options that exist (a stored value that is no longer offered is ignored, the default stays). The sample rate is set after the list for the format is built, so MP3 and its 44.1 or 48 kHz limit work as before.
+- **Export file name, per project** (`S.exName`, in the project and in the `.audiolab` file): each project keeps its own name; an empty name or "AudioLab mix" stores nothing and shows the default as before. Shown again on switching projects and when the page opens; never replaced while you type in it. A changed name marks the project changed (no undo step).
+- **Piano roll, last used** (`UI.prMem`): tool, snap, chord, ghost notes on or off, and the bottom lane. `PR`'s fields became getters and setters, so every way of changing them (header, tool keys, the Ghost menu, the lane select) is remembered by the same code without copies. Ghost colour or grey was already stored (`UI.ghostGrey`), scale lock too (`UI.prLock`).
+- **Scale and root, per project** (`S.prKey`): the song's key. An older project without it shows A minor, the old default. Changing it marks the project changed. Shown again on opening a clip and on switching projects.
+- A help line at the top of Export audio: "AudioLab remembers these choices for the next export. The file name is kept with each project." The file name field got a tooltip. Search page words for Export audio: "remember file name format bit depth".
+- Nothing about how an export sounds changed: the export reads the same controls as before.
+- Code: block `STS2` "v0.231 (task ST-S2)" before `askChoice`, wrapping `exUI`, `openPR` and `switchProject` once each; edit script `tools/edits/taskST_S2.py` with `taskST_S2_block.js`, asserted unique. No CSS.
+
+### Tested
+- `tools/ui-tests/taskST_S2.py` (headless Chromium, 40 checks, all pass), normal and Light level: an older profile starts on the old defaults (WAV, engine rate, 24-bit, 320 kbps, TPDF, no normalize, whole song, 2 s tail, limiter and folder on, "AudioLab mix"; Draw, 1/16, no chord, ghost on, Velocity lane, A minor); the help line and tooltip; changing all of it (FLAC, 96 kHz, 16-bit, Fast, noise shaping, -1 dBFS, from the playhead, 4 s, limiter and folder off, name "Night drive mix", Paint, 1/8, major chord, ghost off, CC1 lane, D dorian) marks the project changed; the `.audiolab` file (pack and unpack) carries the name and the key; another project shows the default name and A minor, switching back brings both back; the stored data holds them per project; after a restart the export choices and the piano roll options are back and shown in the controls; MP3 at 192 kbps comes back; search "file name" finds Export audio; no console errors.
+- Screenshots looked at: Export audio with the help line (dark and Light), the piano roll header with the restored choices.
+- `taskST_S1.py` 54/54 and `setfind.py` pass. `midipanel.py` stops on a name the app no longer has (`ABL`), the same on v0.230: an old test, not this change.
+- Seen while testing, not changed: the headless test page opens the shipped Fractals song fresh on every start when it is unchanged, so a restart there shows a new project id; the per-project checks therefore read the stored project data.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB, Bass -35.48685 dB with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; Saw, Pad, Acid, Wavetable and Venom the same checksums. (Plant and the sample voices vary from run to run on every version, as noted under S1.)
+
+### What is left
+S3 (fix what is out of sync: Mono and swap on the master strip, the Follow list in both places and the command, the visualizer's own header) next, then S4 to S19. Noted for S11 from the end of `docs/settings-research-audiophile.md`: never open a Bluetooth input unless the user picked it, warn on the device card when a Bluetooth output runs at 16 kHz or less, never pick Bluetooth as the recording input by itself.
+

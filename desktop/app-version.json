@@ -1,7 +1,7 @@
 {
-  "version": "0.230",
-  "sha256": "29c9f3fff4839af5792a55f9994afcdf10b079bdd0d89e6b98516e02717fe27b",
-  "size": 5965452,
+  "version": "0.231",
+  "sha256": "2958648fc84ce306326a895c74f813b812fce4300c21c44815ab7127f45cfb90",
+  "size": 5970494,
   "minShell": "0.147.0",
-  "notes": "Settings tidied: no more copies inside Settings. The level meter options appear once (Interface, Level meters), Export audio points to Project file for Save, Save as and Open, and the Interface and DAC page's button now takes you to Audio system, where the output device and the Audio devices window are."
+  "notes": "Export and the piano roll now remember your choices: format, sample rate, bit depth, dither, tail and the other export options come back next time, each project keeps its own export file name, the piano roll keeps its tool, snap, chord, ghost and lane, and each project keeps its own scale and root."
 }
