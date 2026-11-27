@@ -3588,5 +3588,5 @@ Nearest step; a tie (11.5, 12.5, 14) goes to the smaller step, so that less text
 - About lost its spaced capital lines and mono values to the rule; if the science look wants them back, that is one exception to write down.
 
 ### Release
-- v0.226 on main. App copy synced (`node desktop/scripts/sync-app.js`), update note written ("One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown."), no desktop build. `taskSP1.py`: 147 of 149 while other tests ran beside it (two timing checks), 149 of 149 run alone.
+- v0.226: commit ebaaada on main (`index.html` was not touched by other sessions during the run). App copy synced (`node desktop/scripts/sync-app.js`), update note written ("One type scale everywhere: Inter in four sizes and three weights, numbers with equal-width digits, labels in sentence case, mono only where time is shown."), no desktop build. `taskSP1.py`: 147 of 149 while other tests ran beside it (two timing checks), 149 of 149 run alone.
 - Edit script `tools/edits/taskD3.py` with `taskD3_css.txt` and `taskD3_pins.json`; tests `tools/ui-tests/taskD3.py`, `taskD3_census.js`, `taskD3_compare.py`, `taskD3_probe.js`, `taskD3_pins.py`.
