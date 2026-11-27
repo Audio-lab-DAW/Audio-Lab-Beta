@@ -1,0 +1,27 @@
+
+/* LAYOUT: a pick sheet. One mock AudioLab on top; six tools act on that same mock, one tool visible at a time, each beside the file it writes. Then numbered decisions. Picks collect in a bar at the bottom. */
+:root{--pg:#f2f3f7;--card:#ffffff;--pfg:#14161c;--pmut:#5a6070;--pline:#dde0e8;--brand:#1450a8;--brandink:#ffffff;--star:#ffd23a;--starink:#2a2000;--okc:#0d7d4a;--warnc:#8a5a00;--badc:#b3261e;
+  --disp:'Space Grotesk',Inter,system-ui,sans-serif;--text:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--data:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--okc:#5fd39a;--warnc:#e3b341;--badc:#ff8f8f;color-scheme:dark}}
+:root[data-theme="dark"]{--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--okc:#5fd39a;--warnc:#e3b341;--badc:#ff8f8f;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg);color:var(--pfg);font:14px/1.5 var(--text);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+header.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end}
+.brandrow{display:flex;align-items:center;gap:12px;flex:1 1 420px;min-width:0}
+.brandrow svg{width:46px;height:46px;flex:none;border-radius:11px}
+h1{font:700 26px/1.1 var(--disp);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--pmut);margin:3px 0 0;max-width:70ch}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--pline);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#bar .in{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#picks{font:500 12.5px/1.4 var(--data);flex:1 1 320px;min-width:0;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere;max-height:3.9em;overflow:auto}
+#bar button{font:600 12px var(--text);border-radius:7px;padding:7px 12px;cursor:pointer;border:1px solid var(--pline);background:var(--pg);color:var(--pfg)}
+#bar button.go{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+footer{color:var(--pmut);font-size:12.5px;max-width:92ch}
+@media (max-width:480px){h1{font-size:21px}}
+
+
+.proto{display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}.phead{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font:600 11px var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+h2{font:700 19px/1.2 var(--disp);margin:0}.mut{color:var(--pmut);margin:0;max-width:92ch}

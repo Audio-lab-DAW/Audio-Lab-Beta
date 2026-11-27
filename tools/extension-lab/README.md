@@ -7,3 +7,14 @@ Prototypes for user themes, user-made devices, a script device and chat-built de
 - `examples/`: theme, device and script files used on the page.
 
 The plan, the research and the file formats are in `docs/extensions-plan.md`.
+
+## The deep layer (task EX2)
+
+Prototypes for the layer below Settings: an everything list, hide / rename / move any control, commands and macros, CSS snippets, user scripts in a worker, safe mode. Nothing here is loaded by the app.
+
+- `extensions-with-deep-layer.html`: **the file that is published to the pick page** (same link as above): EX1's page plus the part "The deep layer" before the questions. `extensions-round-1.html` itself is not modified.
+- `deep-layer.html`: the deep layer alone, for testing.
+- `python3 tools/extension-lab/build_deep.py`: builds both from `deep-src/` (and from `extensions-round-1.html`). Run it again after any change to EX1's page, then publish `extensions-with-deep-layer.html`.
+- `node tools/extension-lab/deep_check.js`: 73 headless checks over both pages.
+
+Design, research and file formats: `docs/extensions-plan.md`, section 9.

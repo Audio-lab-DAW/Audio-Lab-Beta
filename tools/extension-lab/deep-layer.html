@@ -1,0 +1,758 @@
+<title>AudioLab extensions, the deep layer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+
+/* LAYOUT: a pick sheet. One mock AudioLab on top; six tools act on that same mock, one tool visible at a time, each beside the file it writes. Then numbered decisions. Picks collect in a bar at the bottom. */
+:root{--pg:#f2f3f7;--card:#ffffff;--pfg:#14161c;--pmut:#5a6070;--pline:#dde0e8;--brand:#1450a8;--brandink:#ffffff;--star:#ffd23a;--starink:#2a2000;--okc:#0d7d4a;--warnc:#8a5a00;--badc:#b3261e;
+  --disp:'Space Grotesk',Inter,system-ui,sans-serif;--text:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--data:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--okc:#5fd39a;--warnc:#e3b341;--badc:#ff8f8f;color-scheme:dark}}
+:root[data-theme="dark"]{--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--okc:#5fd39a;--warnc:#e3b341;--badc:#ff8f8f;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg);color:var(--pfg);font:14px/1.5 var(--text);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+header.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end}
+.brandrow{display:flex;align-items:center;gap:12px;flex:1 1 420px;min-width:0}
+.brandrow svg{width:46px;height:46px;flex:none;border-radius:11px}
+h1{font:700 26px/1.1 var(--disp);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--pmut);margin:3px 0 0;max-width:70ch}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--pline);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#bar .in{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#picks{font:500 12.5px/1.4 var(--data);flex:1 1 320px;min-width:0;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere;max-height:3.9em;overflow:auto}
+#bar button{font:600 12px var(--text);border-radius:7px;padding:7px 12px;cursor:pointer;border:1px solid var(--pline);background:var(--pg);color:var(--pfg)}
+#bar button.go{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+footer{color:var(--pmut);font-size:12.5px;max-width:92ch}
+@media (max-width:480px){h1{font-size:21px}}
+
+
+.proto{display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}.phead{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font:600 11px var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+h2{font:700 19px/1.2 var(--disp);margin:0}.mut{color:var(--pmut);margin:0;max-width:92ch}
+#dlRoot .ptabs{display:flex;flex-wrap:wrap;gap:6px}
+#dlRoot .ptabs button{font:600 12.5px var(--text);color:var(--pfg);background:var(--card);border:1px solid var(--pline);border-radius:9px;padding:7px 11px;cursor:pointer;display:flex;gap:7px;align-items:center}
+#dlRoot .ptabs button[aria-pressed=true]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
+#dlRoot .num{font:500 12px var(--data);background:var(--pg);border:1px solid var(--pline);border-radius:5px;padding:1px 6px}
+#dlRoot .ptabs button.picked .num{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+#dlRoot .star{font:600 11px var(--text);background:var(--star);color:var(--starink);border-radius:20px;padding:1px 8px;white-space:nowrap}
+#dlRoot .pinfo{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px;color:var(--pmut)}
+#dlRoot .pinfo p{margin:0;flex:1 1 420px;min-width:0;max-width:96ch}
+#dlRoot .pinfo b{color:var(--pfg)}
+#dlRoot .segm{display:inline-flex;flex-wrap:wrap;background:var(--card);border:1px solid var(--pline);border-radius:9px;padding:3px;gap:2px}
+#dlRoot .segm button{font:600 12px var(--text);color:var(--pmut);background:none;border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+#dlRoot .segm button[aria-pressed=true]{background:var(--brand);color:var(--brandink)}
+#dlRoot .note{font-size:12.5px;color:var(--pmut);max-width:96ch;margin:0}
+#dlRoot #decs{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+#dlRoot .dec{background:var(--card);border:1px solid var(--pline);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:5px;min-width:0}
+#dlRoot .dec h3{font:700 14.5px var(--disp);margin:0 0 2px;display:flex;gap:8px;align-items:center}
+#dlRoot .dec label{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;padding:5px 7px;border-radius:7px;border:1px solid transparent}
+#dlRoot .dec label:has(input:checked){border-color:var(--pline);background:var(--pg)}
+#dlRoot .dec label input{margin:3px 0 0;accent-color:var(--brand)}
+#dlRoot .dec label .star{margin-left:auto}
+#dlRoot .dec .why{font-size:12.5px;color:var(--pmut);margin:4px 0 0}
+#dlRoot #dlRoot{display:flex;flex-direction:column;gap:12px;min-width:0}
+#dlRoot .dlkh{display:flex;flex-direction:column;gap:2px;margin-top:14px}
+#dlRoot .dlkh h3{font:700 16px/1.2 var(--disp);margin:0}
+#dlRoot .m{--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--sel:hsl(var(--hue,217) 100% 65%);--amb:#e3b341;--rec:#ff5a5a;--well:#050506;
+  --f:Inter,system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;color:var(--ink);font:12px/1.35 var(--f);font-variant-numeric:tabular-nums;color-scheme:dark}
+#dlRoot .m button,#dlRoot .m select,#dlRoot .m input,#dlRoot .m textarea{font:inherit;color:inherit}
+#dlRoot .dlstage{border-radius:12px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-width:0}
+#dlRoot #dlApp{border:1px solid var(--ln);border-radius:9px;background:var(--pn);display:flex;flex-direction:column;min-width:0;overflow:hidden;font-size:calc(12px*var(--scale,1));position:relative}
+#dlRoot #dlApp:focus-visible{outline:2px solid var(--sel)}
+#dlRoot .dlbar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--ln);background:var(--pn2)}
+#dlRoot .dlbar .sp{flex:1 1 8px}
+#dlRoot .c{height:24px;background:linear-gradient(#363741,#2a2b33);border:1px solid #0e0f13;border-radius:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);padding:0 8px;cursor:pointer;white-space:nowrap;transition:background var(--anim,80ms)}
+#dlRoot .c.on{background:var(--sel);color:#fff;border-color:transparent}
+#dlRoot .c.rec.on{background:var(--rec)}
+#dlRoot .c.ro{background:var(--well);box-shadow:none;font:500 11px var(--mono);cursor:default;display:inline-flex;align-items:center}
+#dlRoot .c.usr{border-color:var(--sel)}
+#dlRoot .c.ghost{opacity:.35;border-style:dashed;text-decoration:line-through}
+#dlRoot .dlsafe{background:#3a2a05;color:#ffd98a;border-bottom:1px solid #6d5617;padding:6px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#dlRoot .dlsafe button{background:#ffd98a;color:#2a2000;border:0;border-radius:4px;padding:3px 9px;font-weight:600;cursor:pointer}
+#dlRoot .dlarr{display:flex;flex-direction:column;border-bottom:1px solid var(--ln);position:relative}
+#dlRoot .dltr{display:flex;height:var(--th,30px);border-bottom:1px solid #17171c;cursor:pointer}
+#dlRoot .dltr.sel .dlth{background:color-mix(in srgb,var(--sel) 22%,var(--pn2))}
+#dlRoot .dlth{width:112px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--pn2);border-right:1px solid var(--ln);overflow:hidden;white-space:nowrap}
+#dlRoot .dlth i{width:8px;height:8px;border-radius:2px;flex:none;background:var(--c)}
+#dlRoot .dlth small{color:var(--mut);margin-left:auto;font-size:10px}
+#dlRoot .dltl{flex:1;position:relative;min-width:0;background:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 1px),#1b1b21 calc(12.5% - 1px) 12.5%)}
+#dlRoot .dltl b{position:absolute;top:3px;bottom:3px;border-radius:var(--cr,2px);border-top:4px solid var(--c);background:color-mix(in srgb,var(--c) 34%,#0a0a0c)}
+#dlRoot .dltr.mu .dltl b{opacity:.3}
+#dlRoot .dlph{position:absolute;top:0;bottom:0;width:1.5px;background:#fff;left:112px;pointer-events:none}
+#dlRoot .dlpr{height:92px;position:relative;border-bottom:1px solid var(--ln);background:var(--well) repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 1px),#1d1d24 calc(12.5% - 1px) 12.5%)}
+#dlRoot .dlpr::before{content:"Piano roll: the selected clip";position:absolute;left:6px;top:3px;font-size:10px;color:var(--mut)}
+#dlRoot .dlpr i{position:absolute;height:5px;border-radius:1.5px;background:var(--amb);outline:1px solid transparent}
+#dlRoot .dlpr i.s{outline-color:#fff}
+#dlRoot .dlmix{display:flex;gap:4px;padding:8px;overflow-x:auto}
+#dlRoot .dlst{width:var(--sw,76px);flex:none;background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:5px;display:flex;flex-direction:column;gap:4px;align-items:stretch;border-top:3px solid var(--c)}
+#dlRoot .dlst.sel{border-color:var(--sel);border-top-color:var(--c)}
+#dlRoot .dlst .c{height:20px;padding:0 4px;font-size:.92em;text-align:center;overflow:hidden;text-overflow:ellipsis}
+#dlRoot .dlst .c.nm{background:none;border:0;box-shadow:none;font-weight:600;text-align:left}
+#dlRoot .dlst .c.m1.on{background:var(--amb);color:#201800}
+#dlRoot .dlst .c.s1.on{background:var(--sel)}
+#dlRoot .dlfd{height:64px;display:flex;gap:4px;justify-content:center;cursor:default;background:none;border:0;box-shadow:none;padding:0}
+#dlRoot .dlfd span{width:8px;background:var(--well);border-radius:2px;position:relative;overflow:hidden}
+#dlRoot .dlfd span i{position:absolute;left:0;right:0;bottom:0;background:var(--acc);height:0}
+#dlRoot .dlfd span.fx i{background:#c9c9d2;height:auto;top:var(--v,30%);bottom:auto;height:5px;border-radius:1px}
+#dlRoot .dlpan{height:8px;background:var(--well);border-radius:4px;position:relative;border:0;box-shadow:none;padding:0}
+#dlRoot .dlpan::after{content:"";position:absolute;left:calc(50% - 1px);top:1px;bottom:1px;width:3px;background:#c9c9d2;border-radius:1px}
+#dlRoot .dlmaster{margin-left:auto;width:calc(var(--sw,76px) + 30px)}
+#dlRoot .dllamp::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:5px}
+#dlRoot #dlApp.picking [data-al]{cursor:crosshair}
+#dlRoot #dlApp.picking [data-al]:hover{outline:2px dashed var(--amb);outline-offset:1px}
+#dlRoot #dlApp [data-al].pkd{outline:2px solid var(--amb);outline-offset:1px}
+#dlRoot .dlstat{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;color:var(--mut);font-size:11.5px;min-height:20px}
+#dlRoot .dlstat b{color:var(--ink);font:500 11.5px var(--mono)}
+#dlRoot .dltool{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:10px;align-items:start}
+@media (max-width:900px){#dlRoot .dltool{grid-template-columns:minmax(0,1fr)}
+}
+#dlRoot .dlpane{background:var(--pn);border:1px solid var(--ln);border-radius:9px;display:flex;flex-direction:column;min-width:0;max-height:520px;overflow:hidden}
+#dlRoot .dlpane>header{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--ln);flex:none}
+#dlRoot .dlpane>header b{font-size:13px;font-weight:600}
+#dlRoot .dlpane>header .sp{flex:1}
+#dlRoot .dlbody{overflow:auto;padding:6px;display:flex;flex-direction:column;gap:2px;min-height:0}
+#dlRoot .dlq{flex:1 1 160px;min-width:0;height:26px;background:var(--well);border:1px solid #0e0f13;border-radius:5px;padding:0 9px}
+#dlRoot .dlq::placeholder{color:var(--mut)}
+#dlRoot .B{height:24px;background:linear-gradient(#363741,#2a2b33);border:1px solid #0e0f13;border-radius:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);padding:0 8px;cursor:pointer;white-space:nowrap}
+#dlRoot .B:disabled{opacity:.4;cursor:not-allowed}
+#dlRoot .B.pri{background:var(--sel);border-color:transparent;color:#fff;font-weight:600}
+#dlRoot .B.dng{color:#ff9c9c}
+#dlRoot .B[aria-pressed=true]{background:var(--sel);color:#fff;border-color:transparent}
+#dlRoot .sg{display:inline-flex;border:1px solid #0e0f13;border-radius:3px;overflow:hidden;background:var(--well);flex:none;max-width:100%;flex-wrap:wrap}
+#dlRoot .sg button{border:0;background:none;padding:3px 9px;color:var(--mut);cursor:pointer;white-space:nowrap}
+#dlRoot .sg button[aria-pressed=true]{background:var(--sel);color:#fff}
+#dlRoot .sw{width:28px;height:16px;border-radius:99px;border:1px solid #0e0f13;background:#2a2b33;position:relative;flex:none;cursor:pointer;padding:0}
+#dlRoot .sw::after{content:"";position:absolute;left:1px;top:1px;width:12px;height:12px;border-radius:50%;background:#c9c9d2;transition:transform .08s}
+#dlRoot .sw[aria-checked=true]{background:var(--sel)}
+#dlRoot .sw[aria-checked=true]::after{transform:translateX(12px);background:#fff}
+#dlRoot .dlrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto 22px;gap:4px 8px;align-items:center;padding:4px 6px;border-radius:5px;position:relative}
+#dlRoot .dlrow:hover{background:rgba(255,255,255,.035)}
+#dlRoot .dlrow .id{font:500 11.5px var(--mono);overflow-wrap:anywhere}
+#dlRoot .dlrow .id small{display:block;font:400 11px var(--f);color:var(--mut)}
+#dlRoot .dlrow.chg .id{font-weight:700}
+#dlRoot .dlrow.chg::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--sel);border-radius:2px}
+#dlRoot .dlrow .err{grid-column:1/-1;color:#ff9c9c;font-size:11px}
+#dlRoot .dlrow input[type=number],#dlRoot .dlrow input[type=text]{width:84px;height:22px;background:var(--well);border:1px solid #0e0f13;border-radius:3px;padding:0 6px;font:500 11px var(--mono)}
+#dlRoot .dlrow select{height:22px;background:#2a2b33;border:1px solid #0e0f13;border-radius:3px;max-width:150px}
+#dlRoot .tag{font:600 9.5px/1 var(--f);letter-spacing:.03em;text-transform:uppercase;color:var(--mut);border:1px solid var(--ln);border-radius:3px;padding:2px 4px;white-space:nowrap}
+#dlRoot .tag.h{color:#b77bff;border-color:#4a3470}
+#dlRoot .tag.l{color:#ff9c9c;border-color:#6d2a2a}
+#dlRoot .tag.u{color:#9dc0ff;border-color:#2a4270}
+#dlRoot .tag.p{color:var(--amb);border-color:#5b4a17}
+#dlRoot .rs{width:20px;height:20px;border-radius:4px;border:0;background:none;color:var(--sel);cursor:pointer;padding:0;font-size:13px}
+#dlRoot .dlfile{font:400 11.5px/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;margin:0;padding:8px 10px;color:#cfd3db;overflow:auto;min-height:60px}
+#dlRoot textarea.dlfile{background:var(--well);border:0;resize:vertical;min-height:210px;width:100%;display:block;outline-offset:-2px}
+#dlRoot .dlmsg{padding:6px 10px;border-top:1px solid var(--ln);font-size:11.5px;color:var(--mut);flex:none}
+#dlRoot .dlmsg.bad{color:#ff9c9c}
+#dlRoot .dlmsg.ok{color:#7be0ae}
+#dlRoot .dlhint{color:var(--mut);padding:8px;font-size:12px}
+#dlRoot .dlacts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;border-bottom:1px solid var(--ln)}
+#dlRoot .dlacts input[type=text]{height:24px;background:var(--well);border:1px solid #0e0f13;border-radius:3px;padding:0 7px;flex:1 1 110px;min-width:0}
+#dlRoot .dlcmd{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:4px 6px;align-items:center;padding:3px 6px;border-radius:5px}
+#dlRoot .dlcmd:hover{background:rgba(255,255,255,.035)}
+#dlRoot .dlcmd .id{font:500 11.5px var(--mono);overflow-wrap:anywhere}
+#dlRoot .dlcmd .id small{display:block;font:400 11px var(--f);color:var(--mut)}
+#dlRoot .dlkey{min-width:54px;height:22px;background:var(--well);border:1px solid #0e0f13;border-radius:3px;font:500 10.5px var(--mono);cursor:pointer;padding:0 5px}
+#dlRoot .dlkey.w{border-color:var(--amb);color:var(--amb)}
+#dlRoot .dlgrp{font:600 11px var(--f);color:var(--mut);margin:8px 6px 2px}
+#dlRoot .dlsteps{display:flex;flex-direction:column;gap:3px;padding:8px;border-bottom:1px solid var(--ln)}
+#dlRoot .dlsteps .st{display:flex;gap:6px;align-items:center;font:500 11.5px var(--mono)}
+#dlRoot .dlsteps .st span{flex:1;min-width:0;overflow-wrap:anywhere}
+#dlRoot .dlcon{font:400 11.5px/1.5 var(--mono);padding:8px 10px;overflow:auto;min-height:120px;max-height:230px;background:var(--well)}
+#dlRoot .dlcon div{white-space:pre-wrap;overflow-wrap:anywhere}
+#dlRoot .dlcon .e{color:#ff9c9c}
+#dlRoot .dlcon .o{color:#7be0ae}
+#dlRoot .dlcon .i{color:var(--mut)}
+#dlRoot .dlcon .w{color:var(--amb)}
+#dlRoot .dlperm{margin:8px;background:#131c2e;border:1px solid #2a4270;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:7px}
+#dlRoot .dlperm b{font-size:13px}
+#dlRoot .dlperm div{display:flex;flex-wrap:wrap;gap:6px}
+#dlRoot .dlchg{display:flex;gap:8px;align-items:center;padding:4px 6px;border-radius:5px}
+#dlRoot .dlchg span{flex:1;min-width:0;font:500 11.5px var(--mono);overflow-wrap:anywhere}
+#dlRoot .dlchg small{color:var(--mut);font:400 11px var(--f)}
+#dlRoot .dlex{display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-bottom:1px solid var(--ln)}
+#dlRoot .dlyn{display:inline-flex;gap:2px;margin-left:auto}
+</style>
+<div class="wrap" id="page">
+  <header class="top">
+    <div class="brandrow">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#1450A8"/><g fill="none" stroke="#fff" stroke-width="3.2"><ellipse cx="32" cy="32" rx="9" ry="22"/><ellipse cx="32" cy="32" rx="9" ry="22" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="9" ry="22" transform="rotate(-60 32 32)"/></g><circle cx="32" cy="32" r="5" fill="#FFD23A"/><circle cx="51" cy="21" r="3.4" fill="#FFD23A" stroke="#1450A8" stroke-width="1.6"/></svg>
+      <div><h1>AudioLab extensions, the deep layer</h1><p class="sub">For people who want to go much deeper than Settings: a list of everything, hide or move any control, commands and macros, your own CSS, your own scripts. Six working tools on one small mock AudioLab. Nothing in the app has changed yet.</p></div>
+    </div>
+  </header>
+  <section class="proto" id="deep">
+ <div class="phead"><span class="eyebrow">The deep layer · task EX2 · for advanced users</span><h2>Much deeper than Settings: six tools on one mock AudioLab</h2>
+ <p class="mut">Your words: "very advanced loose features … hide certain buttons or features, modify in a very advanced way that goes much, much deeper than the settings … or write their own code." Every tool below changes the same small AudioLab and shows the file it writes on the right. The mock really plays: press Play. Mark each tool Yes, Later or No; the twelve decisions underneath already stand on my recommendation.</p></div>
+ <div id="dlRoot">
+  <div class="ptabs" id="dlTabs" role="group" aria-label="Deep layer tools"></div>
+  <div class="pinfo" id="dlInfo"></div>
+  <div class="dlstage m">
+   <div id="dlApp" tabindex="0" aria-label="Mock AudioLab"></div>
+   <div class="dlstat" id="dlStat"></div>
+   <div class="dltool" id="dlTool"></div>
+  </div>
+  <p class="note">The mock has 6 tracks, one clip with 16 notes, a transport bar and a mixer. The ids, the settings without a normal control and the script functions are proposals to show the idea; the real lists come out of the code when the app is prepared (step DL1 in the plan). The limiter light, the record light and the master meter cannot be hidden or changed by any tool here, on purpose. Scripts here are Workshop scripts: they edit the project from outside the sound engine. They are a different thing from the script devices of prototype 3, which make sound.</p>
+  <div class="dlkh"><h3>Twelve decisions for the deep layer</h3><p class="note">K1 to K12. Each starts on my recommendation (★): change only what you disagree with. They join the same picks line in the bar below.</p></div>
+  <div id="decs"></div>
+ </div>
+</section>
+  <footer>Prototypes, not final pixels. The look follows today's AudioLab. Scripts on this page run in a separate worker with a 2 second limit and no network, as the plan proposes for the app; the network answer in example 5 is made up. Research and sources: docs/extensions-plan.md, section "The deep layer".</footer>
+</div>
+<div id="bar"><div class="in"><span id="picks" aria-live="polite"></span><button id="useRec">Take all ★</button><button id="clr">Start again</button><button class="go" id="copy">Copy my picks</button></div></div>
+<script>
+/* ============ DEEP LAYER PART: script. One closure; the only globals are window.DeepLayer and the element ids that start with dl. ============ */
+(function(){
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+
+/* ---------- the mock project ---------- */
+const GREY='#8b8b97';
+const TYPECOL={drums:'#e5534b',bass:'#4c8dff',lead:'#e3b341',pad:'#b77bff',fx:'#3ecf8e',vocal:'#f0883e'};
+function freshProject(){return{tempo:138,sel:'t3',tracks:[
+ {id:'t1',name:'Kick',type:'drums',color:GREY,mute:0,solo:0,clips:[[0,100]]},
+ {id:'t2',name:'Bass',type:'bass',color:GREY,mute:0,solo:0,clips:[[0,50],[50,50]]},
+ {id:'t3',name:'Lead',type:'lead',color:GREY,mute:0,solo:0,clips:[[25,25],[62.5,37.5]]},
+ {id:'t4',name:'Pad',type:'pad',color:GREY,mute:0,solo:0,clips:[[50,50]]},
+ {id:'t5',name:'Riser',type:'fx',color:GREY,mute:0,solo:0,clips:[[37.5,12.5],[87.5,12.5]]},
+ {id:'t6',name:'Vox chop',type:'vocal',color:GREY,mute:0,solo:0,clips:[[62.5,25]]}],
+ notes:[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30].map((s,i)=>({id:'n'+(i+1),start:s,length:1.5,pitch:[57,60,64,67,69,67,64,60,57,62,65,69,72,69,65,62][i],velocity:100,selected:true}))}}
+let P=freshProject();
+const T={playing:0,rec:0,loop:1,click:0,count:0,pos:0};           // transport, not part of undo
+const UNDO=[],REDO=[];
+function mutate(label,fn){const before=JSON.stringify(P);fn();if(JSON.stringify(P)!==before){UNDO.push({label,snap:before});if(UNDO.length>60)UNDO.shift();REDO.length=0}renderApp()}
+
+/* ---------- customisations: everything a user can change lives here, and only here ---------- */
+const CUST0=()=>({settingsUser:{'mixer.meterFps':30},settingsProject:{},
+ rules:{all:[{id:'transport.tap',rename:'Tap tempo'}],arrange:[],mix:[],compact:[]},
+ keys:{'transport.metronome':'C','macro.tidy-clip':'Shift+T'},toolbar:['macro.tidy-clip'],
+ macros:{'tidy-clip':{name:'Tidy clip',steps:['note.selectAll','clip.quantize16','note.velocityDown']}},
+ css:{on:false,text:''},scripts:{buttons:[]}});
+let CUST=CUST0();
+const ST={tab:'P1',layout:'arrange',safe:false,picking:false,picked:null,ghosts:false,scopeAll:true,target:'user',filter:'all',q:'',cq:'',macroOpen:false,macroDraft:{name:'',steps:[]},waitKey:null};
+
+/* ---------- P1: the settings table. S(id, type, default, extra, label, flags, search words). Flags: h = no normal control today, l = locked safety value, c = belongs to this computer (cannot go into a project) ---------- */
+const SET=[],SBY={};
+function S(id,t,def,x,l,f='',k=''){const e={id,t,def,x,l,h:f.includes('h'),lock:f.includes('l'),comp:f.includes('c'),k};SET.push(e);SBY[id]=e}
+S('ui.accentHue','num',217,[0,360,1,'°'],'Accent colour of selected things','','colour blue tint');
+S('ui.scale','num',100,[75,150,5,'%'],'Interface size','c','zoom bigger smaller');
+S('ui.tooltips','bool',true,0,'Tooltips');
+S('ui.tooltipDelayMs','num',500,[0,2000,50,' ms'],'How long before a tooltip shows','h','hover help');
+S('ui.animationMs','num',80,[0,300,10,' ms'],'Length of button and panel animations','h','speed snappy');
+S('ui.doubleClickMs','num',350,[150,700,10,' ms'],'Longest gap that counts as a double click','h');
+S('ui.dragStartPx','num',4,[1,12,1,' px'],'Pointer travel before a drag starts','h');
+S('ui.splash','bool',true,0,'Splash screen at start');
+S('ui.splash.minMs','num',1000,[0,4000,100,' ms'],'Shortest time the splash stays','h','start loading');
+S('ui.toast.ms','num',2600,[800,8000,200,' ms'],'How long a message stays on screen','h','notification');
+S('ui.focusRing','enum','Keyboard only',['Keyboard only','Always','Never'],'Focus outline','h','accessibility');
+S('glass.level','enum','Glass',['Glass','Light','Solid'],'Glass level','c','performance light mode');
+S('glass.lens','enum','Wide',['Off','Fine','Apple','Wide'],'Glass lens');
+S('glass.lensPx','num',45,[0,80,1,' px'],'Lens width in pixels (the presets set this)','h','refraction');
+S('glass.backdropFps','num',60,[10,240,5,' fps'],'How often the picture behind glass is redrawn','hc','frame rate cost');
+S('transport.clockFormat','enum','Bars',['Bars','Time','Samples'],'Clock shows','','timecode');
+S('transport.playFlash','bool',true,0,'Play button flashes on the beat','','blink');
+S('transport.tapWindowMs','num',2000,[800,5000,100,' ms'],'Tap tempo forgets taps older than','h');
+S('transport.returnOnStop','bool',false,0,'Stop jumps back to where play started','h','cursor');
+S('transport.preRollBars','num',0,[0,4,1,' bars'],'Pre-roll before recording','h','count in');
+S('arrange.trackHeight','num',30,[22,56,2,' px'],'Track height','','zoom rows');
+S('arrange.clipCornerPx','num',2,[0,8,1,' px'],'Clip corner radius','h','round look');
+S('arrange.snapStrengthPx','num',8,[0,24,1,' px'],'How close before a clip snaps','h','magnet grid');
+S('arrange.autoScrollEdgePx','num',40,[10,160,5,' px'],'Edge zone that scrolls while dragging','h');
+S('arrange.wheelZoomStep','num',12,[2,40,1,'%'],'Zoom per wheel notch','h','scroll');
+S('pianoroll.defaultVelocity','num',100,[1,127,1,''],'Velocity of a drawn note','h');
+S('pianoroll.noteNameMinPx','num',28,[10,80,2,' px'],'Narrowest note that still shows its name','h');
+S('pianoroll.previewNotes','bool',true,0,'Hear a note when it is clicked','h','audition');
+S('pianoroll.ghostOpacity','num',35,[5,90,5,'%'],'Ghost notes opacity','h');
+S('edit.nudgeFine','enum','1/64',['1/32','1/64','1/128'],'Finest nudge step','h','move');
+S('edit.undoSteps','num',200,[50,2000,50,''],'Undo steps kept','h','history memory');
+S('edit.pasteAt','enum','Playhead',['Playhead','Original time','Pointer'],'Paste lands at','h');
+S('mixer.stripWidth','num',76,[64,170,2,' px'],'Strip width','','narrow wide channel');
+S('mixer.meterFps','num',60,[10,120,5,' fps'],'How often level meters redraw','h','frame rate cpu');
+S('mixer.peakHoldMs','num',1000,[0,10000,100,' ms'],'Peak hold time','','meter');
+S('mixer.meterFloorDb','num',-60,[-96,-36,6,' dB'],'Lowest level a meter shows','h','range');
+S('mixer.faderFineRatio','num',10,[2,50,1,'×'],'How much finer a fader moves with Shift','h','precision');
+S('mixer.doubleClickReset','bool',true,0,'Double click puts a control back to its default','h');
+S('mixer.soloMode','enum','Latch',['Latch','Exclusive','Momentary'],'Solo behaviour','h');
+S('devices.paramSmoothMs','num',20,[0,200,5,' ms'],'Smoothing of knob moves (zipper noise)','h','automation');
+S('devices.newStart','enum','As each device prefers',['As each device prefers','Shown','Hidden'],'New devices start with their parameters');
+S('devices.presetPreview','bool',true,0,'Hear a preset while pointing at it','h');
+S('audio.bufferSize','enum','Auto',['Auto','64','128','256','512','1024','2048'],'Buffer size','c','latency');
+S('audio.sampleRate','enum','Automatic (device)',['Automatic (device)','44.1 kHz','48 kHz','96 kHz'],'Sample rate','c');
+S('engine.voiceLimit','num',64,[16,256,8,''],'Most voices sounding at once','hc','polyphony cpu');
+S('engine.sleepAfterMs','num',1500,[200,10000,100,' ms'],'A silent track goes to sleep after','h','cpu saver');
+S('engine.lookaheadMs','num',120,[40,400,10,' ms'],'How far ahead notes are scheduled','hc','timing');
+S('engine.freezeIdleS','num',20,[5,300,5,' s'],'Unchanged tracks are frozen after','h','background freeze');
+S('project.autosaveMin','num',2,[1,30,1,' min'],'Autosave every');
+S('project.backupCount','num',20,[1,200,1,''],'Earlier versions kept per project','h','time machine');
+S('export.tailS','num',2,[0,16,1,' s'],'Export tail');
+S('export.ditherSeedFixed','bool',true,0,'Same seed gives the same export','h');
+S('chat.canWriteFiles','bool',true,0,'The chat box may write rules, macros and scripts (it always shows them first)','h','assistant ai');
+S('workshop.enabled','bool',false,0,'Show the Workshop in the menu','','developer advanced');
+S('workshop.scriptHandlerMs','num',50,[10,200,10,' ms'],'Longest a script may take to answer one event','h','time limit');
+S('safety.limiter.ceilingDb','num',-1,[-10,-1,1,' dBFS'],'Master safety limiter ceiling','l','protect loud');
+S('safety.output.maxGainDb','num',0,[0,0,1,' dB'],'Most gain the output stage may add','l','volume');
+S('safety.startup.rampMs','num',30,[30,30,1,' ms'],'Fade-in when the engine starts','l','click pop');
+S('safety.script.runLimitMs','num',2000,[2000,2000,1,' ms'],'Longest a script may run before it is stopped','l','time limit freeze');
+const eff=id=>{const e=SBY[id];if(ST.safe||e.lock)return e.def;const p=CUST.settingsProject,u=CUST.settingsUser;return id in p?p[id]:id in u?u[id]:e.def};
+const layerOf=id=>ST.safe?'default':id in CUST.settingsProject?'project':id in CUST.settingsUser?'user':'default';
+const fmtV=(e,v)=>e.t=='num'?v+e.x[3]:e.t=='bool'?(v?'on':'off'):v;
+/* validation: the same function guards the list, the files and scripts */
+function validate(id,v){const e=SBY[id];if(!e)return{bad:'No setting is called "'+id+'". It is kept in the file but not used.'};
+ if(e.lock)return{bad:'Locked. A safety value: no file, rule or script can change it.'};
+ if(e.t=='bool'){if(typeof v!='boolean')return{bad:'Must be true or false.'};return{v}}
+ if(e.t=='enum'){if(!e.x.includes(v))return{bad:'Must be one of: '+e.x.join(', ')+'.'};return{v}}
+ const n=Number(v);if(v===''||!isFinite(n))return{bad:'Must be a number.'};
+ if(n<e.x[0]||n>e.x[1])return{bad:'Must be from '+e.x[0]+' to '+e.x[1]+e.x[3]+'.'};return{v:n}}
+
+/* ---------- the controls of the mock, each with a stable id ---------- */
+const CTL={},ORDER={transport:[],strip:[],master:[]};
+function C(id,box,label,o={}){CTL[id]=Object.assign({id,box,label},o);ORDER[box].push(id)}
+C('transport.play','transport','Play',{cmd:'transport.play'});C('transport.stop','transport','Stop',{cmd:'transport.stop'});
+C('transport.record','transport','Rec',{cmd:'transport.record',prot:'The record light must always be visible.'});
+C('transport.loop','transport','Loop',{cmd:'transport.loop'});C('transport.metronome','transport','Click',{cmd:'transport.metronome'});
+C('transport.countIn','transport','Count-in',{cmd:'transport.countIn'});C('transport.tap','transport','Tap',{cmd:'transport.tap'});
+C('transport.clock','transport','Clock',{ro:1});C('transport.tempo','transport','Tempo',{ro:1});
+C('transport.capture','transport','Capture',{});C('transport.undo','transport','Undo',{cmd:'edit.undo'});C('transport.redo','transport','Redo',{cmd:'edit.redo'});
+C('transport.cpu','transport','CPU',{ro:1});
+C('mixer.strip.name','strip','Name');C('mixer.strip.fx','strip','FX');C('mixer.strip.sends','strip','Sends');C('mixer.strip.pan','strip','Pan');
+C('mixer.strip.fader','strip','Fader and meter');C('mixer.strip.peak','strip','Peak number');C('mixer.strip.mute','strip','M');C('mixer.strip.solo','strip','S');C('mixer.strip.rec','strip','R');
+C('mixer.master.name','master','Master');C('mixer.master.lufs','master','Loudness');C('mixer.master.truePeak','master','True peak');
+C('mixer.master.limiter','master','Limiter',{prot:'The limiter light shows that your ears and speakers are protected.'});
+C('mixer.master.fader','master','Master meter',{prot:'The master meter must always be visible.'});C('mixer.master.mono','master','Mono');C('mixer.master.dim','master','Dim');
+const BOXNAME={transport:'the transport bar',strip:'every channel strip',master:'the master strip'};
+const LAYOUTS={arrange:'Arrange',mix:'Mix',compact:'Compact'};
+function activeRules(){return ST.safe?[]:[...CUST.rules.all,...CUST.rules[ST.layout]]}
+/* apply the rules to one box: returns [{id,label,hidden}] in display order, and collects problems */
+let RULEWARN=[];
+function layoutOf(box){const rules=activeRules();let order=ORDER[box].slice();const lab={},hid={};
+ for(const r of rules){const c=CTL[r.id];if(!c||c.box!==box)continue;
+  if(r.hide){if(c.prot)RULEWARN.push(r.id+': cannot be hidden. '+c.prot);else hid[r.id]=1}
+  if(typeof r.rename=='string'&&r.rename.trim())lab[r.id]=r.rename.trim().slice(0,24);
+  const rel=r.before||r.after;if(rel){const t=CTL[rel];if(!t||t.box!==box){RULEWARN.push(r.id+': can only move inside '+BOXNAME[box]+'.');continue}
+   order=order.filter(x=>x!==r.id);const i=order.indexOf(rel);order.splice(r.before?i:i+1,0,r.id)}}
+ return order.map(id=>({id,label:lab[id]||CTL[id].label,hidden:!!hid[id]}))}
+function checkRules(){RULEWARN=[];for(const r of activeRules())if(!CTL[r.id])RULEWARN.push('"'+r.id+'": no control has this id. The rule is kept but not used.');['transport','strip','master'].forEach(layoutOf);return RULEWARN}
+
+/* ---------- drawing the mock ---------- */
+const app=$('#dlApp');
+function clockText(){const beats=T.pos/100*16,f=eff('transport.clockFormat');
+ if(f=='Bars')return (1+Math.floor(beats/4))+'.'+(1+Math.floor(beats%4))+'.'+(1+Math.floor(beats*4%4));
+ const s=beats*60/P.tempo;return f=='Time'?'0:'+s.toFixed(2).padStart(5,'0'):Math.round(s*48000).toLocaleString('en')+' smp'}
+function ctlHTML(it,tr){const id=it.id,c=CTL[id],g=it.hidden?' ghost':'',a=`data-al="${id}"${tr?` data-tr="${tr.id}"`:''}`,L=esc(it.label);
+ const pk=ST.picked===id?' pkd':'';
+ switch(id){
+ case'transport.play':return `<button ${a} class="c${T.playing?' on':''}${g}${pk}">▶ ${L}</button>`;
+ case'transport.stop':return `<button ${a} class="c${g}${pk}">■ ${L}</button>`;
+ case'transport.record':return `<button ${a} class="c rec${T.rec?' on':''}${g}${pk}">● ${L}</button>`;
+ case'transport.loop':return `<button ${a} class="c${T.loop?' on':''}${g}${pk}">${L}</button>`;
+ case'transport.metronome':return `<button ${a} class="c${T.click?' on':''}${g}${pk}">${L}</button>`;
+ case'transport.countIn':return `<button ${a} class="c${T.count?' on':''}${g}${pk}">${L}</button>`;
+ case'transport.clock':return `<span ${a} class="c ro${g}${pk}" id="dlClock">${clockText()}</span>`;
+ case'transport.tempo':return `<span ${a} class="c ro${g}${pk}">${P.tempo} BPM</span>`;
+ case'transport.cpu':return `<span ${a} class="c ro${g}${pk}">${L} 7%</span>`;
+ case'mixer.strip.name':return `<button ${a} class="c nm${g}${pk}">${esc(tr.name)}</button>`;
+ case'mixer.strip.fx':return `<button ${a} class="c${g}${pk}">${L} 2</button>`;
+ case'mixer.strip.pan':return `<button ${a} class="c dlpan${g}${pk}" aria-label="${L}"></button>`;
+ case'mixer.strip.fader':return `<button ${a} class="c dlfd${g}${pk}" aria-label="${L}"><span class="fx" style="--v:${tr.id=='t1'?22:34}%"></span><span><i class="al-meter" data-mt="${tr.id}"></i></span><span><i class="al-meter" data-mt="${tr.id}"></i></span></button>`;
+ case'mixer.strip.peak':return `<span ${a} class="c ro${g}${pk}" style="justify-content:center">${tr.mute?'-inf':'-6.2'}</span>`;
+ case'mixer.strip.mute':return `<button ${a} class="c m1${tr.mute?' on':''}${g}${pk}">${L}</button>`;
+ case'mixer.strip.solo':return `<button ${a} class="c s1${tr.solo?' on':''}${g}${pk}">${L}</button>`;
+ case'mixer.master.name':return `<span ${a} class="c nm${g}${pk}">${L}</span>`;
+ case'mixer.master.lufs':return `<span ${a} class="c ro${g}${pk}">${L=='Loudness'?'':L+' '}-14.2 LUFS</span>`;
+ case'mixer.master.truePeak':return `<span ${a} class="c ro${g}${pk}">${L=='True peak'?'TP':L} -1.3</span>`;
+ case'mixer.master.limiter':return `<span ${a} class="c ro dllamp${pk}" title="Safety limiter, ceiling ${eff('safety.limiter.ceilingDb')} dBFS">${L} on</span>`;
+ case'mixer.master.fader':return `<button ${a} class="c dlfd${pk}" aria-label="${L}"><span class="fx" style="--v:26%"></span><span><i class="al-meter" data-mt="M"></i></span><span><i class="al-meter" data-mt="M"></i></span></button>`;
+ default:return `<button ${a} class="c${g}${pk}">${L}</button>`}}
+function boxHTML(box,tr){return layoutOf(box).filter(it=>!it.hidden||(ST.ghosts&&ST.tab=='P2')).map(it=>ctlHTML(it,tr)).join('')}
+function renderApp(){
+ RULEWARN=[];
+ app.style.setProperty('--hue',eff('ui.accentHue'));app.style.setProperty('--scale',eff('ui.scale')/100);
+ app.style.setProperty('--th',eff('arrange.trackHeight')+'px');app.style.setProperty('--cr',eff('arrange.clipCornerPx')+'px');
+ app.style.setProperty('--sw',eff('mixer.stripWidth')+'px');app.style.setProperty('--anim',eff('ui.animationMs')+'ms');
+ app.classList.toggle('picking',ST.picking&&ST.tab=='P2');
+ const lay=ST.layout,tb=ST.safe?[]:CUST.toolbar,sb=ST.safe?[]:CUST.scripts.buttons;
+ let h='';
+ if(ST.safe)h+=`<div class="dlsafe"><span><b>Safe mode.</b> Your changes are all kept, but none of them is used: this is AudioLab as it came.</span><button data-act="unsafe">Leave safe mode</button></div>`;
+ h+=`<div class="dlbar" data-box="transport">${boxHTML('transport')}<span class="sp"></span>${tb.map(id=>`<button class="c usr" data-run="${esc(id)}" title="${esc(id)}">${esc(cmdName(id))}</button>`).join('')}${sb.map(b=>`<button class="c usr" data-sbtn="${esc(b.id)}" title="Added by a script">${esc(b.label)}</button>`).join('')}</div>`;
+ if(lay!='mix'){h+=`<div class="dlarr">${P.tracks.map(t=>`<div class="dltr al-track${t.id==P.sel?' sel':''}${t.mute?' mu':''}" data-sel="${t.id}" style="--c:${t.color}"><div class="dlth"><i></i>${esc(t.name)}<small>${t.type}</small></div><div class="dltl">${t.clips.map(c=>`<b class="al-clip" style="left:${c[0]}%;width:${c[1]}%"></b>`).join('')}</div></div>`).join('')}<div class="dlph" id="dlPh"></div></div>`;
+  h+=`<div class="dlpr">${P.notes.map(n=>`<i class="${n.selected?'s':''}" style="left:${n.start/32*100}%;width:${n.length/32*100}%;bottom:${(n.pitch-50)/36*72+6}px;opacity:${.25+.75*n.velocity/127}"></i>`).join('')}</div>`}
+ if(lay!='compact'){h+=`<div class="dlmix">${P.tracks.map(t=>`<div class="dlst al-strip${t.id==P.sel?' sel':''}" style="--c:${t.color}" data-box="strip">${boxHTML('strip',t)}</div>`).join('')}<div class="dlst al-strip dlmaster" style="--c:#fff" data-box="master">${boxHTML('master')}</div></div>`}
+ app.innerHTML=h;placeHead();drawMeters(true);applyCss();
+ const st=[`Layout <span class="sg" id="dlLay">${Object.keys(LAYOUTS).map(k=>`<button data-lay="${k}" aria-pressed="${k==lay}">${LAYOUTS[k]}</button>`).join('')}</span>`,
+  `<button class="B" data-act="undo" ${UNDO.length?'':'disabled'}>↶ Undo${UNDO.length?' “'+esc(UNDO[UNDO.length-1].label)+'”':''}</button>`,
+  `<button class="B" data-act="safe" aria-pressed="${ST.safe}">Safe mode</button>`,`<span id="dlPoint"></span>`];
+ $('#dlStat').innerHTML=st.join('')}
+function placeHead(){const ph=$('#dlPh');if(ph){const w=ph.parentNode.clientWidth-112;ph.style.left=112+w*T.pos/100+'px'}const c=$('#dlClock');if(c)c.textContent=clockText()}
+const anySolo=()=>P.tracks.some(t=>t.solo);
+function drawMeters(still){const so=anySolo();let mx=0;const lv={};
+ for(const t of P.tracks){const on=T.playing&&!t.mute&&(!so||t.solo)&&t.clips.some(c=>T.pos>=c[0]&&T.pos<c[0]+c[1]);lv[t.id]=on?45+Math.random()*40:0;mx=Math.max(mx,lv[t.id])}
+ lv.M=mx?Math.min(96,mx+6):0;for(const i of $$('[data-mt]',app))i.style.height=(still&&!T.playing?0:lv[i.dataset.mt]*(.9+Math.random()*.1))+'%'}
+/* one timer while playing, none when stopped: the mock costs nothing at rest */
+let tick=null,meterAt=0;
+function setPlaying(on){T.playing=on?1:0;clearInterval(tick);tick=null;
+ if(on){let last=performance.now();tick=setInterval(()=>{const now=performance.now(),dt=now-last;last=now;T.pos+=dt/1000*P.tempo/60/16*100;if(T.pos>=100){if(T.loop)T.pos=0;else{T.pos=100;setPlaying(0);renderApp();return}}
+   placeHead();if(now-meterAt>=1000/eff('mixer.meterFps')){meterAt=now;drawMeters()}},16)}}
+
+/* ---------- commands: every action of the mock as a named command ---------- */
+const CMD=[],CBY={};
+function K(id,g,name,key,run){const c={id,g,name,key:key||'',run};CMD.push(c);CBY[id]=c}
+const selTrack=()=>P.tracks.find(t=>t.id==P.sel);
+const selNotes=()=>{const s=P.notes.filter(n=>n.selected);return s.length?s:P.notes};
+K('transport.play','Transport','Play / pause','Space',()=>{setPlaying(!T.playing);renderApp()});
+K('transport.stop','Transport','Stop','Shift+Space',()=>{setPlaying(0);T.pos=0;T.rec=0;renderApp()});
+K('transport.home','Transport','Go to start','Home',()=>{T.pos=0;renderApp()});
+K('transport.record','Transport','Record','Shift+R',()=>{T.rec=T.rec?0:1;renderApp()});
+K('transport.loop','Transport','Loop on / off','Shift+L',()=>{T.loop=T.loop?0:1;renderApp()});
+K('transport.metronome','Transport','Metronome','',()=>{T.click=T.click?0:1;renderApp()});
+K('transport.countIn','Transport','Count-in on / off','',()=>{T.count=T.count?0:1;renderApp()});
+K('transport.tap','Transport','Tap tempo','',()=>mutate('Tap tempo',()=>{P.tempo=P.tempo>=150?120:P.tempo+2}));
+K('transport.tempoUp','Transport','Tempo up 1 BPM','',()=>mutate('Tempo',()=>{P.tempo=clamp(P.tempo+1,40,240)}));
+K('transport.tempoDown','Transport','Tempo down 1 BPM','',()=>mutate('Tempo',()=>{P.tempo=clamp(P.tempo-1,40,240)}));
+K('edit.undo','Edit','Undo','Mod+Z',()=>{const u=UNDO.pop();if(u){REDO.push({label:u.label,snap:JSON.stringify(P)});P=JSON.parse(u.snap)}renderApp()});
+K('edit.redo','Edit','Redo','Mod+Shift+Z',()=>{const u=REDO.pop();if(u){UNDO.push({label:u.label,snap:JSON.stringify(P)});P=JSON.parse(u.snap)}renderApp()});
+K('track.selectNext','Track','Select the next track','ArrowDown',()=>{const i=P.tracks.findIndex(t=>t.id==P.sel);P.sel=P.tracks[(i+1)%P.tracks.length].id;renderApp()});
+K('track.selectPrevious','Track','Select the track above','ArrowUp',()=>{const i=P.tracks.findIndex(t=>t.id==P.sel);P.sel=P.tracks[(i+P.tracks.length-1)%P.tracks.length].id;renderApp()});
+K('track.mute','Track','Mute the selected track','M',()=>mutate('Mute',()=>{const t=selTrack();t.mute=t.mute?0:1}));
+K('track.solo','Track','Solo the selected track','S',()=>mutate('Solo',()=>{const t=selTrack();t.solo=t.solo?0:1}));
+K('track.unmuteAll','Track','Unmute and unsolo every track','',()=>mutate('Unmute all',()=>P.tracks.forEach(t=>{t.mute=0;t.solo=0})));
+K('track.newInstrument','Track','New instrument track','Mod+Shift+I',()=>mutate('New track',()=>{if(P.tracks.length<9)P.tracks.push({id:'t'+Date.now()%100000,name:'Synth '+(P.tracks.length+1),type:'lead',color:GREY,mute:0,solo:0,clips:[]})}));
+K('track.delete','Track','Delete the selected track','',()=>mutate('Delete track',()=>{if(P.tracks.length>1){const i=P.tracks.findIndex(t=>t.id==P.sel);P.tracks.splice(i,1);P.sel=P.tracks[Math.min(i,P.tracks.length-1)].id}}));
+K('clip.duplicate','Clip','Duplicate the last clip of the selected track','Mod+D',()=>mutate('Duplicate clip',()=>{const t=selTrack(),c=t.clips[t.clips.length-1];if(c&&c[0]+c[1]*2<=100)t.clips.push([c[0]+c[1],c[1]])}));
+K('clip.quantize16','Clip','Quantize the selected notes to 1/16','Q',()=>mutate('Quantize',()=>selNotes().forEach(n=>{n.start=clamp(Math.round(n.start),0,31)})));
+K('note.selectAll','Notes','Select every note','Mod+A',()=>mutate('Select all',()=>P.notes.forEach(n=>n.selected=true)));
+K('note.selectEveryOther','Notes','Select every second note','',()=>mutate('Select',()=>P.notes.forEach((n,i)=>n.selected=i%2==0)));
+K('note.octaveUp','Notes','Selected notes one octave up','Shift+ArrowUp',()=>mutate('Octave up',()=>selNotes().forEach(n=>n.pitch=clamp(n.pitch+12,50,84))));
+K('note.octaveDown','Notes','Selected notes one octave down','Shift+ArrowDown',()=>mutate('Octave down',()=>selNotes().forEach(n=>n.pitch=clamp(n.pitch-12,50,84))));
+K('note.velocityUp','Notes','Selected notes louder','',()=>mutate('Velocity',()=>selNotes().forEach(n=>n.velocity=clamp(n.velocity+12,1,127))));
+K('note.velocityDown','Notes','Selected notes softer','',()=>mutate('Velocity',()=>selNotes().forEach(n=>n.velocity=clamp(n.velocity-12,1,127))));
+K('note.legato','Notes','Stretch each selected note to the next','',()=>mutate('Legato',()=>selNotes().forEach(n=>n.length=2)));
+K('view.layoutArrange','View','Layout: Arrange','',()=>{ST.layout='arrange';renderAll()});
+K('view.layoutMix','View','Layout: Mix','Shift+M',()=>{ST.layout='mix';renderAll()});
+K('view.layoutCompact','View','Layout: Compact','',()=>{ST.layout='compact';renderAll()});
+K('view.zoomIn','View','Taller tracks','',()=>setSetting('arrange.trackHeight',clamp(eff('arrange.trackHeight')+4,22,56)));
+K('view.zoomOut','View','Lower tracks','',()=>setSetting('arrange.trackHeight',clamp(eff('arrange.trackHeight')-4,22,56)));
+K('app.safeMode','App','Safe mode on / off','',()=>{ST.safe=!ST.safe;renderAll()});
+K('project.new','Project','Start the mock project again','',()=>{mutate('New project',()=>{P=freshProject()})});
+function macroCmd(slug){const m=CUST.macros[slug];return m&&{id:'macro.'+slug,g:'My macros',name:m.name,key:'',macro:m}}
+function getCmd(id){if(id.startsWith('macro.'))return ST.safe?null:macroCmd(id.slice(6));return CBY[id]}
+function cmdName(id){const c=getCmd(id);return c?c.name:id+' (missing)'}
+let depth=0;
+function runCmd(id,from){const c=getCmd(id);if(!c){say('No command is called '+id+'.','e');return false}
+ if(c.macro){if(depth>4){say('Macro '+id+' calls itself: stopped.','e');return false}depth++;const n0=UNDO.length,before=JSON.stringify(P);
+  for(const s of c.macro.steps)if(runCmd(s,'macro')===false)break;depth--;
+  if(UNDO.length>n0){UNDO.length=n0;UNDO.push({label:c.name,snap:before})}renderApp();if(from!='macro')say('Macro “'+c.name+'” ran '+c.macro.steps.length+' steps as one undo step.','o');return true}
+ c.run();if(from!='macro'&&from!='quiet')say('Ran '+id,'i');return true}
+const keyOf=id=>ST.safe?(CBY[id]?CBY[id].key:''):(id in CUST.keys?CUST.keys[id]:(CBY[id]?CBY[id].key:''));
+function chord(e){const p=[];if(e.metaKey||e.ctrlKey)p.push('Mod');if(e.altKey)p.push('Alt');if(e.shiftKey)p.push('Shift');let k=e.key;if(k==' ')k='Space';if(['Shift','Control','Alt','Meta'].includes(k))return'';if(k.length==1)k=k.toUpperCase();p.push(k);return p.join('+')}
+function setSetting(id,v,layer){const r=validate(id,v);if(r.bad)return r;const e=SBY[id];layer=layer||'user';
+ if(layer=='project'&&e.comp)return{bad:'This one belongs to the computer, so it cannot travel inside a project.'};
+ const box=layer=='project'?CUST.settingsProject:CUST.settingsUser;if(layer=='user'&&r.v===e.def)delete box[id];else box[id]=r.v;renderAll();return r}
+/* the console line under the tools (also used by commands) */
+const LOG=[];function say(t,k='i'){LOG.push({t:String(t),k});if(LOG.length>200)LOG.shift();const c=$('#dlCon');if(c){c.innerHTML=LOG.map(l=>`<div class="${l.k}">${esc(l.t)}</div>`).join('');c.scrollTop=c.scrollHeight}const m=$('#dlCmdMsg');if(m){m.textContent=t;m.className='dlmsg '+(k=='e'?'bad':k=='o'?'ok':'')}}
+/* ---------- the six tools ---------- */
+const TABS=[
+ {k:'P1',n:'The everything list',d:'Every setting by its id in one searchable list, with its default, like about:config in Firefox. It also holds the options that have no normal control today (purple mark) and the locked safety values (red mark). Try: search "meter", set <b>mixer.meterFps</b> to 10 and press Play; set <b>ui.accentHue</b> to 30; type 999 into <b>mixer.stripWidth</b>.'},
+ {k:'P2',n:'Pick and change any control',d:'Press "Pick an element", then click any button, read-out or strip part in the mock. Hide it, rename it or move it; choose whether that holds in every layout or only this one. The rules file on the right is the whole truth: edit it by hand and press Apply. Try to hide the limiter light.'},
+ {k:'P3',n:'Commands and macros',d:'Every action is a named command. Give it a key, put it on the toolbar, or chain several into a macro that runs as one undo step. Scripts and the chat box call the same names. Keys work while the pointer is over the mock.'},
+ {k:'P4',n:'Your own CSS',d:'A few lines of CSS change the look beyond what any setting offers. Guard rails: it only reaches AudioLab\'s own window, cannot load files or web addresses, and is switched off by itself if it hides a protected control.'},
+ {k:'P5',n:'Your own scripts',d:'A small JavaScript API reads and changes the project. A script runs in a sandbox: no files, no network unless you allow it on a card, 2 seconds at most, and its changes arrive as one undo step. Examples 4 to 6 try to misbehave.'},
+ {k:'P6',n:'Safe mode and reset',d:'The way back. Safe mode starts AudioLab as it came without deleting anything. The list shows every change from all five tools, each with its own remove button.'}];
+const tool=$('#dlTool');
+function renderTabs(){$('#dlTabs').innerHTML=TABS.map(t=>`<button data-tab="${t.k}" aria-pressed="${ST.tab==t.k}" class="${PK.P[t.k]=='yes'?'picked':''}"><span class="num">${t.k}</span>${t.n}${PK.P[t.k]?` <small>· ${PK.P[t.k]}</small>`:''}</button>`).join('');
+ const t=TABS.find(t=>t.k==ST.tab);$('#dlInfo').innerHTML=`<p><b>${t.k} ${t.n}.</b> ${t.d}</p><span>Do you want this?</span><span class="segm" role="group" aria-label="Do you want ${t.n}">${['yes','later','no'].map(v=>`<button data-yn="${v}" aria-pressed="${PK.P[t.k]==v}">${v[0].toUpperCase()+v.slice(1)}${v=='yes'?' ★':''}</button>`).join('')}</span>`}
+const j=o=>JSON.stringify(o,null,2);
+const pane=(head,body,foot='')=>`<div class="dlpane"><header>${head}</header>${body}${foot}</div>`;
+const fileHead=(name,extra='')=>`<b>${name}</b><span class="sp"></span>${extra}`;
+
+/* P1 */
+let ERR=null;
+function setRows(){const q=ST.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+ const rows=SET.filter(e=>{if(ST.filter=='chg'&&layerOf(e.id)=='default')return false;if(ST.filter=='hid'&&!e.h)return false;if(ST.filter=='lock'&&!e.lock)return false;
+  const hay=(e.id+' '+e.l+' '+e.k).toLowerCase();return q.every(w=>hay.includes(w))});
+ if(!rows.length)return '<div class="dlhint">Nothing matches. Try "meter", "ms" or "safety".</div>';
+ return rows.map(e=>{const v=eff(e.id),ly=layerOf(e.id),id=e.id,did='dls-'+id.replace(/\./g,'-');let ed;
+  if(e.lock)ed=`<span class="c ro">${esc(fmtV(e,v))}</span>`;
+  else if(e.t=='bool')ed=`<button class="sw" role="switch" id="${did}" aria-checked="${!!v}" data-set="${id}" aria-label="${esc(e.l)}"></button>`;
+  else if(e.t=='enum')ed=`<select id="${did}" data-set="${id}" aria-label="${esc(e.l)}">${e.x.map(o=>`<option${o==v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else ed=`<input type="number" id="${did}" data-set="${id}" value="${v}" step="${e.x[2]}" aria-label="${esc(e.l)}">`;
+  const tags=(e.h?'<i class="tag h" title="No normal control exists for this today">no control</i> ':'')+(e.lock?'<i class="tag l">locked</i> ':'')+(ly=='user'?'<i class="tag u">yours</i>':ly=='project'?'<i class="tag p">project</i>':'');
+  return `<div class="dlrow${ly!='default'?' chg':''}"><span class="id">${esc(id)}<small>${esc(e.l)} · default ${esc(fmtV(e,e.def))}${e.t=='num'&&!e.lock?' · '+e.x[0]+' to '+e.x[1]:''}</small></span><span>${tags}</span>${ed}${ly!='default'?`<button class="rs" data-rst="${id}" title="Back to the default" aria-label="Reset ${id}">↺</button>`:'<span></span>'}${ERR&&ERR.id==id?`<span class="err">${esc(ERR.msg)}</span>`:''}</div>`}).join('')}
+function p1(){const n=SET.length,h=SET.filter(e=>e.h).length,l=SET.filter(e=>e.lock).length;
+ const F=[['all','All '+n],['chg','Changed'],['hid','No normal control '+h],['lock','Locked '+l]];
+ return pane(`<input class="dlq" id="dlQ" type="search" placeholder="Search ${n} settings by id or words" value="${esc(ST.q)}" aria-label="Search settings"><span class="sg">${F.map(f=>`<button data-flt="${f[0]}" aria-pressed="${ST.filter==f[0]}">${f[1]}</button>`).join('')}</span><span class="sg" title="Where a change is written">${[['user','Write to: mine'],['project','this project']].map(f=>`<button data-tgt="${f[0]}" aria-pressed="${ST.target==f[0]}">${f[1]}</button>`).join('')}</span>`,`<div class="dlbody" id="dlSetList">${setRows()}</div>`)
+ +pane(fileHead('The files this writes'),`<div class="dlbody" style="gap:0"><div class="dlgrp">settings.json · yours, on this computer</div><pre class="dlfile">${esc(j({audiolab:'settings',version:1,values:ST.safe?{}:CUST.settingsUser}))}</pre><div class="dlgrp">inside the project file · travels with the song</div><pre class="dlfile">${esc(j({settings:CUST.settingsProject}))}</pre></div>`,`<div class="dlmsg">Three layers, the later one wins: AudioLab's defaults, then yours, then the project's. Only what differs from the default is written, so an update that improves a default reaches you.</div>`)}
+
+/* P2 */
+const scopeKey=()=>ST.scopeAll?'all':ST.layout;
+function ruleFor(id,make){const L=CUST.rules[scopeKey()];let r=L.find(r=>r.id==id);if(!r&&make){r={id};L.push(r)}return r}
+function tidyRules(){for(const k in CUST.rules)CUST.rules[k]=CUST.rules[k].filter(r=>r.hide||r.rename||r.before||r.after)}
+function ruleText(r){const p=[];if(r.hide)p.push('hidden');if(r.rename)p.push('renamed “'+r.rename+'”');if(r.before)p.push('moved before '+r.before);if(r.after)p.push('moved after '+r.after);return p.join(', ')}
+let RMSG=null;
+function p2(){const id=ST.picked,c=id&&CTL[id],r=id&&ruleFor(id);
+ let acts;
+ if(!c)acts=`<div class="dlhint">${ST.picking?'Now click a control in the mock above.':'Press “Pick an element”, then click any control in the mock.'}</div>`;
+ else acts=`<div class="dlacts"><b style="font:500 12px var(--mono)">${esc(id)}</b><small style="color:var(--mut)">in ${BOXNAME[c.box]}</small></div>
+  <div class="dlacts"><input type="text" id="dlRen" maxlength="24" placeholder="New name" value="${esc(r&&r.rename||'')}" aria-label="New name for ${esc(id)}"><button class="B" data-ract="rename">Rename</button>
+  <button class="B" data-ract="hide" aria-pressed="${!!(r&&r.hide)}">${r&&r.hide?'Hidden: show again':'Hide'}</button><button class="B" data-ract="earlier">◀ Move earlier</button><button class="B" data-ract="later">Move later ▶</button><button class="B dng" data-ract="reset">Reset this control</button></div>`;
+ const all=[];for(const k of ['all','arrange','mix','compact'])for(const r of CUST.rules[k])all.push({k,r});
+ const list=all.length?all.map((x,i)=>`<div class="dlchg"><span>${esc(x.r.id)} <small>${esc(ruleText(x.r))} · ${x.k=='all'?'every layout':'only '+LAYOUTS[x.k]}</small></span><button class="rs" data-rdel="${x.k}|${esc(x.r.id)}" aria-label="Remove this rule">✕</button></div>`).join(''):'<div class="dlhint">No rules yet.</div>';
+ const warn=checkRules(),msg=RMSG||(warn.length?{k:'bad',t:warn.join(' ')}:{k:'ok',t:'The file is valid. '+all.length+' rule'+(all.length==1?'':'s')+'.'});
+ return pane(`<button class="B pri" data-act="pick" aria-pressed="${ST.picking}">${ST.picking?'Picking… (click to stop)':'Pick an element'}</button><button class="B" data-act="ghosts" aria-pressed="${ST.ghosts}">Show hidden ones faintly</button><span class="sp"></span><span class="sg">${[[1,'Every layout'],[0,'Only '+LAYOUTS[ST.layout]]].map(f=>`<button data-scope="${f[0]}" aria-pressed="${!!f[0]==ST.scopeAll}">${f[1]}</button>`).join('')}</span>`,
+  acts+`<div class="dlex"><button class="B" data-chat="rules">Chat box: “hide the sends and the R button in the mixer”</button></div><div class="dlbody"><div class="dlgrp">Rules in use</div>${list}</div>`)
+ +pane(fileHead('ui-rules.json','<button class="B" data-act="rapply">Apply what I typed</button>'),`<textarea class="dlfile" id="dlRules" spellcheck="false" aria-label="The rules file">${esc(j({audiolab:'ui-rules',version:1,layouts:CUST.rules}))}</textarea>`,`<div class="dlmsg ${msg.k}">${esc(msg.t)}</div>`)}
+function ruleAct(a){const id=ST.picked,c=CTL[id];if(!c)return;RMSG=null;
+ if(a=='reset'){for(const k in CUST.rules)CUST.rules[k]=CUST.rules[k].filter(r=>r.id!=id)}
+ else if(a=='hide'){if(c.prot){RMSG={k:'bad',t:id+' cannot be hidden. '+c.prot};return}const r=ruleFor(id,1);r.hide?delete r.hide:r.hide=true}
+ else if(a=='rename'){const v=$('#dlRen').value.trim();const r=ruleFor(id,1);v?r.rename=v:delete r.rename}
+ else{const ids=layoutOf(c.box).map(x=>x.id),i=ids.indexOf(id),t=a=='earlier'?ids[i-1]:ids[i+1];if(!t){RMSG={k:'bad',t:'It is already at the '+(a=='earlier'?'start':'end')+' of '+BOXNAME[c.box]+'.'};return}
+  const r=ruleFor(id,1);delete r.before;delete r.after;a=='earlier'?r.before=t:r.after=t}
+ tidyRules()}
+function applyRulesText(){let o;try{o=JSON.parse($('#dlRules').value)}catch(e){RMSG={k:'bad',t:'Not valid JSON, so nothing was changed: '+e.message};return}
+ if(!o||o.audiolab!='ui-rules'||typeof o.layouts!='object'){RMSG={k:'bad',t:'This is not a ui-rules file ("audiolab": "ui-rules" and "layouts" are needed). Nothing was changed.'};return}
+ if(o.version>1){RMSG={k:'bad',t:'This file is for a newer AudioLab (version '+o.version+'). Nothing was changed.'};return}
+ const out={all:[],arrange:[],mix:[],compact:[]};let skipped=0;
+ for(const k in out)for(const r of Array.isArray(o.layouts[k])?o.layouts[k]:[]){if(!r||typeof r.id!='string'){skipped++;continue}const n={id:r.id};if(r.hide===true)n.hide=true;if(typeof r.rename=='string')n.rename=r.rename.slice(0,24);if(typeof r.before=='string')n.before=r.before;else if(typeof r.after=='string')n.after=r.after;out[k].push(n)}
+ CUST.rules=out;tidyRules();const w=checkRules();RMSG=w.length||skipped?{k:'bad',t:'Applied, with notes: '+w.join(' ')+(skipped?' '+skipped+' entries had no id and were left out.':'')}:{k:'ok',t:'Applied.'}}
+
+/* P3 */
+function allCmds(){const m=ST.safe?[]:Object.keys(CUST.macros).map(macroCmd);return [...m,...CMD]}
+function cmdRows(){const q=ST.cq.trim().toLowerCase().split(/\s+/).filter(Boolean);let g='',h='';
+ for(const c of allCmds()){if(!q.every(w=>(c.id+' '+c.name+' '+c.g).toLowerCase().includes(w)))continue;
+  if(c.g!=g){g=c.g;h+=`<div class="dlgrp">${g}</div>`}const k=keyOf(c.id),on=CUST.toolbar.includes(c.id);
+  h+=`<div class="dlcmd"><span class="id">${esc(c.id)}<small>${esc(c.name)}${c.macro?' · '+c.macro.steps.length+' steps':''}</small></span><button class="dlkey${ST.waitKey==c.id?' w':''}" data-key="${esc(c.id)}" title="Click, then press the new keys. Backspace removes the key.">${ST.waitKey==c.id?'press…':esc(k)||'no key'}</button><button class="B" data-run="${esc(c.id)}" title="Run it now">▶</button><button class="B" data-bar="${esc(c.id)}" aria-pressed="${on}" title="Show on the toolbar">bar</button>${ST.macroOpen?`<button class="B" data-step="${esc(c.id)}" title="Add as a step">＋step</button>`:c.macro?`<button class="rs" data-mdel="${esc(c.id.slice(6))}" aria-label="Delete this macro">✕</button>`:'<span></span>'}</div>`}
+ return h||'<div class="dlhint">No command matches.</div>'}
+function p3(){const d=ST.macroDraft;
+ const draft=ST.macroOpen?`<div class="dlacts"><input type="text" id="dlMName" placeholder="Name of the macro" maxlength="30" value="${esc(d.name)}" aria-label="Name of the macro"><button class="B pri" data-act="msave">Save macro</button><button class="B" data-act="mcancel">Cancel</button></div><div class="dlsteps">${d.steps.length?d.steps.map((s,i)=>`<div class="st"><b>${i+1}</b><span>${esc(s)}</span><button class="rs" data-sup="${i}" aria-label="Move step up" ${i?'':'disabled'}>↑</button><button class="rs" data-sdel="${i}" aria-label="Remove step">✕</button></div>`).join(''):'<span style="color:var(--mut)">Press ＋step on the commands below, in the order they should run.</span>'}</div>`:'';
+ const file={audiolab:'commands',version:1,keys:CUST.keys,toolbar:CUST.toolbar,macros:CUST.macros};
+ return pane(`<input class="dlq" id="dlCQ" type="search" placeholder="Search ${allCmds().length} commands" value="${esc(ST.cq)}" aria-label="Search commands"><button class="B${ST.macroOpen?'':' pri'}" data-act="mnew" aria-pressed="${ST.macroOpen}">New macro</button>`,draft+`<div class="dlbody" id="dlCmdList">${cmdRows()}</div>`)
+ +pane(fileHead('commands.json'),`<pre class="dlfile">${esc(j(file))}</pre>`,`<div class="dlmsg" id="dlCmdMsg">Only your changes are in the file. A key that is not listed keeps AudioLab's default.</div>`)}
+
+/* P4 */
+const CSSX=[['Big mute and solo','/* Larger M and S buttons on every strip */\n[al="mixer.strip.mute"], [al="mixer.strip.solo"] {\n  height: 30px;\n  font-size: 14px;\n  font-weight: 700;\n}'],
+ ['Amber meters, square strips','.al-meter { background: #e3b341; }\n.al-strip { border-radius: 0; }\n.al-clip  { border-top-width: 8px; }'],
+ ['Tries to break things','/* Each line here is stopped by a guard rail */\n@import url("https://example.org/theme.css");\n[al="transport.play"] { background: url(https://example.org/x.png); color: #7be0ae; }\n[al="mixer.master.limiter"] { display: none; }']];
+const PROT=Object.keys(CTL).filter(k=>CTL[k].prot);
+function cleanCss(text){const rep=[];if(/@import/i.test(text))rep.push('Left out @import: a snippet cannot load other files.');
+ let sh;try{sh=new CSSStyleSheet();sh.replaceSync(text.replace(/\[al([~^$*|]?=)/g,'[data-al$1'))}catch(e){return{css:'',rep:['Could not read the CSS: '+e.message]}}
+ const out=[];for(const r of sh.cssRules){if(!(r instanceof CSSStyleRule)){rep.push('Left out '+r.cssText.split('{')[0].trim()+': only plain style rules are allowed.');continue}
+  const d=[];for(let i=0;i<r.style.length;i++){const p=r.style[i],v=r.style.getPropertyValue(p);
+   if(/url\(|image-set|expression/i.test(v)){rep.push('Left out '+p+' on '+r.selectorText.replace(/data-al/g,'al')+': no files or web addresses.');continue}
+   if(p=='position'&&/fixed|sticky/.test(v)){rep.push('Left out position: '+v+': a snippet cannot cover the window.');continue}
+   d.push(p+':'+v+(r.style.getPropertyPriority(p)?' !important':''))}
+  if(d.length)out.push(r.selectorText.split(',').map(s=>'#dlRoot #dlApp:not(#x#y) '+s.trim().replace(/^(:root|html|body)\b/,'')).join(',')+'{'+d.join(';')+'}')}
+ return{css:out.join('\n'),rep}}
+let cssEl=null;
+function applyCss(){if(!cssEl){cssEl=document.createElement('style');cssEl.id='dlUserCss';document.head.appendChild(cssEl)}
+ const on=CUST.css.on&&!ST.safe&&CUST.css.clean;cssEl.textContent=on?CUST.css.clean:'';if(!on)return;
+ for(const id of PROT){const el=$(`[data-al="${id}"]`,app);if(!el)continue;const cs=getComputedStyle(el),b=el.getBoundingClientRect();
+  if(cs.display=='none'||cs.visibility=='hidden'||+cs.opacity<.4||b.width<6||b.height<6){cssEl.textContent='';CUST.css.on=false;CUST.css.rep=(CUST.css.rep||[]).concat('Switched off: it hid '+id+'. '+CTL[id].prot+' Remove that rule and switch it on again.');return}}}
+function setCss(text,on){const r=cleanCss(text);CUST.css={on,text,clean:r.css,rep:r.rep}}
+function p4(){const c=CUST.css,rep=c.rep||[];
+ return pane(`<b>snippets/my-look.css</b><span class="sp"></span><button class="sw" role="switch" id="dlCssOn" aria-checked="${!!c.on}" data-act="csson" aria-label="Snippet on"></button><button class="B pri" data-act="cssapply">Apply</button>`,
+  `<div class="dlex">${CSSX.map((x,i)=>`<button class="B" data-cssx="${i}">${i+1} ${x[0]}</button>`).join('')}</div><textarea class="dlfile" id="dlCss" spellcheck="false" placeholder="Type CSS here, or press an example. A control is addressed by its id: [al=&quot;transport.play&quot;]" aria-label="Your CSS">${esc(c.text)}</textarea>`)
+ +pane(fileHead('What the guard rails did'),`<div class="dlbody">${rep.length?rep.map(r=>`<div class="dlchg"><span style="color:#ffb9b9;font-family:var(--f)">${esc(r)}</span></div>`).join(''):`<div class="dlhint">${c.text?(c.on?'Nothing was left out. The snippet is on.':'The snippet is off.'):'Nothing yet.'}</div>`}
+  <div class="dlgrp">What a snippet can reach</div><div class="dlhint">Controls by id, <b>[al="mixer.strip.mute"]</b>, and a short list of named parts that stay the same between versions: <b>.al-strip</b>, <b>.al-track</b>, <b>.al-clip</b>, <b>.al-meter</b>. Use the picker in P2 to find an id. Anything else in AudioLab's inner markup may change with an update.</div></div>`,`<div class="dlmsg">${c.on?'On · '+c.clean.split('\n').length+' rule(s) in use':'Off · nothing from this snippet is in use'}</div>`)}
+
+/* P5: scripts in a worker */
+const SCR=[['Colour all tracks by type',"// Colour every track by what it is.\nconst colours = { drums:'#e5534b', bass:'#4c8dff', lead:'#e3b341', pad:'#b77bff', fx:'#3ecf8e', vocal:'#f0883e' };\nfor (const track of al.project.tracks) {\n  track.setColor(colours[track.type] || '#8b8b97');\n  console.log(track.name, 'is', track.type);\n}"],
+ ['Humanise selected notes',"// Move each selected note a little in time and loudness.\nconst amount = 0.2;   // in sixteenth notes\nconst notes = al.selection.notes;\nfor (const note of notes) {\n  note.set({\n    start: Math.max(0, note.start + (Math.random() * 2 - 1) * amount),\n    velocity: Math.round(note.velocity - Math.random() * 35)\n  });\n}\nconsole.log('Humanised', notes.length, 'notes. Undo puts them back.');"],
+ ['Add a toolbar button',"// Adds a button at the right end of the transport bar.\n// It stays until the script is stopped.\nal.ui.addToolbarButton({\n  id: 'octave-flip',\n  label: 'Octave flip',\n  onClick() {\n    for (const note of al.selection.notes) {\n      note.set({ pitch: note.pitch >= 69 ? note.pitch - 12 : note.pitch + 12 });\n    }\n    console.log('Flipped', al.selection.notes.length, 'notes');\n  }\n});\nconsole.log('Button added. Press it in the mock.');"],
+ ['Never ends (time limit)',"// A script with a mistake: this loop never ends.\n// Press Play in the mock first: the music keeps going.\nlet n = 0;\nwhile (true) { n++; }"],
+ ['Asks for the network',"// Scripts have no network of their own.\nconsole.log('fetch is', typeof fetch);\n// The only door is al.net.fetch, and it asks you first.\nconst reply = await al.net.fetch('https://presets.example.org/list.json');\nconsole.log('Got', reply.presets.length, 'preset names:', reply.presets.join(', '));"],
+ ['Touches a safety value',"// One allowed change, one out of range, one locked.\nal.settings.set('mixer.stripWidth', 110);\nal.settings.set('mixer.stripWidth', 9999);\nal.settings.set('safety.limiter.ceilingDb', 6);\nal.project.tracks[0].setColor('not a colour');"],
+ ['Chat box: “make every second note softer”',"// Written by the chat box. It explains each step:\n// 1. take the notes of the selected clip, in time order\nconst notes = al.project.notes.sort((a, b) => a.start - b.start);\n// 2. every second one gets 45 less velocity (never below 1)\nnotes.forEach((note, i) => {\n  if (i % 2 === 1) note.set({ velocity: Math.max(1, note.velocity - 45) });\n});\nconsole.log('Softened', Math.floor(notes.length / 2), 'notes');"]];
+let CODE=SCR[0][1],PERM=null;
+function workerMain(){'use strict';
+ for(const k of ['fetch','XMLHttpRequest','WebSocket','EventSource','importScripts','indexedDB','caches','Worker','SharedWorker','BroadcastChannel','Notification','WebTransport','RTCPeerConnection','navigator','location']){for(let o=self;o;o=Object.getPrototypeOf(o)){try{Object.defineProperty(o,k,{value:undefined,configurable:false,writable:false})}catch(e){}}}
+ const post=self.postMessage.bind(self);let snap=null,ops=[],handlers={},asks={},askN=0,nextH=0;
+ const op=o=>{ops.push(o);if(ops.length>5000)throw new Error('Too many changes in one run (the limit is 5000).')};
+ const trackW=t=>({get id(){return t.id},get name(){return t.name},get type(){return t.type},get color(){return t.color},get muted(){return !!t.mute},get soloed(){return !!t.solo},
+  setColor(c){t.color=String(c);op({o:'track',id:t.id,k:'color',v:t.color})},setName(n){t.name=String(n);op({o:'track',id:t.id,k:'name',v:t.name})},
+  setMuted(b){t.mute=b?1:0;op({o:'track',id:t.id,k:'mute',v:t.mute})},setSoloed(b){t.solo=b?1:0;op({o:'track',id:t.id,k:'solo',v:t.solo})}});
+ const noteW=n=>({get id(){return n.id},get start(){return n.start},get length(){return n.length},get pitch(){return n.pitch},get velocity(){return n.velocity},get selected(){return !!n.selected},
+  set(c){for(const k of ['start','length','pitch','velocity'])if(c&&k in c){n[k]=Number(c[k]);op({o:'note',id:n.id,k,v:n[k]})}}});
+ const al={version:'0.1',
+  project:{get tempo(){return snap.tempo},setTempo(v){snap.tempo=Number(v);op({o:'tempo',v:snap.tempo})},get tracks(){return snap.tracks.map(trackW)},get notes(){return snap.notes.map(noteW)}},
+  selection:{get track(){const t=snap.tracks.find(t=>t.id==snap.sel);return t?trackW(t):null},get notes(){return snap.notes.filter(n=>n.selected).map(noteW)}},
+  transport:{get playing(){return snap.playing},play(){op({o:'play',v:1})},stop(){op({o:'play',v:0})}},
+  commands:{run(id){op({o:'cmd',id:String(id)})}},
+  settings:{get(id){return snap.settings[id]},set(id,v){op({o:'setting',id:String(id),v})}},
+  ui:{addToolbarButton(b){const h='h'+(++nextH);handlers[h]=b.onClick;op({o:'button',id:String(b.id),label:String(b.label),h})}},
+  net:{fetch(url){return new Promise((res,rej)=>{const n=++askN;asks[n]={res,rej};post({t:'ask',n,perm:'network',url:String(url)})})}}};
+ const fmt=a=>typeof a=='string'?a:(()=>{try{return JSON.stringify(a)}catch(e){return String(a)}})();
+ const con={log:(...a)=>post({t:'log',k:'i',m:a.map(fmt).join(' ')}),warn:(...a)=>post({t:'log',k:'w',m:a.map(fmt).join(' ')}),error:(...a)=>post({t:'log',k:'e',m:a.map(fmt).join(' ')})};
+ const AF=Object.getPrototypeOf(async function(){}).constructor;
+ self.onmessage=async e=>{const d=e.data;
+  if(d.t=='run'){snap=d.snap;ops=[];handlers={};const t0=performance.now();try{await new AF('al','console','"use strict";'+d.code)(al,con);post({t:'done',ops,ms:performance.now()-t0,keep:Object.keys(handlers).length>0})}catch(err){post({t:'fail',m:String(err&&err.message||err)})}}
+  else if(d.t=='event'){snap=d.snap;ops=[];try{await handlers[d.h]();post({t:'done',ops,ev:1,keep:true})}catch(err){post({t:'fail',m:String(err&&err.message||err),keep:true})}}
+  else if(d.t=='answer'){const a=asks[d.n];delete asks[d.n];if(a)d.ok?a.res(d.body):a.rej(new Error('The network was not allowed.'))}}}
+let W=null,wTimer=null,wBusy=false;
+function killWorker(why){if(W){W.terminate();W=null}clearTimeout(wTimer);wBusy=false;PERM=null;const had=CUST.scripts.buttons.length;CUST.scripts.buttons=[];if(why)say(why,'e');if(had||why)renderAll()}
+function arm(ms,what){clearTimeout(wTimer);wTimer=setTimeout(()=>killWorker('Stopped by AudioLab: '+what+' took longer than '+(ms>=1000?ms/1000+' s':ms+' ms')+'. Nothing it did was applied. The music and the window never waited for it.'),ms)}
+function snapForScript(){const s=clone(P);s.playing=!!T.playing;s.settings={};SET.forEach(e=>s.settings[e.id]=eff(e.id));return s}
+function runScript(code){if(ST.safe){say('Safe mode is on: scripts do not run.','w');return}killWorker();let w;
+ try{w=new Worker(URL.createObjectURL(new Blob(['('+workerMain+')()'],{type:'text/javascript'})))}catch(e){say('This page could not start the sandbox ('+e.message+').','e');return}
+ W=w;w.onmessage=onW;w.onerror=e=>{say('Script error: '+e.message,'e');killWorker()};say('▶ Running in the sandbox…','i');wBusy=true;arm(eff('safety.script.runLimitMs'),'the script');w.postMessage({t:'run',code,snap:snapForScript()});renderTool()}
+function onW(e){const d=e.data;if(e.target!==W)return;
+ if(d.t=='log'){say(d.m,d.k);return}
+ if(d.t=='ask'){clearTimeout(wTimer);PERM=d;renderTool();return}
+ clearTimeout(wTimer);wBusy=false;
+ if(d.t=='fail'){say('Error: '+d.m+' Nothing was applied.','e');if(!d.keep)killWorker();renderTool();return}
+ const r=applyOps(d.ops,d.ev?'Script button':'Script');
+ say((d.ev?'Button handler':'Finished'+(d.ms!=null?' in '+Math.max(1,Math.round(d.ms))+' ms':''))+': '+r.ok+' change'+(r.ok==1?'':'s')+' applied'+(r.ok?' as one undo step':'')+(r.bad.length?', '+r.bad.length+' refused.':'.'),r.bad.length?'w':'o');
+ r.bad.forEach(b=>say('  refused: '+b,'w'));if(!d.keep){W.terminate();W=null}renderAll()}
+function applyOps(ops,label){const bad=[];let ok=0;const n0=UNDO.length,before=JSON.stringify(P);
+ for(const o of ops||[]){
+  if(o.o=='track'){const t=P.tracks.find(t=>t.id==o.id);if(!t){bad.push('no track '+o.id);continue}
+   if(o.k=='color'){if(!/^#[0-9a-f]{6}$/i.test(o.v)){bad.push('"'+o.v+'" is not a colour like #4c8dff');continue}t.color=o.v}
+   else if(o.k=='name')t.name=String(o.v).slice(0,24);else if(o.k=='mute'||o.k=='solo')t[o.k]=o.v?1:0;else{bad.push('unknown track field '+o.k);continue}ok++}
+  else if(o.o=='note'){const n=P.notes.find(n=>n.id==o.id);if(!n||!isFinite(o.v)){bad.push('bad note change');continue}
+   n[o.k]=o.k=='start'?clamp(o.v,0,31.5):o.k=='length'?clamp(o.v,.25,8):o.k=='pitch'?clamp(Math.round(o.v),50,84):clamp(Math.round(o.v),1,127);ok++}
+  else if(o.o=='tempo'){if(!isFinite(o.v)){bad.push('tempo must be a number');continue}P.tempo=clamp(Math.round(o.v),40,240);ok++}
+  else if(o.o=='play'){setPlaying(!!o.v);ok++}
+  else if(o.o=='cmd'){if(runCmd(o.id,'quiet')===false)bad.push('no command '+o.id);else ok++}
+  else if(o.o=='setting'){const r=setSetting(o.id,o.v);if(r.bad)bad.push(o.id+' = '+o.v+': '+r.bad);else ok++}
+  else if(o.o=='button'){const B=CUST.scripts.buttons;if(B.length>=8&&!B.some(b=>b.id==o.id)){bad.push('at most 8 script buttons');continue}CUST.scripts.buttons=B.filter(b=>b.id!=o.id).concat({id:o.id.slice(0,30),label:o.label.slice(0,24),h:o.h});ok++}
+  else bad.push('unknown change')}
+ UNDO.length=Math.min(UNDO.length,n0);if(JSON.stringify(P)!==before){UNDO.push({label,snap:before});REDO.length=0}return{ok,bad}}
+function scriptButton(id){const b=CUST.scripts.buttons.find(b=>b.id==id);if(!b||!W)return;if(wBusy){say('The script is still busy.','w');return}wBusy=true;arm(Math.max(250,eff('workshop.scriptHandlerMs')),'the button handler');W.postMessage({t:'event',h:b.h,snap:snapForScript()})}
+function answerPerm(ok){const d=PERM;PERM=null;if(!W||!d)return;say(ok?'You allowed the network once for '+permHost(d)+'.':'You did not allow the network.',ok?'o':'w');arm(eff('safety.script.runLimitMs'),'the script');
+ W.postMessage({t:'answer',n:d.n,ok,body:{presets:['Acid Line 303','Rolling Bass','Night Pad','Forest Lead']}});renderTool()}
+const permHost=d=>{try{return new URL(d.url).host}catch(e){return d.url}};
+const API=`al.project.tracks        list of tracks: id, name, type, color, muted, soloed
+  .setColor('#rrggbb') .setName(text) .setMuted(bool) .setSoloed(bool)
+al.project.notes         notes of the selected clip: id, start, length, pitch, velocity
+  .set({ start, length, pitch, velocity })
+al.project.tempo  al.project.setTempo(bpm)
+al.selection.track  al.selection.notes
+al.transport.playing  al.transport.play()  .stop()
+al.commands.run('clip.quantize16')     any command from P3, also macros
+al.settings.get(id)  al.settings.set(id, value)     same checks as P1
+al.ui.addToolbarButton({ id, label, onClick })
+await al.net.fetch(url)                asks you on a card first
+console.log(...)`;
+function p5(){const perm=PERM?`<div class="dlperm"><b>This script asks for something</b><span>Network access to <b style="font:500 12px var(--mono)">${esc(permHost(PERM))}</b>. Scripts cannot reach the internet unless you allow it. The time limit is paused while you decide.</span><div><button class="B pri" data-perm="1">Allow once</button><button class="B" data-perm="0">Don't allow</button></div></div>`:'';
+ return pane(`<b>scripts/my-script.js</b><span class="sp"></span><button class="B pri" data-act="srun">▶ Run</button><button class="B" data-act="sstop" ${W?'':'disabled'}>■ Stop${CUST.scripts.buttons.length?' (removes its button)':''}</button>`,
+  `<div class="dlex">${SCR.map((x,i)=>`<button class="B" data-scr="${i}">${i<6?(i+1)+' ':''}${esc(x[0])}</button>`).join('')}</div>${perm}<textarea class="dlfile" id="dlCode" spellcheck="false" aria-label="Your script">${esc(CODE)}</textarea>`)
+ +pane(fileHead('Console','<button class="B" data-act="cclear">Clear</button>'),`<div class="dlcon" id="dlCon" aria-live="polite"></div><div class="dlgrp" style="margin:8px 10px 0">The API on one page (made from the same lists as P1 and P3)</div><pre class="dlfile" style="font-size:11px">${esc(API)}</pre>`)}
+
+/* P6 */
+const EMPTY=()=>({settingsUser:{},settingsProject:{},rules:{all:[],arrange:[],mix:[],compact:[]},keys:{},toolbar:[],macros:{},css:{on:false,text:''},scripts:{buttons:[]}});
+let BACKUP=null,ASKRESET=false;
+function changes(){const L=[];
+ for(const id in CUST.settingsUser)L.push({g:'Settings (yours)',t:id+' = '+CUST.settingsUser[id],s:'default '+SBY[id].def,del:()=>delete CUST.settingsUser[id]});
+ for(const id in CUST.settingsProject)L.push({g:'Settings (this project)',t:id+' = '+CUST.settingsProject[id],s:'',del:()=>delete CUST.settingsProject[id]});
+ for(const k in CUST.rules)CUST.rules[k].forEach(r=>L.push({g:'Controls',t:r.id,s:ruleText(r)+(k=='all'?'':' · only '+LAYOUTS[k]),del:()=>{CUST.rules[k]=CUST.rules[k].filter(x=>x!==r)}}));
+ for(const id in CUST.keys)L.push({g:'Keys',t:id,s:(CUST.keys[id]||'no key')+(CBY[id]&&CBY[id].key?' · default '+CBY[id].key:''),del:()=>delete CUST.keys[id]});
+ CUST.toolbar.forEach(id=>L.push({g:'Toolbar',t:id,s:'button added',del:()=>{CUST.toolbar=CUST.toolbar.filter(x=>x!=id)}}));
+ for(const s in CUST.macros)L.push({g:'Macros',t:'macro.'+s,s:CUST.macros[s].steps.length+' steps',del:()=>{delete CUST.macros[s];delete CUST.keys['macro.'+s];CUST.toolbar=CUST.toolbar.filter(x=>x!='macro.'+s)}});
+ if(CUST.css.text)L.push({g:'CSS',t:'snippets/my-look.css',s:CUST.css.on?'on':'off',del:()=>{CUST.css={on:false,text:''}}});
+ CUST.scripts.buttons.forEach(b=>L.push({g:'Scripts',t:'button “'+b.label+'”',s:'from a running script',del:()=>killWorker()}));return L}
+let CHG=[];
+function p6(){CHG=changes();let g='',list='';CHG.forEach((c,i)=>{if(c.g!=g){g=c.g;list+=`<div class="dlgrp">${g}</div>`}list+=`<div class="dlchg"><span>${esc(c.t)} <small>${esc(c.s)}</small></span><button class="rs" data-cdel="${i}" aria-label="Remove this change">✕</button></div>`});
+ const bundle=Object.assign({audiolab:'customisations',version:1,madeWith:'AudioLab 0.3'},{settings:CUST.settingsUser,uiRules:CUST.rules,commands:{keys:CUST.keys,toolbar:CUST.toolbar,macros:CUST.macros},css:CUST.css.text?{'my-look.css':{on:CUST.css.on,text:CUST.css.text}}:{},scripts:{}});
+ return pane(`<b>Everything you changed: ${CHG.length}</b><span class="sp"></span><button class="B" data-act="safe" aria-pressed="${ST.safe}">Safe mode ${ST.safe?'is on':'is off'}</button>`,
+  `<div class="dlacts">${ASKRESET?`<span style="flex:1 1 200px">Remove all ${CHG.length} changes? A backup is kept, so this can be put back.</span><button class="B dng" data-act="resetyes">Yes, reset</button><button class="B" data-act="resetno">Cancel</button>`:`<button class="B dng" data-act="reset" ${CHG.length?'':'disabled'}>Reset my customisations…</button>${BACKUP?'<button class="B" data-act="restore">Put the backup back</button>':''}`}</div>
+  <div class="dlbody">${list||'<div class="dlhint">AudioLab is exactly as it came.</div>'}</div>`,
+  `<div class="dlmsg">In the app, safe mode also starts by holding Shift while AudioLab opens, and it is offered by itself when the last start did not finish.</div>`)
+ +pane(fileHead('audiolab-customisations.json','<button class="B" data-act="bcopy">Copy</button>'),`<pre class="dlfile" id="dlBundle">${esc(j(bundle))}</pre>`,`<div class="dlmsg">One file to back up or carry to another computer. Audio devices and anything locked are never in it.</div>`)}
+
+let DRAWING=false;
+function renderTool(){if(DRAWING)return;DRAWING=true;try{tool.innerHTML=({P1:p1,P2:p2,P3:p3,P4:p4,P5:p5,P6:p6})[ST.tab]();const c=$('#dlCon');if(c){c.innerHTML=LOG.map(l=>`<div class="${l.k}">${esc(l.t)}</div>`).join('')||'<div class="i">Press Run. What a script prints shows here.</div>';c.scrollTop=c.scrollHeight}}finally{DRAWING=false}}
+function renderAll(){renderApp();renderTabs();renderTool();picksLine()}
+
+/* ---------- events ---------- */
+$('#dlTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;ST.tab=b.dataset.tab;ST.picking=false;RMSG=null;ERR=null;renderAll()};
+$('#dlInfo').onclick=e=>{const b=e.target.closest('[data-yn]');if(!b)return;PK.P[ST.tab]=PK.P[ST.tab]==b.dataset.yn?'':b.dataset.yn;save();renderTabs()};
+$('#dlStat').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.lay){ST.layout=b.dataset.lay;RMSG=null}else if(b.dataset.act=='undo'){runCmd('edit.undo','quiet');return}else if(b.dataset.act=='safe')ST.safe=!ST.safe;renderAll()};
+app.addEventListener('click',e=>{const t=e.target;
+ if(t.closest('[data-act=unsafe]')){ST.safe=false;renderAll();return}
+ const a=t.closest('[data-al]');
+ if(ST.picking&&ST.tab=='P2'){if(a){ST.picked=a.dataset.al;RMSG=null;renderAll()}e.preventDefault();return}
+ const r=t.closest('[data-run]');if(r){runCmd(r.dataset.run);return}
+ const sb=t.closest('[data-sbtn]');if(sb){scriptButton(sb.dataset.sbtn);return}
+ if(a){const id=a.dataset.al,c=CTL[id],tr=a.dataset.tr;
+  if(tr){P.sel=tr;if(id=='mixer.strip.mute')return mutate('Mute',()=>{const x=selTrack();x.mute=x.mute?0:1});if(id=='mixer.strip.solo')return mutate('Solo',()=>{const x=selTrack();x.solo=x.solo?0:1});renderApp();return}
+  if(c.cmd)runCmd(c.cmd,'quiet');return}
+ const s=t.closest('[data-sel]');if(s){P.sel=s.dataset.sel;renderApp()}});
+app.addEventListener('mouseover',e=>{if(!(ST.picking&&ST.tab=='P2'))return;const a=e.target.closest('[data-al]'),p=$('#dlPoint');if(p)p.innerHTML=a?'Pointing at <b>'+esc(a.dataset.al)+'</b>':''});
+tool.addEventListener('input',e=>{const t=e.target;
+ if(t.id=='dlQ'){ST.q=t.value;$('#dlSetList').innerHTML=setRows()}
+ else if(t.id=='dlCQ'){ST.cq=t.value;$('#dlCmdList').innerHTML=cmdRows()}
+ else if(t.id=='dlCode')CODE=t.value;else if(t.id=='dlMName')ST.macroDraft.name=t.value});
+tool.addEventListener('change',e=>{const t=e.target,id=t.dataset.set;if(!id||t.tagName=='BUTTON'||DRAWING)return;
+ const r=setSetting(id,t.type=='number'?t.value:t.value,ST.target);ERR=r.bad?{id,msg:r.bad+' The value was not changed.'}:null;if(r.bad){DRAWING=true;try{$('#dlSetList').innerHTML=setRows()}finally{DRAWING=false}}});
+tool.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.id=='dlRen'){ruleAct('rename');renderAll()}});
+tool.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.set){const r=setSetting(d.set,!eff(d.set),ST.target);ERR=r.bad?{id:d.set,msg:r.bad}:null;if(r.bad)renderTool();return}
+ if(d.rst){delete CUST.settingsUser[d.rst];delete CUST.settingsProject[d.rst];ERR=null}
+ else if(d.flt)ST.filter=d.flt;else if(d.tgt)ST.target=d.tgt;
+ else if(d.scope!=null)ST.scopeAll=d.scope=='1';
+ else if(d.ract)ruleAct(d.ract);
+ else if(d.rdel){const[k,id]=d.rdel.split('|');CUST.rules[k]=CUST.rules[k].filter(r=>r.id!=id);RMSG=null}
+ else if(d.chat=='rules'){CUST.rules.mix=CUST.rules.mix.filter(r=>r.id!='mixer.strip.sends'&&r.id!='mixer.strip.rec').concat({id:'mixer.strip.sends',hide:true},{id:'mixer.strip.rec',hide:true});ST.layout='mix';RMSG={k:'ok',t:'The chat box wrote 2 rules for the Mix layout and showed them here before applying. In the app you press Accept first.'}}
+ else if(d.key){ST.waitKey=ST.waitKey==d.key?null:d.key}
+ else if(d.run){runCmd(d.run);renderTool();return}
+ else if(d.bar){CUST.toolbar=CUST.toolbar.includes(d.bar)?CUST.toolbar.filter(x=>x!=d.bar):CUST.toolbar.concat(d.bar)}
+ else if(d.step){ST.macroDraft.steps.push(d.step)}
+ else if(d.sdel!=null)ST.macroDraft.steps.splice(+d.sdel,1);
+ else if(d.sup!=null){const s=ST.macroDraft.steps,i=+d.sup;[s[i-1],s[i]]=[s[i],s[i-1]]}
+ else if(d.mdel){delete CUST.macros[d.mdel];delete CUST.keys['macro.'+d.mdel];CUST.toolbar=CUST.toolbar.filter(x=>x!='macro.'+d.mdel)}
+ else if(d.cssx!=null){setCss(CSSX[+d.cssx][1],true)}
+ else if(d.scr!=null){CODE=SCR[+d.scr][1]}
+ else if(d.perm!=null){answerPerm(d.perm=='1');return}
+ else if(d.cdel!=null){CHG[+d.cdel].del()}
+ else switch(d.act){
+  case'pick':ST.picking=!ST.picking;break;case'ghosts':ST.ghosts=!ST.ghosts;break;case'rapply':applyRulesText();break;
+  case'mnew':ST.macroOpen=!ST.macroOpen;break;case'mcancel':ST.macroOpen=false;ST.macroDraft={name:'',steps:[]};break;
+  case'msave':{const m=ST.macroDraft,name=m.name.trim();if(!name||!m.steps.length){renderTool();say(!name?'Give the macro a name first.':'Add at least one step.','e');return}
+   const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'macro';CUST.macros[slug]={name,steps:m.steps.slice()};ST.macroOpen=false;ST.macroDraft={name:'',steps:[]};renderAll();say('Saved as macro.'+slug+'. It is now a command like any other.','o');return}
+  case'csson':setCss($('#dlCss').value,!CUST.css.on);break;case'cssapply':setCss($('#dlCss').value,true);break;
+  case'srun':CODE=$('#dlCode').value;runScript(CODE);return;case'sstop':killWorker();say('Stopped.','i');renderAll();return;case'cclear':LOG.length=0;break;
+  case'safe':ST.safe=!ST.safe;break;case'reset':ASKRESET=true;break;case'resetno':ASKRESET=false;break;
+  case'resetyes':BACKUP=clone(CUST);killWorker();CUST=EMPTY();ASKRESET=false;break;case'restore':if(BACKUP){CUST=BACKUP;BACKUP=null;if(CUST.css.text)setCss(CUST.css.text,CUST.css.on)}break;
+  case'bcopy':{const tx=$('#dlBundle').textContent;(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(()=>{b.textContent='Copied'},()=>{const r=document.createRange();r.selectNodeContents($('#dlBundle'));const s=getSelection();s.removeAllRanges();s.addRange(r)});return}
+  default:return}
+ renderAll()});
+document.addEventListener('keydown',e=>{const typing=/INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+ if(ST.waitKey){e.preventDefault();const id=ST.waitKey;ST.waitKey=null;
+  if(e.key=='Escape'){renderTool();return}
+  if(e.key=='Backspace'){CUST.keys[id]='';renderAll();say('Removed the key of '+id+'.','i');return}
+  const ch=chord(e);if(!ch){ST.waitKey=id;return}
+  const other=allCmds().find(c=>c.id!=id&&keyOf(c.id)==ch);if(other)CUST.keys[other.id]='';
+  if(CBY[id]&&CBY[id].key==ch)delete CUST.keys[id];else CUST.keys[id]=ch;renderAll();say(id+' is now on '+ch+(other?'. '+other.id+' had that key and now has none.':'.'),'o');return}
+ if(typing||!(app.matches(':hover')||app.contains(document.activeElement)))return;
+ const ch=chord(e);if(!ch)return;const c=allCmds().find(c=>keyOf(c.id)==ch);if(c){e.preventDefault();runCmd(c.id);if(ST.tab=='P3')renderTool()}});
+
+/* ---------- K: decisions ---------- */
+const DEC=[
+ {k:'K1',t:'How deep',o:[['a','Rules only: the everything list, hide / move / rename, commands and macros (P1 to P3)'],['b','Rules and CSS (P1 to P4)'],['c','Everything including scripts (P1 to P5), built in that order']],r:'c',why:'Each stage is useful alone and prepares the next. Scripts come last because they need the most care, and by then they sit on lists that already exist.'},
+ {k:'K2',t:'Where it lives',o:[['a','A page "Advanced" inside Settings'],['b','Its own window, opened from the logo menu and from a link at the foot of Settings'],['c','Both: the everything list inside Settings, the rest in its own window']],r:'b',why:'Settings stays calm for everyone else. A window of its own has room for a file beside each tool, as on this page.'},
+ {k:'K3',t:'What it is called',o:[['a','Workshop'],['b','Developer'],['c','Advanced'],['d','Lab bench']],r:'a',why:'It says "make and change things" without sounding like it is only for programmers.'},
+ {k:'K4',t:'Who sees it',o:[['a','Always in the menu'],['b','Hidden until one switch in Settings turns it on'],['c','Hidden; a right-click "Hide this" and "Customise…" still works for everyone']],r:'c',why:'Hiding a button is the wish most people have, so that part needs no switch. The files, CSS and scripts stay out of sight until asked for.'},
+ {k:'K5',t:'Where the files are kept',o:[['a','Inside AudioLab only, edited in the Workshop'],['b','Real files in a folder you can open (desktop app), one export file in the browser version'],['c','Real files, and AudioLab reloads them the moment they are saved from another editor']],r:'b',why:'Real files can be backed up, compared and shared. Live reload (c) is a small step to add later.'},
+ {k:'K6',t:'What a project may carry',o:[['a','Nothing: customisations are yours only'],['b','Settings and control rules, never CSS or code'],['c','Also scripts, each asking on a card when the project opens']],r:'b',why:'A song file from someone else must never run code by being opened.'},
+ {k:'K7',t:'Sharing scripts and macros',o:[['a','No sharing: your own only'],['b','As a file; opening one shows what it is, what it asks for, and the code, before anything runs'],['c','b, and later a gallery inside AudioLab']],r:'b',why:'Follows whatever is picked for sharing in the main extensions plan. A gallery needs reviewing and is a later question.'},
+ {k:'K8',t:'Network for scripts',o:[['a','Never'],['b','Per script and per site, asked on a card, off by default'],['c','On for scripts you wrote yourself']],r:'b',why:'The Figma and userscript model. A script that only tidies notes should not be able to send anything anywhere.'},
+ {k:'K9',t:'When a script takes too long',o:[['a','Stopped at 2 seconds, always'],['b','At 2 seconds AudioLab asks: wait longer or stop'],['c','No limit for scripts you wrote yourself']],r:'b',why:'A long but honest job (rename 400 clips) can finish, and a stuck one is still one click from gone. The audio never waits either way.'},
+ {k:'K10',t:'The chat box',o:[['a','Writes rules, macros and scripts, shows them, and you press Accept'],['b','Applies them at once and tells you'],['c','Only explains; you type everything']],r:'a',why:'You always see what will change before it does, and the result is a normal file you can edit or remove.'},
+ {k:'K11',t:'How safe mode starts',multi:1,o:[['a','Hold Shift while AudioLab opens'],['b','A menu item "Restart in safe mode"'],['c','Offered by itself when the last start did not finish']],r:'abc',why:'Three doors, because the moment you need it is the moment the usual door may be the broken thing.'},
+ {k:'K12',t:'Right-click on any control',o:[['a','Adds "Hide this" and "Customise…" to every right-click menu'],['b','Only through the picker in the Workshop'],['c','Hold a key and click (Alt+Shift) to pick, no menu entry']],r:'a',why:'The shortest route to the first thing you asked for. The menu entry appears only where no right-click menu is already full.'}];
+let PK={P:{},K:{}};
+try{const s=JSON.parse(localStorage.getItem('al-ex2')||'null');if(s&&s.P&&s.K)PK=s}catch(e){}
+DEC.forEach(d=>{if(!PK.K[d.k])PK.K[d.k]=d.r});
+function save(){try{localStorage.setItem('al-ex2',JSON.stringify(PK))}catch(e){}picksLine()}
+function renderDecs(){$('#decs').innerHTML=DEC.map(d=>`<div class="dec"><h3><span class="num">${d.k}</span>${d.t}</h3>${d.o.map(o=>{const rec=d.multi?d.r.includes(o[0]):d.r==o[0],on=d.multi?PK.K[d.k].includes(o[0]):PK.K[d.k]==o[0];
+  return `<label><input type="${d.multi?'checkbox':'radio'}" name="dl-${d.k}" id="dl-${d.k}-${o[0]}" value="${o[0]}"${on?' checked':''}><span><b>${o[0]}</b> ${o[1]}</span>${rec?'<span class="star">★</span>':''}</label>`}).join('')}<p class="why">${d.why}</p></div>`).join('')}
+$('#decs').onchange=e=>{const t=e.target,k=t.name.slice(3),d=DEC.find(d=>d.k==k);if(!d)return;PK.K[k]=d.multi?$$('input:checked',t.closest('.dec')).map(i=>i.value).join('')||'none':t.value;save()};
+function picksText(){const p=TABS.map(t=>t.k+' '+(PK.P[t.k]||'?')).join(', ');return 'Deep layer | '+p+' | '+DEC.map(d=>d.k+PK.K[d.k]).join(' ')}
+function picksLine(){const el=$('#picks');if(el&&!window.DeepLayerHost)el.textContent=picksText();document.dispatchEvent(new CustomEvent('deeplayer-picks',{detail:picksText()}))}
+function takeAll(){TABS.forEach(t=>PK.P[t.k]='yes');DEC.forEach(d=>PK.K[d.k]=d.r);save();renderDecs();renderTabs()}
+function startAgain(){PK={P:{},K:{}};DEC.forEach(d=>PK.K[d.k]=d.r);save();renderDecs();renderTabs()}
+window.DeepLayer={picks:picksText,takeAll,startAgain};
+if($('#useRec')&&!window.DeepLayerHost){$('#useRec').onclick=takeAll;$('#clr').onclick=startAgain;
+ $('#copy').onclick=()=>{const tx=picksText(),b=$('#copy');(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy my picks',1500)},()=>{const r=document.createRange();r.selectNodeContents($('#picks'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press copy'})}}
+renderDecs();renderAll();
+})();
+</script>
