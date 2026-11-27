@@ -1,0 +1,15 @@
+/* v0.288 (task ST-S10): the Audio page's cards and the "Keep?" bar above the Settings window's foot, in the LOOK colours (ink, mut, amber) */
+#set .st10k{display:flex;align-items:center;gap:8px;margin:0 14px 8px;padding:7px 8px 7px 12px;border-radius:9px;background:rgba(245,200,76,.10);border:1px solid rgba(245,200,76,.38);color:#ececf1;font-size:var(--fs2,12px);line-height:1.35}
+#set .st10k[hidden]{display:none}
+#set .st10k .st10kt{flex:1 1 auto;min-width:0}
+#set .st10k .st10n{font-variant-numeric:tabular-nums;color:#f5c84c;font-weight:var(--fw6,600)}
+#set .st10k button{flex:none;white-space:nowrap}
+#set .st10k[data-mode=done]{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);color:#c4c7d2}
+#set .st10c .cprow b{font-variant-numeric:tabular-nums;text-align:right;color:#ececf1}
+#set .st10c .cprow b:empty::before{content:"–"}
+#set .st10ro .cpin{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:8px;min-width:0;flex:0 1 auto}
+#set .st10ro .mini{flex:none;white-space:nowrap}
+#set .st10ro b{font-variant-numeric:tabular-nums;color:#c4c7d2;font-weight:var(--fw6,600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px}
+#set .st10lk{background:none;border:0;padding:0;min-height:0;height:auto;color:#8ab4ff;cursor:pointer;font:inherit;text-decoration:underline;text-underline-offset:2px}
+#set .st10ex{margin-top:6px}
+#set .st10out #outSel{flex:0 1 auto;min-width:0;max-width:62%;height:auto;min-height:26px}

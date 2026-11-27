@@ -89,7 +89,7 @@ with sync_playwright() as p:
         ck(f'{L}: the read-outs show numbers',all(x[2] and x[2]!='–' for x in sv if x[0] in('rate','cpu','fps','glass','out')) and sv[0][2].endswith('kHz') and sv[3][2].endswith('fps'),sv)
         ck(f'{L}: Engine shows the context rate, Glass the glass level',J(pg,"[document.querySelector('[data-st5r=rate] span').textContent.startsWith(String(ctx.sampleRate/1000)),document.querySelector('[data-st5r=glass] span').textContent==={glass:'Glass',light:'Light',solid:'Solid'}[GLE.lv]]")==[True,True])
         routes=[]
-        for k,pgw in [('rate','audio'),('buf','audio'),('cpu','perf'),('fps','perf'),('glass','perf'),('out','dac')]:
+        for k,pgw in [('rate','audio'),('buf','audio'),('cpu','perf'),('fps','perf'),('glass','perf'),('out','dac' if float(R(pg,"VERSION"))<0.289 else 'audio')]:  # from S10 (v0.289) the output is chosen on Audio
             pg.click('#st5Strip [data-st5r=%s]'%k);pg.wait_for_timeout(200)
             v=pg.evaluate("()=>document.querySelector('#setNav [data-tab].on').dataset.tab")
             if v!=pgw:routes.append((k,v))
