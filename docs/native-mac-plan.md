@@ -406,6 +406,10 @@ It is not the AudioLab app. Apple Silicon, macOS 12 or later.
 
 ## 11. What happens next
 
+**Answered on 27 November 2026.** The picks and the first report from the Mac are in `docs/native-mac-picks.md`. In short: the recommended route and order stand; Windows follows after stage 3 instead of after stage 2; no Apple account for now; Fractals v10 comes with the first native build; a native look at 240 Hz is wanted. On the Mac the test app found 222 plug-ins (all the named makers are built for Apple Silicon, 31 old bundles are Intel only) and opened the iFi Gryphon; the Zoom AMS-24 was not seen by macOS; no plug-in has been loaded there yet.
+
+The text below is what was written before the answer.
+
 Nothing is built further until you have answered the pick page. The picks line there looks like `NM1 picks: R1c R2b R3a R4a R5a R6a | P1a P2a P3a P4a P5a P6a P7a | U1b U2a U4abcd U5a | U3: your plug-ins`. If you only do one thing: run the test app with your DAC and your plug-ins and paste the report. It answers more than any question can.
 
 ## 12. Files

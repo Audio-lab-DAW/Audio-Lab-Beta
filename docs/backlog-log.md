@@ -3376,3 +3376,8 @@ No app changes: `index.html` and `desktop/` were not touched, no version. Plan: 
 
 ### Next
 Waiting for the picks line (`NM1 picks: ...`) and, more useful than any answer, the test app's report from the user's Mac. Project doc `claude/audiolab-native-mac-plan.md`.
+
+### task NM1, later the same day: the picks and the first report from the Mac
+- Picks: `NM1 picks: R1c R2b R3a R4a R5b R6a | P1a P2a P3a P4a P5a P6a P7a | U1c U2a U4abcdf U5b`, with U3 naming FabFilter, Ozone, Native Instruments, Kick 3, Kilohearts, Melodyne, Neutron, Arturia, Scaler, Serum 2, Steinberg, SubLabXL. Different from the stars: Windows after stage 3 (R5b), no Apple account for now (U1c), Fractals v10 with the first native build (U5b), a native look at 240 Hz added to what matters (U4f).
+- The test app ran on the user's M4 (macOS 27.2): 253 bundles scanned without a crash, 222 plug-ins read, 31 bundles Intel only, 1 broken. The iFi Gryphon opened (rates to 768 kHz, 32-bit integer, a volume the computer can set). The Zoom AMS-24 was not in macOS's device list. No plug-in was loaded yet, so no figures per block.
+- Written down in `docs/native-mac-picks.md` (project doc `claude/audiolab-native-mac-picks.md`). No app changes, nothing built.
