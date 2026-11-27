@@ -37,7 +37,7 @@ STRUCT=r"""()=>{const o={};for(const sec of document.querySelectorAll('#setBody 
  const walk=n=>{if(n.nodeType===3){const t=n.textContent.replace(/[\d.,:−-]+/g,'#').replace(/\s+/g,' ').trim();if(t)a.push('"'+t);return}if(n.nodeType!==1||n.tagName==='CANVAS'||n.tagName==='svg')return;
   const at=[...n.attributes].filter(x=>!/^(data-stid|data-stsc|style|value|data-tip|title)$/.test(x.name)&&!/^aria-valuenow/.test(x.name)).map(x=>x.name+'='+(x.name==='class'?x.value.split(' ').filter(c=>!/^(on|sflash|hot|act)$/.test(c)).sort().join('.'):x.value.replace(/[\d.]+/g,'#'))).sort().join(' ');a.push('<'+n.tagName+' '+at);for(const ch of n.childNodes)walk(ch)};
  walk(sec);o[sec.dataset.page]=a}return o}"""
-EXCL={'ttFn','scQ','phCC','pmEdge','pmAnim','setRefr','fxRefr'}
+EXCL={'ttFn','scQ','phCC','pmEdge','pmAnim','setRefr','fxRefr','st7BkSel'}  # st7BkSel (v0.262): picks which backup to restore, not a setting
 with sync_playwright() as p:
     b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
     for lite in (False,True):

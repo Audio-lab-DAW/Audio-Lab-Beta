@@ -1,0 +1,20 @@
+/* v0.262 (task ST-S7): the changed mark (a blue bar left of the row), ↺ per setting, the page's reset button, the count per page, the Reset all list */
+#set .st7chg{box-shadow:-6px 0 0 -4px var(--blue)}
+#set .st7rs{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;min-width:0;min-height:0!important;padding:0!important;margin:0 0 0 auto;border-radius:5px;border:0!important;background:none!important;box-shadow:none!important;color:#7fb0ff;cursor:pointer;vertical-align:middle}
+#set .st7rs.st7af{display:flex;margin:4px 0 0 auto}
+#set .st7rs[hidden]{display:none}
+#set .st7rs:hover{background:rgba(76,141,255,.2)!important;color:#fff}
+#set .st7rs svg{width:13px;height:13px}
+#st7Pg{margin:-5px 0 -5px auto;align-self:center;display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:0 10px;border-radius:7px;font-size:var(--fs2,12px)}
+#st7Pg svg{width:12px;height:12px;flex:none}
+#st7Pg:disabled{opacity:.45;cursor:default}
+#st7Pg.st7u{border-color:rgba(76,141,255,.6);color:#cfe0ff}
+#setNav .st7n{margin-left:auto;font:600 10px/1 var(--ffu,Inter,sans-serif);font-style:normal;color:#9dc0ff;background:rgba(76,141,255,.2);border-radius:99px;padding:2px 6px;font-variant-numeric:tabular-nums}
+#setNav .st7n::after{content:attr(data-n)}
+#setNav .st7n[hidden]{display:none}
+#setNav button.on .st7n{color:#fff;background:rgba(255,255,255,.24)}
+#st7BkSel{width:100%;max-width:100%;margin:0 0 8px}
+#st7Bk .hint{margin:0 0 8px}
+.st7list{display:flex;flex-direction:column;gap:3px;margin-top:10px;max-height:min(300px,46vh);overflow:auto;padding-right:4px;font-size:var(--fs2,12px)}
+.st7list>b{color:#e3e5ec;font-weight:var(--fw6,600);margin-top:6px}.st7list>b:first-child{margin-top:0}
+.st7ul{display:flex;flex-direction:column;gap:2px}.st7ul>span{padding-left:10px;position:relative}.st7ul>span::before{content:"";position:absolute;left:2px;top:.62em;width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}

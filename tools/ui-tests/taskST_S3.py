@@ -60,7 +60,7 @@ with sync_playwright() as p:
         ck(f'{L}: six Follow cards in the menu order',J(pg,"[...$('#setFollowC').children].map(b=>b.dataset.fm)")==['center','stay','lead','page','edge','off'])
         ck(f'{L}: the stored Look ahead lights its card',J(pg,LIT)==['lead'])
         ck(f'{L}: every card has a tooltip',all(len(t)>25 for t in J(pg,"[...$('#setFollowC').children].map(b=>b.title)")))
-        ck(f'{L}: follow again switch shows the stored off',R(pg,"$('#setFollowRes').checked")==False and len(R(pg,"$('#setFollowRes').closest('label').title"))>30)
+        ck(f'{L}: follow again switch shows the stored off',R(pg,"$('#setFollowRes').checked")==False and len(R(pg,"(l=>l.title||l.dataset.tip||'')($('#setFollowRes').closest('label'))"))>30)
         pg.click('#setFollowC [data-fm=edge]');pg.wait_for_timeout(100)
         ck(f'{L}: Push at the edge card sets the mode',J(pg,"[UI.follow,UI.followMode]")==[True,'edge'] and J(pg,LIT)==['edge'])
         pg.click('#setFollowRes');ck(f'{L}: follow again switch sets the value',R(pg,"UI.followResume")==True)
