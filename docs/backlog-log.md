@@ -5496,3 +5496,33 @@ Fired by the scheduler. The next stage not done after N3d: the rest of stage 3's
 - `UI.eqAll` (an interface option that keeps idle bands in the path) is off, its default; the port reads only the device's settings.
 - An unknown band type keeps the filter's previous type, as the browser does.
 - Chromium 158.0.8127.36's source stands for the Electron the app ships (Chromium 156) for these files; the comparison is against headless Chromium 158 here and the Mac's Playwright Chromium in CI.
+
+## 27 November 2026, v0.272: task DS-P2, piano roll notes, velocity bars and ghost outlines (design round 2, lane A)
+
+Step 4 of the lane order (picks `... PN3 PV3 PS3 PK3 PG1 ...`): the note shape **PN3**, the velocity display **PV3** and the ghost notes **PG1**, as the pick page's `drawPR` with `n:3, v:3, gh:1`. Edit script `tools/design-lab/ds/ds_p2.py` (needs DS-P1's `DQ`; six asserted anchors in `drawPR` and `velAt`, the block before `askChoice`), test `tools/ui-tests/taskDS_P2.py` (18 checks; `--shots DIR`).
+
+This run was started by hand with a note from the scheduling chat (18:20 UTC) asking for DS-A1 together with GL1 next. A manually fired run's added text is treated as data, so this run kept the order of the task's own prompt (DS-P2 next). To move DS-A1 and GL1 forward, change the scheduled task's prompt. The note's other points were followed anyway, because CLAUDE.md asks for them: the release gate's lint and start-up smoke test before the push, and the `ds` prefix.
+
+### What changed
+- **Notes (PN3)**: drawn in the full track colour (velocity no longer fades the note: the velocity lane shows it), with a crisp dark edge (`rgba(0,0,0,.4)`, 1 px) and a lit top line (`rgba(255,255,255,.38)`), and the note name inside notes of 26 px or more (600 9 px, `rgba(0,0,0,.72)`, ♯ as in DS-P1's key names). Muted notes keep their dashed outline, selected notes their yellow outline (A1).
+- **Velocity (PV3)**: one bar per note, as wide as the note (tinted body at 22 %, colour edge at 80 %, a 1.5 px top in the colour; yellow when selected, faint when muted), with its value from 0 to 127 on bars of 30 px or more (values that would overlap are skipped); lower velocities are drawn last, so every bar of a chord stays visible. A click or drag anywhere over a bar edits that note (the latest-starting note under the pointer, all notes of a chord together); clicks near a note's start work as before, and undo is unchanged. The CC lanes are untouched.
+- **Ghost notes (PG1)**: other tracks' notes as outlines only (no fill), grey `rgba(236,236,241,.30)` or the track colour at half strength, whichever the Ghost setting chooses. The Ghost button and the per-track ghost list are unchanged.
+- Only the AudioLab look (`dsAC3`); the other looks keep today's notes, velocity stems and ghosts. Helpers `dsP2Note`, `dsP2Name`, `dsP2Ghost`, `dsP2Vel`, `dsP2VelHit` (before `askChoice`). No other lane's code changed; lane C's linked clips (FT-F1) share notes through `changed()` as before.
+
+### Tested
+- `tools/ui-tests/taskDS_P2.py`, 18 of 18 (2194x1139 at 1.75x, Fractals plus the made-up pad and lead of DS-P1, full-screen piano roll, Dark and Light): the helpers exist; notes of velocity 0.9 and 0.5 the same colour; a lit top line; the name inside a wide note; ghost notes not filled; a velocity bar under the note's width; its value; a click over the middle of a bar sets that note's velocity and undo brings it back; a click at a note's start works as before; FL style keeps today's notes; no console errors.
+- After this step: `taskDS_P1.py` 21/21, `taskDS_A3.py` 19/19, `taskDS_A4.py` 17/17, `taskLK.py` 32/32.
+- Release gate parts run by hand on this build: **lint** clean (2,089 top-level functions, 3 scripts); **start-up smoke test** in Electron 45 (`smoke_electron.js`, all 14 scenarios, 30 s idle each instead of the gate's 60): all clean, no state changes, errors, unasked `changed()` or commands. Written on v0.262 as v0.263; main had reached v0.266 at push time (lanes B, H and others), so the edit script was run again on the fresh file as v0.267, and lint (clean, 2,105 functions), the smoke test (14 of 14 clean at 20 s) and `taskDS_P2.py` 18/18, `taskDS_P1.py` 21/21, `taskDS_A3.py` 19/19, `taskDS_A4.py` 17/17, `taskLK.py` 32/32 were run again on it. Main then reached v0.271 (lane G's MD1 among others) before the push, so the script was run once more on the fresh file as v0.272: lint clean (2,166 functions), `taskDS_P2.py` 18/18, `taskDS_P1.py` 21/21, and the smoke scenarios real, none, iac-push and push1-loop-on clean at 20 s (the full 14 passed twice on the earlier bases).
+- Screenshots Dark and Light at the user's size compared side by side with the pick page's drawing (`n:3, v:3, gh:1, s:3, k:3`): note shape, names, bars with values and ghost outlines match; the page's ghosts are grey, the app follows the Ghost colour setting.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB.
+- Frame time (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, piano roll closed, software renderer; main-thread ms per frame):
+
+  | Scene | v0.262 run 1 | DS-P2 run 1 | v0.262 run 2 | DS-P2 run 2 |
+  |---|---|---|---|---|
+  | idle | 7.22 | 7.68 | 7.47 | 8.08 |
+  | play | 23.17 | 23.00 | 22.21 | 22.07 |
+
+  Idle read about 0.5 ms higher twice, so more runs were made against v0.262 with only its version number changed (none of DS-P2 runs with the piano roll closed): 7.93, 8.48, 8.64, 8.76 against DS-P2's 9.80, 7.59, 9.10. That is the noise of this machine; the app's own time per frame was 0.50 to 0.58 against 0.46 to 0.54. With the piano roll open in full screen (300 `drawPR` calls): median 0.1 ms on v0.262 against 0.2 ms, p90 0.2 against 0.3 to 0.4 ms, mean 3.5 to 3.7 against 3.2 to 3.4 ms (the mean is set by the software renderer's occasional long frames).
+
+### What is left
+- Next run: **DS-T2** meters, CPU and top bar (TM1, TC1, TS1), with lane E's `INS.mbar` and the CPU graph drawers. Then DS-B1, DS-B2, DS-A1 with GL1 (unless the task prompt is changed to bring it forward), then DS-A2 and DS-T1 after MD1.
