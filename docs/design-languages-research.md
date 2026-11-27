@@ -4,7 +4,7 @@ Pick page: **"AudioLab design directions: scientific and beyond"**, https://clau
 
 The user's words (27 Nov): "Maybe you can do some extra design, deep research, specifically for like this scientific type, maybe other types of design."
 
-**Nothing in index.html or desktop/ was changed.** No version bump. Reference version: v0.228. This task runs in parallel with DR2 (design round 2: arrangement, piano roll, browser and transport), and it does not pick component details for those surfaces. It compares whole looks. Where a direction is chosen, DR2's component picks are drawn in that look (section 6).
+**Nothing in index.html or desktop/ was changed.** No version bump. Reference version: v0.228. This task runs in parallel with DR2 (design round 2: arrangement, piano roll, browser and transport), and it does not pick component details for those surfaces. It compares whole looks. Where a direction is chosen, DR2's component picks are drawn in that look (section 6). DR2's own page and research: `docs/design-round-2.md` (recommendations A3 P3 B3 T2, drawn in the subtle scientific look, which matches DS7 here).
 
 Files: `tools/design-lab/dr3/directions.html` (the pick page source), `today-v0228.jpg` (reference screenshot used on the page), `shots_today.py` (headless screenshots of today's app), `check.py` (headless check of the page at 1280 × 720, 1920 × 1080, 400 px, in Dark, Light mode and Bright), `today/` (screenshots of v0.228).
 
