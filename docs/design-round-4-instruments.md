@@ -424,6 +424,8 @@ Each task:
 
    **Done in v0.241** (task IN-A): module `INS` in index.html; the Loudness reading is K-weighted, `vizSide` fixed (the Visualizer's helper is `vizDockSide`). See the backlog log.
 2. **IN-M, level meters (M).** Mixer strips (Flat bars kept), track headers, master, transport and the settings preview `mtrPv`. Uses IN-A's scale and ballistics. RMS and crest come from `al-meter` or the analyser data already read.
+
+   **Claimed 27 November 2026** by a lane E run (task IN-M, M2); a second lane E run does not repeat it.
 3. **IN-L, loudness (L).** Top-bar box, `#lufsPop`, `.mxme` master box, `ND('loud')` and `ND('measure')`. The data is already in `LM`; only the drawing and the colour rule change. LRA settling uses X15.
 4. **IN-S, spectrum (S).** `ND('spec')`, the overlay (SPO), the Visualizer spectrum and the mixer spec view share one drawer. Analyser fftSize and smoothing move to the IN-A cache.
 5. **IN-E, EQ (E).** `vizEQ2()`, `vizFilter()`, Auto Filter. The curve is cached per change; pre and post come from the existing analysers.
