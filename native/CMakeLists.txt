@@ -57,9 +57,36 @@ if(APPLE)
   # Chromium on the Mac runs a biquad with fixed values through Accelerate's vDSP_deq22D; so does the engine there
   target_link_libraries(al_fdlibm PUBLIC "-framework Accelerate")
 endif()
+# Chromium's FFT (task NB-N3g): since Chromium 158 FFTFrame is the RustFFT crate behind a small Rust wrapper
+# (rustfft_ffi.rs). The engine builds that same wrapper and crate version (Cargo.lock) with cargo and links it, so
+# the oscillators' tables (and later the convolver and the analyser) are the browser's bits.
+find_program(AL_CARGO cargo HINTS $ENV{HOME}/.cargo/bin)
+if(NOT AL_CARGO)
+  # configuring still works (the test app's targets do not need it); building a target that links al_rustfft fails
+  message(WARNING "cargo not found: alrender, albus and alnodes need it (Chromium's FFT, task NB-N3g)")
+  set(AL_CARGO cargo)
+endif()
+find_package(Threads REQUIRED)
+set(AL_RUSTFFT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rustfft_ffi)
+set(AL_RUSTFFT_LIB ${CMAKE_BINARY_DIR}/cargo/release/${CMAKE_STATIC_LIBRARY_PREFIX}rustfft_ffi${CMAKE_STATIC_LIBRARY_SUFFIX})
+add_custom_command(OUTPUT ${AL_RUSTFFT_LIB}
+  COMMAND ${CMAKE_COMMAND} -E env MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+          ${AL_CARGO} build --release --locked --quiet --manifest-path ${AL_RUSTFFT_DIR}/Cargo.toml --target-dir ${CMAKE_BINARY_DIR}/cargo
+  DEPENDS ${AL_RUSTFFT_DIR}/src/lib.rs ${AL_RUSTFFT_DIR}/Cargo.toml ${AL_RUSTFFT_DIR}/Cargo.lock
+  COMMENT "cargo: Chromium's RustFFT wrapper" VERBATIM)
+add_custom_target(al_rustfft_build DEPENDS ${AL_RUSTFFT_LIB})
+add_library(al_rustfft STATIC IMPORTED GLOBAL)
+set_target_properties(al_rustfft PROPERTIES IMPORTED_LOCATION ${AL_RUSTFFT_LIB})
+add_dependencies(al_rustfft al_rustfft_build)
+set_property(TARGET al_rustfft APPEND PROPERTY INTERFACE_LINK_LIBRARIES Threads::Threads ${CMAKE_DL_LIBS})
+if(NOT APPLE)
+  set_property(TARGET al_rustfft APPEND PROPERTY INTERFACE_LINK_LIBRARIES m)
+endif()
+add_executable(alnodes engine/alnodes.cpp)
+target_link_libraries(alnodes PRIVATE al_jsmath al_rustfft)
 add_executable(alrender engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender PRIVATE -ffp-contract=off)
-target_link_libraries(alrender PRIVATE al_jsmath al_fdlibm)
+target_link_libraries(alrender PRIVATE al_jsmath al_fdlibm al_rustfft)
 add_executable(almathprobe engine/math_probe.cpp)
 target_compile_options(almathprobe PRIVATE -ffp-contract=off)
 target_link_libraries(almathprobe PRIVATE al_jsmath)
@@ -67,16 +94,16 @@ target_link_libraries(almathprobe PRIVATE al_jsmath)
 add_executable(alrender_sysmath engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_sysmath PRIVATE -ffp-contract=off)
 target_compile_definitions(alrender_sysmath PRIVATE AL_MATH_SYSTEM)
-target_link_libraries(alrender_sysmath PRIVATE al_fdlibm)
+target_link_libraries(alrender_sysmath PRIVATE al_fdlibm al_rustfft)
 # the control: fusing allowed, to show on each machine whether the rule matters for these devices
 add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
-target_link_libraries(alrender_fused PRIVATE al_jsmath al_fdlibm)
+target_link_libraries(alrender_fused PRIVATE al_jsmath al_fdlibm al_rustfft)
 # ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
 # the mixer's buses with the core's devices: groups, sends, returns, delay compensation, the master's chain (task NB-N3d)
 add_executable(albus engine/mix/albus.cpp engine/core/devices.cpp)
 target_compile_options(albus PRIVATE -ffp-contract=off)
-target_link_libraries(albus PRIVATE al_jsmath al_fdlibm)
+target_link_libraries(albus PRIVATE al_jsmath al_fdlibm al_rustfft)
 
 # the project document and its edit protocol (task NB-R7): the state the engine will own
 add_executable(aldoc engine/doc/aldoc.cpp)

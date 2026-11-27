@@ -1,0 +1,25 @@
+[package]
+name = "rustfft_ffi"
+version = "0.1.0"
+edition = "2021"
+description = "Chromium's RustFFT wrapper for Web Audio (rustfft_ffi.rs), with a C interface for the AudioLab native engine (task NB-N3g)"
+license = "BSD-3-Clause"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+path = "src/lib.rs"
+
+[dependencies]
+# Chromium 158.0.8127.36 third_party/rust/chromium_crates_io/Cargo.toml: rustfft = "6.4.1", default features
+rustfft = "=6.4.1"
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "abort"
+lto = false
+codegen-units = 1
+
+[profile.dev]
+panic = "abort"

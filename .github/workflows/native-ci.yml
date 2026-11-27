@@ -58,7 +58,7 @@ jobs:
         run: |
           cmake -S native -B build -DCMAKE_BUILD_TYPE=Release > out/cmake.txt 2>&1 || { tail -40 out/cmake.txt; exit 1; }
           cmake --build build -j 4 2>&1 | tee out/build.txt | grep -E 'error|warning:|Built target' || true
-          test -x build/alengine && test -x build/alrender && test -x build/almix && test -x build/alringstress && test -x build/aldoc && test -x build/albus
+          test -x build/alengine && test -x build/alrender && test -x build/almix && test -x build/alringstress && test -x build/aldoc && test -x build/albus && test -x build/alnodes
       # shift-base is left out: the vendored LLVM libc shifts negative values (defined behaviour from C++20, and in
       # every compiler we use), see native/third_party/llvm-libc/src/__support/math/log_range_reduction.h
       - name: AddressSanitizer + UndefinedBehaviorSanitizer build
@@ -110,6 +110,16 @@ jobs:
         run: |
           T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
           python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
+      - name: "Chromium's source nodes and wave shaper on their own (task NB-N3g: RustFFT tables, oscillators, constant source, wave shaper)"
+        run: |
+          python3 tools/native-lab/make_ref_nodes.py out/nodes | tail -1
+          build/alnodes out/nodes/cases.json out/nodes/native > /dev/null
+          python3 tools/native-lab/compare_nodes.py out/nodes > out/nodes-compare-all.txt || true
+          { grep -v ' bit for bit$' out/nodes-compare-all.txt | head -20; tail -1 out/nodes-compare-all.txt; } | tee out/nodes-compare.txt
+          mkdir -p out/nodes-asan/native && cp -r out/nodes/web out/nodes/cases.json out/nodes-asan/
+          build-asan/alnodes out/nodes-asan/cases.json out/nodes-asan/native > /dev/null
+          python3 tools/native-lab/compare_nodes.py out/nodes-asan | tail -1 | tee -a out/nodes-compare.txt
+          test "$(grep -c '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt)" = 2
       - name: 'Every ported device against the web engine, bit for bit (Release; sanitizers at 128 and 7 frames per call)'
         run: |
           run() { # build blocksize dir
@@ -125,7 +135,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/engine-deepest.txt out/engine-deepest-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/bus.txt out/bus-asan.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/engine-null.txt out/engine-null-asan.txt out/engine-deepest.txt out/engine-deepest-asan.txt out/mix.txt out/mix-asan.txt out/core-compare.txt out/nodes-compare.txt out/bus.txt out/bus-asan.txt out/doc-sync.txt out/doc-sync-asan.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -224,7 +234,12 @@ jobs:
           python3 tools/native-lab/run_bus.py build/albus out/bus out/busref | tee out/bus.txt
           python3 tools/native-lab/make_mix_ref.py > out/mixref-mac.txt 2>&1   # N3b's scenes, the Mac's own references (overwrites ref/mix in this checkout only)
           python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix-macref | tail -1 | tee out/mix-macref.txt
+          python3 tools/native-lab/make_ref_nodes.py out/nodes | tail -1   # task NB-N3g: Chromium's source nodes on the Mac
+          build/alnodes out/nodes/cases.json out/nodes/native > /dev/null
+          python3 tools/native-lab/compare_nodes.py out/nodes > out/nodes-compare-all.txt || true
+          { grep -v ' bit for bit$' out/nodes-compare-all.txt | head -20; tail -1 out/nodes-compare-all.txt; } | tee out/nodes-compare.txt
           grep -q '^\([0-9]*\) of \1 cases bit for bit' out/core-compare.txt   # every case (task NB-N3e added the Pro EQ: 289)
+          grep -q '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt
           grep -qx 'ALL IDENTICAL' out/bus.txt
           grep -qx 'ALL IDENTICAL' out/mix-macref.txt
       - name: ThreadSanitizer (clang) on the ring
@@ -236,7 +251,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/mix-macref.txt out/core-compare.txt out/bus.txt out/bus-linuxref.txt out/doc-sync.txt out/bridge-unit.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/mix-macref.txt out/core-compare.txt out/nodes-compare.txt out/bus.txt out/bus-linuxref.txt out/doc-sync.txt out/bridge-unit.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
