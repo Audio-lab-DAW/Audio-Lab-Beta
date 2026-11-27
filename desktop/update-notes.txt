@@ -1,1 +1,1 @@
-Behind the scenes for "Why is this clipping?": AudioLab now notes where the mix goes over (also when the safety limiter catches it) and can measure which tracks made each peak. The card that shows it comes next.
+MIDI controllers, step 1: AudioLab finds your MIDI devices when they are plugged in, MIDI learn works on notes and buttons too and in pinned device windows, knobs pick up the control instead of jumping, endless knobs are recognised, and a new Controllers window (menu) lists your devices and every mapping.
