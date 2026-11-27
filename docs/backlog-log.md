@@ -4410,4 +4410,4 @@ Reading: idle is a little faster and scrolling costs a quarter of the script tim
 - The layout with the devices on top and the track headers on the right were not looked at in screenshots (the code reads the real places, so they should follow).
 
 ### Release
-- v0.243: commit @HASH@ on main. App copy synced (`node desktop/scripts/sync-app.js`), update note written. No desktop shell file changed, no desktop build. Edit scripts `tools/edits/taskGS4_engine.py` (engine 2.4.0, also in `tools/glass-lab/glass-engine.js`) and `tools/edits/taskGS4.py` with `taskGS4_block.js` and `taskGS4_css.txt`, every replacement asserted unique. Project doc `claude/audiolab-glass-step-4.md`.
+- v0.243: commit 0da5e37 on main. App copy synced (`node desktop/scripts/sync-app.js`), update note written. No desktop shell file changed, no desktop build. Edit scripts `tools/edits/taskGS4_engine.py` (engine 2.4.0, also in `tools/glass-lab/glass-engine.js`) and `tools/edits/taskGS4.py` with `taskGS4_block.js` and `taskGS4_css.txt`, every replacement asserted unique. Project doc `claude/audiolab-glass-step-4.md`.
