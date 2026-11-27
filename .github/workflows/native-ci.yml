@@ -71,8 +71,8 @@ jobs:
           build-asan/alringstress 3 | tee out/ringstress-asan.json
       - name: 'The mixer against the web engine (10 scenes, Release and sanitizers)'
         run: |
-          python3 tools/native-lab/run_mix.py build/almix out/mix | tail -1 | tee out/mix.txt
-          python3 tools/native-lab/run_mix.py build-asan/almix out/mix-asan | tail -1 | tee out/mix-asan.txt
+          python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix | tail -1 | tee out/mix.txt
+          python3 tools/native-lab/run_mix.py "$PWD/build-asan/almix" out/mix-asan | tail -1 | tee out/mix-asan.txt
           grep -q 'ALL IDENTICAL' out/mix.txt && grep -q 'ALL IDENTICAL' out/mix-asan.txt
       - name: Python, Playwright and Chromium (to run the app's own engine)
         run: |
@@ -97,7 +97,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/mix.txt out/mix-asan.txt out/core-compare.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; }; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Linux)"; for f in out/selftest.json out/ringstress.json out/ringstress-asan.json out/mix.txt out/mix-asan.txt out/core-compare.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -154,7 +154,7 @@ jobs:
         run: |
           build/alengine selftest | tee out/selftest.json
           build/alringstress 5 | tee out/ringstress.json
-          python3 tools/native-lab/run_mix.py build/almix out/mix | tail -1 | tee out/mix.txt
+          python3 tools/native-lab/run_mix.py "$PWD/build/almix" out/mix | tail -1 | tee out/mix.txt
       - name: ThreadSanitizer (clang) on the ring
         run: |
           clang++ -std=c++17 -O1 -g -fsanitize=thread -ffp-contract=off -fno-fast-math native/tests/ring_stress.cpp -o build/ringstress-tsan
@@ -164,7 +164,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/bridge-unit.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; }; done; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Native CI (Apple Silicon)"; for f in out/machine.txt out/file.txt out/selftest.json out/ringstress.json out/ringstress-tsan.json out/mix.txt out/bridge-unit.txt; do if [ -f "$f" ]; then echo "### $f"; echo '```'; cut -c1-1500 "$f"; echo '```'; fi; done; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

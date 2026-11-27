@@ -18,6 +18,8 @@ def wav(path):
 
 def main():
     exe = sys.argv[1]; out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "out-mix")
+    # the renderer runs inside ref/mix, so both paths are made absolute here (task NB-R1: CI passed relative ones)
+    exe = os.path.abspath(exe) if os.sep in exe else exe; out = os.path.abspath(out)
     os.makedirs(out, exist_ok=True)
     res = {}; ok_all = True
     for f in sorted(os.listdir(REF)):
