@@ -5526,3 +5526,27 @@ This run was started by hand with a note from the scheduling chat (18:20 UTC) as
 
 ### What is left
 - Next run: **DS-T2** meters, CPU and top bar (TM1, TC1, TS1), with lane E's `INS.mbar` and the CPU graph drawers. Then DS-B1, DS-B2, DS-A1 with GL1 (unless the task prompt is changed to bring it forward), then DS-A2 and DS-T1 after MD1.
+
+## 27 November 2026, v0.273: task XT-DL2, the commands registry (extensions and the Workshop, lane H, second step)
+Row DL2 of docs/extensions-plan.md 9.7 (part c of 9.6). Invisible groundwork: nothing looks or behaves differently, no shortcut changes.
+
+### What was built
+- **Every action has one namespaced command id** (71): the 68 rows of the shortcut list `SCA` plus three buttons without a shortcut row (`transport.countIn`, `transport.tapTempo`, `transport.capture`, kept out of the Settings list in `XT_CMD_EXTRA`). Sections: transport, project, edit, clip, track, view, help, ctl, ni, arr. (`mg.native` of task MG1 exists only in the desktop app and is noted, not listed.) List: `docs/commands.md`.
+- `SCA` itself is unchanged: its old ids stay the keys of `UI.keys`, the key presets (`SCPRE`) and `SCM`, so nobody's keys change and every existing caller (`SCM.get('play').run()` in the controller code) keeps working. `XT_CMD_NS` gives each old id its namespaced id; the ids lanes A, C and D already namespaced (`ctl.*`, `ni.*`, `clip.linkedDup`, `clip.unique`, `arr.*`) are adopted as they are.
+- `COMMAND_ALIAS`: old id (and later retired ids) to the namespaced id; `xtCommandId(any id)` resolves namespaced, old and retired ids.
+- `xtCommands()`: the registry, a Map of `{id, name, group, defaultKey, key (the user's current key), legacy (old id), gesture, when, run}`. Built on first use and again only when `SCA` grows (rows other lanes push later join by themselves). With nothing asking for it, it is never built.
+- `runCommand(id, source)`: the one door for macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15). Refuses gestures (Copy, Shift-drag and the like, which only describe a mouse or edit gesture) and unknown ids without an error. `XT_CMD_LOG` keeps the last 50 runs with the reason when one did not run, for the Workshop console (DL10).
+- Not changed on purpose: existing menus, buttons and the key handler still call their functions directly. They belong to other lanes (lane rules in CLAUDE.md); a lane that wants it can call `runCommand('<id>')` in its own code. `when` (per-editor keys) comes with DL8.
+- Code: block "COMMANDS REGISTRY (v0.273, task XT-DL2)" before `askChoice`, after DL1's block; edit script `tools/edits/taskXT_DL2.py` with `taskXT_DL2_block.js` (asserts DL1 is in and that no name it adds exists). No CSS.
+
+### Tested
+- `tools/ui-tests/taskXT_DL2.py`: 24 of 24. It fails when a command of docs/commands.md disappears from the registry (and from `COMMAND_ALIAS`), when the registry has a command not listed there (**a new `SCA` row needs a namespaced id, or a row in `XT_CMD_NS`, and a row in docs/commands.md**), or when runCommand, the aliases or the keys stop working. Also: the registry is not built at start, with a song, or while playing; the C key still toggles the metronome; the Settings shortcut list has the same 68 rows.
+- With the change: taskXT_DL1 21/21, taskHF1 19/19, taskFT_C2b 59/59, taskFT_C2c 36/36 (the controller code that runs commands through `SCM`). Lint clean, no console errors. Start-up smoke test (`smoke_electron.js`, the desktop app, 20 s per scenario): 17 of 17 clean.
+- Frame time (frametime.py, ms per frame, idle / play): after 12.8 and 11.5 / 33.8 and 34.9; before 11.4 / 30.7. Within this machine's noise; no code of this step runs unless a command is asked for.
+- Audio untouched (no audio code changed; the export lines are those of v0.266).
+
+### For lane F (overlays, OV3 'Advanced' right-click group)
+The rules file (`ui-rules.json`, hide and rename) comes with DL5, after DL12, DL3 and DL4. Its API will be named in that step's entry. What exists now: control ids `data-al` with `xtControlOf(element)` (DL1, docs/ids.md) and commands with `runCommand(id)` (this step, docs/commands.md).
+
+### What is left (task XT, in this order)
+DL12 script sandbox spike; DL3 advanced settings list, DL4 safe mode; DL5 rules engine with the right-click "Advanced" entries, DL6, DL7, DL8; then XT-EX2 to XT-EX10; then DL9, DL10 with the Workshop window, DL11, DL13, DL14, DL15, the Assistant tools, the import card, script instruments.
