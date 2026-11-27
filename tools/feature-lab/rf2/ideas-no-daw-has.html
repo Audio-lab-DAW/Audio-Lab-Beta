@@ -1,0 +1,347 @@
+<title>AudioLab: ideas no DAW has yet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a pick sheet in AudioLab's own dark look. Intro and filters, then eight groups of numbered idea cards; the ten best carry a small live mock-up and span two columns. Picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#3ecf8e;--blue:#4c8dff;--warn:#f5c84c;--bad:#ff6b6b;--vio:#b18cff;--disp:#050507;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);padding-block:28px 110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:72ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:5px 11px;font-weight:500;font-size:12px}
+.btn:hover{border-color:#4a4a57}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#04130c}
+.btn.on{border-color:var(--acc);color:var(--acc)}
+header.top{display:flex;flex-direction:column;gap:14px}
+.lede{font-size:15px;line-height:1.55;color:#cfcfd8}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--mut)}
+.legend b{color:var(--ink);font-weight:500}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{background:transparent;border:1px solid var(--ln2);border-radius:999px;padding:3px 11px;font-size:12px;color:var(--mut)}
+.chip.on,.chip:hover{color:var(--ink);border-color:var(--blue)}
+section.grp{display:flex;flex-direction:column;gap:14px}
+.gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;border-bottom:1px solid var(--ln);padding-bottom:8px}
+.gh .k{font:500 12px var(--fm);color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));grid-auto-flow:row dense;gap:14px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.mk{grid-column:span 2}
+.card.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.ch{display:flex;align-items:flex-start;gap:10px}
+.id{font:500 12px var(--fm);color:var(--blue);background:#4c8dff14;border:1px solid #4c8dff40;border-radius:6px;padding:1px 6px;flex:none}
+.star{color:var(--warn);font-size:15px;line-height:1;flex:none}
+.ch h3{flex:1;min-width:0}
+.pick{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);flex:none;cursor:pointer;user-select:none}
+.pick input{accent-color:var(--acc);width:16px;height:16px;margin:0}
+.sees{color:#d6d6de}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:500 11px var(--fm);border:1px solid var(--ln2);border-radius:5px;padding:1px 6px;color:var(--mut)}
+.tag.nat{color:var(--acc);border-color:#3ecf8e55}
+details{border-top:1px solid var(--ln);padding-top:8px}
+summary{cursor:pointer;color:var(--mut);font-size:12px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:8px 0 0;font-size:12.5px}
+dt{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+dd{margin:0;min-width:0}
+/* mock-up frame: AudioLab's black display box */
+.mock{background:var(--disp);border:1px solid var(--ln);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.mock canvas{width:100%;display:block;border-radius:6px;touch-action:none}
+.mrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.mrow .r{margin-left:auto}
+.read{font:12px/1.45 var(--fm);color:#cfd3dc;min-height:1.45em}
+.mlabel{font:500 10.5px var(--fm);color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+input[type=range]{accent-color:var(--acc);width:140px}
+.clipcard{background:#15151a;border:1px solid var(--ln2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar{display:grid;grid-template-columns:52px 1fr 42px;gap:8px;align-items:center;font:12px var(--fm)}
+.bar i{display:block;height:8px;border-radius:4px;background:var(--blue)}
+.led{width:14px;height:14px;border-radius:50%;background:var(--bad);box-shadow:0 0 10px var(--bad);border:none;padding:0}
+.led.ok{background:var(--acc);box-shadow:0 0 6px var(--acc)}
+.appf{border:2px solid transparent;border-radius:8px;padding:8px;transition:border-color .2s}
+.appf.br{border-color:var(--vio)}
+.ftable{width:100%;border-collapse:collapse;font-size:12.5px}
+.ftable th,.ftable td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+.ftable th{color:var(--mut);font-weight:500}
+.tw{overflow-x:auto}
+#bar{position:fixed;left:0;right:0;bottom:0;background:#0d0d10f2;border-top:1px solid var(--ln);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:5;backdrop-filter:blur(10px)}
+#bar .in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#picks{font:500 12.5px/1.4 var(--fm);flex:1 1 320px;min-width:0;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere}
+.foot{font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:6px}
+@media (max-width:700px){.card.mk{grid-column:auto}h1{font-size:26px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+ <span class="eyebrow">AudioLab Pro · task RF2 · 27 November 2026</span>
+ <h1>Ideas no DAW has yet</h1>
+ <p class="lede">34 features that are new or rare in music software, picked for how you work: psytrance and EDM, the science look, and an app that should feel clear and snappy. Tick the ones you want; the bar at the bottom gives one line to paste back. A parallel task (RF1) covers features other DAWs already have, so those are left out here.</p>
+ <div class="legend"><span><b class="star">★</b> most valuable (6, with proposed tasks)</span><span><b>Live mock-up</b>: the best ten have a small working sketch, made with example data</span><span><b>Effort</b>: in this project's tasks</span><span><b>Native</b>: whether it waits for the native engine</span></div>
+ <div class="filters" role="group" aria-label="Filter"><button class="chip on" data-f="all">All 34</button><button class="chip" data-f="star">★ only</button><button class="chip" data-f="mock">With mock-up</button><button class="chip" data-f="picked">My picks</button></div>
+</header>
+<main id="groups" class="wrap" style="gap:40px"></main>
+<section class="grp">
+ <div class="gh"><h2>What the research says</h2></div>
+ <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">
+  <div class="card"><h3>Musicians want AI as a helper, with control</h3><p class="sm">In a 2026 survey of 1,200 musicians, 93% prefer more control even if slower, 43% want AI changes labelled and 39% want undo and compare (<a href="https://www.mu.se/posts/muse-group-ai-survey" target="_blank" rel="noopener">Muse Group</a>). About 1,200 producers accept AI for technical jobs and resist it for creative ones (<a href="https://www.soundonsound.com/music-business/ai-music-tech-2026" target="_blank" rel="noopener">Sound On Sound</a>, <a href="https://www.sonarworks.com/blog/research/future-music-production-human-producer-survey-2026" target="_blank" rel="noopener">Sonarworks</a>). Basis for I30, I31, I33.</p></div>
+  <div class="card"><h3>Generated music must fit the session</h3><p class="sm">Producers testing text-to-music tools hit wrong tempo and key, no way to edit, and no partial regeneration (<a href="https://arxiv.org/pdf/2509.23364v1" target="_blank" rel="noopener">Ronchini et al., 2025</a>). Professionals distrust black-box mixing; amateurs want one button (<a href="https://arxiv.org/pdf/2304.03407" target="_blank" rel="noopener">Vanka et al., AES 2023</a>). Basis for I32 and the ghost rule.</p></div>
+  <div class="card"><h3>History you can play</h3><p class="sm">Endlesss keeps every step of a jam as a playable rifff and lets you "go back in the timeline and keep working from there" (<a href="https://endlesss.freshdesk.com/support/solutions/articles/80000570917--how-do-i-undo-things-" target="_blank" rel="noopener">help page</a>). Emacs undo-tree never loses a branch and can undo inside a region only (<a href="https://elpa.gnu.org/devel/undo-tree.html" target="_blank" rel="noopener">GNU ELPA</a>). Basis for I22 to I26.</p></div>
+  <div class="card"><h3>Seeing what plays</h3><p class="sm">Strudel lights up the exact code that is sounding, by carrying source positions through every pattern (<a href="https://ddrscott.github.io/blog/2026/strudel-live-code-highlighting" target="_blank" rel="noopener">analysis</a>, <a href="https://iclc.toplap.org/2023/catalogue/paper/strudel-live-coding-patterns-on-the-web.html" target="_blank" rel="noopener">ICLC 2023</a>). Masking meters exist only per plug-in pair (<a href="https://www.soundonsound.com/reviews/izotope-neutron-3-advanced" target="_blank" rel="noopener">Neutron review</a>). Basis for I1, I11, I12.</p></div>
+  <div class="card"><h3>Accessibility is mostly an add-on</h3><p class="sm">"The majority of commercially available DAWs are not designed to be compatible with screen readers" (<a href="https://www.open-access.bcu.ac.uk/16223/1/Haptic_Feedback_to_Overcome_Barriers_for_Visually_Impaired_Users_in_Digital_Audio_Workstations_2_.pdf" target="_blank" rel="noopener">Karpodini et al., BCU</a>); blind producers lean on REAPER with <a href="https://www.github.com/jcsteh/osara" target="_blank" rel="noopener">OSARA</a>. Basis for I34.</p></div>
+  <div class="card"><h3>Low end is tuned by ear today</h3><p class="sm">Kick-bass advice is to tune by ear, move bass notes by octaves and nudge the bass 1 to 5 ms (<a href="https://www.musicradar.com/tuition/tech/how-to-tune-your-kick-and-bass-to-stop-them-from-clashing-639140" target="_blank" rel="noopener">MusicRadar</a>). No tool draws both on one pitch ruler with the key. Basis for I2.</p></div>
+ </div>
+</section>
+<section class="grp" id="tasks">
+ <div class="gh"><h2>Proposed tasks for the ★ ideas</h2><span class="mut sm">All six work with today's web engine; none touches the native engine.</span></div>
+ <div class="tw"><table class="ftable"><thead><tr><th>Task</th><th>Idea</th><th>What it builds</th></tr></thead><tbody>
+ <tr><td class="mono">NF1</td><td>I3</td><td>Per-track peak ring buffers, the clip card with each track's share, three fixes. Smallest of the six and the clearest "why" feature.</td></tr>
+ <tr><td class="mono">NF2</td><td>I2</td><td>Kick pitch tracking (samples and the synth kick), the tuning ruler in the song key, beat-rate read-out, the two fixes.</td></tr>
+ <tr><td class="mono">NF3, NF4</td><td>I1</td><td>Offline per-track analysis in a worker with a cache per clip; then the map view, track layer and click-to-jump.</td></tr>
+ <tr><td class="mono">NF5</td><td>I12</td><td>Band-energy overlap for the 12 loudest tracks, cables in their own colour in the cable lane, duck-in-band and notch fixes.</td></tr>
+ <tr><td class="mono">NF6</td><td>I24</td><td>The Try button, branch outline, Keep, Drop, Keep both into the Time Machine version tree.</td></tr>
+ <tr><td class="mono">NF7</td><td>I30</td><td>Ghost notes and ghost automation for Assistant proposals, tick and cross, "Hear it", AI tag in the undo history.</td></tr>
+ </tbody></table></div>
+</section>
+<footer class="foot">
+ <p>Research, ideas and sources in full: <code>docs/research-features-new.md</code> in the repository. Mock-ups use made-up example data, not your projects. "Not found" in a card means a search did not turn it up, not that it cannot exist somewhere.</p>
+</footer>
+</div>
+<div id="bar"><div class="in"><span id="picks" aria-live="polite"></span><button class="btn" id="takeStar">Take all ★</button><button class="btn" id="clr">Start again</button><button class="btn pri" id="copy">Copy my picks</button></div></div>
+
+<script>
+const DATA={"groups": [{"k": "A", "n": "Understanding the sound", "d": "Science-look views that tell you what is in the sound, not just draw it."}, {"k": "B", "n": "Arrangement and flow", "d": "Shaping a track from start to finish, with the energy visible."}, {"k": "C", "n": "Mixing help", "d": "Tools that show where the problem is and leave the decision to you."}, {"k": "D", "n": "Learning and guidance", "d": "Learning inside your own project instead of in a video."}, {"k": "E", "n": "Safety and never losing work", "d": "Builds on the Time Machine AudioLab already has."}, {"k": "F", "n": "Performance and live", "d": "Keeping the good moments you did not plan to record."}, {"k": "G", "n": "AI that helps without taking over", "d": "Suggestions you can see, compare, accept one by one and undo."}, {"k": "H", "n": "Accessibility", "d": "Hearing and feeling what the screen shows."}], "ideas": [{"id": "I1", "g": "A", "star": true, "mock": true, "t": "Frequency map of the whole song", "sees": "One wide picture of the full song: time left to right, frequency bottom to top (log, 20 Hz to 20 kHz), each pixel coloured by the track that owns the most energy there. Section names from the arrangement sit along the top. Click any spot: the arrangement jumps there and that track is selected. A switch shows a single track as a glowing layer over the rest.", "why": "Answers \"what is happening where\" for a whole psytrance track in one look: whether the sub is owned by one track, where the leads and the pads pile up at 2 to 5 kHz, which section is thin. A normal spectrum shows only the present moment and mixes all tracks together.", "prior": "Spectrograms exist everywhere (Sonic Visualiser layers, iZotope RX); iZotope Neutron's masking meter compares two tracks at a time inside a plug-in. A whole-song, per-track ownership map inside the DAW was not found.", "risks": "Needs an offline analysis pass of every track (cost grows with track count; do it in a worker, cache per clip). Colours for 30 tracks need grouping by the track colours or by bus.", "effort": "2 tasks (analysis worker and cache; the map view and click-to-jump)", "native": "No. Works with the web engine's offline render; the native engine later makes the pass faster."}, {"id": "I2", "g": "A", "star": true, "mock": true, "t": "Kick and bass tuning lab", "sees": "A note ruler (C0 to C3) with the song key's notes lit. The kick's pitch is drawn as its falling curve over its 300 ms life, with the note it settles on marked. The bass notes of the current bar are bars on the same ruler. Where the kick tail and a bass note sit a semitone or two apart, the gap glows red and the beat rate is shown (\"beating at 3.4 Hz\"). Buttons: tune the kick to the key root, or shift the bass by an octave. For rolling psytrance bass, a strip shows the gap the bass leaves for each kick.", "why": "Kick-bass clashes are the classic low-end problem in psytrance and EDM. Producers tune kicks by ear with a tuner device and a note chart. Seeing both on one pitch ruler in the song's key turns a guessing job into a reading.", "prior": "Kick plug-ins (for example Sonic Academy Kick) show the kick's pitch envelope; tuners show one note; tutorials teach tuning by ear and nudging the bass 1 to 5 ms (MusicRadar). Nothing found that draws kick and bass on one ruler with the key.", "risks": "Pitch tracking of a kick's short tail is not exact under 40 Hz; show it as a range. Psytrance kicks often do not settle on a clean note.", "effort": "2 tasks (pitch track of kick samples and synth kick; the view and the two fixes)", "native": "No."}, {"id": "I3", "g": "A", "star": true, "mock": true, "t": "\"Why is this clipping?\" explainer", "sees": "Click a red clip light on the master or on any strip. A card opens with the moment it happened (bar and beat) and a short chain: \"Kick + Bass add up here: +2.1 dB over 0 dBFS. Biggest share: Bass (58%), Kick (31%). Inter-sample peak: +0.6 dB.\" Each line has a fix button: lower the bass by 5 dB, turn on the limiter, play the moment again. A small bar chart shows each track's share of the peak.", "why": "Every DAW shows THAT something clipped, none says WHY. Beginners lower the master fader, which fixes nothing upstream. Tracing the peak back to the tracks that made it is exactly the \"smart and sciencey\" help the app is aiming for.", "prior": "Clip indicators and peak-hold everywhere; loudness meters with history. A causal breakdown by track was not found.", "risks": "A peak is a sum of signals with phase, so \"share\" needs a careful definition (contribution at the peak sample, signed). Needs short per-track ring buffers around each clip event.", "effort": "2 tasks", "native": "No. The ring buffers are cheaper in the native engine later."}, {"id": "I4", "g": "A", "star": false, "mock": false, "t": "Mono-loss map", "sees": "Next to the existing Mono check: a band-by-band bar per track showing how much level that track loses when the mix is folded to mono (\"Pad: −7 dB at 200 to 800 Hz\"). Tracks that cancel each other are joined by a line.", "why": "Mono check tells you the mix sounds worse in mono; it does not tell you which track and which band. Club systems and phones are mono in the low end.", "prior": "Correlation meters and per-band imagers exist as plug-ins (for example in mastering suites). Per-track, per-band loss inside the mixer was not found.", "risks": "Needs a mid and side analysis per track; cheap with existing analysers but many tracks add up.", "effort": "1 task", "native": "No."}, {"id": "I5", "g": "A", "star": false, "mock": false, "t": "Harmonic ruler on every spectrum", "sees": "Any spectrum view can show a piano strip under it. Peaks are labelled with their note and cents (\"A1 −12 c\"); peaks outside the song's scale glow amber, resonances that ring longer than a beat glow red.", "why": "Turns a spectrum from a picture into a reading in musical terms: a resonance becomes \"that F# rings\". Helps tuning, EQ and finding a bad note in a pad.", "prior": "Some analysers show the note under the mouse (for example Voxengo SPAN, not verified). Scale-aware labelling of all peaks was not found.", "risks": "Busy at full mix; show only the five strongest peaks.", "effort": "1 task", "native": "No."}, {"id": "I6", "g": "A", "star": false, "mock": true, "t": "Energy arc", "sees": "A thin curve under the arrangement: loudness, density (how many tracks play) and brightness over the song, with the sections marked. A dashed curve can show a reference track's arc or a typical psytrance arc (build, drop, break, second drop).", "why": "You see the shape of the song: whether the drop really lifts, whether the break is long enough, whether the second half sags. DJs read this kind of energy curve; producers rarely get it inside their DAW.", "prior": "DJ software analyses phrases and energy (rekordbox phrase analysis, Mixed In Key energy level). In a DAW arrangement: not found.", "risks": "\"Energy\" is a made-up measure; keep the three ingredients visible so it can be trusted.", "effort": "1 task", "native": "No."}, {"id": "I7", "g": "B", "star": false, "mock": false, "t": "Draw the arc", "sees": "Draw the energy curve you want with the mouse above the arrangement. The app marks where the song falls short (\"bars 97 to 112 sit 4 dB under your line\") and offers moves you can try one at a time: a riser, a filter sweep, a drum fill, a layer to add. Nothing is changed until you click.", "why": "Starts from the musical intention (where should it build) instead of from tools. Fits the user's way of working on long psytrance structures.", "prior": "None found. Research on generative arrangement exists, but not this kind of target curve in a DAW.", "risks": "Suggestions can feel generic; they must come from your own project (your sounds, your automation). Builds on I6.", "effort": "2 tasks after I6", "native": "No."}, {"id": "I8", "g": "B", "star": false, "mock": false, "t": "Variation family tree", "sees": "Right-click a MIDI clip: \"Breed variations\". Six children appear as a small tree, each a mutation (notes moved, rhythm shifted, octave jumps) at a strength you set. Play them, pick one, breed again from it, or cross two clips. The tree stays with the clip so you can go back to any ancestor.", "why": "Sound design by choosing instead of by programming: you only judge with your ears. Good for acid lines and psytrance bass patterns where small changes matter. The tree looks like a phylogenetic chart, which fits the science look.", "prior": "Sonic Charge Synplant breeds synth patches; genetic-algorithm music research (for example Biles' GenJam). For clips inside a DAW, with a kept tree: not found.", "risks": "Random mutations can be boring; mutations must respect the scale lock and the groove.", "effort": "2 tasks", "native": "No."}, {"id": "I9", "g": "B", "star": false, "mock": false, "t": "Transition doctor", "sees": "Select the border between two sections. Three or four transitions are prepared and can be played in place: riser plus filter sweep, reverse crash and snare roll, a one-bar cut to silence, a tape stop. Pick one: it is built from AudioLab's own devices on its own track, editable.", "why": "Transitions are where tracks lose momentum, and making them is repetitive. Hearing options in context beats dragging samples around.", "prior": "Sample packs of transitions; some apps offer riser generators. Context-aware options built at the section border: not found.", "risks": "Can make every song sound the same; options should use the song's own sounds where possible.", "effort": "2 tasks", "native": "No."}, {"id": "I10", "g": "B", "star": false, "mock": false, "t": "Reference ghost lane", "sees": "Drop a finished reference track on a ghost lane above the arrangement. Its sections are found and lined up with yours (drop to drop). While playing, a split meter compares the matching sections: loudness, low end, width.", "why": "Comparing \"my drop\" with \"their drop\" at the right moment, without jumping around.", "prior": "Reference plug-ins (for example Mastering The Mix REFERENCE, ADPTR Metric AB) compare level-matched audio, not section by section against your arrangement.", "risks": "Section finding in someone else's track is a guess; let the user drag the boundaries.", "effort": "2 tasks", "native": "No."}, {"id": "I11", "g": "B", "star": false, "mock": false, "t": "Activity glow", "sees": "While the song plays, whatever is changing the sound right now glows softly: the automation lane, the LFO, the knob being moved by it, the cable from the modulator. Pause and the glow freezes, so you can see what was moving at that moment.", "why": "\"Where is that wobble coming from?\" is a common hunt in big projects. Strudel lights up the exact piece of code that is playing; this does the same for devices.", "prior": "Strudel's live highlighting of the playing code (\"temporal source mapping\"); Bitwig shows modulation amounts on knobs. A song-wide glow of everything that is moving: not found.", "risks": "Visual noise in busy songs; a filter for \"only the selected track\" is needed. Glass and frame-rate budget.", "effort": "1 task", "native": "No."}, {"id": "I12", "g": "C", "star": true, "mock": true, "t": "Masking cables in the mixer", "sees": "With \"Clashes\" on, the mixer's cable lane shows a cable between two strips that fight in a band right now, its thickness the size of the overlap, labelled with the band (\"Bass vs Kick, 45 to 70 Hz\"). Click the cable: options to duck one under the other in that band only, or to carve a little EQ notch.", "why": "Masking is the hardest mix problem to hear. AudioLab's cable system is the part the user loves, so showing clashes as cables reuses a picture the user already reads well.", "prior": "iZotope Neutron's masking meter (one pair, inside a plug-in, \"does not fix them automatically\", Sound On Sound). Across the whole mixer, with cables: not found.", "risks": "Pairwise comparison grows with the square of track count; limit to the 12 loudest tracks or to the selected track. Must not clutter the cable lane: its own colour and a switch.", "effort": "2 tasks", "native": "No."}, {"id": "I13", "g": "C", "star": false, "mock": true, "t": "Level journey", "sees": "For one channel, a vertical strip that follows the signal from the clip through each device to the fader and the bus: level in and out at every step as a small waterfall, with the biggest jumps marked.", "why": "Gain staging is invisible: each device has its own meter, if any. One picture of the whole path shows where the level jumps or drops.", "prior": "Per-plug-in meters; some channel strips show input and output. A whole-path view: not found.", "risks": "Needs a tap after every device; cheap with analysers, but only for the selected channel.", "effort": "1 task", "native": "No."}, {"id": "I14", "g": "C", "star": false, "mock": false, "t": "Blind shoot-out", "sees": "When you compare two versions (Mix A/B, two EQ settings, two kicks), a \"Blind\" button hides which is which, level-matches them and plays them in random order. You vote; after five rounds it shows whether you really heard a difference.", "why": "A louder version always sounds better. Blind, level-matched comparison is how engineers stop fooling themselves, and AudioLab already has Mix A/B to build on.", "prior": "ABX test tools for audio formats; level matching in some reference plug-ins. Inside a DAW's own A/B: not found.", "risks": "Some users will find it a gimmick; keep it one button.", "effort": "1 task", "native": "No."}, {"id": "I15", "g": "C", "star": false, "mock": false, "t": "Listening lenses", "sees": "A row of small lenses on the master: phone speaker, laptop, earbuds, car, club PA (big low end, mono below 120 Hz), and \"sub only\". One click hears the mix through it.", "why": "Mixes are checked on many systems; walking to the car is slow. Ties in with the DAC and audiophile work in Settings.", "prior": "Plug-ins exist (for example Audified MixChecker, Sonarworks). Built into the master section of a DAW: rare. Close to RF1's field; kept here because the club PA and sub-only lenses are tuned for psytrance.", "risks": "Simulations are approximations; label them as such. Must be off for export.", "effort": "1 task", "native": "No."}, {"id": "I16", "g": "C", "star": false, "mock": false, "t": "Ear-fatigue guardian", "sees": "A small dose meter near the loudness read-out: how much sound your ears have had in this session (level times time, from the output level and the DAC setting). After a long loud stretch it suggests a break; after a break, \"fresh ears\" plays your mix and a reference for 20 seconds before you change anything.", "why": "Mixing decisions made with tired ears are the ones you undo the next day. AudioLab already has a headphone safety ceiling; this adds the time dimension.", "prior": "Phone and watch headphone-exposure tracking. In a DAW: not found.", "risks": "The real level at the ear is unknown without calibration; show it as an estimate and let the user calibrate once. Not medical advice.", "effort": "1 task", "native": "No."}, {"id": "I17", "g": "D", "star": false, "mock": false, "t": "Explain mode with a live picture", "sees": "Hold a key and hover any knob: a small card explains it in one line and shows a live picture of what it does to the sound you are playing (attack reshapes the drawn envelope, the filter cutoff moves on a mini spectrum).", "why": "Learning by seeing the effect on your own sound, not on a textbook example. Ableton's Info View explains in text only.", "prior": "Ableton Info View (text). Live pictures per control: not found.", "risks": "Needs a picture type for each kind of control; start with filter, envelope, compressor and delay.", "effort": "2 tasks", "native": "No."}, {"id": "I18", "g": "D", "star": false, "mock": false, "t": "Recipe cards that act on your project", "sees": "A card like \"Rolling psytrance bass in 6 steps\". Each step points at the real control in your project (it glows), says what to listen for, and ticks itself when the change is made. Cards can be written as extension files (docs/extensions-plan.md).", "why": "Tutorials live in videos, away from the work. Here the steps happen in your own song.", "prior": "Ableton's built-in lessons and the Learning Music site (outside your project). Steps that watch your real project: not found.", "risks": "Writing good cards takes time; start with four for the user's genres.", "effort": "2 tasks plus content", "native": "No."}, {"id": "I19", "g": "D", "star": false, "mock": false, "t": "Ear training on your own mix", "sees": "A two-minute game: AudioLab boosts a band on one of your tracks and you guess the frequency, or it changes a compressor and you guess which one. Score and progress are kept.", "why": "Training on your own sounds transfers better to your own mixing than training on generic loops.", "prior": "Ear-training apps such as SoundGym and TrainYourEars (separate apps with their own audio). Inside a DAW with your audio: not found.", "risks": "Fun is hard to design; keep it short and optional.", "effort": "1 task", "native": "No."}, {"id": "I20", "g": "D", "star": false, "mock": false, "t": "Preset galaxy", "sees": "All 1,238 presets as a star map: similar sounds sit close together, colour by instrument, brightness by how bright the sound is. Hover to hear, drag a lasso to collect favourites, type \"dark pluck\" to light up a region.", "why": "Browsing by sound instead of by name. The star map fits the Webb and Hubble look of the app.", "prior": "XLN Audio XO arranges drum samples as a map; Sononym maps samples. For synth presets of a DAW's own instruments: not found.", "risks": "Needs one render and analysis per preset (offline, once).", "effort": "2 tasks", "native": "No."}, {"id": "I21", "g": "D", "star": false, "mock": false, "t": "Your mix habits", "sees": "Once a month, a private one-page report from your own projects: \"You boost 3 to 4 kHz on leads in 80% of songs\", \"your sub sits 2 dB above your references\", \"you finish songs in about 9 sessions\".", "why": "Habits are invisible from the inside. Seeing your own tendencies is how you improve without a teacher.", "prior": "Not found.", "risks": "Can feel like being watched; local only, opt in, easy to delete.", "effort": "1 task", "native": "No."}, {"id": "I22", "g": "E", "star": false, "mock": true, "t": "Listen through the Time Machine", "sees": "The Time Machine's timeline gets a scrub bar: drag it and hear the same 8 bars as they sounded in each saved version, like a time-lapse of the song growing. Two versions can be put side by side for a quick A/B, and one track can be pulled out of an old version into today's song.", "why": "\"It sounded better on Tuesday\" can be checked in seconds instead of opening old files. Pulling one track from the past fixes the case where only one part got worse.", "prior": "Endlesss keeps every jam step as a playable rifff (\"go back in the timeline and keep working from there\"); game replays and Braid-style time rewind. In a DAW's version history: not found.", "risks": "Each version needs a short render, cached in the background; storage grows (needs the storage read-out the settings audit asked for).", "effort": "2 tasks", "native": "No."}, {"id": "I23", "g": "E", "star": false, "mock": false, "t": "Undo only here", "sees": "Select tracks or a time range, then \"Undo here\": steps back only the changes that touched that selection and leaves the rest of your later work alone. The undo history list highlights which steps that will be.", "why": "Today, undoing a mistake made an hour ago on the bass also undoes everything done since on the drums.", "prior": "Emacs undo-tree's \"undo in region\" (records a new branch, never edits history). In a DAW: not found.", "risks": "Changes that depend on each other (a moved clip that was later edited) need clear rules; refuse with a reason when a step cannot be separated.", "effort": "2 tasks", "native": "No."}, {"id": "I24", "g": "E", "star": true, "mock": true, "t": "What-if branch", "sees": "A \"Try\" button in the top bar. Press it and everything from now on happens on a side branch, shown by a coloured outline around the app and a branch name. At any time: Keep (merge into the song), Drop (back to before, nothing lost), or Keep both (the branch becomes a version in the Time Machine). Branches can be compared with Mix A/B.", "why": "Fear of breaking a good mix stops people from experimenting. Making the experiment explicit and free removes that fear. The Time Machine already has a version tree, so branches have a home.", "prior": "Git branches; Emacs undo-tree; Endlesss' forward-only rifffs. In a DAW as one button: not found.", "risks": "Merging is only simple if the branch replaces the song (no three-way merge); say so. Audio recorded on a branch needs its files kept until the branch is dropped.", "effort": "2 tasks", "native": "No."}, {"id": "I25", "g": "E", "star": false, "mock": false, "t": "Session diary", "sees": "When you open a project, a short card: \"Last time (Tuesday, 2 h): you built the second drop, added the Growl lead, left the break unfinished\", with an 8-bar sound snapshot of where you stopped. Write a note to your future self on closing.", "why": "Getting back into a song after days away is a real cost. The diary is made from the undo history, so it costs you nothing.", "prior": "Not found in DAWs.", "risks": "Summaries from undo steps can be dull; keep them to three lines, optionally written by the Assistant.", "effort": "1 task", "native": "No."}, {"id": "I26", "g": "E", "star": false, "mock": true, "t": "Knob memory", "sees": "Right-click any knob: a small timeline of its last values in this session. Drag along it to scrub the knob back in time while hearing it, then let go to keep that value.", "why": "\"It sounded better a minute ago\" for a single control, without undoing everything else. Like rewinding time in a game.", "prior": "Braid-style rewind in games. In a DAW: not found.", "risks": "Memory per parameter must be small (ring buffer of values, not audio).", "effort": "1 task", "native": "No."}, {"id": "I27", "g": "F", "star": false, "mock": false, "t": "Capture knob moves after the fact", "sees": "AudioLab's Capture already keeps the notes you played. This keeps knob and fader moves too: after a great filter sweep you did while jamming, press Capture and it becomes automation at the right place.", "why": "The best moves happen when you are not recording.", "prior": "Ableton's Capture MIDI and Endlesss' retrospective looper capture notes and audio; for automation: not found.", "risks": "Needs a ring buffer of control changes; cheap.", "effort": "1 task", "native": "No."}, {"id": "I28", "g": "F", "star": false, "mock": false, "t": "Scene morph pad", "sees": "Save up to four snapshots of chosen knobs (for example two filter and delay settings). An XY pad morphs smoothly between them, and the path you draw can be recorded as automation.", "why": "One gesture for a big change, useful for live sets and for long psytrance builds.", "prior": "Elektron Octatrack scenes and crossfader; some plug-ins morph presets. As a DAW-wide pad over any knob: rare.", "risks": "Close to features in other tools; RF1 may list it too.", "effort": "1 task", "native": "No."}, {"id": "I29", "g": "F", "star": false, "mock": false, "t": "Phrase rings", "sees": "In a live or loop view, a ring around the play button fills over the current 8 or 16-bar phrase. Launched clips wait for the next phrase and show a countdown in beats.", "why": "Psytrance and EDM are built in 8 and 16-bar phrases; launching at the phrase keeps a live set clean.", "prior": "Launch quantisation in clip-based DAWs; phrase analysis in DJ software. The phrase ring itself: not found.", "risks": "Small; mostly visual.", "effort": "1 task", "native": "No."}, {"id": "I30", "g": "G", "star": true, "mock": true, "t": "Ghost suggestions", "sees": "Whatever the Assistant proposes appears as ghosts, never as changes: ghost notes in the piano roll, a ghost automation line, a ghost EQ curve over the real one. Each ghost has a tick and a cross; \"Hear it\" plays the song with the ghost included. Accepted ghosts are marked as AI-made in the undo history.", "why": "Surveys agree: musicians accept AI for help and reject AI that decides. 93% prefer more control even if slower, 43% want changes labelled, 39% want undo and compare (Muse Group, 2026). Ghosts are control, labels and compare in one picture.", "prior": "Ghost notes from other clips exist in AudioLab and other DAWs; AI tools usually apply their changes directly (Neutron's Mix Assistant moves Relay faders). Every AI change as an acceptable ghost: not found.", "risks": "Each kind of change needs its own ghost drawing; start with notes and automation. Plays well with the extensions plan (stage 4 tools).", "effort": "2 tasks", "native": "No."}, {"id": "I31", "g": "G", "star": false, "mock": false, "t": "Ask the mix", "sees": "Ask the Assistant a question about the song: \"Why does the second drop feel weaker?\" It answers with measurements, not opinions (\"the second drop is 1.8 dB quieter, 30% narrower, and the lead is missing between bars 161 and 176\"), each with a link that jumps there.", "why": "An answer you can check is one you can trust. Uses the same measurements as I1, I3 and I6.", "prior": "Chat assistants in DAWs mostly do actions or general advice. Answers grounded in measurements of your own project: not found.", "risks": "Needs a model connection for free questions; without one, a set of fixed questions works offline.", "effort": "2 tasks", "native": "No."}, {"id": "I32", "g": "G", "star": false, "mock": false, "t": "Fill the gap from your own clips", "sees": "Select an empty bar or two: the Assistant offers fills made only from material in this song (variations of your own clips, in key and tempo), as ghosts (I30).", "why": "The study of producers using text-to-music tools found wrong tempo and key, no editing and no partial regeneration were the main problems (Ronchini et al., 2025). Working from your own clips avoids all three and the training-data worry.", "prior": "Generative MIDI tools (in other DAWs and plug-ins) use their own models; RF1 covers those. Restricting to the song's own material: rare.", "risks": "Variety is limited to what is in the song; that is the point.", "effort": "2 tasks after I30", "native": "No."}, {"id": "I33", "g": "G", "star": false, "mock": false, "t": "AI provenance layer", "sees": "A switch that tints everything the AI made or changed (notes, automation, stems, device settings). A read-out \"AI share of this song: 6% of notes, 2 stems\". One button removes all AI changes, and the export can include a short honest credit line.", "why": "Only 6% of creators would hide AI use, and most want clear labelling (Sound On Sound 2026 survey; Muse Group). Knowing where the AI was keeps authorship clear.", "prior": "Not found in DAWs.", "risks": "Every AI tool must tag its changes; easy if done from the start (stage 4 of the extensions plan).", "effort": "1 task", "native": "No."}, {"id": "I34", "g": "H", "star": false, "mock": false, "t": "Hear and feel the meters", "sees": "For anyone who cannot or does not want to look: levels as a soft pitch in one ear, a short earcon when a track clips or the master passes the loudness target, and \"Describe the mix\" which reads a short summary (\"Bass loudest, master −8 LUFS, two tracks clip in the drop\"). Haptics on supported trackpads and controllers.", "why": "\"The majority of commercially available DAWs are not designed to be compatible with screen readers\" (Karpodini et al.). Blind producers rely on REAPER with the OSARA add-on; building it in is rare. Earcons also help sighted users mixing with eyes closed.", "prior": "OSARA for REAPER (screen reader support, peak reports); research on haptic meters (Karpodini et al., BCU). Built into a DAW: rare.", "risks": "Needs testing with screen reader users; sighted design guesses go wrong.", "effort": "2 tasks", "native": "No (haptics on Mac trackpads need the native app)."}]};
+const $=(s,r=document)=>r.querySelector(s);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let PK=new Set();try{const s=JSON.parse(localStorage.getItem('al-rf2')||'[]');if(Array.isArray(s))PK=new Set(s)}catch(e){}
+let FIL='all';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function card(it){
+ const c=document.createElement('article');c.className='card'+(it.mock?' mk':'');c.id=it.id;c.dataset.id=it.id;
+ c.innerHTML=`<div class="ch"><span class="id">${it.id}</span>${it.star?'<span class="star" title="Most valuable">★</span>':''}<h3>${esc(it.t)}</h3><label class="pick"><input type="checkbox" id="pk-${it.id}"> Want</label></div>
+ ${it.mock?`<div class="mock" data-mock="${it.id}"></div>`:''}
+ <p class="sees">${esc(it.sees)}</p>
+ <div class="tags"><span class="tag">Effort: ${esc(it.effort.split(' (')[0])}</span><span class="tag nat">Native engine: ${it.native.startsWith('No')?'not needed':'needed'}</span></div>
+ <details><summary>Why, prior art, risks</summary><dl><dt>Why</dt><dd>${esc(it.why)}</dd><dt>Prior art</dt><dd>${esc(it.prior)}</dd><dt>Risks</dt><dd>${esc(it.risks)}</dd><dt>Effort</dt><dd>${esc(it.effort)}</dd><dt>Native</dt><dd>${esc(it.native)}</dd></dl></details>`;
+ const cb=c.querySelector('input');cb.checked=PK.has(it.id);c.classList.toggle('picked',cb.checked);
+ cb.onchange=()=>{cb.checked?PK.add(it.id):PK.delete(it.id);c.classList.toggle('picked',cb.checked);save()};
+ return c}
+function render(){const m=$('#groups');m.innerHTML='';
+ for(const g of DATA.groups){const items=DATA.ideas.filter(i=>i.g===g.k);
+  const s=document.createElement('section');s.className='grp';s.dataset.g=g.k;
+  s.innerHTML=`<div class="gh"><span class="k">${g.k}</span><h2>${esc(g.n)}</h2><span class="mut sm">${esc(g.d)}</span></div><div class="grid"></div>`;
+  const gr=s.querySelector('.grid');items.forEach(i=>gr.appendChild(card(i)));m.appendChild(s)}
+ document.querySelectorAll('[data-mock]').forEach(el=>{try{MOCK[el.dataset.mock](el)}catch(e){el.textContent='Mock-up failed: '+e.message}});
+ applyFilter();picksLine()}
+function applyFilter(){document.querySelectorAll('.card[data-id]').forEach(c=>{const it=DATA.ideas.find(i=>i.id===c.dataset.id);
+ c.hidden=!(FIL==='all'||(FIL==='star'&&it.star)||(FIL==='mock'&&it.mock)||(FIL==='picked'&&PK.has(it.id)))});
+ document.querySelectorAll('section.grp[data-g]').forEach(s=>s.hidden=![...s.querySelectorAll('.card')].some(c=>!c.hidden))}
+document.querySelectorAll('.chip[data-f]').forEach(b=>b.onclick=()=>{FIL=b.dataset.f;document.querySelectorAll('.chip[data-f]').forEach(x=>x.classList.toggle('on',x===b));applyFilter()});
+function order(){return DATA.ideas.map(i=>i.id).filter(id=>PK.has(id))}
+function picksText(){const o=order();return 'RF2 picks: '+(o.length?o.join(' '):'(none yet)')}
+function picksLine(){$('#picks').textContent=picksText()}
+function save(){try{localStorage.setItem('al-rf2',JSON.stringify([...PK]))}catch(e){}picksLine();if(FIL==='picked')applyFilter()}
+function syncBoxes(){DATA.ideas.forEach(i=>{const cb=$('#pk-'+i.id);if(cb){cb.checked=PK.has(i.id);cb.closest('.card').classList.toggle('picked',cb.checked)}});save()}
+$('#takeStar').onclick=()=>{DATA.ideas.filter(i=>i.star).forEach(i=>PK.add(i.id));syncBoxes()};
+$('#clr').onclick=()=>{PK.clear();syncBoxes()};
+$('#copy').onclick=()=>{const tx=picksText(),b=$('#copy');(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy my picks',1500)},()=>{const r=document.createRange();r.selectNodeContents($('#picks'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press copy'})};
+
+/* ---------- shared helpers for the mock-ups ---------- */
+const C={acc:'#3ecf8e',blue:'#4c8dff',warn:'#f5c84c',bad:'#ff6b6b',vio:'#b18cff',mut:'#8b8b97',ln:'#25252c',ink:'#ececf1',pink:'#ff7ac6',cyan:'#43d3e8'};
+function cv(el,h){const c=document.createElement('canvas');el.appendChild(c);const fit=()=>{const w=c.clientWidth||600,d=Math.min(2,devicePixelRatio||1);c.width=w*d;c.height=h*d;c.style.height=h+'px';c.getContext('2d').setTransform(d,0,0,d,0,0);c._w=w;c._h=h};fit();c._fit=fit;return c}
+function row(el,html){const d=document.createElement('div');d.className='mrow';d.innerHTML=html;el.appendChild(d);return d}
+function readout(el){const d=document.createElement('div');d.className='read';el.appendChild(d);return d}
+const vis=new Set();const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target)));
+const loops=[];function loop(el,fn){io.observe(el);loops.push([el,fn])}
+let t0=performance.now();function tick(t){for(const [el,fn] of loops)if(vis.has(el))fn((t-t0)/1000);requestAnimationFrame(tick)}
+addEventListener('resize',()=>document.querySelectorAll('.mock canvas').forEach(c=>{c._fit&&c._fit();c._redraw&&c._redraw()}));
+function rng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+let AC=null;function ac(){if(!AC){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;AC=new A()}if(AC.state==='suspended')AC.resume();return AC}
+
+/* ---------- the ten mock-ups ---------- */
+const SECT=[['Intro',0,16],['Build',16,32],['Drop',32,64],['Break',64,80],['Drop 2',80,112],['Outro',112,128]];
+const MOCK={
+/* I1 frequency map: time x log-frequency, coloured by the owning track */
+I1(el){
+ const TR=[{n:'Kick',c:C.warn,lo:40,hi:90},{n:'Bass',c:C.bad,lo:55,hi:220},{n:'Pad',c:C.vio,lo:200,hi:1800},{n:'Lead',c:C.cyan,lo:900,hi:5500},{n:'Hats',c:C.acc,lo:6000,hi:16000},{n:'Vox',c:C.pink,lo:300,hi:3500}];
+ const play={Kick:[[16,64],[80,112]],Bass:[[32,64],[80,112]],Pad:[[0,32],[64,96]],Lead:[[32,64],[88,112]],Hats:[[8,64],[80,120]],Vox:[[64,80],[96,104]]};
+ const on=(t,b)=>play[t].some(([a,z])=>b>=a&&b<z);
+ let solo=null,sel=null;const bar=row(el,'<span class="mlabel">Layer</span>'+['All',...TR.map(t=>t.n)].map(n=>`<button class="chip${n==='All'?' on':''}" data-n="${n}">${n}</button>`).join(''));
+ const c=cv(el,190),rd=readout(el);rd.textContent='Click anywhere on the map to jump there.';
+ const F=f=>Math.log(f/20)/Math.log(1000);const H=170,top=16;
+ function draw(){const x=c.getContext('2d'),w=c._w;x.fillStyle='#050507';x.fillRect(0,0,w,c._h);
+  const cols=128,rows=60,cw=w/cols,rh=H/rows;const r=rng(7);
+  for(let b=0;b<cols;b++)for(let j=0;j<rows;j++){const f=20*Math.pow(1000,(j+.5)/rows);let best=null,be=0;
+   for(const t of TR){if(!on(t.n,b))continue;if(f<t.lo*.7||f>t.hi*1.3)continue;const m=1-Math.abs(F(f)-(F(t.lo)+F(t.hi))/2)/((F(t.hi)-F(t.lo))/2+.08);const e=m*(.7+.3*r());if(e>be){be=e;best=t}}
+   if(best&&be>0){x.globalAlpha=(solo&&best.n!==solo)?.08:Math.min(1,.25+be*.75);x.fillStyle=best.c;x.fillRect(b*cw,top+H-(j+1)*rh,cw+.5,rh+.5)}}
+  x.globalAlpha=1;x.font='10px JetBrains Mono, monospace';x.fillStyle=C.mut;
+  for(const [n,a] of SECT){x.fillRect(a*cw,0,1,top+H);x.fillText(n,a*cw+4,11)}
+  for(const f of [50,200,1000,5000]){const y=top+H-F(f)*H;x.fillText(f>=1000?f/1000+'k':f,w-26,y-2);x.globalAlpha=.15;x.fillRect(0,y,w,1);x.globalAlpha=1}
+  if(sel){x.strokeStyle='#fff';x.lineWidth=1.5;x.strokeRect(sel[0]-5,sel[1]-5,10,10)}}
+ c._redraw=draw;draw();
+ bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{solo=b.dataset.n==='All'?null:b.dataset.n;bar.querySelectorAll('button').forEach(z=>z.classList.toggle('on',z===b));draw()});
+ c.onclick=e=>{const rc=c.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top;const b=Math.floor(px/c._w*128);const f=20*Math.pow(1000,Math.max(0,Math.min(1,(top+H-py)/H)));
+  const cand=TR.filter(t=>on(t.n,b)&&f>=t.lo*.7&&f<=t.hi*1.3);const s=SECT.find(([n,a,z])=>b>=a&&b<z);sel=[px,py];draw();
+  rd.textContent=`Bar ${b+1} (${s?s[0]:''}), ${f<1000?Math.round(f)+' Hz':(f/1000).toFixed(1)+' kHz'} → ${cand.length?'owner: '+cand[0].n+(cand.length>1?', also '+cand.slice(1).map(t=>t.n).join(', '):''):'empty here'}. The arrangement would jump to bar ${b+1}.`}},
+/* I2 kick and bass tuning lab, with sound */
+I2(el){
+ const NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];const key=6;const scale=[0,1,3,5,7,8,10];/* F# Phrygian, common in psytrance */
+ let tune=-1;const bass=[42,42,43,42];/* MIDI: F#2 F#2 G2 F#2, the rolling-bass root with the Phrygian second */
+ const r=row(el,`<span class="mlabel">Key F# Phrygian</span><label>Kick tune <input type="range" id="i2t" min="-6" max="6" step="1" value="-1"></label><span id="i2v" class="mono">-1 st</span><button class="btn" id="i2r">Tune kick to root</button><button class="btn" id="i2p">▶ Play kick + bass</button>`);
+ const c=cv(el,200),rd=readout(el);
+ const hz=m=>440*Math.pow(2,(m-69)/12);const kickEnd=()=>30+tune;/* F#1 = MIDI 30 */
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);
+  const lo=24,hi=50,Y=m=>h-14-(m-lo)/(hi-lo)*(h-28);const L=56,kw=(w-L)*.45;
+  x.font='10px JetBrains Mono, monospace';
+  for(let m=lo;m<=hi;m++){const pc=(m-key+120)%12,inS=scale.includes(pc);x.fillStyle=inS?'#1a2a22':'#111116';x.fillRect(L,Y(m)-4,w-L,8);
+   if(pc===0){x.fillStyle=C.acc;x.fillRect(L,Y(m)-.5,w-L,1)}
+   if(m%12===0||pc===0){x.fillStyle=pc===0?C.acc:C.mut;x.fillText(NN[m%12]+(Math.floor(m/12)-1),4,Y(m)+3)}}
+  /* kick pitch curve: starts ~3 octaves up, falls exponentially to the end note */
+  x.strokeStyle=C.warn;x.lineWidth=2.5;x.beginPath();for(let i=0;i<=60;i++){const t=i/60,m=kickEnd()+34*Math.exp(-t*9);const yy=Y(Math.min(hi+6,m));i?x.lineTo(L+t*kw,yy):x.moveTo(L+t*kw,yy)}x.stroke();
+  x.fillStyle=C.warn;x.fillText('kick 0 to 300 ms',L+4,14);
+  /* bass notes */
+  const bw=(w-L-kw-20)/4;bass.forEach((m,i)=>{x.fillStyle=C.bad;x.fillRect(L+kw+16+i*bw,Y(m)-4,bw-6,8)});x.fillStyle=C.bad;x.fillText('bass, this bar',L+kw+18,14);
+  /* clash check */
+  const ke=kickEnd();let worst=null;bass.forEach(m=>{const d=Math.abs(m-ke)%12;const dd=Math.min(d,12-d);if(dd>=1&&dd<=2&&(!worst||dd<worst.dd))worst={m,dd}});
+  x.strokeStyle=worst?C.bad:C.acc;x.setLineDash([4,4]);x.beginPath();x.moveTo(L+kw,Y(ke));x.lineTo(w-4,Y(ke));x.stroke();x.setLineDash([]);
+  const pc=(ke-key+120)%12;let msg=`Kick settles on ${NN[(ke%12+12)%12]}${Math.floor(ke/12)-1} (${hz(ke).toFixed(1)} Hz)${pc===0?', the key root':scale.includes(pc)?', in key':', out of key'}. `;
+  if(worst){const a=hz(ke)*Math.pow(2,Math.round((worst.m-ke)/12)),b=hz(worst.m);msg+=`Clash with bass ${NN[worst.m%12]}: ${worst.dd} semitone${worst.dd>1?'s':''} apart, beating at about ${Math.abs(b-a).toFixed(1)} Hz.`}else msg+='No close clash with the bass in this bar.';
+  rd.textContent=msg;rd.style.color=worst?'#ffb3b3':'#bff0d6'}
+ c._redraw=draw;draw();
+ const sl=$('#i2t',r);sl.oninput=()=>{tune=+sl.value;$('#i2v',r).textContent=(tune>0?'+':'')+tune+' st';draw()};
+ $('#i2r',r).onclick=()=>{sl.value=0;sl.oninput()};
+ $('#i2p',r).onclick=()=>{const a=ac();if(!a)return;const t=a.currentTime+.05;for(let k=0;k<4;k++){const s=t+k*.42;
+   const o=a.createOscillator(),g=a.createGain();o.frequency.setValueAtTime(hz(kickEnd()+34),s);o.frequency.exponentialRampToValueAtTime(hz(kickEnd()),s+.12);g.gain.setValueAtTime(.7,s);g.gain.exponentialRampToValueAtTime(.001,s+.38);o.connect(g).connect(a.destination);o.start(s);o.stop(s+.4);
+   const b=a.createOscillator(),bg=a.createGain();b.type='sawtooth';const f=a.createBiquadFilter();f.frequency.value=260;b.frequency.value=hz(bass[k]);bg.gain.setValueAtTime(0,s);bg.gain.linearRampToValueAtTime(.18,s+.12);bg.gain.linearRampToValueAtTime(0,s+.4);b.connect(f).connect(bg).connect(a.destination);b.start(s);b.stop(s+.42)}}},
+/* I3 why is this clipping */
+I3(el){
+ let bassDb=0,lim=false;
+ const r=row(el,`<span class="mlabel">Master</span><button class="led" id="i3l" title="Clip light: click it"></button><span class="sm mut">← click the clip light</span>`);
+ const box=document.createElement('div');box.className='clipcard';box.hidden=true;el.appendChild(box);
+ function calc(){const k=.31,b=.58*Math.pow(10,bassDb/20),o=.11;const over=2.1+20*Math.log10(k+b+o);return{k,b,o,over:lim?Math.min(over,-.3):over}}
+ function show(){const v=calc(),s=v.k+v.b+v.o,clip=v.over>0;$('#i3l',r).classList.toggle('ok',!clip);
+  box.innerHTML=`<div class="mono sm">Bar 33.1.1 (first beat of the Drop)</div>
+  <div>${clip?`Kick + Bass add up here: <b>${v.over>0?'+':''}${v.over.toFixed(1)} dB</b> over 0 dBFS. Inter-sample peak +0.6 dB.`:`Peak now ${v.over.toFixed(1)} dBFS. <b style="color:var(--acc)">No clipping.</b>`}</div>
+  <div class="bars">${[['Bass',v.b,C.bad],['Kick',v.k,C.warn],['Other',v.o,C.mut]].map(([n,a,col])=>`<div class="bar"><span>${n}</span><i style="width:${(a/s*100).toFixed(0)}%;background:${col}"></i><span>${Math.round(a/s*100)}%</span></div>`).join('')}</div>
+  <div class="mrow"><button class="btn" id="i3b">Lower Bass by 5 dB</button><button class="btn${lim?' on':''}" id="i3m">${lim?'Limiter on':'Turn on the master limiter'}</button><button class="btn" id="i3x">Undo both</button></div>`;
+  $('#i3b',box).onclick=()=>{bassDb-=5;show()};$('#i3m',box).onclick=()=>{lim=!lim;show()};$('#i3x',box).onclick=()=>{bassDb=0;lim=false;show()}}
+ $('#i3l',r).onclick=()=>{box.hidden=false;show()}},
+/* I6 energy arc */
+I6(el){
+ const ing={Loudness:true,Density:true,Brightness:true};let ref=true;
+ const r=row(el,Object.keys(ing).map(k=>`<button class="chip on" data-k="${k}">${k}</button>`).join('')+'<button class="chip on" data-k="ref">Typical psytrance arc</button>');
+ const c=cv(el,150),rd=readout(el);rd.textContent='The second drop sits under the first: the arc sags at bar 80.';
+ const song=b=>{const s=SECT.find(([n,a,z])=>b>=a&&b<z)[0];return{Loudness:{Intro:.35,Build:.55,Drop:.9,Break:.4,'Drop 2':.78,Outro:.4}[s]+(s==='Build'?(b-16)/16*.25:0),Density:{Intro:.25,Build:.5,Drop:.85,Break:.3,'Drop 2':.7,Outro:.3}[s],Brightness:{Intro:.3,Build:.5+(b-16)/40,Drop:.8,Break:.55,'Drop 2':.65,Outro:.35}[s]}};
+ const refc=b=>b<16?.35:b<32?.4+(b-16)/16*.45:b<64?.9:b<80?.4+(b-64)/16*.4:b<112?.95:.4;
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);const X=b=>b/128*w,Y=v=>h-12-v*(h-30);
+  x.font='10px JetBrains Mono, monospace';for(const [n,a] of SECT){x.fillStyle='#1c1c22';x.fillRect(X(a),0,1,h);x.fillStyle=C.mut;x.fillText(n,X(a)+4,11)}
+  const ks=Object.keys(ing).filter(k=>ing[k]);
+  x.beginPath();for(let b=0;b<=127;b++){const s=song(b);const v=ks.length?ks.reduce((a,k)=>a+s[k],0)/ks.length:0;b?x.lineTo(X(b),Y(v)):x.moveTo(X(b),Y(v))}
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#3ecf8e55');g.addColorStop(1,'#3ecf8e00');x.lineTo(w,h);x.lineTo(0,h);x.closePath();x.fillStyle=g;x.fill();
+  x.beginPath();for(let b=0;b<=127;b++){const s=song(b);const v=ks.length?ks.reduce((a,k)=>a+s[k],0)/ks.length:0;b?x.lineTo(X(b),Y(v)):x.moveTo(X(b),Y(v))}x.strokeStyle=C.acc;x.lineWidth=2;x.stroke();
+  if(ref){x.setLineDash([5,4]);x.beginPath();for(let b=0;b<=127;b++){b?x.lineTo(X(b),Y(refc(b))):x.moveTo(X(b),Y(refc(b)))}x.strokeStyle=C.blue;x.lineWidth=1.5;x.stroke();x.setLineDash([])}
+  x.fillStyle=C.bad;x.beginPath();x.arc(X(84),Y(.72),4,0,7);x.fill()}
+ c._redraw=draw;draw();
+ r.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='ref')ref=!ref;else ing[k]=!ing[k];b.classList.toggle('on');draw()})},
+/* I12 masking cables between mixer strips */
+I12(el){
+ const S=['Kick','Bass','Pad','Lead','Vox','Hats'];const cab=[{a:0,b:1,band:'45 to 70 Hz',amt:.9},{a:2,b:4,band:'400 to 900 Hz',amt:.55},{a:3,b:4,band:'2 to 4 kHz',amt:.7}];let selC=null;
+ const c=cv(el,180),rd=readout(el);rd.textContent='Click a cable to see the clash and fix it.';const r=row(el,'');
+ let hit=[];
+ function draw(t=0){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);const sw=w/S.length;hit=[];
+  S.forEach((n,i)=>{const cx=i*sw+sw/2;x.fillStyle='#16161b';x.fillRect(i*sw+6,60,sw-12,h-66);const lv=.4+.3*Math.abs(Math.sin(t*2+i));x.fillStyle=C.acc;x.fillRect(cx-3,h-10-lv*(h-90),6,lv*(h-90));x.fillStyle=C.ink;x.font='11px Inter, sans-serif';x.textAlign='center';x.fillText(n,cx,76)});
+  x.textAlign='left';
+  cab.forEach((k,j)=>{const x1=k.a*sw+sw/2,x2=k.b*sw+sw/2,lift=20+j*12;const pul=RM?1:.85+.15*Math.sin(t*4+j);x.strokeStyle=j===selC?'#fff':C.bad;x.globalAlpha=.35+.6*k.amt;x.lineWidth=1+k.amt*7*pul;x.beginPath();x.moveTo(x1,56);x.bezierCurveTo(x1,56-lift,x2,56-lift,x2,56);x.stroke();x.globalAlpha=1;hit.push([(x1+x2)/2,56-lift*.75,j]);
+   x.fillStyle=C.mut;x.font='10px JetBrains Mono, monospace';x.fillText(k.band,(x1+x2)/2-30,56-lift*.75-6)})}
+ c._redraw=()=>draw(0);draw(0);loop(c,t=>draw(t));
+ function info(){if(selC==null){r.innerHTML='';return}const k=cab[selC];rd.textContent=`${S[k.a]} vs ${S[k.b]}, ${k.band}: overlap ${Math.round(k.amt*100)}%.`;
+  r.innerHTML=`<button class="btn" id="i12d">Duck ${S[k.b===1?1:k.b]} under ${S[k.a]} in this band only</button><button class="btn" id="i12n">Carve a 2 dB notch</button>`;
+  $('#i12d',r).onclick=()=>{k.amt=Math.max(.08,k.amt-.45);info()};$('#i12n',r).onclick=()=>{k.amt=Math.max(.08,k.amt-.25);info()}}
+ c.onclick=e=>{const rc=c.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top;let b=null,bd=40;hit.forEach(([hx,hy,j])=>{const d=Math.hypot(px-hx,py-hy);if(d<bd){bd=d;b=j}});selC=b;info()}},
+/* I13 level journey through one channel */
+I13(el){
+ let drive=6;const r=row(el,`<span class="mlabel">Bass channel</span><label>Drive amount <input type="range" id="i13d" min="0" max="18" value="6"></label><span id="i13v" class="mono">+6 dB</span>`);
+ const c=cv(el,170),rd=readout(el);
+ function steps(){const a=[['Clip',-14]];a.push(['EQ',a[0][1]+1.5]);a.push(['Drive',a[1][1]+drive]);a.push(['Comp',a[2][1]-Math.max(0,(a[2][1]+12)*.6)]);a.push(['OTT',a[3][1]+3]);a.push(['Fader',a[4][1]-4]);a.push(['Bus',a[5][1]+1]);return a}
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);const st=steps();const sw=(w-40)/st.length,Y=d=>14+(-d)/30*(h-40);
+  x.font='10px JetBrains Mono, monospace';for(const d of [0,-6,-12,-18,-24]){x.fillStyle=d===0?'#ff6b6b55':'#1c1c22';x.fillRect(30,Y(d),w-30,1);x.fillStyle=C.mut;x.fillText(d,4,Y(d)+3)}
+  let big=0,bi=0;st.forEach((s,i)=>{if(i&&Math.abs(s[1]-st[i-1][1])>big){big=Math.abs(s[1]-st[i-1][1]);bi=i}});
+  st.forEach((s,i)=>{const x0=34+i*sw;const v=s[1];x.fillStyle=v>0?C.bad:v>-6?C.warn:C.acc;x.fillRect(x0+6,Y(Math.min(0,v)),sw-14,h-26-Y(Math.min(0,v)));
+   if(i){x.strokeStyle=i===bi?'#fff':'#55555f';x.lineWidth=i===bi?2:1;x.beginPath();x.moveTo(x0-8+6,Y(Math.min(0,st[i-1][1])));x.lineTo(x0+6,Y(Math.min(0,v)));x.stroke()}
+   x.fillStyle=C.ink;x.textAlign='center';x.fillText(s[0],x0+sw/2-1,h-12);x.fillText((v>0?'+':'')+v.toFixed(1),x0+sw/2-1,Y(Math.min(0,v))-4);x.textAlign='left'});
+  rd.textContent=`Biggest jump: ${st[bi-1][0]} → ${st[bi][0]} (${big.toFixed(1)} dB).${st.some(s=>s[1]>0)?' Level passes 0 dB inside the chain.':''}`}
+ c._redraw=draw;draw();const sl=$('#i13d',r);sl.oninput=()=>{drive=+sl.value;$('#i13v',r).textContent='+'+drive+' dB';draw()}},
+/* I22 listen through the Time Machine */
+I22(el){
+ const V=[['v1','Mon 21:40','kick and bass only'],['v2','Tue 14:02','lead added'],['v3','Tue 18:30','drop mixed'],['v4','Wed 11:15','bass resampled'],['v5','Thu 16:48','new break'],['v6','today','now']];let pos=5;
+ const r=row(el,`<span class="mlabel">Scrub the versions</span><input type="range" id="i22s" min="0" max="5" step=".01" value="5" style="width:220px"><button class="btn" id="i22a">A/B v3 vs now</button><button class="btn" id="i22p">Pull the bass from v3</button>`);
+ const c=cv(el,150),rd=readout(el);let pulled=false;
+ function wave(v,i,w){const r=rng(11+i);const dens=[.3,.5,.7,.75,.8,.85][v];return Math.min(1,(.25+.6*dens)*(.6+.4*Math.abs(Math.sin(i*.31)))*(.7+.3*r()))}
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);
+  const a=Math.floor(pos),b=Math.min(5,a+1),f=pos-a;const X=i=>20+i*(w-40)/5;
+  x.strokeStyle='#2a2a33';x.beginPath();x.moveTo(X(0),24);x.lineTo(X(5),24);x.stroke();
+  V.forEach((v,i)=>{x.fillStyle=Math.abs(pos-i)<.5?C.acc:'#3a3a44';x.beginPath();x.arc(X(i),24,5,0,7);x.fill();x.fillStyle=C.mut;x.font='10px JetBrains Mono, monospace';x.textAlign='center';x.fillText(v[0],X(i),12);x.textAlign='left'});
+  x.fillStyle=C.blue;x.beginPath();x.arc(20+pos*(w-40)/5,24,3,0,7);x.fill();
+  const n=160,bw=(w-20)/n;for(let i=0;i<n;i++){const v=wave(a,i)*(1-f)+wave(b,i)*f;const hh=v*(h-60);x.fillStyle=pulled&&i%8<3?C.warn:C.blue;x.globalAlpha=.85;x.fillRect(10+i*bw,40+(h-50-hh)/2,Math.max(1,bw-1),hh)}x.globalAlpha=1;
+  const near=V[Math.round(pos)];rd.textContent=`Hearing bars 33 to 40 as in ${near[0]} (${near[1]}): ${near[2]}.${pulled?' Bass from v3 is now on a new track in today\'s song.':''}`}
+ c._redraw=draw;draw();const sl=$('#i22s',r);sl.oninput=()=>{pos=+sl.value;draw()};
+ $('#i22a',r).onclick=()=>{pos=pos>4?2:5;sl.value=pos;draw()};$('#i22p',r).onclick=()=>{pulled=true;draw()}},
+/* I24 what-if branch */
+I24(el){
+ const base=[[0,4,C.warn,'Kick'],[1,6,C.bad,'Bass'],[2,3,C.cyan,'Lead']];let br=null,kept=[];
+ const r=row(el,`<button class="btn" id="i24t">Try</button><button class="btn" id="i24e" disabled>Make a wild change</button><span class="r"></span><button class="btn ok" id="i24k" hidden>Keep</button><button class="btn" id="i24d" hidden>Drop</button><button class="btn" id="i24b" hidden>Keep both</button>`);
+ const f=document.createElement('div');f.className='appf';el.appendChild(f);const c=cv(f,110);const rd=readout(el);rd.textContent='Press Try. Everything after that is a side branch.';
+ let cur=base.map(a=>a.slice());
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);const lh=(h-20)/3;
+  cur.forEach(([i,len,col,n],k)=>{x.fillStyle=C.mut;x.font='11px Inter, sans-serif';x.fillText(n,6,14+k*lh+lh/2);for(let s=0;s<len;s++){x.fillStyle=col;x.globalAlpha=.8;x.fillRect(60+s*((w-70)/8)+2,8+k*lh+4,(w-70)/8-4,lh-8)}x.globalAlpha=1});
+  if(br){x.fillStyle=C.vio;x.font='500 11px JetBrains Mono, monospace';x.fillText('branch: '+br,w-150,h-6)}}
+ c._redraw=draw;draw();
+ const B=id=>$('#'+id,r);const setUI=on=>{f.classList.toggle('br',on);B('i24e').disabled=!on;['i24k','i24d','i24b'].forEach(i=>B(i).hidden=!on);B('i24t').disabled=on};
+ B('i24t').onclick=()=>{br='try-'+(kept.length+1);setUI(true);rd.textContent=`On branch ${br}. The song before Try is safe.`;draw()};
+ B('i24e').onclick=()=>{cur=cur.map(([i,l,c2,n])=>[i,Math.max(1,Math.min(8,l+Math.round(Math.random()*6-3))),c2===C.cyan?C.pink:c2,n]);draw()};
+ B('i24k').onclick=()=>{rd.textContent=`Kept: ${br} is now the song.`;br=null;setUI(false);draw()};
+ B('i24d').onclick=()=>{cur=base.map(a=>a.slice());rd.textContent=`Dropped ${br}. Back to before Try, nothing lost.`;br=null;setUI(false);draw()};
+ B('i24b').onclick=()=>{kept.push(br);rd.textContent=`Kept both: ${br} saved as a version in the Time Machine (${kept.length} so far). The song goes back to before Try.`;cur=base.map(a=>a.slice());br=null;setUI(false);draw()}},
+/* I26 knob memory */
+I26(el){
+ const hist=[];const r0=rng(3);let v=.3;for(let i=0;i<120;i++){v+=(r0()-.5)*.08;if(i>40&&i<60)v+=.02;v=Math.max(.05,Math.min(.95,v));hist.push(v)}let cur=hist.length-1;
+ const c=cv(el,130),rd=readout(el);rd.textContent='Drag along the history to scrub the knob back in time; let go to keep that value.';
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);
+  const cx=60,cy=h/2,R=36,val=hist[cur];x.strokeStyle='#2a2a33';x.lineWidth=6;x.beginPath();x.arc(cx,cy,R,Math.PI*.75,Math.PI*2.25);x.stroke();
+  x.strokeStyle=C.acc;x.beginPath();x.arc(cx,cy,R,Math.PI*.75,Math.PI*(.75+1.5*val));x.stroke();
+  x.fillStyle=C.ink;x.font='500 12px JetBrains Mono, monospace';x.textAlign='center';x.fillText(Math.round(200+val*7800)+' Hz',cx,cy+4);x.fillStyle=C.mut;x.font='10px Inter, sans-serif';x.fillText('Filter cutoff',cx,h-8);x.textAlign='left';
+  const L=130,W=w-L-10;x.strokeStyle=C.blue;x.lineWidth=1.5;x.beginPath();hist.forEach((v2,i)=>{const px=L+i/(hist.length-1)*W,py=h-14-v2*(h-28);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+  const px=L+cur/(hist.length-1)*W;x.fillStyle='#ffffff22';x.fillRect(px,6,L+W-px,h-12);x.fillStyle='#fff';x.fillRect(px-1,6,2,h-12);
+  x.fillStyle=C.mut;x.font='10px JetBrains Mono, monospace';x.fillText('−2 min',L,h-2);x.fillText('now',L+W-22,h-2)}
+ c._redraw=draw;draw();let drag=false;
+ const at=e=>{const rc=c.getBoundingClientRect();const L=130,W=c._w-L-10;cur=Math.round(Math.max(0,Math.min(1,(e.clientX-rc.left-L)/W))*(hist.length-1));draw();rd.textContent=`Scrubbing: ${Math.round((hist.length-1-cur)/(hist.length-1)*120)} s ago.`};
+ c.onpointerdown=e=>{drag=true;try{c.setPointerCapture(e.pointerId)}catch(_){}at(e)};c.onpointermove=e=>{if(drag)at(e)};c.onpointerup=()=>{drag=false;rd.textContent=`Kept ${Math.round(200+hist[cur]*7800)} Hz. One undo step was added.`}},
+/* I30 ghost suggestions */
+I30(el){
+ const real=[[0,2,7],[2,2,7],[4,1,10],[6,2,7],[8,2,5],[10,1,7],[12,4,3]];let ghosts=[[5,1,8,'pending'],[9,1,6,'pending'],[14,1,5,'pending'],[16,2,7,'pending']];
+ const r=row(el,`<button class="btn" id="i30h">Hear it with ghosts</button><button class="btn ok" id="i30a">Accept all</button><button class="btn" id="i30r">Reject all</button><span class="r mono sm" id="i30c"></span>`);
+ const c=cv(el,150),rd=readout(el);rd.textContent='The Assistant suggests 4 notes as ghosts. Click a ghost to accept it; right-click or click again to reject.';let hit=[];
+ function draw(){const x=c.getContext('2d'),w=c._w,h=c._h;x.fillStyle='#050507';x.fillRect(0,0,w,h);const sw=w/20,nh=(h-10)/12,Y=p=>h-6-(p+1)*nh;
+  for(let s=0;s<20;s++){x.fillStyle=s%4===0?'#22222a':'#15151a';x.fillRect(s*sw,0,1,h)}
+  real.forEach(([s,l,p])=>{x.fillStyle=C.acc;x.fillRect(s*sw+1,Y(p)+1,l*sw-2,nh-2)});hit=[];
+  ghosts.forEach((g,i)=>{const [s,l,p,st]=g;if(st==='no')return;const gx=s*sw+1,gy=Y(p)+1;if(st==='yes'){x.fillStyle=C.acc;x.fillRect(gx,gy,l*sw-2,nh-2);x.fillStyle=C.vio;x.fillRect(gx,gy,3,nh-2)}else{x.setLineDash([3,3]);x.strokeStyle=C.vio;x.lineWidth=1.5;x.strokeRect(gx,gy,l*sw-2,nh-2);x.setLineDash([]);x.fillStyle='#b18cff33';x.fillRect(gx,gy,l*sw-2,nh-2)}hit.push([gx,gy,l*sw,nh,i])});
+  const a=ghosts.filter(g=>g[3]==='yes').length,p=ghosts.filter(g=>g[3]==='pending').length;$('#i30c',r).textContent=`${a} accepted (tagged AI), ${p} waiting`}
+ c._redraw=draw;draw();
+ const pick=e=>{const rc=c.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top;return hit.find(([x0,y0,w0,h0])=>px>=x0&&px<=x0+w0&&py>=y0-4&&py<=y0+h0+4)};
+ c.onclick=e=>{const hh=pick(e);if(!hh)return;const g=ghosts[hh[4]];g[3]=g[3]==='pending'?'yes':g[3]==='yes'?'no':'pending';draw()};
+ c.oncontextmenu=e=>{const hh=pick(e);if(!hh)return;e.preventDefault();ghosts[hh[4]][3]='no';draw()};
+ $('#i30a',r).onclick=()=>{ghosts.forEach(g=>{if(g[3]==='pending')g[3]='yes'});draw()};$('#i30r',r).onclick=()=>{ghosts.forEach(g=>{if(g[3]==='pending')g[3]='no'});draw()};
+ $('#i30h',r).onclick=()=>{const a=ac();if(!a)return;const t=a.currentTime+.05,st=.14;const notes=real.map(n=>[...n,0]).concat(ghosts.filter(g=>g[3]!=='no').map(g=>[g[0],g[1],g[2],1]));
+  notes.forEach(([s,l,p,gh])=>{const o=a.createOscillator(),g=a.createGain();o.type=gh?'triangle':'sawtooth';o.frequency.value=440*Math.pow(2,(p+57-69)/12);const tt=t+s*st;g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(gh?.12:.08,tt+.01);g.gain.linearRampToValueAtTime(0,tt+l*st);const f=a.createBiquadFilter();f.frequency.value=1800;o.connect(f).connect(g).connect(a.destination);o.start(tt);o.stop(tt+l*st+.02)})}}
+};
+render();requestAnimationFrame(tick);
+</script>
