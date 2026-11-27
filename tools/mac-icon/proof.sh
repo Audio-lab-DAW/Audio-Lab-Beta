@@ -5,10 +5,16 @@
 # 2. Two stand-in apps (one with Assets.car + icon.icns, one with icon.icns only = the app before IC1) and, if given, the built app
 #    are drawn by macOS itself (NSWorkspace) under each 'Icon & widget style', as far as a runner without a logged-in desktop allows.
 set -uo pipefail
+FAIL=0
+blue() {  # blue <label> <output of render-icon>: the tile must be the Ocean blue (20 80 168), give or take 14
+  local t; t=$(echo "$2" | awk '/^TILE/ {print $2, $3, $4}'); echo "   $1: tile colour $t"
+  echo "$t" | awk '{ exit !(($1-20)^2 <= 196 && ($2-80)^2 <= 196 && ($3-168)^2 <= 196) }' || { echo "   NOT BLUE: $1"; FAIL=1; }
+}
 OUT="${1:-icon-proof}"; APP="${2:-}"
 mkdir -p "$OUT"; OUT="$(cd "$OUT" && pwd)"
 D=desktop; ICON=$D/icon-assets/mac-icon/AppIcon.icon
 sw_vers | tee "$OUT/system.txt"
+TAHOE=0; [ "$(sw_vers -productVersion | cut -d. -f1)" -ge 26 ] && TAHOE=1
 DEV="${DEVELOPER_DIR:-$(xcode-select -p)}"
 for x in /Applications/Xcode_*.app /Applications/Xcode.app; do [ -d "$x/Contents/Applications/Icon Composer.app" ] && IC="$x/Contents/Applications/Icon Composer.app"; done
 ICTOOL="${IC:-}/Contents/Executables/ictool"
@@ -50,11 +56,13 @@ for style in Default:none:light RegularDark:RegularDark:dark TintedDark:TintedDa
   "$OUT/render-icon" "$W/new-$name.app" "$OUT/system-$name-with-assets-car.png" 512 >/dev/null; "$OUT/render-icon" "$W/old-$name.app" "$OUT/system-$name-icns-only.png" 512 >/dev/null
   [ -n "$APP" ] && [ -d "$APP" ] && { cp -R "$APP" "$W/built-$name.app"; "$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512 >/dev/null; }
   sleep 4
-  "$OUT/render-icon" "$W/new-$name.app" "$OUT/system-$name-with-assets-car.png" 512
-  "$OUT/render-icon" "$W/old-$name.app" "$OUT/system-$name-icns-only.png" 512
-  if [ -n "$APP" ] && [ -d "$APP" ]; then "$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512; rm -rf "$W/built-$name.app"; fi
+  echo "--- style $name"
+  r=$("$OUT/render-icon" "$W/new-$name.app" "$OUT/system-$name-with-assets-car.png" 512); [ "$name" = Default ] || [ "$name" = RegularDark ] && [ "$TAHOE" = 1 ] && blue "stand-in app with Assets.car, $name" "$r"
+  r=$("$OUT/render-icon" "$W/old-$name.app" "$OUT/system-$name-icns-only.png" 512); echo "   stand-in app with icon.icns only (the app before IC1), $name: $(echo "$r" | grep ^TILE)"
+  if [ -n "$APP" ] && [ -d "$APP" ]; then r=$("$OUT/render-icon" "$W/built-$name.app" "$OUT/system-$name-built-app.png" 512); if { [ "$name" = Default ] || [ "$name" = RegularDark ]; } && [ "$TAHOE" = 1 ]; then blue "the built app, $name" "$r"; else echo "   the built app, $name: $(echo "$r" | grep ^TILE)"; fi; rm -rf "$W/built-$name.app"; fi
 done
 defaults delete -g AppleIconAppearanceTheme 2>/dev/null; defaults delete -g AppleInterfaceStyle 2>/dev/null
 rm -rf "$W" "$OUT/render-icon"
 cp $D/dock-icon.png "$OUT/reference-dock-icon-1024.png"
 ls -la "$OUT"
+[ "$FAIL" = 0 ] && echo "icon proof: blue in the Default and the Dark style" || { echo "icon proof FAILED: see NOT BLUE above"; exit 1; }

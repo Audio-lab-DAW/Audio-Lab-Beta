@@ -34,37 +34,11 @@ run_actool() {
     --output-partial-info-plist "$OUT/partial-info.plist" \
     --output-format human-readable-text --notices --warnings --errors "$@"
 }
-# First try without the flat pictures actool adds for macOS 15 and older (an undocumented switch): those systems then take icon.icns,
-# which has a hand-drawn picture for every size. If this actool does not know the switch, compile the plain way.
-if ! run_actool --enable-icon-stack-fallback-generation=disabled || [ ! -s "$OUT/Assets.car" ]; then
-  echo "actool refused --enable-icon-stack-fallback-generation=disabled; compiling without it"
-  run_actool
-fi
+run_actool
 echo "--- actool wrote:"; ls -la "$OUT"
 echo "--- partial Info.plist:"; plutil -p "$OUT/partial-info.plist" || true
 [ -s "$OUT/Assets.car" ] || { echo "actool wrote no Assets.car"; exit 1; }
 xcrun assetutil --info "$OUT/Assets.car" > "$OUT/assetutil.json"
-python3 - "$OUT/assetutil.json" <<'PY'
-import json, sys, collections
-rows = [r for r in json.load(open(sys.argv[1])) if isinstance(r, dict) and r.get('AssetType')]
-print('--- Assets.car: %d renditions' % len(rows))
-seen = collections.Counter((r.get('AssetType'), r.get('Name'), r.get('Appearance', '(any)'), r.get('RenditionName', '')) for r in rows)
-for k, n in sorted(seen.items(), key=str): print('   %-22s %-12s %-28s %s  x%d' % (k + (n,)))
-kinds = {r.get('AssetType') for r in rows if r.get('Name') == 'AppIcon'}
-stacks = {r.get('Appearance') for r in rows if r.get('AssetType') == 'IconImageStack' and r.get('Name') == 'AppIcon'}
-need = {'NSAppearanceNameAqua', 'NSAppearanceNameDarkAqua', 'ISAppearanceTintable'}
-if not need <= stacks: sys.exit('Assets.car lacks the layered AppIcon for: ' + ', '.join(sorted(need - stacks)))
-# The tile colour of each appearance must be the Ocean blue (a 'Color' layer), never the system's grey gradient.
-bad = []
-for r in rows:
-    if r.get('AssetType') == 'IconImageStack' and r.get('Name') == 'AppIcon':
-        first = (r.get('Layers') or [{}])[0]; c = first.get('Color components') or []
-        okc = first.get('AssetType') == 'Color' and len(c) == 4 and abs(c[0] - 0.078) < 0.01 and abs(c[1] - 0.314) < 0.01 and abs(c[2] - 0.659) < 0.01
-        print('   tile of %-26s %s' % (r.get('Appearance'), ('blue ' + str([round(v, 3) for v in c])) if okc else 'NOT the blue: ' + str(first.get('Name'))))
-        if not okc: bad.append(r.get('Appearance'))
-if bad: sys.exit('the tile is not blue for: ' + ', '.join(map(str, bad)))
-flat = sum(1 for r in rows if r.get('AssetType') in ('Icon Image', 'MultiSized Image'))
-print('   flat pictures for macOS 15 and older inside Assets.car: %d (0 = those systems use icon.icns)' % flat)
-PY
+python3 ../tools/mac-icon/check-car.py "$OUT/assetutil.json"
 cp "$OUT/Assets.car" build/Assets.car
 echo "build/Assets.car ready ($(stat -f %z build/Assets.car) bytes, sha256 $(shasum -a 256 build/Assets.car | cut -d' ' -f1))"
