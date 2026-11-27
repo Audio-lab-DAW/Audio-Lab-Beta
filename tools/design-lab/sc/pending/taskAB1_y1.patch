@@ -1,0 +1,18 @@
+diff --git a/tools/ui-tests/taskAB1.py b/tools/ui-tests/taskAB1.py
+index 2c8db9d..63797fd 100644
+--- a/tools/ui-tests/taskAB1.py
++++ b/tools/ui-tests/taskAB1.py
+@@ -78,11 +78,11 @@ with sync_playwright() as p:
+     cx,pg,errs=page(b,1500,950)
+     R(pg,'AB1.force(null)')
+     st=json.loads(R(pg,"(()=>{const c={corner:0,sheet:0};let run=0,mx=0,last='';for(let i=0;i<20000;i++){const k=AB1.pick();c[k]++;if(k===last){run++;mx=Math.max(mx,run)}else run=0;last=k}return JSON.stringify([c,mx])})()"))
+-    print('20000 picks',st);ck('pick: both pictures, about half each',abs(st[0]['corner']-10000)<400 and st[0]['corner']+st[0]['sheet']==20000,st);ck('pick: the same one can come twice in a row (plain chance)',st[1]>=3,st[1])
++    print('20000 picks',st);ck('pick: both Earth pictures, about 3 in 10 each (from v0.288, task SC-B: the rest is the orbit corner and the field arcs, 1 in 5 each)',abs(st[0]['corner']-6000)<400 and abs(st[0]['sheet']-6000)<400 and abs(st[0]['corner']+st[0]['sheet']-12000)<500,st);ck('pick: the same one can come twice in a row (plain chance)',st[1]>=3,st[1])
+     seq=[]
+     for i in range(40):
+         R(pg,'showAbout()');pg.wait_for_timeout(60);seq.append(pg.evaluate("()=>document.getElementById('splash').dataset.abp"));R(pg,'hideSplash()');pg.wait_for_timeout(700 if i%10==0 else 30)
+-    print('40 openings',''.join(k[0] for k in seq));ck('40 real openings: both seen, no restart needed',6<=seq.count('corner')<=34 and seq.count('corner')+seq.count('sheet')==40,seq.count('corner'))
++    print('40 openings',''.join(k[0] for k in seq));ck('40 real openings: both seen, no restart needed',seq.count('corner')>=3 and seq.count('sheet')>=3 and 14<=seq.count('corner')+seq.count('sheet')<=36,seq.count('corner'))
+     pg.wait_for_timeout(900);ck('after 40 openings: one splash at most, nothing running',pg.evaluate("()=>document.querySelectorAll('#splash').length")==0 and not R(pg,'AB1.running()'))
+     ck('localStorage hook forces a picture',R(pg,"localStorage.setItem('audiolab-about-test','sheet');const a=[1,2,3,4,5,6,7,8].every(()=>AB1.pick()==='sheet');localStorage.removeItem('audiolab-about-test');a"))
+     # the frame gate of task AO holds both drawings
