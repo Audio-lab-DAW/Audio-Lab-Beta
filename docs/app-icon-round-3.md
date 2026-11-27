@@ -101,3 +101,9 @@ In the user's words: "For the big icon round 3, let's go with J3 actually. I lik
 - **Default app icon: J3** (field with the thinner, slightly transparent rings), in Orbit night (P2) as the user's palette pick; Dark stays navy/blue.
 - **Extra options in the in-app icon picker:** J4, J6, J8 and J10 (in P2, and in P8 Chart paper where the round marked that palette as strong: J8 and J10).
 - **Small sizes (32 px and below):** use the zoomed-in, tilted crop (like W7) instead of the whole mark, redrawn for small sizes with thinner rings (the rings are far too fat at 32 px today).
+
+## What shipped (task IC4, v0.270, 27 November 2026)
+- Default app icon **J3 P2**, drawn by `icons3.js` unchanged (rings at 90 %, the field through them). Dark stays navy: the Icon Composer fill #132044 for default, dark and tinted, confirmed on macOS 26.7.2 (Default and Dark tile 20 31 65; Tinted and Clear are the system's).
+- **New small master** for 64 px and below (`tools/icon-lab/ic4/small.js`): the zoomed, tilted W7 crop redrawn with thin rings (1.0 px at 16, 1.3 at 32, 2.3 at 64) at 90 %, nucleus and electron on the pixel grid, ring edges on pixel centres; zoom 1.3 at 16 to 20 so the crop still reads. Used in `icon.icns` (16 and 32 pt, 1x and 2x), `icon.ico` (16 to 64) and the favicons.
+- Picker group "Dipole field" first: Dipole Field (J3, default), Field Orbits (J4), Porthole Field (J6), Measured Field (J8), Measured Field, Chart Paper (J8 P8), Field Dial (J10), Field Dial, Chart Paper (J10 P8), each with its own small versions at 16, 32, 48. P8's Dark question does not arise: P8 icons are picker choices (a Dock picture), not the bundle icon.
+- Desktop app v0.270 (Mac DMG, Windows installer) on the GitHub release v0.270. Details and renders: `docs/backlog-log.md` "task IC4", `tools/icon-lab/ic4/renders/`.
