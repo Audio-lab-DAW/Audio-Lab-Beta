@@ -1,0 +1,4 @@
+ProductName:		macOS
+ProductVersion:		15.7.9
+BuildVersion:		24G830
+ictool: /Applications/Xcode_26.3.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool
