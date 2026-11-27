@@ -1750,7 +1750,7 @@ body.fxmin #mixWin .mx.abxl .fwrap{box-shadow:0 0 0 1px var(--abxc)}
 /* v0.207: update window (task Y) */
 #uywM{position:fixed;inset:0;z-index:2147480400;display:grid;place-items:center;background:rgba(4,5,8,.38);animation:uywf .16s ease-out}
 @keyframes uywf{from{opacity:0}to{opacity:1}}@keyframes uywp{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
-.uyww{position:relative;width:min(470px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:auto;padding:26px 24px 18px;border-radius:18px;background:rgba(var(--gtr),max(var(--ga,.6),.55));border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.07);animation:uywp .2s cubic-bezier(.2,.8,.3,1);color:#e8eaf0}
+.uyww{position:relative;width:min(470px,calc(100vw - 32px));max-height:min(640px,calc(100vh - 48px));overflow:hidden;display:flex;flex-direction:column;padding:26px 24px 18px;border-radius:18px;background:rgba(var(--gtr),max(var(--ga,.6),.55));border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.07);animation:uywp .2s cubic-bezier(.2,.8,.3,1);color:#e8eaf0}
 .uywx{position:absolute;top:12px;right:12px;width:30px;height:30px;padding:0!important;border-radius:9px;font-size:var(--fs3);line-height:1}
 .uywlogo{width:64px;height:64px;margin:0 auto 10px;border-radius:15px;overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08);display:grid;place-items:center}
 .uywlogo img{width:100%;height:100%;display:block}.uywlogo img.pick{transform:scale(1.24)}
@@ -1764,7 +1764,9 @@ body.fxmin #mixWin .mx.abxl .fwrap{box-shadow:0 0 0 1px var(--abxc)}
 .uywrl li b{flex:none;min-width:40px;font:var(--fw6) var(--fs1) var(--ffu);color:#7be0b0}.uywrl li span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.uywrl li.open span{display:block}
 .uywst{margin:0;padding:0 0 0 20px;display:grid;gap:5px;font-size:var(--fs2);line-height:1.45;color:#d9dce4}
 .uywnote{margin:8px 0 0;padding:8px 10px;border-radius:9px;font-size:var(--fs2);line-height:1.45;color:#f6dfb4;background:rgba(245,160,76,.1);border:1px solid rgba(245,160,76,.4)}
-.uywb{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.uywb button{min-width:96px;height:32px;border-radius:9px}.uywb button.pri{background:#3ecf8e;color:#04140c;border-color:#3ecf8e;font-weight:var(--fw6)}.uywb button.pri:hover{filter:brightness(1.08)}
+.uywbody{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}.uywsc{flex:1 1 auto;min-height:60px;overflow:auto;overscroll-behavior:contain;margin:0 -6px 8px 0;padding-right:6px}
+.uywnl{margin:0;padding:8px 12px 8px 26px;border-radius:10px;font-size:var(--fs2);line-height:1.45;color:#dfe2ea;background:rgba(76,141,255,.1);border:1px solid rgba(76,141,255,.35);display:grid;gap:6px}.uywnl li.more{list-style:none;margin-left:-14px;color:#9ba0ad;font-size:var(--fs1)}
+.uywb{flex:none;display:flex;justify-content:flex-end;gap:8px;margin-top:4px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}.uywb button{min-width:96px;height:32px;border-radius:9px}.uywb button.pri{background:#3ecf8e;color:#04140c;border-color:#3ecf8e;font-weight:var(--fw6)}.uywb button.pri:hover{filter:brightness(1.08)}
 #uywB{position:fixed;top:44px;right:12px;z-index:2147480300;display:flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 5px;border-radius:13px;font-size:var(--fs1);font-weight:var(--fw6);color:#ffe48a;background:rgba(var(--gtr),.88);border:1px solid rgba(255,210,58,.45);box-shadow:0 6px 18px rgba(0,0,0,.4);cursor:pointer}
 #uywB[hidden]{display:none}#uywB img{border-radius:4px}#uywB:hover{border-color:#ffd23a}
 /* v0.208 (task AE): several channels selected */
@@ -6461,7 +6463,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.260',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.261',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -17805,9 +17807,9 @@ function uywPaint(){const m=document.getElementById('uywM');if(!m||!UYW.i)return
   const rel=R.filter(n=>updCmp(n.v,i.to)<=0).slice(0,5);
   m.querySelector('.uywbody').innerHTML=`<h3 id="uywT">${title}</h3><p class="uywsub">${esc(sub)}</p>
     <div class="uywv" title="The version you have now and the new one"><span><small>You have</small><b>${esc(from||'?')}</b></span><i aria-hidden="true">→</i><span class="new"><small>New</small><b>${esc(to)}</b></span></div>
-    ${notes?`<div class="uywsec"><h5>What is new</h5><p class="uywn">${esc(notes)}</p></div>`:''}
+    <div class="uywsc">${notes?(()=>{/* task HF1: newest first (update-notes.txt has the newest line on top), at most 8 */const L=notes.split(/\n+/).map(x=>x.trim()).filter(Boolean),sh=L.slice(0,8);return`<div class="uywsec"><h5>What is new</h5><ul class="uywnl">${sh.map(x=>`<li>${esc(x)}</li>`).join('')}${L.length>sh.length?`<li class="more">and ${L.length-sh.length} earlier change${L.length-sh.length>1?'s':''}</li>`:''}</ul></div>`})():''}
     ${rel.length?`<div class="uywsec"><h5>Recent releases</h5><ul class="uywrl">${rel.map(x=>`<li title="Click to read all of it"><b>${esc(x.v)}</b><span>${esc(x.t)}</span></li>`).join('')}</ul></div>`:''}
-    <div class="uywsec"><h5>What to do</h5><ol class="uywst">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>${note?`<p class="uywnote" title="macOS keeps a copy of app icons and sometimes shows the old one until you log in again">${esc(note)}</p>`:''}</div>
+    <div class="uywsec"><h5>What to do</h5><ol class="uywst">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>${note?`<p class="uywnote" title="macOS keeps a copy of app icons and sometimes shows the old one until you log in again">${esc(note)}</p>`:''}</div></div>
     <div class="uywb">${btn.join('')}</div>`}
 async function uywAct(k){const i=UYW.i,D=D_();if(!i)return;
   if(k==='x'){uywClose();return}
@@ -23035,7 +23037,7 @@ const SCA=[
  {id:'redo',g:'edit',l:'Redo',d:'Mod+Shift+Z',nat:1,ic:'M13 7H7a3.5 3.5 0 0 0 0 7h5M13 7l-3-3M13 7l-3 3',run:()=>redo()},
  {id:'redo2',g:'edit',l:'Redo (second key)',d:'Mod+Y',nat:1,ic:'M13 7H7a3.5 3.5 0 0 0 0 7h5M13 7l-3-3M13 7l-3 3',run:()=>redo()},
  {id:'clip.linkedDup',g:'edit',l:'Duplicate as linked copy',d:'',ic:'M8 12l4-4M6.5 9.5l-2 2a2.5 2.5 0 0 0 3.5 3.5l2-2M13.5 10.5l2-2a2.5 2.5 0 0 0-3.5-3.5l-2 2',run:()=>lkDupSel()},
- {id:'clip.unique',g:'edit',l:'Make unique (break the link)',d:'',ic:'M6.5 9.5l-2 2a2.5 2.5 0 0 0 3.5 3.5l2-2M13.5 10.5l2-2a2.5 2.5 0 0 0-3.5-3.5l-2 2M4 4l2 2M14 14l2 2',run:()=>lkUnique(lkSel())},
+ {id:'clip.unique',g:'edit',l:'Make unique (break the link)',d:'',ic:'M6.5 9.5l-2 2a2.5 2.5 0 0 0 3.5 3.5l2-2M13.5 10.5l2-2a2.5 2.5 0 0 0-3.5-3.5l-2 2M4 4l2 2M14 14l2 2',run:()=>lkUnique(ftLinkSel())},
  {id:'dup',g:'edit',l:'Duplicate clip',d:'Mod+D',nat:1,ic:'M7 7h9v9H7zM4 13V4h9',run:()=>{const f=selC&&findClip(selC);if(f){pushUndo();dupClip(f.t,f.c);changed(false)}}},
  {id:'split',g:'edit',l:'Split clip at the playhead',d:'Shift+S',ic:'M10 3v14M4 6l3 3-3 3M16 6l-3 3 3 3',run:()=>{const f=selC&&findClip(selC);if(!f){toast('Select a clip first.');return}pushUndo();if(splitClip(f.t,f.c,curDisp()))changed(false);else toast('Move the playhead inside the clip first.')}},
  {id:'del',g:'edit',l:'Delete selection',d:'Delete',lock:1,ic:'M5 6h10M8 6V4h4v2M6 6l1 10h6l1-10',run:()=>{}},
@@ -23113,8 +23115,11 @@ const ctlDirty=()=>{CTL.idx=null;CTL.idxK=null;ctlIndex()};
 /* ---- devices ---- */
 const ctlBase=n=>String(n||'').replace(/^MIDI(?:IN|OUT)\d*\s*\((.*)\)$/i,'$1').replace(/\s+(?:in|out|input|output)(?:\s*\d+)?$/i,'').trim();
 function ctlProf(p){CTL.profs=CTL.profs.filter(x=>x.id!==p.id);CTL.profs.unshift(p);for(const d of CTL.devs.values())ctlAttach(d,true);return p}
-const ctlOff=d=>!!(UI.ctlOff&&UI.ctlOff[d.name]);
-function ctlAttach(d,re){const p=CTL.profs.find(x=>x.match(d))||CTL.profs[CTL.profs.length-1];if(d.prof===p&&re)return;if(d.prof&&d.prof.detach)try{d.prof.detach(d)}catch(e){console.error('AudioLab controller',e)}d.prof=p;if(p.attach&&!ctlOff(d))try{p.attach(d)}catch(e){console.error('AudioLab controller',e)}ctlFbDev(d)}
+const ctlOff=d=>!!(UI.ctlStop||(d&&d.halt)||(UI.ctlOff&&UI.ctlOff[d.name]));/* task HF1: also off while all controllers are stopped, or a loop was found on the device */
+function ctlAttach(d,re){let p=CTL.profs.find(x=>x.match(d))||CTL.profs[CTL.profs.length-1];
+  /* task HF1: a control surface profile (Push, Mackie, HUI, Launchpad, APC) only takes a device the user turned on as a surface; until then it is a plain device (notes play, nothing is sent to it) */
+  d.cand=null;if(p.surface&&!ctlSurfOn(d)){d.cand=p;p=CTL.profs.find(x=>x.id==='generic')||p;ctlSurfHint(d)}
+  if(d.prof===p&&re)return;if(d.prof&&d.prof.detach)try{d.prof.detach(d)}catch(e){console.error('AudioLab controller',e)}d.prof=p;if(p.attach&&!ctlOff(d))try{p.attach(d)}catch(e){console.error('AudioLab controller',e)}ctlFbDev(d)}
 function ctlScan(first){const A=CTL.acc;if(!A)return;const seen=new Set(),outs=[...A.outputs.values()].filter(o=>o.state!=='disconnected');
   for(const i of A.inputs.values()){if(i.state==='disconnected')continue;seen.add(i.id);let d=CTL.devs.get(i.id);
     if(!d){d={id:i.id,name:i.name||'MIDI device',man:i.manufacturer||'',inp:i,out:null,prof:null,base:ctlBase(i.name)};CTL.devs.set(i.id,d);
@@ -23125,14 +23130,14 @@ function ctlScan(first){const A=CTL.acc;if(!A)return;const seen=new Set(),outs=[
 function ctlStart(){if(CTL.started||!navigator.requestMIDIAccess)return;CTL.started=true;
   const go=(A,sx)=>{CTL.acc=A;CTL.sysex=sx;if(!UI.ctlSeen){UI.ctlSeen=1;saveUI()}ctlG();ctlScan(true);A.onstatechange=()=>ctlScan(false)};
   navigator.requestMIDIAccess({sysex:true}).then(A=>go(A,true),()=>navigator.requestMIDIAccess().then(A=>go(A,false))).catch(()=>{CTL.started=false})}
-function ctlSend(d,bytes){if(!d||!d.out||ctlOff(d))return false;if(bytes[0]===0xF0&&!CTL.sysex)return false;try{d.out.send(bytes);CTL.n.out++;return true}catch(e){return false}}
+function ctlSend(d,bytes){if(!d||!d.out||ctlOff(d))return false;if(bytes[0]===0xF0&&!CTL.sysex)return false;try{d.out.send(bytes);ctlEcho(bytes);CTL.n.out++;return true}catch(e){return false}}
 /* the generic profile: what every controller did before, plus mappings for notes and pitch bend */
 ctlProf({id:'generic',name:'Generic MIDI',match:()=>true,msg(d,a){const s=a[0],c=s&0xf0,ch=s&15;if(s>=0xF0)return;
   if(c===0xB0){ccLive(a[1],a[2]/127);midiCC(ch,a[1],a[2],d);return}
   if(c===0xE0){const v=(a[2]<<7)|a[1];if(ctlIn(d,'pb',ch,0,v))return;ccLive('pb',v/16383);return}
   if(c===0x90&&a[2]>0){if(ctlIn(d,'note',ch,a[1],a[2]))return;noteOn(a[1]-24,a[2]/127,'m'+a[1]);return}
   if(c===0x80||c===0x90){const ms=ctlIndex().byM.get(ctlKey('note',ch,a[1]));if(ms&&ms.some(m=>m.dev==='*'||m.dev===d.name))return;noteOff('m'+a[1])}}});
-function ctlMsg(d,data){CTL.n.in++;if(ctlOff(d))return;const a=data;if(a[0]<0xF0){const c=a[0]&0xf0;CTL.last={dev:d.name,ch:a[0]&15,type:c===0xB0?'cc':c===0xE0?'pb':c===0x90||c===0x80?'note':c===0xD0||c===0xA0?'at':'other',num:c===0xE0?0:a[1],val:c===0xE0?((a[2]<<7)|a[1]):a[2],t:Date.now()};if(FT_HOOKS.controllerMessage)try{FT_HOOKS.controllerMessage(CTL.last)}catch(e){}}
+function ctlMsg(d,data){CTL.n.in++;if(ctlOff(d))return;if(ctlGuard(d,data))return;const a=data;if(a[0]<0xF0){const c=a[0]&0xf0;CTL.last={dev:d.name,ch:a[0]&15,type:c===0xB0?'cc':c===0xE0?'pb':c===0x90||c===0x80?'note':c===0xD0||c===0xA0?'at':'other',num:c===0xE0?0:a[1],val:c===0xE0?((a[2]<<7)|a[1]):a[2],t:Date.now()};if(FT_HOOKS.controllerMessage)try{FT_HOOKS.controllerMessage(CTL.last)}catch(e){}}
   try{d.prof.msg(d,a)}catch(e){console.error('AudioLab controller '+d.name,e)}}
 /* ---- learn and apply ---- */
 const ctlLabel=id=>{if(String(id)[0]==='@'&&typeof ctlTLabel==='function')return ctlTLabel(id);const C=CT.get(id),l=(C&&C.label)||String(id).replace(/^[a-z0-9]+:/i,'');let dn='';try{const el=document.querySelector(`[data-c="${CSS.escape(id)}"]`)||document.querySelector(`[data-c^="pn:"][data-c$=":${CSS.escape(id)}"]`),D=el&&el.closest('.dev'),h=D&&D.querySelector(':scope>.devh>span');dn=h?h.textContent.trim():''}catch(e){}return dn&&dn!==l?dn+': '+l:l};
@@ -23168,7 +23173,8 @@ function ctlMove(m,raw){const C=CT.get(m.target);if(!C)return;let r=CTL.rt.get(m
 function ctlPaintId(id,from){CTL.mv=from||null;try{for(const el of document.querySelectorAll(`[data-c="${CSS.escape(id)}"],[data-c^="pn:"][data-c$=":${CSS.escape(id)}"]`))paintCtl(el)}finally{CTL.mv=null}
   if(from){const ms=ctlIndex().byT.get(id);if(ms)for(const m of ms)if(m!==from)ctlFbQ(m);const r=CTL.rt.get(from);if(r&&from.fb!==false)CTL.sent.set(from.id,ctlOutVal(from))}}
 /* ---- feedback: a mapped control's value goes back to the controller (motor faders, LED rings, lit buttons) ---- */
-function ctlDevOf(m){if(m.dev==='*'){for(const d of CTL.devs.values())if(d.out&&d.prof&&d.prof.id==='generic')return d;return null}for(const d of CTL.devs.values())if(d.name===m.dev)return d;return null}
+function ctlDevOf(m){/* task HF1: feedback only to a device the user turned on as a control surface (a plain device's output may lead straight back to its input) */
+  if(m.dev==='*'){for(const d of CTL.devs.values())if(d.out&&d.prof&&d.prof.id==='generic'&&ctlSurfOn(d)&&!ctlOff(d))return d;return null}for(const d of CTL.devs.values())if(d.name===m.dev)return d.prof&&d.prof.id==='generic'&&!ctlSurfOn(d)?null:d;return null}
 function ctlFbCount(){let n=0;if(CTL.devs.size){const I=CTL.idx||ctlIndex();if(I)for(const ms of I.byT.values())for(const m of ms)if(m.fb!==false&&(!m.enc||m.enc==='abs')){const d=ctlDevOf(m);if(d&&d.out)n++}}CTL.fbn=n}
 function ctlOutVal(m){const C=CT.get(m.target);if(!C)return null;const lo=+(m.min??0),hi=+(m.max??1),n=C.spec.n(C.get()),v=hi===lo?0:clamp((n-lo)/(hi-lo),0,1);return m.type==='pb'?Math.round(v*16383):m.type==='note'?(Math.abs(n-hi)<.004?127:0):Math.round(v*127)}
 function ctlFbQ(m){if(m.fb===false||(m.enc&&m.enc!=='abs'))return;const d=ctlDevOf(m);if(!d||!d.out)return;CTL.fbq.add(m);if(!CTL.fbT)CTL.fbT=setTimeout(ctlFbFlush,33)}
@@ -23198,7 +23204,7 @@ function ctlEdit(mid,ch){const g=ctlG(),p=ctlP(false),inP=p&&p.maps.find(m=>m.id
   ctlDirty();saveUI();if(inP||(ch&&ch.scope==='project'))changed(false);mlMark();return true}
 FT_HOOKS.controllersPage=host=>ctlPage(host);FT_HOOKS.controllersPaint=()=>ctlPagePaint();
 /* in the desktop app MIDI is always allowed: start it right away; in a browser only once it was allowed before */
-setTimeout(()=>{if(!navigator.requestMIDIAccess)return;if(window.audiolabDesktop){ctlStart();return}if(!UI.ctlSeen)return;try{navigator.permissions.query({name:'midi',sysex:true}).then(s=>{if(s.state==='granted')ctlStart()},()=>{})}catch(e){}},1200);
+setTimeout(()=>{if(!navigator.requestMIDIAccess||UI.ctlStop)return;if(window.audiolabDesktop){ctlStart();return}if(!UI.ctlSeen)return;try{navigator.permissions.query({name:'midi',sysex:true}).then(s=>{if(s.state==='granted')ctlStart()},()=>{})}catch(e){}},1200);
 addEventListener('pagehide',()=>{for(const d of CTL.devs.values())if(d.prof&&d.prof.bye)try{d.prof.bye(d)}catch(e){}});
 function ctlUnmap(id){id=ctlBid(id);const g=ctlG(),p=ctlP(false);let n=0;g.maps=g.maps.filter(m=>m.target!==id||(n++,false));if(p){const k=p.maps.length;if(p.maps.some(m=>m.target===id)){pushUndo();p.maps=p.maps.filter(m=>m.target!==id);n+=k-p.maps.length;changed(false)}}ctlDirty();saveUI();mlMark();ctlPagePaint();return n}
 {const _m=midiLearn;midiLearn=function(){const r=_m.apply(this,arguments);ctlPagePaint();return r}}
@@ -23327,7 +23333,7 @@ function p1Enc(d,i,raw){const st=d.p1,dl=raw<64?raw:raw-128;st.acc[i]=(st.acc[i]
   else if(i===2)cyc('lay');else if(i===3)cyc('rows');else if(i===4)cyc('vc');else if(i===5){cyc('at');p1Modes(d)}else if(i===6){cyc('strip');p1Modes(d)}
   else if(i===7){const n=clamp(o.oct+dir,0,8);if(12*(n+1)+(PR.root|0)<=127)p1Set('oct',n)}p1All();ctlPagePaint()}
 /* goodbye goes out also when the device was just switched off (ctlSend refuses a switched-off device) */
-const p1Raw=(d,a)=>{if(!d||!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);CTL.n.out++}catch(e){}};
+const p1Raw=(d,a)=>{if(!d||!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);ctlEcho(a);CTL.n.out++}catch(e){}};
 function p1Bye(d){if(!d.p1)return;for(let i=0;i<4;i++)p1Raw(d,P1.SX.concat([0x1C+i,0,0,0xF7]));for(let n=36;n<100;n++)p1Raw(d,[0x90,n,0]);for(const cc of d.p1.btn.keys())p1Raw(d,[0xB0,cc,0]);
   for(const k of[...LIVE.keys()])if(typeof k==='string'&&k.startsWith('p1:'))noteOff(k);d.p1.disp=['','','',''];d.p1.led.clear();d.p1.btn.clear()}
 ctlProf({id:'push1',name:'Ableton Push 1',match:p1Match,
@@ -23724,7 +23730,7 @@ function mcuMsg(d,a){const s=a[0],c=s&0xf0,ch=s&15;if(s>=0xF0)return;const type=
   if(c===0xE0){if(ch<=8)mcFader(d,ch,raw/16383);return}
   if(c===0x90||c===0x80){const x=MCU_IN[a[1]];if(x)mcBtn(d,x[0],c===0x90&&a[2]>0,x[1]);mcSoon();return}
   if(c===0xB0){const n=a[1],v=a[2],dl=v&0x40?-(v&0x3F):(v&0x3F);if(n>=16&&n<=23){const id=mcVid(d,n-16);if(id)mcNudge(id,dl/(d.mc.shift?1000:100));mcSoon();return}if(n===60){mcJog(dl,d.mc.shift);return}}}
-function mcuBye(d){if(!d.mc)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);CTL.n.out++}catch(e){}};
+function mcuBye(d){if(!d.mc)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);ctlEcho(a);CTL.n.out++}catch(e){}};
   for(let l=0;l<2;l++)raw(MC.SX.concat([d.mc.xt?0x15:0x14,0x12,l*56],Array(56).fill(32),[0xF7]));for(const k of d.mc.out.keys()){if(k[0]==='n')raw([0x90,+k.slice(1),0]);else if(k[0]==='r')raw([0xB0,0x30+(+k.slice(1)),0]);else if(k[0]==='t')raw([0xB0,0x40+(9-(+k.slice(1))),0x20]);else if(k[0]==='a')raw([0xB0,k==='a0'?0x4B:0x4A,0x20])}
   d.mc.out.clear();d.mc.lcd=['',''];d.mc.fo=[]}
 /* HUI */
@@ -23747,7 +23753,7 @@ function huiMsg(d,a){const s=a[0],c=s&0xf0,st=d.mc;if(s>=0xF0)return;if(c===0x90
   if(n===0x2F){const z=st.zone,p=v&0x0F,on=!!(v&0x40);let k=null,i=0;if(z<8){k=HUI.STRIP[p];i=z}else if(HUI.Z[z])k=HUI.Z[z][p];if(k==='vsel'||k==='auto'||k==='ins')k=null;if(k)mcBtn(d,k,on,i);mcSoon();return}
   if(n<8){st.hi[n]=v;return}if(n>=0x20&&n<0x28){const i=n-0x20;mcFader(d,i,((st.hi[i]|0)<<7|v)/16383);return}
   const dl=v>0x40?v-0x40:-v;if(n>=0x40&&n<0x48){const id=mcVid(d,n-0x40);if(id)mcNudge(id,dl/(st.shift?1000:100));mcSoon();return}if(n===0x0D){mcJog(dl,st.shift);return}}
-function huiBye(d){if(!d.mc)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);CTL.n.out++}catch(e){}};
+function huiBye(d){if(!d.mc)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);ctlEcho(a);CTL.n.out++}catch(e){}};
   for(const k of d.mc.out.keys())if(k[0]==='z'){const[z,p]=k.slice(1).split(':').map(Number);raw([0xB0,0x0C,z]);raw([0xB0,0x2C,p])}else if(k[0]==='r')raw([0xB0,0x10+(+k.slice(1)),0]);
   for(let i=0;i<8;i++)raw(HUI.HD.concat([0x10,i,32,32,32,32,0xF7]));for(let z=0;z<8;z++)raw(HUI.HD.concat([0x12,z],Array(10).fill(32),[0xF7]));d.mc.out.clear();d.mc.lcd={};d.mc.fo=[]}
 function huiPing(){const hs=mcDevs().filter(d=>d.prof.id==='hui');if(!hs.length){clearInterval(MC.pingT);MC.pingT=0;return}for(const d of hs){ctlSend(d,[0x90,0,0]);MC.n.ping++}}
@@ -23894,7 +23900,7 @@ function lpPair(d){if(!CTL.acc)return;const want=String(d.name).replace(/^MIDIIN
   const o=outs.find(o=>o.name===want)||outs.find(o=>o.name===d.name);if(o)d.out=o}
 function lpHello(d){const M=d.g.M;LPG.n.hello++;if(M.lp){if(CTL.sysex)ctlSend(d,[0xF0,0,0x20,0x29,2,M.id,0x0E,1,0xF7]);else toast(M.name+': allow SysEx (full MIDI access) so AudioLab can put it in programmer mode.')}
   else if(d.g.mk==='apc40'&&CTL.sysex)ctlSend(d,[0xF0,0x47,0x7F,0x29,0x60,0,4,0x41,0,0,0,0xF7]);/* Ableton Live mode: the host lights everything */}
-function lpBye(d,gone){if(!d.g)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);CTL.n.out++}catch(e){}};const M=d.g.M;
+function lpBye(d,gone){if(!d.g)return;const raw=a=>{if(!d.out||(a[0]===0xF0&&!CTL.sysex))return;try{d.out.send(a);ctlEcho(a);CTL.n.out++}catch(e){}};const M=d.g.M;
   for(const m of[...d.g.held])noteOff('p1:'+m);d.g.held.clear();
   if(!gone){for(const[k,v]of d.g.out){const b=v.split(',').map(Number);if(k[0]==='r'||k[0]==='p'){raw([b[0],b[1],0]);continue}raw([b[0]&0xF0,b[1],0])}
     if(M.lp)raw([0xF0,0,0x20,0x29,2,M.id,0x0E,0,0xF7])}d.g.out.clear()}
@@ -23920,6 +23926,63 @@ ctlProf({id:'grid',name:'Launchpad or APC',match:d=>!!lpModel(d),
     w.textContent='Launchpad and APC: 8 tracks across, the song’s sections down. A lit pad: that track plays in that section (green: playing, white: queued). Pads and the buttons on the right launch a section (Launch setting under Push 1, or Shift: at once); arrows move the grid. Launchpad: Keys or Note plays the pads in key, Drums a 4x4 drum kit, Session goes back. APC: faders on the levels of the 8 tracks (Shift and track buttons 5, 6, 8: volume, pan, the selected device), track buttons select (Shift: arrows). APC40: knobs on the selected device and on pan, transport and tempo.';
     const set=b.querySelector('.mcset');if(set)set.appendChild(w);else b.insertBefore(w,b.querySelector(':scope>.cmtpl'))}return r}}
 FT_HOOKS.gridPaint=()=>lpAll();
+/* v0.261 (task HF1): controllers can never drive AudioLab by themselves again. v0.250 reached the user's Mac and, with nothing touched,
+   tracks got selected, the playhead moved, mutes and solos switched on, a track was duplicated and quitting froze. The start-up harness
+   (tools/release-gate/smoke_electron.js) shows the same only when what AudioLab sends to a controller comes back on its input (a MIDI
+   loop: a virtual port, a MIDI thru, a device that echoes): the Push profile lit its buttons (play, stop, duplicate, the track rows...)
+   and read its own light messages back as presses, from v0.242 on (Push 1 part 2: the buttons run commands); v0.238 already looped
+   without visible effects. Now:
+   - every message sent is remembered for 50 ms; one that comes back the same within that time is ignored (ctlGuard);
+   - a device whose input keeps returning what was sent to it (a loop), or that floods (over 1500 messages a second), is stopped for
+     this session with a notice, and can be turned on again in Controllers;
+   - a control surface profile (Push 1, Mackie Control, HUI, Launchpad, APC) takes a device only when the user turned it on as a surface
+     in Controllers (or chose it under Works as); until then the device is a plain one: its notes play, nothing is sent to it;
+   - mapping feedback goes only to devices turned on as surfaces;
+   - Stop all controllers (Controllers page and the command list) switches all MIDI control and feedback off, kept across restarts. */
+const HF1={win:50,flood:1500,loopN:24};
+window.HF1=HF1;
+function ctlEK(a){if(!a)return'';const n=a.length;if(n<=3)return((a[0]|0)*65536+((a[1]|0)<<8)+(a[2]|0));let k='x'+n;for(let i=0;i<n&&i<24;i++)k+=','+a[i];return k}
+function ctlEcho(a){const E=CTL.echo||(CTL.echo=new Map()),t=performance.now();if(E.size>4096){for(const[k,v]of E)if(t-v>1000)E.delete(k);if(E.size>4096)E.clear()}E.set(ctlEK(a),t)}
+/* true when the message must be dropped: an echo of what AudioLab sent, or the device is looping or flooding (then it is stopped) */
+function ctlGuard(d,a){const t=performance.now(),r=d.rate||(d.rate={t:t,n:0,e:0});if(t-r.t>1000){r.t=t;r.n=0;r.e=0}r.n++;
+  const off=a.length===3&&((a[0]&0xf0)===0x80||((a[0]&0xf0)===0x90&&a[2]===0)||((a[0]&0xf0)===0xE0&&d.prof&&d.prof.id==='mcu')||((a[0]&0xf0)===0xB0&&d.prof&&d.prof.id==='hui'&&(a[1]<8||(a[1]>=0x20&&a[1]<0x28)))),E=CTL.echo,s=off?null:E&&E.get(ctlEK(a)),echo=s!=null&&t-s<=1000;/* never dropped: a note-off (a lost one is a stuck note), and the motor faders of Mackie Control (pitch bend) and HUI (two-byte CCs): a touched fader may send the place it was just sent to */if(echo)r.e++;
+  if(r.n>HF1.flood){ctlHalt(d,'flood');return true}
+  if(r.e>=HF1.loopN&&r.e>=r.n*.6){ctlHalt(d,'loop');return true}
+  if(echo&&t-s<=HF1.win){CTL.n.echo=(CTL.n.echo||0)+1;return true}
+  return false}
+function ctlHalt(d,why){if(d.halt)return;d.halt=why;CTL.n.halt=(CTL.n.halt||0)+1;try{if(d.prof&&d.prof.detach)d.prof.detach(d)}catch(e){}
+  console.warn('AudioLab: controller '+d.name+' stopped ('+why+')');
+  toast(why==='loop'?'AudioLab stopped listening to '+d.name+': what it sends there comes straight back (a MIDI loop). Turn it on again in Controllers.':'AudioLab stopped listening to '+d.name+': it sends far too many messages. Turn it on again in Controllers.');
+  ctlPagePaint()}
+function ctlSurfOn(d){return!!(d&&((UI.ctlOn&&UI.ctlOn[d.name])||(UI.ctlAs&&UI.ctlAs[d.name])))}
+function ctlSurfHint(d){HF1.hinted=HF1.hinted||new Set();if(HF1.hinted.has(d.name)||!d.cand)return;HF1.hinted.add(d.name);
+  setTimeout(()=>{if(d.cand&&CTL.devs.get(d.id)===d)toast(d.name+' looks like '+(d.cand.id==='grid'?'a Launchpad or APC':'a '+d.cand.name)+'. To let it control AudioLab, open Controllers and tick Control surface.')},1500)}
+function ctlSurfSet(name,on){UI.ctlOn=Object.assign({},UI.ctlOn||{});if(on)UI.ctlOn[name]=1;else delete UI.ctlOn[name];saveUI();
+  for(const d of CTL.devs.values())if(d.name===name){d.halt=null;ctlAttach(d)}ctlFbCount();ctlPagePaint()}
+/* every profile but the generic one is a control surface (profiles added later too) */
+for(const p of CTL.profs)if(p.id!=='generic'&&p.surface!==false)p.surface=true;
+{const _p=ctlProf;ctlProf=function(p){if(p&&p.id!=='generic'&&p.surface!==false)p.surface=true;return _p.apply(this,arguments)}}
+function ctlStopAll(stop){UI.ctlStop=stop?1:0;saveUI();
+  for(const d of CTL.devs.values()){if(stop){try{if(d.prof&&d.prof.bye)d.prof.bye(d);else if(d.prof&&d.prof.detach)d.prof.detach(d)}catch(e){}}else{d.halt=null;ctlAttach(d)}}
+  if(!stop)ctlStart();ctlFbCount();ctlPagePaint();toast(stop?'All controllers stopped: AudioLab ignores MIDI controllers and sends them nothing, also after a restart. Start them again in Controllers.':'Controllers on again.')}
+SCA.push({id:'ctl.stopAll',g:'edit',l:'Stop all controllers (MIDI control off)',d:'',ic:'M5 5h10v10H5z',run:()=>ctlStopAll(!UI.ctlStop)});SCM.set('ctl.stopAll',SCA[SCA.length-1]);
+/* the Controllers page: Stop all controllers, and per device a Control surface switch and why a device was stopped */
+{const _p=ctlPagePaint;ctlPagePaint=function(){const r=_p.apply(this,arguments);const b=CTL.host;if(!b||!b.isConnected||b.closest('[hidden]'))return r;
+  const bar=b.querySelector('.cmbar,.cbar');if(bar&&!bar.querySelector('[data-hf="stop"]')){const x=document.createElement('button');x.dataset.hf='stop';x.title='Switch all MIDI controllers off (nothing is read or sent), also after a restart; press again to start them';bar.appendChild(x)}
+  const sb=b.querySelector('[data-hf="stop"]');if(sb){sb.textContent=UI.ctlStop?'Start controllers':'Stop all controllers';sb.classList.toggle('on',!!UI.ctlStop)}
+  for(const row of b.querySelectorAll('label.cmdev,label.cdev')){const cb=row.querySelector('input[data-k2="dev"],input[data-ck="dev"]');if(!cb)continue;const name=cb.dataset.d,d=[...CTL.devs.values()].find(x=>x.name===name);if(!d)continue;
+    if(!row.nextElementSibling||!row.nextElementSibling.classList.contains('hfsurf')){const w=document.createElement('label');w.className='hfsurf';w.style.cssText='display:flex;align-items:center;gap:6px;margin:-2px 0 4px 26px;opacity:.85';
+      w.title='A control surface: AudioLab lights it up, writes its display and lets its buttons run commands (a Push, a Mackie or HUI surface, a Launchpad or APC). Off: it only plays notes and moves what you mapped, and AudioLab sends it nothing.';
+      w.innerHTML='<input type="checkbox" data-hf="surf" title="Let this device work as a control surface"> <span>Control surface</span><em style="font-style:normal;opacity:.65"></em>';row.after(w)}
+    const w=row.nextElementSibling,c=w.querySelector('input');c.dataset.d=name;c.checked=ctlSurfOn(d);
+    w.querySelector('em').textContent=d.halt?(d.halt==='loop'?'Stopped: what AudioLab sent came straight back (a MIDI loop). Tick Use this device again to retry.':'Stopped: far too many messages.'):d.cand&&!ctlSurfOn(d)?'(looks like '+(d.cand.id==='grid'?'a Launchpad or APC':d.cand.name)+')':''}
+  if(UI.ctlStop&&!b.querySelector('.hfstop')){const n=document.createElement('div');n.className='hfstop cmnone';n.textContent='All controllers are stopped: AudioLab ignores MIDI controllers and sends them nothing.';(bar||b.firstChild)&&b.insertBefore(n,bar?bar.nextSibling:b.firstChild)}
+  else if(!UI.ctlStop){const n=b.querySelector('.hfstop');if(n)n.remove()}
+  if(!b._hf){b._hf=1;b.addEventListener('click',e=>{const x=e.target.closest('[data-hf="stop"]');if(x){e.stopPropagation();ctlStopAll(!UI.ctlStop)}},true);
+    b.addEventListener('change',e=>{const x=e.target.closest('input[data-hf="surf"]');if(x){e.stopPropagation();ctlSurfSet(x.dataset.d,x.checked);return}
+      const u=e.target.closest('input[data-k2="dev"],input[data-ck="dev"]');if(u&&u.checked)for(const d of CTL.devs.values())if(d.name===u.dataset.d&&d.halt){d.halt=null;d.rate=null;ctlAttach(d)}},true)}
+  return r}}
+
 /* v0.255 (task FT-F1): linked clips. A clip can be a linked copy (clip.link, an id shared by its copies; optional, older projects have none):
    editing the notes, controller lanes, bend range or envelopes of one changes every copy (MIDI clips); for audio clips the gain, the warp
    markers and the envelopes. Where a copy sits, its length, start offset, fades, name and mute stay its own. Envelopes are shared in the
@@ -23964,10 +24027,11 @@ function lkSweep(){LK.sweepT=0;LK.n.sweep++;const all=lkAllLinked();if(!all.leng
 {const _c=changed;changed=function(){const r=_c.apply(this,arguments);try{if(LK.S!==S){lkBaseAll()}else{const cs=lkCands();if(cs.length&&lkCheck(cs)){dirty=true}}
   if(!LK.sweepT&&(LK.base.size||lkAllLinked().length))LK.sweepT=setTimeout(lkSweep,250)}catch(e){console.error('AudioLab linked clips',e)}return r}}
 /* making and breaking links */
-function lkSel(){const ids=SELCS.size?[...SELCS]:selC?[selC]:[],out=[];for(const id of ids){const f=findClip(id);if(f)out.push(f)}return out}
+/* v0.261 (task HF1): was a second lkSel, which replaced task LK's lkSel(a) (the selection colour) everywhere: every selection outline got an array */
+function ftLinkSel(){const ids=SELCS.size?[...SELCS]:selC?[selC]:[],out=[];for(const id of ids){const f=findClip(id);if(f)out.push(f)}return out}
 function lkDup(t,c){if(LK.S!==S)lkBaseAll();pushUndo();if(!c.link){c.link=lkId();LK.base.set(c.id,lkSnap(c))}dupClip(t,c);const k=findClip(selC);if(k&&k.c!==c){k.c.link=c.link;LK.base.set(k.c.id,lkSnap(k.c))}changed(false);
   toast('Linked copy: editing the notes'+(c.notes?'':' (gain, warp)')+' or envelopes of one changes all '+lkGroup(c.link).length+'.')}
-function lkDupSel(){const f=lkSel()[0];if(!f){toast('Select a clip first.');return}if(f.t.frz){toast(f.t.name+' is frozen.');return}lkDup(f.t,f.c)}
+function lkDupSel(){const f=ftLinkSel()[0];if(!f){toast('Select a clip first.');return}if(f.t.frz){toast(f.t.name+' is frozen.');return}lkDup(f.t,f.c)}
 function lkUnique(list){list=list.filter(f=>f.c.link);if(!list.length){toast('No linked clip selected.');return 0}pushUndo();
   for(const f of list){delete f.c.link;LK.base.delete(f.c.id)}changed(false);toast(list.length===1?f1Name(list[0].c)+' is unique now: its edits stay its own.':list.length+' clips are unique now.');return list.length}
 const f1Name=c=>c.name||'The clip';
@@ -24115,7 +24179,7 @@ const originT=c=>c===ctx?(play.on?play.t0-play.b0*60/S.bpm:0):-((typeof VMOF!=='
 function ndResync(){if(!ctx)return;for(const N of NODES.values())for(const x of N.fxm.values())x.resync&&x.resync();for(const x of MFXM.values())x.resync&&x.resync()}
 /* analyser helpers */
 const TDB={};function tdOf(an){const n=an.fftSize;let a=TDB[n];if(!a)a=TDB[n]=new Float32Array(n);an.getTimeDomainData?0:0;an.getFloatTimeDomainData(a);return a}
-function peakOf(an){return mtrPeak(an)}
+/* peakOf: declared once, above (task HF1) */
 const FQB={};function fqOf(an){const n=an.frequencyBinCount;let a=FQB[n];if(!a)a=FQB[n]=new Float32Array(n);INS.fft(an,a);return a}
 /* log-frequency spectrum drawing; returns nothing. sm = persistent smoothing array (per canvas) */
 function drawSpec(g,w,h,an,o){o=o||{};if(!an||!ctx)return;const D=fqOf(an),ny=ctx.sampleRate/2,lo=o.lo||20,hi=o.hi||20000,top=o.top??-10,fl=o.floor??-100,sl=o.slope||0,st=o.st||(o.st={}),sm=st.sm&&st.sm.length===w?st.sm:(st.sm=new Float32Array(w).fill(-120)),a=o.smooth??.6,pk=st.pk&&st.pk.length===w?st.pk:(st.pk=new Float32Array(w).fill(-120)),y0=o.y0||0,hh=o.h||h;

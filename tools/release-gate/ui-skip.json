@@ -1,0 +1,10 @@
+{
+  "aivoice.py": "needs the voice model files (model dir), not in the repository",
+  "aivoice_electron.py": "needs the voice model files and test audio, not in the repository",
+  "taskD3.py": "a screen census driven by taskD3 runs (ROOT OUT W H LIGHT), not a pass/fail test",
+  "taskD3_compare.py": "compares two taskD3 outputs (a helper)",
+  "taskD3_pins.py": "a helper of taskD3 (json in, json out)",
+  "taskAO_cpu.py": "a CPU measurement (seconds per measurement as its 2nd argument), not pass/fail; frame times are step c",
+  "loadtime.py": "a start-up time measurement (cpu slowdown as its 2nd argument), not pass/fail",
+  "taskAI.py": "compares the Fractals song with an older index.html given as its 2nd argument; the levels are step e"
+}

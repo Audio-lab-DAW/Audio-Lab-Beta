@@ -5035,3 +5035,83 @@ Idea I12 is complete. Edit script `tools/feature-lab/ni/ni_5b.py` (anchored; nee
 
 ### Left
 Group U, next: NI-6, the energy arc (I6) on the NI-3 cache.
+
+## 27 November 2026, v0.261: task HF1, the v0.250 start-up glitch and the release gate (top priority)
+
+The user (18:13 Brussels, M4 Mac mini, 240 Hz, desktop app) opened v0.250 and it "starts glitching all over the place as if someone's clicking all over the place": tracks selected, the playhead and play/stop running several times a second, the instrument browser opening, EQ points moving, mutes and solos on, a "Kick & Bass copy" track, quitting froze; also in an empty project. The update window's long notes also pushed its buttons out of reach.
+
+### The cause
+- **The user's Mac has the IAC Driver online with two ports made for Cubase: "Ableton Push to Cubase" and "nanoKey2 to Cubase"** (their Audio MIDI Setup screenshots, 19:07). The user has no Push or other MIDI device plugged in.
+- Since v0.233 the desktop app opens every MIDI port at start. The Push 1 profile (`p1Match`, v0.238) takes any input whose name contains "Ableton Push" (not "User", not Push 2 or 3), so it took the IAC port. It sent its Live-mode SysEx, display lines, pad and button LEDs to the matching output, the same IAC port. IAC is a loop-back, so every message came straight back in.
+- In v0.238 to v0.241 the echoes only toggled Scales and repainted (614 echoes in 10 s, nothing visible).
+- From **v0.242 (task FT-C2b, Push part 2: buttons run commands)** the button LED values came back as presses. Note-on/CC with a non-zero value is a press, so:
+  - Play (CC 85) toggled play
+  - Stop and Record ran
+  - New (CC 87) ran `newmidi`, which opens the instrument browser
+  - Duplicate (CC 88) duplicated the selected track: "Kick & Bass copy"
+  - the upper and lower rows (CC 20 to 27, 102 to 109) selected tracks and switched mute, solo and arm
+  - the arrows moved the selection
+  - Undo ran
+  - every change relit the buttons, which echoed again
+- **Line:** `p1bCc` (Push 1 part 2, the button handler), reached through `ctlMsg` with no echo guard; the match is `p1Match` in part 1.
+- The user confirmed it: with the IAC Driver switched offline, v0.250 opens calmly.
+
+### Bisect (the start-up harness, scenario `iac-push`: those two IAC ports, echoing)
+| Version | Result |
+|---|---|
+| v0.237 | clean, nothing sent |
+| v0.238 | loop starts (634 sent, 614 back), no visible change |
+| v0.241 | the same |
+| **v0.242** | synthetic clicks on Record, Metronome, Stop and Loop; frame time p50 50 ms (60 ms per frame and worse) |
+| v0.250 | the same |
+| v0.261 | clean, nothing sent to the port |
+
+- Idle with no MIDI, with a plain keyboard, with ports named like the user's audio software, and with a port sending random messages: clean in every release from v0.228 to v0.260, also with the mouse moving over the window.
+
+### Fixed (edit script `tools/release-gate/hf1_edit.py`, anchored, refuses a second run)
+- **Control surfaces only when turned on.**
+  - A surface profile (Push 1, Mackie Control, HUI, Launchpad/APC; every profile but the generic one, also ones added later) takes a port only after the user ticks **Control surface** for it on the Controllers page (`UI.ctlOn`), or picks it under Works as.
+  - Until then the port is plain: its notes play, mappings work, nothing is sent to it, and a notice says once that it looks like a surface.
+  - Mapping feedback goes only to ports turned on as surfaces (`ctlDevOf`).
+- **Echoes ignored.**
+  - Every message sent is remembered (`ctlEcho`, in `ctlSend` and the four goodbye senders), and the same message back within 50 ms is ignored (`ctlGuard` in `ctlMsg`).
+  - Never dropped: note-offs (a stuck note otherwise), Mackie pitch-bend faders, HUI fader CCs.
+- **Loops and floods stopped.**
+  - A port whose messages are at least 24 a second and at least 60 % echoes of what was sent in the last second is stopped for the session with a notice (`d.halt='loop'`), and its profile says goodbye.
+  - So is a port sending over 1500 a second.
+  - Ticking Use this device again retries it.
+- **Stop all controllers** (Controllers page, command `ctl.stopAll`):
+  - nothing is read or sent, kept across restarts (`UI.ctlStop`)
+  - MIDI does not even start at launch while it is on
+- **The two `lkSel` functions** (v0.255, found by the scheduling chat): FT-F1's linked-clips helper is now `ftLinkSel` (2 callers); LK's `lkSel(a)` is the selection colour again everywhere.
+- **`peakOf`** was declared twice with the same body; the second declaration is removed.
+- **Duplicate element ids.** The lint finds none written twice in the HTML or in one piece of markup. The running app shows no duplicate ids in the start-up test or after opening every window (abUpd, dawRecol, ibPlane and master appear in different templates that are never in the page together).
+- **The update window:**
+  - the notes scroll in a fixed area (at most 640 px tall); the buttons sit under a hairline, always in view
+  - "What is new" is one line per release, newest first, 8 shown and "and N earlier changes"
+- The FT tests turn their fake devices on as surfaces (one line in each `F.plug`).
+
+### The release gate (new): `tools/release-gate/gate.py`, `docs/release-gate.md`
+It tests a fresh worktree of origin/main against the build installed apps have:
+- a) lint, `lint.js` (acorn): a top-level function name declared twice, a function sharing a const's name, an id written twice
+- b) every UI test, with failures re-run on the reference to tell regressions from old failures (`ui-skip.json` lists 8 non-pass/fail tools)
+- c) `smoke_electron.js`, the real Electron app at 2194 × 1139 × 1.75 with the Fractals song:
+  - 60 s idle, then the mouse over the whole window
+  - 17 MIDI scenarios (none; keyboard; Push 1 plain, echoing, turned on; IAC loop; the user's IAC ports; Mac names; Mackie echoing; IAC with old learned mappings; random messages)
+  - fails on any state change, synthetic event, command, `changed()` call, console error, duplicate id, or a loop left running
+  - frame times against the reference
+- d) every main window opened and closed; the update window with 40 long lines at three sizes
+- e) `export_same.py`: the Fractals levels and every export line against the reference
+
+Only the gate promotes (`AL_PROMOTE=1 node desktop/scripts/sync-app.js`, notes trimmed to the ten newest).
+
+### Tested
+- `tools/ui-tests/taskHF1.py`: 19 of 19.
+- FT tests C1a to C3c and F1 pass with the change (C3b 51 of 51 after the fader exception).
+- `smoke_electron.js`:
+  - the push1, push1-loop, mackie-loop and keyboard scenarios are clean
+  - push1-loop-on and mackie-loop-on stop the looping device with no state change
+  - iac-push is clean (nothing sent)
+
+### What the user can do with v0.250 now
+Switch the IAC Driver offline in Audio MIDI Setup, or rename its "Ableton Push to Cubase" port so it does not contain "Ableton Push". Either works until v0.261 is installed. With v0.261 the IAC port can stay on.
