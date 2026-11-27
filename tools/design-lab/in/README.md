@@ -9,3 +9,4 @@ Edit scripts for `index.html`, one per step of `docs/design-round-4-instruments.
 
 Tests: `tools/ui-tests/taskIN_<step>.py`.
 - `in_g.py` + `in_g_block.js`: IN-G, dynamics (G1 history `INS.grh`, G3 the compressor's curve `ingCK`, G4 bars `ingBar`). Release notes: `release_g.py <version> tools/design-lab/in/entry_g.md`. Draw cost: `draw_cost_g.py a.html [b.html]`.
+- `in_o.py` + `in_o_block.js`: IN-O, stereo field and phase (O1 marks `inoMarks`, afterglow `inoLayer`, phase bar `inoCorr`, O4 polar view). Release notes: `release_o.py <version> tools/design-lab/in/entry_o.md`. Cost: `stereo_cost_o.py a.html` (one file per run).

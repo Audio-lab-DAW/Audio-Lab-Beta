@@ -131,7 +131,7 @@ play('Pink', [{'type': 'ott', 'p': {'depth': 100, 'time': 120, 'up': 70, 'down':
 D = cap(520, 200); red = R("JSON.stringify(vizInst(S.tracks[0].fx[0]).comps.map(c=>c.reduction))"); red = json.loads(red)
 print('    OTT bars', [round(b['gr'], 2) for b in D['bars']], 'reported', [round(-r, 2) for r in red])
 T = [x[0] for x in D['txt']]
-ck('OTT: one bar per band with the band\'s reduction', len(D['bars']) == 3 and all(abs(b['gr'] + r) < .6 for b, r in zip(D['bars'], red)), [b['gr'] for b in D['bars']])
+ck('OTT: one bar per band: each bar shows the reading it was given (it rises at once), and that reading is the band\'s reduction (read a moment later, within 1 dB)', len(D['bars']) == 3 and all(abs(b['d'] - b['gr']) < .01 or b['d'] > b['gr'] for b in D['bars']) and all(abs(b['gr'] + r) < 1.0 for b, r in zip(D['bars'], red)), [(round(b['gr'], 2), round(b['d'], 2), round(-r, 2)) for b, r in zip(D['bars'], red)])
 ck('OTT: the band edges and the numbers', all(s in T for s in ('< 120 Hz', '120 Hz to 2.5 kHz', '> 2.5 kHz', '0', '1', '3', '10', '30')), T[:40])
 shot('inG_ott.png')
 play('Pink', [{'type': 'mband', 'p': {'t1': -40, 't2': -40, 't3': -40, 'r1': 4, 'r2': 4, 'r3': 4}}], 2000)
