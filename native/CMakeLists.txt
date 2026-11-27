@@ -64,6 +64,9 @@ add_executable(alrender_fused engine/alrender.cpp engine/core/devices.cpp)
 target_compile_options(alrender_fused PRIVATE -ffp-contract=fast)
 target_link_libraries(alrender_fused PRIVATE al_jsmath)
 # ---- the mixer (task NB-N3b): tracks, volume, pan and the master as Chromium computes them, whole quanta, offline --
+# the project document and its edit protocol (task NB-R7): the state the engine will own
+add_executable(aldoc engine/doc/aldoc.cpp)
+
 add_executable(almix engine/mix/almix.cpp)
 target_compile_options(almix PRIVATE -ffp-contract=off)   # the same bits as JavaScript and Chromium: no fused multiply-add
 
