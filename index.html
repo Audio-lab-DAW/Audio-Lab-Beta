@@ -5130,6 +5130,7 @@ function openMenu(cx,cy,items){
   MENU=items;ctxm.classList.remove('mcols','mxvm','mxvo');
   ctxm.innerHTML=ovMenuHTML(items);queueMicrotask(ovMTips);
   ctxm.style.left='100px';ctxm.style.top='100px';
+  if(ctxm.inert||ctxm.classList.contains('ovout')){ctxm.inert=false;ctxm.classList.remove('ovout')}/* task OV2b: not inert while the last menu fades */
   ctxm.hidden=false;const w=ctxm.offsetWidth,h=ctxm.offsetHeight;
   ctxm.style.left='100px';ctxm.style.top='100px';const r0=ctxm.getBoundingClientRect(),zf=r0.left>0?r0.left/100:1,vw=r0.width||w*zf,vh=r0.height||h*zf;
   ctxm.style.left=clamp(cx,4,innerWidth-vw-6)/zf+'px';ctxm.style.top=clamp(cy,4,innerHeight-vh-6)/zf+'px';
@@ -6026,8 +6027,8 @@ function drawChain(){let sv=fxin.querySelector('svg.chain');const ds=[...fxin.qu
 /* device clipboard + menu (Live-style copy with exact settings) */
 let DEVCLIP=null,DEVT='Devices';
 const cloneFx=f=>({...JSON.parse(JSON.stringify(f)),id:rid()});
-function fxMenu(x,y,t,f){const i=t.fx.indexOf(f);openMenu(x,y,[{head:FXDEF[f.type].name+' · '+t.name},{label:f.on?'Turn off':'Turn on',act:()=>{pushUndo();f.on=!f.on;agOnly(()=>{changed(true);renderMixer()})}},{label:'Copy device',sub:'With all its settings',act:()=>{DEVCLIP=cloneFx(f);toast(FXDEF[f.type].name+' copied. Right-click another track\'s devices or mixer slots to paste.')}},
-  {label:'Paste after this',dis:!DEVCLIP,act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(DEVCLIP));changed(true);renderMixer()}},{label:'Duplicate',act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(f));changed(true);renderMixer()}},'-',{label:'Delete',danger:1,act:()=>{pushUndo();t.fx.splice(i,1);changed(true);renderMixer()}}])}
+function fxMenu(x,y,t,f){const i=t.fx.indexOf(f);openMenu(x,y,[{head:FXDEF[f.type].name+' · '+t.name},{label:f.on?'Turn off':'Turn on',crow:'pow',crowL:f.on?'Turn off':'Turn on',on:!!f.on,act:()=>{pushUndo();f.on=!f.on;agOnly(()=>{changed(true);renderMixer()})}},{label:'Copy device',crow:'copy',crowL:'Copy',sub:'With all its settings',act:()=>{DEVCLIP=cloneFx(f);toast(FXDEF[f.type].name+' copied. Right-click another track\'s devices or mixer slots to paste.')}},
+  {label:'Paste after this',crow:'paste',crowL:'Paste',dis:!DEVCLIP,act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(DEVCLIP));changed(true);renderMixer()}},{label:'Duplicate',crow:'dup',crowL:'Duplicate',act:()=>{pushUndo();t.fx.splice(i+1,0,cloneFx(f));changed(true);renderMixer()}},'-',{label:'Delete',danger:1,crow:'del',crowL:'Delete',act:()=>{pushUndo();t.fx.splice(i,1);changed(true);renderMixer()}}])}
 function chainMenu(x,y,t){openMenu(x,y,[{head:'Devices · '+t.name},{label:'Paste device',dis:!DEVCLIP,sub:DEVCLIP?FXDEF[DEVCLIP.type].name:'Copy a device first',act:()=>{pushUndo();t.fx.push(cloneFx(DEVCLIP));changed(true);renderMixer()}},'-',{head:'Add effect'},...Object.entries(FXDEF).map(([k,d])=>({label:d.name,act:()=>{pushUndo();t.fx.push(mkFx(k));changed(true);renderMixer()}}))])}
 fxin.addEventListener('contextmenu',e=>{const t=curT();if(!t)return;const d=e.target.closest('.dev[data-d=fx]');e.preventDefault();e.stopPropagation();const z=ZOOM;if(d){const f=t.fx.find(q=>q.id===d.dataset.id);if(f)fxMenu(e.clientX/z,e.clientY/z,t,f)}else chainMenu(e.clientX/z,e.clientY/z,t)});
 
@@ -6630,7 +6631,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.285',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.286',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -7830,9 +7831,9 @@ $('#bLogo').onclick=()=>{if(!$('#set').hidden){closeSet();return}openSettings()}
 $('#bLogo').addEventListener('contextmenu',e=>{e.preventDefault();const p=curP(),r=$('#bLogo').getBoundingClientRect(),z=ZOOM,qx=()=>{ensureCtx();exUI()};
   const I=(d,c)=>`<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="${c||'currentColor'}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
   openMenu(r.left,r.top,[{head:'Quick actions'},
-   {label:'Save',key:'⌘S',ic:I('M4 3h10l3 3v11H4zM7 3v5h6V3M7 17v-5h7v5','#4c8dff'),act:()=>writeProject(p,false)},
+   {label:'Save',key:'⌘S',crow:'save',crowL:'Save',ic:I('M4 3h10l3 3v11H4zM7 3v5h6V3M7 17v-5h7v5','#4c8dff'),act:()=>writeProject(p,false)},
    {label:'Save as…',key:'⇧⌘S',ic:I('M4 3h10l3 3v11H4zM7 3v5h6V3M10 11v5M7.5 13.5L10 16l2.5-2.5','#4c8dff'),act:()=>writeProject(p,true)},
-   {label:'Open project…',key:'⌘O',ic:I('M2 6h6l2 2h8v9H2zM2 6V4h6','#4c8dff'),act:()=>openProjectFile()},'-',
+   {label:'Open project…',key:'⌘O',crow:'open',crowL:'Open',ic:I('M2 6h6l2 2h8v9H2zM2 6V4h6','#4c8dff'),act:()=>openProjectFile()},'-',
    {label:'Quick export: mixdown',sub:'uses the format set in Export',ic:I('M10 3v9M6 8l4 4 4-4M3 14v3h14v-3','#ff9a3c'),act:()=>{qx();doExport(false)}},
    {label:'Quick export: stems',sub:'one file per track',ic:I('M3 5h14M3 10h14M3 15h14M15 3v14','#ff9a3c'),act:()=>{qx();doExport(true)}},
    {label:'Export settings…',ic:I('M10 3v9M6 8l4 4 4-4M3 14v3h14v-3'),act:()=>openSettings('export')},'-',
@@ -7840,14 +7841,15 @@ $('#bLogo').addEventListener('contextmenu',e=>{e.preventDefault();const p=curP()
    {label:'Controllers…',sub:'MIDI devices and every mapping',ic:I('M3 6h14v8H3zM6 9v2M10 9v2M14 9v2','#b583ff'),act:()=>ctlPage()},
    {label:'Kick and bass lab…',sub:'is the kick in tune with the bass?',ic:I('M3 15h14M6 15V9M10 15V5M14 15v-4','#ff6b6b'),act:()=>NI_kbOpen()},
    {label:'Level journey…',sub:'the level after each device of the selected track',ic:I('M6 3v14M6 6h8M6 10h5M6 14h9','#4cc9f0'),act:()=>NI_jourOpen()},
-   {label:'Undo',key:'⌘Z',dis:!UNDO.length,ic:I('M7 7H13a4 4 0 0 1 0 8H8M7 7l3-3M7 7l3 3'),act:()=>undo()},
+   {label:'Undo',key:'⌘Z',crow:'undo',crowL:'Undo',dis:!UNDO.length,ic:I('M7 7H13a4 4 0 0 1 0 8H8M7 7l3-3M7 7l3 3'),act:()=>undo()},
    {label:'Stop all sound (panic)',ic:I('M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM5 5l10 10','#ff5a5a'),act:()=>panic()},
+   {label:'Restart',sub:'the audio engine, or the whole app',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5','#3ecf8e'),kids:[
    {label:'Restart audio engine',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5','#3ecf8e'),act:()=>restartAudio()},
-   {label:'Restart AudioLab',sub:'reload everything, back to the splash',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5M10 8v3','#ff9a3c'),act:()=>restartApp()},
+   {label:'Restart AudioLab',sub:'reload everything, back to the splash',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5M10 8v3','#ff9a3c'),act:()=>restartApp()}]},
    {label:OVW.on?'Song overview: on':'Song overview',key:scShow(scBind(SCM.get('overview'))).join(''),sub:'the whole song at a glance',ic:I('M2 5h16M2 9h7M11 9h7M2 13h10M14 13h4M2 17h5M9 17h9','#6ea8ff'),act:()=>ovwToggle()},
    {label:UI.pm&&UI.pm.on?'Light mode: on':'Light mode: off',check:!!(UI.pm&&UI.pm.on),keep:1,act:()=>{const c=$('#liteChk');if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}}},'-',
    {label:'Interface and DAC…',ic:I('M4 7h12v9H4zM7 7V4h6v3M8 11.5a2 2 0 1 0 4 0 2 2 0 0 0-4 0','#ffd27a'),act:()=>openSettings('dac')},
-   {label:'Settings…',ic:I('M10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM10 2v2M10 16v2M2 10h2M16 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M15.8 4.2l-1.4 1.4M5.6 14.4l-1.4 1.4'),act:()=>openSettings()}]);
+   {label:'Settings…',crow:'set',crowL:'Settings',ic:I('M10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM10 2v2M10 16v2M2 10h2M16 10h2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M15.8 4.2l-1.4 1.4M5.6 14.4l-1.4 1.4'),act:()=>openSettings()}]);
   requestAnimationFrame(()=>{const h=ctxm.offsetHeight;ctxm.style.top=Math.max(4,r.top/z-h-6)+'px';ctxm.style.left=Math.max(4,r.left/z)+'px';ctxm.classList.add('dropup')})});
 $('#setX').onclick=$('#setDone').onclick=closeSet;
 $('#set').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget)closeSet()});
@@ -24687,6 +24689,10 @@ function dvFitBox(D){const B=D.querySelector(':scope>.devb');if(!B||!D.classList
 /* L2: the values line writes units in amber small caps */
 {const _vv=dvVals;dvVals=function(D){const r=_vv.apply(this,arguments);const V=D&&D.querySelector(':scope>.devb>.dvval');if(V&&V._h!==V._l2h)dvL2(V);return r}}
 function dvL2(V){for(const b of V.querySelectorAll('b')){if(b.querySelector('i'))continue;const m=/^(.*?\d)\s?([A-Za-zµ%°][A-Za-z%°/]*)$/.exec(b.textContent);if(m){b.textContent=m[1];const i=document.createElement('i');i.textContent=m[2];b.append(i)}}V._l2h=V._h}
+/* task OV2b (lane F, overlays, pick R2): two more command-row icons (the tab menu's Close, the device menu's on/off). */
+/* a press on the menu's background (head, gaps, separators) keeps keyboard focus in the menu */
+ctxm.addEventListener('mousedown',e=>{if(!(e.target.closest&&e.target.closest('button,input,select,textarea')))e.preventDefault()});
+Object.assign(OV_IC,{close:'M5 5l10 10M15 5 5 15',pow:'M10 3v7M6.2 5.6a6 6 0 1 0 7.6 0'});
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -24706,12 +24712,12 @@ document.addEventListener('click',async e=>{const o=e.target.closest&&e.target.c
 new MutationObserver(()=>{if(!$('#np').hidden)renderSaved()}).observe($('#np'),{attributes:true,attributeFilter:['hidden']});
 
 function tabMenu(id,x,y){const p=PJ.list.find(q=>q.id===id);if(!p)return;const go=f=>()=>{if(id!==PJ.cur)switchProject(id);setTimeout(f,0)};
-  openMenu(x,y,[{head:p.name+(p.file?' · '+p.file:'')},{label:'Save',key:'⌘S',act:()=>writeProject(p,false)},{label:'Save as…',key:'⇧⌘S',sub:'choose a folder and name for a .audiolab file',act:()=>writeProject(p,true)},{label:'Open project…',key:'⌘O',act:()=>openProjectFile()},'-',
-    {label:'Rename…',act:async()=>{const n=await askText('Project name',p.name);if(n&&n.trim()){p.name=n.trim();p.dirty=true;renderTabs();saveProjects()}}},
-    {label:'Duplicate',act:()=>{const src=id===PJ.cur?S:p.S,nid='p'+rid();PJ.list.splice(PJ.list.indexOf(p)+1,0,{id:nid,name:p.name+' copy',S:JSON.parse(JSON.stringify(src)),dirty:true});saveProjects();switchProject(nid)}},
+  openMenu(x,y,[{head:p.name+(p.file?' · '+p.file:'')},{label:'Save',key:'⌘S',crow:'save',crowL:'Save',act:()=>writeProject(p,false)},{label:'Save as…',key:'⇧⌘S',sub:'choose a folder and name for a .audiolab file',act:()=>writeProject(p,true)},{label:'Open project…',key:'⌘O',act:()=>openProjectFile()},'-',
+    {label:'Rename…',crow:'ren',crowL:'Rename',act:async()=>{const n=await askText('Project name',p.name);if(n&&n.trim()){p.name=n.trim();p.dirty=true;renderTabs();saveProjects()}}},
+    {label:'Duplicate',crow:'dup',crowL:'Duplicate',act:()=>{const src=id===PJ.cur?S:p.S,nid='p'+rid();PJ.list.splice(PJ.list.indexOf(p)+1,0,{id:nid,name:p.name+' copy',S:JSON.parse(JSON.stringify(src)),dirty:true});saveProjects();switchProject(nid)}},
     {label:'New project…',act:()=>npOpen()},
     {label:'Project file settings…',act:()=>{openSettings&&openSettings('files')}},'-',
-    {label:'Close',act:()=>askCloseProject(id),dis:PJ.list.length<2},
+    {label:'Close',crow:'close',crowL:'Close',act:()=>askCloseProject(id),dis:PJ.list.length<2},
     {label:'Close other tabs',dis:PJ.list.length<2,act:async()=>{for(const q of PJ.list.filter(q=>q.id!==id))await askCloseProject(q.id)}}])}
 
 /* with three projects open the app drops into light mode by itself, and goes back when you are down to two */

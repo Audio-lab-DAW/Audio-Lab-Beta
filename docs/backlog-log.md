@@ -5965,3 +5965,27 @@ Step DV-2 of `docs/devices-display-first.md` section 10 (claimed at 20:21 UTC). 
 ### Left
 - DV-3: On the picture (positions, chips as engine faces, More drawer) and Pro EQ. DV-4: Compressor, Sidechain, Echo delay, Reverb (bottom dock, values line clear of their handles). The rule for the other devices with their groups.
 - The values line on the drum designers lies over the picture's time scale labels at the bottom (300 ms); placed per device later.
+
+## 27 November 2026, v0.286: task OV2b, right-click menus to the picked R2, part b: the tab, Quick actions and device menus (lane F, overlays)
+
+Second part of step OV2 (`docs/design-round-5-overlays.md` section 5), the user's pick **R2**, on the engine of OV2a (v0.278). Edit script `tools/design-lab/ov/ov2b.py` (adds only `crow` and `kids` keys to existing entries, every anchor asserted; written on v0.278, re-run on the fresh file after the rebase), test `tools/ui-tests/taskOV2b.py` (26 checks).
+
+### What changed
+- **Project tab menu** (right-click a project tab): Save, Rename, Duplicate and Close on the command row; Close greyed with one tab open, as before. Save as, Open, New project, Project file settings and Close other tabs stay in the list.
+- **Quick actions** (right-click the logo): Save, Open, Undo (greyed with nothing to undo, as before) and Settings on the command row; Restart audio engine and Restart AudioLab folded into one submenu "Restart" (Stop all sound stays in the list, one click away). 20 list rows become 12. It still opens upwards from the logo.
+- **Device menu** (right-click a device): Turn on/off (blue while on), Copy, Paste (greyed until a device is copied), Duplicate and Delete as one command row; a menu that is only a row focuses its first button and the arrows move along it.
+- New row icons `close` and `pow` in `OV_IC`.
+- **Fixed (OV1, OV2a):** a menu opened during the previous menu's 60 ms fade-out (a right-click on another object while a menu is open) was still `inert` when it took focus, so focus was lost and the keyboard did nothing; a press on the menu's background (head, gaps) also moved focus out of the menu. Both keep focus in the menu now.
+- **Left as they are, on purpose:** the mixer's menus are choosers (pan style, fader design, what each strip shows) and its channel menu is the track menu (OV2a); the multi-track menu (lane C's `taskAE.py` clicks its entries by their visible text); the section menu (lane C's `taskFT_F2.py` reads its labels); the device eye menu (lane I, `dvMenu`, has its own Shift+F10). They keep the OV2a look (key chips, descriptions in the tip card, keyboard).
+
+### Tested
+- `tools/ui-tests/taskOV2b.py`, 26 of 26 (2194x1139 at 1.75x, Fractals): the three command rows and their greyed states, the Restart submenu (both restarts, on screen), Quick actions still upwards from the logo, **every enabled entry of the tab, Quick actions and device menus (row and submenu included: 7, 16 and 4) reaches its command through a click**, Shift+F10 on a project tab with Esc returning focus to the tab, the row keyboard, focus after a reopen during the fade-out, after a right-click on another header while a menu is open, after a click on the menu's head; Light mode (Quick actions, the tab menu where asked), Solid level without backdrop-filter, reduced motion, no console errors.
+- `taskOV2a.py` 41/41, `taskOV1.py` 25/25, lint clean; the start-up smoke test (`smoke_electron.js`) clean in the six key scenarios (real, keyboard, push1-loop-on, iac-push, mackie-loop-on, noise) on the v0.281 candidate; on the final file (rebased onto v0.285) lint clean and `taskOV2b.py` 26/26.
+- **Open times** (JS of the open call, median of 15, software renderer on 2 cores): Quick actions 3.6 to 6.2 ms, tab menu 3.1 to 6.0 ms, device menu 2.4 to 5.9 ms over four runs (the track menu's limit in section 1 is 6.9 ms).
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py` on this file): Kick −19.05560 dB (fb577dd5202b), Bass −35.48685 dB (392ec52590c7) with the master at −10 dB; −9.75669 and −25.48699 dB (09e0415bec5e) at 0 dB.
+- Screenshots looked at (dark, Light mode, Solid): tab, Quick actions, its Restart submenu, device menu, against the pick page's R2 card.
+
+### What is left
+- **OV8** next: the command palette K1 over SCA (Recent, the Assistant row, the ? key sheet).
+- New for lane F from the user's picks of 27 Nov evening: **S16** (UX1) the motion tokens 0 / 50 / 80 / 120 ms for every overlay (today's menu fade is 90 in, 60 out from OV1; a small step on `--ov-*` and `LOOK.ov`), **S18** the progress line; **LM1 to LM3** (UX3: guide engine, Help menu, What is this?) after OV8.
+- Then OV6 (T3; ST-S9 is out, v0.282), OV4 (D3), OV5 (N1), OV7 (X1) now that MD1 is out (v0.271), OV3 (K12 Advanced group: the amber group label is ready; needs XT-DL3 or the hook).
