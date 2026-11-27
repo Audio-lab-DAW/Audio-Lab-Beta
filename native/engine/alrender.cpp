@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
         for (auto& c : cj["cases"].a) {
             RenderContext ctx; ctx.sampleRate = in.sr;
             ctx.quantum = (int)cj["quantum"].num(128);
-            ctx.bpm = cj["bpm"].num(120); ctx.beat0 = cj["beat0"].num(0);   // the song's tempo (task NB-N3g)
+            ctx.bpm = c["bpm"].num(cj["bpm"].num(120)); ctx.beat0 = cj["beat0"].num(0);   // the song's tempo (task NB-N3g)
             Chain ch(ctx);
             bool ok = true;
             for (auto& d : c["chain"].a) if (!ch.add(d["type"].str(), d["p"], err)) { ok = false; break; }

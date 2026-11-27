@@ -163,6 +163,7 @@ JS = """async ({b64, N, SR, chain, Q}) => {
   const src = c.createBufferSource(); src.buffer = buf;
   const A = window.__alref, posted = [];
   A.setB0(0);   // the beat the render starts at, read by the Sidechain device when it is made
+  const bpm = A.bpm();   // the song's tempo as the devices read it now (the app may still be opening Fractals)
   let prev = src;
   for (const d of chain) {
     const q = A.mkFx(d.type).p;
@@ -177,7 +178,7 @@ JS = """async ({b64, N, SR, chain, Q}) => {
   const o = await c.startRendering();
   const out = new Float32Array(2 * N); out.set(o.getChannelData(0), 0); out.set(o.getChannelData(1), N);
   let s = ''; const u = new Uint8Array(out.buffer); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768));
-  return {out: btoa(s), posted};
+  return {out: btoa(s), posted, bpm};
 }"""
 
 
@@ -190,7 +191,7 @@ def main():
     x = make_input()
     wav_write(os.path.join(out, "in.wav"), x)
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v}};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v},bpm:()=>S.bpm};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
     presets = al.run("(()=>{const o={};for(const t of %s)o[t]=Object.keys(FXPRE[t]||{});return o})()" % json.dumps(types))
     jobs = []
     for t in types:
@@ -210,7 +211,7 @@ def main():
         r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch, "Q": Q})
         y = np.frombuffer(base64.b64decode(r["out"]), dtype="<f4").reshape(2, N)
         wav_write(os.path.join(out, "web", name + ".wav"), y)
-        cases.append({"name": name, "chain": r["posted"]})
+        cases.append({"name": name, "chain": r["posted"], "bpm": r["bpm"]})
         info["cases"][name] = {"sha256": hashlib.sha256(y.tobytes()).hexdigest(), "peak": float(np.max(np.abs(y))),
                                "changed": bool(np.any(y != x))}
         print(name, "peak %.4f" % info["cases"][name]["peak"], "changed" if info["cases"][name]["changed"] else "UNCHANGED", flush=True)

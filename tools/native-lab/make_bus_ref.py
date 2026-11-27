@@ -127,6 +127,7 @@ SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
 JS = r"""async ({sc, b64, N, SR}) => {
   const A = window.__alref;
   A.setB0(0);
+  const bpm = A.bpm();
   const oc = sc.Q > 128 ? new OfflineAudioContext({numberOfChannels: 2, length: N, sampleRate: SR, renderSizeHint: sc.Q}) : new OfflineAudioContext(2, N, SR);
   await A.wlLoad(oc);
   const posted = {}, mk = (d, owner) => { const q = A.mkFx(d.type).p;
@@ -168,7 +169,7 @@ JS = r"""async ({sc, b64, N, SR}) => {
   const o = await oc.startRendering();
   const res = new Float32Array(2 * N); res.set(o.getChannelData(0), 0); res.set(o.getChannelData(1), N);
   let s = ''; const u = new Uint8Array(res.buffer); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768));
-  return {out: btoa(s), posted, conn, built: [...NN.keys()], delays: Object.fromEntries([...NN].map(([k, v]) => [k, v.delay]))};
+  return {out: btoa(s), bpm, posted, conn, built: [...NN.keys()], delays: Object.fromEntries([...NN].map(([k, v]) => [k, v.delay]))};
 }"""
 
 
@@ -184,7 +185,7 @@ def main():
     for k, x in INPUTS.items(): wav_write(os.path.join(out, "in_%s.wav" % k), x)
     b64 = {k: base64.b64encode(np.ascontiguousarray(x).tobytes()).decode() for k, x in INPUTS.items()}
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat,setB0:v=>{SIDE_B0=v}};1")
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat,setB0:v=>{SIDE_B0=v},bpm:()=>S.bpm};1")
     only = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else None   # some scenes only; the others' entries are kept
     bpm = al.run("S.bpm")
     info = {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N, "scenes": {}}
@@ -199,7 +200,7 @@ def main():
         y2 = np.frombuffer(base64.b64decode(r2["out"]), dtype="<f4").reshape(2, N)
         rep = int(np.count_nonzero(y.view("<u4") != y2.view("<u4")))
         wav_write(os.path.join(out, "web_%s.wav" % name), y)
-        scene = {"sr": SR, "frames": N, "quantum": Q, "bpm": bpm, "beat0": 0, "master": master, "masterFx": r["posted"].get("@master", []), "nodes": []}
+        scene = {"sr": SR, "frames": N, "quantum": Q, "bpm": r["bpm"], "beat0": 0, "master": master, "masterFx": r["posted"].get("@master", []), "nodes": []}
         for t in tracks:
             if t["id"] not in r["built"]: continue
             scene["nodes"].append({"id": t["id"], "kind": t["kind"], "in": ("in_%s.wav" % t["src"]) if t["src"] else None,
