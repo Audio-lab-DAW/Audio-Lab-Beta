@@ -45,24 +45,29 @@ app.whenReady().then(async () => {
     ipcMain.on('tap-port', e => {
       const port = e.ports[0];
       port.on('message', m => {
-        const d = m.data, f = d instanceof Float32Array ? d : new Float32Array(d);
+        const d = m.data; let f;
+        if (d instanceof ArrayBuffer) f = new Float32Array(d);
+        else if (ArrayBuffer.isView(d)) f = new Float32Array(d.buffer, d.byteOffset, Math.floor(d.byteLength / 4));
+        else { R.dataKind = Object.prototype.toString.call(d); return; }
+        if (!R.dataKind) R.dataKind = Object.prototype.toString.call(d);
         const now = Date.now(); if (!firstAt) firstAt = now; else if (now - lastAt > worstGapMs) worstGapMs = now - lastAt; lastAt = now;
         eng.feed(f); blocks++; frames += f.length / 2;
       });
       port.start();
     });
-    ipcMain.on('tap-info', (e, info) => { R.page = info; });
-    const rec = spawn(alnative, ['record', '--device', String(bh.id), '--seconds', String(SECONDS + 4), '--to', path.join(out, 'tap_loopback.wav')], { stdio: 'ignore' });
+    ipcMain.on('tap-info', (e, info) => { R.page = Object.assign(R.page || {}, info); });
+    const rec = spawn(alnative, ['record', '--device', String(bh.id), '--seconds', String(SECONDS * 2 + 6), '--to', path.join(out, 'tap_loopback.wav')], { stdio: 'ignore' });
     const recDone = new Promise(r => rec.on('exit', r));
     await sleep(700);
     const win = new BrowserWindow({ width: 500, height: 300, show: true, webPreferences: { preload: path.join(__dirname, 'preload.js'), backgroundThrottling: false } });
     await win.loadFile(path.join(__dirname, 'page.html'), { query: { seconds: String(SECONDS), sr: String(SR) } });
-    for (let s = 0; s < SECONDS + 2; s++) { await sleep(1000); const st = await eng.status(); R.fills.push(st.ring ? st.ring.fill : -1); R.lastStatus = { ring: st.ring, overloads: st.overloads }; }
+    for (let s = 0; s < SECONDS * 2 + 4 && frames < SECONDS * SR; s++) { await sleep(1000); const st = await eng.status(); R.fills.push(st.ring ? st.ring.fill : -1); R.lastStatus = { ring: st.ring, overloads: st.overloads }; }
     await recDone;
     R.blocks = blocks; R.framesFromPage = frames; R.worstGapBetweenBlocksMs = worstGapMs;
     R.pageSecondsByWallClock = (lastAt - firstAt) / 1000;
     // how far the page's clock and the device's clock moved apart: the ring's fill at the start and the end of steady play
-    const mid = R.fills.slice(2, SECONDS - 1);
+    R.pageSpeedAgainstWallClock = frames / SR / R.pageSecondsByWallClock;
+    const mid = R.fills.slice(2, R.fills.length - 2);
     if (mid.length > 4) R.driftFramesPerSecond = (mid[mid.length - 1] - mid[0]) / (mid.length - 1);
     if (R.driftFramesPerSecond !== undefined) R.driftPartsPerMillion = R.driftFramesPerSecond / SR * 1e6;
     const exp = expected(frames);
