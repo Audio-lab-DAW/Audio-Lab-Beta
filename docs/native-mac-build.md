@@ -9,7 +9,7 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | 0 | The proofs: one effect bit for bit, a VST3 host, the test app | done (task NM1), proven on the user's Mac |
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
-| N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. Next: N3b (the mixer: gain, pan, sends, from Chromium's arithmetic) |
+| N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. **N3b built**: the mixer (track volume, pan, the master, tracks summed) from Chromium's arithmetic, **10 of 10 scenes bit for bit** against the app's own export path on Linux, including the Bitcrusher in a track at 128 and 512 frames. Next: N3c (sends, groups and returns; the mixer's tracks run the N3a chains; quantum 512 for exports) |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
@@ -188,6 +188,22 @@ N2c (the hook in the app) still waits for the design chain, so this run started 
 **Not proven yet:** the Mac (Apple's maths library for `exp`, `pow`, `log10`, `sin`, `cos` against Chromium's; Test A in NM1 found them equal for the Bitcrusher); other sample rates than 48 kHz; settings changed while sound plays (the web engine applies them at the next block, the core does the same, but no test moves a dial during a render yet); anything you can hear, because the core is not connected to the output or the app.
 
 **Assumptions:** the core takes the settings the page posts to the worklet (after the device's `sp` mapping), not the app's own device settings; the mapping moves into the engine when the interface starts driving it (N2c and later). A device whose input has no channels at all (the web engine's disconnected input) is treated like silence; the web worklet then leaves its output untouched, which only differs before the 3-second rule takes over, and no track in the app runs a device with no input connected.
+
+## Stage N3b: the mixer, bit for bit (27 November 2026)
+
+What the app's export does with a track after its devices: a volume (Chromium's GainNode), a pan (StereoPannerNode), all tracks added into the master, the master's gain. Ported in `native/dsp/al_mix.h`, put together in `native/engine/mix/` (renderer `almix`), and compared with the app itself: `tools/native-lab/make_mix_ref.py` builds each scene in the real app page exactly as `renderMix` does, `run_mix.py` compares every 32-bit sample.
+
+**10 of 10 scenes identical** on Linux: one track; two; five at pans from hard left to hard right; mono tracks; mono and stereo mixed at 128 frames; a track at volume 0; the Bitcrusher in a track alone, dry, and with another track at 512 frames (the export's size); two dithering Bitcrushers on two tracks at 128.
+
+What it took, found by comparing (each of these changes the last bit, so a port without them is not the same sound):
+- The panner has two paths. In the first block (where the value was set) it works in double; after that its gains are stored as float and the products and sums are float.
+- On the fixed path the sum `pan + 1` is done in float before it becomes an angle: at pan -0.2 that is 0.800000012 instead of 0.799999997.
+- A volume of 0 writes true silence (not "minus zero").
+- Chromium always renders whole blocks and cuts the end afterwards; a device that draws random numbers draws them for the frames past the end too, which changes what the next device gets.
+
+**Found on the way: the web engine's own export is not always the same bits.** Rendering the same scene twice in the app gave different results for the five-track scene (10,465 samples differed) and for the two dithering Bitcrushers (17,912). Chromium keeps the connections into a bus in an order that changes between renders; the order decides how float sums round and in which order devices draw random numbers. Every other scene came out the same twice. The native mixer takes the order as a setting, and for each web render there is an order that reproduces it bit for bit (`run_mix.py` finds it). So "the same as the export" is exact for one or two tracks per bus; with three or more tracks, or random-drawing devices on several tracks, the web engine itself differs from render to render at about -140 dB, and the native engine matches one of its renders exactly. The native engine always uses project order, so its own renders are always the same.
+
+Not yet: sends, groups, returns, the master's devices and limiter, volume and pan that move (automation, the 10 ms smoothing in live play), other sample rates. The Mac check is in `native-engine.yml` and waits for a build machine like the others.
 
 ## Next: N2c, and why it was not started here
 

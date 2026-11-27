@@ -3903,3 +3903,32 @@ First step of the settings rebuild (`docs/settings-round-1.md`, "Proposed implem
 ### What is left
 S2 (remember the export options and the piano roll options) next, then S3 to S19 in the order of `docs/settings-round-1.md`. Performance and the Glass block stay with the glass chain (G4).
 
+
+## 27 November 2026: task NB-N3b (the mixer from Chromium's arithmetic, bit for bit)
+
+No app changes: `index.html` and `desktop/` untouched, no version. Running list: `docs/native-mac-build.md`.
+
+**Two runs of task NB ran at the same time.** This run started from the scheduler's fire at about 13:20 UTC with the N2b state on main; another run (the one logged as NB-N3a above) started in parallel and pushed the engine core's first part at 13:36. Both chose stage 3 because N2c needs `index.html`. This run built the mixer, which N3a had named as its next part, so it is logged as N3b. The rebase met one conflict (`native/CMakeLists.txt`, both had a target called `alrender`); resolved by keeping N3a's `alrender` and calling this run's renderer `almix`, in `native/engine/mix/` beside N3a's `native/engine/core/`. The scheduling chat may want to make sure only one NB run is fired at a time.
+
+### Built
+- `native/dsp/al_mix.h`: Chromium's GainNode with a fixed value and its StereoPannerNode (both paths), the summing input.
+- `native/engine/mix/mix_graph.h`, `almix.cpp`: tracks (input, devices, volume, pan) into the master, whole render quanta of a chosen size (128 live, 512 as the export), the track order as a setting (project order by default). A scene is one flat JSON object per line.
+- `tools/native-lab/make_mix_ref.py` (each scene built in the real app page as `renderMix` builds it, rendered twice to see whether the web engine repeats itself), `run_mix.py` (every 32-bit sample; when project order does not match, it searches the order the web render used), `ref/mix/` (inputs, web renders and scenes, 1.4 MB). `native-engine.yml` builds `almix` and runs the check on the Mac.
+
+### Proven (Linux, headless Chromium with the app v0.229/v0.230)
+- 10 of 10 scenes identical bit for bit, repeated over four fresh sets of web renders.
+- The four rules it took (two panner paths, `pan + 1` in float, silence at gain 0, whole quanta with random numbers drawn past the end) are each needed: without any one of them scenes differ (from 94 to 11,096 samples, about -132 to -145 dB).
+- The web engine repeats itself on 8 of the 10 scenes. On five tracks into one bus and on two dithering Bitcrushers it does not (10,465 and 17,912 samples differ between two renders of the same scene); in 24 renders of the second there were two outcomes, one per order of the two tracks, and the native mixer reproduces both.
+- Speed on this machine: 350 to 16,000 times real time depending on the scene (one shared core).
+
+### Not proven
+- Apple Silicon: the `native-engine.yml` run dispatched at 13:39 UTC was still queued when this entry was written (earlier ones were cancelled after 15 minutes without a machine).
+- Sends, groups, returns, master devices and limiter, moving values, rates other than 48 kHz.
+
+### Assumptions
+- Project order is the native engine's order. Where the web engine's export is not stable (three or more tracks into one bus, or random-drawing devices on several tracks), "the sound must not change" is judged against one of the web engine's own renders, and the difference between web renders (about -140 dB) is the yardstick. Written here so the user can disagree.
+- The N3a core runs its chains at 128 frames; the export runs at 512 (`renderSizeHint`, RQOK in `index.html`). The worklet bundle's skip-on-silence and every-16-blocks flush count blocks, so an export at 512 and a native render at 128 can differ. N3c should make the quantum a setting of the core.
+
+### Next
+- N3c: the mixer's tracks run N3a's `Chain`, quantum as a setting; sends, groups and returns; then the master chain.
+- Read the Mac results of `native-engine.yml` (N2b cases A to D, N3b mixer) and of `native-core.yml` (N3a) when a machine is given.
