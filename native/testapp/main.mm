@@ -242,7 +242,7 @@ static void watchCb(void*, const char* what, uint32_t) {
     std::string _chosenUid, _chosenName, _devUid, _lastWhy, _lastFormat;
     BOOL _chosenExcl;                                      // exclusive use was on for the chosen device
     uint32_t _lastDefault; int _lastHogPid; double _comebackAt;
-    BOOL _selfDevsim, _simMenu; std::string _simAggUid, _simSubUid; uint32_t _simAgg, _simDefault0; int _devsimFails, _devsimRun; BOOL _simHogBefore;
+    BOOL _selfDevsim, _simMenu; std::string _simAggUid, _simSubUid; uint32_t _simAgg, _simDefault0; int _devsimFails, _devsimRun; BOOL _simHogBefore; std::string _simExclUid;
 }
 
 - (void)say:(NSString*)line {
@@ -1385,6 +1385,32 @@ static uint32_t simMakeAggregate(const std::string& uid, const std::string& sub,
         _chosenUid.clear(); _chosenExcl = NO;      // clean-up: nothing chosen, so the app may follow the default again
         if (_simAgg) { AudioHardwareDestroyAggregateDevice(_simAgg); _simAgg = 0; }
         simSetDefault(_simDefault0);
+        [self devsimLater:gap step:10]; return;
+    }
+    case 10: {
+        // exclusive use on a device that allows it (the aggregate does not): BlackHole when installed, else the machine's own
+        int k = -1; for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].name.find("BlackHole") != std::string::npos) k = i;
+        if (k < 0) for (int i = 0; i < (int)_devs.size(); i++) if (_devs[i].uid == _simSubUid) k = i;
+        if (k < 0) { [self devsim:9]; return; }
+        _simExclUid = _devs[k].uid;
+        [_devPop selectItemAtIndex:k]; _simMenu = YES; [self deviceChanged:_devPop]; _simMenu = NO;
+        _exclBtn.state = NSControlStateValueOn; [self exclChanged:_exclBtn];
+        uint32_t other = 0; for (auto& d : _devs) if (d.uid != _simExclUid && d.outChannels > 0) other = d.id;
+        bool ok = other && simSetDefault(other);
+        [self say:NSF("[devsim] %s chosen with exclusive use (held by process %d); the system's default output set to another output: %s", _devs[k].name.c_str(), deviceInfo(_dev).hogPid, ok ? "done" : "FAILED")];
+        [self devsimLater:gap step:11]; return;
+    }
+    case 11: {
+        bool ok = simSetDefault(_dev);
+        [self say:NSF("[devsim] the system's default output set to the chosen device itself (held exclusively by this app): %s", ok ? "done" : "refused")];
+        [self devsimLater:gap step:12]; return;
+    }
+    case 12: { simSetDefault(_simDefault0); [self devsimLater:gap step:13]; return; }
+    case 13: {
+        DeviceInfo d = deviceInfo(_dev);
+        [self devsimCheck:_devUid == _simExclUid && d.hogPid == (int)getpid() && _hog what:"chosen with exclusive use, the system's default output changed three times: the app stayed and kept exclusive use"];
+        _exclBtn.state = NSControlStateValueOff; [self exclChanged:_exclBtn];
+        _chosenUid.clear(); _chosenExcl = NO;
         [self devsimLater:gap step:9]; return;
     }
     default: {
