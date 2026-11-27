@@ -29,7 +29,10 @@ function server(tag, flags) {
     setTimeout(() => rej(new Error('fake_native did not start: ' + out)), 120000);
   });
 }
-async function launch(srv, tag, extra, dir) {
+async function launch(srv, tag, extra, dir) {   // one retry: a cold start on a busy Windows runner can miss the launch time limit
+  try { return await launch1(srv, tag, extra, dir); } catch (e) { console.log('     launch retried: ' + String(e.message).split('\n')[0]); return launch1(srv, tag, extra, dir); }
+}
+async function launch1(srv, tag, extra, dir) {
   const ad = path.join(TMP, 'appdata-' + tag); fs.mkdirSync(ad, { recursive: true });
   const env = { ...process.env, AL_UPDATE_BASE: `http://127.0.0.1:${srv.port}/`, AL_TEST_APPDATA: ad, XDG_CONFIG_HOME: ad, AL_NATIVE_DEST: path.join(TMP, 'dest-' + tag), AL_MG_QUIT_MS: '1500', ...(extra || {}) };
   const app = await _electron.launch({ executablePath: exe, args: ['--no-sandbox', dir || DIR], env, timeout: 120000 });
@@ -40,9 +43,10 @@ async function launch(srv, tag, extra, dir) {
   let exited = false; app.process().on('exit', () => { exited = true; });
   return { app, page, R, errs, ad, dest: env.AL_NATIVE_DEST, mig: path.join(ad, 'AudioLab', 'migrate'), ud: path.join(ad, 'AudioLab Studio'), get exited() { return exited; } };
 }
-const shown = (A) => A.page.evaluate(() => { const m = document.querySelector('#mgM .mgw'); if (!m) return null; const r = m.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: innerWidth, h: innerHeight, t: (document.getElementById('mgT') || {}).textContent || '', btn: [...m.querySelectorAll('.mgb button')].map((b) => b.textContent), focus: document.activeElement && document.activeElement.textContent || '', ph: document.querySelector('#mgM ol.mgst') ? 'steps' : 'offer' }; });
+const shown = (A) => A.page.evaluate(() => { const m = document.querySelector('#mgM .mgw'); if (!m) return null; const r = m.getBoundingClientRect(), o = document.getElementById('mgM').getBoundingClientRect(); return { x: r.left + r.width / 2 - o.left, y: r.top + r.height / 2 - o.top, w: o.width, h: o.height, t: (document.getElementById('mgT') || {}).textContent || '', btn: [...m.querySelectorAll('.mgb button')].map((b) => b.textContent), focus: document.activeElement && document.activeElement.textContent || '', ph: document.querySelector('#mgM ol.mgst') ? 'steps' : 'offer' }; });
 async function waitFor(fn, secs) { const t0 = Date.now(); while (Date.now() - t0 < secs * 1000) { const v = await fn().catch(() => null); if (v) return v; await sleep(250); } return null; }
-async function close(A) { try { await A.app.evaluate(({ app }) => { app.exit(0); }); } catch (e) { /* gone */ } await sleep(500); }
+// quit and wait until the process is gone (Windows is slow to let go); kill it after 15 s
+async function close(A) { try { await A.app.evaluate(({ app }) => { app.exit(0); }); } catch (e) { /* gone */ } for (let i = 0; i < 60 && !A.exited; i++) await sleep(250); if (!A.exited) { try { A.app.process().kill(); } catch (e) { /* gone */ } await sleep(1000); } await sleep(500); }
 function readAudiolab(f) {   // a .audiolab file: gzip, then "AUDIOLAB", version, json length, json, audio
   let u = fs.readFileSync(f); if (u[0] === 0x1f && u[1] === 0x8b) u = zlib.gunzipSync(u);
   if (u.subarray(0, 8).toString() !== 'AUDIOLAB') throw new Error('not an AudioLab file');
@@ -56,6 +60,7 @@ function readAudiolab(f) {   // a .audiolab file: gzip, then "AUDIOLAB", version
   let A = await launch(good, 'a');
   console.log('     app', await A.app.evaluate(({ app }) => app.getVersion()), 'program', await A.R('VERSION'));
   let w = await waitFor(() => shown(A), 40);
+  if (w) { await sleep(500); w = await shown(A); }   // after its 140 ms opening movement
   ok(!!w, 'the window opens by itself when the manifest offers a native build (' + (w ? w.t : 'not shown in 40 s') + ')');
   if (w) {
     ok(w.t === 'AudioLab is becoming a native app', 'title: ' + w.t);
