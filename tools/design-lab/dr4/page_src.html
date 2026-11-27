@@ -1,0 +1,721 @@
+<title>AudioLab instruments: meters, scopes and analyzers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* LAYOUT: a pick sheet in the family of the science-look rounds. A sticky signal bar on top (test signal, listen, Light mode),
+   then one section per instrument family, each a wrapping row of cards: "Today" (a screenshot of v0.228) and numbered options,
+   each a live canvas driven by the same measured signal. Picks collect in a bar at the bottom. */
+:root{--pg:#f2f3f7;--card:#ffffff;--pfg:#14161c;--pmut:#5a6070;--pline:#dde0e8;--brand:#1450a8;--brandink:#ffffff;--star:#ffd23a;--starink:#2a2000;--tag:#e9ecf3;--disp-bg:#07080b;
+  --disp:'Space Grotesk',Inter,system-ui,sans-serif;--text:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--data:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--tag:#1d2230;color-scheme:dark}}
+:root[data-theme="dark"]{--pg:#0c0e13;--card:#141720;--pfg:#eceef4;--pmut:#959cab;--pline:#272c39;--brand:#7fb0ff;--brandink:#06122a;--tag:#1d2230;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg);color:var(--pfg);font:14px/1.5 var(--text);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+header.top{display:flex;align-items:center;gap:12px;padding-top:20px}
+header.top svg{width:46px;height:46px;flex:none;border-radius:11px}
+h1{font:700 26px/1.1 var(--disp);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--pmut);margin:3px 0 0;max-width:80ch}
+.how{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--pmut);font-size:13px;margin:0;padding:0;list-style:none}
+.how b{color:var(--pfg)}
+#sig{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--card);border:1px solid var(--pline);border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+#sig label{font:600 12px var(--text);color:var(--pmut)}
+#sig select,#sig button{font:600 12px var(--text);border-radius:7px;padding:6px 10px;border:1px solid var(--pline);background:var(--pg);color:var(--pfg);cursor:pointer}
+#sig button[aria-pressed="true"]{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+#sigNow{font:500 12px var(--data);color:var(--pmut);margin-left:auto;min-width:0;overflow-wrap:anywhere}
+.rules{background:var(--card);border:1px solid var(--pline);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.rules h2{font:700 15px/1.2 var(--disp);margin:0}
+.rules ul{margin:0;padding-left:18px;color:var(--pmut);font-size:13px;display:flex;flex-direction:column;gap:3px;max-width:110ch}
+.rules b{color:var(--pfg);font-weight:600}
+section.fam{display:flex;flex-direction:column;gap:10px}
+.ah{display:flex;flex-direction:column;gap:3px}
+.ah h2{font:700 19px/1.2 var(--disp);margin:0}
+.ah h2 i{font-style:normal;color:var(--brand);margin-right:6px}
+.ah p{margin:0;color:var(--pmut);font-size:13px;max-width:115ch}
+.ah p b{color:var(--pfg);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--min,460px)),1fr));gap:12px}
+.opt{background:var(--card);border:1px solid var(--pline);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.opt.pick{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
+.opt:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.oh{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.num{font:500 12px var(--data);background:var(--pg);border:1px solid var(--pline);border-radius:5px;padding:1px 6px}
+.opt.pick .num{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+.oh b{font-weight:600}
+.star{margin-left:auto;font:600 11px var(--text);background:var(--star);color:var(--starink);border-radius:20px;padding:1px 8px;white-space:nowrap}
+.opt p{margin:0;font-size:12.5px;line-height:1.42;color:var(--pmut)}
+.opt p b{color:var(--pfg);font-weight:600}
+.cpu{font:500 11px/1.4 var(--data);color:var(--pmut);border-top:1px dashed var(--pline);padding-top:6px;margin-top:auto}
+.cpu em{font-style:normal;color:var(--pfg)}
+.m{position:relative;border-radius:8px;overflow:hidden;background:var(--disp-bg);max-width:100%}
+.m canvas{display:block;width:100%;height:auto}
+#fam-V .m{max-width:980px}
+.m img{display:block;width:100%;height:100%;object-fit:contain;background:#0a0a0c}
+.menu{background:#18181d;color:#ececf1;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 10px;font:12px var(--text)}
+.menu .grp{display:flex;flex-direction:column;gap:2px}
+.menu .gh{font:500 9.5px var(--data);letter-spacing:.1em;color:#ffb627;text-transform:uppercase;padding:2px 4px}
+.menu button{font:500 12px var(--text);text-align:left;border:0;border-radius:5px;background:transparent;color:#ececf1;padding:3px 8px;cursor:pointer;display:flex;gap:6px}
+.menu button::before{content:"";width:10px;flex:none}
+.menu button[aria-checked="true"]::before{content:"✓"}
+.menu button:hover{background:rgba(76,141,255,.25)}
+.menu button.ro{color:#8b8b97;cursor:default}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--pline);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#bar .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#picks{font:500 12.5px var(--data);flex:1 1 260px;min-width:0;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere;max-height:4.6em;overflow-y:auto}
+#bar button{font:600 12px var(--text);border-radius:7px;padding:7px 12px;cursor:pointer;border:1px solid var(--pline);background:var(--pg);color:var(--pfg)}
+#bar button.go{background:var(--brand);color:var(--brandink);border-color:var(--brand)}
+footer{color:var(--pmut);font-size:12.5px;max-width:110ch;display:flex;flex-direction:column;gap:6px}
+footer p{margin:0}
+footer a{color:var(--brand)}
+@media (prefers-reduced-motion:no-preference){.opt{transition:box-shadow .12s ease-out,border-color .12s ease-out}}
+@media (max-width:480px){h1{font-size:21px}#sigNow{margin-left:0}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#1450A8"/><g fill="none" stroke="#fff" stroke-width="3.2"><ellipse cx="32" cy="32" rx="9" ry="22"/><ellipse cx="32" cy="32" rx="9" ry="22" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="9" ry="22" transform="rotate(-60 32 32)"/></g><circle cx="32" cy="32" r="5" fill="#FFD23A"/><circle cx="51" cy="21" r="3.4" fill="#FFD23A" stroke="#1450A8" stroke-width="1.6"/></svg>
+    <div><h1>AudioLab instruments: meters, scopes and analyzers</h1><p class="sub">Design round 4. Everything in AudioLab that measures sound, redrawn as precise instruments. Every picture below is measured live from the same test signal, with the real ballistics and scales; nothing is faked.</p></div>
+  </header>
+  <ul class="how"><li><b>Click a card</b> to pick it: one per family, any number in O and G (they add to each other).</li><li><b>★</b> is my recommendation.</li><li><b>Today</b> is a screenshot of v0.228 with Fractals playing.</li><li>Then press <b>Copy my picks</b> and paste the line to me.</li><li>Nothing in the app has changed.</li></ul>
+  <div id="sig">
+    <label for="sigSel">Test signal</label>
+    <select id="sigSel">
+      <option value="mix">Mix loop, 145 BPM (drums, bass, wide pad)</option>
+      <option value="drums">Drum loop only</option>
+      <option value="pink">Pink noise, L and R independent, −20 dBFS RMS</option>
+      <option value="sweep">Sine sweep 20 Hz to 20 kHz, −12 dBFS</option>
+      <option value="tone">1 kHz sine, −18 dBFS (calibration)</option>
+      <option value="stereo">Stereo test: mono, wide, anti-phase, left only</option>
+    </select>
+    <button id="listen" aria-pressed="false">Listen</button>
+    <button id="pause" aria-pressed="false">Pause</button>
+    <button id="light" aria-pressed="false" title="The app's Light mode: 30 pictures a second, no afterglow or persistence, smaller FFT">Light mode</button>
+    <span id="sigNow"></span>
+  </div>
+  <div class="rules"><h2>The rules every instrument follows</h2><ul>
+    <li><b>Kept as they are</b> (your standing picks): the mixer's <b>Flat bars</b> design, the half pan dial, the mixer header, the stereo field displays and the cables. For these only the drawing and the scales improve; nothing replaces them.</li>
+    <li><b>Units always shown</b> (dBFS, dBTP, LUFS, LU, Hz), one decimal for levels, a real minus sign, frequencies with their note (X8). Numbers that are still settling show it (X15).</li>
+    <li><b>Ticks follow resolution:</b> a mark per dB where the scale is wide, every 3 or 6 dB where it is crowded. Log frequency axes: long marks at decades, shorter at 2 and 5, labels only where they fit.</li>
+    <li><b>Colour means something:</b> today's meter zones and colours stay; heat pictures use perceptually even maps (magma by default), always with a colour bar. Red never carries a meaning alone; a position or a mark goes with it.</li>
+    <li><b>Snappy and cheap:</b> drawing at most at screen rate, nothing while hidden or off screen, half rate in Light mode with no afterglow. Each card shows how long its picture takes to draw on your computer.</li>
+  </ul></div>
+  <div id="fams"></div>
+  <footer id="foot"></footer>
+</div>
+<div id="bar"><div class="in"><span id="picks"></span><button id="useRec">Take all ★</button><button id="clr">Clear</button><button class="go" id="copy">Copy my picks</button></div></div>
+
+<script>
+'use strict';
+const TODAY=/*TODAY*/{};
+const CMHEX=/*CMAPS*/{};
+const TAU=Math.PI*2,MIN='−',SR=48000,BPM=145,BEAT=60/BPM;
+const MONO='"JetBrains Mono",ui-monospace,Menlo,monospace',SANS='Inter,system-ui,sans-serif';
+/* today's app colours (index.html v0.228): panel greys, accent green, blue, cyan, yellow, orange, red, EQ curve; amber labels from the science look */
+const K={bg:'#07080b',pn:'#121216',pn2:'#18181d',trk:'#15171d',ink:'#ececf1',mut:'#8b8b97',dim:'#5d5d69',acc:'#3ecf8e',bl:'#4c8dff',cy:'#4cc9f0',ye:'#f5c84c',or:'#ff9a3c',rd:'#ff4d6d',am:'#ffb627',eq:'#ffd27a',ok:'#6fe6ae',hot:'#f5c84c',over:'#ff8a8a'};
+const W_=a=>'rgba(255,255,255,'+a+')',AM=a=>'rgba(255,182,39,'+a+')',CYA=a=>'rgba(76,201,240,'+a+')',RDA=a=>'rgba(255,77,109,'+a+')';
+/* the app's meter zones (LVC) and fader taper (TAPER), copied from index.html */
+const LVC=[[-60,'#12804f'],[-18,'#2fc27c'],[-12,'#3ecf8e'],[-9,'#b9d64a'],[-6,'#f5c84c'],[-3,'#ff9838'],[-1,'#ff5a3c'],[0,'#ff3b3b'],[6,'#ff2020']];
+const TAPER=[[0,-60],[.05,-52],[.15,-40],[.29,-24],[.45,-12],[.63,-6],[.82,0],[1,6]];
+function taper(d){if(!(d>-60))return 0;if(d>=6)return 1;for(let i=1;i<TAPER.length;i++){const a=TAPER[i-1],b=TAPER[i];if(d<=b[1])return a[0]+(b[0]-a[0])*(d-a[1])/(b[1]-a[1])}return 1}
+const dB=v=>v>1e-12?20*Math.log10(v):-240,lin=d=>Math.pow(10,d/20);
+function fd(v,d=1,plus){if(!isFinite(v)||v<-150)return MIN+'∞';const s=Math.abs(v).toFixed(d);if(+s===0)return(0).toFixed(d);return(v<0?MIN:plus?'+':'')+s}
+const NOTES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+function note(f){const n=69+12*Math.log2(f/440),r=Math.round(n);return[NOTES[((r%12)+12)%12]+(Math.floor(r/12)-1),(n-r)*100]}
+function hz(f){return f>=1000?(f/1000).toFixed(f>=10000?1:2)+' kHz':f.toFixed(f<100?1:0)+' Hz'}
+
+/* ================= test signals (rendered once per choice, 48 kHz stereo, looped) ================= */
+function rng(seed){let z=seed;return()=>(z=(z*16807)%2147483647)/2147483647*2-1}
+function pinkGen(r){let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;return()=>{const w=r();b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;const o=b0+b1+b2+b3+b4+b5+b6+w*.5362;b6=w*.115926;return o*.11}}
+function normPeak(L,R,pk){let m=0;for(let i=0;i<L.length;i++){m=Math.max(m,Math.abs(L[i]),Math.abs(R[i]))}const g=lin(pk)/m;for(let i=0;i<L.length;i++){L[i]*=g;R[i]*=g}}
+function normRms(L,R,d){let s=0;for(let i=0;i<L.length;i++)s+=L[i]*L[i]+R[i]*R[i];const g=lin(d)/Math.sqrt(s/(2*L.length));for(let i=0;i<L.length;i++){L[i]*=g;R[i]*=g}}
+function synth(kind){
+  const bars=4,N=kind==='tone'?SR*6:Math.round(SR*BEAT*4*bars),L=new Float32Array(N),R=new Float32Array(N),rn=rng(7);
+  if(kind==='mix'||kind==='drums'){
+    for(let b=0;b<16;b++){const s0=Math.round(b*BEAT*SR);let ph=0;for(let i=0;i<SR*.42&&s0+i<N;i++){const t=i/SR,f=44+110*Math.exp(-t*30);ph+=TAU*f/SR;const v=Math.sin(ph)*Math.exp(-t*6.5)*Math.min(1,t/.0015)*.95;L[s0+i]+=v;R[s0+i]+=v}}
+    for(let b=1;b<16;b+=2){const s0=Math.round(b*BEAT*SR);let ph=0,hp=0,px=0;for(let i=0;i<SR*.3&&s0+i<N;i++){const t=i/SR,nz=rn();hp=.82*(hp+nz-px);px=nz;ph+=TAU*188/SR;const v=(hp*Math.exp(-t*17)*.55+Math.sin(ph)*Math.exp(-t*28)*.45)*Math.min(1,t/.001);L[s0+i]+=v*.95;R[s0+i]+=v*1.05}}
+    for(let s=0;s<64;s++){const s0=Math.round(s*BEAT/4*SR),acc=s%2?.5:.22,pan=s%4===2?.3:-.15;let hp=0,px=0;for(let i=0;i<SR*.08&&s0+i<N;i++){const t=i/SR,nz=rn();hp=.6*(hp+nz-px);px=nz;const v=hp*Math.exp(-t*(s%2?55:90))*acc;L[s0+i]+=v*(1-pan);R[s0+i]+=v*(1+pan)}}}
+  if(kind==='mix'){
+    const roots=[55,43.65,65.41,49],ch=[[220,261.63,329.63],[174.61,220,261.63],[196,261.63,329.63],[196,246.94,293.66]];
+    let ph=0,lp=0,lp2=0;for(let i=0;i<N;i++){const t=i/SR,bt=t/BEAT,bar=Math.floor(bt/4)%4,e=bt%.5/.5,f=roots[bar]*(Math.floor(bt*2)%4===3?2:1);ph=(ph+f/SR)%1;const saw=2*ph-1,duck=1-.8*Math.exp(-(bt%1)*BEAT*12),fc=.03+.09*Math.exp(-e*6);lp+=(saw-lp)*fc;lp2+=(lp-lp2)*fc;const v=lp2*.55*duck*Math.min(1,e*40);L[i]+=v;R[i]+=v}
+    const vo=[];for(let n=0;n<3;n++)for(let s=0;s<2;s++)vo.push({n,s,ph:(rn()+1)/2,det:s?1.004:.996,lp:0});
+    for(let i=0;i<N;i++){const t=i/SR,bar=Math.floor(t/BEAT/4)%4,inb=(t/BEAT)%4,env=Math.min(1,inb/.8)*Math.min(1,(4-inb)/.15),duck=1-.5*Math.exp(-(t/BEAT%1)*BEAT*8);let l=0,r=0;for(const o of vo){o.ph=(o.ph+ch[bar][o.n]*o.det/SR)%1;o.lp+=((2*o.ph-1)-o.lp)*.12;if(o.s)r+=o.lp;else l+=o.lp}L[i]+=l*.07*env*duck;R[i]+=r*.07*env*duck}
+    normPeak(L,R,-1)}
+  else if(kind==='drums')normPeak(L,R,-1);
+  else if(kind==='pink'){const a=pinkGen(rng(3)),b=pinkGen(rng(11));for(let i=0;i<N;i++){L[i]=a();R[i]=b()}normRms(L,R,-20)}
+  else if(kind==='sweep'){const T=N/SR,A=lin(-12),k=Math.log(1000);for(let i=0;i<N;i++){const t=i/SR,phs=TAU*20*T/k*(Math.exp(k*t/T)-1),fade=Math.min(1,t/.01,(T-t)/.01);L[i]=R[i]=A*Math.sin(phs)*fade}}
+  else if(kind==='tone'){const A=lin(-18);for(let i=0;i<N;i++)L[i]=R[i]=A*Math.sin(TAU*1000*i/SR)}
+  else if(kind==='stereo'){const a=pinkGen(rng(5)),b=pinkGen(rng(9)),q=N/4;for(let i=0;i<N;i++){const p=a(),p2=b(),s=Math.floor(i/q);L[i]=p;R[i]=s===0?p:s===1?p2:s===2?-p:0}normRms(L,R,-20)}
+  return{L,R,N}}
+const SIGNOTE={mix:'4 bars at 145 BPM, peaks normalised to −1.0 dBFS (sample peak), so true peak goes above it',drums:'kick, snare, hats; sample peak −1.0 dBFS',pink:'equal energy per octave: reads flat on 1/3-octave bars and with a 3 dB/oct tilt',sweep:'log sweep, 6.6 s',tone:'should read −18.0 dBFS peak, −18.0 dBFS RMS (AES17), −18.0 LUFS, correlation +1.00',stereo:'1.66 s each'};
+
+/* ================= the measuring engine: one pass over new samples per frame, shared by every card ================= */
+const RB=16384,RM=RB-1;
+function bqC(b0,b1,b2,a1,a2){return{b0,b1,b2,a1,a2,s1:0,s2:0}}
+function bq(q,x){const y=q.b0*x+q.s1;q.s1=q.b1*x-q.a1*y+q.s2;q.s2=q.b2*x-q.a2*y;return y}
+function rbj(type,f,g,Q){const A=Math.pow(10,g/40),w=TAU*f/SR,cs=Math.cos(w),sn=Math.sin(w),al=sn/(2*Q);let b0,b1,b2,a0,a1,a2;
+  if(type==='hp'){b0=(1+cs)/2;b1=-(1+cs);b2=b0;a0=1+al;a1=-2*cs;a2=1-al}
+  else if(type==='bell'){b0=1+al*A;b1=-2*cs;b2=1-al*A;a0=1+al/A;a1=-2*cs;a2=1-al/A}
+  else{const sq=2*Math.sqrt(A)*al,s=type==='ls'?1:-1;b0=A*((A+1)-s*(A-1)*cs+sq);b1=s*2*A*((A-1)-s*(A+1)*cs);b2=A*((A+1)-s*(A-1)*cs-sq);a0=(A+1)+s*(A-1)*cs+sq;a1=-s*2*((A-1)+s*(A+1)*cs);a2=(A+1)+s*(A-1)*cs-sq}
+  return bqC(b0/a0,b1/a0,b2/a0,a1/a0,a2/a0)}
+function bqMag(q,f){const w=TAU*f/SR,c1=Math.cos(w),s1=Math.sin(w),c2=Math.cos(2*w),s2=Math.sin(2*w),nr=q.b0+q.b1*c1+q.b2*c2,ni=-(q.b1*s1+q.b2*s2),dr=1+q.a1*c1+q.a2*c2,di=-(q.a1*s1+q.a2*s2);return 10*Math.log10((nr*nr+ni*ni)/(dr*dr+di*di))}
+/* the example Pro EQ used by E1 to E4 (run on the signal, so "post" is really filtered) */
+const EQB=[{n:1,type:'hp',f:30,g:0,Q:.707,col:'#ff6b6b',name:'LOW CUT 12 DB/OCT'},{n:2,type:'ls',f:100,g:2,Q:.707,col:'#ff9a3c',name:'LOW SHELF'},{n:3,type:'bell',f:320,g:-3.5,Q:1.4,col:'#f5c84c',name:'BELL'},{n:4,type:'bell',f:2800,g:2.5,Q:.9,col:'#b9d64a',name:'BELL'},{n:5,type:'hs',f:10000,g:3,Q:.707,col:'#3ecf8e',name:'HIGH SHELF'}];
+EQB.forEach(b=>b.q=rbj(b.type,b.f,b.g,b.Q));
+const eqDb=f=>EQB.reduce((s,b)=>s+bqMag(b.q,f),0);
+/* 4x true-peak interpolator: 48-tap windowed sinc, 12 taps per phase (ITU-R BS.1770 annex 2 style) */
+const TPH=(()=>{const h=[];for(let n=0;n<48;n++){const x=(n-23.5)/4,s=x===0?1:Math.sin(Math.PI*x)/(Math.PI*x),w=.42-.5*Math.cos(TAU*(n+.5)/48)+.08*Math.cos(2*TAU*(n+.5)/48);h.push(s*w)}const P=[];for(let p=0;p<4;p++){const a=[];let sm=0;for(let k=0;k<12;k++){a.push(h[p+4*k]);sm+=h[p+4*k]}P.push(a.map(v=>v/sm))}return P})();
+
+const E={
+  sig:'mix',buf:null,pos:0,t:0,frame:0,listen:false,paused:false,
+  rL:new Float32Array(RB),rR:new Float32Array(RB),rM:new Float32Array(RB),rP:new Float32Array(RB),wi:0,
+  hist:[],ft:[],lh:[],stv:[],z400:[],blk:[],
+  reset(){const k1=()=>bqC(1.53512485958697,-2.69169618940638,1.19839281085285,-1.69065929318241,.73248077421585),k2=()=>bqC(1,-2,1,-1.99004745483398,.99007225036621);
+    this.kw=[k1(),k2(),k1(),k2()];this.ks=0;this.kn=0;this.blk=[];this.z400=[];this.stv=[];this.lh=[];this.M=-240;this.S=-240;this.I=-240;this.LRA=0;this.lt=0;this.tpMax=-240;this.spMax=-240;
+    this.vu=[0,0,0,0];this.ppm=[0,0];this.cor=[0,1e-12,1e-12,1e-12,1e-12];this.sub=new Float64Array(120);this.subI=0;this.subA=0;this.subB=0;this.subN=0;
+    this.tph=[new Float32Array(12),new Float32Array(12)];this.cg=0;this.lg=1;this.mb={lp:[0,0,0,0],env:[0,0,0],gr:[0,0,0]};this.eq=EQB.map(b=>bqC(b.q.b0,b.q.b1,b.q.b2,b.q.a1,b.q.a2));this.hist=[];this.t=0;this.i0=0;this.P10=null;this.P95=null;
+    this.rec={t:0,pk:[-240,-240],tp:[-240,-240],ppm:[-240,-240],vu:[-240,-240],rms:[-240,-240],rms6:[-240,-240],corr:1,bal:0,width:0,cIn:-240,cOut:-240,cGr:0,lIn:-240,lOut:-240,lGr:0,mbGr:[0,0,0],M:-240,S:-240}},
+  load(k){this.sig=k;this.buf=synth(k);this.pos=0;this.reset();if(this.listen)audioStart()},
+  step(dt){
+    let n;if(this.paused)n=0;else if(this.listen&&AC){const p=Math.floor((AC.currentTime-AT0)*SR+AP0)%this.buf.N;n=(p-this.pos+this.buf.N)%this.buf.N;if(n>SR*.2)n=0}else n=Math.round(dt*SR);
+    this.dt=n/SR;this.frame++;this.fc={};if(n>0)this.feed(n)},
+  feed(n){const B=this.buf,L=B.L,R=B.R,N=B.N,kw=this.kw,aC=Math.exp(-1/(.5*SR)),vz=.81,vw=13.4,vdt=1/SR,ppa=1-Math.exp(-1/(.0063*SR)),ppf=Math.pow(10,-8.571/20/SR);
+    const cT=-18,cR=4,cW=6,cA=Math.exp(-1/(.01*SR)),cRl=Math.exp(-1/(.12*SR)),lRl=1-Math.exp(-1/(.1*SR)),g6=lin(6),ceil=lin(-1),mbA=[Math.exp(-TAU*120/SR),Math.exp(-TAU*2500/SR)],mbAt=Math.exp(-1/(.005*SR)),mbRl=Math.exp(-1/(.15*SR)),mbEr=Math.exp(-1/(.05*SR));
+    let pk0=0,pk1=0,tp0=0,tp1=0,pp0=0,pp1=0,ci=-240,co=-240,cg=0,lgMin=1,mbMin=[0,0,0],li=0;const v=this.vu,pp=this.ppm,cr=this.cor,mb=this.mb,eq=this.eq,th=this.tph;
+    for(let j=0;j<n;j++){const l=L[this.pos],r=R[this.pos];this.pos=(this.pos+1)%N;
+      /* K-weighted loudness, 100 ms blocks (BS.1770) */
+      const kl=bq(kw[1],bq(kw[0],l)),kr=bq(kw[3],bq(kw[2],r));this.ks+=kl*kl+kr*kr;if(++this.kn===4800){this.block(this.ks/4800);this.ks=0;this.kn=0}
+      const al=Math.abs(l),ar=Math.abs(r);if(al>pk0)pk0=al;if(ar>pk1)pk1=ar;
+      /* true peak, 4x */
+      for(let c=0;c<2;c++){const h=th[c];h.copyWithin(1,0,11);h[0]=c?r:l;for(let p=0;p<4;p++){const P=TPH[p];let y=0;for(let k=0;k<12;k++)y+=P[k]*h[k];y=Math.abs(y);if(c){if(y>tp1)tp1=y}else if(y>tp0)tp0=y}}
+      /* VU: 2nd order on the rectified signal, zeta .81, 13.4 rad/s: 99 % in 0.3 s, 1.3 % overshoot (IEC 60268-17) */
+      v[1]+=(vw*vw*(al-v[0])-2*vz*vw*v[1])*vdt;v[0]+=v[1]*vdt;v[3]+=(vw*vw*(ar-v[2])-2*vz*vw*v[3])*vdt;v[2]+=v[3]*vdt;
+      /* PPM type IIb (EBU): 10 ms integration, falls 24 dB in 2.8 s */
+      pp[0]=al>pp[0]?pp[0]+(al-pp[0])*ppa:pp[0]*ppf;pp[1]=ar>pp[1]?pp[1]+(ar-pp[1])*ppa:pp[1]*ppf;if(pp[0]>pp0)pp0=pp[0];if(pp[1]>pp1)pp1=pp[1];
+      /* RMS in 10 ms sub-blocks */
+      this.subA+=l*l;this.subB+=r*r;if(++this.subN===480){this.sub[this.subI*2]=this.subA;this.sub[this.subI*2+1]=this.subB;this.subI=(this.subI+1)%60;this.subA=this.subB=this.subN=0}
+      /* correlation, 500 ms */
+      const m=(l+r)/2,s=(l-r)/2;cr[0]=aC*cr[0]+(1-aC)*l*r;cr[1]=aC*cr[1]+(1-aC)*l*l;cr[2]=aC*cr[2]+(1-aC)*r*r;cr[3]=aC*cr[3]+(1-aC)*m*m;cr[4]=aC*cr[4]+(1-aC)*s*s;
+      /* compressor: -18 dBFS, 4:1, 6 dB knee, 10 ms / 120 ms */
+      const x=dB(Math.max(al,ar));let y=x;if(2*(x-cT)>cW)y=cT+(x-cT)/cR;else if(2*Math.abs(x-cT)<=cW)y=x+(1/cR-1)*Math.pow(x-cT+cW/2,2)/(2*cW);const gr=y-x;
+      this.cg=gr<this.cg?cA*this.cg+(1-cA)*gr:cRl*this.cg+(1-cRl)*gr;if(x>ci)ci=x;const xo=x+this.cg;if(xo>co)co=xo;if(this.cg<cg)cg=this.cg;
+      /* limiter: +6 dB in, ceiling -1 dBFS, instant attack, 100 ms release */
+      const pkL=Math.max(al,ar)*g6,need=pkL>ceil?ceil/pkL:1;this.lg=need<this.lg?need:this.lg+(1-this.lg)*lRl;if(this.lg<lgMin)lgMin=this.lg;if(pkL>li)li=pkL;
+      /* three bands at 120 Hz and 2.5 kHz, each -30 dBFS 3:1 */
+      const lp=mb.lp;lp[0]=lp[0]*mbA[0]+m*(1-mbA[0]);lp[1]=lp[1]*mbA[0]+lp[0]*(1-mbA[0]);lp[2]=lp[2]*mbA[1]+m*(1-mbA[1]);lp[3]=lp[3]*mbA[1]+lp[2]*(1-mbA[1]);const bands=[lp[1],lp[3]-lp[1],m-lp[3]];
+      for(let q=0;q<3;q++){const a=Math.abs(bands[q]);mb.env[q]=a>mb.env[q]?a:mb.env[q]*mbEr;const xd=dB(mb.env[q]),g=xd>-30?(-30+(xd+30)/3)-xd:0;mb.gr[q]=g<mb.gr[q]?mbAt*mb.gr[q]+(1-mbAt)*g:mbRl*mb.gr[q]+(1-mbRl)*g;if(mb.gr[q]<mbMin[q])mbMin[q]=mb.gr[q]}
+      /* example EQ on the mid signal */
+      let pq=m;for(const q of eq)pq=bq(q,pq);
+      const w=this.wi;this.rL[w]=l;this.rR[w]=r;this.rM[w]=m;this.rP[w]=pq;this.wi=(w+1)&RM}
+    this.t+=n/SR;const sub=this.sub;let a3=0,b3=0,a6=0,b6=0;for(let k=0;k<60;k++){const i=((this.subI-1-k)%60+60)%60;if(k<30){a3+=sub[i*2];b3+=sub[i*2+1]}a6+=sub[i*2];b6+=sub[i*2+1]}
+    const spm=Math.max(pk0,pk1),tpm=Math.max(tp0,tp1,spm);if(dB(spm)>this.spMax)this.spMax=dB(spm);if(dB(tpm)>this.tpMax)this.tpMax=dB(tpm);
+    this.rec={t:this.t,pk:[dB(pk0),dB(pk1)],tp:[dB(Math.max(tp0,pk0)),dB(Math.max(tp1,pk1))],ppm:[dB(pp0),dB(pp1)],vu:[dB(v[0]*Math.PI/2),dB(v[2]*Math.PI/2)],
+      rms:[dB(Math.sqrt(2*a3/14400)),dB(Math.sqrt(2*b3/14400))],rms6:[dB(Math.sqrt(2*a6/28800)),dB(Math.sqrt(2*b6/28800))],
+      corr:cr[0]/Math.sqrt(cr[1]*cr[2]+1e-24),bal:(cr[2]-cr[1])/(cr[1]+cr[2]+1e-24),width:Math.sqrt(cr[4]/(cr[3]+1e-24)),
+      cIn:ci,cOut:co,cGr:cg,lIn:dB(li),lOut:dB(li*lgMin),lGr:dB(lgMin),mbGr:mbMin.slice(),M:this.M,S:this.S};
+    this.hist.push(this.rec);if(this.hist.length>900)this.hist.shift()},
+  block(ms){const b=this.blk;b.push(ms);if(b.length>30)b.shift();const mean=k=>{let s=0;for(let i=b.length-k;i<b.length;i++)s+=b[i];return s/k},lu=v=>-.691+10*Math.log10(v+1e-30);
+    if(b.length>=4){const z=mean(4);this.M=lu(z);this.z400.push(z)}
+    if(b.length>=30){const z=mean(30);this.S=lu(z);this.stv.push(this.S)}
+    this.lh.push({t:this.t,M:this.M,S:b.length>=30?this.S:null});if(this.lh.length>900)this.lh.shift();
+    if(++this.lt%10===0)this.gate()},
+  gate(){const lu=v=>-.691+10*Math.log10(v+1e-30),z=this.z400.filter(v=>lu(v)>-70);if(z.length){const g=lu(z.reduce((a,b)=>a+b,0)/z.length)-10,z2=z.filter(v=>lu(v)>g);this.I=lu(z2.reduce((a,b)=>a+b,0)/z2.length)}
+    const s=this.stv.filter(v=>v>-70);if(s.length>2){const en=s.reduce((a,v)=>a+Math.pow(10,(v+.691)/10),0)/s.length,g=lu(en)-20,s2=s.filter(v=>v>g).sort((a,b)=>a-b),pc=p=>s2[Math.min(s2.length-1,Math.max(0,Math.round(p*(s2.length-1))))];this.LRA=pc(.95)-pc(.1);this.P10=pc(.1);this.P95=pc(.95)}},
+  /* FFT of the last n samples of a ring (M = mid before EQ, P = after EQ), cached per frame; dBFS where a full-scale sine reads 0 */
+  fft(n,src){const key=n+src;if(this.fc[key])return this.fc[key];const F=FFTS[n]||(FFTS[n]=mkFFT(n)),rg=src==='P'?this.rP:src==='L'?this.rL:this.rM;return this.fc[key]=F(rg,this.wi)}
+};
+const FFTS={};
+function mkFFT(n){const lev=Math.log2(n),rev=new Uint32Array(n);for(let i=0;i<n;i++){let r=0,x=i;for(let j=0;j<lev;j++){r=(r<<1)|(x&1);x>>=1}rev[i]=r}
+  const co=new Float64Array(n/2),si=new Float64Array(n/2);for(let i=0;i<n/2;i++){co[i]=Math.cos(TAU*i/n);si[i]=Math.sin(TAU*i/n)}
+  const win=new Float64Array(n);let ws=0;for(let i=0;i<n;i++){win[i]=.5-.5*Math.cos(TAU*i/n);ws+=win[i]}
+  const re=new Float64Array(n),im=new Float64Array(n),out=new Float32Array(n/2),sc=2/ws;
+  return(rg,wi)=>{for(let i=0;i<n;i++){const v=rg[(wi-n+i)&RM]*win[i];re[rev[i]]=v;im[rev[i]]=0}
+    for(let size=2;size<=n;size<<=1){const h=size>>1,st=n/size;for(let i=0;i<n;i+=size)for(let j=0;j<h;j++){const k=j*st,a=i+j,b=a+h,tr=re[b]*co[k]+im[b]*si[k],ti=im[b]*co[k]-re[b]*si[k];re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}
+    for(let k=0;k<n/2;k++){const m=Math.sqrt(re[k]*re[k]+im[k]*im[k])*sc;out[k]=m>1e-12?20*Math.log10(m):-240}return out}}
+/* per-pixel spectrum columns on a log axis: the strongest bin in each column, interpolated where a column is narrower than a bin */
+const BM={};
+function binMap(n,w,lo,hi){const key=n+'|'+w+'|'+lo+'|'+hi;if(BM[key])return BM[key];const a=new Float32Array(w*3),bw=SR/n;for(let i=0;i<w;i++){const f0=lo*Math.pow(hi/lo,i/w),f1=lo*Math.pow(hi/lo,(i+1)/w);a[i*3]=f0/bw;a[i*3+1]=f1/bw;a[i*3+2]=Math.sqrt(f0*f1)}return BM[key]=a}
+function cols(sp,n,w,o={}){const lo=o.lo||20,hi=o.hi||20000,m=binMap(n,w,lo,hi),r=new Float32Array(w),H=n/2-1,tl=o.tilt||0;
+  for(let i=0;i<w;i++){const k0=m[i*3],k1=m[i*3+1];let v;const a=Math.ceil(k0),b=Math.floor(k1);if(b>=a){v=-240;for(let k=a;k<=Math.min(b,H);k++)if(sp[k]>v)v=sp[k]}else{const kc=(k0+k1)/2,q=Math.min(H-1,Math.floor(kc)),f=kc-q;v=sp[q]*(1-f)+sp[q+1]*f}
+    r[i]=v+tl*Math.log2(m[i*3+2]/1000)}return r}
+function smooth(st,key,v,dt,rel){let s=st[key];if(!s||s.length!==v.length){s=st[key]=Float32Array.from(v);return s}const k=1-Math.exp(-dt/rel);for(let i=0;i<v.length;i++)s[i]=v[i]>s[i]?v[i]:s[i]+(v[i]-s[i])*k;return s}
+function maxHold(st,key,v,dt,fall){let s=st[key];if(!s||s.length!==v.length){s=st[key]=Float32Array.from(v);return s}for(let i=0;i<v.length;i++)s[i]=Math.max(v[i],s[i]-fall*dt);return s}
+
+/* ================= audio (only when "Listen" is on) ================= */
+let AC=null,SRC=null,AT0=0,AP0=0;
+function audioStart(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR});audioStop();const B=E.buf,ab=AC.createBuffer(2,B.N,SR);ab.copyToChannel(B.L,0);ab.copyToChannel(B.R,1);SRC=AC.createBufferSource();SRC.buffer=ab;SRC.loop=true;const g=AC.createGain();g.gain.value=.6;SRC.connect(g).connect(AC.destination);AC.resume();AT0=AC.currentTime+.03;AP0=E.pos;SRC.start(AT0,E.pos/SR)}catch(e){E.listen=false;btnState()}}
+function audioStop(){if(SRC){try{SRC.stop()}catch(e){}SRC.disconnect();SRC=null}}
+
+/* ================= drawing helpers ================= */
+function tx(c,s,x,y,o={}){c.font=(o.w||400)+' '+Math.max(6.5,o.s||8)+'px '+(o.sans?SANS:MONO);c.textAlign=o.a||'left';c.textBaseline=o.b||'middle';c.fillStyle=o.c||K.mut;if('letterSpacing' in c)c.letterSpacing=o.ls||'0px';c.fillText(s,x,y);if('letterSpacing' in c)c.letterSpacing='0px'}
+const lab=(c,s,x,y,a,col,sz)=>tx(c,s,x,y,{s:sz||6.5,c:col||AM(.9),a,ls:'0.1em'});
+const num=(c,s,x,y,o={})=>tx(c,s,x,y,Object.assign({s:9,c:K.ink},o));
+function ln(c,x1,y1,x2,y2,s,w){c.strokeStyle=s;c.lineWidth=w||1;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke()}
+function rect(c,x,y,w,h,f,r){c.fillStyle=f;if(r){c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);c.fill()}else c.fillRect(x,y,w,h)}
+function dot(c,x,y,r,f){c.fillStyle=f;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+function hatch(c,x,y,w,h,col){c.save();c.beginPath();c.rect(x,y,w,h);c.clip();c.strokeStyle=col;c.lineWidth=1;c.beginPath();for(let i=-h;i<w;i+=4){c.moveTo(x+i,y+h);c.lineTo(x+i+h,y)}c.stroke();c.restore()}
+function lvGrad(c,x0,y0,x1,y1){const g=c.createLinearGradient(x0,y0,x1,y1);for(const[d,col]of LVC)g.addColorStop(taper(d),col);return g}
+const zoneCol=d=>{let col=LVC[0][1];for(const[z,cc]of LVC)if(d>=z)col=cc;return col};
+/* a log frequency axis: long marks at decades, mid at 2 and 5, short elsewhere; labels where they fit */
+function fAxis(c,x0,w,y0,h,o={}){const lo=o.lo||20,hi=o.hi||20000,fx=f=>x0+w*Math.log(f/lo)/Math.log(hi/lo),lb=o.labels||[20,50,100,200,500,1000,2000,5000,10000,20000];
+  for(let d=10;d<=hi;d*=10)for(let m=1;m<10;m++){const f=d*m;if(f<lo||f>hi)continue;const x=Math.round(fx(f))+.5,dec=m===1,mid=m===2||m===5;if(o.grid!==false)ln(c,x,y0,x,y0+h,W_(dec?.11:mid?.055:.028));ln(c,x,y0+h,x,y0+h+(dec?5:mid?3.5:2),W_(dec?.5:.3))}
+  if(o.lab!==false)for(const f of lb){const x=fx(f);if(x<x0-1||x>x0+w+1)continue;tx(c,f>=1000?f/1000+'k':String(f),x,y0+h+10,{s:7,a:f===lo?'left':f===hi?'right':'center',c:[100,1000,10000].includes(f)?'#b7b7c2':K.mut})}
+  return fx}
+function frame(c,x,y,w,h){c.strokeStyle=W_(.12);c.lineWidth=1;c.strokeRect(x+.5,y+.5,w-1,h-1)}
+
+/* ================= ballistics shared by the meter cards ================= */
+function ball(st,key,v,dt,fall,hold){const s=st[key]||(st[key]={d:-240,h:-240,ht:0,mx:-240});s.d=Math.max(v,s.d-fall*dt);if(v>=s.h){s.h=v;s.ht=E.t}else if(E.t-s.ht>hold)s.h=Math.max(s.d,s.h-fall*dt);if(v>s.mx)s.mx=v;return s}
+const DPPM=20/1.7; /* digital peak meter, IEC 60268-18: falls 20 dB in 1.7 s */
+
+/* ---------- the Flat bars strip (kept), with a scale that follows the fader taper ---------- */
+function flatStrip(c,x,y,h,vals,o){/* vals: [{d,h,core,mark}] for L and R; o.scale: tick set */
+  const bx=x+30,bw=5,gap=2,Y=d=>y+h-h*taper(d);
+  /* scale */
+  const S=o.scale;c.strokeStyle=W_(.32);c.lineWidth=1;c.beginPath();for(const d of S.minor){const yy=Math.round(Y(d))+.5;c.moveTo(bx-5,yy);c.lineTo(bx-2,yy)}c.stroke();
+  c.strokeStyle=W_(.6);c.beginPath();for(const d of S.major){const yy=Math.round(Y(d))+.5;c.moveTo(bx-7,yy);c.lineTo(bx-2,yy)}c.stroke();
+  for(const d of S.major)if(!S.nolab||!S.nolab.includes(d))tx(c,S.fmt?S.fmt(d):fd(d,0,true),bx-9,Y(d),{a:'right',s:7,c:d===0||(S.hi&&S.hi===d)?K.ink:K.mut});
+  const g=lvGrad(c,0,y+h,0,y);
+  vals.forEach((v,i)=>{const X=bx+i*(bw+gap);rect(c,X,y,bw,h,K.trk);c.fillStyle=o.colOf?o.colOf(v.d):g;const top=Y(v.d);
+    if(v.core!=null){c.globalAlpha=.38;c.fillRect(X,top,bw,y+h-top);c.globalAlpha=1;const ct=Y(v.core);c.fillStyle=o.colOf?o.colOf(v.core):g;c.fillRect(X,ct,bw,y+h-ct)}else c.fillRect(X,top,bw,y+h-top);
+    if(v.h>-60)rect(c,X,Math.round(Y(v.h)),bw,1.2,v.h>0?K.rd:'#fff');
+    if(v.mark!=null&&v.mark>-60){rect(c,X-1,Math.round(Y(v.mark))-.5,bw+2,1.6,K.am)}});
+  /* fader (kept): thin track, white flat cap, pointer */
+  const fx=bx+2*(bw+gap)+6;rect(c,fx,y,3,h,'#000');const fy=Y(-1.9);rect(c,fx-6,fy-1.5,15,3,'#e8e8ee',1);c.fillStyle='#fff';c.beginPath();c.moveTo(fx+10,fy);c.lineTo(fx+16,fy-4);c.lineTo(fx+16,fy+4);c.closePath();c.fill();
+  return Y}
+const SC_TODAY={major:[6,0,-6,-12,-24,-40],minor:[],nolab:[]};
+const SC_CAL={major:[6,0,-6,-12,-18,-24,-36,-48,-60],minor:[5,4,3,2,1,-1,-2,-3,-4,-5,-7,-8,-9,-10,-11,-15,-21,-30,-42,-54]};
+
+/* ================= cards ================= */
+const FAMS=[];const CARDS=[];
+function fam(o){FAMS.push(o);return o}
+function card(f,o){o.fam=f.id;o.W=o.W||f.W||420;o.H=o.H||f.H||240;o.st={};o.ms=[];CARDS.push(o);(f.cards=f.cards||[]).push(o);return o}
+
+/* ---------- M: level meters ---------- */
+const FM=fam({id:'M',name:'Level meters',W:420,H:240,single:true,
+  intro:'Track meters in the track headers, the mixer strips (the <b>Flat bars</b> design stays: same bars, cap and colours), the master and the transport meter. Each card shows the three places from one measurement: a mixer strip, a track header and the transport. What changes is the scale, the ballistics and the read-outs.',
+  where:'meters(), trackMeters(), drawMixer(), mxsTick(), miniMeter(); settings UI.mtr (speed, reading, colours, hold)'});
+function mShell(c,st,F,o){/* o: vals(rec)->[{d,h,core,mark}], read(c,x,y), tvals for transport */
+  const r=E.rec||{pk:[-240,-240]};
+  rect(c,8,8,150,224,K.pn,6);tx(c,'Mix',16,20,{s:8.5,w:600,sans:1,c:K.ink});
+  const vals=o.vals(st,r,F.dt);
+  /* max read-out box above the strip (click resets in the app) */
+  const mx=o.max(st),clip=mx>0&&!o.noClip;rect(c,42,30,48,15,clip?'#3a0d14':'#000',3);num(c,clip?'CLIP '+fd(mx,1,true):fd(mx,1),66,37.5,{a:'center',s:8,c:clip?K.over:K.ink});lab(c,o.maxLab||'PEAK MAX',66,52,'center',null,5.5);
+  const Y=flatStrip(c,12,60,148,vals,o);
+  lab(c,o.unit||'DBFS',38,218,'right',null,5.5);
+  /* track header (mini) */
+  rect(c,168,8,104,64,K.pn,6);c.fillStyle=K.bl;c.fillRect(168,8,3,64);tx(c,'Mix',178,20,{s:8.5,w:600,sans:1,c:K.ink});rect(c,178,30,30,12,'#000',2);num(c,MIN+'1.9',193,36.5,{a:'center',s:7});
+  const hx=256,hy=14,hh=52,HY=d=>hy+hh-hh*taper(d);vals.forEach((v,i)=>{const X=hx+i*5;rect(c,X,hy,3,hh,K.trk);c.fillStyle=o.colOf?o.colOf(v.d):lvGrad(c,0,hy+hh,0,hy);const tp=HY(v.d);c.fillRect(X,tp,3,hy+hh-tp);if(v.h>-60)rect(c,X,Math.round(HY(v.h)),3,1,v.h>0?K.rd:'#fff');if(v.mark!=null&&v.mark>-60)rect(c,X-1,Math.round(HY(v.mark)),5,1.2,K.am)});
+  if(o.hdrTicks){c.strokeStyle=W_(.35);c.beginPath();for(const d of o.hdrTicks){const yy=Math.round(HY(d))+.5;c.moveTo(hx-4,yy);c.lineTo(hx-1,yy)}c.stroke();o.hdrTicks.forEach(d=>tx(c,fd(d,0),hx-6,HY(d),{a:'right',s:5.5}))}
+  lab(c,'TRACK HEADER',220,80,'center',null,5.5);
+  /* transport (horizontal) */
+  rect(c,168,172,244,60,K.pn,6);tx(c,'Transport',176,182,{s:7.5,w:600,sans:1,c:K.mut});
+  const tx0=178,tw=150,ty=192,X=d=>tx0+tw*(Math.max(-60,Math.min(6,d))+60)/66;
+  vals.forEach((v,i)=>{const yy=ty+i*5;rect(c,tx0,yy,tw,3,'#050608');c.fillStyle=o.colOf?o.colOf(v.d):lvGrad(c,tx0,0,tx0+tw,0);c.fillRect(tx0,yy,X(v.d)-tx0,3);if(v.h>-60)rect(c,Math.round(X(v.h)),yy-1,1.3,5,v.h>0?K.rd:'#fff');if(v.mark!=null&&v.mark>-60)rect(c,Math.round(X(v.mark)),yy-1.5,1.5,6,K.am)});
+  const tk=o.tTicks||[-48,-36,-24,-12,-6,-3,0,6];c.strokeStyle=W_(.4);c.beginPath();for(const d of tk){const xx=Math.round(X(d))+.5;c.moveTo(xx,ty+10);c.lineTo(xx,ty+(d%12?12:14))}c.stroke();
+  for(const d of(o.tLab||[-48,-24,-12,0]))tx(c,fd(d,0),X(d),ty+20,{a:'center',s:5.5});
+  o.tRead(c,st,r,336,ty+1);
+  /* read-outs panel */
+  o.read(c,st,r,282,14);
+}
+function readRow(c,x,y,k,v,u,col){lab(c,k,x,y,'left',null,5.5);num(c,v,x+122,y+9,{a:'right',s:10,c:col||K.ink});lab(c,u,x+124,y+9.5,'left',W_(.45),5)}
+card(FM,{id:'M0',name:'Today',img:'M',desc:'Flat bars with the scale +6, 0, −6, −12, −24, −40, −∞; the pointer and cap; header bars without a scale; the transport meter with an orange peak arc and a dB read-out. Settings let you choose speed, reading, colours and hold.'});
+card(FM,{id:'M1',name:'Calibrated peak',desc:'The same bars, scale and fader. New: a scale that follows the fader taper (a mark per dB from +6 to −12, every 3 dB to −24, then 6), <b>digital peak ballistics</b> (instant rise, falls 20 dB in 1.7 s, IEC 60268-18), a 2 s peak hold, the highest peak in a box (click to reset, CLIP latched until clicked) and true peak beside it.',
+  cpu:'Bars and ticks only; the scale is drawn once into the strip in the app. Light mode: same.',
+  draw(c,st,F){mShell(c,st,F,{scale:SC_CAL,hdrTicks:[0,-12,-24],
+    vals:(st,r,dt)=>[0,1].map(i=>{const b=ball(st,'p'+i,r.pk[i],dt,DPPM,2);return{d:b.d,h:b.h}}),max:st=>Math.max(st.p0?st.p0.mx:-240,st.p1?st.p1.mx:-240),
+    tRead:(c,st,r,x,y)=>{num(c,fd(Math.max(st.p0.d,st.p1.d),1),x+70,y+2,{a:'right',s:9});lab(c,'DBFS PK',x+72,y+13,'right',null,5)},
+    read:(c,st,r,x,y)=>{lab(c,'MASTER · DIGITAL PEAK',x,y+2);readRow(c,x,y+14,'PEAK NOW L / R',fd(st.p0.d,1)+' '+fd(st.p1.d,1),'DBFS');readRow(c,x,y+40,'TRUE PEAK MAX',fd(E.tpMax,1),'DBTP',E.tpMax>-1?K.over:K.ink);readRow(c,x,y+66,'HOLD',(2).toFixed(1),'S');lab(c,'RISE 0 MS · FALL 11.8 DB/S',x,y+98,'left',W_(.45),5)}})}});
+card(FM,{id:'M2',star:true,name:'Peak and RMS in one bar',desc:'M1 plus the average inside the peak: the bright core is <b>RMS over 300 ms</b> (AES17, so a sine reads its peak level), the faint part above it is the peak. Peak and RMS read-outs, and the <b>crest factor</b> (peak minus RMS) that says how punchy the mix is. RME DIGICheck draws it this way.',
+  cpu:'One more fill per bar; RMS comes from the audio thread meter (al-meter), not from the screen. Light mode: same.',
+  draw(c,st,F){mShell(c,st,F,{scale:SC_CAL,hdrTicks:[0,-12,-24],
+    vals:(st,r,dt)=>[0,1].map(i=>{const b=ball(st,'p'+i,r.pk[i],dt,DPPM,2),q=ball(st,'r'+i,r.rms[i],dt,DPPM,0);return{d:b.d,h:b.h,core:q.d}}),max:st=>Math.max(st.p0?st.p0.mx:-240,st.p1?st.p1.mx:-240),
+    tRead:(c,st,r,x,y)=>{num(c,fd(Math.max(st.r0.d,st.r1.d),1),x+70,y+2,{a:'right',s:9});lab(c,'DBFS RMS',x+72,y+13,'right',null,5)},
+    read:(c,st,r,x,y)=>{const pk=Math.max(st.p0.d,st.p1.d),rm=Math.max(st.r0.d,st.r1.d);lab(c,'MASTER · PEAK + RMS 300 MS',x,y+2);readRow(c,x,y+14,'PEAK',fd(pk,1),'DBFS');readRow(c,x,y+40,'RMS (AES17)',fd(rm,1),'DBFS');readRow(c,x,y+66,'CREST',rm>-100?fd(pk-rm,1):'—','DB',K.cy);readRow(c,x,y+92,'TRUE PEAK MAX',fd(E.tpMax,1),'DBTP',E.tpMax>-1?K.over:K.ink)}})}});
+card(FM,{id:'M3',name:'Peak with a loudness mark',desc:'M1 plus a short amber mark across both bars at the <b>momentary loudness</b> (K-weighted, 400 ms, the same scale since LUFS and dBFS line up for a sine). You see level and loudness in one place without a second meter. Read-outs: momentary and short-term LUFS.',
+  cpu:'One mark more per bar; loudness already comes from the master meter worklet. Light mode: same.',
+  draw(c,st,F){mShell(c,st,F,{scale:SC_CAL,hdrTicks:[0,-12,-24],
+    vals:(st,r,dt)=>[0,1].map(i=>{const b=ball(st,'p'+i,r.pk[i],dt,DPPM,2);return{d:b.d,h:b.h,mark:E.M}}),max:st=>Math.max(st.p0?st.p0.mx:-240,st.p1?st.p1.mx:-240),
+    tRead:(c,st,r,x,y)=>{num(c,fd(E.M,1),x+70,y+2,{a:'right',s:9,c:K.am});lab(c,'LUFS M',x+72,y+13,'right',null,5)},
+    read:(c,st,r,x,y)=>{lab(c,'MASTER · PEAK + LOUDNESS',x,y+2);readRow(c,x,y+14,'PEAK',fd(Math.max(st.p0.d,st.p1.d),1),'DBFS');readRow(c,x,y+40,'MOMENTARY',fd(E.M,1),'LUFS',K.am);readRow(c,x,y+66,'SHORT-TERM',fd(E.S,1),'LUFS');lab(c,'AMBER MARK = MOMENTARY',x,y+98,'left',W_(.45),5)}})}});
+card(FM,{id:'M4',name:'K-14 scale',desc:'For mixing to a monitor level: the scale reads 0 at −14 dBFS (Bob Katz\'s K-14; K-20 and K-12 as choices). The bar is the <b>average</b> (RMS 600 ms), green below 0, yellow up to +4, red above; the peak is the thin line on top. Same strip, same taper; only the numbers and zones move.',
+  cpu:'Same as M2. Light mode: same.',
+  draw(c,st,F){const ref=-14,zc=d=>d<ref?'#2fc27c':d<ref+4?'#f5c84c':'#ff3b3b';mShell(c,st,F,{scale:{major:[6,0,-6,-10,-14,-18,-24,-34,-44],minor:[2,-2,-4,-8,-12,-16,-20,-22],fmt:d=>fd(d-ref,0,true),hi:-14},colOf:zc,unit:'K-14',noClip:1,
+    vals:(st,r,dt)=>[0,1].map(i=>{const b=ball(st,'p'+i,r.pk[i],dt,DPPM,2),q=ball(st,'k'+i,r.rms6[i],dt,DPPM,0);return{d:q.d,h:b.d}}),max:st=>Math.max(st.k0?st.k0.mx:-240,st.k1?st.k1.mx:-240)-ref,maxLab:'AVG MAX K',
+    hdrTicks:[-14],tLab:[-34,-24,-14,0],tTicks:[-34,-24,-14,-10,0],
+    tRead:(c,st,r,x,y)=>{num(c,fd(Math.max(st.k0.d,st.k1.d)-ref,1,true),x+70,y+2,{a:'right',s:9});lab(c,'K-14 AVG',x+72,y+13,'right',null,5)},
+    read:(c,st,r,x,y)=>{const av=Math.max(st.k0.d,st.k1.d)-ref,pk=Math.max(st.p0.d,st.p1.d)-ref;lab(c,'MASTER · K-14 · 0 = '+MIN+'14 DBFS',x,y+2);readRow(c,x,y+14,'AVERAGE',fd(av,1,true),'K',zc(av+ref));readRow(c,x,y+40,'PEAK',fd(pk,1,true),'K');lab(c,'GREEN < 0 · YELLOW 0 TO +4 · RED',x,y+72,'left',W_(.45),5);lab(c,'K-20 · K-14 · K-12 IN THE MENU',x,y+84,'left',W_(.45),5)}})}});
+
+/* ---------- L: loudness ---------- */
+const FL=fam({id:'L',name:'Loudness and true peak',W:420,H:240,single:true,
+  intro:'The LUFS box in the top bar and its pop-up, the mixer master\'s LUFS box and the Loudness device. The measurement is already right (BS.1770-5 in the al-meter worklet: K-weighting, 400 ms and 3 s windows, gating, LRA, 4× true peak); this is about how it reads. Target here: −14 LUFS (your Spotify setting), so 0 LU = −14 LUFS. Loudness is measured over everything since the signal was chosen.',
+  where:'lmPaint(), lmOpen() (#lufsPop), .mxme in the mixer master, ND(\'loud\'), ND(\'measure\')'});
+const TGT=-14;
+function lAll(c){return{M:E.M,S:E.S,I:E.I,LRA:E.LRA,tp:E.tpMax}}
+function topBox(c,x,y,o){rect(c,x,y,150,22,K.pn,5);const s=E.S,col=s>TGT+3?K.over:s>TGT+1?K.hot:K.ok;num(c,fd(s,1),x+40,y+11.5,{a:'right',s:9,c:col});lab(c,'LUFS',x+43,y+12,'left',W_(.5),5);const gx=x+70,gw=50;rect(c,gx,y+3,gw,16,'#000',2);const hs=E.lh.slice(-120);c.strokeStyle=col;c.lineWidth=1;c.beginPath();hs.forEach((h,i)=>{if(h.S==null)return;const yy=y+19-16*Math.max(0,Math.min(1,(h.S-TGT+12)/18));i?c.lineTo(gx+gw*i/119,yy):c.moveTo(gx+gw*i/119,yy)});c.stroke();ln(c,gx,y+19-16*12/18+.5,gx+gw,y+19-16*12/18+.5,AM(.6));num(c,fd(E.tpMax,1),x+146,y+11.5,{a:'right',s:7,c:E.tpMax>-1?K.over:K.mut})}
+card(FL,{id:'L0',name:'Today',img:'L',desc:'Pop-up with short-term, integrated and true peak max, a short-term history with the target line; the Loudness device with big M, S, I numbers, a history scale and TP bars. The top bar shows "−8.6 LUFS" and a tiny graph.'});
+card(FL,{id:'L1',star:true,name:'EBU Mode read-out',desc:'The layout EBU Tech 3341 defines: an <b>EBU +9 scale</b> (−18 to +9 LU around the target) with a short-term bar and a momentary line, the target as one amber line; beside it M, S and I in LUFS with one decimal, <b>LRA</b> (marked as settling for its first 60 s, X15), and <b>true peak max</b> in dBTP (red above −1). Below: the top-bar box with its colour rule.',
+  cpu:'Text and two bars, updated 10 times a second (the measurement rate), not every frame. Light mode: same.',
+  draw(c,st,F){const x0=34,y0=16,h=178,Y=lu=>y0+h-h*(Math.max(-18,Math.min(9,lu))+18)/27;
+    c.strokeStyle=W_(.3);c.beginPath();for(let lu=-18;lu<=9;lu++){const yy=Math.round(Y(lu))+.5;c.moveTo(x0-(lu%3?3:6),yy);c.lineTo(x0,yy)}c.stroke();for(let lu=-18;lu<=9;lu+=3)tx(c,fd(lu,0,true),x0-8,Y(lu),{a:'right',s:7,c:lu===0?K.am:K.mut});
+    rect(c,x0+3,y0,22,h,K.trk);const S=E.S-TGT,M=E.M-TGT,col=S>3?K.over:S>1?K.hot:K.ok;if(E.S>-100){const ys=Y(S);rect(c,x0+3,ys,22,y0+h-ys,col)}if(E.M>-100)rect(c,x0+29,Math.round(Y(M)),4,y0+h-Math.round(Y(M)),W_(.5));rect(c,x0+29,y0,4,h,W_(.05));
+    ln(c,x0,Math.round(Y(0))+.5,x0+38,Math.round(Y(0))+.5,K.am,1.2);lab(c,'LU',x0+14,y0+h+10,'center',null,5.5);lab(c,'S   M',x0+18,y0-6,'center',W_(.5),5);
+    const rx=96,rw=130;const row=(i,k,v,u,cl,sz)=>{const y=18+i*30;lab(c,k,rx,y,'left',null,5.5);num(c,v,rx+rw,y+13,{a:'right',s:sz||14,c:cl||K.ink});lab(c,u,rx+rw+4,y+15,'left',W_(.5),5.5)};
+    row(0,'MOMENTARY',fd(E.M,1),'LUFS');row(1,'SHORT-TERM',fd(E.S,1),'LUFS',col);row(2,'INTEGRATED',fd(E.I,1),'LUFS',null,16);
+    const settle=E.t<60;row(3,'LOUDNESS RANGE',E.stv.length>2?fd(E.LRA,1):'—','LU',settle?K.mut:K.ink);if(settle)lab(c,'SETTLING '+Math.ceil(60-E.t)+' S',rx+rw+4,18+3*30+3,'left',K.mut,5);
+    row(4,'TRUE PEAK MAX',fd(E.tpMax,1),'DBTP',E.tpMax>-1?K.over:K.ink);
+    lab(c,'TARGET '+MIN+'14 LUFS · '+MIN+'1 DBTP',rx,170,'left',W_(.5),5.5);num(c,'I '+fd(E.I-TGT,1,true)+' LU',rx,183,{s:8.5,c:E.I>TGT+1?K.hot:K.ok});
+    rect(c,262,14,150,176,K.pn,6);lab(c,'TOP BAR BOX',272,26);topBox(c,262,36);lab(c,'GREEN WITHIN ±1 LU',272,72,'left',W_(.5),5);lab(c,'YELLOW +1 TO +3 · RED ABOVE',272,82,'left',W_(.5),5);lab(c,'NUMBER = SHORT-TERM',272,92,'left',W_(.5),5);lab(c,'SMALL = TRUE PEAK MAX',272,102,'left',W_(.5),5);lab(c,'EBU TECH 3341 · BS.1770-5',272,180,'left',W_(.35),5);
+    lab(c,'+9 SCALE · 0 LU = '+MIN+'14 LUFS',96,226,'left',W_(.45),5.5)}});
+card(FL,{id:'L2',name:'Loudness history',desc:'A 30 s graph like iZotope Insight and NUGEN VisLM: short-term as the line, momentary faint, integrated dashed, the target band ±1 LU shaded. Where the music goes above the band the line turns yellow. Time marks every 5 s, LUFS on the left. Best for the pop-up and the Loudness device.',
+  cpu:'One polyline of 300 points, redrawn 10 times a second. Light mode: same.',
+  draw(c,st,F){const x0=40,y0=24,w=360,h=170,lo=TGT-24,hi=TGT+9,Y=v=>y0+h-h*(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo),T=30,now=E.t,X=t=>x0+w*(1-(now-t)/T);
+    rect(c,x0,Y(TGT+1),w,Y(TGT-1)-Y(TGT+1),'rgba(62,207,142,.12)');for(let v=lo;v<=hi;v+=3){const yy=Math.round(Y(v))+.5;ln(c,x0,yy,x0+w,yy,W_(v%6===TGT%6?.08:.035));if((v-TGT)%6===0)tx(c,fd(v,0),x0-5,yy,{a:'right',s:7,c:v===TGT?K.am:K.mut})}
+    for(let s=0;s<=T;s+=5){const xx=Math.round(x0+w*(1-s/T))+.5;ln(c,xx,y0+h,xx,y0+h+4,W_(.4));tx(c,s?MIN+s+' s':'now',xx,y0+h+11,{a:s?'center':'right',s:6.5})}
+    const hs=E.lh.filter(p=>p.t>now-T);c.lineWidth=1;c.strokeStyle=W_(.25);c.beginPath();hs.forEach((p,i)=>{if(p.M<-100)return;const xx=X(p.t),yy=Y(p.M);i?c.lineTo(xx,yy):c.moveTo(xx,yy)});c.stroke();
+    c.lineWidth=1.4;for(let i=1;i<hs.length;i++){const a=hs[i-1],b=hs[i];if(a.S==null||b.S==null)continue;c.strokeStyle=b.S>TGT+3?K.over:b.S>TGT+1?K.hot:K.cy;c.beginPath();c.moveTo(X(a.t),Y(a.S));c.lineTo(X(b.t),Y(b.S));c.stroke()}
+    if(E.I>-100){c.setLineDash([4,3]);ln(c,x0,Math.round(Y(E.I))+.5,x0+w,Math.round(Y(E.I))+.5,K.am,1);c.setLineDash([])}
+    frame(c,x0,y0,w,h);lab(c,'S',x0+6,y0+8,'left',K.cy);lab(c,'M',x0+18,y0+8,'left',W_(.5));lab(c,'I',x0+30,y0+8,'left',K.am);lab(c,'TARGET ±1 LU',x0+42,y0+8,'left',K.ok);
+    num(c,'S '+fd(E.S,1)+'  I '+fd(E.I,1)+' LUFS',x0+w,12,{a:'right',s:8.5});lab(c,'LUFS',8,12,'left',null,5.5)}});
+card(FL,{id:'L3',name:'Loudness radar',desc:'TC Electronic\'s radar in AudioLab\'s orbit style: the sweep goes round once in 30 s (4 minutes in the app), the distance from the centre is the short-term loudness, rings every 6 LU with the target ring in green, the outer ring lights with the momentary level. Integrated in the middle. Reads at a glance from across the room.',
+  cpu:'One filled shape of up to 300 points and a few rings, 10 times a second. Light mode: same.',
+  draw(c,st,F){const cx=150,cy=122,R=100,lo=TGT-24,r=v=>R*Math.max(0,Math.min(1,(v-lo)/30));
+    for(let v=lo+6;v<=TGT+6;v+=6){c.strokeStyle=v===TGT?'rgba(62,207,142,.6)':W_(.09);c.lineWidth=v===TGT?1.2:1;c.beginPath();c.arc(cx,cy,r(v),0,TAU);c.stroke();tx(c,fd(v-TGT,0,true),cx+3,cy-r(v)-4,{s:6,c:v===TGT?K.ok:K.mut})}
+    c.strokeStyle=W_(.35);c.beginPath();for(let i=0;i<60;i++){const a=i/60*TAU-Math.PI/2,l=i%5?3:6;c.moveTo(cx+Math.cos(a)*(R+2),cy+Math.sin(a)*(R+2));c.lineTo(cx+Math.cos(a)*(R+2+l),cy+Math.sin(a)*(R+2+l))}c.stroke();
+    const T=30,ph=(E.t%T)/T,hs=E.lh.filter(p=>p.t>E.t-T&&p.S!=null);c.fillStyle=CYA(.28);c.strokeStyle=CYA(.8);c.lineWidth=1;c.beginPath();c.moveTo(cx,cy);hs.forEach(p=>{const a=((p.t%T)/T)*TAU-Math.PI/2,rr=r(p.S);c.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)});c.closePath();c.fill();
+    c.beginPath();hs.forEach((p,i)=>{const a=((p.t%T)/T)*TAU-Math.PI/2,rr=r(p.S);i?c.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):c.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)});c.stroke();
+    const a=ph*TAU-Math.PI/2;ln(c,cx,cy,cx+Math.cos(a)*R,cy+Math.sin(a)*R,AM(.8),1);
+    const mcol=E.M-TGT>3?K.over:E.M-TGT>1?K.hot:E.M>-100?K.ok:W_(.1);c.strokeStyle=mcol;c.lineWidth=3;c.beginPath();c.arc(cx,cy,R+12,-Math.PI/2-.6,-Math.PI/2+.6);c.stroke();
+    dot(c,cx,cy,22,'rgba(7,8,11,.9)');num(c,fd(E.I,1),cx,cy-2,{a:'center',s:11});lab(c,'LUFS INT',cx,cy+10,'center',null,5);
+    const rx=290;lab(c,'RADAR · 30 S A TURN',rx,22);[['M',fd(E.M,1),'LUFS'],['S',fd(E.S,1),'LUFS'],['LRA',fd(E.LRA,1),'LU'],['TP MAX',fd(E.tpMax,1),'DBTP']].forEach((q,i)=>{lab(c,q[0],rx,46+i*26,'left',null,5.5);num(c,q[1],rx+84,57+i*26,{a:'right',s:10});lab(c,q[2],rx+88,58+i*26,'left',W_(.5),5)});
+    lab(c,'RINGS 6 LU · GREEN = TARGET',rx,200,'left',W_(.45),5);lab(c,'OUTER ARC = MOMENTARY',rx,211,'left',W_(.45),5)}});
+card(FL,{id:'L4',name:'Loudness distribution',desc:'How the loudness is spread: a histogram of every short-term value so far, the <b>loudness range</b> drawn as an amber caliper from the 10th to the 95th percentile (exactly how EBU Tech 3342 computes LRA), integrated and target as lines. Shows at once whether a master is squashed or alive.',
+  cpu:'At most 60 bars, rebuilt once a second when LRA is recomputed. Light mode: same.',
+  draw(c,st,F){const x0=24,y0=30,w=376,h=150,lo=TGT-24,hi=TGT+9,X=v=>x0+w*(v-lo)/(hi-lo),bins=new Array(66).fill(0);E.stv.forEach(v=>{const b=Math.floor((v-lo)*2);if(b>=0&&b<66)bins[b]++});const mx=Math.max(1,...bins);
+    for(let v=lo;v<=hi;v+=3){const xx=Math.round(X(v))+.5;ln(c,xx,y0,xx,y0+h,W_(.04));ln(c,xx,y0+h,xx,y0+h+((v-TGT)%6?3:5),W_(.4));if((v-TGT)%6===0)tx(c,fd(v,0),xx,y0+h+12,{a:'center',s:7,c:v===TGT?K.am:K.mut})}
+    bins.forEach((n,i)=>{if(!n)return;const hh=h*.9*n/mx;rect(c,X(lo+i/2)+.5,y0+h-hh,w/66-1,hh,CYA(.7))});
+    ln(c,Math.round(X(TGT))+.5,y0,Math.round(X(TGT))+.5,y0+h,'rgba(62,207,142,.8)');if(E.I>-100){c.setLineDash([3,3]);ln(c,Math.round(X(E.I))+.5,y0,Math.round(X(E.I))+.5,y0+h,K.am);c.setLineDash([])}
+    if(E.P10!=null&&E.stv.length>2){const a=X(E.P10),b=X(E.P95),yy=y0-8;c.strokeStyle=K.am;c.lineWidth=1;c.beginPath();c.moveTo(a,yy-4);c.lineTo(a,yy+4);c.moveTo(b,yy-4);c.lineTo(b,yy+4);c.moveTo(a,yy);c.lineTo(b,yy);c.stroke();lab(c,'LRA '+fd(E.LRA,1)+' LU',(a+b)/2,yy-9,'center')}
+    frame(c,x0,y0,w,h);lab(c,'SHORT-TERM VALUES · '+E.stv.length,x0,y0+h+24,'left',W_(.5),5.5);lab(c,'LUFS',x0+w,y0+h+24,'right',W_(.5),5.5);lab(c,'P10 TO P95, RELATIVE GATE '+MIN+'20 LU',x0+w,12,'right',W_(.5),5.5);num(c,'I '+fd(E.I,1)+' LUFS',x0,12,{s:8.5})}});
+
+/* ---------- S: spectrum ---------- */
+const FS=fam({id:'S',name:'Spectrum analyzer',W:420,H:240,single:true,
+  intro:'The Spectrum device, the spectrum overlay on the master, the Visualizer\'s spectrum and the mixer\'s spectrum view. Today they differ (−100 to −4 dB, slopes 0 or 3 dB/oct, gradients); the pick sets one look for all of them. All use a log frequency axis 20 Hz to 20 kHz.',
+  where:'ND(\'spec\') drawSpec(), spoOpen() SPO/ANZM, VZD.fft, drawMixer spec view'});
+function specData(st,F,o){const n=F.light?4096:8192,sp=E.fft(n,'M');return smooth(st,'sm',cols(sp,n,o.w,{tilt:o.tilt}),F.dt||.016,o.rel||.25)}
+function dbGrid(c,x0,y0,w,h,top,bot,step,lstep,right){const Y=v=>y0+h*(top-v)/(top-bot);for(let v=top;v>=bot;v-=step){const yy=Math.round(Y(v))+.5;ln(c,x0,yy,x0+w,yy,W_(v%lstep===0?.08:.035));if(v%lstep===0)tx(c,fd(v,0),right?x0+w+4:x0-4,yy,{a:right?'left':'right',s:7})}return Y}
+function trace(c,arr,x0,Y,col,lw,fill,y1){c.beginPath();for(let i=0;i<arr.length;i++){const y=Y(Math.max(-200,arr[i]));i?c.lineTo(x0+i,y):c.moveTo(x0,y)}if(fill){c.lineTo(x0+arr.length-1,y1);c.lineTo(x0,y1);c.closePath();c.fillStyle=fill;c.fill()}else{c.strokeStyle=col;c.lineWidth=lw||1;c.stroke()}}
+function peakOf(arr,x0,fx,lo=25){let bi=0,bv=-999;for(let i=0;i<arr.length;i++){const f=20*Math.pow(1000,i/arr.length);if(f<lo)continue;if(arr[i]>bv){bv=arr[i];bi=i}}return[bi,bv,20*Math.pow(1000,(bi+.5)/arr.length)]}
+card(FS,{id:'S0',name:'Today',img:'S',desc:'Spectrum device: fill and line, peak line, slope 3 dB/oct, −96 to −12 dB with labels every 12; a peak marker with note. The Visualizer\'s spectrum: a gradient fill on −100 to −4 dB with no scale.'});
+card(FS,{id:'S1',star:true,name:'Calibrated spectrum',desc:'One fine line with a faint fill, a <b>max-hold</b> line that falls 3 dB/s, a <b>4.5 dB/oct tilt</b> around 1 kHz (FabFilter and Voxengo use it, so a mix reads about flat), 0 to −90 dB with a line every 10, decade marks long and 2 and 5 shorter. A marker follows the strongest peak, or your pointer: frequency, note and level (X8). The settings in a corner: FFT, window and resolution.',
+  cpu:'One 8192-point FFT a frame shared by every spectrum on screen (about 0.2 ms), 376 points to draw. Light mode: 4096 points, 30 a second, no max-hold.',
+  draw(c,st,F){const x0=12,y0=14,w=376,h=196,sm=specData(st,F,{w,tilt:4.5}),Y=dbGrid(c,x0,y0,w,h,0,-90,10,20,true),fx=fAxis(c,x0,w,y0,h);
+    if(!F.light){const mh=maxHold(st,'mh',sm,F.dt||.016,3);trace(c,mh,x0,Y,W_(.3),1)}
+    trace(c,sm,x0,Y,null,0,CYA(.1),y0+h);trace(c,sm,x0,Y,K.cy,1.2);
+    let mi,mv,mf;if(st.mx!=null&&st.mx>=x0&&st.mx<x0+w){mi=Math.round(st.mx-x0);mv=sm[mi];mf=20*Math.pow(1000,(mi+.5)/w)}else[mi,mv,mf]=peakOf(sm);
+    const mxp=x0+mi,myp=Y(mv);ln(c,mxp+.5,y0,mxp+.5,y0+h,AM(.35));c.fillStyle=K.am;c.beginPath();c.moveTo(mxp,myp-3);c.lineTo(mxp+3,myp);c.lineTo(mxp,myp+3);c.lineTo(mxp-3,myp);c.closePath();c.fill();
+    const nn=note(mf),lbl=hz(mf)+' · '+nn[0]+' '+fd(nn[1],0,true)+' ct · '+fd(mv,1)+' dB';num(c,lbl,mxp>x0+w/2?mxp-6:mxp+6,y0+10,{a:mxp>x0+w/2?'right':'left',s:8,c:K.am});
+    frame(c,x0,y0,w,h);lab(c,'FFT '+(F.light?4096:8192)+' · HANN · RBW '+(1.5*SR/(F.light?4096:8192)).toFixed(1)+' HZ',x0+4,y0+h-8,'left',W_(.45),5.5);lab(c,'TILT 4.5 DB/OCT @ 1 KHZ',x0+w-4,y0+h-8,'right',W_(.45),5.5);lab(c,'DBFS',x0+w+4,y0+h+10,'left',null,5)}});
+card(FS,{id:'S2',name:'Analyzer front panel',desc:'Laid out like a Keysight or Rohde & Schwarz analyzer: a 10 by 10 graticule, <b>reference level</b> on the top line, 10 dB per division, start and stop frequency, RBW, averaging and detector in the corners. Trace 1 live (yellow), trace 2 max hold (cyan), marker 1 on the peak and a <b>delta marker</b> to the second peak with Δf and ΔdB.',
+  cpu:'Same FFT as S1; a few more text labels. Light mode: no trace 2.',
+  draw(c,st,F){const x0=12,y0=20,w=376,h=180,sm=specData(st,F,{w,tilt:0,rel:.15}),Y=v=>y0+h*(0-v)/100;
+    for(let i=0;i<=10;i++){const yy=Math.round(y0+h*i/10)+.5,xx=Math.round(x0+w*i/10)+.5;ln(c,x0,yy,x0+w,yy,W_(i%5?.06:.1));ln(c,xx,y0,xx,y0+h,W_(i%5?.06:.1))}
+    c.strokeStyle=W_(.25);c.beginPath();for(let i=0;i<50;i++){const xx=Math.round(x0+w*i/50)+.5,yy=Math.round(y0+h*i/50)+.5;c.moveTo(xx,y0+h/2-2);c.lineTo(xx,y0+h/2+2);c.moveTo(x0+w/2-2,yy);c.lineTo(x0+w/2+2,yy)}c.stroke();
+    if(!F.light){const mh=maxHold(st,'mh',sm,F.dt||.016,0);trace(c,mh,x0,Y,'rgba(76,201,240,.65)',1)}trace(c,sm,x0,Y,K.ye,1);
+    const[a,av,af]=peakOf(sm);let b=-1,bv=-999;for(let i=0;i<sm.length;i++){if(Math.abs(i-a)<12)continue;const f=20*Math.pow(1000,i/w);if(f<25)continue;if(sm[i]>bv&&(i===0||sm[i]>=sm[i-1])&&(i===sm.length-1||sm[i]>=sm[i+1])){bv=sm[i];b=i}}
+    const bf=20*Math.pow(1000,(b+.5)/w),mk=(i,v,t)=>{const xx=x0+i,yy=Y(v);c.fillStyle='#fff';c.beginPath();c.moveTo(xx,yy-4);c.lineTo(xx+3,yy-8);c.lineTo(xx-3,yy-8);c.closePath();c.fill();tx(c,t,xx,yy-13,{a:'center',s:7,c:'#fff'})};mk(a,av,'1');if(b>=0)mk(b,bv,'Δ2');
+    frame(c,x0,y0,w,h);tx(c,'REF 0.0 DBFS',x0,10,{s:7.5,c:K.ink});tx(c,'10 DB/DIV',x0+82,10,{s:7.5});tx(c,'MKR1 '+hz(af)+'  '+fd(av,1)+' dB',x0+w,10,{a:'right',s:7.5,c:K.ink});
+    tx(c,'START 20 Hz',x0,y0+h+9,{s:7});tx(c,'LOG',x0+w/2,y0+h+9,{a:'center',s:7});tx(c,'STOP 20 kHz',x0+w,y0+h+9,{a:'right',s:7});
+    tx(c,'RBW '+(1.5*SR/(F.light?4096:8192)).toFixed(1)+' Hz  AVG 0.15 s  DET PEAK',x0,y0+h+20,{s:7});if(b>=0)tx(c,'ΔMKR2 '+fd(bf-af,0,true)+' Hz  '+fd(bv-av,1,true)+' dB',x0+w,y0+h+20,{a:'right',s:7,c:K.ink});
+    lab(c,'1 CLRW',x0+4,y0+8,'left',K.ye,5.5);if(!F.light)lab(c,'2 MAXH',x0+36,y0+8,'left',K.cy,5.5)}});
+const THIRD=[20,25,31.5,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000,20000];
+card(FS,{id:'S3',name:'1/3-octave bars',desc:'The 31 standard bands (IEC 61260, 20 Hz to 20 kHz), each the summed power of its bins, with a peak cap that holds 2 s and falls like a peak meter. Pink noise reads flat without any tilt, which is why live sound uses it. Readable at a glance; less detail than S1.',
+  cpu:'Same FFT, 31 bars. Light mode: same, 30 a second.',
+  draw(c,st,F){const n=F.light?4096:8192,sp=E.fft(n,'M'),bw=SR/n,x0=26,y0=14,w=376,h=186,Y=v=>y0+h*(0-Math.max(-90,v))/90,cw=w/31;st.b=st.b||new Array(31).fill(-240);
+    for(let v=0;v>=-90;v-=10){const yy=Math.round(Y(v))+.5;ln(c,x0,yy,x0+w,yy,W_(v%30?.035:.08));if(v%30===0)tx(c,fd(v,0),x0-4,yy,{a:'right',s:7})}
+    THIRD.forEach((fc,i)=>{const lo=fc/Math.pow(2,1/6),hi=fc*Math.pow(2,1/6);let p=0,cnt=0;for(let k=Math.max(1,Math.floor(lo/bw));k<=Math.ceil(hi/bw)&&k<n/2;k++){const f=k*bw;const wgt=f<lo?Math.max(0,1-(lo-f)/bw):f>hi?Math.max(0,1-(f-hi)/bw):1;p+=Math.pow(10,sp[k]/10)*wgt;cnt++}
+      const v=10*Math.log10(p/1.5+1e-24),d=ball(st,'q'+i,v,F.dt,DPPM,2),x=x0+i*cw+1;st.b[i]=v;const top=Y(d.d);rect(c,x,top,cw-2,y0+h-top,i%3===2?CYA(.85):CYA(.62));if(d.h>-90)rect(c,x,Math.round(Y(d.h)),cw-2,1.3,'#fff');
+      if([31.5,63,125,250,500,1000,2000,4000,8000,16000].includes(fc))tx(c,fc>=1000?fc/1000+'k':String(fc),x+cw/2-1,y0+h+9,{a:'center',s:6.5,c:fc===1000?'#b7b7c2':K.mut})});
+    frame(c,x0,y0,w,h);lab(c,'1/3 OCT · BAND POWER · DBFS',x0+4,y0+8,'left',W_(.5),5.5);lab(c,'CAP HOLDS 2 S',x0+w-4,y0+8,'right',W_(.5),5.5)}});
+card(FS,{id:'S4',name:'Persistence',desc:'The analyzer\'s "digital phosphor": every recent trace adds to a density picture, so how often a level occurs shows as colour, in the even <b>magma</b> map with its colour bar. Steady tones become bright lines, noise a soft cloud. The live trace stays on top as a thin line.',
+  cpu:'A 188 by 98 density picture updated each frame and scaled up (about 0.3 ms). Light mode: off, the live line only.',
+  draw(c,st,F){const x0=12,y0=14,w=376,h=196,sm=specData(st,F,{w,tilt:4.5,rel:.05}),Y=dbGrid(c,x0,y0,w,h,0,-90,10,20,true),gw=188,gh=98;
+    if(!F.light){if(!st.d){st.d=new Float32Array(gw*gh);st.cv=document.createElement('canvas');st.cv.width=gw;st.cv.height=gh;st.im=st.cv.getContext('2d').createImageData(gw,gh)}
+      const d=st.d,dec=Math.pow(.93,(F.dt||.016)*60);for(let i=0;i<d.length;i++)d[i]*=dec;for(let x=0;x<gw;x++){const v=Math.max(sm[x*2],sm[x*2+1]),yy=Math.floor(gh*(0-v)/90);if(yy>=0&&yy<gh)d[yy*gw+x]+=.35}
+      const L=LUT(VS.map),p=st.im.data;for(let i=0;i<d.length;i++){const q=Math.min(255,Math.floor(255*Math.min(1,d[i])));p[i*4]=L[q*3];p[i*4+1]=L[q*3+1];p[i*4+2]=L[q*3+2];p[i*4+3]=q<3?0:255}
+      st.cv.getContext('2d').putImageData(st.im,0,0);c.imageSmoothingEnabled=true;c.drawImage(st.cv,x0,y0,w,h)}
+    fAxis(c,x0,w,y0,h,{grid:false});trace(c,sm,x0,Y,W_(.7),1);frame(c,x0,y0,w,h);
+    if(!F.light){const L=LUT(VS.map),bx=x0+w-90,by=y0+8;for(let i=0;i<80;i++){const q=Math.floor(i/79*255);c.fillStyle='rgb('+L[q*3]+','+L[q*3+1]+','+L[q*3+2]+')';c.fillRect(bx+i,by,1,4)}lab(c,'RARE',bx,by+11,'left',W_(.5),5);lab(c,'OFTEN',bx+80,by+11,'right',W_(.5),5)}
+    lab(c,F.light?'LIGHT MODE · LIVE LINE ONLY':'PERSISTENCE · '+VS.map.toUpperCase(),x0+4,y0+h-8,'left',W_(.5),5.5)}});
+
+/* ---------- O: scope and stereo ---------- */
+const FO=fam({id:'O',name:'Oscilloscope, stereo field and phase',W:420,H:240,single:false,
+  intro:'The stereo field displays in the mixer strips and the master (they <b>stay</b>: diamond, L, R and M labels, dots; only marks and scales are added), the correlation bar and stereo read-outs, the Visualizer\'s waveform and a new oscilloscope. Several can be picked; they add to each other. Try the "Stereo test" signal.',
+  where:'drawMixer stereo view, .mxco in the master, ANZM stereo/corr, VZD.wave'});
+function gonio(c,st,F,x,y,s,o={}){/* today's stereo field display, kept, plus marks */
+  rect(c,x,y,s,s,'#000',4);const cx=x+s/2,cy=y+s/2,R=s/2-6;c.strokeStyle=W_(.14);c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-R);c.lineTo(cx+R,cy);c.lineTo(cx,cy+R);c.lineTo(cx-R,cy);c.closePath();c.moveTo(cx-R/2,cy-R/2);c.lineTo(cx+R/2,cy+R/2);c.moveTo(cx+R/2,cy-R/2);c.lineTo(cx-R/2,cy+R/2);c.moveTo(cx,cy-R);c.lineTo(cx,cy+R);c.stroke();
+  tx(c,'L',x+10,y+9,{s:7,c:K.mut,sans:1});tx(c,'R',x+s-10,y+9,{s:7,c:K.mut,a:'right',sans:1});tx(c,'M',cx,y+s-7,{s:7,c:K.mut,a:'center',sans:1});
+  if(o.marks){/* dB marks on the M axis and the L and R axes: 0, -6, -12, -18 dB of a mono signal */c.strokeStyle=AM(.55);c.beginPath();[1,.5,.25,.125].forEach((g,i)=>{const yy=cy-R*g;c.moveTo(cx-3,yy);c.lineTo(cx+3,yy);[-1,1].forEach(sg=>{const d=R*g/Math.SQRT2;c.moveTo(cx+sg*d-2,cy-d+2*sg*0);c.lineTo(cx+sg*d+2,cy-d)})});c.stroke();[[1,'0'],[.5,MIN+'6'],[.25,MIN+'12']].forEach(q=>lab(c,q[1],cx+5,cy-R*q[0]+1,'left',null,5));lab(c,'+S',cx+R-2,cy-5,'right',null,5);lab(c,MIN+'S',cx-R+2,cy-5,'left',null,5)}
+  const n=o.n||768,rl=E.rL,rr=E.rR,wi=E.wi;
+  const plot=(g,ox,oy,alpha)=>{g.fillStyle=o.col||'#4cc9f0';for(let i=0;i<n;i+=1){const l=rl[(wi-n+i)&RM],r=rr[(wi-n+i)&RM],px=(r-l)/Math.SQRT2,py=(l+r)/Math.SQRT2;g.globalAlpha=alpha*(.3+.7*i/n);g.fillRect(ox+px*R*1.4-.6,oy-py*R*1.4-.6,1.2,1.2)}g.globalAlpha=1};
+  c.save();c.beginPath();c.rect(x+1,y+1,s-2,s-2);c.clip();
+  if(o.glow&&!F.light){const S2=s*2;if(!st.gcv){st.gcv=document.createElement('canvas');st.gcv.width=S2;st.gcv.height=S2;st.gx=st.gcv.getContext('2d');st.gx.setTransform(2,0,0,2,0,0)}const g=st.gx;g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,'+(1-Math.pow(.82,(F.dt||.016)*60)).toFixed(3)+')';g.fillRect(0,0,s,s);g.globalCompositeOperation='source-over';plot(g,s/2,s/2,.9);c.drawImage(st.gcv,x,y,s,s)}
+  else plot(c,cx,cy,.9);
+  if(o.newest){const l=rl[(wi-1)&RM],r=rr[(wi-1)&RM];dot(c,cx+(r-l)/Math.SQRT2*R*1.4,cy-(l+r)/Math.SQRT2*R*1.4,2.2,K.am)}
+  c.restore()}
+function corrBar(c,x,y,w,v,o={}){rect(c,x,y,w,5,'#000',2);hatch(c,x,y,w/2,5,RDA(.35));c.strokeStyle=W_(.35);c.lineWidth=1;c.beginPath();for(let i=0;i<=20;i++){const xx=Math.round(x+w*i/20)+.5;c.moveTo(xx,y+7);c.lineTo(xx,y+(i%5?9:11))}c.stroke();
+  [[0,MIN+'1'],[.5,'0'],[1,'+1']].forEach(q=>tx(c,q[1],x+w*q[0],y+17,{a:q[0]===0?'left':q[0]===1?'right':'center',s:6.5}));const px=x+w*(Math.max(-1,Math.min(1,v))+1)/2;c.fillStyle=v<0?K.rd:K.ok;c.beginPath();c.moveTo(px,y-1);c.lineTo(px-3.5,y-7);c.lineTo(px+3.5,y-7);c.closePath();c.fill();rect(c,Math.min(px,x+w/2),y+1,Math.abs(px-x-w/2),3,v<0?RDA(.7):'rgba(62,207,142,.7)')}
+card(FO,{id:'O0',name:'Today',img:'O',desc:'Each mixer strip: the stereo field box (diamond, L, R, M, coloured dots). The master: a larger box, then True peak, Target and a Stereo bar from −1 to +1 with +0.97.'});
+card(FO,{id:'O1',star:true,name:'Stereo field with marks and afterglow',desc:'The same display, with marks only (X5): dB ticks on the M and the L and R axes, +S and −S at the sides, a short <b>afterglow</b> so the shape reads instead of flickering dots, and a bright dot at the newest point. Under it the correlation bar gets a −1 to +1 scale, the negative half hatched, the value and the phase angle.',
+  cpu:'768 dots a frame into a small layer that fades (about 0.15 ms); in a mixer, strips off screen only keep history, as today. Light mode: no afterglow, dots only.',
+  draw(c,st,F){const r=E.rec||{corr:1};gonio(c,st,F,16,12,170,{marks:1,glow:1,newest:1});st.cs=st.cs==null?r.corr:st.cs+(r.corr-st.cs)*.15;corrBar(c,16,198,170,st.cs);
+    const rx=212;lab(c,'CORRELATION',rx,24);num(c,fd(st.cs,2,true),rx+120,40,{a:'right',s:16,c:st.cs<0?K.over:K.ink});lab(c,'PHASE ANGLE φ',rx,66);num(c,(Math.acos(Math.max(-1,Math.min(1,st.cs)))*180/Math.PI).toFixed(1)+'°',rx+120,82,{a:'right',s:12});
+    lab(c,'500 MS AVERAGE',rx,104,'left',W_(.45),5);lab(c,'MARKS: 0, '+MIN+'6, '+MIN+'12 DB MONO',rx,116,'left',W_(.45),5);lab(c,'AMBER DOT = NEWEST SAMPLE',rx,128,'left',W_(.45),5);
+    rect(c,rx,150,190,70,K.pn,6);lab(c,'MIXER STRIP SIZE',rx+8,160);gonio(c,{},F,rx+8,168,48,{n:256});gonio(c,st.small||(st.small={}),F,rx+64,168,48,{n:256,marks:0,glow:1,newest:1});lab(c,'TODAY',rx+32,224,'center',W_(.5),5);lab(c,'O1',rx+88,224,'center',W_(.5),5)}});
+card(FO,{id:'O2',star:true,name:'Correlation, balance and width',desc:'For the master box and the Visualizer: three proper scales instead of one bar. <b>Correlation</b> −1 to +1, <b>balance</b> left to right in percent, <b>width</b> (side over mid) 0 to 200 %, each with a pointer and a number, and a 10 s correlation history with the negative part hatched red, so a phase problem shows even after it has passed.',
+  cpu:'Three pointers and a 600-point line, values from the audio thread. Light mode: same.',
+  draw(c,st,F){const r=E.rec||{corr:1,bal:0,width:0};st.c=st.c==null?r.corr:st.c+(r.corr-st.c)*.15;st.b=st.b==null?r.bal:st.b+(r.bal-st.b)*.1;st.w=st.w==null?r.width:st.w+(r.width-st.w)*.1;
+    const sc=(y,k,v,lo,hi,labels,fmt,unit,neg)=>{const x=18,w=250;lab(c,k,x,y-12);rect(c,x,y,w,5,'#000',2);if(neg)hatch(c,x,y,w*(0-lo)/(hi-lo),5,RDA(.35));c.strokeStyle=W_(.35);c.beginPath();for(let i=0;i<=20;i++){const xx=Math.round(x+w*i/20)+.5;c.moveTo(xx,y+7);c.lineTo(xx,y+(i%5?9:11))}c.stroke();labels.forEach((q,i)=>tx(c,q,x+w*i/(labels.length-1),y+17,{a:i===0?'left':i===labels.length-1?'right':'center',s:6.5}));
+      const px=x+w*(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo);c.fillStyle=neg&&v<0?K.rd:K.am;c.beginPath();c.moveTo(px,y-1);c.lineTo(px-3.5,y-7);c.lineTo(px+3.5,y-7);c.closePath();c.fill();num(c,fmt(v),x+w+70,y+3,{a:'right',s:11,c:neg&&v<0?K.over:K.ink});lab(c,unit,x+w+74,y+4,'left',W_(.5),5)};
+    sc(26,'CORRELATION',st.c,-1,1,[MIN+'1',MIN+'0.5','0','+0.5','+1'],v=>fd(v,2,true),'',1);
+    sc(70,'BALANCE',st.b*100,-100,100,['L 100','L 50','C','R 50','R 100'],v=>Math.abs(v)<.5?'C':(v<0?'L ':'R ')+Math.abs(v).toFixed(0),'%');
+    sc(114,'WIDTH (SIDE / MID)',Math.min(2,st.w)*100,0,200,['0','50','100','150','200'],v=>v.toFixed(0),'%');
+    const x0=18,y0=160,w=372,h=56,T=10,Y=v=>y0+h/2-v*h/2,hs=E.hist.filter(p=>p.t>E.t-T);rect(c,x0,y0,w,h,'#000',3);hatch(c,x0,y0+h/2,w,h/2,RDA(.12));ln(c,x0,y0+h/2+.5,x0+w,y0+h/2+.5,W_(.2));
+    c.strokeStyle=K.ok;c.lineWidth=1;c.beginPath();hs.forEach((p,i)=>{const xx=x0+w*(1-(E.t-p.t)/T),yy=Y(p.corr);i?c.lineTo(xx,yy):c.moveTo(xx,yy)});c.stroke();lab(c,'CORRELATION, LAST 10 S',x0+4,y0+8,'left',W_(.5),5);tx(c,'+1',x0+w+3,y0+3,{s:6});tx(c,MIN+'1',x0+w+3,y0+h-3,{s:6})}});
+card(FO,{id:'O3',name:'Oscilloscope',desc:'A new scope for the Visualizer\'s waveform pane: an 8 by 10 graticule with five minor marks per division on the centre lines, <b>triggered</b> on the rising zero crossing of L so the wave stands still, L yellow and R cyan as on a two-channel scope, a short phosphor afterglow. Time per division and volts per division as read-outs (here 2 ms and 0.25 per division).',
+  cpu:'Two lines of 960 points and a fading layer (about 0.2 ms). Light mode: no afterglow, 30 a second.',
+  draw(c,st,F){const x0=20,y0=14,w=380,h=200,dx=w/10,dy=h/8,span=Math.round(SR*.02),rm=E.rM,rl=E.rL,rr=E.rR,wi=E.wi;
+    for(let i=0;i<=10;i++){const xx=Math.round(x0+dx*i)+.5;ln(c,xx,y0,xx,y0+h,W_(i===5?.14:.06))}for(let j=0;j<=8;j++){const yy=Math.round(y0+dy*j)+.5;ln(c,x0,yy,x0+w,yy,W_(j===4?.14:.06))}
+    c.strokeStyle=W_(.3);c.beginPath();for(let i=0;i<50;i++){const xx=Math.round(x0+w*i/50)+.5;c.moveTo(xx,y0+h/2-2);c.lineTo(xx,y0+h/2+2)}for(let j=0;j<40;j++){const yy=Math.round(y0+h*j/40)+.5;c.moveTo(x0+w/2-2,yy);c.lineTo(x0+w/2+2,yy)}c.stroke();
+    let s0=(wi-span-1200)&RM,trig=-1;for(let k=0;k<1200;k++){const a=rl[(s0+k-1)&RM],b=rl[(s0+k)&RM];if(a<0&&b>=0&&Math.abs(b-a)>1e-4){trig=k}}const st0=trig>=0?(s0+trig)&RM:(wi-span)&RM;
+    const draw=(g,ox,oy,rg,col)=>{g.strokeStyle=col;g.lineWidth=1.1;g.beginPath();for(let i=0;i<span;i+=2){const v=rg[(st0+i)&RM],xx=ox+w*i/span,yy=oy+h/2-v*h/2;i?g.lineTo(xx,yy):g.moveTo(xx,yy)}g.stroke()};
+    c.save();c.beginPath();c.rect(x0,y0,w,h);c.clip();
+    if(!F.light){if(!st.cv){st.cv=document.createElement('canvas');st.cv.width=w*2;st.cv.height=h*2;st.g=st.cv.getContext('2d');st.g.setTransform(2,0,0,2,0,0)}const g=st.g;g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,'+(1-Math.pow(.7,(F.dt||.016)*60)).toFixed(3)+')';g.fillRect(0,0,w,h);g.globalCompositeOperation='source-over';draw(g,0,0,rr,'rgba(76,201,240,.9)');draw(g,0,0,rl,'rgba(245,200,76,.95)');c.drawImage(st.cv,x0,y0,w,h)}
+    else{draw(c,x0,y0,rr,K.cy);draw(c,x0,y0,rl,K.ye)}c.restore();
+    c.fillStyle=K.am;c.beginPath();c.moveTo(x0-1,y0+h/2);c.lineTo(x0-7,y0+h/2-4);c.lineTo(x0-7,y0+h/2+4);c.closePath();c.fill();
+    tx(c,'CH1 L 0.25 /DIV',x0,y0+h+12,{s:7.5,c:K.ye});tx(c,'CH2 R 0.25 /DIV',x0+110,y0+h+12,{s:7.5,c:K.cy});tx(c,'2 ms/DIV',x0+w,y0+h+12,{a:'right',s:7.5,c:K.ink});tx(c,trig>=0?'TRIG L ↑ 0.00':'TRIG AUTO',x0+w-80,y0+h+12,{a:'right',s:7.5,c:trig>=0?K.am:K.mut})}});
+card(FO,{id:'O4',name:'Polar view (extra view)',desc:'An extra view to choose in the stereo display\'s right-click menu, never instead of it: iZotope\'s "polar sample". The angle is the stereo position (straight up = mono, ±45° = hard left or right), the distance is the level in dB; beyond ±45° is out of phase and sits on a hatched ground. A percentage says how much is in phase.',
+  cpu:'1024 dots a frame with a fading layer. Light mode: no fading.',
+  draw(c,st,F){const cx=170,cy=200,R=160,rl=E.rL,rr=E.rR,wi=E.wi,n=1024;c.save();c.beginPath();c.rect(10,8,320,196);c.clip();
+    c.fillStyle=RDA(.06);c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,R,Math.PI,Math.PI*1.25);c.closePath();c.fill();c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,R,Math.PI*1.75,TAU);c.closePath();c.fill();
+    for(let i=1;i<=4;i++){c.strokeStyle=W_(.08);c.beginPath();c.arc(cx,cy,R*i/4,Math.PI,TAU);c.stroke();tx(c,MIN+(48-i*12),cx+3,cy-R*i/4-4,{s:6})}
+    [-90,-45,0,45,90].forEach(a=>{const t=(a-90)*Math.PI/180;ln(c,cx,cy,cx+Math.cos(t)*R,cy+Math.sin(t)*R,a%90===0&&a?W_(.08):a?AM(.5):W_(.18))});
+    let inph=0;const plot=(g,ox,oy)=>{g.fillStyle='#4cc9f0';for(let i=0;i<n;i++){let l=rl[(wi-n+i)&RM],r=rr[(wi-n+i)&RM],m=(l+r)/2,s=(r-l)/2;if(m<0){m=-m;s=-s}const lev=Math.sqrt(m*m+s*s);if(lev<1e-5)continue;const th=Math.atan2(s,m),rad=R*Math.max(0,1+dB(lev)/48);if(Math.abs(th)<=Math.PI/4+1e-6)inph++;const t=th-Math.PI/2;g.globalAlpha=.25+.6*i/n;g.fillRect(ox+Math.cos(t)*rad-.6,oy+Math.sin(t)*rad-.6,1.2,1.2)}g.globalAlpha=1};
+    if(!F.light){if(!st.cv){st.cv=document.createElement('canvas');st.cv.width=640;st.cv.height=400;st.g=st.cv.getContext('2d');st.g.setTransform(2,0,0,2,0,0)}const g=st.g;g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,0,320,200);g.globalCompositeOperation='source-over';plot(g,160,192);c.drawImage(st.cv,cx-160,cy-192,320,200)}else plot(c,cx,cy);
+    c.restore();lab(c,'L',cx-R*.72,cy-R*.72-6,'center');lab(c,'R',cx+R*.72,cy-R*.72-6,'center');lab(c,'MONO',cx,14,'center');lab(c,'OUT OF PHASE',22,cy-8,'left',RDA(.8),5);lab(c,'OUT OF PHASE',318,cy-8,'right',RDA(.8),5);
+    st.ip=st.ip==null?inph/n:st.ip+(inph/n-st.ip)*.1;const rx=340;lab(c,'IN PHASE',rx,40);num(c,(st.ip*100).toFixed(0)+' %',rx+70,58,{a:'right',s:14,c:st.ip<.9?K.over:K.ink});lab(c,'RINGS 12 DB',rx,90,'left',W_(.45),5);lab(c,'±45° = HARD L / R',rx,102,'left',W_(.45),5)}});
+
+/* ---------- G: gain reduction ---------- */
+const FG=fam({id:'G',name:'Gain reduction',W:420,H:240,single:false,
+  intro:'Compressor, Limiter, Gate, OTT and the other dynamics devices. Here a real compressor (−18 dBFS, 4:1, 6 dB knee, 10 and 120 ms), a limiter (+6 dB in, −1 dBFS ceiling, 100 ms) and three bands at 120 Hz and 2.5 kHz run on the test signal. Several can be picked: G1 or G2 for the meter, G3 for the curve.',
+  where:'vizComp(), ND(\'limit\'), vizOTT(), gate, multiband, de-esser, transient, ducker'});
+const GRS=[0,1,2,3,4,6,8,10,15,20,30],grY=(g,y0,h)=>y0+h*Math.sqrt(Math.min(30,Math.max(0,-g))/30);
+card(FG,{id:'G0',name:'Today',img:'G',desc:'Compressor: the transfer curve on a 12 dB grid with a GR bar and a small history; Limiter: the level history as a white line on blue, GR and OUT bars without numbers.'});
+card(FG,{id:'G1',star:true,name:'Gain reduction history',desc:'As FabFilter Pro-L draws it: 4 s of history, input level as a grey area, output as a blue line, <b>gain reduction in red hanging from the top</b> on the same dB scale (1 dB down is 1 dB). Left scale dBFS, right scale GR. Big number for now, smaller for the most in the last 4 s. For compressor, limiter, gate and ducker alike.',
+  cpu:'Three lines of up to 240 points, values the devices already send. Light mode: same at 30 a second.',
+  draw(c,st,F){const x0=40,y0=22,w=330,h=180,T=4,Y=d=>y0+h*Math.min(1,Math.max(0,-d)/30),hs=E.hist.filter(p=>p.t>E.t-T),X=t=>x0+w*(1-(E.t-t)/T);
+    for(let d=0;d<=30;d+=6){const yy=Math.round(Y(-d))+.5;ln(c,x0,yy,x0+w,yy,W_(.05));tx(c,d?MIN+d:'0',x0-4,yy,{a:'right',s:7});tx(c,d?MIN+d:'0',x0+w+4,yy,{a:'left',s:7,c:'#ff8aa0'})}
+    if(hs.length>1){c.fillStyle=W_(.13);c.beginPath();c.moveTo(X(hs[0].t),y0+h);hs.forEach(p=>c.lineTo(X(p.t),Y(Math.max(-30,p.cIn))));c.lineTo(X(hs[hs.length-1].t),y0+h);c.closePath();c.fill();
+      c.strokeStyle=K.bl;c.lineWidth=1.2;c.beginPath();hs.forEach((p,i)=>{const yy=Y(Math.max(-30,p.cOut));i?c.lineTo(X(p.t),yy):c.moveTo(X(p.t),yy)});c.stroke();
+      c.fillStyle=RDA(.22);c.beginPath();c.moveTo(X(hs[0].t),y0);hs.forEach(p=>c.lineTo(X(p.t),Y(p.cGr)));c.lineTo(X(hs[hs.length-1].t),y0);c.closePath();c.fill();c.strokeStyle=K.rd;c.lineWidth=1.2;c.beginPath();hs.forEach((p,i)=>{const yy=Y(p.cGr);i?c.lineTo(X(p.t),yy):c.moveTo(X(p.t),yy)});c.stroke()}
+    frame(c,x0,y0,w,h);ln(c,x0,Math.round(Y(-18))+.5,x0+w,Math.round(Y(-18))+.5,AM(.5));lab(c,'THRESHOLD '+MIN+'18',x0+4,Y(-18)-6,'left',null,5);
+    const now=E.rec?E.rec.cGr:0,mx=Math.min(0,...hs.map(p=>p.cGr));num(c,fd(now,1),x0+w-6,y0+16,{a:'right',s:15,c:'#ff8aa0'});lab(c,'GR DB',x0+w-6,y0+30,'right',null,5);lab(c,'MAX '+fd(mx,1)+' IN 4 S',x0+w-6,y0+40,'right',W_(.5),5);
+    lab(c,'IN',x0+4,y0+h-8,'left',W_(.6),5.5);lab(c,'OUT',x0+20,y0+h-8,'left',K.bl,5.5);lab(c,'GR',x0+42,y0+h-8,'left',K.rd,5.5);lab(c,'DBFS',x0-4,y0+h+12,'right',null,5);lab(c,'GR',x0+w+4,y0+h+12,'left',RDA(.9),5);tx(c,MIN+'4 s',x0,y0+h+10,{s:6.5});tx(c,'now',x0+w,y0+h+10,{a:'right',s:6.5});lab(c,'COMPRESSOR 4:1',x0,12)}});
+card(FG,{id:'G2',name:'GR meters with a hardware scale',desc:'A bar that falls from the top, on the scale studio compressors use (0, 1, 2, 3, 4, 6, 8, 10, 15, 20, 30 dB): <b>the first dB gets the most room</b>, where gentle compression lives. Red peak tick held 2 s, number below. A thin horizontal version for the device title strip. Compressor and limiter side by side.',
+  cpu:'Two bars and one tick each. Light mode: same.',
+  draw(c,st,F){const r=E.rec||{cGr:0,lGr:0},y0=26,h=170;[[60,'COMP',r.cGr,'c'],[170,'LIMIT',r.lGr,'l']].forEach(q=>{const x=q[0],b=ball(st,q[3],-q[2],F.dt,25,2),d=-b.d,hd=-b.h;lab(c,q[1],x+7,14,'center');rect(c,x,y0,14,h,K.trk,2);
+      c.strokeStyle=W_(.4);c.lineWidth=1;c.beginPath();GRS.forEach(g=>{const yy=Math.round(grY(-g,y0,h))+.5;c.moveTo(x-6,yy);c.lineTo(x-1,yy)});c.stroke();GRS.forEach(g=>tx(c,String(g),x-8,grY(-g,y0,h),{a:'right',s:6.5}));
+      const yy=grY(d,y0,h);rect(c,x,y0,14,yy-y0,K.rd);if(hd<-.05)rect(c,x-1,Math.round(grY(hd,y0,h)),16,1.3,'#fff');num(c,fd(d,1),x+7,y0+h+12,{a:'center',s:9,c:'#ff8aa0'})});
+    lab(c,'GR DB · FIRST DB WIDEST',30,226,'left',W_(.45),5);
+    const hx=236,hw=170;rect(c,hx-8,20,186,60,K.pn,6);lab(c,'IN THE DEVICE TITLE',hx,32);const d=-(st.c?st.c.d:0);rect(c,hx,44,hw,4,K.trk);const xr=hx+hw*Math.sqrt(Math.min(30,-d)/30);rect(c,hx,44,xr-hx,4,K.rd);c.strokeStyle=W_(.4);c.beginPath();[0,1,3,6,10,20,30].forEach(g=>{const xx=Math.round(hx+hw*Math.sqrt(g/30))+.5;c.moveTo(xx,50);c.lineTo(xx,53)});c.stroke();[0,1,3,6,10,20].forEach(g=>tx(c,String(g),hx+hw*Math.sqrt(g/30),60,{a:'center',s:6}));
+    rect(c,hx-8,92,186,104,K.pn,6);lab(c,'ATTACK 10 MS · RELEASE 120 MS',hx,104,'left',W_(.5),5);lab(c,'METER FALLS 25 DB/S',hx,116,'left',W_(.5),5);lab(c,'TICK HOLDS 2 S',hx,128,'left',W_(.5),5);num(c,'max '+fd(-(st.c?st.c.mx:0),1)+' dB',hx,150,{s:9,c:K.ink});lab(c,'SINCE START, CLICK RESETS',hx,164,'left',W_(.45),5)}});
+card(FG,{id:'G3',star:true,name:'Transfer curve with a live point',desc:'Today\'s compressor curve, calibrated: input and output in dBFS from −60 to 0, a line every 6 dB and labels every 12, the 1:1 line dashed. The <b>signal rides the curve as a dot</b> with a short trail, and an amber caliper (M3) measures the distance to the 1:1 line: that is the gain reduction, with its number.',
+  cpu:'One curve drawn once, a dot and a 30-point trail each frame. Light mode: no trail.',
+  draw(c,st,F){const x0=26,y0=14,s=190,X=d=>x0+s*(Math.max(-60,Math.min(0,d))+60)/60,Y=d=>y0+s-s*(Math.max(-60,Math.min(0,d))+60)/60,T=-18,Rt=4,Wk=6;
+    rect(c,x0,y0,s,s,'#000',3);for(let d=-60;d<=0;d+=6){const a=Math.round(X(d))+.5,b=Math.round(Y(d))+.5;ln(c,a,y0,a,y0+s,W_(d%12?.04:.08));ln(c,x0,b,x0+s,b,W_(d%12?.04:.08));if(d%12===0){tx(c,fd(d,0),a,y0+s+9,{a:'center',s:6.5});tx(c,fd(d,0),x0-4,b,{a:'right',s:6.5})}}
+    c.setLineDash([3,3]);ln(c,X(-60),Y(-60),X(0),Y(0),W_(.3));ln(c,Math.round(X(T))+.5,y0,Math.round(X(T))+.5,y0+s,RDA(.6));c.setLineDash([]);
+    const gc=x=>2*(x-T)>Wk?T+(x-T)/Rt:2*Math.abs(x-T)<=Wk?x+(1/Rt-1)*Math.pow(x-T+Wk/2,2)/(2*Wk):x;c.strokeStyle=K.eq;c.lineWidth=1.6;c.beginPath();for(let d=-60;d<=0;d+=.5){const xx=X(d),yy=Y(gc(d));d>-60?c.lineTo(xx,yy):c.moveTo(xx,yy)}c.stroke();
+    const r=E.rec||{cIn:-240,cGr:0};st.tr=st.tr||[];const xin=r.cIn,xo=xin+r.cGr;if(xin>-60){st.tr.push([xin,xo]);if(st.tr.length>30)st.tr.shift()}
+    if(!F.light)st.tr.forEach((p,i)=>dot(c,X(p[0]),Y(p[1]),1.2,'rgba(255,210,122,'+(i/30*.6).toFixed(2)+')'));
+    if(xin>-60){const px=X(xin),py=Y(xo),p1=Y(xin);dot(c,px,py,3.5,'#fff');if(r.cGr<-.2){c.strokeStyle=K.am;c.lineWidth=1;c.beginPath();c.moveTo(px+6,p1);c.lineTo(px+10,p1);c.moveTo(px+6,py);c.lineTo(px+10,py);c.moveTo(px+8,p1);c.lineTo(px+8,py);c.stroke();lab(c,fd(r.cGr,1)+' DB',px+13,(p1+py)/2,'left')}}
+    lab(c,'IN DBFS',x0+s,y0+s+19,'right',null,5);lab(c,'OUT',x0-4,y0-6,'right',null,5);
+    const rx=238;[['THRESHOLD',MIN+'18.0','DBFS'],['RATIO','4.0 : 1',''],['KNEE','6.0','DB'],['ATTACK','10','MS'],['RELEASE','120','MS'],['GAIN REDUCTION',fd(r.cGr,1),'DB']].forEach((q,i)=>{lab(c,q[0],rx,22+i*32,'left',null,5.5);num(c,q[1],rx+110,36+i*32,{a:'right',s:i===5?13:10,c:i===5?'#ff8aa0':K.ink});lab(c,q[2],rx+114,37+i*32,'left',W_(.5),5)})}});
+card(FG,{id:'G4',name:'Per-band gain reduction',desc:'For OTT, Multiband and the de-esser: one GR bar per band on the G2 scale, the band\'s edges as frequencies, and its number. Today OTT shows coloured blocks without a scale.',
+  cpu:'Three bars. Light mode: same.',
+  draw(c,st,F){const r=E.rec||{mbGr:[0,0,0]},y0=34,h=160,B=[['LOW','< 120 HZ',K.rd],['MID','120 HZ TO 2.5 KHZ',K.ye],['HIGH','> 2.5 KHZ',K.cy]];
+    B.forEach((b,i)=>{const x=60+i*120,q=ball(st,'b'+i,-r.mbGr[i],F.dt,25,2),d=-q.d;lab(c,b[0],x+12,14,'center',b[2]);lab(c,b[1],x+12,24,'center',W_(.5),5);rect(c,x,y0,24,h,K.trk,2);c.strokeStyle=W_(.4);c.beginPath();GRS.forEach(g=>{const yy=Math.round(grY(-g,y0,h))+.5;c.moveTo(x-6,yy);c.lineTo(x-1,yy)});c.stroke();
+      if(i===0)GRS.forEach(g=>tx(c,String(g),x-8,grY(-g,y0,h),{a:'right',s:6.5}));const yy=grY(d,y0,h);rect(c,x,y0,24,yy-y0,b[2]);if(q.h>.05)rect(c,x-1,Math.round(grY(-q.h,y0,h)),26,1.3,'#fff');num(c,fd(d,1),x+12,y0+h+14,{a:'center',s:9})});
+    lab(c,'DOWNWARD '+MIN+'30 DBFS 3:1 PER BAND · GR DB',60,226,'left',W_(.45),5)}});
+
+/* ---------- E: EQ ---------- */
+const FE=fam({id:'E',name:'EQ curves and the Pro EQ display',W:420,H:240,single:true,
+  intro:'Pro EQ, Auto Filter and the filter displays. A five-band example runs on the signal (cut 30 Hz, shelf +2 dB at 100 Hz, −3.5 dB at 320 Hz, +2.5 dB at 2.8 kHz, shelf +3 dB at 10 kHz), so "post" is the filtered sound, not a sum. Band colours and numbered dots stay as today.',
+  where:'vizEQ2(), mkEQ2 analysers pre/post, vizFilter(), Auto Filter'});
+const EQCV={};
+function eqBase(c,st,F,o){const x0=26,y0=18,w=366,h=190,G=o.range||12,Y=g=>y0+h/2-g*h/(2*G),A=v=>y0+h*(0-v)/90,fx=fAxis(c,x0,w,y0,h);
+  for(let g=-G;g<=G;g+=G>12?6:3){const yy=Math.round(Y(g))+.5;ln(c,x0,yy,x0+w,yy,W_(g===0?.16:g%6?.03:.06));if(g%6===0)tx(c,fd(g,0,true),x0-4,yy,{a:'right',s:7,c:g===0?K.ink:'#c9b37a'})}
+  if(o.ana!==false){const n=F.light?4096:8192,pre=smooth(st,'pre',cols(E.fft(n,'M'),n,w,{tilt:4.5}),F.dt||.016,.3),post=smooth(st,'post',cols(E.fft(n,'P'),n,w,{tilt:4.5}),F.dt||.016,.3);st.preA=pre;st.postA=post;
+    if(o.ana==='line'){trace(c,post,x0,A,CYA(.45),1)}else{trace(c,pre,x0,A,W_(.28),1);trace(c,post,x0,A,null,0,'rgba(76,141,255,.16)',y0+h);trace(c,post,x0,A,'rgba(120,200,255,.5)',1)}
+    if(o.anaScale!==false)[0,-30,-60,-90].forEach(v=>tx(c,fd(v,0),x0+w+4,A(v),{s:6.5,c:K.dim}))}
+  c.save();c.beginPath();c.rect(x0,y0,w,h);c.clip();
+  const CV=EQCV[w]||(EQCV[w]={sum:Array.from({length:w+1},(_,i)=>eqDb(20*Math.pow(1000,i/w))),band:EQB.map(b=>Array.from({length:w+1},(_,i)=>bqMag(b.q,20*Math.pow(1000,i/w))))});
+  if(o.bands!==false)EQB.forEach((b,j)=>{c.strokeStyle=b.col;c.globalAlpha=.45;c.lineWidth=1;c.beginPath();for(let i=0;i<=w;i+=2){const g=CV.band[j][i];i?c.lineTo(x0+i,Y(g)):c.moveTo(x0+i,Y(g))}c.stroke();c.globalAlpha=1});
+  if(o.fill){c.fillStyle='rgba(255,210,122,.08)';c.beginPath();c.moveTo(x0,Y(0));for(let i=0;i<=w;i+=2)c.lineTo(x0+i,Y(CV.sum[i]));c.lineTo(x0+w,Y(0));c.closePath();c.fill()}
+  c.strokeStyle=K.eq;c.lineWidth=1.6;c.beginPath();for(let i=0;i<=w;i+=1){const g=CV.sum[i];i?c.lineTo(x0+i,Y(g)):c.moveTo(x0+i,Y(g))}c.stroke();c.restore();
+  frame(c,x0,y0,w,h);return{x0,y0,w,h,Y,fx,G}}
+function nodes(c,g,sel){EQB.forEach(b=>{const x=g.fx(b.f),y=g.Y(b.type==='hp'?0:b.type==='bell'?b.g:b.g/2);dot(c,x,y,b.n===sel?7:6,'#000');c.strokeStyle=b.col;c.lineWidth=b.n===sel?2:1.4;c.beginPath();c.arc(x,y,b.n===sel?7:6,0,TAU);c.stroke();tx(c,String(b.n),x,y+.5,{a:'center',s:7,w:600,c:b.col})})}
+function bandRead(c,b,x,y){const nn=note(b.f),bw=b.type==='bell'?2/Math.LN2*Math.asinh(1/(2*b.Q)):null;num(c,b.n+' · '+b.name+' · '+hz(b.f)+' · '+nn[0]+' '+fd(nn[1],0,true)+' ct'+(b.type==='hp'?'':' · '+fd(b.g,1,true)+' dB')+(bw?' · Q '+b.Q.toFixed(2)+' · '+bw.toFixed(2)+' oct':''),x,y,{s:7.5,c:b.col})}
+card(FE,{id:'E0',name:'Today',img:'E',desc:'Grid lines at 30 Hz to 20 kHz and ±18, 12, 6 dB on a ±24 dB range, the analyzer (post) as a blue fill with a line, numbered coloured dots, the summed curve in warm yellow with a glow.'});
+card(FE,{id:'E1',star:true,name:'Calibrated EQ',desc:'Two scales, each in its own colour: <b>EQ gain on the left</b> (±12 dB here, zooming to ±6, 12, 18 or 30 to fit the bands) and <b>analyzer dBFS on the right</b>. Decades long, 2 and 5 shorter. Pre in grey, post in blue, both with the 4.5 dB/oct tilt named. Each band\'s own curve faint in its colour, the sum on top. The selected band reads out frequency, note (X8), gain, Q and bandwidth in octaves.',
+  cpu:'The curve is computed once per change; two spectra from the shared FFT (pre and post). Light mode: 4096 points, 30 a second.',
+  draw(c,st,F){const sel=1+Math.floor(E.t/3)%5,g=eqBase(c,st,F,{});nodes(c,g,sel);bandRead(c,EQB[sel-1],g.x0,9);lab(c,'GAIN DB',g.x0-4,g.y0+g.h+20,'right','#c9b37a',5);lab(c,'ANALYZER POST · PRE GREY · TILT 4.5 DB/OCT · DBFS',g.x0+g.w,g.y0+g.h+20,'right',W_(.4),5)}});
+card(FE,{id:'E2',name:'Measured response',desc:'E1 plus a check: the white dotted line is <b>post minus pre</b>, measured from the sound over the last 2 s. It lies on the curve when the EQ does what it shows, and moves when a dynamic band acts or the input has no energy there (shown faint). A read-out gives how close they are.',
+  cpu:'One more line from spectra already computed. Light mode: off.',
+  draw(c,st,F){const g=eqBase(c,st,F,{bands:false});nodes(c,g,0);if(!F.light&&st.preA){const n=st.preA.length;st.df=st.df||new Float32Array(n);const k=1-Math.exp(-(F.dt||.016)/2);let se=0,sn=0;c.fillStyle='#fff';for(let i=0;i<n;i++){const d=st.postA[i]-st.preA[i];st.df[i]+=(d-st.df[i])*k;const f=20*Math.pow(1000,(i+.5)/n),ok=st.preA[i]>-80;if(i%3===0){c.globalAlpha=ok?.9:.25;c.fillRect(g.x0+i-.6,g.Y(Math.max(-g.G,Math.min(g.G,st.df[i])))-.6,1.3,1.3)}if(ok&&f>40&&f<16000){se+=Math.pow(st.df[i]-eqDb(f),2);sn++}}c.globalAlpha=1;
+      num(c,'MEASURED vs CURVE ±'+(sn?Math.sqrt(se/sn):0).toFixed(1)+' dB RMS',g.x0,9,{s:7.5,c:'#fff'})}lab(c,'DOTS = POST − PRE, 2 S AVERAGE',g.x0+g.w,g.y0+g.h+20,'right',W_(.45),5)}});
+card(FE,{id:'E3',name:'Bandwidth calipers',desc:'E1 with the area between curve and 0 dB lightly filled, so boosts and cuts read as shapes, and an amber <b>caliper under each bell</b> marking its −3 dB bandwidth with the width in octaves (M3 caliper style); shelves and the cut show their corner frequency.',
+  cpu:'Drawn once per change. Light mode: same.',
+  draw(c,st,F){const g=eqBase(c,st,F,{fill:true,bands:false});nodes(c,g,0);EQB.forEach(b=>{const x=g.fx(b.f);if(b.type==='bell'){const bw=2/Math.LN2*Math.asinh(1/(2*b.Q)),f1=b.f/Math.pow(2,bw/2),f2=b.f*Math.pow(2,bw/2),a=g.fx(f1),bb=g.fx(f2),y=g.Y(b.g)+(b.g>0?-14:14);c.strokeStyle=K.am;c.lineWidth=1;c.beginPath();c.moveTo(a,y-3);c.lineTo(a,y+3);c.moveTo(bb,y-3);c.lineTo(bb,y+3);c.moveTo(a,y);c.lineTo(bb,y);c.stroke();lab(c,bw.toFixed(2)+' OCT',(a+bb)/2,y+(b.g>0?-7:8),'center')}else{ln(c,Math.round(x)+.5,g.y0+g.h-10,Math.round(x)+.5,g.y0+g.h,K.am);lab(c,hz(b.f).toUpperCase(),x,g.y0+g.h-15,'center')}})}});
+card(FE,{id:'E4',name:'Quiet',desc:'For small device windows and Light mode: decade lines only, the sum curve and the post spectrum as one thin line, no band curves and no fill. The least to look at and to draw.',
+  cpu:'One curve and one spectrum line. Light mode: same.',
+  draw(c,st,F){const g=eqBase(c,st,F,{ana:'line',bands:false,anaScale:false});nodes(c,g,0)}});
+
+/* ---------- V: visualizer ---------- */
+const VS={map:'magma',range:90,tilt:4.5,hold:'max',speed:'normal',scales:'edges'};
+const LUTS={};function LUT(k){if(LUTS[k])return LUTS[k];const a=new Uint8Array(768);if(k==='today'){for(let i=0;i<256;i++){const t=i/255;a[i*3]=Math.round(255*Math.min(1,Math.max(0,1.6*t-.35)));a[i*3+1]=Math.round(255*Math.min(1,Math.max(0,1.8*t-.8)));a[i*3+2]=Math.round(255*Math.min(1,Math.max(0,t<.5?.25+t*1.2:1.6-t*1.4)))}}
+  else{const h=CMHEX[k],n=h.length/6;for(let i=0;i<256;i++){const p=i/255*(n-1),j=Math.min(n-2,Math.floor(p)),f=p-j;for(let ch=0;ch<3;ch++){const v0=parseInt(h.substr(j*6+ch*2,2),16),v1=parseInt(h.substr((j+1)*6+ch*2,2),16);a[i*3+ch]=Math.round(v0+(v1-v0)*f)}}}return LUTS[k]=a}
+const FV=fam({id:'V',name:'The Visualizer and its right-click menu',W:680,H:230,single:true,min:'640px',
+  intro:'The Visualizer panel (All, Spectrogram, Spectrum, Waveform, Levels; docked top, bottom, left, right or floating). Pick a layout, then set the menu below: it changes these pictures live, and your colour map goes into the line. Right-click any picture here to jump to the menu.',
+  where:'VZ, vizBuild(), vizFrame(), VZD.spec/fft/wave/lev, pvMenu()'});
+function sgram(st,F,rows,o={}){/* scrolling spectrogram: one column per frame (speed), rows log-spaced 20 Hz to 20 kHz */
+  const cw=o.cols||240;if(!st.sg||st.sg.height!==rows){st.sg=document.createElement('canvas');st.sg.width=cw;st.sg.height=rows;st.sgx=st.sg.getContext('2d');st.sgx.fillStyle='#000';st.sgx.fillRect(0,0,cw,rows);st.col=st.sgx.createImageData(1,rows);st.ci=0;st.acc=0}
+  if(F.dt>0){st.acc=Math.min(4,st.acc+F.dt*60*(VS.speed==='slow'?.5:VS.speed==='fast'?2:1));const L=LUT(VS.map),sp=E.fft(2048,'M'),bw=SR/2048,rg=VS.range;while(st.acc>=1){st.acc-=1;const d=st.col.data;for(let y=0;y<rows;y++){const f0=20*Math.pow(1000,(rows-1-y)/rows),f1=20*Math.pow(1000,(rows-y)/rows);let v=-240;for(let k=Math.floor(f0/bw);k<=Math.ceil(f1/bw)&&k<1024;k++)if(sp[k]>v)v=sp[k];const q=Math.max(0,Math.min(255,Math.round(255*(v+rg)/rg)));d[y*4]=L[q*3];d[y*4+1]=L[q*3+1];d[y*4+2]=L[q*3+2];d[y*4+3]=255}st.sgx.putImageData(st.col,st.ci,0);st.ci=(st.ci+1)%cw}}
+  return st.sg}
+function blitSg(c,st,x,y,w,h){const cw=st.sg.width,a=st.ci;c.imageSmoothingEnabled=true;const wa=(cw-a)/cw*w;c.drawImage(st.sg,a,0,cw-a,st.sg.height,x,y,wa,h);if(a>0)c.drawImage(st.sg,0,0,a,st.sg.height,x+wa,y,w-wa,h)}
+function cbar(c,x,y,w,h,vert){const L=LUT(VS.map),n=vert?h:w;for(let i=0;i<n;i++){const q=Math.floor((vert?(n-1-i):i)/(n-1)*255);c.fillStyle='rgb('+L[q*3]+','+L[q*3+1]+','+L[q*3+2]+')';vert?c.fillRect(x,y+i,w,1):c.fillRect(x+i,y,1,h)}}
+function fAxisV(c,x,y0,h,side){const fy=f=>y0+h-h*Math.log(f/20)/Math.log(1000);for(let d=10;d<=20000;d*=10)for(let m=1;m<10;m++){const f=d*m;if(f<20||f>20000)continue;const yy=Math.round(fy(f))+.5;ln(c,x,yy,x+(side*(m===1?5:m===2||m===5?3.5:2)),yy,W_(m===1?.5:.3))}[50,100,200,500,1000,2000,5000,10000].forEach(f=>tx(c,f>=1000?f/1000+'k':String(f),x+side*8,fy(f),{a:side>0?'left':'right',s:6.5,c:[100,1000,10000].includes(f)?'#b7b7c2':K.mut}));return fy}
+function waveMini(c,x,y,w,h,ms,o={}){const span=Math.round(SR*ms/1000),cols=Math.floor(w),per=span/cols,rm=E.rM,wi=E.wi;ln(c,x,y+h/2+.5,x+w,y+h/2+.5,W_(.12));c.fillStyle=o.col||'rgba(140,210,255,.85)';for(let i=0;i<cols;i++){let mn=1,mx=-1;const s0=wi-span+Math.floor(i*per);for(let k=0;k<per;k+=2){const v=rm[(s0+k)&RM];if(v<mn)mn=v;if(v>mx)mx=v}const a=y+h/2-mx*h/2,b=y+h/2-mn*h/2;c.fillRect(x+i,a,1,Math.max(1,b-a));if(mx>.99||mn<-.99){c.fillStyle=K.rd;c.fillRect(x+i,y,1,2);c.fillStyle=o.col||'rgba(140,210,255,.85)'}}}
+function levMini(c,st,F,x,y,w,h){const r=E.rec||{pk:[-240,-240],rms:[-240,-240]};const Y=d=>y+h-h*taper(d);const g=lvGrad(c,0,y+h,0,y);[0,1].forEach(i=>{const b=ball(st,'vp'+i,r.pk[i],F.dt,DPPM,2),q=ball(st,'vr'+i,r.rms[i],F.dt,DPPM,0),X=x+i*(w/2+1);rect(c,X,y,w/2-1,h,K.trk);c.fillStyle=g;c.globalAlpha=.38;c.fillRect(X,Y(b.d),w/2-1,y+h-Y(b.d));c.globalAlpha=1;c.fillRect(X,Y(q.d),w/2-1,y+h-Y(q.d));if(b.h>-60)rect(c,X,Math.round(Y(b.h)),w/2-1,1.2,b.h>0?K.rd:'#fff')});
+  c.strokeStyle=W_(.4);c.beginPath();[0,-6,-12,-24,-48].forEach(d=>{const yy=Math.round(Y(d))+.5;c.moveTo(x-4,yy);c.lineTo(x-1,yy)});c.stroke();[0,-12,-24,-48].forEach(d=>tx(c,fd(d,0),x-6,Y(d),{a:'right',s:6}))}
+card(FV,{id:'V0',name:'Today',img:'V',desc:'Spectrogram in a home-made heat map with three frequency labels, a spectrum with a gradient fill and no scale, the waveform with bar lines, levels with LUFS and PEAK numbers.'});
+card(FV,{id:'V1',star:true,name:'One frequency axis',desc:'Spectrogram and spectrum <b>share one frequency axis</b>: the spectrum lies sideways next to the spectrogram, so a line in one is a peak in the other at the same height. Magma with its colour bar in dBFS, the waveform with a time scale bar (X11), the levels as M2. Scales only at the edges.',
+  cpu:'One 2048 FFT column a frame into a 240 by 128 picture (shifted, not redrawn), one spectrum from the shared FFT. Light mode: 30 a second, no max hold.',
+  draw(c,st,F){const y0=14,h=176,sg=sgram(st,F,128);blitSg(c,st,10,y0,300,h);frame(c,10,y0,300,h);const fy=fAxisV(c,312,y0,h,1);
+    const n=F.light?4096:8192,sp=E.fft(n,'M'),rows=88,vals=new Float32Array(rows);for(let i=0;i<rows;i++){const f0=20*Math.pow(1000,i/rows),f1=20*Math.pow(1000,(i+1)/rows);let v=-240;for(let k=Math.floor(f0*n/SR);k<=Math.ceil(f1*n/SR)&&k<n/2;k++)if(sp[k]>v)v=sp[k];vals[i]=v+VS.tilt*Math.log2(Math.sqrt(f0*f1)/1000)}
+    const sv=smooth(st,'sv',vals,F.dt||.016,.25),sx=340,sw=110,X=v=>sx+sw*Math.max(0,Math.min(1,(v+VS.range)/VS.range));for(let d=0;d>=-VS.range;d-=VS.range/3){const xx=Math.round(X(d))+.5;ln(c,xx,y0,xx,y0+h,W_(.06));tx(c,fd(d,0),xx,y0+h+9,{a:'center',s:6.5})}
+    if(VS.hold==='max'&&!F.light){const mh=maxHold(st,'vmh',sv,F.dt||.016,3);c.strokeStyle=W_(.3);c.lineWidth=1;c.beginPath();for(let i=0;i<rows;i++){const yy=y0+h-h*(i+.5)/rows;i?c.lineTo(X(mh[i]),yy):c.moveTo(X(mh[i]),yy)}c.stroke()}
+    c.fillStyle=CYA(.12);c.beginPath();c.moveTo(sx,y0+h);for(let i=0;i<rows;i++)c.lineTo(X(sv[i]),y0+h-h*(i+.5)/rows);c.lineTo(sx,y0);c.closePath();c.fill();c.strokeStyle=K.cy;c.lineWidth=1.1;c.beginPath();for(let i=0;i<rows;i++){const yy=y0+h-h*(i+.5)/rows;i?c.lineTo(X(sv[i]),yy):c.moveTo(X(sv[i]),yy)}c.stroke();frame(c,sx,y0,sw,h);
+    cbar(c,10,y0+h+6,120,4);tx(c,fd(-VS.range,0),10,y0+h+16,{s:6.5});tx(c,'0 dBFS',130,y0+h+16,{a:'right',s:6.5});lab(c,VS.map.toUpperCase(),136,y0+h+8,'left',null,5.5);lab(c,'HZ',312,y0-6,'left',null,5);lab(c,'SPECTRUM · TILT '+VS.tilt+' · DBFS',sx+sw,y0-6,'right',W_(.5),5);
+    rect(c,466,y0,206,80,'#000',3);waveMini(c,466,y0,206,80,200);ln(c,472,y0+72.5,472+206*50/200,y0+72.5,K.am);lab(c,'50 MS',474+206*50/200,y0+72,'left',null,5);lab(c,'WAVEFORM · 200 MS',470,y0+8,'left',W_(.5),5);
+    rect(c,466,y0+90,206,86,K.pn,3);levMini(c,st,F,500,y0+98,22,72);const r=E.rec||{pk:[-240,-240]};lab(c,'PEAK',540,y0+104,'left',null,5);num(c,fd(Math.max(st.vp0?st.vp0.d:-240,st.vp1?st.vp1.d:-240),1),620,y0+118,{a:'right',s:11});lab(c,'DBFS',624,y0+119,'left',W_(.5),5);lab(c,'SHORT-TERM',540,y0+136,'left',null,5);num(c,fd(E.S,1),620,y0+150,{a:'right',s:11});lab(c,'LUFS',624,y0+151,'left',W_(.5),5)}});
+card(FV,{id:'V2',name:'Instrument rack',desc:'Four modules side by side, each a small instrument with its settings in its header like a lab rack: SPECTROGRAM (FFT size, Hz per bin), SPECTRUM (RBW, tilt), SCOPE (ms per division, triggered as O3), LEVELS (ballistics). Each has its own graticule. Easiest to read what each one is set to.',
+  cpu:'Same as V1, plus the scope trace. Light mode: 30 a second.',
+  draw(c,st,F){const mods=[['SPECTROGRAM','2048 · 23.4 HZ/BIN'],['SPECTRUM','RBW 8.8 HZ · TILT '+VS.tilt],['SCOPE','2 MS/DIV · TRIG L ↑'],['LEVELS','PEAK + RMS 300 MS']],mw=160,y0=26,h=164;
+    mods.forEach((m,i)=>{const x=10+i*(mw+8);rect(c,x,6,mw,14,K.pn2,3);lab(c,m[0],x+5,13);lab(c,m[1],x+mw-5,13,'right',W_(.5),5);rect(c,x,y0,mw,h,'#000',3)});
+    const sg=sgram(st,F,96,{cols:160});blitSg(c,st,10,y0,mw,h);cbar(c,10,y0+h+6,mw,3);tx(c,fd(-VS.range,0),10,y0+h+15,{s:6});tx(c,'0',10+mw,y0+h+15,{s:6,a:'right'});
+    const x1=178,n=F.light?4096:8192,sm=smooth(st,'s',cols(E.fft(n,'M'),n,mw,{tilt:VS.tilt}),F.dt||.016,.25),Y=v=>y0+h*(0-v)/VS.range;fAxis(c,x1,mw,y0,h,{labels:[100,1000,10000]});trace(c,sm,x1,Y,K.cy,1);
+    const x2=346,span=Math.round(SR*.02),rl=E.rL,wi=E.wi;for(let i=0;i<=10;i++)ln(c,Math.round(x2+mw*i/10)+.5,y0,Math.round(x2+mw*i/10)+.5,y0+h,W_(i===5?.12:.05));for(let j=0;j<=8;j++)ln(c,x2,Math.round(y0+h*j/8)+.5,x2+mw,Math.round(y0+h*j/8)+.5,W_(j===4?.12:.05));
+    let s0=(wi-span-1200)&RM,trig=0;for(let k=0;k<1200;k++){if(rl[(s0+k-1)&RM]<0&&rl[(s0+k)&RM]>=0)trig=k}const st0=(s0+trig)&RM;c.strokeStyle=K.ye;c.lineWidth=1;c.beginPath();for(let i=0;i<span;i+=3){const xx=x2+mw*i/span,yy=y0+h/2-rl[(st0+i)&RM]*h/2;i?c.lineTo(xx,yy):c.moveTo(xx,yy)}c.stroke();
+    levMini(c,st,F,560,y0+8,40,h-16);const r=E.rec;num(c,fd(Math.max(st.vp0?st.vp0.d:-240,st.vp1?st.vp1.d:-240),1),666,y0+20,{a:'right',s:10});lab(c,'PK DBFS',666,y0+32,'right',null,5);num(c,fd(Math.max(st.vr0?st.vr0.d:-240,st.vr1?st.vr1.d:-240),1),666,y0+56,{a:'right',s:10});lab(c,'RMS DBFS',666,y0+68,'right',null,5);num(c,fd(E.S,1),666,y0+92,{a:'right',s:10});lab(c,'S LUFS',666,y0+104,'right',null,5)}});
+card(FV,{id:'V3',name:'Spectrogram first',desc:'For listening and finding things: the spectrogram fills the panel, with the frequency axis on the left, a <b>time axis in bars and beats</b> at the project tempo along the bottom and bar lines on the picture, the colour bar upright on the right. A thin waveform strip under it, levels as two slim bars.',
+  cpu:'One column a frame, shifted (about 0.1 ms). Light mode: 30 a second.',
+  draw(c,st,F){const x0=40,y0=10,w=560,h=170,sg=sgram(st,F,128,{cols:280});blitSg(c,st,x0,y0,w,h);frame(c,x0,y0,w,h);fAxisV(c,x0,y0,h,-1);
+    const cps=60*(VS.speed==='slow'?.5:VS.speed==='fast'?2:1),secs=280/cps,bar=BEAT*4,now=E.t;for(let b=Math.floor((now-secs)/bar);b<=Math.floor(now/bar);b++){const t=b*bar,xx=x0+w*(1-(now-t)/secs);if(xx<x0)continue;ln(c,Math.round(xx)+.5,y0,Math.round(xx)+.5,y0+h,W_(.14));ln(c,Math.round(xx)+.5,y0+h,Math.round(xx)+.5,y0+h+4,W_(.5));tx(c,String(b+1),xx+2,y0+h+10,{s:6.5})}
+    lab(c,'BARS AT 145 BPM · '+secs.toFixed(1)+' S ACROSS',x0+w,y0+h+10,'right',W_(.5),5);cbar(c,612,y0,6,h,true);tx(c,'0',622,y0+3,{s:6.5});tx(c,fd(-VS.range,0),622,y0+h-3,{s:6.5});lab(c,'DBFS',622,y0+h/2,'left',null,5);
+    rect(c,x0,y0+h+18,w,22,'#000',2);waveMini(c,x0,y0+h+18,w,22,2000,{col:'rgba(140,210,255,.6)'});levMini(c,st,F,646,y0+10,24,h)}});
+
+/* ---------- C: CPU graph ---------- */
+const FC=fam({id:'C',name:'CPU graph',W:420,H:200,single:true,
+  intro:'The CPU button in the top bar (a small graph, a percentage, the latency). On this page the graph shows <b>this page\'s own drawing time</b> as a share of one screen frame (16.7 ms), so it is a real measurement. Each card shows the button at its real size and enlarged.',
+  where:'cpuFrame() #cpuC, cpuPopFill(), #cpuPop'});
+function cpuData(){const ft=E.ft.slice(-240);return ft.map(v=>Math.min(150,v/16.67*100))}
+card(FC,{id:'C0',name:'Today',img:'C',desc:'A green dot, a filled history graph (red when the load is too high) and a percentage. No scale.'});
+function cpuBtn(c,x,y,o){rect(c,x,y,58,26,K.pn,5);o(c,x,y)}
+card(FC,{id:'C1',star:true,name:'Load against budget',desc:'The same filled graph, now with a scale: 0, 50 and 100 %, a dashed <b>budget line at 75 %</b> (above it dropouts become likely) and the area turning red only above it. Read-outs: now, the peak of the last 4 s, and the time per frame in ms. In the button a small tick marks the budget.',
+  cpu:'A 120-point area every 100 ms, as today. Light mode: same.',
+  draw(c,st,F){const d=cpuData(),x0=36,y0=16,w=340,h=120,Y=v=>y0+h-h*Math.min(1,v/100);[0,25,50,75,100].forEach(v=>{const yy=Math.round(Y(v))+.5;ln(c,x0,yy,x0+w,yy,W_(v===75?0:.05));if(v%50===0)tx(c,v+'%',x0-4,yy,{a:'right',s:7})});c.setLineDash([4,3]);ln(c,x0,Math.round(Y(75))+.5,x0+w,Math.round(Y(75))+.5,AM(.8));c.setLineDash([]);lab(c,'BUDGET 75 %',x0+w,Y(75)-6,'right');
+    const area=(g,X,YY,arr,ww,yb)=>{g.beginPath();g.moveTo(X,yb);arr.forEach((v,i)=>g.lineTo(X+ww*i/(arr.length-1),YY(v)));g.lineTo(X+ww,yb);g.closePath()};if(d.length>1){c.save();area(c,x0,Y,d,w,y0+h);c.clip();rect(c,x0,Y(75),w,y0+h-Y(75),'rgba(62,207,142,.35)');rect(c,x0,y0,w,Y(75)-y0,'rgba(255,77,77,.5)');c.restore()}frame(c,x0,y0,w,h);
+    const now=d.length?d[d.length-1]:0,pk=d.length?Math.max(...d.slice(-600)):0,ms=E.ft.length?E.ft[E.ft.length-1]:0;num(c,now.toFixed(0)+' %',x0,y0+h+20,{s:12});lab(c,'NOW',x0,y0+h+32,'left',null,5);num(c,pk.toFixed(0)+' %',x0+90,y0+h+20,{s:12});lab(c,'PEAK 4 S',x0+90,y0+h+32,'left',null,5);num(c,ms.toFixed(2)+' ms',x0+180,y0+h+20,{s:12});lab(c,'PER FRAME OF 16.7',x0+180,y0+h+32,'left',null,5);
+    cpuBtn(c,350,160,(c,x,y)=>{const gx=x+16,gw=24,gy=y+4,gh=18,dd=d.slice(-40);dot(c,x+8,y+13,2.5,K.acc);c.save();if(dd.length>1){area(c,gx,v=>gy+gh-gh*Math.min(1,v/100),dd,gw,gy+gh);c.fillStyle='rgba(62,207,142,.45)';c.fill()}c.restore();ln(c,gx,gy+gh-gh*.75+.5,gx+gw,gy+gh-gh*.75+.5,AM(.8));num(c,now.toFixed(0)+'%',x+56,y+13,{a:'right',s:7,c:K.acc})});lab(c,'REAL SIZE',379,192,'center',W_(.5),5)}});
+card(FC,{id:'C2',name:'Frame-time histogram',desc:'For the CPU pop-up: how long each frame took, as a histogram from 0 to 33 ms, with the 16.7 ms frame line. The median and the 99th percentile say more than an average: a smooth app has both well left of the line.',
+  cpu:'34 bars once a second. Light mode: same.',
+  draw(c,st,F){const ft=E.ft.slice(-600),x0=30,y0=16,w=360,h=130,b=new Array(34).fill(0);ft.forEach(v=>{b[Math.min(33,Math.floor(v))]++});const mx=Math.max(1,...b),X=ms=>x0+w*ms/34;
+    b.forEach((n,i)=>{if(!n)return;const hh=h*n/mx;rect(c,X(i)+.5,y0+h-hh,w/34-1,hh,i>=17?'rgba(255,77,77,.7)':CYA(.7))});for(let ms=0;ms<=34;ms+=2){const xx=Math.round(X(ms))+.5;ln(c,xx,y0+h,xx,y0+h+(ms%8?3:5),W_(.4));if(ms%8===0)tx(c,ms+'',xx,y0+h+11,{a:'center',s:6.5})}
+    ln(c,Math.round(X(16.7))+.5,y0,Math.round(X(16.7))+.5,y0+h,AM(.8));lab(c,'1 FRAME AT 60 HZ',X(16.7)+4,y0+6);frame(c,x0,y0,w,h);const s=ft.slice().sort((a,b)=>a-b),pc=p=>s.length?s[Math.min(s.length-1,Math.floor(p*s.length))]:0;
+    num(c,pc(.5).toFixed(2)+' ms',x0,y0+h+30,{s:11});lab(c,'MEDIAN',x0,y0+h+42,'left',null,5);num(c,pc(.99).toFixed(2)+' ms',x0+110,y0+h+30,{s:11});lab(c,'99TH PERCENTILE',x0+110,y0+h+42,'left',null,5);lab(c,'MS',x0+w,y0+h+11,'right',null,5)}});
+card(FC,{id:'C3',name:'Orbit gauge',desc:'The load as an arc of 240° with a tick ring every 5 % (the orbit motif of the science look), the budget at 75 % as an amber mark, the number in the middle. At button size it is a ring with a dot instead of a graph: readable at a glance, no history.',
+  cpu:'One arc. Light mode: same.',
+  draw(c,st,F){const d=cpuData(),now=d.length?d[d.length-1]:0;st.v=st.v==null?now:st.v+(now-st.v)*.2;const g=(cx,cy,R,big)=>{const a0=Math.PI*.833,sp=Math.PI*1.333,A=v=>a0+sp*Math.min(1,v/100);c.strokeStyle=W_(.12);c.lineWidth=big?6:2.5;c.beginPath();c.arc(cx,cy,R,a0,a0+sp);c.stroke();c.strokeStyle=st.v>75?K.rd:K.acc;c.beginPath();c.arc(cx,cy,R,a0,A(st.v));c.stroke();
+      if(big){c.strokeStyle=W_(.35);c.lineWidth=1;c.beginPath();for(let i=0;i<=20;i++){const a=A(i*5),r1=R+6,r2=R+(i%2?9:12);c.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);c.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2)}c.stroke();[0,50,100].forEach(v=>{const a=A(v);tx(c,v+'',cx+Math.cos(a)*(R+20),cy+Math.sin(a)*(R+20),{a:'center',s:7})})}
+      const ab=A(75);ln(c,cx+Math.cos(ab)*(R-(big?6:3)),cy+Math.sin(ab)*(R-(big?6:3)),cx+Math.cos(ab)*(R+(big?6:3)),cy+Math.sin(ab)*(R+(big?6:3)),K.am,big?1.5:1);dot(c,cx+Math.cos(A(st.v))*R,cy+Math.sin(A(st.v))*R,big?3:1.6,'#fff')};
+    g(140,104,64,1);num(c,st.v.toFixed(0)+' %',140,100,{a:'center',s:18});lab(c,'LOAD',140,118,'center',null,5.5);lab(c,'AMBER = BUDGET 75 %',140,190,'center',W_(.5),5);
+    cpuBtn(c,300,80,(c,x,y)=>{g(x+13,y+14,7,0);num(c,st.v.toFixed(0)+'%',x+54,y+13,{a:'right',s:7,c:K.acc})});lab(c,'REAL SIZE',329,118,'center',W_(.5),5)}});
+
+/* ---------- D: previews in devices ---------- */
+const FD=fam({id:'D',name:'Waveform and spectrum previews in devices',W:420,H:200,single:true,
+  intro:'The small pictures inside Delay, Reverb, Drive, Soft Clipper, Gate and the instruments: today a line or a filled shape without a scale. One style for all of them.',
+  where:'level(), miniWave(), cs2Wave, wtWave, vnWave, Soft Clipper and Gate displays'});
+function devBox(c,title){rect(c,6,6,408,188,K.pn,8);rect(c,6,6,14,188,K.pn2,4);c.save();c.translate(15,100);c.rotate(-Math.PI/2);tx(c,title,0,0,{a:'center',s:8,w:600,sans:1,c:K.ink});c.restore();rect(c,26,14,380,172,'#000',6)}
+card(FD,{id:'D0',name:'Today',img:'D',desc:'Soft Clipper: the output as an orange line, "peak −11.6 dB" as plain text. Gate: a filled level history in teal on a −72 to 0 scale with open and close lines.'});
+card(FD,{id:'D1',star:true,name:'Scope preview',desc:'The last 300 ms as min and max columns (no aliasing, cheap), a centre line and faint lines at ±0.5, a <b>scale bar</b> that says how much time is shown (X11), the peak in dBFS as a read-out, and red marks at the top edge where the signal touched full scale.',
+  cpu:'190 columns from the shared ring buffer. Light mode: same at 30 a second.',
+  draw(c,st,F){devBox(c,'Drive');const x=34,y=22,w=364,h=140;ln(c,x,y+h/2+.5,x+w,y+h/2+.5,W_(.15));[.25,.75].forEach(q=>ln(c,x,Math.round(y+h*q)+.5,x+w,Math.round(y+h*q)+.5,W_(.05)));['+1','+0.5','0',MIN+'0.5',MIN+'1'].forEach((s,i)=>tx(c,s,x+w-2,y+h*i/4+(i===0?5:i===4?-5:0),{a:'right',s:6,c:K.dim}));
+    waveMini(c,x,y,w-24,h,300,{col:K.or});const r=E.rec||{pk:[-240,-240]},b=ball(st,'p',Math.max(r.pk[0],r.pk[1]),F.dt,DPPM,2);ln(c,x+4,y+h+10.5,x+4+(w-24)*50/300,y+h+10.5,K.am);ln(c,x+4.5,y+h+7,x+4.5,y+h+14,K.am);ln(c,x+4+(w-24)*50/300+.5,y+h+7,x+4+(w-24)*50/300+.5,y+h+14,K.am);lab(c,'50 MS',x+10+(w-24)*50/300,y+h+11);
+    num(c,'PEAK '+fd(b.h,1)+' dBFS',x+w,y+h+11,{a:'right',s:8,c:b.h>-.1?K.over:K.ink})}});
+card(FD,{id:'D2',name:'Level envelope in dB',desc:'The same columns on a <b>dB scale</b> (−48 to 0, mirrored), with the RMS as a darker core: quiet tails, reverb decay and gate action become visible, which a linear wave hides. Lines at −6, −12, −24 and −48 with labels.',
+  cpu:'Same columns, one log per column. Light mode: same.',
+  draw(c,st,F){devBox(c,'Reverb');const x=34,y=22,w=340,h=150,mid=y+h/2,span=Math.round(SR*.3),cols=w,per=span/cols,rm=E.rM,wi=E.wi,Yd=d=>(h/2)*Math.max(0,(Math.min(0,d)+48)/48);
+    [0,-6,-12,-24,-48].forEach(d=>{[1,-1].forEach(s=>ln(c,x,Math.round(mid-s*Yd(d))+.5,x+w,Math.round(mid-s*Yd(d))+.5,W_(d===-48?.12:.05)));if(d>-48)tx(c,fd(d,0),x+w+4,mid-Yd(d),{s:6.5})});tx(c,MIN+'∞',x+w+4,mid,{s:6.5});
+    for(let i=0;i<cols;i++){let mx=0,ss=0;const s0=wi-span+Math.floor(i*per);for(let k=0;k<per;k++){const v=Math.abs(rm[(s0+k)&RM]);if(v>mx)mx=v;ss+=v*v}const a=Yd(dB(mx)),b=Yd(dB(Math.sqrt(ss/per)));rect(c,x+i,mid-a,1,2*a,'rgba(76,201,240,.35)');rect(c,x+i,mid-b,1,2*b,'rgba(76,201,240,.85)')}
+    lab(c,'DBFS · 300 MS',x,y+h+8,'left',null,5)}});
+card(FD,{id:'D3',name:'Mini spectrum',desc:'For devices that change the tone (Drive, filters, instruments): a 1/6-octave smoothed spectrum line from the shared FFT, decade marks with 100, 1k and 10k, lines at −24 and −48 dB, the strongest peak with its note.',
+  cpu:'One 4096 FFT shared by every device on screen. Light mode: same at 30 a second.',
+  draw(c,st,F){devBox(c,'Drive');const x=34,y=22,w=364,h=136,sp=E.fft(4096,'M'),raw=cols(sp,4096,w,{tilt:3}),sm6=new Float32Array(w),k=Math.round(w/60);for(let i=0;i<w;i++){let s=0,n=0;for(let j=Math.max(0,i-k);j<=Math.min(w-1,i+k);j++){s+=Math.pow(10,raw[j]/10);n++}sm6[i]=10*Math.log10(s/n)}
+    const sm=smooth(st,'s',sm6,F.dt||.016,.3),Y=v=>y+h*(0-v)/72;[0,-24,-48,-72].forEach(d=>{ln(c,x,Math.round(Y(d))+.5,x+w,Math.round(Y(d))+.5,W_(d?.05:.1));tx(c,fd(d,0),x+3,Y(d)+(d?-5:6),{s:6,c:K.dim})});fAxis(c,x,w,y,h,{labels:[100,1000,10000],grid:false});
+    trace(c,sm,x,Y,null,0,'rgba(255,154,60,.12)',y+h);trace(c,sm,x,Y,K.or,1.2);const[pi,pv,pf]=peakOf(sm);const nn=note(pf);dot(c,x+pi,Y(pv),2,K.am);num(c,hz(pf)+' · '+nn[0],x+pi+(pi>w/2?-6:6),Y(pv)-8,{a:pi>w/2?'right':'left',s:7,c:K.am});lab(c,'1/6 OCT · 3 DB/OCT TILT',x+w,y+h+18,'right',W_(.5),5)}});
+
+/* ================= page: build, observe, run ================= */
+let LIGHT=false;const PK={};
+function build(){const root=document.getElementById('fams');
+  for(const f of FAMS){const s=document.createElement('section');s.className='fam';s.id='fam-'+f.id;s.innerHTML='<div class="ah"><h2><i>'+f.id+'</i>'+f.name+'</h2><p>'+f.intro+'</p><p style="font-size:12px">In the app: <span style="font-family:var(--data)">'+f.where+'</span>'+(f.single?'':'<br><b>Pick any number.</b>')+'</p></div>';
+    const g=document.createElement('div');g.className='grid';if(f.min)g.style.setProperty('--min',f.min);s.appendChild(g);
+    for(const k of f.cards){const el=document.createElement('div');el.className='opt';el.tabIndex=0;el.setAttribute('role','button');el.dataset.id=k.id;
+      el.innerHTML='<div class="oh"><span class="num">'+k.id+'</span><b>'+k.name+'</b>'+(k.star?'<span class="star">★ recommended</span>':'')+'</div><div class="m" style="aspect-ratio:'+k.W+'/'+k.H+'"></div><p>'+k.desc+'</p>'+(k.img?'<div class="cpu">Screenshot of v0.228 with Fractals playing.</div>':'<div class="cpu">'+k.cpu+'<br>Drawn here in <em data-ms>…</em> a frame.</div>');
+      const m=el.querySelector('.m');if(k.img){const im=document.createElement('img');im.src=TODAY[k.img];im.style.objectFit='scale-down';im.alt='Today in AudioLab v0.228: '+f.name;m.appendChild(im)}else{const cv=document.createElement('canvas');m.appendChild(cv);k.cv=cv;k.ctx=cv.getContext('2d');k.msEl=el.querySelector('[data-ms]');
+        cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();k.st.mx=(e.clientX-r.left)*k.W/r.width});cv.addEventListener('mouseleave',()=>{k.st.mx=null});if(f.id==='V')cv.addEventListener('contextmenu',e=>{e.preventDefault();document.getElementById('vmenu').scrollIntoView({block:'center',behavior:'smooth'});document.getElementById('vmenu').focus()})}
+      el.addEventListener('click',()=>togglePick(f,k.id));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePick(f,k.id)}});k.el=el;g.appendChild(el)}
+    if(f.id==='V')s.appendChild(vMenu());root.appendChild(s)}
+  const io=new IntersectionObserver(es=>{for(const e of es){const k=CARDS.find(q=>q.cv===e.target);if(k)k.vis=e.isIntersecting}kick()},{rootMargin:'40px'});
+  const ro=new ResizeObserver(es=>{for(const e of es){const k=CARDS.find(q=>q.cv===e.target);if(!k)continue;const w=e.contentRect.width,dpr=Math.min(2,window.devicePixelRatio||1);k.cv.width=Math.round(w*dpr);k.cv.height=Math.round(w*k.H/k.W*dpr);k.sc=w*dpr/k.W;k.dirty=true}kick()});
+  CARDS.forEach(k=>{if(k.cv){io.observe(k.cv);ro.observe(k.cv)}});
+  document.getElementById('foot').innerHTML=FOOT}
+function vMenu(){const d=document.createElement('div');d.className='opt';d.style.cursor='default';d.innerHTML='<div class="oh"><span class="num">V menu</span><b>Right-click menu of the Visualizer</b><span class="star" style="background:var(--tag);color:var(--pfg)">live</span></div><p>Today the menu has the panel switches and where the Visualizer sits. Proposed additions below (✓ = my default). They change the V pictures above and S4 live; the colour map goes into your picks line.</p>';
+  const m=document.createElement('div');m.className='menu';m.id='vmenu';m.tabIndex=-1;m.setAttribute('role','menu');
+  const G=[['View (today)',[['All',1],['Spectrogram'],['Spectrum'],['Waveform'],['Levels']],null],['Colour map',[['Magma','magma'],['Inferno','inferno'],['Viridis','viridis'],['Today\'s heat','today']],'map'],['Range',[['60 dB',60],['90 dB',90],['120 dB',120]],'range'],['Spectrum tilt',[['0 dB/oct',0],['3 dB/oct',3],['4.5 dB/oct',4.5]],'tilt'],['Hold',[['Off','off'],['Max hold','max']],'hold'],['Speed',[['Slow','slow'],['Normal','normal'],['Fast','fast']],'speed'],['Sits (today)',[['Top'],['Bottom',1],['Left'],['Right'],['Own window']],null]];
+  for(const[h,items,key]of G){const g=document.createElement('div');g.className='grp';g.innerHTML='<div class="gh">'+h+'</div>';for(const it of items){const b=document.createElement('button');b.textContent=it[0];b.setAttribute('role','menuitemradio');if(key){b.setAttribute('aria-checked',String(VS[key]===it[1]));b.onclick=()=>{VS[key]=it[1];g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-checked','false'));b.setAttribute('aria-checked','true');CARDS.forEach(k=>{if(k.fam==='V'||k.id==='S4'){k.st.sg=null;k.st.vmh=null}});showPicks();kick()}}else{b.className='ro';b.setAttribute('aria-checked',String(!!it[1]));b.disabled=true}g.appendChild(b)}m.appendChild(g)}
+  d.appendChild(m);const w=document.createElement('div');w.style.marginTop='0';w.appendChild(d);return w}
+function togglePick(f,id){if(f.single){PK[f.id]=PK[f.id]&&PK[f.id][0]===id?[]:[id]}else{const a=PK[f.id]||[];PK[f.id]=a.includes(id)?a.filter(x=>x!==id):a.concat(id).sort()}showPicks()}
+function showPicks(){CARDS.forEach(k=>k.el&&k.el.classList.toggle('pick',(PK[k.fam]||[]).includes(k.id)));const parts=FAMS.map(f=>{const a=PK[f.id]||[];if(!a.length)return null;return a.join(' ')+(f.id==='V'?' map '+VS.map:'')}).filter(Boolean);
+  document.getElementById('picks').textContent=parts.length?'My picks: '+parts.join(' | '):'Nothing picked yet. Click cards, or press "Take all ★".'}
+document.getElementById('useRec').onclick=()=>{FAMS.forEach(f=>{PK[f.id]=f.cards.filter(k=>k.star).map(k=>k.id)});showPicks()};
+document.getElementById('clr').onclick=()=>{FAMS.forEach(f=>{PK[f.id]=[]});showPicks()};
+document.getElementById('copy').onclick=async e=>{const t=document.getElementById('picks').textContent,b=e.currentTarget;try{await navigator.clipboard.writeText(t);b.textContent='Copied'}catch(err){const r=document.createRange();r.selectNodeContents(document.getElementById('picks'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Cmd+C'}setTimeout(()=>{b.textContent='Copy my picks'},1800)};
+function btnState(){document.getElementById('listen').setAttribute('aria-pressed',String(E.listen));document.getElementById('pause').setAttribute('aria-pressed',String(E.paused));document.getElementById('light').setAttribute('aria-pressed',String(LIGHT))}
+document.getElementById('sigSel').onchange=e=>{E.load(e.target.value);CARDS.forEach(k=>{k.st={}});kick()};
+document.getElementById('listen').onclick=()=>{E.listen=!E.listen;if(E.listen){E.paused=false;audioStart()}else audioStop();btnState();kick()};
+document.getElementById('pause').onclick=()=>{E.paused=!E.paused;if(E.paused&&E.listen){E.listen=false;audioStop()}btnState();kick()};
+document.getElementById('light').onclick=()=>{LIGHT=!LIGHT;btnState();kick()};
+let running=false,last=0,fr=0;
+function kick(){if(!running&&!document.hidden){running=true;last=performance.now();requestAnimationFrame(loop)}}
+document.addEventListener('visibilitychange',kick);
+function loop(now){const vis=CARDS.filter(k=>k.vis&&k.cv&&k.sc);if(document.hidden||!vis.length){running=false;return}
+  fr++;if(LIGHT&&fr%2){requestAnimationFrame(loop);return}const dt=Math.min(.1,(now-last)/1000);last=now;const t0=performance.now();
+  E.step(dt);const F={dt:E.dt,light:LIGHT};
+  for(const k of vis){const c=k.ctx;c.setTransform(k.sc,0,0,k.sc,0,0);c.fillStyle=K.bg;c.fillRect(0,0,k.W,k.H);const a=performance.now();try{k.draw(c,k.st,F)}catch(err){console.error(k.id,err);k.vis=false}const ms=performance.now()-a;k.ms.push(ms);if(k.ms.length>60)k.ms.shift();if(fr%30===0&&k.msEl){const s=k.ms.slice().sort((x,y)=>x-y);k.msEl.textContent=s[s.length>>1].toFixed(2)+' ms'}}
+  E.ft.push(performance.now()-t0);if(E.ft.length>900)E.ft.shift();
+  if(fr%15===0){const seg=E.sig==='stereo'?' · now: '+['mono','wide','anti-phase','left only'][Math.min(3,Math.floor(E.pos/(E.buf.N/4)))]:'';document.getElementById('sigNow').textContent=SIGNOTE[E.sig]+seg}
+  if(E.paused)running=false;else requestAnimationFrame(loop)}
+const FOOT='<p><b>Measured, not drawn:</b> one engine reads each new block of the test signal once per frame and feeds every card: sample and true peak (4× oversampling), RMS (AES17), VU (2nd order, 0.3 s), PPM type IIb, K-weighted loudness with gating and LRA (ITU-R BS.1770-5, EBU Tech 3341 and 3342), correlation, a real compressor, limiter, three-band compressor and the example EQ, and FFTs shared per frame. Choose "1 kHz sine" to check the calibration: −18.0 dBFS, −18.0 LUFS, correlation +1.00.</p>'+
+ '<p><b>Sources</b> (opened 27 November 2026): <a href="https://tech.ebu.ch/docs/tech/tech3341.pdf" target="_blank" rel="noopener">EBU Tech 3341</a>, <a href="https://tech.ebu.ch/docs/tech/tech3342.pdf" target="_blank" rel="noopener">EBU Tech 3342</a>, <a href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf" target="_blank" rel="noopener">ITU-R BS.1770-5</a>, <a href="https://en.wikipedia.org/wiki/Peak_programme_meter" target="_blank" rel="noopener">PPM types (IEC 60268-10, -18)</a>, <a href="https://en.wikipedia.org/wiki/VU_meter" target="_blank" rel="noopener">VU (IEC 60268-17)</a>, <a href="https://www.digido.com/?p=1441" target="_blank" rel="noopener">Katz, K-system</a>, <a href="https://archiv.rme-audio.de/old/english/techinfo/digich.htm" target="_blank" rel="noopener">RME DIGICheck</a>, <a href="https://prod.fabfilter.com/help/pro-q/using/analyzer" target="_blank" rel="noopener">FabFilter Pro-Q analyzer</a>, <a href="https://prod.fabfilter.com/help/pro-l/using/metering" target="_blank" rel="noopener">Pro-L metering</a>, <a href="https://www.voxengo.com/files/userguides/VoxengoSPAN_en.pdf/getbyname/Voxengo%20SPAN%20User%20Guide%20en.pdf" target="_blank" rel="noopener">Voxengo SPAN guide</a>, <a href="https://nugenaudio.com/files/manuals/VisLM2%20Manual.pdf" target="_blank" rel="noopener">NUGEN VisLM 2</a>, <a href="https://www.soundonsound.com/node/4917026" target="_blank" rel="noopener">TC Clarity M (SOS)</a>, <a href="https://www.soundonsound.com/node/4903554" target="_blank" rel="noopener">iZotope Insight (SOS)</a>, <a href="https://matplotlib.org/stable/users/explain/colors/colormaps" target="_blank" rel="noopener">matplotlib colormaps</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7595127" target="_blank" rel="noopener">Crameri et al. 2020</a>, <a href="https://www.ece.ucdavis.edu/~spencer/195/datasheets/XYZ.pdf" target="_blank" rel="noopener">Tektronix, XYZs of oscilloscopes</a>, <a href="https://www.dinfo.unifi.it/upload/sub/laboratori/emc/Dispense%20Misure%20Elettroniche/Keysight_Spectrum%20analysis%20basics_2015.pdf" target="_blank" rel="noopener">Keysight, spectrum analysis basics</a>, <a href="https://www.soundonsound.com/techniques/ian-shepherd-loudness-dynamics" target="_blank" rel="noopener">Ian Shepherd on loudness (SOS)</a>. Full list in docs/design-round-4-instruments.md.</p>'+
+ '<p>Not repeated here (decided earlier, task MD1): read-outs with units (M1), the orbit loader (M2) and the caliper (M3) of round 1; X5, X8, X11 and X15 of round 2 are used where they fit and keep their own tasks. Nothing in the app has changed.</p>';
+E.load('mix');build();showPicks();btnState();
+window.__dr4={E,CARDS,VS,PK,setLight:v=>{LIGHT=v;btnState()}};
+</script>
