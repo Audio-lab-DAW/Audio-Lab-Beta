@@ -80,6 +80,14 @@ jobs:
           rm -f out/engine/loopback.wav
           cat out/engine/engine.json
 
+      - name: "Engine: the app's side (Node drives the engine through native/bridge/engine-bridge.js)"
+        continue-on-error: true
+        run: |
+          node --version
+          node tools/native-lab/bridge_test.js build/alengine build/alnative out/bridge | tee out/bridge.txt
+          python3 tools/native-lab/stream_compare.py out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav out/bridge/bridge_compare.json | tee -a out/bridge.txt
+          rm -f out/bridge/bridge_sent.raw out/bridge/bridge_loopback.wav
+
       # ---------------- test B ----------------
       - name: Build the SDK's own example plug-ins (fallback and extra subjects)
         continue-on-error: true
