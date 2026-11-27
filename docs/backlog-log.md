@@ -3845,3 +3845,16 @@ No app changes: `index.html` and `desktop/` untouched, no version. The plan is `
 
 Left: everything in the plan. Next: FT-C1a, the controller layer.
 
+
+## 27 November 2026: task NI-0 (the plan for building the picked ideas, lane D)
+
+No app changes: `index.html` and `desktop/` untouched, no version. The plan is `docs/ideas-build.md`; its check `tools/feature-lab/ni/check_plan.py` passes (every one of the 28 picked ideas has a step, none of the six unpicked ones has).
+
+- The user's picks: `RF2 picks: I1 I2 I3 I4 I5 I6 I7 I8 I9 I10 I11 I12 I13 I14 I15 I16 I17 I18 I20 I21 I22 I23 I26 I27 I28 I29 I31 I32`. Not built: I19, I24 (NF6), I25, I30 (NF7), I33, I34.
+- Read for it: `docs/research-features-new.md` (all), `docs/features-build.md` (lane C), the backlog headings, glass plan section 1, the design language research, design round 4 (instrument look), settings round 1 (S4 table shape) and extensions plan 9.6.
+- Order: the starred ideas first in the research's order (NI-1a/b I3, NI-2a/b I2, NI-3 analysis worker and per-beat band cache, NI-4 frequency map, NI-5a/b masking cables); then the ideas that reuse the cache (I6, I13, I4, I5, I7, I31); memory and time (control tape with I26, I27, I22, I23, I21); mixing help (I14, I15, I16, I28); arrangement (I29, I11, I8, I9, I10); learning and browsing (I17, I18, I32, I20). 44 runs in all.
+- **Not built twice with lane C** (plan section 3): lane D builds the kick and bass analysis and the I2 ruler first and leaves `NI_HOOKS.kickBass` and `NI_HOOKS.kickBassView`, so **FT-F18 only needs to add low-band correlation, the phase-rotation knob, "shorten tail" and its suggestions** on top (if F18a runs first, NI-2 builds on it instead). I10 is gated on FT-F25a's reference slots; I15's lenses and F25b's listening modes share one monitor-only stage (whoever is first builds it); I7 and I9 use F20's build writer when it exists; I26 to I28 take MIDI moves from FT-C1a's router, lane D does not touch MIDI input.
+- I32 relied on I30's ghosts, which were not picked: it gets a small preview layer for fills only (Hear it, Keep, Drop), not a general ghost system.
+- Rules: anchored edit scripts in `tools/feature-lab/ni/`, `NI_`/`ni` prefixes, commands `ni.*` in `SCA`, settings rows in the S4 shape, hooks `NI_HOOKS.<name>`, optional versioned project keys, every measurement on offline renders in a worker or idle slices (never the audio thread), Fractals levels checked every run (reference today: Kick -19.05560 dB, Bass -35.48685 dB at master -10 dB, from AB2 v0.229).
+
+Left: everything in the plan. Next: NI-1a, the "Why is this clipping?" engine.
