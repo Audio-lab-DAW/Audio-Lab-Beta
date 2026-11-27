@@ -1,1 +1,1 @@
-New splash screen: five science drawings that change from start to start (moons in resonance, harmonograph, magnetic field, orbit chart, spectrogram), with the name and the loading bar in the drawing's colours. It stays about 1.5 seconds after loading; a click or a key closes it sooner.
+New About window: Earth with its radiation belts drawn in code behind the text, one of two pictures at random each time it opens, a finer animated atom as the logo, and the features as a quiet spec list in the colours of the picture.

@@ -1,4 +1,4 @@
-"""About window showcase "Under the hood" (v0.209, task AD): collapsed and expanded, normal and Light mode, no page errors,
+"""About window showcase "Under the hood" (v0.209, task AD; selectors follow the new About window of v0.225, task AB1): collapsed and expanded, normal and Light mode, no page errors,
 no em dashes, no sideways scroll, Settings > General > About opens it.
   python3 tools/ui-tests/about_showcase.py [repo dir] [out dir] [width] [height]"""
 import sys,os,mimetypes,json
@@ -22,12 +22,12 @@ with sync_playwright() as p:
         pg.evaluate("()=>{const n=document.getElementById('liteNote');n&&n.remove()}")
         pg.evaluate("()=>AudioLab.run('showAbout()')");pg.wait_for_timeout(1500)
         pg.screenshot(path=f'{OUT}/ad_{mode}_{W}_collapsed.png')
-        print(' tiles',pg.evaluate("()=>document.querySelectorAll('#splash .ahfT').length"),'button',pg.evaluate("()=>document.getElementById('ahfMore').textContent"),'scrollH',pg.evaluate("()=>{const s=document.getElementById('splash');return [s.clientHeight,s.scrollHeight]}"))
-        pg.click('#ahfMore');pg.wait_for_timeout(1200)
+        print(' tiles',pg.evaluate("()=>document.querySelectorAll('#splash .abT').length"),'button',pg.evaluate("()=>document.getElementById('abMore').textContent"),'scrollH',pg.evaluate("()=>{const s=document.getElementById('splash');return [s.clientHeight,s.scrollHeight]}"))
+        pg.click('#abMore');pg.wait_for_timeout(1200)
         pg.screenshot(path=f'{OUT}/ad_{mode}_{W}_expanded.png')
         pg.evaluate("()=>document.getElementById('splash').scrollTo(0,99999)");pg.wait_for_timeout(400)
         pg.screenshot(path=f'{OUT}/ad_{mode}_{W}_expanded_end.png')
-        print(' rows',pg.evaluate("()=>document.querySelectorAll('#splash .ahfR').length"),'button',pg.evaluate("()=>document.getElementById('ahfMore').textContent"),'emdash',pg.evaluate("()=>document.getElementById('ahf').textContent.includes('—')"),'overflowX',pg.evaluate("()=>{const s=document.getElementById('splash');return s.scrollWidth-s.clientWidth}"))
+        print(' rows',pg.evaluate("()=>document.querySelectorAll('#splash .abR').length"),'button',pg.evaluate("()=>document.getElementById('abMore').textContent"),'emdash',pg.evaluate("()=>document.querySelector('#splash .abC').textContent.includes('—')"),'overflowX',pg.evaluate("()=>{const s=document.getElementById('splash');return s.scrollWidth-s.clientWidth}"))
         pg.keyboard.press('Escape');pg.wait_for_timeout(800)
         print(' closed',pg.evaluate("()=>!document.getElementById('splash')"))
         if mode=='normal':
@@ -35,6 +35,6 @@ with sync_playwright() as p:
             pg.evaluate("()=>document.getElementById('genHood').scrollIntoView()");pg.wait_for_timeout(300)
             pg.screenshot(path=f'{OUT}/ad_settings.png')
             pg.click('#genHood');pg.wait_for_timeout(1200)
-            print(' genHood opens about',pg.evaluate("()=>!!document.querySelector('#splash.ab .ahf')"))
+            print(' genHood opens about',pg.evaluate("()=>!!document.querySelector('#splash.ab .abF')"))
         print(' errors after',errs)
         c.close()
