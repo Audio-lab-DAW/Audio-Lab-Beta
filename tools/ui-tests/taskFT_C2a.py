@@ -65,7 +65,7 @@ with sync_playwright() as p:
     L = lines(R); ok(sorted(L) == [0, 1, 2, 3] and all(len(L[k]) in (0, 68) for k in L), 'the 4 display lines written, 68 characters each (F0 47 7F 15 18..1B 00 45 00 ... F7)', L)
     w = [d for d in X if 0x18 <= d[4] <= 0x1B and d[8:-1]]
     ok(all(d[5:8] == [0, 69, 0] and len(d) == 77 for d in w), 'line message shape: 00, 69 bytes follow (offset 0 + 68), 77 bytes in all', [d[:8] for d in w])
-    ok(L[0].startswith('AudioLab') and t[:16] in L[0] and 'Key A minor' in L[1] and 'Octave 2' in L[1], 'display: track name, key, layout and octave', L)
+    ok(t[:16] in L[2] and 'A minor' in L[2] and 'Oct 2' in L[2], 'display: track name, key and octave (on line 3 since FT-C2b: lines 1 and 2 show the device)', L)
     P = pads(R); ok(sorted(P) == list(range(36, 100)), 'all 64 pads coloured', len(P))
     ok(P[36] == 5 and P[42] == 3 and P[37] == 3 and P[43] == 5, 'in key: the root pad (bottom left) in the track colour (red = 5), other pads white (3), the octave above red again', (P[36], P[37], P[42], P[43]))
     root_pads = [n for n in range(36, 100) if P[n] == 5]; ok(len(root_pads) >= 8, 'root pads repeat up the grid', root_pads)
@@ -87,11 +87,11 @@ with sync_playwright() as p:
     # encoder touch and strip touch never play; strip as pitch bend
     R("VO.length=0;window.CCL=[];{const c=ccLive;ccLive=function(k,v){CCL.push([String(k),+(+v).toFixed(3)]);return c.apply(this,arguments)}};FAKEMIDI.msg('Ableton Push',[0x90,0,127]);FAKEMIDI.msg('Ableton Push',[0x90,12,127]);FAKEMIDI.msg('Ableton Push',[0xE0,0,96])")
     ok(J(R, "VO.length") == 0 and J(R, "CCL") == [['pb', round((96 << 7) / 16383, 3)]], 'encoder and strip touches do not play; the strip bends pitch', J(R, "CCL"))
-    R("CCL.length=0;FAKEMIDI.msg('Ableton Push',[0xB0,85,127]);FAKEMIDI.msg('Ableton Push',[0xB0,85,0])")
+    R("CCL.length=0;FAKEMIDI.msg('Ableton Push',[0xB0,56,127]);FAKEMIDI.msg('Ableton Push',[0xB0,56,0])")
     ok(J(R, "CCL") == [], 'Push buttons are not recorded into controller lanes')
     # octave
     R("FAKEMIDI.sent.length=0;FAKEMIDI.msg('Ableton Push',[0xB0,55,127]);FAKEMIDI.msg('Ableton Push',[0xB0,55,0])")
-    L = lines(R); ok(J(R, "p1S().oct") == 3 and list(L) == [1] and 'Octave 3' in L[1], 'Octave up: octave 3, only the changed display line sent', L)
+    L = lines(R); ok(J(R, "p1S().oct") == 3 and list(L) == [2] and 'Oct 3' in L[2], 'Octave up: octave 3, only the changed display line sent', L)
     R("VO.length=0;FAKEMIDI.msg('Ableton Push',[0x90,36,100]);FAKEMIDI.msg('Ableton Push',[0x80,36,0])")
     ok(J(R, "VO.map(x=>x[1])") == [57 - 24], 'pad 36 now plays A2 (MIDI 57)', J(R, "VO"))
     R("FAKEMIDI.msg('Ableton Push',[0xB0,54,127])")
