@@ -1,7 +1,7 @@
 {
-  "version": "0.245",
-  "sha256": "a3838a6679045d41bb97a2acfb989333c24891417c30d299b37ad610436fc1ec",
-  "size": 6166002,
+  "version": "0.246",
+  "sha256": "5b8d40b2ac7780916a87a9d4918ba6624ffb88cbd4545dcad3de15a671844aca",
+  "size": 6181365,
   "minShell": "0.147.0",
   "notes": "Behind the scenes for the frequency map: AudioLab can now measure every track beat by beat (how loud it is in each band from 20 Hz to 20 kHz, in the middle and at the sides, loudness, brightness and its strongest notes), quietly in the background and remembered between sessions. The map that shows it comes next.\nMIDI controllers, step 5: Session mode on your Ableton Push 1. Press Session: the pads show 8 tracks across and the song's sections down, lit where a track plays something; the buttons on the right (and the pads) launch a section: from a stop it plays from there, while playing it jumps at the next bar (or at the end of the section, or at once: the Launch setting on the Controllers page; Shift+button: at once). Press the waiting section again to cancel; Note goes back.\nGlass for the transport and the device panel: both now float a little in from the window edges with rounded corners, so you see the arrangement around them; the bottom-left corner is properly frosted again, and the transport gets the lens, with a little extra bend on its top and bottom edges."
 }

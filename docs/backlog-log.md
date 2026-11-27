@@ -4467,3 +4467,34 @@ Note on this run: it first built NI-2b (the kick and bass view) in parallel with
 
 ### Left
 NI-4: the frequency map view (time left to right, log frequency 20 Hz to 20 kHz, each pixel the owning track's colour, sections on top, a one-track layer switch, click to jump and select, command `ni.freqMap`), built on `NI.an`. Then NI-5a/b masking cables.
+
+
+## 27 November 2026, v0.246: task NI-4, the frequency map of the whole song (lane D, idea I1 part 2, NF4)
+
+Idea I1 is complete. Edit script `tools/feature-lab/ni/ni_4.py` (anchored; needs NI-3 and lane E's IN-A), test `tools/ui-tests/taskNI_4.py` (31 checks, all pass). The step was claimed in the plan before it started.
+
+### Built
+- **A window "Frequency map"** (command `ni.freqMap`, "Frequency map of the whole song"; the app's floating window: moves, resizes, remembers its place). Time left to right over the whole song, frequency bottom to top on a log scale from 20 Hz to 20 kHz (NI-3's 61 bands of 1/6 octave), every spot in the colour of the **track that owns the most energy there** (mid plus side), brightness by the total level (-84 to -18 dB), spots under -90 dB dark, pieces not measured yet hatched. Section names and colours along the top with lines down the map; bar numbers under it as often as they fit; frequency labels at 20, 50, 100 ... 20k with the decades brighter.
+- **Colours**: Auto (by track, or by group when the song has more than 12 tracks, as the research asked), By track, By group. **Legend** of the owners, most spots first (spots over -60 dB counted), as groups when coloured by group.
+- **Layer**: one track or one group glowing by its own level in its colour over the rest in grey (from the select or by clicking a legend chip; again for all).
+- **Hover read-out**: bar and beat, the band's frequency with its note (lane E's `INS.hz`), the owner and the runner-up with their levels (`INS.fmt`), or "silent" / "not measured yet". **Click**: the playhead moves to that beat (while playing too) and the owner is selected (with a layer on, the layer's track, or the group's track that sounds there).
+- **Snappy**: the owners are worked out once per change of the analysis from the stored bytes through a lookup table, into an image of beats by bands that is scaled into the window; drawn again only when the analysis grows (at most every 600 ms while it fills), on a resize, or when a setting changes; nothing per frame. While the song plays a thin playhead marker is moved by a 250 ms check (a CSS position, the map is not drawn again). The analysis starts when the window opens and stops when it closes; an edit is measured again after 1 s of quiet.
+- NI-3's key now leaves out the track's group (`grp`): a render with `only` does not pass through the group, so putting a track in a group no longer re-measures it.
+- `NI.map` (`open`, `close`, `draw`, `own(beat, band)`, `grid()`) for NI-5 and NI-11.
+
+### Checked
+- A test song (audio, 120 BPM, 8 bars, sections Intro and Drop): Kick 50 Hz in bars 1 and 2, Pad 500 Hz throughout, Hat 8 kHz from bar 5. The command opens the window and measures it ("3 tracks · 32 beats"); Kick owns beat 4 at 50 Hz, nothing at beat 20 there, Pad at 500 Hz, Hat at 8 kHz; the cells are red, blue and green as the tracks; a silent cell is dark. Hover at the kick spot reads "bar 2.1 · 50.4 Hz · G1 +49 ct · Kick −16.0 dB"; clicking it puts the playhead on beat 4 and selects Kick. Layer Pad: the kick spot grey, the pad blue. The legend lists the three owners in order of their spots; clicking the chosen chip again shows all. Kick put in a group "Drums": nothing measured again; by group the kick spot takes the group's yellow, the legend shows Drums, Hat, Pad; the Drums layer glows yellow with the pad grey, and a click there selects Kick. Bar numbers every bar at this width.
+- Nothing drawn in 1.5 s with the window open and the song stopped; while playing the marker shows and moves with no redraw; stopped, it hides. An edit (Hat shortened to bar 7) is measured again in the background and beat 28 at 8 kHz turns silent. Every control has a tooltip, no em dashes, the window inside the app; closing it stops its check and the measuring. No console errors.
+- **The Fractals demo** (first 96 bars measured, the rest hatched; screenshots normal and Light level, looked at): coloured by group (27 tracks): Kick & Bass own the low end under about 150 Hz through the drops, Music (blue) the 300 Hz to 2 kHz band, Drums the top, the vocal intro and the breaks visible as gaps.
+- After the rebase onto the claims of lanes C and E (main still v0.245): `taskNI_4.py` 31 of 31, `taskNI_3.py` 29 of 29, `taskNI_2b.py` 36 of 36, `taskNI_1b.py` 36 of 36, lane E's `taskIN_A.py` 37 of 37.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB. No audio code was touched.
+
+### Limits
+- As NI-3: a track's numbers leave out its sends and sidechain ducking, so a ducked bass owns more of the low end on the map than you hear.
+- The whole Fractals song takes several minutes to measure the first time (about 0.6 s per piece on the test machine, more while it plays); after that it opens from the browser's storage.
+- With group colours, groups that share a colour (Drums and FX in the demo are both yellow) look alike; By track or the legend tells them apart.
+- Docking the map like the analyser is not built; it is a floating window.
+- What only the user can judge: whether owner-by-loudest reads right for the way they listen (an alternative would be "share over 50%"), and whether the brightness range (-84 to -18 dB) suits their mixes. To try: open the map on a finished song, point at the low end in a drop and at 2 to 5 kHz.
+
+### Left
+NI-5a: masking cables (the clashes between the loudest tracks from the NI-3 cache at the playhead, cables in the cable lane under a "Clashes" switch). Then NI-5b, the fixes.
