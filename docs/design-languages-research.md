@@ -435,3 +435,9 @@ Every link above was opened by research helpers on 27 November 2026, unless the 
 - MoMA work 7233;
 - the KSP navball wiki;
 - the DOE flicker page (its claims are cited as the helper reported them).
+
+## The user's picks (27 November 2026, 14:43 Brussels)
+
+`DR3 picks: (no direction) | G3 W1 L2 A1 M3 N3`
+
+No single direction: today's colours and look stay, with these details everywhere: G3 drafting grid, W1 hairline lines, L2 amber units, A1 yellow selection, M3 ambient motion (only where motion is already allowed: empty and waiting states; Light mode stays without it), N3 dense (track rows about 48 px where today's are 62 px on the page). Built first as the look tokens of section 6 step 1 (task LK, lane A, after GS4), then used by design round 2 (task DS), MD1, SC and DV. Where a more specific pick covers the same thing (design round 2's AG2 grid detail, the arrangement-lines round), the specific pick decides that surface and the tokens supply its line weights and colours.
