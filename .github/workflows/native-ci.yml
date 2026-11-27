@@ -213,8 +213,12 @@ jobs:
           V=$(node -e "console.log(require('./desktop/package-lock.json').packages['node_modules/electron'].version)")
           echo "electron $V"
           mkdir -p "$RUNNER_TEMP/el" && cd "$RUNNER_TEMP/el" && npm init -y > /dev/null && npm install --no-audit --no-fund "electron@$V" > npm.txt 2>&1 || { tail -20 npm.txt; exit 1; }
+          # this Electron fetches its binary on first use; fetch it now
+          test -x node_modules/electron/dist/electron || node node_modules/electron/install.js
+          test -x node_modules/electron/dist/electron
           sudo apt-get install -y -qq xvfb > /dev/null 2>&1 || true
       - name: 'The sound path out of the main process (task NB-R3): main blocked or busy, frozen feeder, the old path for comparison'
+        shell: bash   # -eo pipefail: the test's exit code survives the tee
         run: |
           xvfb-run -a python3 tools/native-lab/feeder_test.py "$RUNNER_TEMP/el/node_modules/electron/dist/electron" build/alengine out-feeder | tee feeder-test.txt
           { echo '```'; cat feeder-test.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

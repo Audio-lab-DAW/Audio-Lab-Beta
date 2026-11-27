@@ -10,6 +10,7 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
 | N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. **N3b built**: the mixer (track volume, pan, the master, tracks summed) from Chromium's arithmetic, **10 of 10 scenes bit for bit** against the app's own export path on Linux, including the Bitcrusher in a track at 128 and 512 frames. **N3c done**: five more devices (chorus, stereo imager, frequency shifter, vocoder, tape stop), the browser's own maths functions carried by the engine, **240 of 240 cases bit for bit**; the same bits at any buffer size from 1 to 4,096 frames on the web engine's grid (exceptions measured and explained), the export's 512 quantum. Devices native: 10 of 42. Next: N3d (sends, groups and returns; the mixer's tracks run the core's chains) |
+| R3 | Review fix NB-R3: the sound path out of the shell's main process | **done, proven with the real Electron shell on Linux** (task NB-R3): the page's sound goes to a small helper process (the feeder) that only writes it into the engine, with a bounded queue and back-pressure; a watchdog replaces a feeder or an engine that stops answering (3 s); with the main process blocked 50 or 250 ms every second every frame arrived bit for bit with no gap, where the old path made gaps; `alengine` 0.4 no longer stalls a source switch on a frozen sender. The Mac waits for D9 |
 | R2 | Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac | **done on Linux** (task NB-R2): the page must say its rate and the engine refuses any other; a device that changes rate goes silent, tells the page and resumes when the rate comes back; source switching without the 30 ms sleep (review C1, C2, C5); the engine now runs everywhere on a null device and is tested end to end on every push (24 checks, also under ASan, UBSan and TSan). The Mac build of this code waits for a Mac runner (D9) |
 | R1 | Review fix NB-R1: native CI on every push | **done on Linux** (task NB-R1): workflow `native-ci.yml` builds every native target normally and with AddressSanitizer + UndefinedBehaviorSanitizer, runs the engine's selftest, the ring under two real threads (also under ThreadSanitizer), the mixer's 10 scenes and all 240 device cases against the web engine (green: 240 of 240, sanitizers 240 of 240 at 128 frames, 239 of 240 at 7 as known), and 27 bridge checks against a stand-in engine. The Apple Silicon part waits for a Mac runner (D9) |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
@@ -250,7 +251,7 @@ The review has 34 issues (A1 to A15, C1 to C14, P1 to P5) and nine decisions for
 | A4 | the 128 quantum is part of the sound | N3c | done |
 | A5 | what bit identity can promise per family | NB-R11 | open (research) |
 | A6, A7 | fused multiply-add, float control state | N3c | done |
-| A8 | sound path through Electron's main process | NB-R3 | open, before N2c |
+| A8 | sound path through Electron's main process | NB-R3 | **fixed** (task NB-R3): utilityProcess feeder, bounded queue with drops counted, back-pressure honoured, watchdog for the feeder and the engine; proven on Linux with Electron 45.4.1 and the null device |
 | A9 | bit-perfect versus exclusive use | D1 (yours) | open |
 | A10, A11 | state ownership and protocol; project file version | NB-R7, NB-R9 | open, before the bridge carries edits |
 | A12, A13, A14 | plug-in module lifetime, host gaps, scanner hang | NB-R8 (N4) | open |
@@ -261,7 +262,7 @@ The review has 34 issues (A1 to A15, C1 to C14, P1 to P5) and nine decisions for
 | C5 | data races outside the ring | NB-R2 | **fixed** for the device rate, the device id and the steering reset; TSan clean on Linux |
 | C6, C7 | output safety; the integer path | NB-R4 | open |
 | C8 | latency figure understates | NB-R4 | open |
-| C9 | possible stalls | NB-R4 | partly: a hung engine is now killed at start (NB-R1) |
+| C9 | possible stalls | NB-R4 | partly: a hung engine is killed at start (NB-R1) and, while it runs, after 3 s without an answer (NB-R3); a frozen sender no longer holds a source switch (NB-R3) |
 | C10, C11 | bad input; bridge details | NB-R4 | open |
 | C12, C13 | page tap allocates; preload trusts any message | N2c | open |
 | C14 | test app's audio thread | test app, later | for the record |
@@ -269,6 +270,33 @@ The review has 34 issues (A1 to A15, C1 to C14, P1 to P5) and nine decisions for
 | P3 | no sanitizers | NB-R1 | **done** on Linux (ASan, UBSan, TSan) |
 | P4 | references from headless Chromium, not the app's Electron | D3 | open |
 | P5 / **D9** | no macOS build machine | yours | **open, and now clearer**: on 27 November `macos-15` jobs waited 15 minutes and were cancelled (runs 46009024051, 46016748702), a `macos-14` job was cancelled at once without a machine (run 46019198450), `macos-latest` waited too (run 46019206859, still queued after 15 minutes). That pattern looks like the account's macOS minutes or spending limit rather than a busy queue: worth a look in the repository's Billing and plans > Actions. A self-hosted runner on the Mac mini costs nothing and ends it |
+
+## Review fix NB-R3: the sound path out of the shell's main process (27 November 2026)
+
+**What was wrong (review A8).** The page's 128-frame blocks went through the desktop shell's main process on their way to the engine. That process also runs the menus, every request from the page (AI voices, the DAC volume, updates) and the updater's downloads and hashing. With 30 ms of sound in hand at the engine, one 30 ms pause there was a gap you hear. The socket's "wait" signal was ignored.
+
+**What changed.**
+- **The feeder** (`desktop/native-feeder.js`): a small Electron utilityProcess that does nothing but take the blocks from the page's worklet port and write them into the engine's socket. The shell hands it the port and the socket's address; no block passes the main process any more. If the socket says "wait", blocks go into a queue of 250 ms; when that is full, new blocks are dropped whole and counted (order kept, memory bounded).
+- **The watchdog**: once a second, while the engine is wanted, the shell asks the feeder and the engine for an answer. After 3 missed answers the feeder is replaced (event `feeder-restarted`, the page gives the new one a port through `tap.reconnect()`, done by `alNativeWatchFeeder` in `page-tap.js`) or the engine is killed and started again by the crash recovery from N2b (event `engine-hung`, then `restarted`). Three restarts in a minute: `gave-up`, back to the web engine.
+- **`alengine` 0.4**: switching the sound source used to wait until the old sender closed its connection; a frozen feeder held the engine's command thread. Now the old connection is shut down at once (found by this task's frozen-feeder test).
+- The status's `tap` now says which path carries the sound (`feeder` or `main`) with the feeder's counts (blocks, frames written, back-pressure, largest queue, drops, the longest wait between two blocks).
+- `AL_FEED_IN_MAIN=1` keeps the old path, for the comparison only. Nothing changes for the app today: the shell stays idle until the page asks for the native engine (stage N2c).
+
+**Proven** (here, on a 2-core Linux machine, with the real Electron 45.4.1 shell, `native-engine.js`, the feeder, `preload.js`, `page-tap.js`, and the real `alengine` on the null device, which records what it played; production settings: 30 ms prefill, exact clock; `tools/native-lab/feeder_test.py`, 13 checks):
+
+| Case | Main process | Frames bit for bit | Gaps | Ring ran empty |
+|---|---|---|---|---|
+| A, feeder | blocked 50 ms every second, 20 s | 960,000 of 960,000 | 0 | 0 |
+| B, feeder | blocked 250 ms every second, 12 s | 576,000 of 576,000 | 0 | 0 |
+| E, feeder | spinning 50 ms every second (using a core) | 960,000 of 960,000 | 0 | 0 |
+| C, old path (comparison) | spinning 50 ms every second | 960,000, but with gaps | 2 to 5 per run (up to 152 ms) | 2 to 5 |
+| D, feeder frozen at second 4 | blocked 50 ms every second | after the gap, every frame bit for bit to the end | one, 3.7 s (the watchdog's 3 s and the restart) | |
+
+Spread over more runs here: with the main process blocked (waiting) 0 gaps in 9 runs; with it spinning a whole core 2 of 8 runs had one short gap, every time from blocks that reached the feeder up to 74 ms apart, so upstream of the feeder: the spin took half of this 2-core machine from the page's audio thread. On 4 or more cores (GitHub's machines, the user's M4) the test counts that case as strict.
+
+Unit tests (`bridge_unit.js`, 45 checks, 16 new): the port goes on to the feeder and the main process does not listen to it; every frame arrives; a new page port keeps the socket; a frozen feeder is replaced within about 3 s; an engine that does not read: the queue stops at its bound and every frame is written, queued or counted as dropped; an engine that stops answering while it runs is killed and started again with its device and sound. `engine_null_test.py` 26 checks (2 new: a sender that stops sending and never closes does not hold a source switch, 3 ms instead of waiting forever).
+
+**Not proven:** the Mac (D9). What only the Mac can show: the same with Core Audio's clock and the app's real main process; that comes with N2c.
 
 ## Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac (27 November 2026)
 
