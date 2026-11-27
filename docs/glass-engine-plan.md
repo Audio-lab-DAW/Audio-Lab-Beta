@@ -444,6 +444,16 @@ How it is wired: `docs/glass-engine-module.md` section 10. What was measured and
 
 **Still open**: the frame rate on the Mac with v0.228 (idle should now reach the screen rate; scrolling still draws the whole arrangement every frame). Scrolling at 240 with Settings open needs the arrangement drawn in tiles the compositor moves, or by the glass engine on the graphics card: a task of its own. Numbers and tests: `docs/backlog-log.md` (task GS3).
 
+### 3.12 Glass step 4 (27 Nov, task GS4): the device panel and the transport float, the transport gets the lens
+
+**The user's look at v0.228 on the Mac** (two screenshots, `docs/user-screens/2026-11-27-glass-device-panel-left.png` and `...-scrolled.png`): "the blur effect and the diffraction is not working" in the bottom left corner; "I also want diffraction on the transport bar ... vertically diffract a little bit extra for effect"; "I do like it when it looks like the devices are a little bit floating ... the corners ending a little sooner before the screen ends. So you can see the arrangement view behind it."
+
+- **Cause**: the track header rows run on down behind the device panel and the transport. They are page elements above the engine's canvas and not in its picture, so they showed sharp through both panels (left of and under the device cards, and in the strip above the transport). The arrangement canvas was cut away there, the header rows were not.
+- **Fix**: the engine's canvas now lies above the arrangement canvas (under the header column), so its faces cover what is under the glass and nothing has to be cut out of the arrangement; the header rows are cut away under the glass with a path that has the rounded holes. A cut of that shape on the arrangement canvas itself was tried first and dropped: the compositor masks the full-window canvas on every frame (idle about 40 % slower on the cloud machine).
+- **Floating**: device panel and transport 10 px in from both window edges (where the tab band starts), 12 px corners, 4 px between them; the device row scrolls inside the rounded shape and is cut at its ends.
+- **Lens**: both panels bend on every edge, the lens follows the real corners, and engine 2.4 has a per-panel `lensY` (transport 1.3, device panel 1.2: the bend along the top and bottom edges a little stronger). Constants in `GS4` at the top of the block.
+- Numbers and screenshots: `docs/backlog-log.md` (task GS4). Module: `docs/glass-engine-module.md` section 12.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)

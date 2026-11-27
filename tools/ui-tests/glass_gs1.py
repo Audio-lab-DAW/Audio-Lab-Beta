@@ -94,7 +94,11 @@ with sync_playwright() as p:
       let jump=0,grad=0,n=0;for(let i=3;i<44;i++){const a=GT.px(on,fx.x+i+1,fx.y+i),c=GT.px(on,fx.x+i,fx.y+i+1),e=GT.px(on,fx.x+i+2,fx.y+i);for(let k=0;k<3;k++){jump=Math.max(jump,Math.abs(a[k]-c[k]));grad+=Math.abs(a[k]-e[k]);n++}}
       o.cornerJump=jump;o.cornerGrad=grad/n;return o}""")
     ok(lens['fxMid'] == 0, 'device panel: the middle is the same picture with and without the lens', [lens['fxRim'], lens['fxMid']])
-    ok(lens['edges'] == ['r', '', 't'] and lens['fxBot'] == 0 and lens['fxLeft'] == 0 and lens['trRim'] == 0 and lens['hgBot'] == 0, 'the lens only on free edges (engine 2.2): headers towards the arrangement, device panel on its top edge, nothing on the window border, nothing where two panels meet', [lens['edges'], lens['fxTop'], lens['fxBot'], lens['fxLeft'], lens['trRim'], lens['hgBot']])
+    GS4 = R("typeof GS4!=='undefined'")
+    if GS4:   # v0.231 (task GS4): the device panel and the transport float (inset, rounded, a gap between them): every edge of theirs is free and bends
+        ok(lens['edges'] == ['r', 'trbl', 'trbl'] and lens['fxBot'] > 0 and lens['trRim'] > 0 and lens['hgBot'] == 0, 'the lens only on free edges: headers towards the arrangement; the floating device panel and transport on every edge (task GS4); nothing where the header glass meets the device panel', [lens['edges'], lens['fxTop'], lens['fxBot'], lens['fxLeft'], lens['trRim'], lens['hgBot']])
+    else:
+        ok(lens['edges'] == ['r', '', 't'] and lens['fxBot'] == 0 and lens['fxLeft'] == 0 and lens['trRim'] == 0 and lens['hgBot'] == 0, 'the lens only on free edges (engine 2.2): headers towards the arrangement, device panel on its top edge, nothing on the window border, nothing where two panels meet', [lens['edges'], lens['fxTop'], lens['fxBot'], lens['fxLeft'], lens['trRim'], lens['hgBot']])
     R("devHide(true)"); pg.wait_for_timeout(1500)
     t2 = pg.evaluate(r"""()=>{const g=GT.R('GLE.g'),tr=GT.rect('tr');g.setLensPreset('off');const off=GT.read();g.setLensPreset('wide');const on=GT.read();return {rim:GT.maxDiff(on,off,tr.x+230,tr.y+1,tr.x+tr.w-20,tr.y+12),mid:GT.maxDiff(on,off,tr.x+230,tr.y+19,tr.x+tr.w-20,tr.y+22),e:GT.R("GLE.g.panelInfo('tr').edges"),a:GT.px(on,tr.x+800,tr.y+20)[3]}}""")
     ok(t2['rim'] >= 4 and t2['mid'] <= 2 and t2['a'] == 255, 'transport: rim refraction on its top edge while the devices are folded (band about 13 px on a 40 px bar), flat middle', t2)
@@ -110,7 +114,7 @@ with sync_playwright() as p:
       for(let i=4;i<44;i++){const a=GT.px(b,fx.x+i+1,fx.y+i),e=GT.px(b,fx.x+i,fx.y+i+1);jump=Math.max(jump,Math.abs(a[0]-e[0]),Math.abs(a[1]-e[1]))}
       const up=g.stats.uploads,upx=g.stats.uploadPixels,rim=GT.px(b,fx.x+300,fx.y+3)[1]-63,mid=GT.px(b,fx.x+300,fx.y+120)[1]-180;
       g.setBackdrop(null);g.render(performance.now()+2000);const back=g.info.source;return {jump,rim,mid,top,left,up,upx,full:W*H,back}}""")
-    ok(cr['jump'] <= 4 and cr['rim'] >= 8 and abs(cr['mid']) <= 3 and cr['top'] >= 8 and cr['left'] == 0, 'no corner seam and no arc with a place-coloured picture: no jump across the corner diagonal, the top rim is bent inward, the middle is not', cr)
+    ok(cr['jump'] <= 4 and cr['rim'] >= 8 and abs(cr['mid']) <= 3 and cr['top'] >= 8 and ((cr['left'] > 0) if GS4 else (cr['left'] == 0)), 'no corner seam and no arc with a place-coloured picture: no jump across the corner diagonal, the top rim is bent inward, the middle is not', cr)
     ok(cr['upx'] * 12 <= cr['full'] and cr['back'] == 'scene', 'the small-copy route (used by the overview) uploads a quarter-size copy, never the full canvas; then back to the scene', [cr['upx'], cr['full'], cr['back']])
     R("(()=>{GLE.g.stats.uploads=0;GLE.g.stats.uploadPixels=0})()")
     pg.screenshot(path=os.path.join(OUT, 'gs1_glass.png'))

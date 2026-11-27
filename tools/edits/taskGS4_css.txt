@@ -1,0 +1,10 @@
+/* v@VER@ (task GS4): the device panel and the transport float: GS4.ins px in from the window edges, rounded corners (GS4.rad), a GS4.gap px gap between them.
+   The glass itself is the engine's (behind); these are the see-through tint, the edge line and the clip of what scrolls inside. */
+#fx:not(.popped):not(.prdev){border-top-color:transparent!important;box-shadow:none!important}
+#fxglass.gs4{left:var(--gs4i,10px)!important;right:var(--gs4i,10px)!important;border-radius:var(--gs4r,12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.05)}
+/* the device row scrolls inside the rounded glass and is cut at its ends: no device slides over the corners */
+#fx:not(.popped):not(.prdev)>#fxin{margin:0 var(--gs4i,10px) var(--gs4g,4px);border-radius:var(--gs4r,12px)}
+#tr{margin-left:var(--gs4i,10px);margin-right:var(--gs4i,10px);border-radius:var(--gs4r,12px);border-bottom-color:transparent!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.05)}
+/* the engine's canvas lies above the arrangement canvas and its playhead layer, under the track header column (z-index 2) and the docked panels:
+   its faces cover what is under the glass, so the arrangement is no longer cut out (a clip with rounded holes would be masked on every frame) */
+body.gle #glassCv{z-index:1}

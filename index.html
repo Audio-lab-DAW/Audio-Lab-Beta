@@ -2075,6 +2075,16 @@ body #bCap.ls .cpd{animation:cpl2 1.6s steps(12,jump-none) infinite}
 #niKB .nifix button.pri{background:linear-gradient(#ff7a7a,#d94848);border-color:#5e1414;color:#fff}#niKB .nifix button[hidden]{display:none}
 #niKB .ninote{font-size:var(--fs1);color:var(--mut);line-height:1.4}#niKB .ninote:empty{display:none}
 #niKB .nikbx:empty{display:none}
+/* v0.243 (task GS4): the device panel and the transport float: GS4.ins px in from the window edges, rounded corners (GS4.rad), a GS4.gap px gap between them.
+   The glass itself is the engine's (behind); these are the see-through tint, the edge line and the clip of what scrolls inside. */
+#fx:not(.popped):not(.prdev){border-top-color:transparent!important;box-shadow:none!important}
+#fxglass.gs4{left:var(--gs4i,10px)!important;right:var(--gs4i,10px)!important;border-radius:var(--gs4r,12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.05)}
+/* the device row scrolls inside the rounded glass and is cut at its ends: no device slides over the corners */
+#fx:not(.popped):not(.prdev)>#fxin{margin:0 var(--gs4i,10px) var(--gs4g,4px);border-radius:var(--gs4r,12px)}
+#tr{margin-left:var(--gs4i,10px);margin-right:var(--gs4i,10px);border-radius:var(--gs4r,12px);border-bottom-color:transparent!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.05)}
+/* the engine's canvas lies above the arrangement canvas and its playhead layer, under the track header column (z-index 2) and the docked panels:
+   its faces cover what is under the glass, so the arrangement is no longer cut out (a clip with rounded holes would be masked on every frame) */
+body.gle #glassCv{z-index:1}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6347,7 +6357,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.242',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.243',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -19710,7 +19720,7 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
    Docs: docs/glass-engine-module.md */
 (function (root) {
   'use strict';
-  var VERSION = '2.3.0';
+  var VERSION = '2.4.0';
   /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
   var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
   /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
@@ -19779,7 +19789,7 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
   /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
      shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity; sq, ed = the lens field (above) */
   function fsGlass(model) {
-    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;in vec2 p;out vec4 o;' + SDF + KF +
+    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;uniform vec2 lk;in vec2 p;out vec4 o;' + SDF + KF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.),sh=0.;' +
     'if(shd.z>0.){float ds=sd(l-vec2(0.,shd.x),hb,rad);sh=shd.z*(1.-smoothstep(-shd.y,shd.y,ds));}' +
     'if(a<=0.){if(sh<.003)discard;o=vec4(0.,0.,0.,sh*md.y);return;}' +
@@ -19789,7 +19799,7 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
     'if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}' +
     'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}') +
     'vec3 c;if(md.x>.5){c=tint.rgb+(fract(sin(dot(floor(p),vec2(12.9898,78.233)))*43758.5453)-.5)*.022;}else{' +
-    'vec2 sp=p-dv*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
+    'vec2 sp=p-dv*amt*lk;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
     'float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,face.x)*face.y+face.z;c=mix(c,tint.rgb,tint.a);}' +
     'float rim=1.-smoothstep(0.,rimp.x,-d);c+=rim*(rimp.y+rimp.z*lit);' +
     'c=mix(c,vec3(1.),rimp.w*(1.-smoothstep(dpr-.5,dpr+.5,-d)));' +
@@ -20193,6 +20203,8 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
         gl.uniform4f(u.rc, (p.x - OX) * D, (p.y - OY) * D, p.w * D, p.h * D); gl.uniform1f(u.mg, mg);
         gl.uniform1f(u.rad, Math.min(p.radius, sh / 2) * D); gl.uniform1f(u.band, band * D); gl.uniform1f(u.amt, amt * D);
         if (u.lr) gl.uniform1f(u.lr, lensR(p, band) * D);
+        /* 2.4: the lens strength of this panel along each axis (lensX bends at the left and right edges, lensY at the top and bottom); 1 = as before */
+        if (u.lk) gl.uniform2f(u.lk, p.lensX != null ? +p.lensX : 1, p.lensY != null ? +p.lensY : 1);
         gl.uniform4f(u.tint, tin[0], tin[1], tin[2], tA);
         gl.uniform4f(u.rimp, opt.rim.width * D, hc ? 0 : opt.rim.base, hc ? 0 : opt.rim.lit, hc ? 0.6 : 0);
         gl.uniform3f(u.shd, 8 * D, (4 + 20 * tt) * D, sm > 0 ? sm * (0.04 + 0.56 * tt) : 0);
@@ -20286,7 +20298,7 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
       if (d.rect) { r = rectOf(d.rect); if (r.x !== p.x || r.y !== p.y || r.w !== p.w || r.h !== p.h) { p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h; ch = true; } }
       if (d.kind != null && d.kind !== p.kind) { p.kind = d.kind; p.K = kinds[d.kind] || kinds.window; ch = true; }
       if (d.z != null && d.z !== p.z) { p.z = +d.z; ch = true; sortOrder(); }
-      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners'].forEach(function (k) {
+      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners', 'lensX', 'lensY'].forEach(function (k) {
         if (k in d && d[k] !== p[k]) { p[k] = d[k]; ch = true; if (k === 'over') bDirty = true; }
       });
       return ch;
@@ -20388,8 +20400,10 @@ if(!UI.fd7){const back=!!UI.fd22&&!!UI.mxs&&UI.mxs.fd===22;if(back)UI.mxs=Object
         var p = panels.get(id), ln = LENS[opt.lens], m; if (!p) return null;
         if (edDirty) edges(); m = p.em;
         var bd = ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0, h = Math.min(p.w, p.h) / 2;
-        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
+        var info = { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
           lensRadius: opt.corners === 'outline' ? lensR(p, bd) : p.sq ? 0 : Math.min(Math.max(Math.min(p.radius, h), bd), h) };
+        /* 2.4: lensX and lensY only when the panel was given its own (otherwise 1) */
+        if (p.lensX != null) info.lensX = +p.lensX; if (p.lensY != null) info.lensY = +p.lensY; return info;
       },
       setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
       setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },
@@ -20541,7 +20555,7 @@ function gleFeed(){const g=GLE.g;if(!g||!GLE.on)return;const dz=(window.devicePi
   if(sig!==GLE.sig){GLE.sig=sig;const L=gleBuild(),P=phCfg();g.setBackdropColor(gleCol(TH.bg));g.setScene({lanes:L.lanes,clips:L.clips,bg:gleCol(TH.bg),titleH:0,bodyAlpha:1,playheadColor:gleCol(P.c),playheadW:P.w});GLE.n.scene++}
   g.setView({scrollX:V.x,scrollY:V.y,zoom:V.ppb,rect:[0,AY,w,Math.max(1,h-AY)],originX:X0});GLE.n.view++;glePh();
   /* the header glass follows the track rows: its place comes from the numbers drawArr just worked out, without asking the page */
-  {const on=HGR.on&&!GLE.hgOff&&!document.body.classList.contains('ovw'),x=UI.tracksRight?w-HDRW:0,R=[x-1,HGR.t-1,HDRW+2,HGR.b-HGR.t+2];
+  {const on=HGR.on&&!GLE.hgOff&&!document.body.classList.contains('ovw'),x=UI.tracksRight?w-HDRW:0,R=[x,HGR.t,HDRW,HGR.b-HGR.t];
    if(g.hasPanel('hglass'))g.updatePanel('hglass',on?{rect:R,visible:true,edges:gleEdges('hglass')}:{visible:false});else if(on)g.addPanel({id:'hglass',rect:R,radius:0,kind:'docked',tintAmount:0,edges:gleEdges('hglass')})}}
 /* which edges of a docked panel bend the picture: only those that have the open arrangement beyond them (engine 2.2, plan 3.7). The track headers: the edge towards the arrangement.
    The panels across the window: the top or bottom edge that borders the part of the arrangement canvas that is not cut away (GB.t and GB.b from gbLayout). */
@@ -20555,7 +20569,7 @@ function gleSync(){const g=GLE.g,on=GLE.on&&!!g&&!!GLE.cv,m=on?GLE.cv.getBoundin
   for(const id of GLIDS){const el=document.getElementById(id);if(!el)continue;let face=false;const can=on&&m.width>4&&m.height>4&&!gleCovered(id)&&!(id==='hglass'&&document.body.classList.contains('ovw'));
     if(id==='hglass')GLE.hgOff=!can;
     if(can&&el.offsetHeight>2&&el.offsetWidth>2){const r=el.getBoundingClientRect(),x0=Math.max(r.left,m.left),y0=Math.max(r.top,m.top),x1=Math.min(r.right,m.right),y1=Math.min(r.bottom,m.bottom);
-      if(x1-x0>2&&y1-y0>2){face=true;const R=[r2((x0-m.left)/z)-1,r2((y0-m.top)/z)-1,r2((x1-x0)/z)+2,r2((y1-y0)/z)+2],E=gleEdges(id,R[1]+1,R[3]-2);if(g.hasPanel(id))g.updatePanel(id,{rect:R,visible:true,edges:E});else g.addPanel({id,rect:R,radius:0,kind:'docked',tintAmount:0,edges:E})}}
+      if(x1-x0>2&&y1-y0>2){face=true;const R=[r2((x0-m.left)/z),r2((y0-m.top)/z),r2((x1-x0)/z),r2((y1-y0)/z)],E=gleEdges(id,R[1],R[3]);if(g.hasPanel(id))g.updatePanel(id,{rect:R,visible:true,edges:E});else g.addPanel({id,rect:R,radius:0,kind:'docked',tintAmount:0,edges:E})}}
     if(!face&&g&&g.hasPanel(id))g.updatePanel(id,{visible:false});
     /* no engine face behind it: the panel is solid */
     if(el.classList.contains('glsol')===face)el.classList.toggle('glsol',!face)}}
@@ -20918,7 +20932,7 @@ function glfR(r){const z=ZOOM,q=v=>Math.round(v/z*100)/100;return[q(r.left),q(r.
 /* flat pictures for one layer: what its faces may cover that is not the arrangement. Only changes are passed on (each change rebuilds the flats' blur). */
 function glfFlat(L,key,d,sig,seen){seen.add(key);if(L.flats.get(key)===sig)return;L.flats.set(key,sig);L.g.setFlat(key,d);GLF.n.flatSet++}
 function glfFlats(L,items,disp,dock){const seen=new Set(),g=L.g;
-  for(const f of dock)glfFlat(L,f.k,{rect:f.R,radius:0,color:f.c},f.s,seen);
+  for(const f of dock)glfFlat(L,f.k,{rect:f.R,radius:(f.k==='d:tr'||f.k==='d:fxglass')?gs4Rad(f.k.slice(2)):0,color:f.c},f.s,seen);
   for(const f of disp)glfFlat(L,f.k,{rect:f.R,radius:2,source:f.cv},f.s,seen);
   for(const it of items)if(it.lv<L.i){const c=it.bg,a=Math.max(c[3],.85),col=[c[0],c[1],c[2],a];glfFlat(L,'w:'+it.id,{rect:it.R,radius:it.rad,color:col},it.R.join(',')+'|'+it.rad+'|'+col.join(','),seen)}
   for(const k of [...L.flats.keys()])if(!seen.has(k)){L.flats.delete(k);g.removeFlat(k)}}
@@ -21755,6 +21769,63 @@ const INS={nfft:0,ntd:0,
     if(s<0)s=Math.max(0,n-Math.max(0,Math.min(n,Math.round(exp))));t[0]=a[n-4];t[1]=a[n-3];t[2]=a[n-2];t[3]=a[n-1];st.tv=1;return s},
 };
 /* ===== end of lane E IN-A ===== */
+/* ====================== v0.243 (task GS4, glass step 4): the device panel and the transport float, the transport gets the lens ======================
+   The user's look at v0.228 on the Mac: in the bottom left corner the glass did not blur and did not bend. Cause: the track header rows (#hdrclip) run on
+   down behind the device panel and the transport, and they are page elements, not part of the engine's picture, so they showed sharp through the
+   see-through panels (and so did the 6 px of device glass under the device cards). Now:
+   - the device panel and the transport are floating glass: GS4.ins px in from the left and right window edges (the tab band starts there too), corners of
+     GS4.rad px, GS4.gap px between them; the arrangement shows beside them and in their corners.
+   - the engine's canvas now lies ABOVE the arrangement canvas and its playhead layer (and under the track header column): its faces cover what is under
+     the glass, and around them the real arrangement shows, so nothing is cut out of the arrangement canvas any more (no clip, no copy into #arrCol). A
+     clip with rounded holes was tried first: right on screen, but a clip of that shape makes the compositor mask the full-window canvas on every frame
+     (measured: idle 63-74 down to 38-40 frames a second on the cloud machine). Only the header rows (#hdrclip, a narrow layer that repaints rarely) are
+     cut away under the glass, with such a path.
+   - the transport's lens bends on every edge; GS4.lensY makes the bend along the top and bottom edges a little stronger on the transport and the device
+     panel (engine 2.4, lensY). These are the numbers to change. */
+const GS4={ins:10,rad:12,gap:4,lensY:{tr:1.3,fxglass:1.2},seg:6,holes:[],fresh:true,n:{clip:0,hdr:0}};
+document.documentElement.style.setProperty('--gs4i',GS4.ins+'px');document.documentElement.style.setProperty('--gs4r',GS4.rad+'px');document.documentElement.style.setProperty('--gs4g',GS4.gap+'px');
+/* the floating look applies to the docked device panel and transport (not to devices popped out into a window or shown in the piano roll) */
+function gs4Dock(el){if(!el)return false;if(el.id==='tr')return true;const fx=document.getElementById('fx');return!!fx&&!fx.classList.contains('popped')&&!fx.classList.contains('prdev')}
+/* the device glass ends GS4.gap px above the transport */
+{const _fg=fxGlassSync;fxGlassSync=function(){const r=_fg.apply(this,arguments);try{const fx=document.getElementById('fx'),g=document.getElementById('fxglass');if(fx&&g){const d=gs4Dock(g);if(g.classList.contains('gs4')!==d)g.classList.toggle('gs4',d);const h=Math.max(0,fx.offsetHeight-2-(d?GS4.gap:0))+'px';if(g.style.height!==h)g.style.height=h}}catch(e){}return r}}
+/* the glass shapes over the arrangement, in CSS px relative to the arrangement canvas (which has the size and place of #main) */
+function gs4Shapes(){const a=arr.getBoundingClientRect(),z=ZOOM,out=[];if(!a.width||!a.height)return out;
+  for(const id of['fxglass','tr']){const el=document.getElementById(id);if(!el||!el.getClientRects().length)continue;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')continue;
+    const r=el.getBoundingClientRect();if(r.width<a.width*.5||r.height<4||r.bottom<=a.top+1||r.top>=a.bottom-1)continue;
+    out.push({id,x:(r.left-a.left)/z,y:(r.top-a.top)/z,w:r.width/z,h:r.height/z,r:Math.min(parseFloat(cs.borderTopLeftRadius)||0,r.height/z/2,r.width/z/2)})}
+  return out}
+/* a rounded rectangle as a polygon (GS4.seg steps per corner), clockwise */
+function gs4Poly(s){const{x,y,w,h,r}=s,n=GS4.seg,P=[];if(!(r>.5))return[[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
+  for(const[cx,cy,a0] of[[x+w-r,y+r,-90],[x+w-r,y+h-r,0],[x+r,y+h-r,90],[x+r,y+r,180]])for(let i=0;i<=n;i++){const t=(a0+90*i/n)*Math.PI/180;P.push([cx+r*Math.cos(t),cy+r*Math.sin(t)])}
+  return P}
+/* the part of a convex polygon inside a rectangle (Sutherland and Hodgman) */
+function gs4Cut(P,x0,y0,x1,y1){const E=[[p=>p[0]>=x0,(a,b)=>[x0,a[1]+(b[1]-a[1])*(x0-a[0])/(b[0]-a[0])]],[p=>p[0]<=x1,(a,b)=>[x1,a[1]+(b[1]-a[1])*(x1-a[0])/(b[0]-a[0])]],
+  [p=>p[1]>=y0,(a,b)=>[a[0]+(b[0]-a[0])*(y0-a[1])/(b[1]-a[1]),y0]],[p=>p[1]<=y1,(a,b)=>[a[0]+(b[0]-a[0])*(y1-a[1])/(b[1]-a[1]),y1]]];
+  for(const[inside,cross] of E){if(!P.length)break;const Q=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length],ia=inside(a),ib=inside(b);if(ia){Q.push(a);if(!ib)Q.push(cross(a,b))}else if(ib)Q.push(cross(a,b))}P=Q}
+  return P}
+/* clip-path (for the header rows) that shows the rectangle [x0,y0,x1,y1] of an element except the glass shapes (dx, dy: where the element's box starts, in arrangement px) */
+function gs4Path(x0,y0,x1,y1,S,dx,dy){const f=v=>(Math.round(v*10)/10);let d=`M${f(x0)} ${f(y0)}H${f(x1)}V${f(y1)}H${f(x0)}Z`,holes=0;
+  for(const s of S){const P=gs4Cut(gs4Poly({x:s.x-dx,y:s.y-dy,w:s.w,h:s.h,r:s.r}),x0,y0,x1,y1);if(P.length<3)continue;holes++;d+='M'+P.map(p=>f(p[0])+' '+f(p[1])).join('L')+'Z'}
+  return holes?`path(evenodd,'${d}')`:(x0>0||y0>0?null:'')}
+/* no cut any more: the engine's canvas lies above the arrangement (CSS body.gle #glassCv), its faces cover what is under the glass */
+gbClip=function(){let hd=false;if(GS4.fresh){GS4.fresh=false;GS4.holes=gs4Shapes();hd=true}
+  if(GB.clip){GB.clip='';arr.style.clipPath='';GS4.n.clip++}if(GB.col&&GB.col.style.display!=='none')GB.col.style.display='none';
+  if(hd)gs4Hdr(GS4.holes)};
+/* the header rows: cut away under the glass (a path with the rounded holes), so that only the engine's frosted picture is there */
+function gs4Hdr(S){const hc=document.getElementById('hdrclip');if(!hc)return;let cl='';
+  if(S&&S.length&&GB.on){const a=arr.getBoundingClientRect(),r=hc.getBoundingClientRect(),z=ZOOM;if(r.width>2&&r.height>2)cl=gs4Path(0,0,r.width/z,r.height/z,S,(r.left-a.left)/z,(r.top-a.top)/z)||''}
+  if(hc._gs4!==cl){hc._gs4=cl;hc.style.clipPath=cl;GS4.n.hdr++}}
+/* the header column copy is not needed: the arrangement canvas itself shows above the first and below the last track */
+gbCol=function(){};
+/* the engine off (Solid, no WebGL2): nothing is cut */
+{const _gl=gbLayout;gbLayout=function(){GS4.fresh=true;const r=_gl.apply(this,arguments);try{if(!GB.on){GS4.holes=[];gs4Hdr(null)}}catch(e){}return r}}
+/* the floating panels bend on every edge, the docked ones as before */
+{const _ge=gleEdges;gleEdges=function(id){if((id==='tr'||id==='fxglass')&&GS4.holes.some(s=>s.id===id))return'trbl';return _ge.apply(this,arguments)}}
+{const _gs=gleSync;gleSync=function(){const r=_gs.apply(this,arguments);const g=GLE.g;if(g&&GLE.on)for(const id of['tr','fxglass']){if(!g.hasPanel(id))continue;const el=document.getElementById(id),fl=!!el&&gs4Dock(el),rad=fl?(parseFloat(getComputedStyle(el).borderTopLeftRadius)||0):0;
+  g.updatePanel(id,{radius:rad>0?rad+1:0,lensY:fl?GS4.lensY[id]:1})}return r}}
+/* a window or menu over the floating panels sees them with their rounded corners */
+function gs4Rad(id){const el=document.getElementById(id);if(!el||(id!=='tr'&&id!=='fxglass')||!gs4Dock(el))return 0;return parseFloat(getComputedStyle(el).borderTopLeftRadius)||0}
+try{setTimeout(()=>{try{fxGlassSync();GB.lt=0;gbCopy()}catch(e){}},0)}catch(e){}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);

@@ -144,6 +144,14 @@ g.info.corners              // 'outline'
 AudioLabGlass.CORNERS       // ['square', 'blend', 'fade', 'round', 'outline']
 ```
 
+Added in 2.4 (task GS4; nothing else in the API changed):
+
+```js
+g.addPanel({id:'tr', rect, radius:13, kind:'docked', lensY:1.3});  // the bend along the top and bottom edges 1.3 times as strong (lensX: the left and right edges)
+g.updatePanel('tr', {lensY:1});                                    // back to the preset's strength
+g.panelInfo('tr')          // {..., lensY:1.3}: lensX and lensY appear only when the panel was given its own
+```
+
 Options of `create`: `corners` (`'outline'` since 2.3), `squareBelow` (8: panels with a radius under this many px take the square lens), `bounds`. `kinds.docked.edges` is `'auto'`; a kind given through `opts.kinds` can set its own `edges`.
 
 `create(canvas, {backdropRate: 120})` sets the rate at the start. `info.sceneRects` is one less than in 2.0: the background colour is no longer a rectangle.
@@ -204,7 +212,7 @@ Read-only: `g.mode` (`'gl'` or `'fallback'`), `g.reason` (`'no webgl2'`, `'lost'
 | `flatUploads` | small copies of fed display canvases | only while such a display repaints under floating glass |
 | `pyramids`, `flatPyramids`, `draws`, `skipped`, `lost`, `restored` | blur builds, face redraws, idle calls, context losses | |
 
-Panel options beyond rect, radius and kind: `visible`, `opacity` (0 to 1, for menu fades), `z` (drawing order), `over:'flats'`, `tint:[r,g,b]`, `tintAmount`, `shadow` (0 = none, 1 = Apple's), `lens:false`, `edges` and `corners` (2.2, above).
+Panel options beyond rect, radius and kind: `visible`, `opacity` (0 to 1, for menu fades), `z` (drawing order), `over:'flats'`, `tint:[r,g,b]`, `tintAmount`, `shadow` (0 = none, 1 = Apple's), `lens:false`, `edges` and `corners` (2.2, above), `lensX` and `lensY` (2.4: a multiplier on the bend along the left and right, or top and bottom, edges; 1 = the preset).
 
 Main `opts`: `level`, `lens`, `blur`, `tint` and `solid` (panel colours, default rgb 22 28 42), `backdropColor`, `copyRate` (60; 0 = no cap), `copyQuality` (`'low'`, the `imageSmoothingQuality` used when a canvas is reduced; see section 5), `maxDpr` (2), `face`, `rim`, `kinds`, `allowSoftware` (false: refuse a software renderer where the browser reports one), `regionCull` (true), `autoResize` (true), `onFallback(on, why)`, `requestRender()` (the engine asks for a frame after a restore or a system setting change), `fallbackCanvas`, `reduceTransparency`, `increaseContrast`.
 
@@ -463,4 +471,14 @@ All of it is the block "v0.227 (task GS2, glass step 2)" in `index.html` (before
 - No `rfMap`, `rfBuild`, `rfStyle`, `RFX`, `feImage` map, `#arrBlur`, `abDraw`, `fxBlurPic` or `ABL` any more. `rfAttach`, `rfUpdate` and `rfAll` are empty calls kept for older code. `gbCopy` only keeps the 2 x 2 click layer `#arrBack` and the cut-away (`gbLayout`, `gbClip`, `#arrCol`); `elTick` is the glass step 1 version (a 384 x 216 copy of the arrangement, only while a window or menu is open).
 - One CSS rule still sets `backdrop-filter` to none on every element and pseudo element; no other declaration of it is left in the file.
 - The engine itself and how the app wires it (sections 9 and 10) are unchanged. Frame-time work of the same task: `docs/backlog-log.md` (task GS3).
+
+## 12. Step 4 (task GS4): the device panel and the transport float, the transport gets the lens
+
+The block "(task GS4, glass step 4)" in `index.html` (before `askChoice`), made by `tools/edits/taskGS4_engine.py` (engine 2.4.0, here and in `tools/glass-lab/glass-engine.js`) and `tools/edits/taskGS4.py` from `taskGS4_block.js` and `taskGS4_css.txt`.
+
+- **What was wrong** (the user's screenshots of v0.228): in the bottom left corner the device panel and the transport showed the track header rows sharp. The rows (`#hdrclip`) run on down behind both panels; they are page elements, so they are not in the engine's picture, and they lay above the engine's canvas. The arrangement canvas was cut away under the panels, the header rows were not.
+- **The engine's canvas now lies above the arrangement canvas** (and its playhead layer `#arrPhW`), under the track header column: `body.gle #glassCv{z-index:1}`, `#hdrcol` is 2, the docked panels' elements are above both. The faces cover what is under the glass; around them the real arrangement shows. So nothing is cut out of the arrangement canvas any more (`gbClip` sets no clip, `#arrCol` is not used, `gbCol` copies nothing), and the faces are exactly the size of their elements (the 1 px margin was there to hide the seam of the cut). Only the header rows are cut away under the glass, with a `clip-path: path(evenodd, ...)` that has the rounded holes (`gs4Hdr`, read only when `gbLayout` runs). A clip of that shape on the arrangement canvas itself was tried first: right on screen, but the compositor then masks the full-window canvas on every frame (idle 63 to 74 frames a second went down to 38 to 40 on the cloud machine).
+- **Floating panels**: `GS4.ins` (10 px) in from the left and right window edges, the tab band starts there too; corners `GS4.rad` (12 px, the windows' radius); `GS4.gap` (4 px) between the device panel and the transport. `#fxglass.gs4`, `#fxin` (margin and the same radius, so the device row scrolls inside the rounded shape and is cut at its ends), `#tr` (margins and radius). Popped-out devices and devices in the piano roll keep their old look.
+- **Lens**: both panels bend on every edge (`gleEdges` gives `'trbl'`), their lens follows the real corners (radius + 1 for the face), and `lensY` is `GS4.lensY` (transport 1.3, device panel 1.2). The header glass is as before.
+- **Glass never samples glass**: the device panel no longer touches the transport or the tab band. Windows and menus over them get them as flat pictures with their rounded corners (`glfFlat` radius).
 

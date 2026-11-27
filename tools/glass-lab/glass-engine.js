@@ -11,7 +11,7 @@
    Docs: docs/glass-engine-module.md */
 (function (root) {
   'use strict';
-  var VERSION = '2.3.0';
+  var VERSION = '2.4.0';
   /* lens presets: [divisor of the short side, maximum band in px]. Apple's rule: band = min(short side / 4, 20). The user's default is wide (up to 45 px). */
   var LENS = { off: [0, 0], fine: [4, 12], apple: [4, 20], wide: [3, 45] };
   /* blur presets: how deep the pyramid goes (deepest level 1/4, 1/8, 1/16 of the size at level Glass) */
@@ -80,7 +80,7 @@
   /* the glass face. tint = rgb + amount; face = saturation, multiply, add; rimp = width, base, lit, contrast border;
      shd = offset y, radius, opacity; md = static (1 = no backdrop), opacity; sq, ed = the lens field (above) */
   function fsGlass(model) {
-    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;in vec2 p;out vec4 o;' + SDF + KF +
+    return '#version 300 es\nprecision highp float;uniform sampler2D t;uniform vec2 res;uniform vec4 rc,tint,rimp,ed;uniform vec3 face,shd;uniform vec2 md;uniform float rad,band,amt,dpr,sq,lr;uniform vec2 lk;in vec2 p;out vec4 o;' + SDF + KF +
     'void main(){vec2 hb=rc.zw*.5,l=p-rc.xy-hb;float d=sd(l,hb,rad),a=clamp(.5-d,0.,1.),sh=0.;' +
     'if(shd.z>0.){float ds=sd(l-vec2(0.,shd.x),hb,rad);sh=shd.z*(1.-smoothstep(-shd.y,shd.y,ds));}' +
     'if(a<=0.){if(sh<.003)discard;o=vec4(0.,0.,0.,sh*md.y);return;}' +
@@ -90,7 +90,7 @@
     'if(q.x>0.&&q.y>0.){float L=length(q);dl=L-R;n=q/L*sg;}else if(q.x>q.y){dl=q.x-R;n=vec2(sg.x,0.);}else{dl=q.y-R;n=vec2(0.,sg.y);}' +
     'float x=clamp(-dl/band,0.,1.),k=1.-sqrt(max(0.,1.-(1.-x)*(1.-x)));dv=n*k;lit=abs(dot(n,vec2(-.7071,-.7071)));}') +
     'vec3 c;if(md.x>.5){c=tint.rgb+(fract(sin(dot(floor(p),vec2(12.9898,78.233)))*43758.5453)-.5)*.022;}else{' +
-    'vec2 sp=p-dv*amt;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
+    'vec2 sp=p-dv*amt*lk;c=texture(t,vec2(sp.x/res.x,1.-sp.y/res.y)).rgb;' +
     'float L=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(L),c,face.x)*face.y+face.z;c=mix(c,tint.rgb,tint.a);}' +
     'float rim=1.-smoothstep(0.,rimp.x,-d);c+=rim*(rimp.y+rimp.z*lit);' +
     'c=mix(c,vec3(1.),rimp.w*(1.-smoothstep(dpr-.5,dpr+.5,-d)));' +
@@ -494,6 +494,8 @@
         gl.uniform4f(u.rc, (p.x - OX) * D, (p.y - OY) * D, p.w * D, p.h * D); gl.uniform1f(u.mg, mg);
         gl.uniform1f(u.rad, Math.min(p.radius, sh / 2) * D); gl.uniform1f(u.band, band * D); gl.uniform1f(u.amt, amt * D);
         if (u.lr) gl.uniform1f(u.lr, lensR(p, band) * D);
+        /* 2.4: the lens strength of this panel along each axis (lensX bends at the left and right edges, lensY at the top and bottom); 1 = as before */
+        if (u.lk) gl.uniform2f(u.lk, p.lensX != null ? +p.lensX : 1, p.lensY != null ? +p.lensY : 1);
         gl.uniform4f(u.tint, tin[0], tin[1], tin[2], tA);
         gl.uniform4f(u.rimp, opt.rim.width * D, hc ? 0 : opt.rim.base, hc ? 0 : opt.rim.lit, hc ? 0.6 : 0);
         gl.uniform3f(u.shd, 8 * D, (4 + 20 * tt) * D, sm > 0 ? sm * (0.04 + 0.56 * tt) : 0);
@@ -587,7 +589,7 @@
       if (d.rect) { r = rectOf(d.rect); if (r.x !== p.x || r.y !== p.y || r.w !== p.w || r.h !== p.h) { p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h; ch = true; } }
       if (d.kind != null && d.kind !== p.kind) { p.kind = d.kind; p.K = kinds[d.kind] || kinds.window; ch = true; }
       if (d.z != null && d.z !== p.z) { p.z = +d.z; ch = true; sortOrder(); }
-      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners'].forEach(function (k) {
+      ['radius', 'opacity', 'visible', 'over', 'tint', 'solid', 'tintAmount', 'shadow', 'lens', 'edges', 'corners', 'lensX', 'lensY'].forEach(function (k) {
         if (k in d && d[k] !== p[k]) { p[k] = d[k]; ch = true; if (k === 'over') bDirty = true; }
       });
       return ch;
@@ -689,8 +691,10 @@
         var p = panels.get(id), ln = LENS[opt.lens], m; if (!p) return null;
         if (edDirty) edges(); m = p.em;
         var bd = ln[0] && LV.lens && !moreC() && p.lens !== false ? Math.max(0.5, Math.min(ln[1], Math.min(p.w, p.h) / ln[0])) : 0, h = Math.min(p.w, p.h) / 2;
-        return { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
+        var info = { edges: (m & 1 ? 't' : '') + (m & 2 ? 'r' : '') + (m & 4 ? 'b' : '') + (m & 8 ? 'l' : ''), square: !!p.sq, band: bd,
           lensRadius: opt.corners === 'outline' ? lensR(p, bd) : p.sq ? 0 : Math.min(Math.max(Math.min(p.radius, h), bd), h) };
+        /* 2.4: lensX and lensY only when the panel was given its own (otherwise 1) */
+        if (p.lensX != null) info.lensX = +p.lensX; if (p.lensY != null) info.lensY = +p.lensY; return info;
       },
       setLensPreset: function (n) { if (!(n in LENS) || n === opt.lens) return; opt.lens = n; panelsDirty = true; },
       setBlurPreset: function (n) { if (!(n in BLUR) || n === opt.blur) return; opt.blur = n; if (mode === 'gl') dropPyr(); },

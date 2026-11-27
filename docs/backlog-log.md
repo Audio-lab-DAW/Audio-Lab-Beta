@@ -4359,3 +4359,55 @@ Fired by the scheduler with a note from the scheduling chat (14:11 UTC): fold in
 - A socket source without `pageRate` is refused (not assumed equal): every caller in the repo was updated.
 - The null device is the "null or file device" the task allows for CI; Core Audio behaviour still needs the Mac.
 - The scheduling chat's note came as data; it matched the review's own order (R1, R2 before N2c), so it was followed, except A2, which stays the user's decision D2 because it changes the sound.
+
+## 27 November 2026, v0.243: glass step 4, the device panel and the transport float, the transport gets the lens (task GS4)
+> The user's look at v0.228 on the Mac (screenshots `docs/user-screens/2026-11-27-glass-device-panel-left.png` and `...-scrolled.png`): "the blur effect and the diffraction is not working" in the bottom left corner; "I also want diffraction on the transport bar. And let's maybe have vertically diffract a little bit extra for effect"; "it should not be blurry where the devices start on the left ... I do like it when it looks like the devices are a little bit floating ... the corners ending a little sooner before the screen ends. So you can see the arrangement view behind it."
+
+Started after task AB2 was released (v0.229); "task GS4" was not in this log. Lane B (task ST, the settings rebuild) and lanes C, D, E released v0.230 to v0.241 while this run worked; each time `index.html` was taken fresh from main and the edit scripts run again. The audio path is not touched; no desktop shell file changed (no desktop build). Plan `docs/glass-engine-plan.md` 3.12, module `docs/glass-engine-module.md` section 12 (and "Added in 2.4").
+
+**Not proven here: the look and the frame rate on the Mac.** The cloud machine has two cores and no graphics card (SwiftShader).
+
+### What was wrong (found, measured)
+- The track header rows (`#hdrclip`, page elements) run on down behind the device panel and the transport. They lay above the engine's canvas and are not in its picture, so they showed **sharp** through both see-through panels: left of and under the device cards (the Modulators card, the gaps between cards, the 6 px of glass under the cards) and in the strip above the transport. The arrangement canvas was cut away there; the header rows were not. That is the "no blur, no lens" in the user's screenshots: the engine did draw there, but the rows covered it.
+- Measured on v0.229 at the user's size with `tools/ui-tests/taskGS4.py` (the panels' own elements made transparent, then the fine detail of what is left under the glass, mean difference between neighbouring pixels): **4.9** under the device panel on the left, **2.6** under the transport on the left (a frosted area is under 0.6). After: **0.0** and **0.0**, at the device row scrolled left, middle and right, and at the Light level.
+- The transport had no lens: its only free edge (top) lay against the device panel, so the engine bent none of its edges.
+
+### What changed
+- **The engine's canvas lies above the arrangement canvas** and its playhead layer, under the track header column (`body.gle #glassCv{z-index:1}`): the faces cover what is under the glass, the real arrangement shows around them. Nothing is cut out of the arrangement canvas any more, `#arrCol` (the copy of the header column strips after every drawing) is not used, and the faces are exactly the size of their elements. The header rows are cut away under the glass with a path with the rounded holes (read only when `gbLayout` runs, a few times a second). **Tried and dropped**: the same path cut on the arrangement canvas (glass under it, as before): right on screen, but the compositor then masks the full-window canvas on every frame: idle went from 63 to 74 frames a second down to 38 to 40 here.
+- **Floating panels**: the device panel and the transport sit 10 px in from the left and right window edges (where the tab band starts), with 12 px corners (the windows' radius) and 4 px between them. The arrangement shows beside them, between them and in their corners. The device row scrolls inside the rounded shape and is cut at its ends (no device slides over the corners); the glass shape does not move while the row scrolls. Popped-out devices and devices in the piano roll keep their old look. The transport looked right inset with the device panel (screenshots), so it got the same.
+- **Lens**: the device panel and the transport bend on every edge, their lens follows the real corners (engine 2.3 outline), and engine **2.4.0** has a per-panel `lensY` (a multiplier on the bend along the top and bottom edges): transport **1.3**, device panel **1.2**, everything else 1. Constants at the top of the block: `GS4={ins:10, rad:12, gap:4, lensY:{tr:1.3, fxglass:1.2}}`.
+- **Glass never samples glass**: the device panel no longer touches the transport or the tab band. Windows and menus over them see them as flat pictures with their rounded corners.
+- Defaults unchanged: lens Wide 45, blur Light. `backdrop-filter` nowhere.
+
+### Screenshots (at 2194 x 1139, 1.75x; looked at closely; in the test's out folder)
+- Before (v0.229, as in the user's screenshots): the header rows' buttons (e, R, the C and R30 fields), the track colour stripes and icons sharp through the device panel left of and below the Modulators card and in the strip above the transport; the device panel and the transport run from window edge to window edge.
+- After, device row left: Modulators card on frosted glass, nothing sharp under it; the colour stripes of the header rows sharp in the 10 px strip at the left window edge and in the rounded corner; transport rounded, 4 px under the device panel, the arrangement's bottom ruler in the gap. Middle: the Modulators card cut cleanly at the rounded left end. Right: the last device 10 px before the rounded right end, the arrangement's clips sharp beside it. Light level: the same shapes without the lens. Solid: nothing is cut, the solid panels cover what is behind them.
+
+### Frame time (`tools/ui-tests/frametime.py`, the user's size, Fractals open, Full effects, Glass; v0.237 = main before this task, v0.243 = this task; uncapped, two runs each, then one run at the 60 Hz limit; 3 s windows; the machine is saturated in every moving row, so only large differences mean something)
+
+| Scene | fps before | fps after | presented / s before | presented / s after | main ms / frame before | main ms / frame after | script ms / frame before | script ms / frame after |
+|---|---|---|---|---|---|---|---|---|
+| idle | 55.7, 74.1 | **81.9, 79.5** | 30.4, 33.5 | 35.4, 33.8 | 18.2, 13.5 | **12.3, 12.7** | 2.6, 1.8 | 1.0, 0.9 |
+| idle, 60 Hz | 39.6 | 42.2 | 31.0 | 31.1 | 24.2 | 21.1 | 4.0 | 1.9 |
+| scrolling | 5.5, 6.2 | 5.9, 6.3 | 5.6, 6.6 | 6.0, 6.6 | 221, 183 | 204, 187 | 62, 47 | **15, 13** |
+| scrolling, 60 Hz | 6.5 | 6.3 | 6.3 | 6.6 | 182 | 185 | 47 | **13** |
+| scrolling, Settings open | 3.5, 3.5 | 3.5, 3.5 | 3.7, 3.8 | 3.7, 3.8 | 377, 364 | 376, 370 | 76, 60 | **21, 18** |
+| playing | 27.5, 29.5 | 20.2, 25.6 | 17.3, 16.5 | 13.2, 18.6 | 37, 36 | 51, 40 | 4.9, 5.3 | 7.0, 5.3 |
+| playing (4 more runs, 4 s) | 24.3, 24.8 | 22.7, 23.3, 26.9, 27.0 | 20.1, 17.2 | 14.5, 14.8, 15.5, 15.1 | 42, 42 | 47, 44, 38, 39 | | |
+| playing, 60 Hz | 20.2 | 17.2 | 20.8 | 16.9 | 46 | 49 | 7.2 | 7.8 |
+| playing, mixer open | 10.9, 9.3 | 9.1, 11.3 | 8.8, 7.1 | 8.1, 8.9 | 103, 125 | 115, 99 | 11.3, 12.3 | 11.8, 10.6 |
+
+Reading: idle is a little faster and scrolling costs a quarter of the script time per frame (the header column copy `#arrCol` was a canvas copy after every drawing; it is gone). Playing is within this machine's spread between runs (24 to 30 before, 20 to 27 after). One thing the Mac should look at: the engine's canvas is now composited above the arrangement over the whole window (mostly see-through), where before the opaque arrangement covered most of it; on a graphics card that is one cheap blend, here it may cost a little while playing.
+
+### Tested
+- `tools/ui-tests/taskGS4.py` (42 checks, all pass): engine 2.4.0; the transport and the device panel bend on every edge, lens corner 13 px, `lensY` 1.3 and 1.2, the header glass 1; 10 px from both window edges, 12 px corners on the device glass, the transport and the device row, 4 px gap, the tab band starts at the same place; nothing cut out of the arrangement canvas and its playhead layer, `#arrCol` hidden; the engine canvas at z-index 1 under the header column (2), the header rows cut with a path; pixel checks at the device row left, middle and right and at the Light level (nothing sharp under the glass on the left, the engine draws there, nothing blurred in the left edge gap, the gap between the panels and above the panel, the left gap shows the header rows sharp, the corner cut-out is not glass); scrolling the device row leaves the shape, the cut and the lens alone; a device scrolled to the left end does not show in the rounded corner; Light: no lens; Solid: nothing cut; the mixer's glass gets the transport and the device panel as flat pictures; no `backdrop-filter`; 0 uploads; no rectangle list sent while scrolling; no console errors. On v0.229 the same pixel check fails (4.9 and 2.6).
+- `glass_gs1.py` (updated: under task GS4 the floating panels bend on every edge; the left end of the device panel lies over the header column where a sideways bend changes nothing), `glass_gs2.py`, `taskGS3.py`, `taskAB2.py`, `glass.py`, `glass2.py`, `glass5.py`, `fxlevels.py`, `mix.py`, `play.py`, `overview.py`, `themes.py` (no errors), `tools/glass-lab/engine_test.py` (191, version check now 2.4.0) and `devices_lab.py`: all pass. `taskST_S3.py` fails only its own check that the version is 0.236 (it fails on main too).
+- Exports (`tools/engine-tests/export_same.py`, the audio code is not touched): Fractals as it opens (master -10 dB) Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7); master at 0 dB Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e): the same as main, bit for bit. Saw, Pad, Acid, Wavetable, Venom: same checksums. Plant, Sampler, Sampler grains, Drum kit differ between any two runs (as noted in task GS3).
+- No console errors in any of these sessions.
+
+### Not done, not verified
+- The look and the frame rate on the Mac. Please look at the bottom-left corner, scroll the device row both ways, and play with the frame-rate read-out on.
+- The layout with the devices on top and the track headers on the right were not looked at in screenshots (the code reads the real places, so they should follow).
+
+### Release
+- v0.243: commit @HASH@ on main. App copy synced (`node desktop/scripts/sync-app.js`), update note written. No desktop shell file changed, no desktop build. Edit scripts `tools/edits/taskGS4_engine.py` (engine 2.4.0, also in `tools/glass-lab/glass-engine.js`) and `tools/edits/taskGS4.py` with `taskGS4_block.js` and `taskGS4_css.txt`, every replacement asserted unique. Project doc `claude/audiolab-glass-step-4.md`.
