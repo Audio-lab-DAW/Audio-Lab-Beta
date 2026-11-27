@@ -315,6 +315,59 @@ Checked headless: `python3 tools/glass-lab/engine_test.py`, 151 checks, all pass
 
 No fix that changes the look or the defaults was made blind. After this run the fix is one line (a default) or one integration rule for G3.
 
+### 3.7 Engine 2.1 on the user's Mac: the requirement is met on the test page; square corners (27 Nov) and engine 2.2 (task G2d)
+
+**Good news first.** The user ran the engine 2.1 test page on the Mac: M4, Chrome 157, 2560x1337 at 1.5x (7.7 megapixels), 238 Hz, mixer moving, lens Wide, blur Light.
+
+| Row | fps | frames delivered | GPU background per s | uploads | lists |
+|---|---|---|---|---|---|
+| Solid (page only, as Bench 3) | 240 | 100 % | 0 | 0 | 0 |
+| Solid, drawn by the engine | 240 | 100 % | 0 | 0 | 0 |
+| Light, drawn on GPU | 240 | 100 % | 60 | 0 | 0 |
+| **Glass, drawn on GPU (scrolling)** | **240** | **100 %** | 480 | 0 | 0 |
+| **Glass, drawn on GPU, playing** | **240** | **100 %** | 480 | 0 | 0 |
+| Light, small copy | 240 | 100 % | | | |
+| Glass, small copy | 240 | 100 % | | | |
+| Bench 3 path (its own GL code) | 240 | 100 % | | | |
+
+Median 4.20 ms on every row, 95 % between 4.3 and 4.6 ms, worst between 4.7 and 4.8 ms. Uploads 0 and lists 0 on the "drawn on GPU" rows. **"Find the cost" showed no row that changes anything**: all 100 %, worst 4.5 to 4.8 ms.
+
+**Reading.** Engine 2.1 meets the requirement on the test page: full glass with the Wide lens at the screen's own rate, scrolling and playing, with both layers and the mixer moving. The two savings of 2.1 and the lighter page were enough; **the fitted canvas (`setOrigin`) and a backdrop rate (`setBackdropRate`) are not needed** and stay off. (This run was at 2560x1337 at 1.5x, the run in 3.6 at 3840x2027 at 1x: about the same number of pixels.) **The real check is now in the app**, where the arrangement canvas, the DOM and the meters share the frame (GS1b).
+
+**The problem the user saw**, in the user's words: "There is still a weird little artifact. When you have square corners, it looks on the inside that the corners are still rounded with the diffraction." The screenshot shows the Track headers panel (square corners, flush with the left edge of the window and with the panel below it) with the lens on: in its bottom left corner, and at the top left corner of the Device panel, the refracted rim follows a large quarter circle inside the square corner. A bright curved band inside a panel whose outline is square.
+
+**Cause.** The earlier corner fix (section 1, "Corner artifact fixed in the bench shader"). To stop the bending direction from flipping along the corner diagonal, the lens got its own distance field with a corner radius of at least the lens width: 45 px on Wide. That is right for rounded panels and wrong for square ones: the outline is square, the refraction is a 45 px arc. A second thing made it stand out: both corners in the screenshot lie on edges that border nothing (the window's left edge, the seam between two panels). A lens rim there bends content that the user never sees enter the panel, so it reads as a fault and not as glass.
+
+**What was compared** (one lookup per pixel in each; pictures of the same corners side by side, and pixel checks):
+
+| | Square panels | Result |
+|---|---|---|
+| K1 | as before: rounded lens | the arc |
+| K2 | the nearest edge bends; its direction turns to the other edge's across the diagonal within 4 px (a smooth minimum of the two edge distances) | no arc, but a **crease along the diagonal** wherever a clip edge crosses it: on one side the picture is moved sideways by up to 54 px, on the other side up or down, and 4 px cannot hide that |
+| K3 | the nearest edge bends; the bend fades to nothing on the diagonal | no arc, but a **wedge of unbent picture** along the diagonal |
+| **K4** | **each edge bends along its own axis by the usual profile; in the corner the two add** | **clean**: the band runs straight into the corner on both edges, and nothing can jump on the diagonal, because the sideways move depends only on x and the vertical move only on y |
+| K5, K6, **K7** | K2, K3, **K4**, with the lens only on free edges | K7: the corners in the screenshot have no rim at all; corners between two free edges look like K4 |
+
+**Decided (recommendation, the user judges on the Mac): K7.** Square lens for square panels, and the rim only on free edges.
+
+**What changed (engine 2.2.0, test page; `index.html` and `desktop/` not touched, API kept).**
+
+- **Square panels** (corner radius under 8 px) get the square lens (K4). **Rounded panels are pixel-identical to 2.1** (checked against the 2.1 file).
+- **Panel option `edges`**: `'all'`, `'none'`, letters `t r b l`, or `'auto'`. Auto closes an edge that lies on the window border or against other docked panels along its whole length. **Docked panels default to auto**, floating kinds to all. On the test page: track headers bend on top and right, the tab band on top, device panel and transport nowhere.
+- `setCorners('square' | 'blend' | 'fade' | 'round')`, `setBounds(rect)`, `panelInfo(id)`; panel option `corners` to force one panel square or round.
+- The other three models are separate programs, built only if chosen. The default program holds the rounded shape (same instructions as 2.1) and the square shape (two square roots, no `length()`, no division), chosen per panel by one uniform. Still one lookup per pixel. **Expected cost: nothing measurable; not measured**, the cloud machine has no graphics card.
+- Test page: a **Corners** chooser (K1 to K7, the star on K7, which is the default) with a **zoomed corner** (3x; five corners to pick from). The zoom is drawn at most 12 times per second and not at all while a table runs. **The eight rows of Run and the 25 rows of Find the cost are unchanged.**
+
+Checked headless: `python3 tools/glass-lab/engine_test.py`, **171 checks, all pass**, no console errors (was 151). Among them: on a square panel the bend at a given distance from an edge is the same in the corner region as along the straight edge (0 px difference, all four edges); the same check fails by 22 to 37 px on K1, K2 and K3; closed edges are pixel-identical to lens off; rounded panels identical with every model.
+
+**What the user is asked to do:** open the test page, look at Corners K1 to K7 with the zoomed corner and say which looks right; run the table once more (every row should stay at 100 %).
+
+**Left open on purpose:**
+- The rim light (the thin bright line on the outline) still runs along every edge, closed ones too. It was not what the user pointed at. If it should follow `edges`, that is a small change.
+- The "Bench 3 path" row keeps Bench 3's own shader (the rounded lens): it is a speed reference, not a look.
+- Slightly rounded panels (radius 8 to 44 px with the Wide lens) keep 2.1's lens, whose corner radius is the lens width and not the panel's. Nobody has pointed at it; on the 12 and 16 px corners of menus and windows it reads as round glass.
+- For GS1b: where a docked panel lies against something that is not glass (toolbar, ruler), auto cannot know; such an edge is named in the app (`edges:'r'`). See `docs/glass-engine-module.md` section 7c.
+
 ## 4. Open questions for the user
 
 1. (Answered: Wide 45 px and Light.)

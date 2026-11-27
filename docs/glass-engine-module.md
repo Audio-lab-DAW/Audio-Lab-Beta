@@ -1,27 +1,54 @@
-# AudioLab glass engine: the module (tasks G2, G2b and G2c, 27 November 2026)
+# AudioLab glass engine: the module (tasks G2, G2b, G2c and G2d, 27 November 2026)
 
-The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.1 (task G2c). Since 2.0 (task G2b) the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). 2.1 follows the Mac run of the 2.0 test page (plan 3.6): two small savings, a canvas that can be only as large as its glass, a backdrop rate, and a test page that finds the cost; see section 7b. **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here.
+The engine from `docs/glass-engine-plan.md` as a stand-alone file. **Version 2.2 (task G2d). Since 2.0 (task G2b) the engine draws its own backdrop on the graphics card. No canvas is copied.** This follows the user's Mac tests (plan 3.2 to 3.5). 2.1 follows the Mac run of the 2.0 test page (plan 3.6): two small savings, a canvas that can be only as large as its glass, a backdrop rate, and a test page that finds the cost; see section 7b. **Nothing in `index.html` or `desktop/` was changed, VERSION was not bumped.** Glass step 1 (task G3, docked surfaces) starts from here. **2.2 follows the Mac run of the 2.1 test page (plan 3.7): every row kept 100 % at 240 fps, and one thing looked wrong: inside square panels the refraction was rounded. 2.2 gives square panels a square lens and bends only along free edges.**
 
 | File | What it is |
 |---|---|
-| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 51 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
+| `tools/glass-lab/glass-engine.js` | The engine. Plain JS, one file, no build step, no dependencies, about 59 KB with comments. Defines `window.AudioLabGlass`. Paste it into `index.html` or load it with a script tag. |
 | `tools/glass-lab/engine-test.html` | Test page: AudioLab-sized panels over a scrolling arrangement; levels Glass, Light, Solid; background drawn on the GPU or small copy; live frame-share readout and counters; "Run" table like Glass Bench 3 (with Bench 3's own GPU path as a row); "Find the cost" table. Needs `glass-engine.js` beside it. |
-| `tools/glass-lab/engine_test.py` | 151 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
+| `tools/glass-lab/engine_test.py` | 171 headless checks (Python Playwright). `python3 tools/glass-lab/engine_test.py` |
 
 Test page as an artifact (one file, engine inlined): https://claude.ai/artifact/HCdnmA3jbVsRyz4ifo7yvY
 
-**Please run it on the Mac** (full window, other heavy tabs closed, and if possible inside the AudioLab desktop app): press "Run (about 45 s)", then "Find the cost (about 2 min)", then "Copy tables" and paste both. What must be true there: "Solid (page only)" and "Bench 3 path" reach 240, and the rows "drawn on GPU" deliver 100 % of the frames at 3840x2027 and 240 Hz, like Solid (plan 3.6 says how to read the rest). The cloud machine that built this has no graphics card, so **every frame rate measured here means nothing**; only correctness was checked.
+**Please look at it on the Mac** (full window): in the control card, **Corners** has seven choices, K1 to K7, with a zoomed view of one corner under it. K1 is the look before (rounded lens inside square panels), K7 (starred) is the new default. Say which looks right. Then press "Run (about 45 s)" and "Copy tables" once more: every row should still be at 100 % as in plan 3.7.
 
 ## 1. How it works
 
 1. **One WebGL2 canvas** per layer. Everything the engine draws is glass faces; where there is no glass the canvas is transparent.
 2. **The backdrop is a list of rectangles, drawn by the engine itself**: the lane backgrounds, each clip as a flat rectangle in its track colour (body and title band), a selection tint, the playhead line. No waveforms, notes, text or grid: under frost they cannot be seen. The list is sent to the graphics card once (`setScene`) and again only after an edit.
 3. The rectangles are drawn **straight into the quarter-size target** in **one instanced draw call**. Each small pixel gets exactly the share of each rectangle that covers it, so the result equals the full-size picture reduced with a box filter: thin lines and slow scrolling do not shimmer.
-4. **One dual-Kawase blur pyramid** is built from that target, then **every glass surface is one quad in one shader**: rounded-rectangle distance field, rim refraction, face colour, tint, rim light, shadow. The shader reads only the blurred backdrop, never the canvas it draws to, so **glass never samples glass**.
+4. **One dual-Kawase blur pyramid** is built from that target, then **every glass surface is one quad in one shader**: rounded-rectangle distance field, rim refraction (shaped like the panel: see "Corners and edges" below), face colour, tint, rim light, shadow. The shader reads only the blurred backdrop, never the canvas it draws to, so **glass never samples glass**.
 5. **Only what changed is redone.** Scroll and zoom are one uniform, the playhead is one uniform; both redraw the backdrop and the blur (cheap: Bench 3 held 240 Hz at 7.8 megapixels doing this on every frame) but **send nothing**. Moving, resizing, fading a panel redraws the quads only. With nothing changed, `render()` returns at once and makes no GL call.
 6. **Never a full-size upload.** The other route, a canvas as the backdrop (`setBackdrop`), is the fallback and the route for other sources (piano roll, device displays): the canvas is first reduced to a quarter of its size on screen on a small 2D canvas, and only that small copy is uploaded, only after `markDirty()`, at most 60 times per second.
 
 `backdrop-filter` is used nowhere.
+
+### Corners and edges (2.2, plan 3.7)
+
+The lens is the band along a panel's edge where the backdrop is bent. Its shape now follows the panel, and it can be left off on some edges.
+
+**Rounded panels** (corner radius 8 px or more: windows, menus, sheets, pills): exactly as in 2.1, pixel for pixel. The lens has its own distance field whose corner radius is at least the lens width, so the bending direction turns smoothly around the corner.
+
+**Square panels** (radius under 8 px: track headers, transport, tab band, device panel): until 2.1 they got the same rounded lens, so with Wide a 45 px quarter circle showed inside a corner that is square. Now **each edge bends along its own axis**: the left and right edges move a pixel only sideways, the top and bottom edges only up or down, each by the usual quarter-circle profile of its distance from that edge. In the corner square, where both bands overlap, **the two simply add**. The band so runs straight into the corner on both edges; there is no arc. And there is no seam on the diagonal, because nothing is decided there: the sideways move depends only on x, the vertical move only on y.
+
+**Edges.** Each panel has `edges`: which of its four edges carry the lens. `'all'`, `'none'`, any of the letters `t r b l` (`'tr'` = top and right), or `'auto'`. **Auto keeps only the free edges**: an edge is closed when it lies on the border of the window (within 1 px, or beyond it), or when other docked panels reach it from outside along its whole length (together, if several). A rim on such an edge bends content the user never sees enter, and reads as an artifact. Docked panels default to `'auto'`, floating kinds to `'all'` (a window dragged to the screen edge keeps its lens). Where a free edge meets a closed one, the free edge's band runs straight to the end. Hiding or moving a neighbour frees the edge again; this is worked out only when a panel, the size or the origin changes.
+
+On the test page auto gives: track headers top and right; tab band top; device panel and transport none.
+
+The rim light (the 1.6 px bright line on the outline) is not part of this and stays on every edge.
+
+Three more corner models exist for comparison (`setCorners`, the test page's chooser); they are not built into the default program and cost nothing when not chosen:
+
+| Corners | Square panels | Edges | Verdict |
+|---|---|---|---|
+| K1 `'round'` | rounded lens as in 2.1 | every edge | the arc the user saw |
+| K2 `'blend'` | nearest edge bends; its direction turns across the diagonal within 4 px | every edge | a crease along the diagonal wherever a clip edge crosses it |
+| K3 `'fade'` | nearest edge bends; the bend fades to nothing on the diagonal | every edge | a wedge of unbent picture along the diagonal |
+| K4 `'square'` | each edge on its own axis, the two add | every edge | clean corner; still a rim on edges that border nothing |
+| K5, K6 | K2, K3 | free edges only | |
+| **K7** (default) | **K4** | **free edges only** | **recommended** |
+
+**Cost.** One texture lookup per pixel in every model, as before. The square shape needs two square roots and no `length()` or division; the rounded shape runs the same instructions as in 2.1. Which of the two a panel takes is one branch on a uniform (the same for every pixel of the panel). This could not be timed on a real graphics card here; the Mac table decides.
 
 ### Levels (plan 3.5)
 
@@ -68,6 +95,20 @@ g.info.origin               // [x, y]
 g.debug.set({aa:false});    // test page only: rectangles with hard edges
 g.debug.set({freeze:true}); // test page only: a backdrop change redraws the faces but not the backdrop
 ```
+
+Added in 2.2 (nothing else in the API changed):
+
+```js
+g.addPanel({id:'hdr', rect, radius:0, kind:'docked'});                 // docked: edges 'auto' by default, square lens because radius < 8
+g.addPanel({id:'hdr', rect, radius:0, kind:'docked', edges:'r'});      // or say it: only the right edge bends
+g.addPanel({id:'w', rect, radius:16, kind:'window', corners:'square'});// corners: 'square' or 'round' for this panel, whatever its radius
+g.setCorners('square');     // how two edges of a square panel meet: 'square' (default), 'blend', 'fade', or 'round' = 2.1's look on every panel (edges is then ignored)
+g.setBounds([0, 0, w, h]);  // where the window is, for edges:'auto'. Default: the canvas. Needed only when the canvas is smaller than the window
+g.panelInfo('hdr')          // {edges:'tr', square:true, band:45}: what the panel got
+g.info.corners              // 'square'
+```
+
+Options of `create`: `corners` (`'square'`), `squareBelow` (8: panels with a radius under this many px take the square lens), `bounds`. `kinds.docked.edges` is `'auto'`; a kind given through `opts.kinds` can set its own `edges`.
 
 `create(canvas, {backdropRate: 120})` sets the rate at the start. `info.sceneRects` is one less than in 2.0: the background colour is no longer a rectangle.
 
@@ -126,18 +167,18 @@ Read-only: `g.mode` (`'gl'` or `'fallback'`), `g.reason` (`'no webgl2'`, `'lost'
 | `flatUploads` | small copies of fed display canvases | only while such a display repaints under floating glass |
 | `pyramids`, `flatPyramids`, `draws`, `skipped`, `lost`, `restored` | blur builds, face redraws, idle calls, context losses | |
 
-Panel options beyond rect, radius and kind: `visible`, `opacity` (0 to 1, for menu fades), `z` (drawing order), `over:'flats'`, `tint:[r,g,b]`, `tintAmount`, `shadow` (0 = none, 1 = Apple's), `lens:false`.
+Panel options beyond rect, radius and kind: `visible`, `opacity` (0 to 1, for menu fades), `z` (drawing order), `over:'flats'`, `tint:[r,g,b]`, `tintAmount`, `shadow` (0 = none, 1 = Apple's), `lens:false`, `edges` and `corners` (2.2, above).
 
 Main `opts`: `level`, `lens`, `blur`, `tint` and `solid` (panel colours, default rgb 22 28 42), `backdropColor`, `copyRate` (60; 0 = no cap), `copyQuality` (`'low'`, the `imageSmoothingQuality` used when a canvas is reduced; see section 5), `maxDpr` (2), `face`, `rim`, `kinds`, `allowSoftware` (false: refuse a software renderer where the browser reports one), `regionCull` (true), `autoResize` (true), `onFallback(on, why)`, `requestRender()` (the engine asks for a frame after a restore or a system setting change), `fallbackCanvas`, `reduceTransparency`, `increaseContrast`.
 
 ### Kinds
 
-| kind | for | shadow | tint | moves? |
-|---|---|---|---|---|
-| `docked` | track headers, transport, tab band, device panel | none | 0.5 | no |
-| `window` | mixer and other floating windows | yes | 0.5 | yes |
-| `sheet`, `menu` | sheets, menus | yes | 0.6 | yes |
-| `pill` | small floating controls | faint (by size) | 0.45 | yes |
+| kind | for | shadow | tint | moves? | lens on (2.2) |
+|---|---|---|---|---|---|
+| `docked` | track headers, transport, tab band, device panel | none | 0.5 | no | free edges only (`'auto'`) |
+| `window` | mixer and other floating windows | yes | 0.5 | yes | every edge |
+| `sheet`, `menu` | sheets, menus | yes | 0.6 | yes | every edge |
+| `pill` | small floating controls | faint (by size) | 0.45 | yes | every edge |
 
 "Moves: no" matters for speed: when every visible panel is docked, the backdrop and the blur are worked out **only for the screen area under those panels** (plus a safety margin). As soon as a floating panel is visible the whole picture is done, so that moving it never needs a rebuild.
 
@@ -214,13 +255,18 @@ The test page is built exactly this way (two engines, docked and floating, both 
 
 ## 5. What was tested (headless, cloud machine)
 
-`python3 tools/glass-lab/engine_test.py`: **151 checks, all pass**, no console errors or warnings (126 before task G2c). `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
+`python3 tools/glass-lab/engine_test.py`: **171 checks, all pass**, no console errors or warnings (151 before task G2d, 126 before G2c). `python3 tools/glass-lab/devices_lab.py` (the display-first devices lab, which uses the engine through the small-copy route): 17 of 17. The cloud machine has **no GPU** (a software renderer), so **its frame rates mean nothing**; only correctness and the counters were tested.
 
 - **Uploads == 0 on the scene path**: scrolling and playing for one second at a simulated 240 frames per second with a panel moving: backdrop drawn 240 times, 0 canvas uploads, 0 lists sent, 240 panel redraws. On the test page (1x and 2x): scrolling + mixer moving and playing + mixer moving give 0 uploads and 0 sends on both layers.
 - **A playhead-only change does not send the clips again**: 20 playhead steps give 20 backdrop draws and 0 sends; the same for 20 scroll steps and 20 zoom steps; setting a value it already has does nothing; an edit sends once.
 - **The GPU-drawn backdrop is the right picture**: title band, body, lane, half-transparent body, background, selection tint and playhead have the right colours and places; scroll, zoom, vertical scroll, view rectangle and origin move them correctly; a scene and a small copy of the same picture give pixel-identical glass (Glass and Light); on the test page the two routes differ by under 2 of 255 on average (the copy also contains note marks and grid, the scene leaves them out).
 - **Rim bends, middle flat**: the place each glass pixel is taken from was read back, on both routes. The shift follows the quarter-circle profile on the left, top and right edges for Fine, Apple and Wide 45 (worst error 1 px); nothing bends beyond the band; the middle is the same pixel with every lens preset; band width follows the panel.
 - **No corner seam**: the bending direction is continuous across the corner diagonal for Apple and Wide, radius 0, 6 and 16.
+- **2.2, square panels have no curved band**: on a square panel with lens Wide the place every glass pixel is taken from was read back at 6 distances from an edge and 7 positions along it, down into the corner, on all four edges: the bend at a given distance from an edge is the same in the corner region as in the middle of the straight edge (difference 0 px). On the diagonal each edge bends by its own profile (worst error 0.9 px), so nothing jumps there. The same comparison run on the three other models fails by 22 px (the arc of `'round'`), 27 px (`'blend'`) and 37 px (`'fade'`), so it does detect what it should.
+- **2.2, rounded panels unchanged**: a window (radius 16), a menu (12), a pill (16) and a sheet (8) are pixel-identical with every corner model, `'round'` included. Checked once by hand against the 2.1 file itself: `corners:'round'` equals 2.1 over the whole frame (difference 0), and the default equals 2.1 on every rounded panel (difference 0).
+- **2.2, edges**: `'tr'` bends the top and right edges by the usual profile and the other two not at all, also in the corners; `'none'` is pixel-identical to a panel without lens; changing `edges` costs one face redraw. **Auto**: a panel on the left border with a bar under it gets top and right; a bar whose top is only partly covered keeps its top; the bottom bar gets nothing; a hidden neighbour frees the edge; two panels that together cover an edge close it, one alone does not; a gap of 1.5 px is free, 0.6 px closed; floating kinds keep every edge on the border and do not close a docked panel's edge; `setBounds` works for a canvas smaller than the window.
+- **2.2, `setCorners`**: one face redraw, no backdrop work, nothing sent; after a lost and restored context the chosen model draws again.
+- **2.2, test page**: the chooser has K1 to K7 with the star on K7, selected; with K7 the bottom left corner and the left edge of the track headers, the device panel and the transport are pixel-identical with the lens on and off, while the top right corner and the right edge still bend; with K1 and K4 that corner does bend; the zoomed corner shows a picture for each of its five corners, draws nothing when nothing moves, and stands still during a table.
 - **Middle frosted**: detail under glass (11 px clips every 23 px) drops to 28 % of the picture with blur Light, 13 % Regular, 2 % Heavy at level Glass, 14 % at level Light; the same strength on a 2x screen as on a 1x screen.
 - **Levels**: Glass (lens Wide, quarter size, every frame), Light (lens off, an eighth, 30 backdrop draws per second, panels still 240), Solid (no backdrop work); defaults are Glass, Wide 45, blur Light.
 - **Small-copy fallback**: a 1600x1000 canvas over an 800x500 engine goes up as 200x125 (never full size), 100x63 at Light; with the picture dirty on every frame at 240 per second: 60 uploads at Glass, 30 at Light; no upload without `markDirty()`; a 640x480 display shown at 120x90 goes up as 30x23; fed displays follow the same cap.
@@ -238,7 +284,8 @@ The test page is built exactly this way (two engines, docked and floating, both 
 Not tested here, for the user's Mac and for Windows:
 
 - **Frame rate and real GPU cost.** This is the point of the Mac run. Bench 3 says the recipe holds 240 Hz at 7.8 megapixels; the module adds exact edge coverage in the rectangle shader and a second layer. The first Mac run of the engine page (plan 3.6) kept 67 % while scrolling and 93 % while playing; which piece costs is what "Find the cost" on the 2.1 page measures.
-- **Whether the fitted canvas or a backdrop rate is needed**, and which. Both are built and draw correctly; neither is a default.
+- **Whether the fitted canvas or a backdrop rate is needed**: answered by the Mac run of 2.1 (plan 3.7): neither. Every row kept 100 %. They stay in the engine, off.
+- **2.2 on a real graphics card**: that the square lens costs nothing measurable (the table again), and how the corners look to the user (the chooser).
 - **The small-copy route on a GPU.** The reduction uses the browser's fast setting (`copyQuality: 'low'`, the one Bench 3 measured). `'medium'` would be smoother for thin lines but may cost more; not measured.
 - A real driver context loss (GPU process restart, sleep and wake), Windows drivers.
 - `allowSoftware:false`: Chromium here did not report its software renderer as a "major performance caveat", so the refusal could not be seen working on this machine.
@@ -253,6 +300,7 @@ Open `tools/glass-lab/engine-test.html` in Chrome (or the artifact), full window
 - **Live readout**: frames per second and the **share of the screen's frames that were delivered**, median / 95 % / worst frame time, and per second: background drawn on the GPU, **canvas uploads (must be 0)**, clip lists sent (must be 0), face redraws; CPU time in the engine's calls per frame.
 - **Run (about 45 s)** gives a table to copy, like Glass Bench 3: Solid as in Bench 3 (page only: no engine canvas, plain panels; it sets the screen rate); Solid drawn by the engine; Light and Glass drawn on the GPU while scrolling; Glass while playing; Light and Glass with the small copy; **Bench 3 path** (Bench 3's own GPU code and five panels, on this page). Columns: fps, frames delivered, median, 95 %, worst, and the three counters.
 - **Find the cost (about 2 min)**: Glass while scrolling, 25 rows with one piece switched off at a time: anti-aliasing off; background 120 and 60 per second; background frozen (faces still drawn); engine idle (canvases on screen, nothing drawn); floating layer off; docked layer off; each panel off in turn; scene with 0 clips; page scrolling off (the 2D arrangement stands still, the glass still scrolls its backdrop); mixer not moving; lens off; engine canvases at half size; only the mixer floating, with a full-window and with a fitted canvas; Bench 3 path; Glass playing. The last column is the change in frames delivered against "everything on". Plan 3.6 has the table that says what each jump means.
+- **Corners** (2.2): K1 to K7, see the table in section 1. The star marks the engine's default (K7). Under it a **zoomed corner** (3x) of the track headers' bottom left (the corner in the user's screenshot), their top right (two free edges), the device panel's and the tab band's top left, or the mixer's top left (rounded, for comparison). The zoom shows the arrangement and the glass layer, not the panels' DOM border and label. It is redrawn at most 12 times per second and not at all while a table runs, so the tables measure the same page as before; it can be switched off. The table header names the corner choice.
 - **Copy tables** copies both.
 - **Time the pieces**: each piece alone with the graphics card made to finish (send the list, draw the background + blur, draw the faces, the small copy).
 - Switches: what moves underneath (scrolling, playing, still), move the mixer, floating canvas only as large as its glass, a moving device display (a small copy per refresh, off by default), lens, blur, face, Reduce transparency, Increase contrast, lose and restore the graphics context, each panel on or off.
@@ -282,6 +330,25 @@ The reason, the Mac table and the reading are in plan 3.6. API: nothing removed 
 | Test page: Solid kept two engine canvases on screen; 6 rows | Solid as in Bench 3; Bench 3's own GPU path as a row; Find the cost; readout paused during runs |
 
 **For the task that ports this into `index.html`** (GS1 integrated 2.0.0): replace the engine text with `tools/glass-lab/glass-engine.js` 2.1.0 as it is. Nothing the app calls has changed. Do not use `setOrigin` or `setBackdropRate` in the app until the Mac run in plan 3.6 says which one is needed.
+
+## 7c. What changed from engine 2.1 (task G2c) to 2.2 (task G2d)
+
+The reason and the Mac table are in plan 3.7. API: nothing removed or changed; `edges`, `corners`, `setCorners`, `setBounds`, `panelInfo`, `info.corners` and the options `corners`, `squareBelow`, `bounds` are new.
+
+| 2.1 | 2.2 |
+|---|---|
+| Every panel got a lens with a corner radius of at least the lens width (45 px on Wide), so square panels showed a rounded band inside square corners | Panels with a radius under 8 px get a square lens: each edge bends along its own axis, the two add in the corner |
+| The lens ran along all four edges of every panel | Docked panels bend only along free edges (`edges:'auto'`); any panel can name its edges |
+| One glass program | One per corner model, built when first used; the default one holds only the default model |
+| Rim light strength followed the lens field's direction | On square panels it is the constant a straight edge always had (0.707); rounded panels as before |
+
+**What looks different in the app after the port, without any call changed:** square docked panels lose the rounded band in their corners, and lose the rim refraction on edges that touch the window border or another docked panel. Rounded panels look the same.
+
+**For the task that ports this into `index.html`** (GS1b): replace the engine text with `tools/glass-lab/glass-engine.js` 2.2.0 as it is. Three things to check in the app:
+
+1. `'auto'` only knows the window border and other **docked glass panels of the same engine**, and needs their rectangles to meet within 1 px. Where a docked panel lies against something that is not glass (a solid toolbar or ruler above the track headers, a splitter), that edge counts as free. If it should not bend, give the panel its edges by name, for example `edges:'r'` for the track headers.
+2. If the docked layer's canvas does not cover the whole window, call `setBounds([0, 0, innerWidth, innerHeight])` (in the same space as the panel rectangles) so that the window border is found.
+3. `g.panelInfo(id).edges` says what each panel got; log it once after layout.
 
 ## 8. History: first numbers from the user's Mac with engine 1.0 (26 November 2026)
 
