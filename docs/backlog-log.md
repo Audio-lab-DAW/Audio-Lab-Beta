@@ -3832,6 +3832,28 @@ No app changes: `index.html` was not touched (task AB2 had work in progress ther
 - Dispatch `native-engine.yml` and read cases A to D (fix the Mac build first if it fails).
 - N2c, when the design chain allows `index.html` work: the hook (copy `alNativeTap`, the "Native output" settings: device, rate, buffer, exclusive use, device volume both ways, switch back to the web engine), and shipping `alengine` in the desktop build (`desktop.yml` builds `alvol` the same way; that workflow may only be changed with the user's leave or through `afterPack`).
 
+## 27 November 2026: task NB-N3a (the native engine core's first part: devices, chains, offline render; the dynamics family and the Bitcrusher bit for bit)
+
+No app changes: `index.html` and `desktop/` untouched, no version. N2c (the hook in the app) still waits for the design chain, so this run began stage 3, which needs no app work. Running list: `docs/native-mac-build.md`.
+
+### Built
+- `native/engine/core/`: `device.h` (the device interface; `WorkletShell` repeats the worklet bundle's skip after 3 s of exact silence and its every-16-blocks zeroing of state below 1e-30), `params.h` and `json_value.h` (settings read with JavaScript's rules: `||`, `??`, `!==false`, `===`), `jsmath.h` (Math.max with NaN and signed zero, Math.round, `>>`, the seeded Math.random, float stores), `dev_dynamics.h` (Limiter `al-limit`, Gate `al-gate`, Transient shaper `al-trans`, De-esser `al-deess`), `dev_crush.h` (Bitcrusher `al-crush` on the new interface), `graph.h` (chains in 128-frame quanta, offline render), `devices.cpp` (the registry).
+- `native/engine/alrender.cpp`: `alrender list`, `alrender cases <cases.json> <in.wav> <outdir>` (one WAV per case, time per block). CMake targets `alrender` (`-ffp-contract=off`) and `alrender_fused` (the control).
+- `tools/native-lab/make_ref_core.py` (the real app in headless Chromium: every preset of each ported device, extra settings for every style and mode, two chains; the test signal has hits above full scale, sibilants, a slow level ride, a tail into values below 1e-30, 3.3 s of exact silence), `compare_core.py` (every 32-bit sample), `ref/core_web_linux.json` (the web renders' checksums), `.github/workflows/native-core.yml` (Linux and Apple Silicon jobs, started by hand).
+
+### Proven
+- **119 of 119 cases bit for bit** against the web engine (v0.229): here (Linux, Chromium 158) and on GitHub's Linux machine (run 46008664578, Chromium 159, whose web renders were identical to the recorded ones).
+- The check catches what it should: with the silence rule removed 35 cases differ, with the tiny-value rule removed 36.
+- Cost here (shared 2.1 GHz Xeon core): 2.7 to 7 µs per 128-frame block per device, about 0.1 to 0.4 % of a core at 48 kHz.
+
+### Not proven
+- **Apple Silicon.** The Mac job of run 46008664578 and a new N2b run of `native-engine.yml` were queued for a macOS machine; neither had one when this entry was written (the N2b run dispatched at 13:13 UTC was cancelled after 15 minutes in the queue). The next run reads them first.
+- Other sample rates, settings moved during a render, and anything audible: the core is not yet connected to the output or the app.
+
+### Assumptions
+- The core is given the settings the page posts to the worklet (after each device's `sp` mapping in `index.html`); the mapping moves into the engine when the interface drives it.
+- Families go in the plan's order: worklet devices first (provable to the bit), then the mixer, then the browser-node devices. Next part N3b: the mixer (gain, pan, sends, groups, returns) rebuilt from Chromium's arithmetic and measured against it, and the core connected to `alengine` so it can play.
+
 ## 27 November 2026: task FT-0 (the plan for building the picked features, lane C)
 
 No app changes: `index.html` and `desktop/` untouched, no version. The plan is `docs/features-build.md`.

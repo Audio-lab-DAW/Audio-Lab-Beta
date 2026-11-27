@@ -9,6 +9,8 @@ The plan is in `docs/native-mac-plan.md`.
 - `host/plugin_api.h`: the plug-in interface of the future engine, with no format named in it.
 - `host/vst3_format.cpp`, `host/scan.cpp`: VST3 behind that interface, and scanning in a child process.
 - `host/cli.cpp`: test B, `alvst3 scan` and `alvst3 run`.
+- `engine/`: `alengine` (task NB-N1, N2b), the helper that owns the audio output.
+- `engine/core/`, `engine/alrender.cpp` (task NB-N3a): the engine core, ported devices bit for bit with the web engine; `alrender` renders offline. Checked by `tools/native-lab/make_ref_core.py` and `compare_core.py`, workflow `native-core.yml`.
 - `testapp/`: test C, the small window app "AudioLab VST3 test".
 
 Build (macOS or Linux; the Core Audio parts and the app are macOS only):

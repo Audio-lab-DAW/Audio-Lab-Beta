@@ -9,13 +9,13 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | 0 | The proofs: one effect bit for bit, a VST3 host, the test app | done (task NM1), proven on the user's Mac |
 | N1 | Native audio output and device control, as a helper the app can talk to | **done as a helper and proven on the build machine; not yet inside the app** |
 | N2 | The bridge: the app sends its sound to the engine, with a switch back | **N2a done**: the path is proven outside the app. **N2b built**: the clock follower (proven in the engine's own tests), the shell's side and the page's side of the bridge, crash recovery; the Mac proof (cases A to D) is written but waits for a macOS build machine. **N2c** (the hook in `index.html`, the settings, `alengine` in the desktop build) waits for the design chain |
-| N3 | The engine core, devices ported family by family | not started |
+| N3 | The engine core, devices ported family by family | **N3a done**: the core's device layer, chains and offline render; the dynamics family (limiter, gate, transient shaper, de-esser) and the Bitcrusher, **119 of 119 cases bit for bit** against the web engine (every preset) on Linux, here and on GitHub's Linux machine; the Apple Silicon run waits for a build machine. Next: N3b (the mixer: gain, pan, sends, from Chromium's arithmetic) |
 | N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
 
-Nothing new to try from stage N2b: it changes nothing you can hear or click yet. The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
+Nothing new to try from stages N2b and N3a: they change nothing you can hear or click yet (the native engine core renders offline and is checked by machines). The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
 
 ## What you could try with test app 0.2 (stage N1)
 
@@ -160,6 +160,34 @@ Measured in the engine's own tests (they run on Linux too): bit for bit at speed
 Nothing of this is active in the app: the page never calls it yet, and the desktop build does not carry `alengine` yet.
 
 **Proof on the Mac, waiting.** Workflow `native-engine.yml`, four cases with the real shell pieces on the loop-back device: A one clock, exact, bit for bit; B two clocks, follow, a clean sine; C two clocks, exact, as the contrast; D the engine killed while it plays and started again. On 27 November from about 12:36 UTC no macOS build machine was given to any run in the repository (queued 15 minutes then cancelled, or cancelled at once), so these have not run yet.
+
+## Stage N3a: the engine core's first part, and the first family of devices (27 November 2026)
+
+N2c (the hook in the app) still waits for the design chain, so this run started stage 3, which needs no `index.html` work: the native engine making the sound itself.
+
+**What was built** (`native/engine/core/`, `native/engine/alrender.cpp`):
+- **The device layer.** A device takes a stereo block of 128 frames and gives one back. Its settings are read with JavaScript's own rules (`p.x||default`, `p.x??default`, `p.x!==false`), from exactly the object the page posts to the web device, so the native side is given what the web side is given (`params.h`, `json_value.h`).
+- **The worklet bundle's two hidden rules, repeated around every device** (`device.h`): after more than 3 seconds of exact silence a device stops and outputs zeros until sound returns; every 16 blocks, state values smaller than 1e-30 are set to exactly zero. Both change the output's bits, so a port without them cannot match. The check below proves it: with the silence rule removed 35 cases no longer match, with the tiny-value rule removed 36.
+- **JavaScript's number rules** where C++ differs (`jsmath.h`): `Math.max` with NaN and signed zero, `Math.round`, the `>>` operator, the worklets' seeded `Math.random`, float stores into `Float32Array`. Built with `-ffp-contract=off`.
+- **Five devices ported statement by statement** (`dev_dynamics.h`, `dev_crush.h`): Limiter (`al-limit`, true-peak look-ahead, three styles), Gate (`al-gate`, gate and expander, look-ahead, listen), Transient shaper (`al-trans`), De-esser (`al-deess`, split, wide, listen), Bitcrusher (`al-crush`). Their meter values are kept in the engine, so the interface can read them later (the engine keeps all state).
+- **Chains and offline render** (`graph.h`, `alrender`): devices in series in 128-frame render quanta, the way a track's effects run in the web engine.
+
+**How it was proven:**
+- `tools/native-lab/make_ref_core.py` opens the real app (v0.229) in headless Chromium and, for each device, makes it the way the app does (`mkFx`), applies **every preset the app has for it** (98 presets), the settings a new device starts with, and 14 settings no preset uses (every style, mode and the listen switches), and renders a 6.5-second test signal with the app's own worklets: drum hits above full scale, a voice with sibilants and a slow level ride from -50 dB, a tail that fades into values below 1e-30, 3.3 s of exact silence, then hits again. Two chains (gate, transient shaper, crusher, limiter; de-esser, gate, limiter) are rendered too. 119 cases.
+- `alrender` renders the same cases natively; `tools/native-lab/compare_core.py` compares every 32-bit sample.
+
+| Where | Result |
+|---|---|
+| This build machine (Linux, x86-64, Chromium 158) | **119 of 119 bit for bit** |
+| GitHub's Linux machine, run 46008664578 (Chromium 159) | **119 of 119 bit for bit**; its web renders are identical to the ones recorded here (119 of 119), so the reference does not depend on the Chromium version |
+| The same with fused multiply-add allowed (the control) | 119 of 119 on x86-64 (that machine has no fused instruction by default); the Apple Silicon run will show whether the rule matters there |
+| GitHub's Apple Silicon machine | waiting: no macOS machine was given to the run in this session (workflow `native-core.yml`) |
+
+**Cost** on this build machine (a shared 2.1 GHz Xeon core): 2.7 to 7 microseconds per 128-frame block per device (a block lasts 2,667 microseconds at 48 kHz), so each device takes about 0.1 to 0.4 % of one core; the four-device drum chain 17 microseconds. The M4 will be faster; the web engine's cost for the same devices was not measured in this run.
+
+**Not proven yet:** the Mac (Apple's maths library for `exp`, `pow`, `log10`, `sin`, `cos` against Chromium's; Test A in NM1 found them equal for the Bitcrusher); other sample rates than 48 kHz; settings changed while sound plays (the web engine applies them at the next block, the core does the same, but no test moves a dial during a render yet); anything you can hear, because the core is not connected to the output or the app.
+
+**Assumptions:** the core takes the settings the page posts to the worklet (after the device's `sp` mapping), not the app's own device settings; the mapping moves into the engine when the interface starts driving it (N2c and later). A device whose input has no channels at all (the web engine's disconnected input) is treated like silence; the web worklet then leaves its output untouched, which only differs before the 3-second rule takes over, and no track in the app runs a device with no input connected.
 
 ## Next: N2c, and why it was not started here
 
