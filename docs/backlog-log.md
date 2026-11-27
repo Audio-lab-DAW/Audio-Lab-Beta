@@ -5496,10 +5496,10 @@ Fired by the scheduler. The next stage not done after N3d: the rest of stage 3's
 - Buses: **16 of 16 identical** (with `eqbus`, `eqbus128`: EQ on a mono source, mid/side on a group and on a mono source, tilt with auto gain on a return, an EQ before the master's limiter); N3b's mixer 10 of 10 (with the fdlibm pan gains).
 - Found by measurement: Chromium's own nodes run with denormals flushed (without it only the samples under 1.2e-38 differed); a GainNode at exactly 1 copies.
 - Cost: four active bells 7.9 µs per 128 stereo frames; 48 dB/oct passes 14.6 µs; Fractals' EQs 0.3 to 3.8 µs.
-- GitHub: Native CI dispatched with the Mac job (macos-latest) after the push; its result is read by the next run if it is not added below.
+- **Apple Silicon** (native-ci with the Mac job, against the Mac's own Chromium; the whole run 46062616472 green, Linux too with the sanitizers at 128 and 7 frames): run 46060870529: buses 16 of 16, N3b's mixer 10 of 10 with the Mac's references (vDSP_vsma and vDSP_deq22D right), devices 288 of 289: `eq-x-ms` gave +0 where Chromium gave -0. Chromium's `AudioChannel::SumFrom` copies the first connection into the silent summing bus and adds the rest; the port started from 0 (0 + -0 + -0 = +0). Fixed in the EQ and in the buses' inputs (3ce1a8c). Run 46062616472: **289 of 289, 16 of 16, 10 of 10 on Apple Silicon**, strict gates (the Mac job now prints the cases that differ).
 
 ### Left
-- On the Mac: whether the EQ (vDSP_deq22D path) and the panner (vDSP_vsma) match the Mac's Chromium: the dispatched run says.
+- A connection flagged silent is skipped by Chromium's summing (a GainNode at 0, a finished source): not modelled yet; it matters with clips as sources.
 - The EQ's dynamic bands (live only) and automation; a biquad's tail after silence (with clips as sources).
 - Next devices for Fractals: compressor (DynamicsCompressor), sidechain pump, tempo delay, plate reverb (convolver: measured), clipper; then clips as sources and the instruments.
 
