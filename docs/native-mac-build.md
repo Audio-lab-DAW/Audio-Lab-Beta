@@ -15,12 +15,12 @@ The running list of the native Mac work (task NB). Plan: `docs/native-mac-plan.m
 | R3 | Review fix NB-R3: the sound path out of the shell's main process | **done, proven with the real Electron shell on Linux** (task NB-R3): the page's sound goes to a small helper process (the feeder) that only writes it into the engine, with a bounded queue and back-pressure; a watchdog replaces a feeder or an engine that stops answering (3 s); with the main process blocked 50 or 250 ms every second every frame arrived bit for bit with no gap, where the old path made gaps; `alengine` 0.4 no longer stalls a source switch on a frozen sender. The Mac waits for D9 |
 | R2 | Review fix NB-R2: the rate contract, the source hand-shake, the engine off the Mac | **done on Linux** (task NB-R2): the page must say its rate and the engine refuses any other; a device that changes rate goes silent, tells the page and resumes when the rate comes back; source switching without the 30 ms sleep (review C1, C2, C5); the engine now runs everywhere on a null device and is tested end to end on every push (24 checks, also under ASan, UBSan and TSan). The Mac build of this code waits for a Mac runner (D9) |
 | R1 | Review fix NB-R1: native CI on every push | **done on Linux** (task NB-R1): workflow `native-ci.yml` builds every native target normally and with AddressSanitizer + UndefinedBehaviorSanitizer, runs the engine's selftest, the ring under two real threads (also under ThreadSanitizer), the mixer's 10 scenes and all 240 device cases against the web engine (green: 240 of 240, sanitizers 240 of 240 at 128 frames, 239 of 240 at 7 as known), and 27 bridge checks against a stand-in engine. The Apple Silicon part waits for a Mac runner (D9) |
-| N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.4 (search, parameter moves, notes, output warning); not in the app |
+| N4 | VST3 in the app | host layer and scanner exist from stage 0, the test app is at 0.5 (task NL5: the host now gives the controller the processor's state and delivers messages between the two from any thread, the gap most likely behind the silent Phase Plant and Pigments; a silence probe and [diag] lines measure it on your Mac); not in the app |
 | N5 to N8 | Recording, export, packaging, polish | not started |
 
 ## What you can try now
 
-Nothing new to try from stages N2b to N3c: they change nothing you can hear or click yet (the native engine core renders offline and is checked by machines). The newest test app is 0.4 (task NL4, see `docs/backlog-log.md`).
+Test app 0.5 (task NL5, below): load Phase Plant and Pigments, play the pattern on the Gryphon at 44.1 kHz, paste the report. Stages N2b to N3c change nothing you can hear or click yet.
 
 ## What you could try with test app 0.2 (stage N1)
 
@@ -80,6 +80,56 @@ Tested on the build machine (virtual M1, macOS 15, run 45998343614, commit e58f1
 **AudioLab VST3 test 0.4**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-4 (a pre-release; the desktop app's latest release stays v0.223.0).
 
 What to try: search for Phase Plant, load it, turn a few knobs in its window, play the pattern, paste the report. Before that, take the Bose out of call mode (or pick the Gryphon), and load Pigments once more to see whether it sounds at 44.1 kHz.
+
+## The user's fifth report on test app 0.4 (27 November 2026, 18:04 Brussels), and test app 0.5 (task NL5)
+
+The report: `tools/native-lab/reports/2026-11-27-test-app-0.4-report-5.txt`.
+
+What it shows:
+- **Search works**: Phase Plant was found and loaded (Kilohearts 2.2.1, 2,174 parameters, 251 ms, its window 1259 x 642).
+- **Knob moves reach the host**: 1,428 moves from Phase Plant's window, gestures begun and ended 4 and 4, last "Lane 2 > Gain = 0.83 (+3.61 dB)".
+- **Phase Plant stayed silent**: peak 0.000 on the iFi Gryphon at 48 kHz (63 notes) and at 44.1 kHz (80, then 113 notes), 0 failed blocks, about 96 microseconds per 512-frame block. Pigments was silent the same way in report 4. So the 16 kHz explanation from report 4 is wrong at least for Phase Plant: the rate was fine here.
+- **The Gryphon** was off at the start (not in the [device] list), appeared during the scan and the app switched to it by itself, but 0.4 wrote no [device] line for a device that appears later.
+- **32 bundles are Intel-only**: Output's Arcade, Black, Boost, Brass, Clone, Duck, Hatz, Infiltrator, Minipol, PitchMonster, Shaper2, Tantrum, Tapex2, Texture, Transient Master, Vybz, Midnight Mirage, and all 14 RX 9 plug-ins. **One is broken**: helisert_6.0 ("Could not create Bundle").
+- **Mojibake**: "12‚ÄØ%" and "‚àí3.26‚ÄØdB" are a narrow no-break space and a minus sign, written as UTF-8 by 0.4 and read as Mac Roman.
+
+### The cause found for the silent instruments (by reading the code against the SDK and JUCE, then measuring)
+
+0.1 to 0.4 set plug-ins up through the VST 3 SDK's helper `PlugProvider`. Checked line by line against JUCE's VST3 host (`juce_VST3PluginFormatImpl.h`) and the SDK's own sources, two things differ, and both matter only for plug-ins whose processor and controller are separate objects that talk to each other, which is how Kilohearts and Arturia build theirs (JUCE-built plug-ins such as Surge XT and Serum share one object, which is why they always sounded):
+1. **The controller was never given the processor's state.** `PlugProvider` initialises both halves and connects them, but never calls `IEditController::setComponentState`. JUCE does it right after connecting (`synchroniseStates`). A plug-in whose controller loads the start patch and hands it to the processor on that call never gets a patch into its processor.
+2. **Messages between the two halves were dropped unless they came from the main thread.** `PlugProvider` connects them through the SDK's `ConnectionProxy`, whose `notify` says "We discard the message if we are not in the UI main thread". JUCE connects the two directly. A plug-in that prepares its patch on a loader thread and sends it from there loses it.
+
+The bus set-up, process data, events and process context were also checked against the list in the task (arrangements before `setActive`, main output and event input active, aux outputs off but given buffers, `setupProcessing` with the real rate and largest block, `setProcessing(true)` after `setActive(true)`, buffers for every output bus, note-on on channel 0 with velocity 0 to 1 and a matching note-off, offsets inside the block, tempo, time signature, project time and the playing flag, `kSample32`, the main thread's run loop turning): 0.4 already did these, except that it set up the buses before `setupProcessing` (the validator and JUCE do it after), forced stereo on the main buses, and activated only the first event input. 0.5 follows the validator's order and the plug-in's own preferences there too, but nothing found there explains a silent instrument.
+
+**What is proven and what is not.** The two gaps are real (the code shows them). That they are what silences Phase Plant and Pigments is the most likely explanation, not yet proven: neither plug-in is on the build machine (both are paid; Kilohearts' free plug-ins and Phase Plant's trial come only through the Kilohearts Installer with a signed-in account, which a build machine cannot do lawfully). To prove the mechanism, 0.5 brings a small test instrument, **AL Strict Synth**, built to behave the way we suspect: it only sounds after its controller has been given the state and has sent the patch from a loader thread. And to prove it on your Mac, 0.5 measures it there (below).
+
+### Built (0.5)
+1. **The host** (`native/host/vst3_format.cpp`): its own set-up instead of `PlugProvider`: component and controller created and initialised, the component handler set, the two connected through counting links that deliver messages from any thread (as JUCE), then `setComponentState` with the processor's state. Then `setupProcessing`, `setBusArrangements` with the arrangements the plug-in prefers (read back and logged), main buses on (aux buses off, still given buffers), every event input on, `setActive(true)`, `setProcessing(true)`. Process context with system time and bar position as well. `HostOptions` holds each of these choices, so each 0.4 behaviour can be switched back one at a time.
+2. **Diagnostics** ("Diagnostic lines in the report", on by default): `[diag]` lines per plug-in with the buses it offers (name, main or aux, channels, default on or off), the arrangements it prefers and what it now has, the result of every call (initialise, connect, setComponentState, setupProcessing, setBusArrangements, each activateBus, setActive, setProcessing), the buffers given; and at the summary: blocks in which the plug-in's own main output held sound (measured before the app copies or halves it), other output buses, silence flags it set, process() results, notes handed over and refused, parameter changes, and the messages between its halves (to each side, from other threads, dropped).
+3. **"Why silent?"** (and by itself once, when you stop the pattern and an instrument stayed silent): loads the plug-in again in a separate process and plays 2 s of the pattern under nine set-ups: the 0.5 host, the 0.4 host, and 0.5 with one thing changed (no state given to the controller; off-thread messages dropped; buses as in 0.4; unique note ids; every audio bus on; transport stopped; its first factory preset). One `[probe]` line each (sound or silent, peak, blocks with sound, messages) and a one-line conclusion. The same on the command line: `alvst3 diag`.
+4. **Factory presets**: the plug-in's program list (through `IUnitInfo` and its program-change parameter) and `.vstpreset` files in the standard folders, in a menu. Phase Plant and Pigments keep their presets in their own windows, so the report says to choose one there; a `[state]` line says when the plug-in's state changed size since loading (a preset was loaded).
+5. **`[device] appeared:`** a line with the same details for a device that is switched on or plugged in after the start.
+6. **At the end of every report**: `[rosetta]` the Intel-only bundles ("These need Rosetta: a helper comes later") and `[broken]` the ones that could not be read.
+7. **`[clap]` and `[au]`**: the CLAP folders (`~/Library/Audio/Plug-Ins/CLAP`, `/Library/Audio/Plug-Ins/CLAP`) and the Audio Units folders (`Components`) listed, not loaded: counts, Apple Silicon or Intel-only, kinds (from the Audio Unit's Info.plist) and names, for decision D5.
+8. **The report in ASCII**: narrow and no-break spaces become spaces, the minus sign and dashes a hyphen-minus, and so on; if anything outside ASCII is left (an accented name), the file starts with a UTF-8 byte order mark.
+9. Everything else as in 0.4 (search, knob moves, the Bluetooth warning).
+
+Code: `native/host/vst3_format.cpp` (host), `native/host/diag.cpp` (probe, [diag] text, the CLAP and AU listing), `native/host/plugin_api.h`, `native/host/cli.cpp` (`alvst3 diag`), `native/testapp/main.mm` (the app), `native/testapp/strictsynth/` (the test instrument, built only for the tests), `.github/workflows/native-lab.yml`.
+
+### Tested
+Build machine: GitHub's `macos-latest` runner (virtual Apple M2 Pro, macOS 26.7.2), run 46041572291 on commit 141af31 (main with this task's commit 0e3bb3a): this is the published build. The `macos-15` run queued for 12 minutes without a machine and was cancelled once `macos-latest` started; the `macos-14` run was cancelled by GitHub at once. Also on Linux here (`alvst3 diag`, normal and under AddressSanitizer + UndefinedBehaviorSanitizer: no errors).
+- **AL Strict Synth** (the test instrument) at 48 and 44.1 kHz: 0.5 host SOUND (-8.0 dB, sound in 188 of 188 blocks, 1 message from its loader thread delivered); 0.4 host SILENT (0 of 188); 0.5 without the state given to the controller SILENT; 0.5 with off-thread messages dropped SILENT (1 message dropped); buses as in 0.4, unique note ids, every bus on, transport stopped: all SOUND. Conclusion line: "the 0.4 host's set-up was the cause ... Silent again with: 0.5 without giving the controller the processor's state; 0.5 but messages from other threads dropped". The same in the app itself: loaded, 47 notes, live peak 0.200 ("it sounded"), and the same probe from the app's child process.
+- **Surge XT**, **mda JX10**, **Note Expression Synth** (48 and 44.1 kHz): sound under all nine set-ups (nothing broken by the change; Surge's controller answers setComponentState with "not implemented", which is allowed).
+- **The app** with Surge XT: search, grouping, load, window, 47 notes, peak 0.192, drags reached the host (3 moves, 13 gestures), [diag] lines, the probe from a child process (all nine set-ups sound), `[state]` line, `[clap]` 2 bundles and `[au]` 2 bundles listed with names and kinds (Surge's CLAP and Audio Unit copied there by the workflow).
+- **Report encoding**: the strict-synth report is pure ASCII (no BOM); the Surge report starts with EF BB BF because its self-test search "SÜRGE XT" is written into it.
+- Pre-release `native-lab-5` published; the latest release is still v0.223.0 (checked after publishing).
+
+### What only your Mac can prove
+Whether Phase Plant and Pigments now sound, and if they still do not, which of the probe's set-ups (if any) makes them sound. The `[probe] ... conclusion:` line says it in one sentence.
+
+**AudioLab VST3 test 0.5**: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-5 (a pre-release; open it once with Open Anyway as before).
+
+What to try: choose the Gryphon at 44.1 kHz, load Phase Plant, open its window, play the pattern ten seconds, stop it; the same with Pigments; if either stays silent, wait for the [probe] lines (10 to 40 s), then choose a preset in its own window and play again. Paste the report.
 
 ## Stage N1: what was built (27 November 2026)
 

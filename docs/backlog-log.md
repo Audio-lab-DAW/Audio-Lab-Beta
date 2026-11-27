@@ -4973,3 +4973,36 @@ Step IN-L of `docs/design-round-4-instruments.md`, the user's pick **L2** (the l
 
 ### Left
 IN-S next: the spectrum (S2, the analyzer front panel) in `ND('spec')`, the overlay (SPO), the Visualizer spectrum and the mixer's spec view, one drawer; the analysers' sizes move to the IN-A cache (and the track taps can grow from 256 samples, see IN-M). Then IN-E (E3), IN-G (G1 G3 G4), IN-O (O0 kept, O1, O4), IN-V (V1, viridis), IN-C and IN-D.
+
+## 27 November 2026: task NL5 (VST3 test app 0.5: why Phase Plant and Pigments are silent, measured; device lines on hot-plug; Intel-only list; CLAP and AU listed; ASCII report)
+
+No app changes: `index.html`, `desktop/` and `native/engine/` were not touched, no version. Touched: `native/host/` (host layer, new `diag.cpp`), `native/testapp/` (the app, new `strictsynth/`), the test-app part of `native/CMakeLists.txt`, `tools/native-lab/READ-ME-FIRST.txt`, `.github/workflows/native-lab.yml`, `docs/native-mac-build.md`, this log. Ran in parallel with task NB.
+
+### From the user's fifth report (0.4, 18:04 Brussels)
+- Search worked (Phase Plant found and loaded); 1,428 knob moves from Phase Plant's window reached the host (gestures 4 and 4).
+- Phase Plant SILENT (peak 0.000) on the Gryphon at 48 kHz and 44.1 kHz with 63, 80 and 113 notes sent; Pigments was silent the same way in report 4. The 16 kHz explanation of NL4 is wrong for Phase Plant.
+- The Gryphon appeared during the scan; the app switched to it but wrote no [device] line for it.
+- 32 Intel-only bundles (Output's Arcade, Black, Boost, Brass, Clone, Duck, Hatz, Infiltrator, Minipol, PitchMonster, Shaper2, Tantrum, Tapex2, Texture, Transient Master, Vybz, Midnight Mirage; the 14 RX 9 plug-ins), one broken (helisert_6.0).
+- Mojibake ("12‚ÄØ%", "‚àí3.26‚ÄØdB"): UTF-8 read as Mac Roman.
+
+### Cause found (code read against the SDK and JUCE's VST3 host; mechanism proven with a test instrument; the user's Mac still to confirm)
+- The SDK's `PlugProvider`, used by 0.1 to 0.4, never calls `IEditController::setComponentState` with the processor's state (JUCE: `synchroniseStates`), and connects processor and controller through `ConnectionProxy`, which drops every message not sent from the main thread (JUCE connects directly). Plug-ins with separate processor and controller that pass the patch between them (Kilohearts, Arturia) can stay silent; JUCE-built ones (Surge XT, Serum 2) share one object and never noticed.
+- The rest of the checklist (bus arrangements and activation, setupProcessing, setActive and setProcessing order, buffers for every output bus, events, process context, sample size, run loop) was already right in 0.4 except the order and stereo forcing of the bus set-up and only the first event input on; changed to the validator's and JUCE's way, not a cause found.
+
+### Built (0.5)
+See `docs/native-mac-build.md`, section on report 5 and test app 0.5: own set-up instead of PlugProvider (state to the controller, messages from any thread, counted), validator order with the plug-in's preferred arrangements, `HostOptions` to switch each 0.4 behaviour back; `[diag]` lines; "Why silent?" probe in a child process with nine set-ups and a conclusion line (also automatic once per silent instrument; `alvst3 diag` on the command line); factory presets (program list, .vstpreset) and a `[state]` line; `[device] appeared:` for hot-plugged devices; `[rosetta]` and `[broken]` lists at the end; `[clap]` and `[au]` listings for D5; report in ASCII with a BOM only if needed; AL Strict Synth, a test instrument that only sounds with both fixes.
+
+### Tested
+Build machine: GitHub's `macos-latest` runner (virtual Apple M2 Pro, macOS 26.7.2), run 46041572291 on commit 141af31 (main with this task's commit 0e3bb3a): this is the published build. The `macos-15` run queued for 12 minutes without a machine and was cancelled once `macos-latest` started; the `macos-14` run was cancelled by GitHub at once. Also on Linux here (`alvst3 diag`, normal and under AddressSanitizer + UndefinedBehaviorSanitizer: no errors).
+- **AL Strict Synth** (the test instrument) at 48 and 44.1 kHz: 0.5 host SOUND (-8.0 dB, sound in 188 of 188 blocks, 1 message from its loader thread delivered); 0.4 host SILENT (0 of 188); 0.5 without the state given to the controller SILENT; 0.5 with off-thread messages dropped SILENT (1 message dropped); buses as in 0.4, unique note ids, every bus on, transport stopped: all SOUND. Conclusion line: "the 0.4 host's set-up was the cause ... Silent again with: 0.5 without giving the controller the processor's state; 0.5 but messages from other threads dropped". The same in the app itself: loaded, 47 notes, live peak 0.200 ("it sounded"), and the same probe from the app's child process.
+- **Surge XT**, **mda JX10**, **Note Expression Synth** (48 and 44.1 kHz): sound under all nine set-ups (nothing broken by the change; Surge's controller answers setComponentState with "not implemented", which is allowed).
+- **The app** with Surge XT: search, grouping, load, window, 47 notes, peak 0.192, drags reached the host (3 moves, 13 gestures), [diag] lines, the probe from a child process (all nine set-ups sound), `[state]` line, `[clap]` 2 bundles and `[au]` 2 bundles listed with names and kinds (Surge's CLAP and Audio Unit copied there by the workflow).
+- **Report encoding**: the strict-synth report is pure ASCII (no BOM); the Surge report starts with EF BB BF because its self-test search "SÜRGE XT" is written into it.
+- Pre-release `native-lab-5` published; the latest release is still v0.223.0 (checked after publishing).
+Test app 0.5: https://github.com/Audio-lab-DAW/Audio-Lab-Pro-Alpha/releases/tag/native-lab-5 (pre-release).
+
+### Not verified
+Phase Plant and Pigments themselves (paid; Kilohearts' free plug-ins and Phase Plant's trial need the Kilohearts Installer with an account, which a build machine cannot use lawfully). Anything by hand. The hot-plug [device] line and the Bluetooth warning (no such devices on the build machine).
+
+### Next
+The user: load Phase Plant and Pigments, play the pattern on the Gryphon at 44.1 kHz, paste the report (the [probe] conclusion line says which part of the host set-up they need, or that the host is not the cause).
