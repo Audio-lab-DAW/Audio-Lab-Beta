@@ -1,0 +1,34 @@
+/* task MD1: measurement details. M1: units as tiny amber capitals (small capitals of the 11 px step, so no size off the scale), fixed widths in the transport, a fine tick scale under the position. M2: the orbit loader. */
+.lku{font-variant-caps:all-small-caps;letter-spacing:.03em}
+.mdu{font:var(--fw6) var(--fs1)/1 var(--ffu);font-variant-caps:all-small-caps;letter-spacing:.07em;color:var(--unit,#ffb547);flex:none;user-select:none;-webkit-user-select:none;margin-right:-2px}
+#tr .lcd.tempo .mdu{margin:0 0 0 -3px}
+#tr .lcd.mdclk>svg{display:none}
+#tr .tmc .mdu{display:none}#tr .tmc.lcd.mdclk>svg{display:none}
+#tr .lcd.mdtk{position:relative}
+#tr .lcd.mdtk::after{content:'';position:absolute;left:7px;right:7px;bottom:2px;height:3px;pointer-events:none;opacity:.55;
+  background:repeating-linear-gradient(90deg,var(--lk-tick,rgba(255,255,255,.32)) 0 1px,transparent 1px 25%) 0 0/100% 3px no-repeat,repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 6.25%) 0 100%/100% 1.5px no-repeat}
+#tr .tmc.lcd.mdtk::after{display:none}
+#latV{font-variant-numeric:tabular-nums}
+.mdorb{display:inline-block;flex:none;vertical-align:middle;width:16px;height:16px;overflow:visible}
+.mdorb.mdo24{width:24px;height:24px}.mdorb.mdo40{width:40px;height:40px}
+.mdorb path{fill:none;stroke-linecap:round}
+.mdorb .o0{stroke:rgba(159,194,255,.32);stroke-width:2.2}
+.mdorb .o1{stroke:#4cc9f0;stroke-width:2.6;stroke-dasharray:26 74;animation:mdoT 1.3s linear infinite}
+.mdorb .o2{stroke:#fff;stroke-width:6;stroke-dasharray:0 100;stroke-dashoffset:-26;animation:mdoE 1.3s linear infinite}
+.mdorb .nu{fill:#ffd23a}
+.mdorb.mdo16 .o0{stroke-width:3}.mdorb.mdo16 .o1{stroke-width:3.4}.mdorb.mdo16 .o2{stroke-width:7.5}.mdorb.mdo16 .nu{r:4.4}
+.mdorb.mdp .o0{stroke:rgba(255,255,255,.16)}
+.mdorb.mdp .o1,.mdorb.mdp .o2{animation:none;transition:stroke-dasharray .2s linear,stroke-dashoffset .2s linear}
+.mdorb.mdp .o1{stroke-dasharray:0 100}
+@keyframes mdoT{from{stroke-dashoffset:0}to{stroke-dashoffset:-100}}
+@keyframes mdoE{from{stroke-dashoffset:-26}to{stroke-dashoffset:-126}}
+@media (prefers-reduced-motion:reduce){.mdorb .o1,.mdorb .o2{animation-duration:3.6s}}
+.ldb .mdorb{width:var(--s);height:var(--s)}
+#busyPill .ldb,#mdJob{display:flex;align-items:center;gap:8px}
+#mdJob{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483000;padding:6px 14px 6px 8px;border-radius:999px;background:rgba(16,18,25,.96);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:var(--fs2);color:#cfd3db;max-width:min(560px,92vw)}
+#mdJob[hidden]{display:none}#mdJob span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mdJob b{font-weight:var(--fw6);color:#e8ebf2;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums}
+#exTop>i{display:none}#exTop .mdorb{position:relative;margin-left:-4px}
+#exWave .mdorb{position:absolute;right:46px;bottom:5px;z-index:1}
+#exFz .fzb{display:none}#exFz .fzr{align-items:center}#exFz .fzr .mdorb{margin-right:-2px}
+.upds .mdorb{margin:-2px 8px 0 -2px}
+#vaiWin .vaprog.mdvap{height:auto;background:none;overflow:visible;display:flex;align-items:center;gap:8px;font-size:var(--fs2);color:#cfd3db}#vaiWin .vaprog.mdvap[hidden]{display:none}#vaiWin .vaprog.mdvap b{font-weight:var(--fw6);font-variant-numeric:tabular-nums}
