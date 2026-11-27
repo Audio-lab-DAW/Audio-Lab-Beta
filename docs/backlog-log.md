@@ -5467,3 +5467,32 @@ The user (27 Nov, 19:25 Brussels), on "AudioLab app icon, round 3: dipole field"
 
 ### Not verified
 - The real Mac (retina, real Inter and SF Mono), the Electron app, the AI voice window with a real model download and the neural stem model (no network models here); the code paths are the same functions the tests drove.
+
+## 27 November 2026: task NB-N3e (the Pro EQ: Chromium's BiquadFilterNode, the first device made of browser nodes)
+
+Fired by the scheduler. The next stage not done after N3d: the rest of stage 3's devices. Chosen by what the built-in song needs: Fractals uses the Pro EQ 35 times (33 tracks), the compressor 4, the sidechain pump 4, the tempo delay 5, the plate reverb 1 and a clipper on the master, none of them worklets; the EQ first. `index.html`, `desktop/` (also `desktop/app-version.json`) untouched; no version. A second NB run had meanwhile committed an N3d follow-up on the panner (2e165ad, b2f67da); this run rebased on it and merged the two (below).
+
+### Built
+- `native/engine/core/biquad.h`: Chromium 158.0.8127.36's BiquadFilterNode (biquad.cc, biquad_filter_handler.cc; identical on main): float AudioParams, `pow10` via `fdlibm::expf`, all eight types, coefficients at the first quantum and on change, the Linux loop (double state fed back through float) and the Mac path (`vDSP_deq22D`, 1,024-frame slices), `getFrequencyResponse` with libc++'s complex arithmetic written out.
+- `native/third_party/fdlibm/`: Chromium's fdlibm (SunPro licence; only `base/` includes replaced). CMake library `al_fdlibm` (links Accelerate on the Mac), used by `alrender*`, `albus`, `almix`.
+- `native/engine/core/dev_eq.h`: the Pro EQ as `mkEQ2` builds it (stages, tilt, solo, idle bands kept out until used, mid/side, auto gain, out gain). Registered as `eq`.
+- `device.h`: `Processor::worklet()` (browser-node devices skip the worklet rules), `NodeFloatState` (denormals flushed, as Chromium's audio thread), mono in and out per call; `graph.h`, `bus_graph.h`: a chain keeps a mono input mono through browser-node devices.
+- `al_mix.h` (merged with the other run's fix): the panner's fused form is the Mac's `vDSP_vsma` (Chromium is built with `-ffp-contract=off` everywhere, BUILD.gn; `Vsma` is `vDSP_vsma` in vector_math_mac.h), so `AL_WEB_PAN_FUSED` defaults on for the Mac only and calls `vDSP_vsma` there; the first quantum's double path unfused (`AL_WEB_PAN_SA_FUSED` switch kept); pan gains from fdlibm as stereo_panner.cc.
+- `make_ref_core.py`: the EQ's 47 cases (17 settings that reach every branch, all 29 distinct EQ settings of Fractals from `ref/eq_fractals.json`) and two chains with worklet devices; chains may name an extra setting. `make_bus_ref.py`: settings merged into a device (`("eq", None, {...})`), scenes `eqbus`, `eqbus128`, and a scene filter that keeps the others' entries. CI: the Mac's device gate counts every case.
+
+### Proven (Linux, this machine)
+- Devices: **289 of 289 bit for bit** at 128 frames per call; 288 of 289 at 7, 64 and 512 (the known two-random-device chain, review A2). Under ASan+UBSan at 7 frames: the 47 EQ cases bit for bit.
+- Buses: **16 of 16 identical** (with `eqbus`, `eqbus128`: EQ on a mono source, mid/side on a group and on a mono source, tilt with auto gain on a return, an EQ before the master's limiter); N3b's mixer 10 of 10 (with the fdlibm pan gains).
+- Found by measurement: Chromium's own nodes run with denormals flushed (without it only the samples under 1.2e-38 differed); a GainNode at exactly 1 copies.
+- Cost: four active bells 7.9 µs per 128 stereo frames; 48 dB/oct passes 14.6 µs; Fractals' EQs 0.3 to 3.8 µs.
+- GitHub: Native CI dispatched with the Mac job (macos-latest) after the push; its result is read by the next run if it is not added below.
+
+### Left
+- On the Mac: whether the EQ (vDSP_deq22D path) and the panner (vDSP_vsma) match the Mac's Chromium: the dispatched run says.
+- The EQ's dynamic bands (live only) and automation; a biquad's tail after silence (with clips as sources).
+- Next devices for Fractals: compressor (DynamicsCompressor), sidechain pump, tempo delay, plate reverb (convolver: measured), clipper; then clips as sources and the instruments.
+
+### Assumptions
+- `UI.eqAll` (an interface option that keeps idle bands in the path) is off, its default; the port reads only the device's settings.
+- An unknown band type keeps the filter's previous type, as the browser does.
+- Chromium 158.0.8127.36's source stands for the Electron the app ships (Chromium 156) for these files; the comparison is against headless Chromium 158 here and the Mac's Playwright Chromium in CI.
