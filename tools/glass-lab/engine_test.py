@@ -125,7 +125,7 @@ def unit_tests(b):
     ok('scene: scrollX moves the clips (uniform only), zoom scales them, scrollY moves lanes and clips', near(r['scrolled'], [255, 0, 0]) and near(r['scrolledOld'], [0, 0, 255]) and near(r['zoomed'], [255, 0, 0]) and near(r['zoomedOut'], [0, 0, 255]) and near(r['scrollY'], [255, 0, 0]) and near(r['laneY'], [0, 0, 255]) and near(r['laneY2'], [0, 0, 0]),
        json.dumps({k: r[k][:3] for k in ['scrolled', 'scrolledOld', 'zoomed', 'zoomedOut', 'scrollY', 'laneY', 'laneY2']}))
     ok('scene: view rectangle and origin place the arrangement on the canvas; outside it the base colour', near(r['rectIn'], [255, 0, 0]) and near(r['rectLane'], [0, 0, 255]) and near(r['rectOut'], [10, 10, 12]), 'inside %s outside %s' % (r['rectIn'][:3], r['rectOut'][:3]))
-    ok('scene: all of that with the rectangle list sent twice (start, playhead width) and no canvas upload', r['st']['sceneSends'] == 3 and r['st']['uploads'] == 0 and r['st']['flatUploads'] == 0 and r['n'] == 1 + 2 + 3 + 1 + 1 + 1, r['st'])
+    ok('scene: all of that with the rectangle list sent twice (start, playhead width) and no canvas upload', r['st']['sceneSends'] == 3 and r['st']['uploads'] == 0 and r['st']['flatUploads'] == 0 and r['n'] == 2 + 3 + 1 + 1 + 1, r['st'])
 
     # the GPU-drawn backdrop and a small copy of the same picture give the same glass
     r = pg.evaluate(r"""()=>{ const out={}; for(const lv of ['glass','light']){ const C=T.flat(512,256,'#0a0a0c'), x=C.getContext('2d'), clips=[]; const col=['#e5534b','#4c8dff','#e3b341','#3ecf8e'];
@@ -195,7 +195,7 @@ def unit_tests(b):
       g.updatePanel('w',{visible:false}); g.updatePanel('d',{visible:false}); g.setPlayhead(99); g.setScene({clips}); g.render(); o.hidden={...g.stats};
       g.destroy(); return o; }""")
     f, m, i_, s_, pl, ps, sc, zm, ed, l, bl, hd = (r[k] for k in ['first', 'move', 'idle', 'same', 'play', 'playSame', 'scroll', 'zoom', 'edit', 'lens', 'blur', 'hidden'])
-    ok('scene, first frame: rectangles sent once (400 clips), backdrop drawn once, one pyramid, no upload', f['sceneSends'] == 1 and f['sceneDraws'] == 1 and f['pyramids'] == 1 and f['uploads'] == 0 and r['n'] == 1 + 4 + 800 + 1, f)
+    ok('scene, first frame: rectangles sent once (400 clips), backdrop drawn once, one pyramid, no upload', f['sceneSends'] == 1 and f['sceneDraws'] == 1 and f['pyramids'] == 1 and f['uploads'] == 0 and r['n'] == 4 + 800 + 1, f)
     ok('scene, moving a panel 50 times: 50 quad redraws, backdrop not drawn again, nothing sent', r['moveDrew'] == 50 and m['sceneDraws'] == 1 and m['sceneSends'] == 1 and m['pyramids'] == 1 and m['draws'] == f['draws'] + 50, m)
     ok('nothing changed: render() does nothing (50 calls, 0 draws)', r['idleDrew'] == 0 and i_['draws'] == m['draws'] and i_['skipped'] == m['skipped'] + 50)
     ok('updatePanel with the same rectangle: nothing drawn', r['sameDrew'] == 0 and s_['draws'] == i_['draws'])
@@ -351,6 +351,56 @@ def unit_tests(b):
     ok('software GL is refused by default (falls back to the plain tint) or accepted where the browser does not report it', r['mode'] in ('fallback', 'gl'), r)
     ctx.close()
 
+def g2c_tests(b):
+    # engine 2.1 (task G2c): small canvas with setOrigin, background as a clear, backdrop rate, the test page's debug switches, cached regions
+    ctx, pg = unit_page(b)
+    r = pg.evaluate(r"""()=>{ const out={}; const clips=[]; for(let i=0;i<80;i++) clips.push({x:i*37,y:(i%9)*64,w:29,h:60,color:['#e5534b','#4c8dff','#e3b341','#3ecf8e'][i&3]});
+      const S=T.stripes(800,600,0);
+      for(const way of ['scene','copy']) for(const over of ['backdrop','flats']) for(const [ox,oy] of [[264,124],[265,125]]){
+        const mk=(w,h,x,y)=>{ const g=T.make(w,h,{blur:'light'}); if(way==='scene') g.setScene({clips,lanes:[{y:128,h:64,color:'#202838'}],playheadX:420,scrollX:13,rect:[0,0,800,600]}); else g.setBackdrop(S,{rect:[0,0,800,600]});
+          g.setFlat('f',{rect:[0,300,800,300],color:[.5,.1,.1,1]}); g.addPanel({id:'w',rect:[300,160,300,200],radius:12,kind:'window',over}); g.setOrigin(x,y); g.render(); return g; };
+        const full=mk(800,600,0,0), A=T.read(full), small=mk(372,272,ox,oy), B=T.read(small); let m=0,sum=0,n=0;
+        for(let y=16;y<256;y++) for(let x=16;x<356;x++){ const ka=((y+oy)*A.w+x+ox)*4, kb=(y*B.w+x)*4; for(let c=0;c<4;c++){ const d=Math.abs(A[ka+c]-B[kb+c]); if(d>m)m=d; sum+=d; n++; } }
+        const o={max:m,mean:sum/n,info:small.info.origin,up:small.stats.uploads,ss:small.stats.sceneSends,mid:T.px(B,186,136)};
+        // the window moves by 8 px with its canvas: same picture again, nothing uploaded or sent again; setting the same origin again draws nothing
+        full.updatePanel('w',{rect:[308,160,300,200]}); full.render(); small.updatePanel('w',{rect:[308,160,300,200]}); small.setOrigin(ox+8,oy); o.drew=small.render(); const A2=T.read(full), B2=T.read(small); let m2=0;
+        for(let y=16;y<256;y++) for(let x=16;x<356;x++){ const ka=((y+oy)*A2.w+x+ox+8)*4, kb=(y*B2.w+x)*4; for(let c=0;c<4;c++) m2=Math.max(m2,Math.abs(A2[ka+c]-B2[kb+c])); }
+        o.max2=m2; o.up2=small.stats.uploads; o.ss2=small.stats.sceneSends; small.setOrigin(ox+8,oy); o.again=small.render(); full.destroy(); small.destroy(); out[way+' '+over+' '+ox]=o; }
+      return out; }""")
+    al = {k: v for k, v in r.items() if k.endswith('264')}; od = {k: v for k, v in r.items() if k.endswith('265')}
+    ok('setOrigin: a 372x272 canvas placed at (264,124) draws the same window, shadow and backdrop as an 800x600 canvas (scene and copy, over the backdrop and over flats)', all(v['max'] <= 2 and v['info'] == [264, 124] and v['mid'][3] == 255 for v in al.values()), json.dumps({k: [v['max'], round(v['mean'], 2)] for k, v in al.items()}))
+    ok('setOrigin: an origin that is not a multiple of the small pixel gives the same picture within the blur (no jump)', all(v['mean'] < 1.5 and v['max'] <= 40 for v in od.values()), json.dumps({k: [v['max'], round(v['mean'], 2)] for k, v in od.items()}))
+    ok('setOrigin: the canvas moves with its window: same picture, drawn once, no upload and no clip list sent again; the same origin again draws nothing', all(v['max2'] <= 2 and v['drew'] is True and v['again'] is False and v['up2'] == v['up'] and v['ss2'] == v['ss'] for v in al.values()), json.dumps({k: v['max2'] for k, v in al.items()}))
+    r = pg.evaluate(r"""()=>{ const g=T.make(512,256,Object.assign({blur:'light',backdropColor:[0,0,1]},T.plain)); g.setScene({bg:[1,0,0,.5],rect:[128,0,256,256]});
+      g.addPanel({id:'a',rect:[0,0,512,256],kind:'docked',tintAmount:0,lens:false}); g.render(); let b=T.read(g); const o={inside:T.px(b,256,128),outside:T.px(b,460,128),n:g.info.sceneRects,s0:{...g.stats}};
+      g.setScene({bg:[0,1,0]}); g.render(); b=T.read(g); o.green=T.px(b,256,128); o.out2=T.px(b,40,128); o.s1={...g.stats};
+      g.setScene({rect:[0,0,512,256]}); g.render(); b=T.read(g); o.all=T.px(b,460,128); g.destroy(); return o; }""")
+    near = lambda a, e, tol=8: all(abs(x - y) <= tol for x, y in zip(a[:3], e))
+    ok('scene background is the clear of the view rectangle: right colour inside (half-transparent over the backdrop colour), backdrop colour outside, it is not a rectangle in the list',
+       near(r['inside'], [128, 0, 128]) and near(r['outside'], [0, 0, 255]) and r['n'] == 1 and near(r['green'], [0, 255, 0]) and near(r['out2'], [0, 0, 255]) and near(r['all'], [0, 255, 0]), [r['inside'], r['outside'], r['green'], r['all']])
+    ok('a new background colour is one backdrop draw and does not send the list again', r['s1']['sceneSends'] == r['s0']['sceneSends'] == 1 and r['s1']['sceneDraws'] == r['s0']['sceneDraws'] + 1 and r['s1']['uploads'] == 0, [r['s0']['sceneSends'], r['s1']['sceneDraws']])
+    r = pg.evaluate(r"""()=>{ const out={}; const clips=[]; for(let i=0;i<60;i++) clips.push({x:i*37,y:(i%9)*64,w:29,h:60,color:'#e5534b'});
+      const g=T.make(800,600,{blur:'light'}); g.setScene({clips}); g.addPanel({id:'w',rect:[100,60,300,200],radius:12,kind:'window'}); g.render(0);
+      const sec=(t0)=>{ const s={...g.stats}; for(let i=1;i<=240;i++){ g.setView({scrollX:i+t0}); g.updatePanel('w',{rect:[100+(i&63),60,300,200]}); g.render(t0+i*1000/240); } return {sd:g.stats.sceneDraws-s.sceneDraws,dr:g.stats.draws-s.draws,ss:g.stats.sceneSends-s.sceneSends,up:g.stats.uploads-s.uploads}; };
+      out.every=sec(1000); g.setBackdropRate(120); out.r120=sec(3000); out.i120=g.info.rate; g.setBackdropRate(60); out.r60=sec(5000); g.setBackdropRate(0); out.back=sec(7000); out.i0=g.info.rate;
+      g.setBackdropRate(120); g.setLevel('light'); out.light=g.info.rate; g.setLevel('glass'); g.setBackdropRate(null);
+      // the test page's switches: hard edges, and a frozen backdrop with the faces still drawn
+      g.setView({scrollX:13}); g.render(9000); const A=T.read(g); g.debug.set({aa:false}); g.render(9001); const B=T.read(g); let sum=0,n=0,lit=0; for(let k=0;k<A.length;k+=4){ sum+=Math.abs(A[k]-B[k]); n++; if(B[k]>40)lit++; } out.aa={mean:sum/n,lit};
+      g.debug.set({aa:true}); g.render(9002); out.aaBack=T.maxDiff(A,T.read(g),0,0,800,600);
+      g.debug.set({freeze:true}); g.render(9003); const s={...g.stats}; for(let i=1;i<=20;i++){ g.setView({scrollX:500+i}); g.render(9003+i*5); } out.frozen={sd:g.stats.sceneDraws-s.sceneDraws,py:g.stats.pyramids-s.pyramids,dr:g.stats.draws-s.draws};
+      g.debug.set({freeze:false}); const s2={...g.stats}; for(let i=1;i<=20;i++){ g.setView({scrollX:600+i}); g.render(9200+i*5); } out.thaw={sd:g.stats.sceneDraws-s2.sceneDraws,dr:g.stats.draws-s2.draws}; out.err=g.gl.getError(); g.destroy();
+      // the area under docked glass is worked out when a panel changes, not per frame: a docked panel that is moved or resized still gives the same pixels as working on everything
+      const mk=cull=>{ const h=T.make(800,600,{blur:'regular',regionCull:cull}); h.setScene({clips,playheadX:300}); h.addPanel({id:'h',rect:[0,20,108,400],kind:'docked'}); h.addPanel({id:'t',rect:[0,576,800,24],kind:'docked'}); h.render();
+        h.updatePanel('h',{rect:[0,20,180,300]}); h.render(); h.setView({scrollX:9}); h.render(); h.updatePanel('t',{rect:[0,500,800,100]}); h.setView({scrollX:20}); h.render(); return h; };
+      const a=mk(true), b=mk(false); out.reg={d:T.maxDiff(T.read(a),T.read(b),0,0,800,600),ra:a.info.regions,rb:b.info.regions}; a.removePanel('h'); a.render(); b.removePanel('h'); b.render(); out.reg.d2=T.maxDiff(T.read(a),T.read(b),0,0,800,600); out.reg.ra2=a.info.regions; a.destroy(); b.destroy();
+      return out; }""")
+    ok('setBackdropRate at a simulated 240 frames per second: every change by default (240), 120 and 60 per second when asked, panels still redrawn on every frame, no upload, no list sent; a level with a lower rate keeps it',
+       r['every']['sd'] == 240 and 118 <= r['r120']['sd'] <= 122 and 59 <= r['r60']['sd'] <= 61 and r['back']['sd'] == 240 and all(r[k]['dr'] == 240 and r[k]['ss'] == 0 and r[k]['up'] == 0 for k in ['every', 'r120', 'r60', 'back']) and r['i120'] == 120 and r['i0'] == 0 and r['light'] == 30, json.dumps({k: r[k] for k in ['every', 'r120', 'r60', 'back']}))
+    ok('debug switch "anti-aliasing off": the backdrop is still drawn (hard edges, nearly the same picture) and comes back identical when switched on again', r['aa']['mean'] < 4 and r['aa']['lit'] > 1000 and r['aaBack'] == 0 and r['err'] == 0, r['aa'])
+    ok('debug switch "frozen": a scroll redraws the faces but not the backdrop or its blur; switched off, the backdrop is drawn on every change again', r['frozen'] == {'sd': 0, 'py': 0, 'dr': 20} and r['thaw'] == {'sd': 20, 'dr': 20}, [r['frozen'], r['thaw']])
+    ok('area under docked glass (now worked out only when a panel changes): after moving, resizing and removing docked panels the pixels are identical to working on everything', r['reg']['d'] == 0 and r['reg']['d2'] == 0 and r['reg']['ra'] >= 1 and r['reg']['rb'] == 0 and r['reg']['ra2'] >= 1, r['reg'])
+    ctx.close()
+
 def AUDIT_LENS(pg):
     return pg.evaluate("()=>AudioLabGlass.LENS.wide")
 
@@ -429,6 +479,35 @@ def page_tests(b, dsf):
     rim = rimbox(glass, off); mid = diff(glass, off, midbox)
     ok('screenshot: lens wide and lens off differ in the rim of the mixer window and are identical in its middle' + tag, rim[0] >= 6 and mid[0] <= 1, 'rim max %d mean %.1f, middle max %d' % (rim[0], rim[1], mid[0]))
     glass.save(os.path.join(OUT, 'engine-test-glass-%dx.png' % dsf))
+    # 2.1: the floating canvas only as large as its glass (setOrigin). Same picture, a fraction of the canvas.
+    c8 = lambda v: -(-v // 8) * 8
+    pg.evaluate(setsel, ['#p_menu', False]); pg.evaluate(setsel, ['#p_pill', False]); settle(); wide = shot()
+    pg.evaluate(setsel, ['#fit', True]); settle(); fitted = shot(); fi = pg.evaluate("()=>({b:__t.gB.info,r:__t.bRect,tr:__t.cB.style.transform,w:__t.cB.getBoundingClientRect().toJSON()})")
+    d = diff(wide, fitted, (x0 - 30, y0 - 20, x0 + w0 + 30, y0 + h0 + 34))
+    ok('fitted floating canvas: the mixer window and its shadow look the same as with a full-window canvas, on a canvas of 1168x504 instead of 1600x1000' + tag,
+       d[0] <= 3 and fi['r'] == [x0 - 34, y0 - 34, c8(w0 + 68), c8(h0 + 68)] and fi['b']['width'] == c8(w0 + 68) * dsf and fi['b']['height'] == c8(h0 + 68) * dsf and fi['b']['origin'] == [x0 - 34, y0 - 34] and abs(fi['w']['left'] - (x0 - 34)) < .01 and abs(fi['w']['width'] - c8(w0 + 68)) < .01, 'max difference %d of 255, mean %.2f; canvas %dx%d at %s' % (d[0], d[1], fi['b']['width'], fi['b']['height'], fi['b']['origin']))
+    pg.evaluate(setsel, ['#scn', 'scroll']); pg.evaluate(setsel, ['#drag', True]); pg.wait_for_timeout(300)
+    o0 = pg.evaluate("()=>__t.gB.info.origin"); r = pg.evaluate(count, N); pg.wait_for_timeout(250); fi2 = pg.evaluate("()=>({b:__t.gB.info,r:__t.bRect,mx:__t.P.mix.x+__t.P.mix.dx})")
+    ok('fitted floating canvas, scrolling + mixer moving: the canvas travels with the window (origin follows, size stays), uploads == 0, clip list not sent again, backdrop drawn every frame' + tag,
+       noup(r) and r['b']['sceneDraws'] >= N - 2 and r['a']['sceneDraws'] >= N - 2 and fi2['b']['width'] == c8(w0 + 68) * dsf and fi2['b']['origin'] == [fi2['mx'] - 34, y0 - 34] and fi2['r'][0] == fi2['mx'] - 34, [o0, fi2['b']['origin'], short(r)])
+    pg.evaluate(setsel, ['#p_menu', True]); pg.wait_for_timeout(200); fi3 = pg.evaluate("()=>({b:__t.gB.info,r:__t.bRect})")
+    ok('fitted floating canvas with a second floating panel: one canvas over both and the window\'s travel, standing still' + tag, fi3['b']['origin'] == fi3['r'][:2] and fi3['r'][2] > w0 + 68 and fi3['r'][2] % 8 == 0 and fi3['r'][2] < 1600 and fi3['b']['width'] == fi3['r'][2] * dsf, fi3['r'])
+    pg.evaluate(setsel, ['#fit', False]); pg.evaluate(setsel, ['#p_pill', True]); pg.evaluate(setsel, ['#scn', 'still']); pg.evaluate(setsel, ['#drag', False]); pg.evaluate("()=>{__t.P.mix.dx=0;__t.layout()}"); settle()
+    fi4 = pg.evaluate("()=>({b:__t.gB.info,r:__t.bRect})"); back = shot(); d = diff(glass, back, (0, 0, 1600, 1000))
+    ok('fit off again: full-window canvas, origin 0, the page looks exactly as before' + tag, fi4['r'] == [0, 0, 1600, 1000] and fi4['b']['origin'] == [0, 0] and fi4['b']['width'] == 1600 * dsf and d[0] <= 1, 'max difference %d' % d[0])
+    # 2.1: Solid as in Glass Bench 3 (no engine canvas, plain DOM panels) and Bench 3's own GPU path on this page
+    pg.evaluate("()=>__t.setPm('dom')"); settle(); r = pg.evaluate(count, 10); dom = shot(); c = dom.getpixel((int(100 * dsf), int(300 * dsf)))
+    dm = pg.evaluate("()=>[getComputedStyle(__t.cA).display,getComputedStyle(__t.cB).display,getComputedStyle(__t.DC).display]")
+    ok('page mode "Solid as in Bench 3": both engine canvases and the display are out of the page, the engine is not called, the panels are plain DOM in the panel colour' + tag,
+       dm == ['none', 'none', 'none'] and r['a']['renders'] == 0 and r['b']['renders'] == 0 and all(abs(a - e) <= 22 for a, e in zip(c, [22, 28, 42])), [dm, c])
+    pg.evaluate("()=>__t.setPm('b3')"); settle(); settle(); b3 = shot(); r = pg.evaluate(count, 10)
+    bi = pg.evaluate("()=>({ok:__t.B3.ok,n:document.querySelectorAll('#stage canvas').length,band:__t.P.band.el.hidden,menu:__t.P.menu.el.hidden,hh:__t.P.hdr.h,err:__t.B3.gl.getError()})")
+    e3, em3 = energy(b3, (60, 120, 160, 560)), energy(b3, (330, 130, 1270, 440))
+    ok('page mode "Bench 3 path": Bench 3\'s own canvas and GL code draw frosted headers and mixer (five panels, no tab band, no menu), the engine is not called, no GL error' + tag,
+       bi['ok'] and bi['n'] == 5 and bi['band'] and bi['menu'] and bi['err'] == 0 and r['a']['renders'] == 0 and e3 < eb * .2 and em3 < ebm * .2 and e3 > 0, 'headers %d of %d, mixer %d of %d' % (e3, eb, em3, ebm))
+    b3.save(os.path.join(OUT, 'engine-test-bench3-path-%dx.png' % dsf))
+    pg.evaluate("()=>__t.setPm('engine')"); settle(); settle(); back = shot(); d = diff(glass, back, (0, 0, 1600, 1000))
+    ok('back to the engine: Bench 3\'s canvas and context are gone, the glass looks exactly as before' + tag, d[0] <= 1 and pg.evaluate("()=>document.querySelectorAll('#stage canvas').length") == 4 and not pg.evaluate("()=>__t.B3.ok"), 'max difference %d' % d[0])
 
     # level Light: the same engine, lens off, backdrop an eighth of the size; still frosted, no uploads
     pg.evaluate("()=>__t.setLevel('light')"); settle(); light = shot(); li = pg.evaluate("()=>__t.gA.info")
@@ -480,14 +559,25 @@ def page_tests(b, dsf):
         print(pc['t'], flush=True)
         print('NOTE the times above are from a software renderer (no GPU here): they say nothing about the Mac.', flush=True)
         ok('Time the pieces runs (send, draw + blur, faces, small copy) and puts the source back', len(pc['d']) == 10 and all(v[1] >= 0 for v in pc['d']) and pc['src'] == 'scene' and 'send the clip list' in pc['t'])
-        rn = pg.evaluate("async()=>{const rows=await __t.run(700);await new Promise(r=>setTimeout(r,1300));return {rows,t:document.querySelector('#res').textContent,live:document.querySelector('#live').textContent,a:__t.gA.info,scn:document.querySelector('#scn').value}}")
+        rn = pg.evaluate("async()=>{const rows=await __t.run(700);await new Promise(r=>setTimeout(r,1300));return {rows,t:document.querySelector('#res').textContent,live:document.querySelector('#live').textContent,a:__t.gA.info,pm:__t.pm,cv:document.querySelectorAll('#stage canvas').length,scn:document.querySelector('#scn').value}}")
         print(rn['t'], flush=True)
         print('NOTE fps and kept% above come from a cloud machine without a GPU: they mean nothing. Only the last three columns (counters) are checked.', flush=True)
-        tail = {x[:29].strip(): [float(v) for v in x.split()[-3:]] for x in rn['rows']}
-        ok('Run fills the table: rows for Solid, Light, Glass, playing and the small-copy fallback at Light and Glass', list(tail) == ['Solid', 'Light, drawn on GPU', 'Glass, drawn on GPU', 'Glass, drawn on GPU, playing', 'Light, small copy', 'Glass, small copy'] and 'kept%' in rn['t'], list(tail))
+        tail = {x[:31].strip(): [float(v) for v in x.split()[-3:]] for x in rn['rows']}
+        ok('Run fills the table: Solid as in Bench 3 (page only), Solid by the engine, Light, Glass, playing, the small-copy fallback at Light and Glass, and the Bench 3 path', list(tail) == ['Solid (page only, as Bench 3)', 'Solid, drawn by the engine', 'Light, drawn on GPU', 'Glass, drawn on GPU', 'Glass, drawn on GPU, playing', 'Light, small copy', 'Glass, small copy', 'Bench 3 path (its own GL code)'] and 'kept%' in rn['t'] and 'screen frame' in rn['t'], list(tail))
         ok('Run: the "drawn on GPU" rows upload 0 canvases and send 0 clip lists while drawing the backdrop; Solid does nothing; the small-copy rows upload and draw no scene',
-           tail['Solid'] == [0, 0, 0] and all(tail[k][0] > 0 and tail[k][1] == 0 and tail[k][2] == 0 for k in ['Light, drawn on GPU', 'Glass, drawn on GPU', 'Glass, drawn on GPU, playing']) and all(tail[k][0] == 0 and tail[k][1] > 0 for k in ['Light, small copy', 'Glass, small copy']), json.dumps(tail))
-        ok('Run puts level, source and scene back; the live readout shows the frame share', rn['a']['level'] == 'glass' and rn['a']['source'] == 'scene' and rn['scn'] == 'scroll' and 'frames delivered' in rn['live'] and 'canvas uploads 0' in rn['live'], rn['live'].split('\n')[0])
+           all(tail[k] == [0, 0, 0] for k in ['Solid (page only, as Bench 3)', 'Solid, drawn by the engine', 'Bench 3 path (its own GL code)']) and all(tail[k][0] > 0 and tail[k][1] == 0 and tail[k][2] == 0 for k in ['Light, drawn on GPU', 'Glass, drawn on GPU', 'Glass, drawn on GPU, playing']) and all(tail[k][0] == 0 and tail[k][1] > 0 for k in ['Light, small copy', 'Glass, small copy']), json.dumps(tail))
+        ok('Run puts level, source, scene and the page mode back; the live readout shows the frame share', rn['pm'] == 'engine' and rn['cv'] == 4 and rn['a']['level'] == 'glass' and rn['a']['source'] == 'scene' and rn['scn'] == 'scroll' and 'frames delivered' in rn['live'] and 'canvas uploads 0' in rn['live'], rn['live'].split('\n')[0])
+        fd = pg.evaluate("""async()=>{const rows=await __t.find(350);await new Promise(r=>setTimeout(r,700));const g=__t.gA,b=__t.gB,s0=g.stats.sceneDraws;await new Promise(r=>setTimeout(r,500));
+          return {rows,t:document.querySelector('#res2').textContent,pm:__t.pm,X:__t.X,on:Object.values(__t.P).every(p=>p.on&&!p.el.hidden),a:g.info,b:b.info,bRect:__t.bRect,cv:document.querySelectorAll('#stage canvas').length,
+            disp:[getComputedStyle(__t.cA).display,getComputedStyle(__t.cB).display],scn:document.querySelector('#scn').value,drag:document.querySelector('#drag').checked,fit:document.querySelector('#fit').checked,moving:g.stats.sceneDraws>s0,n:g.info.sceneRects}}""")
+        print(fd['t'], flush=True)
+        print('NOTE as above: no GPU here, the numbers mean nothing. Only that every row runs and everything is put back is checked.', flush=True)
+        names = [x[:31].strip() for x in fd['rows']]
+        ok('Find the cost: one row per switch (anti-aliasing, background rate, frozen, idle, each layer, each panel, 0 clips, page scrolling, mixer, lens, half size, fitted canvas, Bench 3 path, playing)',
+           len(names) == 25 and names[1] == 'Glass scrolling, everything on' and all(any(k in n for n in names) for k in ['anti-aliasing off', '120 per second', '60 per second', 'frozen', 'engine idle', 'floating layer off', 'docked layer off', 'without track headers', 'without pill', '0 clips', 'page scrolling off', 'mixer not moving', 'lens off', 'half size', 'only the mixer', 'fitted', 'Bench 3 path', 'playing']) and 'change' in fd['t'], names)
+        ok('Find the cost puts everything back (page mode, both canvases shown and full size, origin 0, all panels, level, source, scrolling, mixer moving, lens, rate, the clip list, backdrop drawn again)',
+           fd['pm'] == 'engine' and not any(fd['X'].values()) and fd['on'] and fd['cv'] == 4 and fd['disp'] == ['block', 'block'] and fd['bRect'] == [0, 0, 1600, 1000] and fd['b']['origin'] == [0, 0] and fd['b']['width'] == 1600 and fd['a']['width'] == 1600 and fd['a']['dpr'] == 1
+           and fd['a']['level'] == 'glass' and fd['a']['source'] == 'scene' and fd['a']['lens'] == 'wide' and fd['a']['rate'] == 0 and fd['scn'] == 'scroll' and fd['drag'] and not fd['fit'] and fd['moving'] and fd['n'] > 100, [fd['pm'], fd['bRect'], fd['n']])
     ctx.close()
 
     # phone width: nothing wider than the screen
@@ -503,6 +593,7 @@ if __name__ == '__main__':
     with sync_playwright() as p:
         b = p.chromium.launch(args=ARGS)
         unit_tests(b)
+        g2c_tests(b)
         if not os.environ.get('GLASS_UNIT_ONLY'):
             for dsf in (1, 2): page_tests(b, dsf)
         b.close()
