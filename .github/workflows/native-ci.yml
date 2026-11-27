@@ -110,6 +110,7 @@ jobs:
         run: |
           T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
           python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
+          python3 -c "import json;cs=json.load(open('out/core/cases.json'))['cases'];print('side made with (beat0, beat0 after, bpm):', sorted(set((d.get('beat0'),d.get('beat0After'),d.get('bpm')) for c in cs for d in c['chain'] if d['type']=='side')))"
       - name: "Chromium's source nodes and wave shaper on their own (task NB-N3g: RustFFT tables, oscillators, constant source, wave shaper)"
         run: |
           python3 tools/native-lab/make_ref_nodes.py out/nodes | tail -1
@@ -230,6 +231,7 @@ jobs:
         run: |
           T=$(build/alrender list | python3 -c "import json,sys;print(','.join(json.load(sys.stdin)))")
           python3 tools/native-lab/make_ref_core.py out/core "$T" | tail -2
+          python3 -c "import json;cs=json.load(open('out/core/cases.json'))['cases'];print('side made with (beat0, beat0 after, bpm):', sorted(set((d.get('beat0'),d.get('beat0After'),d.get('bpm')) for c in cs for d in c['chain'] if d['type']=='side')))"
           mkdir -p out/core/native
           build/alrender cases out/core/cases.json out/core/in.wav out/core/native 128 > out/core/native.jsonl
           python3 tools/native-lab/compare_core.py out/core > out/core-compare-all.txt || true

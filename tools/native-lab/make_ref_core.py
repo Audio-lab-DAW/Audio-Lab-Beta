@@ -186,8 +186,10 @@ JS = """async ({b64, N, SR, chain, Q}) => {
     const q = A.mkFx(d.type).p;
     if (d.pre) { const e = (A.FXPRE[d.type] || {})[d.pre]; if (!e) throw new Error('no preset ' + d.type + ' ' + d.pre); Object.assign(q, JSON.parse(JSON.stringify(e[1]))); q.pre = d.pre }
     if (d.extra) Object.assign(q, d.extra);
-    const fx = A.mkFxNode(c, d.type); fx.set(q);
-    posted.push({type: d.type, p: JSON.parse(JSON.stringify(fx.sp ? fx.sp(q) : q))});
+    A.setB0(0); const b0Before = A.getB0(), bpmNow = A.bpm();
+    const fx = A.mkFxNode(c, d.type); const b0After = A.getB0(); fx.set(q);
+    // the start beat and tempo the device was made with (the Sidechain device reads both when it is made)
+    posted.push({type: d.type, p: JSON.parse(JSON.stringify(fx.sp ? fx.sp(q) : q)), beat0: b0Before, beat0After: b0After, bpm: bpmNow});
     prev.connect(fx.in); prev = fx.out;
   }
   await A.wlLoad(c);
@@ -208,7 +210,7 @@ def main():
     x = make_input()
     wav_write(os.path.join(out, "in.wav"), x)
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v},bpm:()=>S.bpm};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v},getB0:()=>SIDE_B0,bpm:()=>S.bpm};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
     presets = al.run("(()=>{const o={};for(const t of %s)o[t]=Object.keys(FXPRE[t]||{});return o})()" % json.dumps(types))
     jobs = []
     for t in types:
