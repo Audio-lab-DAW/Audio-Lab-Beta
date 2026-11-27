@@ -76,7 +76,8 @@ It needs Node 22, Python 3 with Playwright, `xvfb-run`, and Electron (`desktop/n
 **e) Sound**
 - `tools/engine-tests/export_same.py` runs on both builds.
 - The Fractals Kick and Bass must be −19.05560 dB (fb577dd5202b) and −35.48685 dB (392ec52590c7) with the master at −10 dB.
-- Every export line must be bit-identical to the reference build. A release that changes a sound on purpose names that line in `audio-changes.json` with its version and reason.
+- Each build renders twice. A line that differs between two renders of the same build is not repeatable, so it is listed and not compared. On 27 Nov 2026 that was Plant, Sampler, Sampler grains and Drum kit, which move by up to 1 dB from run to run on one build because their randomness runs free. The Fractals lines must always be repeatable.
+- Every repeatable export line must be bit-identical to the reference build. A release that changes a sound on purpose names that line in `audio-changes.json` with its version and reason.
 
 ## What the HF1 fix changed in the app
 

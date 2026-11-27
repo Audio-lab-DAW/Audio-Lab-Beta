@@ -115,19 +115,24 @@ step('d windows open and close, the update window with long notes', bool(w) and 
 def export(tree):
     r = sh(['python3', os.path.join(tree, 'tools', 'engine-tests', 'export_same.py'), os.path.join(tree, 'index.html')], cwd=tree, timeout=1800)
     return [l for l in r.stdout.splitlines() if re.match(r'^(Fractals|\S.{0,14}\s+-?[\d.]+ dB)', l)], r
-en, rn = export(NEW), export(REF)
+# every build renders twice: a line that differs between two renders of the same build is not repeatable (instruments with
+# free-running randomness: Plant, Sampler, Sampler grains, Drum kit move by up to 1 dB from run to run on one build, measured
+# 27 Nov 2026), so it cannot be compared; it is listed, not judged. Every repeatable line must be bit-identical to the reference.
+en, en2, rn, rn2 = export(NEW), export(NEW), export(REF), export(REF)
 allow = {}
 try: allow = json.load(open(os.path.join(NEW, 'tools', 'release-gate', 'audio-changes.json')))
 except Exception: pass
 key = lambda l: re.sub(r'\s+-?[\d.]+ dB.*$', '', l).strip() + ('' if 'master' not in l else ' ' + re.sub(r'^.*\((.*)\)\s*$', r'\1', l))
-mr = {key(l): l for l in rn[0]}; diff = []
-for l in en[0]:
-    k = key(l)
-    if k in mr and mr[k] != l and k not in allow: diff.append('%s: %s -> %s' % (k, mr[k].split(None, 1)[-1].strip(), l.split(None, 1)[-1].strip()))
+km = lambda L: {key(l): l for l in L}
+n1, n2, r1, r2 = km(en[0]), km(en2[0]), km(rn[0]), km(rn2[0])
+unstable = sorted(k for k in set(n1) | set(r1) if n1.get(k) != n2.get(k) or r1.get(k) != r2.get(k))
+diff = ['%s: %s -> %s' % (k, r1[k].split(None, 1)[-1].strip(), l.split(None, 1)[-1].strip()) for k, l in n1.items() if k in r1 and r1[k] != l and k not in allow and k not in unstable]
+same = [k for k in n1 if k in r1 and k not in unstable]
 fx = [l for l in en[0] if l.startswith('Fractals') and 'master put back' not in l]
-fixed = any('-19.05560 dB  fb577dd5202b' in l for l in fx) and any('-35.48685 dB  392ec52590c7' in l for l in fx)
+fixed = any('-19.05560 dB  fb577dd5202b' in l for l in fx) and any('-35.48685 dB  392ec52590c7' in l for l in fx) and not any(k.startswith('Fractals') for k in unstable)
+RES['exportUnstable'] = unstable
 step('e Fractals levels and exports', bool(en[0]) and fixed and not diff,
-     ('Kick -19.05560 dB, Bass -35.48685 dB, same checksums; %d export lines identical to v%s' % (len(en[0]), REFV)) if bool(en[0]) and fixed and not diff
+     ('Kick -19.05560 dB, Bass -35.48685 dB, same checksums; %d repeatable export lines bit-identical to v%s%s' % (len(same), REFV, '; not repeatable from run to run on either build, so not compared: ' + ', '.join(unstable) if unstable else '')) if bool(en[0]) and fixed and not diff
      else 'changed: ' + ('; '.join(diff) if diff else ' | '.join(fx) or en[1].stderr[-300:]))
 if [x for x in en[0] if 'errors' in x]: pass
 
