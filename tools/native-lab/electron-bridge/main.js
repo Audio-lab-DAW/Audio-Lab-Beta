@@ -2,7 +2,8 @@
 // with the real desktop/native-engine.js and desktop/preload.js, and a page that uses only what the app's page
 // will use: window.audiolabDesktop.nativeEngine and native/bridge/page-tap.js. The loop-back device records
 // what reaches the "DAC".
-//   AL_ENGINE=build/alengine electron tools/native-lab/electron-bridge/main.js <alnative> <outdir> <seconds> <exact|follow> <noise|sine>
+//   AL_ENGINE=build/alengine electron tools/native-lab/electron-bridge/main.js <alnative> <outdir> <seconds> <exact|follow> <noise|sine> [kill-at-second]
+// With a kill second the engine is killed while it plays, to prove the shell starts it again (crash recovery).
 'use strict';
 const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
@@ -11,7 +12,7 @@ const { spawn } = require('child_process');
 
 const args = process.argv.slice(process.argv.findIndex(a => a.endsWith('main.js')) + 1);
 const [alnative, out] = args;
-const SECONDS = Number(args[2] || 20), CLOCK = args[3] || 'exact', SIGNAL = args[4] || 'noise', SR = 48000;
+const SECONDS = Number(args[2] || 20), CLOCK = args[3] || 'exact', SIGNAL = args[4] || 'noise', KILL_AT = Number(args[5] || 0), SR = 48000;
 fs.mkdirSync(out, { recursive: true });
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
@@ -51,6 +52,7 @@ app.whenReady().then(async () => {
       await sleep(1000);
       const t = await js('window.__t');
       if (t.status) R.statuses.push({ s, fill: t.status.ring && t.status.ring.fill, ppm: t.status.ring && t.status.ring.ppm, ranEmpty: t.status.ring && t.status.ring.ranEmpty, dropped: t.status.ring && t.status.ring.droppedTimes, blocks: t.status.tap && t.status.tap.blocks });
+      if (KILL_AT && s === KILL_AT && t.start && t.start.pid) { try { process.kill(t.start.pid, 'SIGKILL'); R.killed = { pid: t.start.pid, atSecond: s }; } catch (e) { R.killed = { error: String(e) }; } }
       if (t.stage === 'finished') break;
     }
     await recDone;

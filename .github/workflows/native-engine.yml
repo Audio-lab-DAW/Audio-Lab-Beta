@@ -78,13 +78,22 @@ jobs:
           python3 tools/native-lab/sine_check.py out/case-c/loopback.wav out/case-c/sine.json | tee -a out/case-c.txt || true
           rm -f out/case-c/loopback.wav
 
+      - name: 'N2b, case D: the engine is killed while it plays; the shell starts it again (crash recovery)'
+        continue-on-error: true
+        run: |
+          SwitchAudioSource -t output -s "BlackHole 2ch" || true
+          AL_ENGINE="$PWD/build/alengine" desktop/node_modules/.bin/electron tools/native-lab/electron-bridge/main.js "$PWD/build/alnative" "$PWD/out/case-d" 20 exact sine 8 2>/dev/null | tail -1 | tee out/case-d.txt || true
+          python3 -c "import json;d=json.load(open('out/case-d/bridge.json'));print('killed',d.get('killed'));print('events',[e for e in d['page'].get('events',[]) if e.get('ev') in ('stopped','restarted','gave-up')])" | tee -a out/case-d.txt || true
+          python3 tools/native-lab/sine_check.py out/case-d/loopback.wav out/case-d/sine.json | tee -a out/case-d.txt || true
+          rm -f out/case-d/loopback.wav
+
       - name: Summary
         if: always()
         run: |
           {
             echo "## Native engine, task NB-N2b"
             echo '```'; cat out/machine.txt; echo '```'
-            for f in out/selftest.json out/engine.txt out/case-a.txt out/case-b-page-device.txt out/case-b.txt out/case-c.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-3000 "$f"; echo '```'; }; done
+            for f in out/selftest.json out/engine.txt out/case-a.txt out/case-b-page-device.txt out/case-b.txt out/case-c.txt out/case-d.txt; do [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-3000 "$f"; echo '```'; }; done
           } > out/RESULTS.md
           cat out/RESULTS.md >> "$GITHUB_STEP_SUMMARY"
           cat out/RESULTS.md
