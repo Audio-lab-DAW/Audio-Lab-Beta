@@ -2174,6 +2174,7 @@ body.lkm1{--ov-mo:0}
 #niClashPop p{margin:0 0 6px;color:var(--mut)}#niClashPop .nicpr{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
 #niClashPop .nicpr i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
 #niClashPop .nicpb{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#niClashPop .nicpb button{min-height:24px;padding:0 9px}
+.mxme .mxtg .mxbar{display:none}.mxme .mxtg canvas.inlh{display:block;width:100%;height:16px;margin-top:3px;border-radius:3px;background:#181a21}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6453,7 +6454,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.258',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.259',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8491,14 +8492,11 @@ const MMH={l:-90,r:-90,hl:-90,hr:-90,t:0};function miniMeter(){const cv=document
   MMH.l=L;MMH.r=R;{const hd=mtrHold();if(L>=MMH.hl||now-(MMH.tl||0)>hd){MMH.hl=L;MMH.tl=now}if(R>=MMH.hr||now-(MMH.tr||0)>hd){MMH.hr=R;MMH.tr=now}}{/* silent and already drawn empty: don't repaint (it sits inside the glass top bar) */const idle=MMH.l<=-89&&MMH.r<=-89&&MMH.hl<=-89&&MMH.hr<=-89;if(idle&&MMH.z)return;MMH.z=idle}const{g,w,h}=fit(cv);g.clearRect(0,0,w,h);const bw=(w-1)/2;
   for(const[k,v,hv] of[[0,MMH.l,MMH.hl],[1,MMH.r,MMH.hr]]){const x=k*(bw+1),f=clamp((v+48)/48,0,1),fh=clamp((hv+48)/48,0,1);g.fillStyle='#1b1e26';g.fillRect(x,0,bw,h);g.fillStyle=mcolAt(v);g.fillRect(x,h-f*h,bw,f*h);if(hv>-47){g.fillStyle=hv>=-.1?'#ff1d6e':'rgba(240,244,250,.85)';g.fillRect(x,h-fh*h,bw,1)}}}
 function lmPaint(){const T=lmTarget(),b=$('#lufsB');{const e=document.getElementById('mxLu');if(e){const s=LM.S;e.textContent=s>-69?s.toFixed(1):'–'}}if(b){const s=LM.S,d=s-T[2];b.querySelector('span').textContent=(s>-69?s.toFixed(1):'–')+' LUFS';b.classList.toggle('ok',s>-69&&Math.abs(d)<=1);b.classList.toggle('hot',s>-69&&d>1&&d<=3);b.classList.toggle('over',s>-69&&d>3);
-    {const cv=b.querySelector('.lfgr');if(cv&&cv.offsetParent){const{g,w,h}=fit(cv),yy=v=>1+(1-clamp((v+36)/36,0,1))*(h-2);g.clearRect(0,0,w,h);g.fillStyle='rgba(62,207,142,.22)';g.fillRect(0,yy(T[2]+1),w,Math.max(1,yy(T[2]-1)-yy(T[2]+1)));const H=LM.hist;if(H.length>1){const n=Math.min(H.length,120);g.strokeStyle=s>-69&&d>3?'#ff8a8a':s>-69&&d>1?'#f5c84c':'#4cc9f0';g.lineWidth=1.3;g.beginPath();for(let i=0;i<n;i++){const v=H[H.length-n+i],x=w-(n-1-i)*(w/119);i?g.lineTo(x,yy(v)):g.moveTo(x,yy(v))}g.stroke()}}}
+    {const cv=b.querySelector('.lfgr');if(cv&&cv.offsetParent)inlTop(cv)}/* IN-L: L2 */
     const pos=v=>clamp((v+40)/40,0,1)*100;b.querySelector('.lfbar i').style.width=pos(s)+'%';b.querySelector('.lfbar b').style.left='calc('+pos(T[2])+'% - 1px)';b.title=`Master loudness: ${lf(s)} LUFS short-term, ${lf(LM.I)} integrated. Target ${T[2]} LUFS (${T[1]}). Click for details.`}
   if(!LMP)return;$('#lmS').textContent=lf(LM.S);$('#lmI').textContent=lf(LM.I);$('#lmP').textContent=LM.tpMax>-89?LM.tpMax.toFixed(1):'–';$('#lmP').style.color=LM.tpMax>T[3]?'#ff8a8a':'';
   const di=LM.I>-69?LM.I-T[2]:null;$('#lmMsg').innerHTML=di==null?'Play the song to measure. Integrated loudness is the number streaming services compare with their target.':Math.abs(di)<=1?`<b>On target.</b> The whole song so far measures ${LM.I.toFixed(1)} LUFS, within 1 dB of ${T[2]}.`:di>0?`<b>${di.toFixed(1)} dB louder</b> than ${T[2]} LUFS. ${T[1]} will turn it down by about that much, so extra limiting buys nothing there.`:`<b>${(-di).toFixed(1)} dB quieter</b> than ${T[2]} LUFS. Raise the level before the limiter, or accept that it plays quieter.`;
-  const cv=$('#lmC');const{g,w,h}=fit(cv),y=v=>8+(1-clamp((v+36)/36,0,1))*(h-16);g.clearRect(0,0,w,h);for(let db=0;db>=-36;db-=6){g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,y(db),w,1);g.fillStyle='#5d6272';g.font='9px ui-monospace,Menlo,monospace';g.fillText(db,4,y(db)-2)}
-  g.fillStyle='rgba(62,207,142,.12)';g.fillRect(0,y(T[2]+1),w,y(T[2]-1)-y(T[2]+1));g.fillStyle='#3ecf8e';g.fillRect(0,y(T[2]),w,1.5);g.fillText('target '+T[2],w-62,y(T[2])-3);
-  const H=LM.hist;if(H.length>1){g.strokeStyle='#4cc9f0';g.lineWidth=1.8;g.beginPath();H.forEach((v,i)=>{const x=w-(H.length-1-i)*(w/240);i?g.lineTo(x,y(v)):g.moveTo(x,y(v))});g.stroke()}
-  if(LM.I>-69){g.strokeStyle='#f5c84c';g.setLineDash([4,4]);g.beginPath();g.moveTo(0,y(LM.I));g.lineTo(w,y(LM.I));g.stroke();g.setLineDash([])}}
+  inlPop()}/* IN-L: L2, the loudness history (also redrawn 10 times a second while the pop-up is open) */
 setInterval(lmPaint,250);$('#lufsB')&&($('#lufsB').onclick=lmOpen);
 /* spectrum overlays: floating, see-through spectrum windows for the master or any tracks. Several sources can share one overlay to compare them; pinned overlays stay on top and come back next time */
 const SPO={list:[],an:new Map(),raf:0};
@@ -13899,7 +13897,7 @@ function msuNums(g,x,y,w,h,f,X,T,compact){const st=msuStat(X,T),tpl=msuTp(X,T),b
   msuBig(g,x,y+10,'INTEGRATED',X.I,'LUFS',X.I>-69?st[1]:MSUC.txt,big);txt(g,st[0],x,y+big+26,st[1],11);if(st[2])txt(g,st[2],x,y+big+39,MSUC.dim,9);
   let yy=y+big+(st[2]?56:46);const row=(k,v,c)=>{if(yy>y+h-4)return;msuKV(g,x,yy,k,v,c,w-8);yy+=compact?14:15};
   row('Short-term',msuF(X.S)+' LUFS');if(!compact)row('Momentary',msuF(X.M)+' LUFS');
-  row('True peak max',(X.tp>-89?X.tp.toFixed(1):'–')+' dBTP',X.tp>tpl?MSUC.red:null);row('Range (LRA)',X.I>-69?X.LRA.toFixed(1)+' LU':'–');
+  row('True peak max',(X.tp>-89?X.tp.toFixed(1):'–')+' dBTP',X.tp>tpl?MSUC.red:null);row('Range (LRA)',X.I>-69?X.LRA.toFixed(1)+' LU'+(X.hn<600?' settling':''):'–',X.I>-69&&X.hn<600?MSUC.dim:null);/* IN-L: settling for 60 s (EBU Tech 3341) */
   row('PLR',X.I>-69&&X.tp>-89?(X.tp-X.I).toFixed(1)+' dB':'–');row('PSR',X.psr?X.psr.toFixed(1)+' dB':'–',X.psr&&X.psr<6?MSUC.over:null);if(!compact){row('Max short-term',msuF(X.Smax)+' LUFS');row('Max momentary',msuF(X.Mmax)+' LUFS')}
   if(X.tp>tpl&&yy<y+h-2){txt(g,'Peaks over '+tpl.toFixed(1)+' dBTP',x,Math.min(y+h-3,yy+2),MSUC.red,10)}}
 /* the short-term loudness since the last reset (up to 10 minutes), momentary faint behind it, the target band and the integrated line */
@@ -22601,6 +22599,61 @@ function inmHeaders(){const L=trackMeters.L;if(!L)return;const now=performance.n
   if(!rv){pk.nextElementSibling&&pk.nextElementSibling.insertAdjacentHTML('afterend','<b id="mtrRmV" class="inmv">–</b><small class="inmv">RMS</small><b id="mtrCfV" class="inmv">–</b><small class="inmv">Crest</small>');rv=document.getElementById('mtrRmV')}
   const now=performance.now();if(rv&&now-(mtrPv.t9||0)>(INS.lite()?250:125)){mtrPv.t9=now;const q=play.on&&anL?INM.read(anL,anR):null,a=q&&q.rms>-200?INS.num(q.rms,1):'–',c=q&&q.rms>-200?INS.fmt(q.cf,'dB'):'–';if(rv._t!==a){rv._t=a;rv.textContent=a}const cf=document.getElementById('mtrCfV');if(cf&&cf._t!==c){cf._t=c;cf.textContent=c}}}}catch(e){}return r}}
 /* ===== end of lane E IN-M ===== */
+/* ===== lane E (task IN-L): loudness, L2 (the loudness history) =====
+   The user's pick L2 (docs/design-round-4-instruments.md): a history graph like iZotope Insight and NUGEN VisLM. Short-term loudness is the line,
+   momentary faint behind it, integrated dashed (amber, the unit colour), the target band ±1 LU shaded green; where the short-term line goes above the
+   band it turns yellow, and red more than 3 LU above (the same rule as the top-bar number: green within ±1 LU, yellow to +3, red above). LUFS on the
+   left, time marks along the bottom. One drawer, INS.lhist, for every place:
+   - the loudness pop-up (#lufsPop): the last 30 s, momentary and short-term sampled 10 times a second from LM (what the al-meter worklet already
+     sends; no new audio work), redrawn 10 times a second while it is open (half that at the Light level)
+   - the top-bar box (.lfgr): the last 30 s, short-term only, 4 times a second as before
+   - the mixer's master box (.mxme Target row): the last 30 s under the target read-out, at the mixer's slow rate
+   - the Loudness device (ND loud): its own measurement, 60 s as before, on its own scale (the target line is still dragged on it)
+   - the Meter device (ND measure): its own history, the whole measurement as before (at least 60 s, up to 10 minutes)
+   The loudness range (LRA, EBU Tech 3342) is marked as settling for the first 60 s of measurement after a reset (Tech 3341: "not yet stable"):
+   dimmed in the Loudness device, "settling" in the Meter device. (X15, the ± settling read-out, is task SC-K's; it can take this over.) */
+INS.lhist=function(g,x,y,w,h,o){/* o: lo, hi (LUFS shown), target, tol (band, ±LU), n, M(i), S(i) (oldest first; below −69 = no sound), span (samples across the width), dt (s per sample),
+     I (integrated, dashed), step and major (grid, LU), rel (grid from the target), lab (numbers), labIn (numbers inside on the left), fs, tm (time marks), tlab (their numbers), mOff (no momentary line), legend */
+  const L=INS.look(),lo=o.lo,hi=o.hi,T=o.target,tol=o.tol==null?1:o.tol,Y=v=>y+h-h*(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo),n=o.n|0,span=Math.max(2,o.span||n,n),dx=w/(span-1),xr=x+w;
+  {const a=Y(T+tol),b=Y(T-tol);g.fillStyle='rgba(62,207,142,.12)';g.fillRect(x,a,w,Math.max(1,b-a))}
+  if(o.grid!==false){const st=o.step||3,mj=o.major||6,base=o.rel===false?0:T,on=(v,m)=>Math.abs((v-base)/m-Math.round((v-base)/m))<1e-6;g.lineWidth=INS.hair(g,L.lwGrid);
+    for(const m of[0,1]){g.strokeStyle=m?L.gMaj:L.gMid;g.beginPath();for(let v=base+Math.ceil((lo-base)/st-1e-9)*st;v<=hi+1e-9;v+=st){if(on(v,mj)!==!!m)continue;const yy=INS.px(g,Y(v));g.moveTo(x,yy);g.lineTo(xr,yy)}g.stroke()}
+    if(o.lab!==false){g.font=(o.fs||7)+'px '+L.mono;g.textBaseline='middle';g.textAlign=o.labIn?'left':'right';let last=-1e9;
+      for(let v=base+Math.floor((hi-base)/mj+1e-9)*mj;v>=lo-1e-9;v-=mj){const yy=Y(v);if(yy-last<(o.gap||9)||yy<y+3||yy>y+h-3)continue;last=yy;g.fillStyle=Math.abs(v-T)<1e-6?L.unit:L.mut;g.fillText(INS.num(v,0),o.labIn?x+2:x-3,o.labIn?yy-4:yy)}}}
+  if(o.tm!==false&&o.dt){const tot=(span-1)*o.dt,sts=[5,10,15,30,60,120,300,600];let st=sts[sts.length-1];for(const s of sts)if(tot/s<=8){st=s;break}
+    g.lineWidth=INS.hair(g,L.lwLine);g.strokeStyle=L.tick;g.beginPath();for(let s=0;s<=tot+1e-9;s+=st){const xx=INS.px(g,xr-s/o.dt*dx);g.moveTo(xx,y+h);g.lineTo(xx,y+h-3)}g.stroke();
+    if(o.tlab){g.font=(o.fs||7)+'px '+L.mono;g.textBaseline=o.tlab==='in'?'bottom':'top';g.fillStyle=L.mut;let last=-1e9;for(let s=0;s<=tot+1e-9;s+=st){const xx=xr-s/o.dt*dx,t=s?INS.MIN+(s>=60?(s/60)+' min':s+' s'):'now';
+      g.textAlign=s?'center':'right';const tw=g.measureText(t).width,l0=s?xx-tw/2:xx-tw;if(xr-l0-tw<last||l0<x)continue;last=xr-l0+3;g.fillText(t,s?xx:xx-1,o.tlab==='in'?y+h-4:y+h+2)}}}
+  if(n>1){/* at most about one point per pixel: the loudest value of each pixel's samples */const k=Math.max(1,Math.floor(n/Math.max(8,w))),pts=INS._lp||(INS._lp=[]);let m=0;
+    for(let i=0;i<n;i+=k){let vm=-200,vs=-200;for(let q=i;q<Math.min(n,i+k);q++){const a=o.M?o.M(q):-200,b=o.S(q);if(a>vm)vm=a;if(b>vs)vs=b}pts[m++]=[x+w-(n-1-i)*dx,vm,vs]}
+    if(o.M&&!o.mOff){g.lineWidth=INS.hair(g,L.lwCurve);g.strokeStyle='rgba(255,255,255,.25)';g.beginPath();let on=false;for(let j=0;j<m;j++){const p=pts[j];if(p[1]<-69){on=false;continue}const yy=Y(p[1]);if(on)g.lineTo(p[0],yy);else{g.moveTo(p[0],yy);on=true}}g.stroke()}
+    g.lineWidth=o.lw||1.4;g.lineJoin='round';const cols=['#4cc9f0','#f5c84c','#ff6b6b'];for(let c=0;c<3;c++){g.strokeStyle=cols[c];g.beginPath();for(let j=1;j<m;j++){const a=pts[j-1],b=pts[j];if(a[2]<-69||b[2]<-69)continue;const cc=b[2]>T+3?2:b[2]>T+tol?1:0;if(cc!==c)continue;g.moveTo(a[0],Y(a[2]));g.lineTo(b[0],Y(b[2]))}g.stroke()}}
+  if(o.I>-69){g.save();g.setLineDash([4,3]);g.lineWidth=1;g.strokeStyle=L.unit;const yy=INS.px(g,Y(o.I));g.beginPath();g.moveTo(x,yy);g.lineTo(xr,yy);g.stroke();g.restore()}
+  if(o.legend){g.font='600 '+(o.fs||7)+'px '+L.mono;g.textBaseline='top';g.textAlign='left';let lx=x+(o.labIn?24:4);for(const[t,c] of[['S','#4cc9f0'],['M','rgba(255,255,255,.5)'],['I',L.unit],['TARGET ±'+INS.num(tol,0)+' LU','rgba(62,207,142,.9)']]){g.fillStyle=c;g.fillText(t,lx,y+3);lx+=g.measureText(t).width+7}}
+  return Y};
+/* the master's history: momentary and short-term 10 times a second from LM (the readings the al-meter worklet already sends), 60 s kept; while nothing plays
+   and nothing sounds, nothing is added (the graph stands still, as today's did); a reset (LM.hist made new and empty) clears it */
+const INL={N:600,M:new Float32Array(600),S:new Float32Array(600),i:0,n:0,ref:null,pk:0,
+  push(m,s){INL.M[INL.i]=m;INL.S[INL.i]=s;INL.i=(INL.i+1)%INL.N;if(INL.n<INL.N)INL.n++},
+  at(arr,q,cnt){/* q-th of the newest cnt samples, oldest first */return arr[(INL.i-cnt+q+INL.N*2)%INL.N]},
+  draw(g,x,y,w,h,secs,o){const cnt=Math.min(INL.n,Math.round(secs*10)),T=lmTarget()[2];return INS.lhist(g,x,y,w,h,Object.assign({lo:T-24,hi:T+9,target:T,n:cnt,span:secs*10,dt:.1,M:q=>INL.at(INL.M,q,cnt),S:q=>INL.at(INL.S,q,cnt),I:LM.I},o||{}))}};
+setInterval(()=>{try{if(LM.hist!==INL.ref){INL.ref=LM.hist;if(!LM.hist.length){INL.n=0;INL.i=0}}if(!LM.w)return;const act=(typeof play==='object'&&play.on)||(typeof LIVE!=='undefined'&&LIVE.size>0)||LM.S>-69||LM.M>-69;if(act)INL.push(LM.M,LM.S)}catch(e){}},100);
+/* the pop-up's graph (replaces its own drawing), 10 times a second while open */
+function inlPop(){const cv=document.getElementById('lmC');if(!cv||!cv.offsetParent)return;const{g,w,h}=fit(cv);g.clearRect(0,0,w,h);INL.draw(g,28,6,w-34,h-20,30,{lab:true,fs:7.5,tlab:true,legend:true})}
+setInterval(function inlTick(){/* a screen-only timer like lmPaint's, so the background freeze stops it (AOVIS) */if(!LMP||document.hidden)return;INL.pk=(INL.pk+1)%2;if(INS.lite()&&INL.pk)return;try{inlPop()}catch(e){}},100);
+/* the top-bar box's little graph: the last 30 s of short-term, the band, the colour rule */
+function inlTop(cv){const{g,w,h}=fit(cv),T=lmTarget()[2];g.clearRect(0,0,w,h);INL.draw(g,0,1,w,h-2,30,{lo:T-18,hi:T+6,grid:false,tm:false,mOff:true,I:-90,lw:1.3})}
+/* the mixer's master box: the same little graph under the target read-out (its bar is replaced by it) */
+function inlMx(){const w=document.getElementById('mixWin');if(!w||w.hidden)return;const tg=w.querySelector('.mxme .mxtg');if(!tg)return;let cv=tg.querySelector('canvas.inlh');
+  if(!cv){tg.insertAdjacentHTML('beforeend','<canvas class="inlh" aria-hidden="true"></canvas>');cv=tg.querySelector('canvas.inlh')}if(!cv.offsetParent)return;const{g,w:W,h}=fit(cv),T=lmTarget()[2];g.clearRect(0,0,W,h);INL.draw(g,0,1,W,h-2,30,{lo:T-18,hi:T+6,grid:false,tm:false,mOff:true,I:-90,lw:1.2})}
+{const _mxL=mxsMaster;mxsMaster=function(){const r=_mxL.apply(this,arguments);try{inlMx()}catch(e){}return r}}
+/* the Meter device's history: the same drawer on its own data (the whole measurement, as before) */
+msuHist=function(g,x,y,w,h,X,T){const lo=Math.min(-40,T[1]-20),hi=0,n=X.hn|0,k0=(X.hi-n+6000)%6000;g.fillStyle='rgba(255,255,255,.025)';g.fillRect(x,y,w,h);
+  const Yf=INS.lhist(g,x,y,w,h,{lo,hi,target:T[1],tol:T[4],n,span:Math.max(600,n),dt:.1,M:q=>X.hM[(k0+q)%6000],S:q=>X.hS[(k0+q)%6000],I:X.I,step:10,major:10,rel:false,labIn:true,fs:8,tlab:'in'});
+  g.fillStyle='rgba(62,207,142,.8)';g.fillRect(x,Yf(T[1]),w,1);txt(g,'target '+T[1],x+w-4,Yf(T[1])-3,'#3ecf8e',8,'right')};
+/* the Loudness device: LRA settling for the first 60 s of sound after a reset */
+function inlSettle(H){if(!H)return 0;let c=0;for(let i=0;i<H.length;i++)if(H[i].S>-70)c++;return c}
+/* ===== end of lane E IN-L ===== */
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -24087,10 +24140,9 @@ ND('loud',{name:'Loudness',vw:560,grp:['Analysis','#4cc9f0'],desc:'LUFS (momenta
  draw:(g,w,h,f,X)=>{const p=f.p;vbg(g,w,h);const m=X&&X.m&&X.m.M!==undefined?X.m:{M:-90,S:-90,I:-70,LRA:0,tpL:-90,tpR:-90,corr:0},LX=0,LW=138,GX=LW+8,GW=w-LW-8-172,RX=w-160,ty=db=>10+(1-clamp((db+40)/40,0,1))*(h-26);
   const col=(v)=>v>p.target+1?'#ff6b6b':v>p.target-2?'#3ecf8e':'#4cc9f0';
   const big=(lab,v,y,c,sz)=>{txt(g,lab,10,y-sz-2,'rgba(255,255,255,.5)',9);g.font='600 '+sz+'px Inter,system-ui,sans-serif';g.fillStyle=c;g.fillText(v>-80?v.toFixed(1):'−∞',10,y+2);txt(g,'LUFS',10+g.measureText(v>-80?v.toFixed(1):'−∞').width+4,y+2,'rgba(255,255,255,.4)',9)};
-  const r0=h*.24,r1=h*.5,r2=h*.76;big('MOMENTARY',m.M,r0+12,col(m.M),20);big('SHORT-TERM',m.S,r1+12,col(m.S),20);big('INTEGRATED',m.I,r2+12,col(m.I),20);txt(g,'LRA '+m.LRA.toFixed(1)+' LU',10,h-8,'#b583ff',10);txt(g,'TP max '+(X?X.tpMax:-90).toFixed(1),78,h-8,(X&&X.tpMax>p.tpmax)?'#ff4d6d':'rgba(255,255,255,.5)',10);
-  g.save();g.beginPath();g.rect(GX,0,GW,h);g.clip();for(const db of[-40,-30,-20,-10,0]){lineH(g,ty(db),w,'rgba(255,255,255,.06)');txt(g,db+'',GX+2,ty(db)-2,'rgba(255,255,255,.28)',8)}
-  const H=X?X.H:[],n=H.length;if(n>1){const dx=GW/600,x0=GX+GW-n*dx;g.beginPath();H.forEach((q,i)=>{const x=x0+i*dx,y=ty(q.M);i?g.lineTo(x,y):g.moveTo(x,y)});g.strokeStyle='rgba(76,201,240,.65)';g.lineWidth=1;g.stroke();g.beginPath();H.forEach((q,i)=>{const x=x0+i*dx,y=ty(q.S);i?g.lineTo(x,y):g.moveTo(x,y)});glow(g,'#fff',5);g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.shadowBlur=0}
-  lineH(g,ty(m.I),w,'rgba(255,154,60,.7)',[2,3]);g.restore();const tyT=ty(p.target);lineH(g,tyT,GX+GW,'rgba(62,207,142,.85)',[5,4]);txt(g,'target '+p.target.toFixed(1),GX+GW-4,tyT-4,'#3ecf8e',9,'right');
+  const r0=h*.24,r1=h*.5,r2=h*.76;big('MOMENTARY',m.M,r0+12,col(m.M),20);big('SHORT-TERM',m.S,r1+12,col(m.S),20);big('INTEGRATED',m.I,r2+12,col(m.I),20);{const stl=inlSettle(X&&X.H)<600;txt(g,'LRA '+m.LRA.toFixed(1)+' LU',10,h-8,stl?'rgba(181,131,255,.45)':'#b583ff',10)}/* IN-L: dim while the range settles (60 s, EBU Tech 3341) */txt(g,'TP max '+(X?X.tpMax:-90).toFixed(1),78,h-8,(X&&X.tpMax>p.tpmax)?'#ff4d6d':'rgba(255,255,255,.5)',10);
+  g.save();g.beginPath();g.rect(GX,0,GW,h);g.clip();/* IN-L: L2 on the device's own scale (-40 to 0 LUFS, which the dragged target line uses) */{const H=X?X.H:[];INS.lhist(g,GX,10,GW,h-26,{lo:-40,hi:0,target:p.target,n:H.length,span:600,dt:.1,M:i=>H[i].M,S:i=>H[i].S,I:m.I,step:10,major:10,rel:false,labIn:true,fs:8,tlab:'in',legend:false})}
+  g.restore();const tyT=ty(p.target);lineH(g,tyT,GX+GW,'rgba(62,207,142,.85)',[5,4]);txt(g,'target '+p.target.toFixed(1),GX+GW-4,tyT-4,'#3ecf8e',9,'right');
   /* goniometer */
   const cx=RX+46,cy=Math.min(62,h*.36),R=Math.min(44,h*.28);g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.arc(cx,cy,R,0,7);g.stroke();lineV(g,cx,0,'transparent');g.beginPath();g.moveTo(cx,cy-R);g.lineTo(cx,cy+R);g.moveTo(cx-R,cy);g.lineTo(cx+R,cy);g.stroke();txt(g,'L',cx-R+2,cy-R+9,'rgba(255,255,255,.35)',8);txt(g,'R',cx+R-9,cy-R+9,'rgba(255,255,255,.35)',8);txt(g,'M',cx-3,cy-R-2,'rgba(255,255,255,.35)',8);
   if(X)X.trail.forEach((pts,ti)=>{g.fillStyle=`rgba(76,201,240,${.2+ti*.15})`;for(let i=0;i<pts.length;i+=2){const l=pts[i],r=pts[i+1],xx=cx+(r-l)*R*.7,yy=cy-(l+r)*R*.7;g.fillRect(xx-1,yy-1,2,2)}});

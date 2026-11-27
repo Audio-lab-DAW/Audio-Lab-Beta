@@ -4940,3 +4940,36 @@ Fired by the scheduler with a note from the scheduling chat (16:27 UTC, read as 
 - 40 ms is the default because it is the smallest of the tested targets that held through the worst gaps measured at the feeder (25 ms); lower latency is for the settings page to offer from what `worstGapMs` and `fillMinMs` show on the user's Mac, and for N3 (native playback has no ring).
 - The acquisition phase (30 s, three times faster) is chosen so that a sender 1,000 ppm off never sinks the fill below the margin; its extra wobble (about 3 times, still under 0.1 cent) lasts only those 30 s.
 - Real crystals are usually under 100 ppm; ±1,000 ppm is tested as the far case.
+
+## 27 November 2026, v0.259: task IN-L, loudness: the loudness history (lane E, instruments)
+
+Step IN-L of `docs/design-round-4-instruments.md`, the user's pick **L2** (the loudness history, which replaces L1). Edit script `tools/design-lab/in/in_l.py` with `in_l_block.js` (every anchor asserted unique), test `tools/ui-tests/taskIN_L.py` (24 checks, all pass). Written on v0.257, rebased onto v0.258 by re-running the edit script on the fresh file.
+
+### Built (block "lane E (task IN-L)" before `askChoice`)
+- **One history drawer, `INS.lhist`**, as on the pick page (iZotope Insight and NUGEN VisLM style): the short-term loudness is the line, the momentary loudness a faint grey line behind it, the integrated loudness a dashed line in the amber unit colour, the target band (±1 LU, or the Meter device's own tolerance) shaded green. **The colour rule:** the line is cyan inside or under the band, yellow above it, red more than 3 LU above it (the same as the top-bar number: green within ±1 LU, yellow to +3, red above); red always sits high on the scale, so it never carries the meaning alone. LUFS on the left (the target's number in amber), time marks along the bottom ("now", −5 s, −10 s…; coarser for longer spans, with a real minus sign), hairline grid (the G3 levels from `LOOK`), at most about one point per pixel (the loudest sample of each pixel).
+- **Loudness pop-up** (click the LUFS box in the top bar): the last 30 s on the L2 scale (target −24 to +9 LU), with the legend. The master's momentary and short-term readings are sampled 10 times a second from `LM` (what the al-meter worklet already sends; nothing new in the audio) into `INL` (60 s kept); nothing is added while nothing plays or sounds, as before; Reset clears it. Redrawn 10 times a second while open (half at the Light level), 0.36 ms a redraw; the timer is a screen timer, so the background freeze stops it.
+- **Top-bar box** (the little graph beside the LUFS number): the last 30 s of short-term with the band and the colour rule per segment (it was one colour for the whole line, set by the current value); 0.05 ms, 4 times a second as before.
+- **Mixer master box**: a 30 s graph under the Target read-out replaces its bar (the number, the colours and the click that opens the target menu stay).
+- **Loudness device** (`ND('loud')`): its own measurement, 60 s and its own −40 to 0 LUFS scale as before (the target and true-peak lines are still dragged on it), drawn by the same drawer; the LRA read-out is dimmed while the range settles.
+- **Meter device** (`ND('measure')`): its history (`msuHist`) goes through the drawer, still the whole measurement (at least 60 s, up to 10 minutes); "Range (LRA)" reads "settling" in grey for the first 60 s.
+- **LRA settling:** EBU Tech 3341 says the loudness range is "not yet stable" for 60 s after a reset; both devices now say so. X15 (the ± settling read-out) belongs to task SC-K (lane A) and can take this over.
+- **Overlaps named:** NI-3 and NI-4 (lane D, idea I1 frequency map) keep their own per-beat loudness (BS.1770) and their own view; MD1 is not out yet; the true peak in the mixer master box is unchanged.
+
+### Tested (`tools/ui-tests/taskIN_L.py`, at 2194x1139)
+- Drawer with a made-up history (target −14): −20 cyan, −14.5 cyan, −12 yellow, −9 red; momentary faint grey; the band green and nothing outside it; integrated dashed amber; time marks every 5 s for 30 s, coarser for 60 s, 4 min and 10 min.
+- Live, a 1 kHz sine at −18 dBFS in both channels: 51 samples in 5 s after a reset (10 a second); the newest equals the loudness reading (−17.97 LUFS). Pop-up against Spotify (−14): under the band, cyan; against EBU R128 (−23): 5 LU over, red. Redrawn 28 times in 2 s (10 a second plus `lmPaint`'s 4), 18 at the Light level; no redraws while closed or in the background freeze (`aoLevel(1)`). Reset clears the history. Top-bar graph: band and cyan line. Mixer master box: the graph in place of the bar, and the click still opens "Loudness target". A step from −30 to −18 LUFS in the Loudness and Meter devices draws through the drawer; both count LRA settling. No console errors, no audio nodes, no em dashes.
+- Screenshots looked at (dark and the Light level): the pop-up (Spotify and EBU), the top-bar box, the two devices.
+- On v0.257: `taskIN_M.py` 26 of 26, `taskIN_A.py` 37 of 37. After the rebase onto v0.258: `taskIN_L.py` 24 of 24, `taskIN_M.py` 26 of 26.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`, measured on this file): Kick −19.05560 dB (fb577dd5202b), Bass −35.48685 dB (392ec52590c7) with the master at −10 dB; at 0 dB Kick −9.75669, Bass −25.48699 (09e0415bec5e), as in the newest entries.
+- **Frame time** (`tools/ui-tests/frametime.py`, 2194x1139 at 1.75x, Fractals, software renderer, one 4 s window each, three runs alternating with the untouched v0.257; app ms per frame, main-thread ms in brackets):
+
+| Scene | v0.257 untouched | with IN-L |
+|---|---|---|
+| idle | 0.68, 0.59, 0.67 (10.5, 8.7, 10.2) | 0.58, 1.13, 0.65 (9.3, 15.9, 9.1) |
+| playing, mixer closed | 2.63, 3.46, 4.88 (23.0, 29.5, 38.1) | 3.31, 4.68, 4.12 (29.1, 34.9, 32.1) |
+| playing, mixer open | 6.94, 14.05, 9.46 (66.2, 126.5, 76.2) | 8.04, 8.82, 7.70 (60.2, 78.0, 68.8) |
+
+  The app's frame callback timed directly (`tools/design-lab/in/frame0_cost.py`, playing with the mixer open, three loads each, alternating): untouched 18.99, 14.02, 15.18, 20.35, 17.99, 16.22 ms; with IN-L 19.00, 12.87, 16.15, 14.30, 16.02, 15.10 ms. Not worse, within the noise. The only new steady work is the 10-a-second sampling (a few numbers) and, while the pop-up is open, 0.36 ms ten times a second.
+
+### Left
+IN-S next: the spectrum (S2, the analyzer front panel) in `ND('spec')`, the overlay (SPO), the Visualizer spectrum and the mixer's spec view, one drawer; the analysers' sizes move to the IN-A cache (and the track taps can grow from 256 samples, see IN-M). Then IN-E (E3), IN-G (G1 G3 G4), IN-O (O0 kept, O1, O4), IN-V (V1, viridis), IN-C and IN-D.
