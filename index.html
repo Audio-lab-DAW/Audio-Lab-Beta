@@ -6622,7 +6622,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.283',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.284',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -24062,11 +24062,11 @@ function inoCorr(g,bx,yb,bw2,corr,fill){const L=INS.look(),lw=INS.hair(g,1),c=Ma
   g.save();g.beginPath();g.rect(bx,yb,bw2/2,6);g.clip();g.strokeStyle=INSO.HAT;g.lineWidth=lw;g.beginPath();for(let k=-8;k<bw2/2+8;k+=3){g.moveTo(bx+k,yb+6);g.lineTo(bx+k+6,yb)}g.stroke();g.restore();
   const cpos=bx+(c+1)/2*bw2;g.fillStyle=fill;g.fillRect(Math.min(cpos,bx+bw2/2),yb,Math.abs(cpos-(bx+bw2/2)),6);g.fillStyle='#fff';g.fillRect(cpos-1,yb-1,2,8);g.fillStyle='rgba(255,255,255,.25)';g.fillRect(bx+bw2/2,yb,1,6);
   g.strokeStyle=L.tick;g.lineWidth=lw;g.beginPath();const st=bw2>=60?20:4;for(let i=0;i<=st;i++){const x=INS.px(g,bx+bw2*i/st),maj=st===4||i%5===0;g.moveTo(x,yb+7);g.lineTo(x,yb+(maj?10:8.5))}g.stroke();
-  g.font='6.5px '+L.mono;g.textAlign='right';g.textBaseline='alphabetic';const ang=Math.acos(c)*180/Math.PI,s=INS.num(c,2,true)+(bw2>=56?'  '+Math.round(ang)+'°':'');g.fillStyle=c<0?'#ff8a8a':L.ink;g.fillText(s,bx+bw2,yb-5);g.restore()}
+  g.font='6.5px '+L.mono;g.textAlign='right';g.textBaseline='alphabetic';const ang=Math.acos(Math.round(c*100)/100)*180/Math.PI,/* IN-O fix: the angle of the value as shown */s=INS.num(c,2,true)+(bw2>=56?'  '+Math.round(ang)+'°':'');g.fillStyle=c<0?'#ff8a8a':L.ink;g.fillText(s,bx+bw2,yb-5);g.restore()}
 /* O1 on the balance bar: ticks at L, the quarters, C and R */
 function inoBalTicks(g,bx,yb2,bw2){const L=INS.look();g.save();g.strokeStyle=L.tick;g.lineWidth=INS.hair(g,1);g.beginPath();for(let i=0;i<=4;i++){const x=INS.px(g,bx+bw2*i/4);g.moveTo(x,yb2+7);g.lineTo(x,yb2+(i%2?8.5:10))}g.stroke();g.restore()}
 /* the master box's Stereo read-out: a real minus, the phase angle */
-function inoMaster(me,v){const b=me.querySelector('b');if(!b)return;if(v==null){b.textContent='–';return}const t=INS.num(v,2,true)+' '+Math.round(Math.acos(Math.max(-1,Math.min(1,v)))*180/Math.PI)+'°';if(b.textContent!==t)b.textContent=t}
+function inoMaster(me,v){const b=me.querySelector('b');if(!b)return;if(v==null){b.textContent='–';return}const t=INS.num(v,2,true)+' '+Math.round(Math.acos(Math.max(-1,Math.min(1,Math.round(v*100)/100)))*180/Math.PI)+'°';if(b.textContent!==t)b.textContent=t}
 /* O4 in the stereo field's right-click menu: the picture */
 {const o=mxMenuItems;mxMenuItems=function(v){const it=o.apply(this,arguments);if(v!=='stereo')return it;const p=!!mxOpt('stereo','pol');
   it.push('-',{head:'Picture'},{label:'Stereo field',sub:'mono is an upright line, left and right on the diagonals',check:!p,act:()=>mxSet('stereo','pol',false)},{label:'Polar view',sub:'up is mono, 45° is only left or only right, outside that is out of phase; rings every 12 dB',check:p,act:()=>mxSet('stereo','pol',true)});return it}}

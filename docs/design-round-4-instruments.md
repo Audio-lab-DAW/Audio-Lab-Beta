@@ -440,7 +440,7 @@ Each task:
    **Done in v0.276** (task IN-G, G1 G3 G4): `INS.grh` (the one gain reduction history drawer) in the Compressor, Limiter, Gate and Ducker; the Compressor's curve as Chromium computes it (`ingCK`) with the live point, a 30-point trail and the amber caliper; `ingBar` (G4 bars on the studio scale) in OTT, Multiband and the De-Esser. See the backlog log.
 7. **IN-O, stereo and scope (O).** Marks and afterglow on the kept stereo displays: mixer strips (strips off screen keep only history, as today) and the master. The correlation, balance and width scales. The scope in the Visualizer. The polar view as a menu choice.
 
-   **Done in v0.280** (task IN-O, O0 O1 O4): today's stereo field kept with `inoMarks` (the O1 marks), `inoLayer` (the afterglow), the newest sample amber, `inoCorr` (the phase bar's scale, value and angle); the master box's Stereo value and bar; the overlay's stereo module with the marks; the polar view (`inoPolBg`, `inoPol`) as a Picture choice in the stereo view's menu. The track taps stay at 256. See the backlog log.
+   **Done in v0.280** (task IN-O, O0 O1 O4): today's stereo field kept with `inoMarks` (the O1 marks), `inoLayer` (the afterglow), the newest sample amber, `inoCorr` (the phase bar's scale, value and angle); the master box's Stereo value and bar; the overlay's stereo module with the marks; the polar view (`inoPolBg`, `inoPol`) as a Picture choice in the stereo view's menu. The track taps stay at 256. See the backlog log. v0.283: the phase angle from the value as shown (`in_o_fix1.py`).
 8. **IN-V, Visualizer (V).** The layout, plus the right-click menu entries (colour map, range, tilt, hold, speed).
 9. **IN-C and IN-D, CPU graph and device previews (C, D).** The smallest; they can go with IN-M or IN-G.
 

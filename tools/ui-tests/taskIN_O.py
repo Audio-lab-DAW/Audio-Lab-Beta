@@ -61,6 +61,12 @@ CB = r"""(v=>{const t=[];const c=document.createElement('canvas');c.width=200;c.
 for v, s in ((1, '+1.00  0°'), (-1, '−1.00  180°'), (0, '0.00  90°'), (.5, '+0.50  60°')):
     T, font = json.loads(R(CB + "(%r)" % v))
     ck('phase bar at %+g reads "%s" (value with a real minus, the phase angle), the canvas font put back' % (v, s), s in T and '8px' in font, (T, font))
+# the angle of the value as shown (in_o_fix1.py): acos is steep near the ends, so -0.996 must read -1.00 with 180 degrees, not 175
+for v, s in ((-.996, '−1.00  180°'), (.996, '+1.00  0°')):
+    T, font = json.loads(R(CB + "(%r)" % v))
+    ck('phase bar at %+g reads "%s" (the angle of the value shown)' % (v, s), s in T, T)
+MB = json.loads(R(r"(()=>{const me=document.createElement('div');me.innerHTML='<b></b>';const o=[];for(const v of[-.996,.996,.004])" r"{inoMaster(me,v);o.push(me.querySelector('b').textContent)}return JSON.stringify(o)})()"))
+ck("master box: −0.996 reads −1.00 180°, +0.996 reads +1.00 0°, 0.004 reads 0.00 90°", MB == ['−1.00 180°', '+1.00 0°', '0.00 90°'], MB)
 
 # 4. afterglow by time
 AG = R(r"""(()=>{const c=document.createElement('canvas');c.width=c.height=100;const g=c.getContext('2d');const key={};const P=performance.now.bind(performance);let t=P();performance.now=()=>t;const a=[];
