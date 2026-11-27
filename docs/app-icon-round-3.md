@@ -93,3 +93,11 @@ Regenerate: `node render3.js && python3 shrink.py && python3 build_page.py`. Sta
 3. **Picker**: add every pick to `desktop/icon-assets/picker/` (512 px plus a 128 px thumb) and to `icons.json` as a group "Dipole field" with plain names ("Dipole field, Orbit night"); mark the default.
 4. Run the "Mac icon proof" job on macOS 26 with the new tile colour as the expected value for Default and Dark (P8N's for Dark when P8 is chosen), and `tools/ui-tests/taskAH_electron.js`.
 5. Raise the app version, write the update note ("New app icon ... log out and in once if the old one still shows"), and run the desktop build. The animated icon stays a separate later task.
+
+## The user's picks (27 November 2026, 19:25 Brussels)
+
+In the user's words: "For the big icon round 3, let's go with J3 actually. I like that it's a little bit transparent, like you can see the rings in full and sense its energy. Maybe it makes sense that it's a little bit transparent. So that's cool. Let's have J4 as an extra option in the options. Same for J6. And have J10 and J8 also in the options. And then for the main logo, I think the 32 pixel one should be the zoomed in tilted one. And should be optimized a little bit more for the smaller, because the rings look way too fat on the 32 pixel."
+
+- **Default app icon: J3** (field with the thinner, slightly transparent rings), in Orbit night (P2) as the user's palette pick; Dark stays navy/blue.
+- **Extra options in the in-app icon picker:** J4, J6, J8 and J10 (in P2, and in P8 Chart paper where the round marked that palette as strong: J8 and J10).
+- **Small sizes (32 px and below):** use the zoomed-in, tilted crop (like W7) instead of the whole mark, redrawn for small sizes with thinner rings (the rings are far too fat at 32 px today).
