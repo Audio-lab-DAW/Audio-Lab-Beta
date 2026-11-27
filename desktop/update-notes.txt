@@ -1,1 +1,1 @@
-Export and the piano roll now remember your choices: format, sample rate, bit depth, dither, tail and the other export options come back next time, each project keeps its own export file name, the piano roll keeps its tool, snap, chord, ghost and lane, and each project keeps its own scale and root.
+Behind the scenes for "Why is this clipping?": AudioLab now notes where the mix goes over (also when the safety limiter catches it) and can measure which tracks made each peak. The card that shows it comes next.

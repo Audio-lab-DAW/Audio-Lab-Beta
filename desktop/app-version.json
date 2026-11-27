@@ -1,7 +1,7 @@
 {
-  "version": "0.231",
-  "sha256": "2958648fc84ce306326a895c74f813b812fce4300c21c44815ab7127f45cfb90",
-  "size": 5970494,
+  "version": "0.232",
+  "sha256": "89b975ac0de49ad72d9ccf034b9931b33d88aee380c7b754453ff462591963af",
+  "size": 5979746,
   "minShell": "0.147.0",
-  "notes": "Export and the piano roll now remember your choices: format, sample rate, bit depth, dither, tail and the other export options come back next time, each project keeps its own export file name, the piano roll keeps its tool, snap, chord, ghost and lane, and each project keeps its own scale and root."
+  "notes": "Behind the scenes for \"Why is this clipping?\": AudioLab now notes where the mix goes over (also when the safety limiter catches it) and can measure which tracks made each peak. The card that shows it comes next."
 }
