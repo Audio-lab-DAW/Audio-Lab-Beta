@@ -394,3 +394,14 @@ Every SQ task keeps the release-gate rules in `CLAUDE.md`, and keeps the Fractal
   - `docs/review-native.md` (D2 one random stream per device, D4 the block grid)
   - `docs/research-native-mac.md` (denormals, FMA)
   - `native/engine/mix/mix_graph.h` (float mixing for the bit match)
+
+## The user's picks (27 November 2026, 21:48 Brussels)
+
+`AE1 picks: Q0aa Q0ba Q1a Q2a Q3a Q4a Q5a Q6a Q7a Q8a Q9b Q10a Q11a Q12a Q13a Q14a Q15a Q16b` (the last letter: a = now, b = later)
+
+- **Now:** Q0a a Quality switch per device (Classic = today's bits, Clean) AND Q0b one project-wide quality as well (both: the project setting is the default and "Use Clean everywhere", each device can still differ); Q1 table-BLEP oscillators and BLAMP triangle in al-poly; Q2 Acid at 2x with ADAA drive; Q3 Kick, pads and Growl at 4x; Q4 Drive ADAA and the curve beyond ±1; Q5 the remaining shapers oversampled; Q6 ZDF SVF in al-poly; Q7 Pro EQ analog-matched top end; Q8 Pro EQ Butterworth slopes or a label; Q10 DC blocker; Q11 resample buffers once with a sinc; Q12 sinc read for pitched samples; Q13 true-peak limiter style; Q14 the export safety limiter at -1 dBTP; Q15 the export report.
+- **Later:** Q9 64-bit summing (native engine), Q16 shaped dither for 16-bit.
+
+Who builds it: a new lane N, task **SQ** (sound quality infrastructure, prefix `sq`): SQ1 the Quality switch per device and per project (with Q10 as its first Clean feature); SQ3 resample once (Q11) and SQ3b the pitched-sample read (Q12); SQ4 the true-peak limiter style (Q13), the export safety limiter (Q14) and the export report (Q15). The device DSP items go to lane L (SND), which owns those worklets and already improves the same devices: Q1, Q2 and Q6 (al-poly and Acid, with SND-7 and SND-12), Q3 (Kick, pads, Growl, with SND-8 and the Growl fold-in), Q4 and Q5 (Drive and shapers, with SND-16), Q7 and Q8 (Pro EQ, with SND-4). SND's "v2 modes" ARE the Clean quality: one switch, defined by SQ1. Q9 goes to task NB, Q16 waits.
+
+Side finding to fix first: device parameter automation (`S.pauto`) seems not to be rendered in exports. Lane K (MX, owner of renderMix) verifies it with a render and fixes it so an export equals what plays.

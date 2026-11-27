@@ -140,3 +140,7 @@ The idea (the user's, written in `docs/research-mixing.md`): while playing a tra
 
 ## What is not lane K's
 X8 bounce with a tap point (lane C, through `MX_HOOKS.tap`), X9, X10, X11 routing map (lane C, through `MX_HOOKS.links`, `canLink`, `pathLat`), X14, X15, X20, X21, X22, X26 (lane C); X16, X18, X23, X27 (lane D); X17 band listen, X19's meter, X25 (lane E, with `MX_HOOKS.bandFilter`); X5 for VST3 in the native engine (task NB).
+
+## Added 27 Nov 2026, 21:48 Brussels: a bug to fix first (from the sound-quality research AE1)
+
+`docs/research-engine-sound.md` (side findings) reports that device parameter automation (`S.pauto`, applied by `paApply` from the main thread every 33 ms while playing) seems not to be rendered by `renderMix` / `renderMixChunked`: an export would differ from what plays. Verify with a render (a filter sweep automated on a device, export against a live recording); if it holds, render it in the export at sample accuracy (and say how close live playback is). Do it in your next step before or together with MX-1's remainder. Lane N (SQ) changes only the export's post-processing (`postProc`: the safety limiter, dither, the report), not the graph.
