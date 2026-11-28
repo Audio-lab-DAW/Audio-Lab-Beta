@@ -734,4 +734,8 @@ Unconfirmed or guessed: Serum 2's skin format, a track-colour intensity control 
 
 ## The user's picks
 
-(pending)
+28 November 2026, 15:05 Brussels: `Theme picks: A B C D E G H J | default: A | icons follow theme: yes`, then: "Let's rework these themes that I gave you in Fable and then come back to me."
+
+- Kept: **A** Orbit night (the default), **B** Chart paper, **C** Space Race, **D** Chalkboard, **E** Blueprint, **G** Cutaway nucleus, **H** Rutherford scattering, **J** Patent drawing. Dropped: B2, F, I, K, L, M, N.
+- Icons follow theme: yes (TM3).
+- Next: task **TH2** (on Fable) reworks these eight into a second, higher-quality pick page; the user picks again, then the build lane (task TM, its own new lane, prefix `tm`; lane R is now SG2's) is created. Section 7's lane letter "R" is replaced by the next free letter.
