@@ -128,6 +128,18 @@ SCENES["clipbus"] = (512, 0.9, [("comp", None, CP_MASTER), ("clip", None, CL_FRX
                       T("b", "st_b", vol=0.6, pan=-0.2, fx=[("eq", None, EQ_BELLS)]),
                       T("r", kind="return", vol=0.7, fx=[("clip", None, CL_NONE)])])
 SCENES["clipbus128"] = (128,) + SCENES["clipbus"][1:]
+# task NB-N3h: the Timeless delay as Fractals has it (the Lead: EQ, then the ping-pong delay at 1/8 dotted), on a mono
+# source (stereo out, its right input silent), on a group with wow, a send into a return; the master's compressor and
+# clipper
+TD_FRX = {"time": 0.375, "feedback": 33, "mix": 22, "lowcut": 400, "highcut": 4000, "drive": 0, "wow": 0, "rate": 0.6, "width": 100, "sync": "1/8 dotted", "ping": True}
+TD_STRAIGHT = dict(TD_FRX, ping=False, feedback=55, width=40, sync="free", time=0.2)
+TD_WOW = dict(TD_FRX, wow=70, rate=2.5, drive=40, mix=35)
+SCENES["tdelaybus"] = (512, 0.9, [("comp", None, CP_MASTER), ("clip", None, CL_FRX)],
+                       [T("ld", "st_a", vol=0.7, pan=-0.2, fx=[("eq", None, EQ_BELLS), ("tdelay", None, TD_FRX)], sends={"r": 0.3}),
+                        T("m", "mono_a", vol=0.8, pan=0.3, fx=[("tdelay", None, TD_STRAIGHT)]),
+                        T("g", kind="group", vol=0.9, fx=[("tdelay", None, TD_WOW)]), T("b", "st_b", vol=0.6, grp="g"),
+                        T("r", kind="return", vol=0.6, fx=[("tdelay", None, dict(TD_FRX, mix=100, ping=False))])])
+SCENES["tdelaybus128"] = (128,) + SCENES["tdelaybus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),

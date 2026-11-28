@@ -427,6 +427,48 @@
    "peak": 1.203040599822998,
    "webRendersTwiceSame": true,
    "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "tdelaybus": {
+   "quantum": 512,
+   "built": [
+    "ld",
+    "m",
+    "g",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "ld": 0,
+    "m": 0,
+    "g": 0,
+    "b": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.0664992332458496,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "tdelaybus128": {
+   "quantum": 128,
+   "built": [
+    "ld",
+    "m",
+    "g",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "ld": 0,
+    "m": 0,
+    "g": 0,
+    "b": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.0661883354187012,
+   "webRendersTwiceSame": true,
+   "webSamplesDifferingBetweenTwoRenders": 0
   }
  }
 }

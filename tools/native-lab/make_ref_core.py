@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side", "clip", "drive"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side", "clip", "drive", "tdelay"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -110,6 +110,18 @@ EXTRA["clip"] = {
 }
 EXTRA["drive"] = {"x-zero": {"drive": 0, "mix": 100}, "x-full": {"drive": 100, "mix": 100}, "x-half-mix": {"drive": 60, "mix": 50},
                   "x-dry": {"drive": 80, "mix": 0}, "x-odd": {"drive": 33.3, "mix": 77.7}}
+# task NB-N3h: the Timeless delay (DelayNodes in a feedback loop, the delay time gliding in by setTargetAtTime, a wow
+# LFO on it): Fractals' five (ping-pong, 1/8 dotted, the song's tempo), free times, straight feedback, wow, drive, width
+def TD(**k):
+    d = dict(time=0.375, feedback=33, mix=22, lowcut=400, highcut=4000, drive=0, wow=0, rate=0.6, width=100, sync="1/8 dotted", ping=True); d.update(k); return d
+EXTRA["tdelay"] = {
+    "frx-lead": TD(), "frx-lead-high": TD(mix=30), "frx-hook": TD(mix=18), "frx-arp": TD(mix=20),
+    "x-free-straight": TD(sync="free", time=0.25, ping=False, feedback=60, width=40),
+    "x-wow": TD(sync="free", time=0.3, wow=80, rate=3.5, width=70), "x-wow-ping": TD(wow=45, rate=0.6, drive=40),
+    "x-drive-hot": TD(drive=100, feedback=90, ping=False, lowcut=20, highcut=20000), "x-short": TD(sync="free", time=0.02, feedback=70, ping=False),
+    "x-long": TD(sync="free", time=2, feedback=50), "x-16th": TD(sync="1/16", width=0), "x-quarter-triplet": TD(sync="1/4 triplet", mix=100),
+    "x-dry": TD(mix=0), "x-max-fb": TD(feedback=98, ping=False, drive=60),
+}
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
@@ -126,6 +138,9 @@ CHAINS = {
     "chain-side-mix": [("chorus", None), ("side", "x-8th"), ("limit", "trans")],
     # task NB-N3g: Fractals' master (compressor, then the clipper), and the shapers between worklet devices and an EQ
     "chain-frx-master": [("comp", "frx-master"), ("clip", "frx-master")],
+    # task NB-N3h: Fractals' Lead (EQ, then the delay) and the delay between worklet devices
+    "chain-tdelay-lead": [("eq", "frx01"), ("tdelay", "frx-lead")],
+    "chain-tdelay-mix": [("chorus", None), ("tdelay", "x-wow"), ("limit", "trans")],
     "chain-shape": [("drive", "x-half-mix"), ("eq", "x-bells"), ("clip", "x-2x"), ("limit", "loud")],
 }
 

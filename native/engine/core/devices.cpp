@@ -6,6 +6,7 @@
 #include "dev_modulation.h"
 #include "dev_side.h"
 #include "dev_shape.h"
+#include "dev_tdelay.h"
 
 namespace al {
 template <class T> static ProcessorFactory mk() { return [](RenderContext& c) { return std::unique_ptr<Processor>(new T(c)); }; }
@@ -33,5 +34,7 @@ void registerCoreDevices() {
     // task NB-N3g: Chromium's WaveShaperNode (oversampled, with its FFT) and DelayNode
     deviceRegistry()["clip"] = mk<shape::Clip>();
     deviceRegistry()["drive"] = mk<shape::Drive>();
+    // task NB-N3h: the Timeless delay (a DelayNode feedback loop run quantum by quantum as Chromium pulls it)
+    deviceRegistry()["tdelay"] = mk<tdl::TDelay>();
 }
 }  // namespace al

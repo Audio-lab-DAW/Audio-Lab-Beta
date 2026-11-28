@@ -47,10 +47,13 @@ struct GridDevice : Processor {
     unsigned sub;
     int mode = 0;   // 0 not decided, 1 on the grid, 2 holding a sub-block
     explicit GridDevice(RenderContext& c) : ctx(c), sub(cr::subBlockFrames((unsigned)std::max(1, c.quantum))) {}
+    // a device whose graph must run on whole render quanta (a feedback loop: task NB-N3h)
+    GridDevice(RenderContext& c, unsigned block) : ctx(c), sub(std::max(1u, block)) {}
     bool worklet() const override { return false; }
     // one sub-block (sub frames, starting at grid frame `frame`), two channels, in place
     virtual void block(float* L, float* R, double frame) = 0;
     virtual void ensure() = 0;
+    virtual bool keepsMono() const { return true; }
     int addedLatency() const override { return mode == 2 ? (int)sub : 0; }
     int maxAddedLatency() const override { return (int)sub; }
 
@@ -93,7 +96,7 @@ struct GridDevice : Processor {
                 if (outPos_ >= sub) { outL_.erase(outL_.begin(), outL_.begin() + outPos_); outR_.erase(outR_.begin(), outR_.begin() + outPos_); outPos_ = 0; }
             }
         }
-        monoOut = mono;   // both channels were the same; a mono input stays mono, as in the browser
+        monoOut = mono && keepsMono();   // both channels were the same; a mono input stays mono, as in the browser
     }
     void flushTiny() override {}
 

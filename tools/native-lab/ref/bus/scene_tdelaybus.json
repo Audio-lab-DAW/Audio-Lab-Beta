@@ -1,0 +1,244 @@
+{
+ "sr": 48000,
+ "frames": 24000,
+ "quantum": 512,
+ "bpm": 145,
+ "beat0": 0,
+ "master": 0.9,
+ "masterFx": [
+  {
+   "type": "comp",
+   "p": {
+    "threshold": -12,
+    "ratio": 1.5,
+    "attack": 30,
+    "release": 120,
+    "makeup": 0,
+    "gs": 100,
+    "an": "post",
+    "auto": false,
+    "pre": "init"
+   },
+   "lat": 288
+  },
+  {
+   "type": "clip",
+   "p": {
+    "gain": 6,
+    "thr": -4,
+    "ceil": -1,
+    "bias": 0,
+    "mix": 100,
+    "out": 0,
+    "gs": 100,
+    "an": "post",
+    "auto": false,
+    "shape": "tanh",
+    "os": "4x",
+    "pre": "gentle"
+   },
+   "lat": 192
+  }
+ ],
+ "nodes": [
+  {
+   "id": "ld",
+   "kind": "audio",
+   "in": "in_st_a.wav",
+   "vol": 0.7,
+   "pan": -0.2,
+   "fx": [
+    {
+     "type": "eq",
+     "p": {
+      "out": 0,
+      "bands": [
+       {
+        "t": "peaking",
+        "f": 120,
+        "g": 4.5,
+        "q": 0.8,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       },
+       {
+        "t": "peaking",
+        "f": 900,
+        "g": -6,
+        "q": 2.5,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       },
+       {
+        "t": "peaking",
+        "f": 3200,
+        "g": 3,
+        "q": 0.4,
+        "on": true,
+        "sl": 12,
+        "pl": "st"
+       }
+      ],
+      "gs": 100,
+      "an": "post",
+      "auto": false
+     },
+     "lat": 0
+    },
+    {
+     "type": "tdelay",
+     "p": {
+      "time": 0.375,
+      "feedback": 33,
+      "mix": 22,
+      "lowcut": 400,
+      "highcut": 4000,
+      "drive": 0,
+      "wow": 0,
+      "rate": 0.6,
+      "width": 100,
+      "gs": 100,
+      "an": "post",
+      "auto": false,
+      "sync": "1/8 dotted",
+      "ping": true,
+      "pre": "tape2"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "m",
+   "kind": "audio",
+   "in": "in_mono_a.wav",
+   "vol": 0.8,
+   "pan": 0.3,
+   "fx": [
+    {
+     "type": "tdelay",
+     "p": {
+      "time": 0.2,
+      "feedback": 55,
+      "mix": 22,
+      "lowcut": 400,
+      "highcut": 4000,
+      "drive": 0,
+      "wow": 0,
+      "rate": 0.6,
+      "width": 40,
+      "gs": 100,
+      "an": "post",
+      "auto": false,
+      "sync": "free",
+      "ping": false,
+      "pre": "tape2"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "g",
+   "kind": "group",
+   "in": null,
+   "vol": 0.9,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "tdelay",
+     "p": {
+      "time": 0.375,
+      "feedback": 33,
+      "mix": 35,
+      "lowcut": 400,
+      "highcut": 4000,
+      "drive": 40,
+      "wow": 70,
+      "rate": 2.5,
+      "width": 100,
+      "gs": 100,
+      "an": "post",
+      "auto": false,
+      "sync": "1/8 dotted",
+      "ping": true,
+      "pre": "tape2"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  },
+  {
+   "id": "b",
+   "kind": "audio",
+   "in": "in_st_b.wav",
+   "vol": 0.6,
+   "pan": 0.0,
+   "fx": [],
+   "delay": 0
+  },
+  {
+   "id": "r",
+   "kind": "return",
+   "in": null,
+   "vol": 0.6,
+   "pan": 0.0,
+   "fx": [
+    {
+     "type": "tdelay",
+     "p": {
+      "time": 0.375,
+      "feedback": 33,
+      "mix": 100,
+      "lowcut": 400,
+      "highcut": 4000,
+      "drive": 0,
+      "wow": 0,
+      "rate": 0.6,
+      "width": 100,
+      "gs": 100,
+      "an": "post",
+      "auto": false,
+      "sync": "1/8 dotted",
+      "ping": false,
+      "pre": "tape2"
+     },
+     "lat": 0
+    }
+   ],
+   "delay": 0
+  }
+ ],
+ "inputs": {
+  "@master": [
+   {
+    "from": "ld"
+   },
+   {
+    "from": "m"
+   },
+   {
+    "from": "g"
+   },
+   {
+    "from": "r"
+   }
+  ],
+  "r": [
+   {
+    "from": "ld",
+    "send": 0.3
+   }
+  ],
+  "g": [
+   {
+    "from": "b"
+   }
+  ]
+ }
+}
