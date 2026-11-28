@@ -140,3 +140,10 @@ Built in `tools/design-lab/ws/ws1.js` and `ws1.css`, put into `index.html` by `p
 - **Not in this step:** a key per project (projects store no key yet); thumbnails of the arrangement are a small clip map, not audio waveforms.
 
 - **Next: WS-1b**, the drawings setting the user asked for at 01:53 (above): it is not in this build, which was made before that note.
+
+### WS-1 pre-release checks (28 Nov, 01:10 to 01:40 UTC, during the freeze, on main aa2da78 plus `ws1_edit.py`)
+- Lint clean (2393 top-level functions). `taskWS_1.py` 38 of 38.
+- Desktop smoke test (`smoke_electron.js --secs 20 --scen real,keyboard`, the real Electron app at 2194 x 1139 at 1.75x): all scenarios clean, 0 errors, 0 state changes; frames p50 16.7 ms, p95 50 ms. The app starts on the start screen there (no webdriver), the gate's `openDemoFractals()` opens Fractals and closes it.
+- `loadtime.py`: splash timings as before, no errors. `taskAI.py`: two old failures ("playing marks the song unsaved ... keeps nothing", "update from v0.219 ... nothing kept"), identical on main without this step.
+- **For lane G (the splash's drawings):** the splash still draws its own dipole with today's bounce (F0) and picks from its five pictures; the start screen draws F1 (Jupiter, smaller and fewer particles). If the user wants F1 and the R4 to R8 set in the splash too, the drawing is ready as `WSR2.FN.dipF1` (and `WSR2.FN.interf`, `vdp`, `liss`, `trap`, `four`, palettes in `WSR2.PAL`); `SPLBG` would need to read them at first paint. Not done here, since SPLBG is not lane Q's.
+- No new command in the commands registry (so `docs/commands.md` is unchanged).
