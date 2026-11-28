@@ -4347,7 +4347,7 @@ function syncGraph(){
   syncMaster();
   const ids=new Set(S.tracks.map(t=>t.id));
   for(const[id,N] of NODES)if(!ids.has(id)){try{N.pan.disconnect()}catch(e){}try{for(const M of[PVS,GVS]){const m=M.get(ctx),st=m&&m.get(N.in);if(st)pvDrop(ctx,st)}}catch(e){}NODES.delete(id)}
-  const solo=S.tracks.some(t=>t.solo),PDC=pdcMap(ctx.sampleRate);CPU.pdc=PDC.target/ctx.sampleRate;
+  const solo=S.tracks.some(t=>t.solo),PDC=pdcMap(ctx.sampleRate,1);CPU.pdc=PDC.target/ctx.sampleRate;
   for(const t of S.tracks){if(t.inst)ITRK.set(t.inst,t);
     let N=NODES.get(t.id);
     if(!N){N={ut:mkUtil(ctx),in:ctx.createGain(),vol:ctx.createGain(),pan:ctx.createStereoPanner(),an:ctx.createAnalyser(),sp:ctx.createChannelSplitter(2),aL:ctx.createAnalyser(),aR:ctx.createAnalyser(),fxm:new Map(),sig:null};N.an.fftSize=N.aL.fftSize=N.aR.fftSize=256;N.vol.connect(N.pan);N.pan.connect(master);N.dest=master;N.pan.connect(N.an);N.pan.connect(N.sp);N.sp.connect(N.aL,0);N.sp.connect(N.aR,1);N.ut.out.connect(N.vol);N.pdc=ctx.createDelay(1);N.pdc.delayTime.value=0;N.pdc.connect(N.ut.in);N.pdcV=0;NODES.set(t.id,N)}
@@ -6214,7 +6214,7 @@ function recStart(){const armed=S.tracks.filter(t=>t.arm);if(!armed.length){toas
   if(!play.on)start();const wait=()=>{if(!REC.on)return;if(play.counting){setTimeout(wait,20);return}for(const a of REC.audio){a.b0=curDisp();a.mr.start()}};wait()}
 async function recStop(){if(!REC.on)return;REC.on=false;$('#bRec').classList.remove('on');for(const k of[...LIVE.keys()])noteOff(k);let made=0;pushUndo();
   for(const[id,ns]of REC.notes){const t=S.tracks.find(x=>x.id===id);if(!t||!ns.length)continue;const a=Math.floor(Math.min(...ns.map(n=>n.s))/4)*4,b=Math.ceil(Math.max(...ns.map(n=>n.s+n.l))/4)*4||a+4;
-    const c=mkClip({start:a,len:Math.max(4,b-a),name:t.name+' take',notes:ns.map(n=>({id:rid(),p:n.p,s:Math.max(0,n.s-a-(UI.recOff||0)/1000*S.bpm/60),l:n.l,v:n.v}))});t.clips.push(c);if(REC.cc&&REC.cc.length){c.cc=c.cc||{};for(const q of REC.cc){const bb=q.b-a;if(bb<0||bb>c.len)continue;(c.cc[q.k]=c.cc[q.k]||[]).push({b:bb,v:q.v})}}made++}
+    const c=mkClip({start:a,len:Math.max(4,b-a),name:t.name+' take',notes:ns.map(n=>({id:rid(),p:n.p,s:Math.max(0,n.s-a-((UI.recOff||0)/1000+ltRecSec(t))*S.bpm/60),l:n.l,v:n.v}))});t.clips.push(c);if(REC.cc&&REC.cc.length){c.cc=c.cc||{};for(const q of REC.cc){const bb=q.b-a;if(bb<0||bb>c.len)continue;(c.cc[q.k]=c.cc[q.k]||[]).push({b:bb,v:q.v})}}made++}
   REC.cc=null;
   for(const r of REC.audio){if(r.mr.state==='inactive')continue;await new Promise(res=>{r.mr.onstop=res;r.mr.stop()});try{const buf=await ctx.decodeAudioData(await new Blob(r.ch).arrayBuffer()),id=addBuf(buf);r.t.clips.push(mkClip({start:r.b0||0,len:buf.duration*S.bpm/60,name:r.t.name+' take',buf:id,dur:buf.duration,gain:0,fi:0,fo:0}));made++}catch(e){}}
   REC.audio=null;changed(true);toast(made?`Recorded ${made} clip${made>1?'s':''}.`:'Nothing was recorded.')}
@@ -6941,7 +6941,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.304',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.305',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -10230,9 +10230,9 @@ function fxLat(f,sr){if(!f||!f.on)return 0;const p=f.p||{};switch(f.type){case'c
   case'limit':{let l=Math.max(1,Math.round((p.look||2)*sr/1000));if(p.style==='aggressive')l=Math.max(1,l>>2);return l}
   case'gate':return Math.round((p.look||0)*sr/1000);case'vocoder':return Math.round(.00445*sr);case'pshift':case'pcorr':case'reson':return 2048}return 0}
 const trkLat=(t,sr)=>{if(t.fxByp)return 0;let n=0;for(const f of t.fx)n+=fxLat(f,sr);return n};
-function pdcMap(sr){const M=new Map();M.target=0;if(UI.pdc===false)return M;const src=S.tracks.filter(t=>t.kind!=='group'&&t.kind!=='return'),path=new Map();
+function pdcMap(sr,live){const M=new Map();M.target=0;if(UI.pdc===false)return M;const src=S.tracks.filter(t=>t.kind!=='group'&&t.kind!=='return'),path=new Map();
   for(const t of src){let n=trkLat(t,sr);for(const g of grpAnc(t))n+=trkLat(g,sr);path.set(t.id,n);if(n>M.target)M.target=n}
-  if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));return M}
+  if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));if(live)try{LT_HOOKS.pdcLive(M,sr)}catch(e){}return M}
 /* Level meter colours (v0.155). Zones as on hardware meters: green is safe, yellow from about -9 dB, orange from -3 dB, red at 0 dB and above. */
 const LVC=[[-60,'#12804f'],[-18,'#2fc27c'],[-12,'#3ecf8e'],[-9,'#b9d64a'],[-6,'#f5c84c'],[-3,'#ff9838'],[-1,'#ff5a3c'],[0,'#ff3b3b'],[6,'#ff2020']];
 /* the peak line of a bar meter: jumps up with the level, holds for a second, then drops to the current level */
@@ -25429,7 +25429,7 @@ document.addEventListener('pointerup',()=>{if(ctx&&!play.on)ltSoon()},true);
 /* while playing: a clean minute marks Auto one step down; dropouts at the playing buffer switch to the mixing buffer at once */
 function ltTick(){if(!play.on||!ctx)return;const now=performance.now(),tot=URS.total,dt=CPU.dropT,drop=tot!==LT.tot||dt!==LT.dropT;LT.tot=tot;LT.dropT=dt;
  const ab=UI.abuf||256;if(ab!==LT.abuf){if(ab>LT.abuf&&LT.abuf){LT.stepT=now;LT.down=false;LT.clean=0;if(now-LT.downT<120000)LT.need=Math.min(480000,LT.need*2)}LT.abuf=ab}
- if(LT.cur==='play'){if(drop&&!LT.heavy){LT.heavy=true;URS.n=0;try{DBUF.ev=[]}catch(e){}setTimeout(()=>{if(!play.on||LT.cur!=='play')return;LT.forceMix=true;try{restartAudio(true)}finally{LT.forceMix=false}URS.n=0;
+ if(LT.cur==='play'){if(drop&&!LT.heavy){LT.heavy=true;URS.n=0;try{DBUF.ev=[]}catch(e){}setTimeout(()=>{if(!play.on||LT.cur!=='play'||REC.on)return;LT.forceMix=true;try{restartAudio(true)}finally{LT.forceMix=false}URS.n=0;
    toast('The playing buffer crackled with the whole song, so AudioLab went back to the mixing buffer while it plays. Your notes still use the small buffer when the song is stopped.')},0)}return}
  if(drop){LT.clean=0;return}LT.clean+=1000;if(UI.buf===-1&&ab>256&&LT.clean>=LT.need&&now-LT.stepT>=60000)LT.down=true}
 function ltStepDown(){if(!LT.down||play.on||UI.buf!==-1)return;const ab=UI.abuf||256,i=ABUF.indexOf(ab);if(ab!==LT.abuf){LT.down=false;return}/* Auto went up at this Stop: no step down */
@@ -25489,6 +25489,38 @@ LT_HOOKS.audioRows=LT_ROWS;
 try{for(const r of LT_ROWS)if(!STX.has(r.id)){STT.push(r);STX.set(r.id,r)}}catch(e){}
 {const o=document.querySelector('#bufSel option[value="-1"]');if(o)o.textContent='Auto (recommended): goes up when it hears dropouts, back down after a clean minute'}
 /* ===== end of lane J LT-1 ===== */
+/* ===== lane J, task LT-2 (lane J): the played track skips delay compensation (L4). docs/latency-build.md =====
+   Delay compensation holds every track back to the slowest path (6 ms in Fractals, 52 ms with a resonance suppressor). The track you play
+   (armed, or the selected one while the computer keyboard plays) now skips that hold while you play, like reduced latency when monitoring
+   in other DAWs: its own devices' latency stays, the rest of the song keeps its compensation (CPU.pdc unchanged). The switch ramps the delay
+   (no click). Recorded notes are placed by the compensated clock: what you heard when you pressed is the song CPU.pdc earlier than the
+   output clock says, so the take moves earlier by it (ltRecSec), on top of the Recording latency offset; the press itself is read from the
+   output clock at the key event, not from the display clock. Exports use pdcMap without the live
+   flag, so they are untouched. Lane K owns pdcMap; this hook only lowers the played tracks' entries, so AE3's returns and sends compose. */
+LT.pdcSig='';LT.pdcOut=new Map();
+LT_HOOKS.pdcLive=function(M,sr){let L=[];if(UI.ltPdc!==false)try{L=liveTracks()}catch(e){}
+ if(!(M instanceof Map)){/* lane K's MX-2 asks pdcLive(sr) for the ids and fades the delays itself */LT.pdcSig=L.map(t=>t.id).join(',');LT.pdcOut=new Map();return L.map(t=>t.id)}
+ const out=new Map();
+ for(const t of L){const d=M.get(t.id)||0;if(d>0){out.set(t.id,d);M.set(t.id,0)}}
+ const ids=new Set([...LT.pdcOut.keys(),...out.keys()]);LT.pdcOut=out;LT.pdcSig=L.map(t=>t.id).join(',');
+ if(ctx&&sr===ctx.sampleRate)for(const id of ids){const N=NODES.get(id);if(!N||!N.pdc)continue;const d=(M.get(id)||0)/sr;if(d===N.pdcV)continue;
+  const p=N.pdc.delayTime,t0=ctx.currentTime,dur=Math.min(.25,Math.max(.03,Math.abs(d-(N.pdcV||0))*4));N.pdcV=d;
+  try{p.cancelScheduledValues(t0);p.setValueAtTime(p.value,t0);p.linearRampToValueAtTime(d,t0+dur)}catch(e){p.value=d}}};
+/* what the played tracks skip, for read-outs (lanes E, K): [{id,name,ms}] */
+LT_HOOKS.pdcOut=()=>[...LT.pdcOut].map(([id,n])=>{const t=S.tracks.find(x=>x.id===id);return{id,name:t?t.name:'',ms:ctx?n/ctx.sampleRate*1000:0}});
+function ltRecSec(t){try{if(UI.pdc===false||!t||t.kind!=='inst')return 0;return CPU.pdc||0}catch(e){return 0}}
+/* arming, the computer keyboard and the selected track change who plays: the graph is brought up to date after the click or key */
+function ltPdcEval(){clearTimeout(ltPdcEval.t);ltPdcEval.t=setTimeout(()=>{if(!ctx||UI.pdc===false||!(CPU.pdc>0))return;let sig='';try{sig=(UI.ltPdc===false?[]:liveTracks()).map(t=>t.id).join(',')}catch(e){}if(sig!==LT.pdcSig)syncGraph()},120)}
+document.addEventListener('pointerup',ltPdcEval,true);document.addEventListener('keyup',ltPdcEval,true);
+/* the press, placed exactly: the take used the display clock (smoothed for drawing, a frame or more behind); the note's position is moved
+   to what the speakers played at the moment of the press (the key event's own time when a key started it), from getOutputTimestamp */
+document.addEventListener('keydown',e=>{if(!e.repeat)LT.kdT=e.timeStamp},true);
+{const _n=noteOn;noteOn=function(p,v,key){const had=LIVE.has(key),now=performance.now(),T=DISP_T;let o=null;try{if(!had&&play.on&&ctx&&ctx.getOutputTimestamp)o=ctx.getOutputTimestamp()}catch(e){}
+  const r=_n.apply(this,arguments);/* the clock is read before the voice starts: starting a voice can take a few ms */
+  try{const L=!had&&LIVE.get(key);if(L&&L.b!=null&&play.on&&!play.counting&&o&&o.contextTime>0&&o.performanceTime>0){const T0=T!=null?T:ctx.currentTime,
+    pn=LT.kdT&&now-LT.kdT<40&&LT.kdT<=now?LT.kdT:now,spk=o.contextTime+(pn-o.performanceTime)/1000,b=beatOf(secOf(L.b)+(spk-T0));
+    if(isFinite(b)&&Math.abs(secOf(b)-secOf(L.b))<.25)L.b=b}}catch(e){}return r}}
+/* ===== end of lane J LT-2 ===== */
 /* ===== lane E (task IN-V): the Visualizer, the user's pick V1 (one frequency axis) with the viridis colour map =====
    - The spectrogram and the spectrum share one frequency axis: the spectrum lies sideways beside the spectrogram, on the same log rows from
      20 Hz (bottom) to 20 kHz (top), with the axis between them (long marks at decades, mid at 2 and 5, numbers where they fit, HZ in amber), so

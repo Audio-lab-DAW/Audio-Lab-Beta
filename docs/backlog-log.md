@@ -6856,3 +6856,33 @@ Step DV-3 of `docs/devices-display-first.md` section 10 (claimed at 21:36 UTC). 
 - DV-4: Compressor, Sidechain, Echo delay, Space reverb (bottom dock for hover reveal, values line clear of the handles, positions On the picture: Threshold and Ratio on the curve, Attack and Release on their dots, Makeup at the output). Then the groups DV-5 to DV-11 and the check DV-12.
 - The values line on the drum designers lies over the picture's time scale labels (300 ms); placed per device later.
 - With the rail closed in Hover reveal, the Pro EQ shows no values line when no band is selected (nothing to show); unchanged.
+
+## 28 November 2026, v0.305: task LT-2, the played track skips delay compensation (lane J, the user's AE2 pick L4)
+
+Step LT-2 of `docs/latency-build.md` (research id AE2-2). Edit script `tools/engine-lab/lt/lt_2.py` (unique asserted anchors, needs LT-1), test `tools/ui-tests/taskLT_2.py` (13 checks), measurement `tools/engine-lab/lt/lt2_measure.py` (results in `lt2_measure_result.json`). The scheduler's chain-check note asked for LT-1; LT-1 was already out (v0.289), so this run did the next step not yet logged.
+
+### Built
+- **The played track outside delay compensation.** Delay compensation holds every track back to the slowest path. The track you play (armed, or the selected one while the computer keyboard plays, `liveTracks()`) now skips that hold: its own devices' latency stays, every other track and the song's compensation (`CPU.pdc`, the Performance read-out) stay as they were. The same trade as reduced latency when monitoring in other DAWs: while armed, that track's own clips also play the compensation earlier than the rest.
+- **The hook in lane K's `pdcMap`**, as small as asked: `pdcMap(sr,live)`; one line `if(live)try{LT_HOOKS.pdcLive(M,sr)}catch(e){}` before it returns; the live call in `syncGraph` passes `1`. The exporter's call has no flag, so exports cannot change. The hook only lowers the played tracks' entries, so AE3's returns and sends (MX-2) compose with it.
+- **No click:** the played track's delay moves with a ramp (30 ms, longer for a long change: 0.2 s for 52 ms). Arming, disarming, the keyboard on or off and the selected track changing bring the graph up to date after the click or key (`ltPdcEval`, only when there is compensation at all).
+- **Recording on the compensated clock:** what you heard when you pressed is the song `CPU.pdc` earlier than the output clock says, so the take moves earlier by it (`ltRecSec`, one hook in lane C's take line beside `UI.recOff`). The press itself is now read from the output clock (`getOutputTimestamp`) at the key event, taken before the voice starts (a wrapper on `noteOn`, as other lanes wrap it): the display clock used before is smoothed for drawing and ran 30 to 40 ms behind here.
+- **A fix to LT-1 found in a second LT-2 run:** when the playing buffer crackled while the song played, LT-1 restarted the engine at once, and a restart ends a recording (`restartAudio` calls `stop`, which calls `recStop`): with real dropouts a take was cut after about a second and its notes lost. While recording the switch now waits for Stop (the next Play starts on the mixing buffer, as before). The test checks it: without the fix the take is lost (`rec: false, take: false`), with it kept.
+- `LT_HOOKS.pdcOut()` lists what the played tracks skip ({id, name, ms}) for a read-out. There is no per-track latency row today; lane E (Performance pop-up) or lane K may show it. `UI.ltPdc=false` turns the bypass off (no Settings row; not asked for).
+
+### Measured (build machine, headless Chromium, Fractals remake v6, fixed 256-sample buffer, playing buffer off)
+- The armed Lead's compensation delay: **6.01 ms to 0**; with a resonance suppressor on the Bass (song compensation 52.45 ms): **52.45 ms to 0**; disarmed: back to 52.45 ms (`pdc_live.py`'s cases).
+- Key press to the Lead's signal after its compensation delay, with the suppressor on the Bass (10 presses): **before median 92.7 ms (85.9 to 109.4); after 40.7 and 45.6 ms in two runs**. Key to the track's input is unchanged (40 to 46 ms): the 52 ms is gone.
+- Recording, the song playing at bar 81 with the suppressor, 10 presses on the armed Lead, each compared with the song position coming out of the speakers at the press: **before median +18.4 ms late (worst 32.2 ms); after median 0.0 ms, worst 0.1 ms** in two runs. The UI test checks the same with and without the suppressor (6.0 and 52.4 ms): within 0.24 ms.
+- **Exports unchanged** (`tools/engine-tests/export_same.py` on this build): Fractals Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) at master -10 dB; -9.75669 (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB; Saw, Pad, Acid, Wavetable, Venom and the other repeatable lines identical to v0.277's (Plant, Sampler, Sampler grains, Drum kit differ from run to run on old builds too).
+- On the step rebased onto v0.304 (as v0.305): `taskLT_2.py` 13 of 13 (14 of 14 on v0.294 with the recording fix), `taskLT_1.py` 42 of 42, lint clean (2316 top-level functions, no duplicates), start-up smoke test (`smoke_electron.js`, the desktop app under xvfb, 30 s per scenario) 14 of 14 clean, state changes 0 and errors 0 in every scenario.
+
+### Seen, for lane K
+- `syncGraph` sets each track's compensation with `N.pdc.delayTime.setValueAtTime(d,ctx.currentTime)`; on this machine a later change sometimes does not take (`N.pdcV` has the new value, the parameter keeps the old one), on v0.289 before this step too: `tools/engine-lab/lt/pdc_set_probe.py` adds and removes a suppressor six times and prints both for the Kick. LT's own ramps (`cancelScheduledValues`, `setValueAtTime(p.value)`, `linearRampToValueAtTime`) applied every time in the tests. Worth a look in MX-2.
+
+- Lane K's MX-2 (waiting for the same freeze) replaces `pdcMap` and asks `LT_HOOKS.pdcLive(sr)` for the played tracks' ids: the hook answers both ways, and `lt_2.py` leaves its `pdcMap` and `syncGraph` edits out when MX-2 is in. MX-2, then LT-2, then LT-3a on v0.294: `taskLT_2.py` 14 of 14 (with MX-2 its own 8 ms fades replace LT-2's ramp), lint clean. If LT-2 lands first, `mx2.py`'s two anchors change (`docs/latency-build.md`, lane K).
+
+### Only the user's Mac can prove
+- How it feels with the Push 1 on a song with a resonance suppressor or a look-ahead limiter, and the record take against the grid through the iFi (the Recording latency offset measured on the DAC page still applies on top).
+
+### Left
+- LT-3a next: notes past the main thread in the desktop app (L5). The S15 "steady timing" pick (UX1) is an LT step after LT-3.
