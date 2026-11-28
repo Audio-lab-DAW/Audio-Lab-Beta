@@ -45,7 +45,7 @@ with sync_playwright() as p:
         ck(f'{L}: Audio shows device, buffer, larger buffer, rate, blocks, headroom, offset, keep awake on the page',all(vis(pg,s) for s in need),[s for s in need if not vis(pg,s)])
         ck(f'{L}: the Control Panel pop-up and its button are gone from Settings',not vis(pg,'#cpBtn') and R(pg,"!document.querySelector('#set #cp')"))
         cards=J(pg,"[...document.querySelectorAll('#setBody>section[data-page=\"audio\"] .sbox>h4')].map(h=>h.childNodes[0].textContent.trim())")
-        ck(f'{L}: the cards are Audio driver, Running now, Advanced, Test tone',cards[:4]==['Audio driver','Running now','Advanced','Test tone'],cards)
+        ck(f'{L}: the cards are Audio driver, Running now, Advanced, Test tone (after Devices from v0.315)',[x for x in cards if x!='Devices'][:4]==['Audio driver','Running now','Advanced','Test tone'],cards)
         pg.wait_for_timeout(700)
         rn=J(pg,"['st10Sr','st10Buf','st10Lat','st10Dev','st10Drop'].map(i=>document.getElementById(i).textContent)")
         ck(f'{L}: Running now shows rate, buffer, latency, device and dropouts',('kHz' in rn[0]) and ('samples' in rn[1] or 'not reported' in rn[1]) and rn[3] and rn[4]!='–',rn)

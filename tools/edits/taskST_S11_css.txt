@@ -1,0 +1,25 @@
+/* v0.315 (task ST-S11): the Devices card on Settings › Audio (role cards and the two setups) and the quiet notice after an automatic switch, in the LOOK colours */
+#set .st11top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:2px 0 8px}
+#set .st11seg{display:inline-flex;flex:none;border:1px solid rgba(255,255,255,.14);border-radius:8px;overflow:hidden;background:rgba(255,255,255,.03)}
+#set .st11seg button{border:0;border-radius:0;background:none;min-height:26px;padding:3px 14px;color:#c4c7d2;font-weight:var(--fw6,600);cursor:pointer}
+#set .st11seg button+button{border-left:1px solid rgba(255,255,255,.12)}
+#set .st11seg button.on{background:rgba(74,140,255,.22);color:#fff;box-shadow:inset 0 -2px 0 #4a8cff}
+#set .st11seg button:focus-visible{outline:2px solid #4a8cff;outline-offset:-2px}
+#set .st11why{flex:1 1 260px;min-width:0;margin:0;color:#c4c7d2;font-size:var(--fs2,12px);line-height:1.4}
+#set .st11roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin:0 0 6px}
+#set .st11r{min-width:0;padding:8px 10px 4px;border-radius:9px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
+#set .st11rh{display:flex;align-items:center;gap:10px;margin-bottom:4px;min-width:0}
+#set .st11rh .adt{min-width:0}
+#set .st11k{display:block;font-size:var(--fs1,11px);color:#8b8f9c;text-transform:uppercase;letter-spacing:.05em}
+#set .st11by{align-self:flex-start;margin-left:auto;flex:none;font-style:normal;font-size:var(--fs1,11px);color:#8b8f9c;white-space:nowrap}
+#set .st11by:empty{display:none}
+#set .st11r .cprow select{flex:0 1 auto;min-width:0;max-width:62%;height:auto;min-height:26px}
+#set .st11oth{margin:2px 0 6px}
+#set .st11act{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+#set .st11act [hidden]{display:none}
+#st11Note{position:fixed;right:16px;bottom:120px;z-index:9950;display:flex;align-items:center;gap:8px;max-width:min(480px,calc(100vw - 32px));padding:7px 8px 7px 12px;border-radius:10px;background:rgba(36,36,46,.95);border:1px solid rgba(255,255,255,.14);color:#ececf1;font-size:12px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#st11Note[hidden]{display:none}
+#st11Note .st11nt{flex:1 1 auto;min-width:0}
+#st11Note button{flex:none;white-space:nowrap}
+#st11Note button[hidden]{display:none}
+body.fxzero #st11Note{background:rgb(36,36,46)}
