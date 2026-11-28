@@ -16,7 +16,7 @@ Lane K owns the audio graph: `syncGraph`, `busRoute`, `fxLat`, `trkLat`, `pdcMap
 | MX-1 | X12, X13 | pre or post per send (blue and yellow rings); output to any group, return or track; one loop check for every link | **done** (v0.294) |
 | MX-2 | X5, X6 | delay compensation for returns, sends and sidechain triggers, live and in export; latency changes re-aligned without a click; latency you can see, subtly, in few places; first the `S.pauto` export check (end of this file) | built and tested (27 Nov, 41 checks); re-checked on v0.294 on 28 Nov 09:30 UTC (edit applies, taskMX_2 41/41, taskMX_1 49/49, lint clean, Fractals unchanged); `index.html` waits for the gate's freeze of 09:11:57 UTC; release with `tools/engine-lab/mx/mx2_release/release.sh` |
 | MX-3 | X1, X4 | sidechain from anything (`mxScPick`, tap points) on Compressor, Gate, Multiband, OTT and the EQ's dynamic bands; "Duck under the kick" on each return and in the cable menu | built and tested (28 Nov, 40 checks; `mx3.py`, `taskMX_3.py`); `index.html` after MX-2, once the freeze lifts: `tools/engine-lab/mx/mx3_release/release.sh` |
-| MX-4 | X3, X19 | the Ducker's Spectral focus (32 bands); Bass mono switch; `MX_HOOKS.bandFilter` for lane E's band listen (X17) | |
+| MX-4 | X3, X19 | the Ducker's Spectral focus (32 bands); Bass mono switch; `MX_HOOKS.bandFilter` for lane E's band listen (X17) || step claimed (28 Nov, 12:37 UTC); built on v0.297 + MX-2 + MX-3 while the gate's freeze of 12:35:47 UTC holds |
 | MX-5 | (X7 replaced) | the user's play-through idea, **only if this repository records the user's yes**; otherwise the run says "MX waits for the user's answer on the play-through idea" and stops | waits for the user |
 
 After the last step the run says "mixing engine complete".
