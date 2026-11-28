@@ -117,3 +117,10 @@ Round 2 picks line format: `Start screen round 2: R1 R2 R6 R8 | dipole F1 Jupite
 - **The dipole:** particle flow **F1**, in the **Jupiter** option as the page names it. The user also wants the S1 dipole's particles **a little smaller and fewer** ("let's have the particles a little smaller and a little less particles").
 - **The hand-over:** **M1, 1000 ms, smooth** easing: one fluid motion from the splash into the start screen (the drawing moves up, the logo and the 'Digital Audio Workstation' text move to the left, the recent projects slide up from the bottom).
 - With round 1's **W1 T1 D3 P1**. WS-1 builds all of this.
+
+## Added 01:53 Brussels: choose which drawings appear
+
+The user: "you should have in the settings where you can turn off some of these or only have one on. And that setting should be a little bit more hidden. But put it on a place where it makes sense."
+- A setting listing the drawings of the random set (S1 dipole field, S2 moons, R4 to R8), each with a switch, plus "Only this one" per drawing; at least one stays on; the default is all on.
+- A little hidden: not on the start screen itself and not a top-level Settings row. Proposed place: Settings, Appearance, under the start screen's own row 'Show the start screen at start-up', as an expanding 'Start screen drawings…' line (a hook for lane B: WS_HOOKS.settingsRows in the S4 shape); the splash uses the same choice, since it picks the same drawings.
+- If WS-1 is already released without it, do it as WS-1b.
