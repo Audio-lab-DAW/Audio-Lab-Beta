@@ -1,0 +1,60 @@
+/* ===== task WS-1 (lane Q): the start screen (W1 card over the drawing). Hairlines W1, the drafting grid G3, units in amber L2, the selection in yellow A1. No backdrop-filter. ===== */
+.ws{position:fixed;inset:0;z-index:2147479000;font-family:Inter,system-ui,sans-serif;color:#e6e8ee;--wsink:#eaf0ff;--wsa:#6096ff;--wsb:#9fc2ff;--wsp:#b9d0ff;--wsm:#8190b2;transition:opacity .12s ease}
+.ws[hidden]{display:none}.ws.out{opacity:0;pointer-events:none}.ws.fade{opacity:0}
+.ws .wsBk{position:absolute;inset:0;background-color:rgba(4,5,8,.9);background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:24px 24px}
+.ws .wsCard{position:absolute;background:#0c0d12;border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 80px rgba(0,0,0,.55);box-sizing:border-box}
+.ws .wsGlow{position:absolute;pointer-events:none}
+.ws .wsCv{position:absolute;pointer-events:none;display:block}
+.ws .wsLogo,.ws .wsVer,.ws .wsBar{position:absolute;left:0;top:0;pointer-events:none}
+.ws .wsLogo{transform-origin:0 0;display:flex;align-items:flex-start;font:700 30px/1.15 Inter,system-ui,sans-serif;letter-spacing:.5px;white-space:nowrap;will-change:transform}
+.ws .wsA{color:var(--wsink)}.ws .wsLb{background:linear-gradient(100deg,var(--wsa),var(--wsb));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ws .wsP{margin-left:.24em;margin-top:.18em;font-size:.26em;font-weight:700;letter-spacing:.14em;line-height:1;padding:.3em .58em .28em .7em;border-radius:9em;border:1.5px solid var(--wsa);color:var(--wsp)}
+.ws .wsVer{font:500 10.5px/1 "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--wsm);white-space:nowrap}
+.ws .wsBar{background:rgba(255,255,255,.1)}.ws .wsBar b{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--wsa),var(--wsb))}
+.ws .wsCont{position:absolute;display:flex;flex-direction:column;pointer-events:none}
+.ws .wsSp{flex:none}
+.ws .wsBody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,55fr) minmax(0,45fr);grid-template-rows:minmax(0,1fr) 44px;column-gap:28px;padding:14px 24px 0;pointer-events:auto}
+.ws .wsL,.ws .wsR{min-height:0;display:flex;flex-direction:column}
+.ws .wsR{gap:7px;overflow:auto;padding:0 2px 8px 0}
+.ws .wsH{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.ws .wsT{font:600 11px/1 Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#9a9eac}
+.ws .wsH .wsT{flex:1}
+.ws .wsT2{font:600 10px/1 Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#7c808e;margin-top:4px}
+.ws .wsQ{display:flex;align-items:center;gap:6px;width:220px;height:28px;padding:0 9px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:rgba(255,255,255,.03);color:#8b8f9c}
+.ws .wsQ:focus-within{border-color:rgba(245,200,76,.55)}
+.ws .wsQ svg{width:13px;height:13px;flex:none}
+.ws .wsQ input{flex:1;min-width:0;background:none;border:0;outline:0;color:#e6e8ee;font:13px Inter,system-ui,sans-serif}
+.ws .wsList{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px;padding:1px 2px 8px 1px}
+.ws .wsRow{display:grid;grid-template-columns:72px minmax(0,1fr) 104px 196px;align-items:center;gap:12px;min-height:42px;padding:5px 10px;border-radius:7px;border:1px solid transparent;cursor:pointer}
+.ws .wsRow:hover{background:rgba(255,255,255,.035)}
+.ws .wsRow.on{border-color:rgba(245,200,76,.6);background:rgba(245,200,76,.06)}
+.ws .wsMini{width:72px;height:28px;border-radius:3px;display:block}
+.ws .wsN{min-width:0;display:flex;flex-direction:column;gap:3px}
+.ws .wsN b{font:500 13.5px/1.2 Inter,system-ui,sans-serif;color:#eceef3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws .wsN small,.ws .wsD{font-size:11px;color:#7f8391;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws .wsM{font:500 11.5px/1 "JetBrains Mono",ui-monospace,Menlo,monospace;color:#d6d9e1;text-align:right;white-space:nowrap}
+.ws .wsU{color:#ffb547;font-variant:small-caps;letter-spacing:.04em}
+.ws .wsNone,.ws .wsQuiet{color:#7f8391;font-size:12px;padding:10px 10px}
+.ws .wsQuiet{padding:2px 2px;grid-column:1/-1}
+.ws .wsG{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ws .wsTile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:8px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);color:#e6e8ee;cursor:pointer;font:inherit;min-width:0}
+.ws .wsTile[hidden]{display:none}
+.ws .wsTile:hover{background:rgba(255,255,255,.05)}
+.ws .wsTile.on{border-color:rgba(245,200,76,.6);background:rgba(245,200,76,.06)}
+.ws .wsTile b{font:500 13px/1.2 Inter,system-ui,sans-serif;color:#eceef3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws .wsTile small{font-size:11px;line-height:1.3;color:#848896}
+.ws .wsPri{border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.045)}
+.ws .wsTh{display:flex;align-items:center;gap:8px;width:100%}
+.ws kbd{margin-left:auto;font:500 10px/1 "JetBrains Mono",ui-monospace,Menlo,monospace;color:#9a9eac;border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:3px 5px}
+.ws .wsF{grid-column:1/-1;display:flex;align-items:center;gap:16px;border-top:1px solid rgba(255,255,255,.08)}
+.ws .wsK{flex:1;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11px;color:#6f7381;min-width:0;overflow:hidden;max-height:30px}
+.ws .wsK b{font:500 10.5px "JetBrains Mono",ui-monospace,Menlo,monospace;color:#a3a7b4;margin-right:3px}
+.ws .wsSw{display:flex;align-items:center;gap:8px;background:none;border:0;color:#a3a7b4;font:12px Inter,system-ui,sans-serif;cursor:pointer;padding:4px 0}
+.ws .wsSw i{width:26px;height:14px;border-radius:7px;background:rgba(255,255,255,.14);position:relative;flex:none}
+.ws .wsSw i::after{content:"";position:absolute;left:2px;top:2px;width:10px;height:10px;border-radius:50%;background:#c9ccd6;transition:transform .08s ease}
+.ws .wsSw.on i{background:rgba(245,200,76,.55)}.ws .wsSw.on i::after{transform:translateX(12px);background:#fff3c8}
+.ws.hand .wsCont{pointer-events:none}
+body.lite .ws .wsCard{box-shadow:none}
+@media (prefers-reduced-motion:reduce){.ws,.ws .wsSw i::after{transition:none}}
+/* D3: no demo songs in the New project window */
+#np #npTpl [data-t="demo"],#np #npDemo,#np h4:has(+#npDemo){display:none!important}
