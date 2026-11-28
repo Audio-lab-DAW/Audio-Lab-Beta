@@ -44,7 +44,8 @@
       "voice-ai.js",
       "voice-ai-worker.js",
       "native-engine.js",
-      "native-feeder.js"
+      "native-feeder.js",
+      "lt-midi.js"
     ],
     "publish": [
       {

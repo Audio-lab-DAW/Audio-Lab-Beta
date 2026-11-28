@@ -86,3 +86,8 @@ contextBridge.exposeInMainWorld('audiolabDesktop', {
 window.addEventListener('message', (e) => {
   if (e.data && e.data.alNativePort === true && e.ports && e.ports[0]) ipcRenderer.postMessage('al:native-port', null, [e.ports[0]]);
 });
+// task LT-3a: fast MIDI notes (desktop/lt-midi.js): the page posts { ltMidiPort: true } with one end of a MessageChannel whose other end is in its AudioWorklet
+contextBridge.exposeInMainWorld('audiolabLtMidi', true);
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.ltMidiPort === true && e.ports && e.ports[0]) ipcRenderer.postMessage('al:lt-port', null, [e.ports[0]]);
+});

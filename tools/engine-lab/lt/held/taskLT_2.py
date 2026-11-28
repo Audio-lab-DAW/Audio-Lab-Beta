@@ -53,9 +53,12 @@ with sync_playwright() as p:
     ok(r['lead0'] > 5.9 and r['lead1'] == 0, 'arming the Lead takes its compensation delay from %.2f ms to 0' % r['lead0'], r)
     ok(r['kick1'] == r['kick0'] and r['t1'] == r['t0'], 'the other tracks and the song compensation stay', r)
     ok(abs(r['exp'] - r['lead0']) < .01, "the exporter's map (no live flag) is unchanged while the Lead is armed", r['exp'])
-    ok(any(x.startswith('Lead ') for x in r['out']), 'LT_HOOKS.pdcOut lists the Lead', r['out'])
+    MX = R("typeof mxSolve==='function'")  # lane K's MX-2 plans the compensation and fades the moved paths itself (8 ms), lane J's hook only names the played tracks
+    if MX: ok(R("JSON.stringify(LT_HOOKS.pdcLive(48000))") == '[]', "with MX-2: LT_HOOKS.pdcLive(sr) answers MX-2 with the played tracks' ids (none now)")
+    else: ok(any(x.startswith('Lead ') for x in r['out']), 'LT_HOOKS.pdcOut lists the Lead', r['out'])
     ok(r['rt'] > 50 and r['rlead'] == 0 and abs(r['rkick'] - r['rkickExp']) < .05 and r['rkickExp'] > 40, 'with a resonance suppressor on the Bass (%.1f ms) the armed Lead still skips it' % r['rt'], r)
-    ok(0 < r['rmid'] < r['rt'] and abs(r['rback'] - r['rt']) < .05, 'disarmed: back to the full compensation, ramped over 0.2 s (no jump, no click)', r)
+    if MX: ok(abs(r['rback'] - r['rt']) < .05, 'disarmed: back to the full compensation (MX-2 fades the path)', r)
+    else: ok(0 < r['rmid'] < r['rt'] and abs(r['rback'] - r['rt']) < .05, 'disarmed: back to the full compensation, ramped over 0.2 s (no jump, no click)', r)
     ok(abs(r['back'] - r['lead0']) < .01, 'suppressor removed: back to %.2f ms' % r['lead0'], r['back'])
     r = R("""(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));const lead=S.tracks.find(t=>t.name==='Lead'),ms=t=>+(NODES.get(t.id).pdc.delayTime.value*1000).toFixed(2);selT=lead.id;UI.kbPiano=true;ltPdcEval();await w(500);
       const o={kb:ms(lead)};UI.kbPiano=false;ltPdcEval();await w(500);o.off=ms(lead);UI.pdc=false;lead.arm=true;changed(true);syncGraph();await w(300);o.pdcOff=ms(lead);o.rec=ltRecSec(lead);UI.pdc=true;lead.arm=false;changed(true);syncGraph();await w(300);return o})()""")

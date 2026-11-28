@@ -12,12 +12,16 @@ def rep(a,b):
     global s
     n=s.count(a);assert n==1,(n,a[:90]);s=s.replace(a,b)
 
-# 1. pdcMap (lane K's): a live flag and one hook that only lowers the played tracks' entries; the exporter's call is unchanged
-rep("function pdcMap(sr){const M=new Map();M.target=0;","function pdcMap(sr,live){const M=new Map();M.target=0;")
-rep("if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));return M}",
-    "if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));if(live)try{LT_HOOKS.pdcLive(M,sr)}catch(e){}return M}")
+# 1. pdcMap (lane K's): a live flag and one hook that only lowers the played tracks' entries; the exporter's call is unchanged.
+#    Lane K's MX-2 (tools/engine-lab/mx/mx2.py) replaces pdcMap with one plan for the whole graph that already has the live flag and asks
+#    LT_HOOKS.pdcLive(sr) for the played tracks' ids: when MX-2 is in, steps 1 and 2 are left out and the hook answers MX-2's way.
+MX2='mxSolve(sr,!!live)' in s
+if not MX2:
+  rep("function pdcMap(sr){const M=new Map();M.target=0;","function pdcMap(sr,live){const M=new Map();M.target=0;")
+  rep("if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));return M}",
+      "if(M.target>0)for(const t of src)M.set(t.id,Math.min(sr,M.target-path.get(t.id)));if(live)try{LT_HOOKS.pdcLive(M,sr)}catch(e){}return M}")
 # 2. the live call in syncGraph passes live
-rep("PDC=pdcMap(ctx.sampleRate);CPU.pdc=PDC.target/ctx.sampleRate;","PDC=pdcMap(ctx.sampleRate,1);CPU.pdc=PDC.target/ctx.sampleRate;")
+  rep("PDC=pdcMap(ctx.sampleRate);CPU.pdc=PDC.target/ctx.sampleRate;","PDC=pdcMap(ctx.sampleRate,1);CPU.pdc=PDC.target/ctx.sampleRate;")
 # 3. the take (lane C's): notes placed by the compensated clock, beside UI.recOff
 rep("s:Math.max(0,n.s-a-(UI.recOff||0)/1000*S.bpm/60),l:n.l,v:n.v}","s:Math.max(0,n.s-a-((UI.recOff||0)/1000+ltRecSec(t))*S.bpm/60),l:n.l,v:n.v}")
 # 4. LT-1's own switch to the mixing buffer after dropouts at the playing buffer restarts the engine, and a restart ends a recording
@@ -35,7 +39,9 @@ JS=r"""/* ===== lane J, task LT-2 (lane J): the played track skips delay compens
    output clock at the key event, not from the display clock. Exports use pdcMap without the live
    flag, so they are untouched. Lane K owns pdcMap; this hook only lowers the played tracks' entries, so AE3's returns and sends compose. */
 LT.pdcSig='';LT.pdcOut=new Map();
-LT_HOOKS.pdcLive=function(M,sr){let L=[];if(UI.ltPdc!==false)try{L=liveTracks()}catch(e){}const out=new Map();
+LT_HOOKS.pdcLive=function(M,sr){let L=[];if(UI.ltPdc!==false)try{L=liveTracks()}catch(e){}
+ if(!(M instanceof Map)){/* lane K's MX-2 asks pdcLive(sr) for the ids and fades the delays itself */LT.pdcSig=L.map(t=>t.id).join(',');LT.pdcOut=new Map();return L.map(t=>t.id)}
+ const out=new Map();
  for(const t of L){const d=M.get(t.id)||0;if(d>0){out.set(t.id,d);M.set(t.id,0)}}
  const ids=new Set([...LT.pdcOut.keys(),...out.keys()]);LT.pdcOut=out;LT.pdcSig=L.map(t=>t.id).join(',');
  if(ctx&&sr===ctx.sampleRate)for(const id of ids){const N=NODES.get(id);if(!N||!N.pdc)continue;const d=(M.get(id)||0)/sr;if(d===N.pdcV)continue;

@@ -20,6 +20,8 @@ Step LT-2 of `docs/latency-build.md` (research id AE2-2). Edit script `tools/eng
 ### Seen, for lane K
 - `syncGraph` sets each track's compensation with `N.pdc.delayTime.setValueAtTime(d,ctx.currentTime)`; on this machine a later change sometimes does not take (`N.pdcV` has the new value, the parameter keeps the old one), on v0.289 before this step too: `tools/engine-lab/lt/pdc_set_probe.py` adds and removes a suppressor six times and prints both for the Kick. LT's own ramps (`cancelScheduledValues`, `setValueAtTime(p.value)`, `linearRampToValueAtTime`) applied every time in the tests. Worth a look in MX-2.
 
+- Lane K's MX-2 (waiting for the same freeze) replaces `pdcMap` and asks `LT_HOOKS.pdcLive(sr)` for the played tracks' ids: the hook answers both ways, and `lt_2.py` leaves its `pdcMap` and `syncGraph` edits out when MX-2 is in. MX-2, then LT-2, then LT-3a on v0.294: `taskLT_2.py` 14 of 14 (with MX-2 its own 8 ms fades replace LT-2's ramp), lint clean. If LT-2 lands first, `mx2.py`'s two anchors change (`docs/latency-build.md`, lane K).
+
 ### Only the user's Mac can prove
 - How it feels with the Push 1 on a song with a resonance suppressor or a look-ahead limiter, and the record take against the grid through the iFi (the Recording latency offset measured on the DAC page still applies on top).
 

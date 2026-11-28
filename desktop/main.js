@@ -719,6 +719,7 @@ if (!gotLock) {
     setupUpdater();
     try { require('./voice-ai').setup({ ipcMain, app }); } catch (e) { console.warn('AI voices', e); }  // task Z2: AI voices (desktop/voice-ai.js)
     try { require('./native-engine').setup({ ipcMain, app }); } catch (e) { console.warn('native engine', e); }  // task NB-N2b: idle until the page asks (desktop/native-engine.js)
+    try { require('./lt-midi').setup({ ipcMain, app, BrowserWindow, session, scheme: SCHEME }); } catch (e) { console.warn('fast MIDI notes', e); }  // task LT-3a: notes past the page's main thread (desktop/lt-midi.js)
     try { if (NM) NM.setup({ app, ipcMain, shell, getWin: () => win, dockAll, rebuildMenu: buildMenu, quitNow: () => { quitOK = true; quitting = true; app.quit(); } }); } catch (e) { console.warn('native migrate', e); }  // task MG1
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
