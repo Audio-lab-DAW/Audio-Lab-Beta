@@ -1,0 +1,295 @@
+<meta charset="utf-8">
+<title>AudioLab start screen, round 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/*CSS1*/
+/* ===== round 3 (task WS-0c). Layout: four families, each a live start screen (W1 at 1254 x 651 points) with tabs for its drawings, then the drawings as splash cards with their science. ===== */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dc{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dc.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.dv{position:relative;width:100%;max-width:100%;aspect-ratio:577/427;border-radius:8px;overflow:hidden;background:#05070c;border:0;padding:0;display:block;cursor:pointer}
+.dv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dv .nm2{position:absolute;left:0;right:0;bottom:17%;display:flex;justify-content:center;align-items:center;gap:6px;font:600 clamp(14px,2.2vw,22px)/1 'Space Grotesk',Inter,sans-serif;pointer-events:none}
+.dv .nm2 i{font-style:normal;-webkit-background-clip:text;background-clip:text;color:transparent}
+.dv .nm2 s{text-decoration:none;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;border:1px solid;border-radius:3px;padding:2px 4px 1px}
+.dv .bar3{position:absolute;left:30%;right:30%;bottom:10.5%;height:2px;background:rgba(128,128,128,.16)}
+.dv.on{outline:2px solid var(--acc);outline-offset:1px}
+.dh{display:flex;align-items:center;gap:8px}
+.dh h3{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh .id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px}
+.dh .star{color:var(--acc)}
+.dc p{font-size:12.5px;color:var(--mut);max-width:none}
+.dc p b{color:var(--ink);font-weight:500}
+.dc .ft{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:auto;font-size:12px}
+.dc .ft .sp{flex:1}
+.ms{font:500 11.5px var(--fm);color:var(--mut);white-space:nowrap}
+.ms b{color:var(--acc);font-weight:500}
+.chk{font:500 12px var(--fm);color:var(--mut);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--ln2);border-radius:7px;padding:3px 9px;white-space:nowrap}
+.dc.picked .chk{color:var(--acc);border-color:var(--acc)}
+.stage{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:12px;display:flex;flex-direction:column;gap:10px}
+.tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px}
+.tb .sp{flex:1}
+.tabs{display:flex;flex-wrap:wrap;gap:4px}
+.tabs button{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 9px;font:500 12px var(--f);color:var(--mut);display:inline-flex;gap:6px;align-items:center}
+.tabs button b{font:600 11px var(--fm);color:inherit}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs button .star{color:var(--acc)}
+.tabs button.on .star{color:inherit}
+.cnt{display:inline-flex;gap:8px;align-items:center}
+.cnt input{accent-color:var(--acc);width:120px}
+.ro{font:500 12px var(--fm);color:var(--acc)}
+.cap{font-size:12.5px;color:var(--mut);max-width:110ch}
+.cap b{color:var(--ink);font-weight:500}
+.fps{font:500 11.5px var(--fm);color:var(--mut)}
+.fps b{color:var(--acc);font-weight:500}
+.src{font-size:12.5px;display:flex;flex-direction:column;gap:4px;padding-left:18px;margin:0;max-width:110ch}
+.scr .band{position:absolute;overflow:hidden;border-radius:12px 12px 0 0}
+.scr .band canvas{position:absolute;left:0;top:0;width:1020px;height:172px;display:block}
+.scr .w1card{position:absolute;border-radius:12px;background:var(--m-pn);border:1px solid var(--m-ln2)}
+.scr .w1in{position:absolute;overflow:hidden;border-radius:12px}
+.scr .w1shade{position:absolute;left:0;top:0;width:480px;height:172px;pointer-events:none}
+.scr .w1logo{position:absolute}
+.scr .w1ver{position:absolute;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.scr .w1edge{position:absolute;height:1px}
+@media (max-width:900px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.grid3,.grid2{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · start screen · round 3 · task WS-0c · lane Q · 28 November 2026</div>
+ <h1>AudioLab start screen, round 3</h1>
+ <p class="lede">You asked for four things: new particles for the dipole with its flow kept as it is, a cooler phase portrait, a cooler Fourier series, and six more drawings. Each family below opens with your start screen (W1, at your window of 1254 x 651 points) showing one drawing live; the tabs switch drawings. Under it, every drawing is shown as the splash card, with what it is and where the science comes from.</p>
+ <div class="how"><span><b>1.</b> Look at each drawing in the start screen (tabs) and as a card.</span><span><b>2.</b> Pick one particle style and a count; tick the phase, Fourier and new drawings you want (★ = recommended).</span><span><b>3.</b> Copy the line at the bottom into the chat.</span></div>
+ <div class="bar2"><span class="lab">Start screen</span><div class="seg" data-sw="mode"><button data-v="dark">Dark</button><button data-v="light">Light</button></div>
+  <span class="lab" style="margin-left:8px">Motion</span><div class="seg" data-sw="motion"><button data-v="on">Ambient</button><button data-v="still">Reduce motion</button></div>
+  <span class="fps" id="fps" title="How many pictures a second this page draws right now, and the time spent drawing all pictures on screen">… fps</span></div>
+ <p class="mut sm">In the app a drawing moves only at Motion Ambient, in Dark, while the window is shown. In Light mode and with Reduce motion it is one still picture, which is what the two switches show here. Each card shows the time one picture takes to draw on your computer (at 60 pictures a second there are 16.7 ms to spend).</p>
+</header>
+
+<section class="fam" id="fam-D">
+ <div class="famh"><span class="tag">P</span><h2>The dipole's particles</h2><span class="mut sm">The flow is untouched: out at the top, along the line, back in at the bottom, up through the ball (F1, Jupiter). Only what a particle is changes.</span></div>
+ <div class="stage" data-fam="D"></div>
+ <div class="grid3" data-cards="D"></div>
+ <div class="two">
+  <div class="note"><b>What is kept exactly.</b> The eight field lines, the ball, the tilt, the direction, the speed along each line (faster near the ball) and the timing of the dots are the code of your F1 pick. Every style below rides on that same motion, so the animation you like does not change.</div>
+  <div class="note"><b>The three counts.</b> 1 is fewer than today, 2 is today's count (the one in the build, already 30 % fewer than round 2), 3 is more. The slider changes all six cards and the start screen above at once.</div>
+ </div>
+</section>
+
+<section class="fam" id="fam-PH">
+ <div class="famh"><span class="tag">PH</span><h2>The phase portrait, reworked</h2><span class="mut sm">The green one (R5). Four richer pictures of the same idea: a system's motion drawn in its own state space. Tick one to replace R5, or several to have them all in the random set.</span></div>
+ <div class="stage" data-fam="PH"></div>
+ <div class="grid2" data-cards="PH"></div>
+</section>
+
+<section class="fam" id="fam-FS">
+ <div class="famh"><span class="tag">FS</span><h2>The Fourier series, reworked</h2><span class="mut sm">The pink one (R8). Four pictures of a shape built from sines. Tick one to replace R8, or several.</span></div>
+ <div class="stage" data-fam="FS"></div>
+ <div class="grid2" data-cards="FS"></div>
+</section>
+
+<section class="fam" id="fam-N">
+ <div class="famh"><span class="tag">N</span><h2>Six new drawings</h2><span class="mut sm">Each one real physics, most of it about sound and waves, each in its own colour. Tick the ones that should join the random set.</span></div>
+ <div class="stage" data-fam="N"></div>
+ <div class="grid3" data-cards="N"></div>
+</section>
+
+<section class="fam" id="sources">
+ <div class="famh"><span class="tag">S</span><h2>Sources</h2></div>
+ <ul class="src" id="srcs"></ul>
+</section>
+
+<section class="fam" id="builds">
+ <div class="famh"><span class="tag">Next</span><h2>What lane Q builds after this pick</h2></div>
+ <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:96ch">
+  <li>The dipole keeps its flow and gets the particle style and count you pick.</li>
+  <li>The phase and Fourier drawings you tick replace R5 and R8 in the random set; the new drawings you tick join it. Each appears in "Start screen drawings…" in Settings with its own switch.</li>
+  <li>The drawings go in as lane Q's own functions beside the splash's (the splash's code is not changed), in the same function shape, so the hand-over from the splash keeps working with every one of them.</li>
+  <li>As today: they move only at Motion Ambient, in Dark, while the window is shown; one still picture in Light and with Reduce motion; nothing is drawn once the start screen is closed.</li>
+ </ul>
+</section>
+</div>
+
+<div class="pbar" role="region" aria-label="Your picks"><div class="in">
+ <div class="line" id="pline"></div>
+ <input id="pnote" type="text" placeholder="Add a note (optional)" aria-label="Note">
+ <button class="btn" id="rec">Use the ★ picks</button>
+ <button class="btn ok" id="copy">Copy line</button><span id="copied" class="mut sm" aria-live="polite"></span>
+</div></div>
+
+<script>
+/*R2DRAW*/
+</script>
+<script>
+/*R3DRAW*/
+</script>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('ws0c-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ws0c-'+k,JSON.stringify(v))}catch(e){}}};
+let SYSREDUCE=false;try{SYSREDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+let MODE='dark',MOTION=SYSREDUCE?'still':'on';
+const still=()=>MODE==='light'||MOTION==='still';
+
+/* ---------- the drawings ---------- */
+const LPAL={L:'40,62,130',T:'29,127,176',O:'170,104,0',A:'29,127,176'};
+const SRC={
+ fitz:['Fitzpatrick, Plasma Physics: magnetic mirrors and the motion of trapped charges','https://farside.ph.utexas.edu/teaching/plasma/Plasma/node23.html'],
+ fline:['Field lines: their spacing shows the strength of the field','https://en.wikipedia.org/wiki/Field_line'],
+ belt:['Van Allen radiation belts: trapped particles and their energies','https://en.wikipedia.org/wiki/Van_Allen_radiation_belt'],
+ jup:['Magnetosphere of Jupiter: radiation belts and aurorae','https://en.wikipedia.org/wiki/Magnetosphere_of_Jupiter'],
+ lorenz:['Lorenz 1963, Deterministic nonperiodic flow','https://en.wikipedia.org/wiki/Lorenz_system'],
+ vdp:['Van der Pol oscillator (Scholarpedia)','http://www.scholarpedia.org/article/Van_der_Pol_oscillator'],
+ duff:['Duffing oscillator (Scholarpedia)','http://www.scholarpedia.org/article/Duffing_oscillator'],
+ may:['May 1976, Simple mathematical models with very complicated dynamics (Nature)','https://doi.org/10.1038/261459a0'],
+ b3b1:['3Blue1Brown, But what is a Fourier series? From heat flow to drawing with circles','https://www.3blue1brown.com/lessons/fourier-series'],
+ fser:['Fourier series of the square, sawtooth and triangle waves (MathWorld)','https://mathworld.wolfram.com/FourierSeries.html'],
+ gibbs:['Gibbs phenomenon and the Wilbraham-Gibbs constant (MathWorld)','https://mathworld.wolfram.com/GibbsPhenomenon.html'],
+ unc:['The uncertainty relation between time and frequency (Gabor 1946)','https://en.wikipedia.org/wiki/Uncertainty_principle#Harmonic_analysis'],
+ drum:['Russell, Vibrational modes of a circular membrane (Penn State)','https://www.acs.psu.edu/drussell/Demos/MembraneCircle/Circle.html'],
+ str:['Wolfe, Strings, standing waves and harmonics (UNSW)','https://newt.phys.unsw.edu.au/jw/strings.html'],
+ mach:['NASA Glenn Research Center, Mach angle','https://www.grc.nasa.gov/www/k-12/airplane/machang.html'],
+ hyd:['Hydrogen wavefunctions (HyperPhysics)','http://hyperphysics.phy-astr.gsu.edu/hbase/quantum/hydwf.html'],
+ gw:['Abbott et al. 2016, Observation of gravitational waves from a binary black hole merger (Physical Review Letters)','https://doi.org/10.1103/PhysRevLett.116.061102'],
+ em:['Electromagnetic waves (HyperPhysics)','http://hyperphysics.phy-astr.gsu.edu/hbase/Waves/emwv.html']};
+/* id, key, title, starred, what you see, the science, source keys */
+const FAM={
+ D:{pick:'radio',tabs:'P',items:[
+  ['P0','dipP0','Today',false,'Plain amber dots, as the build has them now. Here to compare.','The dots mark the field’s direction and pace; they are tracers, not yet a kind of particle.',[]],
+  ['P1','dipP1','Gyrating charges',true,'Each dot is a charge winding round its line: a small glowing spiral, tight and quick near the ball, wide and slow far out.','A charge in a magnetic field cannot cross the lines, it circles them. Carried along the line the circle becomes a helix; the weaker the field, the wider and slower the turns (radius as 1/√B, rate as B, drawn compressed).',['fitz']],
+  ['P2','dipP2','Field strength as density',false,'A fine dust of dots on forty more faint lines. The dust is thick around the ball and thins out with distance.','Field lines are drawn so their spacing shows the field’s strength. Every line carries the same flow, so the dots crowd exactly where the field is strong.',['fline']],
+  ['P3','dipP3','Energy',false,'Dots of different sizes and warmth: many small cool ones, fewer bright ones, a rare large one with a ring.','Belt particles come with a steep spectrum of energies, many slow and few fast. Size, brightness and colour show the energy. Above about 1 MeV electrons all travel at almost the speed of light, so the pace stays the same.',['belt']],
+  ['P4','dipP4','Radiation belt',false,'The flow as today, plus a belt of pale particles on the inner lines that spiral and bounce without ever reaching the ball.','Charges with a steep enough pitch are turned back before the ball by the growing field and stay trapped between two mirror points. Together they fill a belt, as at Jupiter and in Earth’s Van Allen belts.',['fitz','jup']],
+  ['P5','dipP5','Aurora at the poles',false,'Dots become short streaks, longer where they are fast. Where each line meets the ball its foot glows and flashes as a dot passes through.','Particles that follow the lines down to the planet hit its upper air and make it glow: the auroral ovals around both poles, here seen edge-on. Jupiter’s are the brightest in the solar system.',['jup']]]},
+ PH:{pick:'checkbox',tabs:'PH',items:[
+  ['R5','vdp','Today (R5)',false,'','',[],true],
+  ['PH1','phLor','Lorenz attractor',true,'A butterfly of one endless curve, turning slowly in space. Nine dots start together, travel as one, then scatter over both wings.','Three simple equations for a layer of heated air. The orbit never repeats and never crosses itself, and starts 0.001 apart end up anywhere: the butterfly effect, shown live with its distance read-out.',['lorenz']],
+  ['PH2','phFlow','Flow onto the limit cycle',false,'The whole plane streams: dim green where the flow is slow, bright where it is fast, all of it drawn onto one glowing loop that slowly changes shape.','Your R5 oscillator, done fully. Every start ends on the same loop, the limit cycle. As μ goes from 0.3 to 3 the loop turns from a near circle (a pure tone) into a sharp relaxation shape (a buzz). Dashed: where dx/dt stops changing.',['vdp']],
+  ['PH3','phPoin','Poincaré section',false,'A sheet of 1500 points that stretches, folds over itself and returns, once every 11.6 s. One amber dot shows a single state and its path.','A driven oscillator with two resting places is chaotic. Seen once per turn of the drive, always at the same phase, its states fall on a strange attractor; sweeping that phase shows the stretch and fold that makes chaos.',['duff']],
+  ['PH4','phBif','Road to chaos',false,'A branching tree draws itself from left to right: one line splits in two, in four, in eight, then dissolves into dust with clear windows. A cursor then sweeps it with the orbit shown as dots.','The simplest model of growth, x → r x (1 − x). Raising r doubles the period again and again, each step 4.669 times shorter (Feigenbaum), until chaos at 3.5699, with a window of period 3 at 3.8284.',['may']]]},
+ FS:{pick:'checkbox',tabs:'FS',items:[
+  ['R8','four','Today (R8)',false,'','',[],true],
+  ['FS1','fsAtom','Circles draw the atom',true,'A chain of turning circles draws the AudioLab atom in one stroke. First 2 circles, then 5, 12, 30 and 60: each lap the rings get sharper.','Any closed curve is a sum of circles turning at whole-number rates (the complex Fourier series). The bars are the circles’ radii, largest first, the ones in use in amber.',['b3b1']],
+  ['FS2','fsStack','One sound, two views',false,'A wave in front, the eight sine waves it is made of stacked behind it, and on the end wall one amber bar per sine. The wave changes from square to sawtooth to triangle and the bars glide.','Time and frequency are two views of one sound: seen from the front the stack adds up to the waveform, seen from the side it is the spectrum. The recipes are the exact series of the three waves.',['fser']],
+  ['FS3','fsGibbs','Gibbs effect',false,'A square wave built up one harmonic at a time, from 1 to 24 terms, the earlier sums lingering as ghosts. The amber dots mark the overshoot at each jump.','However many harmonics are added, the overshoot beside a jump gets narrower but never lower: it stays at 8.95 % of the jump. It is why a sharply filtered edge rings.',['gibbs']],
+  ['FS4','fsUnc','Short in time, wide in frequency',false,'On the left a train of pulses, on the right its 30 harmonics. As the spectrum narrows the pulse spreads; as it widens the pulse sharpens to a click.','The two widths (amber) always multiply to the same number, 1 / 2π. A click holds every frequency; a pure tone lasts for ever. This is the uncertainty relation of every sound.',['unc']]]},
+ N:{pick:'checkbox',tabs:'N',items:[
+  ['N1','drum','Drum head',true,'A round membrane as a fine wire mesh, rising and falling in six patterns, with its still lines in amber.','A drum skin moves in modes with still lines across it and still circles round it. Their pitches are 1, 1.59, 2.14, 2.30, 2.65 and 2.92 times the lowest, not whole numbers, which is why a drum has no clear note.',['drum']],
+  ['N2','string','Plucked string',false,'A string pulled aside and let go: two corners run to and fro and slowly round off. Bars show its harmonics as they ring.','The plucked shape is a sum of harmonics. Where you pluck decides which ones are missing (at 1/3 every third, at 1/2 all the even ones), and the high ones die first, so the tone mellows.',['str']],
+  ['N3','mach','Mach cone',false,'A source crossing the screen sends out rings. As it speeds up the rings bunch ahead of it; past Mach 1 they pile into a cone.','The Doppler effect, then a shock: once the source outruns its own sound the waves add along a cone whose half angle has a sine of 1 / Mach. The amber line is the true envelope of the rings drawn.',['mach']],
+  ['N4','hydro','Hydrogen atom',true,'A cloud of 1400 dots that re-settles into a new shape every 9 s: lobes, rings and dumb-bells around an amber nucleus.','Where the electron is likely to be found, for six states of hydrogen. They are the atom’s standing waves, with still surfaces like a drum’s; the two tints are the two signs of the wave. A bar gives the scale.',['hyd']],
+  ['N5','chirp','Gravitational wave',true,'Two black holes circle each other faster and faster and merge; beside them the wave they send out rises in pitch and size, then rings down.','GW150914, the first gravitational wave measured (LIGO, 2015): 36 and 29 suns merging. Its frequency ran from 35 to about 250 Hz in 0.2 s, inside the range of hearing. Shown 47 times slower, with the true chirp law.',['gw']],
+  ['N6','light','Light wave',false,'Two interlocked waves run across the screen, one upright, one lying towards you, with one wavelength marked.','A light wave: the electric and the magnetic field swing in step, at right angles to each other and to the direction of travel. Pairs well with the dipole.',['em']]]}};
+const REC={D:'P1',cnt:1,PH:['PH1'],FS:['FS1'],N:['N1','N4','N5']};
+const PK=Object.assign({D:null,cnt:1,PH:[],FS:[],N:[]},store.get('picks',{}));
+R3.cnt=PK.cnt;
+const OLDBAND={vdp:.58,four:.62};
+const fnOf=k=>R3.FN[k]||R2.FN[k],palOf=k=>R3.PAL[k.startsWith('dip')?'dip':k]||R2.PAL[k],bandOf=k=>R3.BAND[k]||OLDBAND[k]||.7;
+const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',');
+function bgCss(P,x,y){return `radial-gradient(ellipse 75% 75% at ${x.toFixed(1)}% ${y.toFixed(1)}%,${P.g},${P.bg} 70%,${P.e})`}
+
+/* one drawn surface: a splash card (577 x 427) or a start screen band (1020 x 172). Both go through paint() */
+const SURF=[];
+function fit(st){const w=st.cv.clientWidth,h=st.cv.clientHeight;if(!w)return false;const z=st.zoom?st.zoom():1,d=Math.min(2,(devicePixelRatio||1)*z),pw=Math.round(w*d),ph=Math.round(h*d);if(st.cv.width!==pw||st.cv.height!==ph){st.cv.width=pw;st.cv.height=ph}st.w=w;st.h=h;st.dpr=d;return true}
+function paint(st,ts){if(!st.w&&!fit(st))return;const light=MODE==='light',k=st.k,P0=palOf(k),P=light?Object.assign({},P0,LPAL):P0,c=st.cv.getContext('2d'),w=st.w,h=st.h;
+ let s,ox,oy,ext;if(st.band){s=bandOf(k);ox=w/2-288.5*s;oy=h*(s<1?.5:.56)-147*s;ext=w/2/s}else{s=w/577;ox=0;oy=0;ext=288.5}
+ const bg=light?'#f4f5f7':bgCss(P0,(ox+288.5*s)/w*100,(oy+147*s)/h*100);if(st.bg!==bg){st.bg=bg;st.box.style.background=bg}
+ const key=k+'|'+light+'|'+still();if(st.key!==key){st.key=key;st.d={}}
+ st.d.ext=ext;const t=still()?40:(ts-st.t0)/1000+st.off;
+ c.setTransform(st.dpr,0,0,st.dpr,0,0);c.clearRect(0,0,w,h);c.save();c.translate(ox,oy);c.scale(s,s);
+ const a=performance.now();try{fnOf(k)(c,577,427,t,P,st.d)}catch(e){console.error(k,e)}const b=performance.now();c.restore();
+ st.acc+=b-a;st.n++;st.last=b-a;if(st.n>=40){st.ms=st.acc/st.n;st.acc=0;st.n=0;if(st.msEl)st.msEl.innerHTML=`<b>${st.ms.toFixed(2)} ms</b> a picture`+(st.d.np?` · ${st.d.np} particles`:'')}}
+function surf(o){const st=Object.assign({d:{},t0:performance.now(),off:20+Math.random()*30,vis:false,acc:0,n:0,w:0,dirty:true},o);SURF.push(st);return st}
+
+/* ---------- the start screen mock (W1): the card 1020 x 607 in a 1254 x 651 window, the drawing in its 172 point band ---------- */
+const C8=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'];
+const RECP=[{n:'Night bus sketch',d:'Today, 23:12',bpm:124,k:['A','minor'],tr:[0,1,2,5,6]},{n:'Shrine Legion edit',d:'Yesterday, 18:40',bpm:145,k:['F','minor'],tr:[3,4,2,0,6,5,1,7]},{n:'Vocal comp, take 3',d:'25 Nov, 21:05',bpm:98,k:['D','major'],tr:[1,1,1,6]},{n:'Kick and bass study',d:'24 Nov, 16:30',bpm:142,k:['F♯','minor'],tr:[3,0]},{n:'Ambient pad ideas',d:'21 Nov, 09:48',bpm:80,k:['E♭','major'],tr:[5,6,7]},{n:'Untitled 4',d:'19 Nov, 22:17',bpm:120,k:null,tr:[0]}];
+const TPL=[['Beat starter','Drums and a bassline, ready to build on.'],['Audio tracks','Vocals, guitar, bass and drums tracks.']],MY=[['My psy start','Kick, Psy Bass, 2 buses, Limiter.'],['Two mics','2 audio tracks, Gate, Compressor.']];
+function wave(cv,i,col){const w=64,h=26;cv.width=w*2;cv.height=h*2;const c=cv.getContext('2d');c.scale(2,2);let s=(i+1)*9301;const r=()=>((s=(s*48271)%2147483647)/2147483647);c.fillStyle=col;c.globalAlpha=.75;for(let x=6;x<w;x+=2){const env=.35+.65*Math.abs(Math.sin(Math.floor(x/w*8)*1.7+i)),a=(r()*.6+.4)*env*h*.42;c.fillRect(x,h/2-a,1,a*2)}}
+const STAGE={};
+function mkStage(host,fam){const F=FAM[fam],X=117,Y=22,W=1020,H=607,B=172;
+ host.innerHTML=`<div class="tb"><div class="tabs" role="tablist" aria-label="Drawing shown in the start screen"></div><span class="sp"></span>${fam==='D'?'<label class="cnt"><span class="lab">Particles</span><input type="range" id="cnt" min="1" max="3" step="1" aria-label="Particle count"><span class="ro" id="cntv"></span></label>':''}
+   <div class="seg" data-sw="mode"><button data-v="dark">Dark</button><button data-v="light">Light</button></div><div class="seg" data-sw="motion"><button data-v="on">Ambient</button><button data-v="still">Reduce motion</button></div><span class="ms"></span></div>
+  <div class="mkw"><div class="scr"><div class="gridbg"></div><div class="w1card" style="left:${X}px;top:${Y}px;width:${W}px;height:${H}px"></div>
+   <div class="band" style="left:${X}px;top:${Y}px;width:${W}px;height:${B}px"><canvas></canvas><div class="w1shade"></div></div>
+   <div class="w1edge" style="left:${X}px;top:${Y+B}px;width:${W}px"></div>
+   <div class="w1logo" style="left:${X+28}px;top:${Y+B-73}px"><div class="nm">Audio<i>Lab</i><s>PRO</s></div></div><div class="w1ver" style="left:${X+28}px;top:${Y+B-31}px">Digital audio workstation · v0.300</div>
+   <div class="w1in" style="left:${X}px;top:${Y+B}px;width:${W}px;height:${H-B}px">
+    <div style="position:absolute;left:24px;top:16px;width:55%;display:flex;align-items:center;gap:10px"><span class="hd" style="flex:1">Recent projects</span><span class="q" style="width:220px">⌕<span style="flex:1">Type to search</span></span></div>
+    <div style="position:absolute;left:14px;top:54px;width:calc(55% + 10px);display:flex;flex-direction:column">${RECP.map((p,i)=>`<div class="rr${i?'':' on'}" style="--rc:64px minmax(0,1fr) 110px 122px;--rh:42px"><div class="th"><canvas data-w="${i}"></canvas><div class="cs">${p.tr.map(t=>`<b style="background:${C8[t]}"></b>`).join('')}</div></div><span class="tn">${esc(p.n)}</span><span class="dt">${esc(p.d)}</span><span class="mt">${p.bpm}<span class="u"> BPM</span>${p.k?`&nbsp;&nbsp;${esc(p.k[0])}<span class="u"> ${p.k[1]}</span>`:''}</span></div>`).join('')}</div>
+    <div style="position:absolute;left:calc(55% + 48px);right:24px;top:16px;display:flex;flex-direction:column;gap:6px"><span class="hd">Start something new</span>
+     <div class="tile pri"><span style="display:flex;gap:8px"><b>New empty project</b><kbd>⌘N</kbd></span><small>One audio and one instrument track, 120 BPM.</small></div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${TPL.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+     <span class="sub">My templates</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${MY.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+     <div class="tile"><span style="display:flex;gap:8px"><b>Open a file…</b><kbd>⌘O</kbd></span><small>A .audiolab project from your computer.</small></div></div>
+    <div style="position:absolute;left:24px;right:24px;bottom:0;height:44px;border-top:1px solid var(--m-ln);display:flex;align-items:center;gap:16px"><div class="keys"><span><b>↵</b> opens Night bus sketch</span><span><b>↑ ↓</b> choose</span><span><b>type</b> to search</span><span><b>⌘N</b> empty</span><span><b>⌘O</b> open</span></div><span style="flex:1"></span><span class="sw on"><i></i>Show at start-up</span></div></div>
+  </div></div><p class="cap"></p>`;
+ const S={fam,host,scr:$('.scr',host),mkw:$('.mkw',host),tabs:$('.tabs',host),cap:$('.cap',host),cur:null};
+ S.surf=surf({cv:$('.band canvas',host),box:$('.band',host),band:true,k:F.items[0][1],msEl:$('.ms',host),zoom:()=>S.z||1});
+ for(const it of F.items){const b=document.createElement('button');b.dataset.id=it[0];b.setAttribute('role','tab');b.innerHTML=`<b>${it[0]}</b>${it[3]?'<span class="star" title="Recommended">★</span>':''}<span>${esc(it[2])}</span>`;b.onclick=()=>show(fam,it[0],true);S.tabs.appendChild(b)}
+ STAGE[fam]=S;return S}
+function stageLook(S){if(!S.cur)return;const L=MODE==='light',it=FAM[S.fam].items.find(i=>i[0]===S.cur),P=palOf(it[1]);S.scr.classList.toggle('light',L);
+ const nm=$('.w1logo .nm',S.scr);nm.style.color=L?'#16181d':P.ink;$('i',nm).style.backgroundImage=L?'linear-gradient(90deg,#1d7fb0,#2f5fd0)':`linear-gradient(90deg,${P.a},${P.b})`;const s=$('s',nm);s.style.color=s.style.borderColor=L?'#2f5fd0':P.p;
+ const bgc=L?'244,245,247':R3.U.rgb?hexRgb(P.bg):'0,0,0';$('.w1shade',S.scr).style.background=R3.WIDE[it[1]]?`radial-gradient(ellipse 310px 96px at 150px 124px,rgba(${bgc},.94) 0,rgba(${bgc},.9) 40%,rgba(${bgc},0) 100%)`:'none';
+ $('.w1ver',S.scr).style.color=L?'#5c606b':P.m||'#8c8f9b';$('.w1edge',S.scr).style.background=L?'rgba(20,24,40,.1)':'rgba(255,255,255,.08)';
+ $$('canvas[data-w]',S.scr).forEach(cv=>{const i=+cv.dataset.w;wave(cv,i,L?'#4a5470':C8[RECP[i].tr[0]])})}
+function show(fam,id,user){const S=STAGE[fam],F=FAM[fam],it=F.items.find(i=>i[0]===id)||F.items[1];S.cur=it[0];S.surf.k=it[1];S.surf.w=0;S.surf.dirty=true;S.surf.acc=0;S.surf.n=0;
+ $$('button',S.tabs).forEach(b=>{const on=b.dataset.id===it[0];b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+ S.cap.innerHTML=it[7]?`<b>${it[0]}</b> is the drawing in the build today, shown here to compare with the reworked ones.`:`<b>${it[0]} ${esc(it[2])}.</b> ${esc(it[4])} ${esc(it[5])}`;
+ $$(`[data-cards="${fam}"] .dv`).forEach(v=>v.classList.toggle('on',v.dataset.id===it[0]));stageLook(S);if(user)store.set('show-'+fam,it[0]);kick()}
+
+/* ---------- the cards ---------- */
+function mkCard(host,fam,it){const [id,k,t,star,p,sci,src]=it,P=palOf(k),F=FAM[fam],el=document.createElement('div');el.className='dc';el.dataset.id=id;
+ el.innerHTML=`<div class="dh"><span class="id">${id}</span>${star?'<span class="star" title="Recommended">★</span>':''}<h3 title="${esc(t)}">${esc(t)}</h3><label class="chk"><input type="${F.pick}" name="pk-${fam}" id="pk-${id}"> ${F.pick==='radio'?'Pick':'In the set'}</label></div>
+  <button class="dv" data-id="${id}" title="Show ${esc(id)} in the start screen above" aria-label="Show ${esc(id)} ${esc(t)} in the start screen above"><canvas></canvas><div class="nm2">Audio<i>Lab</i><s>PRO</s></div><div class="bar3"><b style="display:block;height:100%;width:62%"></b></div></button>
+  <p><b>You see:</b> ${esc(p)}</p><p><b>The science:</b> ${esc(sci)}</p>
+  <div class="ft"><span class="ms">measuring…</span><span class="sp"></span>${src.map(s=>`<a href="${SRC[s][1]}" target="_blank" rel="noopener">Source</a>`).join('')}</div>`;
+ host.appendChild(el);const dv=$('.dv',el),st=surf({cv:$('canvas',el),box:dv,k,msEl:$('.ms',el),el,fam,id});
+ dv.onclick=()=>{show(fam,id,true);STAGE[fam].host.scrollIntoView({behavior:still()?'auto':'smooth',block:'nearest'})};
+ $('input',el).onchange=e=>{if(F.pick==='radio')PK.D=id;else{PK[fam]=PK[fam].filter(x=>x!==id);if(e.target.checked)PK[fam].push(id);PK[fam].sort()}save()};return st}
+function cardLook(){const L=MODE==='light';for(const st of SURF){if(!st.el)continue;const P=palOf(st.k),nm=$('.nm2',st.el);nm.style.color=L?'#16181d':P.ink;$('i',nm).style.backgroundImage=L?'linear-gradient(90deg,#1d7fb0,#2f5fd0)':`linear-gradient(90deg,${P.a},${P.b})`;const s=$('s',nm);s.style.color=s.style.borderColor=L?'#2f5fd0':P.p;$('.bar3 b',st.el).style.background=L?'linear-gradient(90deg,#1d7fb0,#2f5fd0)':`linear-gradient(90deg,${P.a},${P.b})`}}
+
+for(const fam of ['D','PH','FS','N']){mkStage($(`.stage[data-fam="${fam}"]`),fam);const host=$(`[data-cards="${fam}"]`);for(const it of FAM[fam].items)if(!it[7])mkCard(host,fam,it)}
+{const seen=new Set(),ul=$('#srcs');for(const fam in FAM)for(const it of FAM[fam].items)for(const s of it[6]){if(seen.has(s))continue;seen.add(s);const li=document.createElement('li');li.innerHTML=`<a href="${SRC[s][1]}" target="_blank" rel="noopener">${esc(SRC[s][0])}</a>`;ul.appendChild(li)}
+ const li=document.createElement('li');li.innerHTML='The dipole’s field, flow and direction: the sources of round 2 (docs/start-screen.md, section F).';ul.appendChild(li)}
+
+/* ---------- switches ---------- */
+function setSw(){$$('[data-sw="mode"] button').forEach(b=>b.classList.toggle('on',b.dataset.v===MODE));$$('[data-sw="motion"] button').forEach(b=>b.classList.toggle('on',b.dataset.v===MOTION));
+ for(const st of SURF){st.dirty=true}cardLook();for(const f in STAGE)stageLook(STAGE[f]);kick()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sw] button');if(!b)return;const sw=b.parentNode.dataset.sw;if(sw==='mode')MODE=b.dataset.v;else MOTION=b.dataset.v;setSw()});
+const CN=['1 · fewer','2 · today','3 · more'];
+function setCnt(v){PK.cnt=v;R3.cnt=v;$('#cnt').value=v+1;$('#cntv').textContent=CN[v];for(const st of SURF)st.dirty=true;kick()}
+$('#cnt').oninput=e=>{setCnt(+e.target.value-1);save()};
+
+/* ---------- one loop: every surface on screen, up to 60 pictures a second; one still picture each in Light or with Reduce motion ---------- */
+let raf=0,fN=0,fT=0,fMs=0;
+function loop(ts){raf=0;if(document.hidden)return;const s=still();let sum=0;
+ for(const st of SURF){if(!st.vis)continue;if(s&&!st.dirty)continue;st.dirty=false;paint(st,ts);sum+=st.last||0}
+ fN++;fMs+=sum;if(ts-fT>=1000){$('#fps').innerHTML=s?'still pictures':`<b>${Math.round(fN*1000/(ts-fT))} fps</b> · <b>${(fMs/fN).toFixed(1)} ms</b> for everything on screen`;fN=0;fMs=0;fT=ts}
+ if(!s||SURF.some(st=>st.vis&&st.dirty))raf=requestAnimationFrame(loop)}
+function kick(){if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
+document.addEventListener('visibilitychange',kick);
+const io=new IntersectionObserver(es=>{for(const e of es){const st=SURF.find(c=>c.box===e.target);if(st){st.vis=e.isIntersecting;if(st.vis)st.dirty=true}}kick()},{rootMargin:'60px'});
+const ro=new ResizeObserver(es=>{for(const e of es){if(e.target.classList.contains('mkw')){const S=Object.values(STAGE).find(x=>x.mkw===e.target);S.z=e.target.clientWidth/1254;S.scr.style.setProperty('--s',S.z);S.surf.w=0;S.surf.dirty=true;continue}const st=SURF.find(c=>c.box===e.target);if(st){st.w=0;st.dirty=true}}kick()});
+for(const st of SURF){io.observe(st.box);if(!st.band)ro.observe(st.box)}for(const f in STAGE)ro.observe(STAGE[f].mkw);
+
+/* ---------- picks line ---------- */
+function save(){store.set('picks',PK);sync()}
+function sync(){const note=$('#pnote').value.trim();
+ $('#pline').textContent=`Start screen round 3: dipole ${PK.D||'P?'} count ${PK.cnt+1} | phase ${PK.PH.join(' ')||'keep R5'} | fourier ${PK.FS.join(' ')||'keep R8'} | new ${PK.N.join(' ')||'none'}`+(note?' | note: '+note:'');
+ for(const st of SURF){if(!st.el)continue;const on=st.fam==='D'?PK.D===st.id:PK[st.fam].includes(st.id);st.el.classList.toggle('picked',on);$('input',st.el).checked=on}}
+$('#pnote').oninput=sync;
+$('#rec').onclick=()=>{Object.assign(PK,JSON.parse(JSON.stringify(REC)));setCnt(PK.cnt);save();for(const f in STAGE)show(f,f==='D'?PK.D:PK[f][0])};
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ function sel(){const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(e){}}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{sel();ok()});else{sel();ok()}};
+
+/* a bench for the docs: the mean time of one picture of each drawing, in the band at 2x and in the splash card at 2x */
+window.__bench=function(frames){const out={},cv=document.createElement('canvas'),c=cv.getContext('2d');for(const fam in FAM)for(const it of FAM[fam].items){const k=it[1],r={};for(const band of [1,0]){const w=band?1020:577,h=band?172:427;cv.width=w*2;cv.height=h*2;const s=band?bandOf(k):1,ox=band?w/2-288.5*s:0,oy=band?h*(s<1?.5:.56)-147*s:0,d={ext:band?w/2/s:288.5},P=palOf(k);
+   const run=(n,t0)=>{const a=performance.now();for(let i=0;i<n;i++){c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,w,h);c.save();c.translate(ox,oy);c.scale(s,s);fnOf(k)(c,577,427,t0+i/60,P,d);c.restore()}return(performance.now()-a)/n};run(30,20);r[band?'band':'card']=+run(frames||240,20.5).toFixed(3)}out[it[0]]=r}return out};
+
+setSw();setCnt(PK.cnt);sync();for(const f of ['D','PH','FS','N']){const it=FAM[f].items.find(i=>i[0]===store.get('show-'+f,''))||FAM[f].items.find(i=>i[3]);show(f,it[0])}kick();
+</script>

@@ -186,3 +186,75 @@ The user: "Let's do a round 3 of the start screens in Fable. When it comes to th
 - **Rework R8 Fourier series** (pink): cooler, still a correct Fourier construction.
 - **Six new drawings** in the same style for the random set.
 - Pick page only (tools/design-lab/ws/round3/); WS-1 is released as built and the round 3 picks replace or add drawings afterwards in a lane Q step.
+
+## Round 3 (WS-0c)
+
+Pick page: **AudioLab start screen, round 3**, https://claude.ai/artifact/G85f356uRtBCiWYejhE1EC (source `tools/design-lab/ws/round3/`: `start3.src.html`, the drawings `r3a_base.js` to `r3e_new.js`, built by `build3.py` into `start3.html`; screenshots, bench and console check by `shot3.py`). A pick page only: no `index.html`, `desktop/` or `native/` change.
+
+Each of the four families opens with the start screen W1 at the user's window (1254 x 651 points) showing one drawing live in its 172 point band, with tabs for the family's drawings, a Dark / Light switch and an Ambient / Reduce motion switch (Light and Reduce motion show one still picture, as in the app). Under it every drawing is a splash card (577 x 427) with what you see, the science, a source and the measured time per picture. The picks bar gives one line.
+
+### P, the dipole's particles (the F1 flow kept exactly)
+The lines, the ball, the tilt, the direction (Jupiter), the speed law V·(B/2)^0.2 and the timing of the dots are the F1 code of round 2 (`mkLine`, `each` in `r3b_dipole.js` are that table and that schedule). Only what a particle is changes. Count 1 is fewer than today (a gap of 2.3 s between dots on a line), 2 is today's (1.55 s, the WS-1 build), 3 is more (1.05 s); `R3.cnt` 0, 1, 2.
+- **P0 Today:** plain amber dots (radius 1, 0.72 inside the ball), to compare. 246 / 368 / 548 dots in all (most of them outside the band, on the long outer lines).
+- **P1 ★ Gyrating charges:** each dot is a charge winding round its line, drawn as the last 0.6 of a turn of its helix. With the magnetic moment conserved the gyro-radius goes as 1/√B and the turning rate as B: tight and quick near the ball, wide and slow far out (both compressed for the eye: radius 1.1 to 4.6 points as (B/2)^-0.17, rate 15 to 3 radians a second). Same counts as P0. ([Fitzpatrick](https://farside.ph.utexas.edu/teaching/plasma/Plasma/node23.html))
+- **P2 Field strength as density:** forty more lines, evenly spaced where they leave the ball, drawn faintly, each carrying the same flow; a dot dims as it slows, so what is left is the crowding of the lines, which is the field's strength (Faraday's picture). 448 / 658 / 994 small dots. ([Field line](https://en.wikipedia.org/wiki/Field_line))
+- **P3 Energy:** a steep spectrum (energy = hash^2.3): size 0.6 to 2 points, cool to amber, the hottest with a ring, and a small legend. Above about 1 MeV electrons all move at nearly the speed of light, so the pace stays F1's. ([Van Allen belts](https://en.wikipedia.org/wiki/Van_Allen_radiation_belt))
+- **P4 Radiation belt:** the flow as today plus 34 / 60 / 96 trapped charges on the inner shells (L 3.4 to 9 ball radii), each with its own equatorial pitch angle (36 to 80 degrees), its mirror latitude solved from B_mirror = B_eq / sin²α, gyrating and bouncing; a faint belt shade. ([Magnetosphere of Jupiter](https://en.wikipedia.org/wiki/Magnetosphere_of_Jupiter))
+- **P5 Aurora at the poles:** dots as streaks (their path over the last 70 ms), the feet of the lines glowing and flashing as a dot goes through, the two ovals as short bars on the ball (colour `P.A`, a mint green; falls back to `P.T`).
+Recommendation: **P1 at count 2**. It is the reading that answers "a scientific representation" most directly and it makes the flow look alive without adding dots. P5 is the runner-up (the detail sits on a 17 point ball, so it is subtle); P2 is the calmest.
+
+### PH, the phase portrait reworked (green, replaces R5)
+- **PH1 ★ Lorenz attractor** (`phLor`): σ 10, ρ 28, β 8/3, RK4. One long orbit (3800 points) swinging slowly about the z axis, the two fixed points marked, nine tracers started 0.001 apart every 24 s with a live "now ... apart" read-out. In the wide band, to the right: x of each of the nine against time, one line that fans out. ([Lorenz system](https://en.wikipedia.org/wiki/Lorenz_system))
+- **PH2 Flow onto the limit cycle** (`phFlow`): the Van der Pol plane filled with 130 streaks in four speed classes, the nullcline dashed, the limit cycle recomputed every picture while μ breathes between 0.3 and 3 (a near circle to a relaxation shape). In the band: dx/dt against time beside it, level with the dot. ([Scholarpedia](http://www.scholarpedia.org/article/Van_der_Pol_oscillator))
+- **PH3 Poincaré section** (`phPoin`): the driven Duffing oscillator x'' + 0.3x' − x + x³ = 0.5 cos 1.2t, chaotic; 1500 states at one drive phase, the phase swept once per 11.6 s, so the strange attractor stretches and folds; one state and its path in amber, the drive phase on a dial. ([Scholarpedia](http://www.scholarpedia.org/article/Duffing_oscillator))
+- **PH4 Road to chaos** (`phBif`): the logistic map's bifurcation diagram drawn in 14 s (a 760 x 300 picture, scaled), then a cursor sweeping r with the orbit as dots and the regime named (period 2, 4, 8, chaos, the period 3 window). ([May 1976](https://doi.org/10.1038/261459a0))
+Recommendation: **PH1**. PH2 is the closest to what R5 was, done fully.
+
+### FS, the Fourier series reworked (pink, replaces R8)
+- **FS1 ★ Circles draw the atom** (`fsAtom`): the AudioLab atom's three rings as one closed stroke, its complex Fourier series from a 512 point DFT; epicycles largest first, 2, 5, 12, 30 then 60 of them, one lap of 7 s each; the radii as bars. ([3Blue1Brown](https://www.3blue1brown.com/lessons/fourier-series))
+- **FS2 One sound, two views** (`fsStack`): the wave in front, its eight sines stacked behind in depth, the spectrum on the end wall; square, sawtooth, triangle with their exact series, gliding every 11 s. ([MathWorld](https://mathworld.wolfram.com/FourierSeries.html))
+- **FS3 Gibbs effect** (`fsGibbs`): the square wave from 1 to 24 terms across the whole band, earlier sums as ghosts, the 8.95 % overshoot level dashed and the first peaks marked. ([MathWorld](https://mathworld.wolfram.com/GibbsPhenomenon.html))
+- **FS4 Short in time, wide in frequency** (`fsUnc`): a pulse train from 30 harmonics with a bell-shaped spectrum; the two widths marked, their product 1/2π. ([Uncertainty principle, harmonic analysis](https://en.wikipedia.org/wiki/Uncertainty_principle#Harmonic_analysis))
+Recommendation: **FS1** (it is the brand's own shape). FS2 is the most useful picture for a producer.
+
+### N, six new drawings
+- **N1 ★ Drum head** (`drum`, lime): a circular membrane as a wire mesh in the modes (0,1) (1,1) (2,1) (0,2) (3,1) (1,2), Bessel functions by their integral, moving at 1, 1.59, 2.14, 2.30, 2.65, 2.92 times the lowest, still lines in amber. ([Russell, Penn State](https://www.acs.psu.edu/drussell/Demos/MembraneCircle/Circle.html))
+- **N2 Plucked string** (`string`, silver): 24 harmonics with b_n = 2 sin(nπp) / (n²π²p(1−p)), plucked at 1/5, 1/2, 1/3, 1/8; the high ones die first; bars for harmonics 1 to 16. ([Wolfe, UNSW](https://newt.phys.unsw.edu.au/jw/strings.html))
+- **N3 Mach cone** (`mach`, rose): a source at Mach 0.4 to 1.6 sending a ring every 0.14 s; the amber line is the exact envelope of the rings drawn (tangent point at r/M ahead of each centre). ([NASA Glenn](https://www.grc.nasa.gov/www/k-12/airplane/machang.html))
+- **N4 ★ Hydrogen atom** (`hydro`, violet): 1400 dots drawn from |ψ|² of 2p, 3d, 3p, 4d, 4f, 4p (m 0), re-settling by a Metropolis walk every 9 s, two tints for the two signs of ψ, a scale bar in Bohr radii. ([HyperPhysics](http://hyperphysics.phy-astr.gsu.edu/hbase/quantum/hydwf.html))
+- **N5 ★ Gravitational wave** (`chirp`, teal): GW150914 with the chirp law f = 35 Hz (τ / 0.17 s)^(-3/8), amplitude as f^(2/3), 9.5 cycles, then the ring-down at 250 Hz, 47 times slower; the two black holes (36 and 29 suns) at separation as τ^(1/4), one turn per two waves; a 20 ms scale bar. ([Abbott et al. 2016](https://doi.org/10.1103/PhysRevLett.116.061102))
+- **N6 Light wave** (`light`, cyan and red): a plane electromagnetic wave, E and B in step and at right angles, E × B along the travel, one wavelength marked. ([HyperPhysics](http://hyperphysics.phy-astr.gsu.edu/hbase/Waves/emwv.html))
+Recommendation: **N1, N4, N5**.
+
+### Numbers
+Time for one picture, mean of 240, headless Chromium with software drawing (a GPU is faster), at 2x: in the start screen's band (1020 x 172) and as the splash card (577 x 427). At 60 pictures a second there are 16.7 ms.
+
+| | band ms | card ms | | band ms | card ms |
+|---|---|---|---|---|---|
+| P0 today | 0.23 | 0.18 | FS1 atom | 0.07 | 0.07 |
+| P1 gyration | 0.84 | 0.77 | FS2 stack | 0.19 | 0.12 |
+| P2 density | 0.63 | 0.60 | FS3 Gibbs | 0.13 | 0.09 |
+| P3 energy | 0.35 | 0.36 | FS4 widths | 0.20 | 0.14 |
+| P4 belt | 0.30 | 0.31 | N1 drum | 0.07 | 0.06 |
+| P5 aurora | 0.39 | 0.64 | N2 string | 0.05 | 0.08 |
+| R5 today | 0.21 | 0.22 | N3 Mach | 0.07 | 0.06 |
+| PH1 Lorenz | 0.65 | 0.30 | N4 hydrogen | 0.33 | 0.30 |
+| PH2 flow | 0.22 | 0.17 | N5 chirp | 0.09 | 0.06 |
+| PH3 Poincaré | 0.34 | 0.28 | N6 light | 0.10 | 0.06 |
+| PH4 chaos | 0.06 | 0.04 | R8 today | 0.05 | 0.04 |
+
+Every drawing is under 1 ms a picture. One-time work on first use: PH3 about 150 000 integration steps (the section), PH1 5300 steps (the orbit), FS1 one 512 point transform, each a few milliseconds and shared between instances. Checked in the page at 1312 points wide (the mocks at 100 %), every drawing in W1 in Dark, in Light and with Reduce motion, the cards, and at 400 points wide in Light: no console errors, no sideways scroll; the page ran at 60 pictures a second.
+
+### What lane Q builds after the pick
+Line format: `Start screen round 3: dipole P1 count 2 | phase PH1 | fourier FS1 | new N1 N4 N5` (the ★ picks).
+- **Put in** `r3a_base.js` and the parts that hold picked drawings as one const beside `WSR2` (the same way `ws1_edit.py` puts `r2draw.js` in; for example `WSR3`), `SPLBG` untouched. The function shape and palettes are the splash's, so `wsFn` / `wsPal` only need the new keys.
+- **Dipole:** `wsFn('dipole')` becomes `WSR3.FN.dipP<n>` with `WSR3.cnt` = count − 1 (and `WSR3.dir` 1). The two string replacements in `ws1_edit.py` that made F1's dots smaller and fewer are then no longer needed (count 2 is that build).
+- **The random set:** each ticked PH replaces `vdp`, each ticked FS replaces `four`, each ticked N is added; `WS.SET`, the names in "Start screen drawings…" (`R3.NAME`) and `audiolab-ws-draw` follow. A stored choice that names a removed drawing falls back to all on (already the rule).
+- **Band scale:** `R3.BAND[k]` replaces the per-drawing scale table, and the host sets `d.ext` (half the visible width in frame units: band width / 2 / scale; 288.5 in the splash) before each call, including during the hand-over (interpolate it with the scale). Without `d.ext` a drawing draws its splash layout.
+- **A shade behind the name** for the drawings in `R3.WIDE` (they run the full width of the band): a radial gradient of the card's colour behind the logo and the version line, as on the page (CSS only, nothing per picture).
+- **Rules as today:** motion only at Motion Ambient, Dark, window shown; one still picture otherwise (every drawing rebuilds its state from `t` on its first call, so a still at any `t` is complete); nothing per frame once closed. `phBif` keeps one 760 x 300 canvas and `phPoin` three arrays of 1500 numbers while shown.
+- **The splash (lane G's):** unchanged by this; the same functions are ready for it if the user wants them there too.
+- Tests: extend `taskWS_1b.py` (the set and the names), a still-picture check per new drawing (non-empty canvas, no errors), frame time not worse.
+
+### Round 3 picks
+(waiting for the user's line)
