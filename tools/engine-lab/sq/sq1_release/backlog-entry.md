@@ -1,4 +1,4 @@
-## 27 November 2026, v0.294: task SQ1, the Quality switch shown as one switch "Hi-Fi", and the DC blocker after biased shapers (lane N, sound quality)
+## 27 November 2026, v0.296: task SQ1, the Quality switch shown as one switch "Hi-Fi", and the DC blocker after biased shapers (lane N, sound quality)
 
 Fired by the scheduler: the first step of task SQ (the user's AE1 picks Q0a and Q0b both now, Q10 now). Plan written: `docs/quality-build.md`. The user named the switch while this step ran (23:00 to 23:08 Brussels, recorded in the research doc and `docs/sounds-build.md`): one on/off switch "Hi-Fi" (off = `classic`, on = `clean`; no stored data changes), its short line shown next to it, and a one-time note for older songs; the interface was redone to that before release. Edit script `tools/engine-lab/sq/sq1.py` (inserts `sq1.js` before `askChoice` and `sq1.css` before `.dacv`; re-runnable, asserted anchors), test `tools/ui-tests/taskSQ1.py` (57 checks).
 

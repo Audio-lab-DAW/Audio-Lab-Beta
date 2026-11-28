@@ -9,14 +9,14 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 
 | Step | What | Status |
 |---|---|---|
-| SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | built and tested (57 of 57 on v0.294 + SQ1, 28 Nov 09:40 UTC); waits for the release freeze (the gate's run since 09:11:57 UTC), then released with `tools/engine-lab/sq/sq1_release/release.sh` |
-| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | built and tested (45 of 45 on v0.294 + SQ1 + SQ3, 28 Nov); released after SQ1 with `tools/engine-lab/sq/sq3_release/release.sh` |
+| SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | **done**, v0.296 (released 28 Nov, after the gate's freeze) |
+| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | built and tested (45 of 45 on v0.296 + SQ1 + SQ3, 28 Nov); released after SQ1 with `tools/engine-lab/sq/sq3_release/release.sh` |
 | SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | |
 | SQ4 | The Limiter style "True peak 4x" (Q13: BS.1770 detection with the meter's filter from lane E, 4x final clip); the export safety limiter replaced by it at -1 dBTP (Q14: only exports that would clip change); the export report (Q15: true peak, overs, clipped samples) through lane F's notification or dialog code. Then: sound quality complete | |
 
 (There is no SQ2: al-poly's Hi-Fi oscillators and Acid went to lane L with the picks.)
 
-## SQ1: the Quality switch, shown as Hi-Fi (built; released after the freeze)
+## SQ1: the Quality switch, shown as Hi-Fi (done, v0.296)
 
 ### What the user sees (the user's naming, 27 Nov 23:00 to 23:08 Brussels: one on/off switch "Hi-Fi")
 - Internally the values stay `'classic'` (Hi-Fi off) and `'clean'` (Hi-Fi on), so no stored data changes; the interface only says Hi-Fi on or off. The short line is shown next to the switch, not only on hover: "Hi-Fi on: higher quality sound." / "Hi-Fi off: lighter and faster, good for slower computers or big projects."
@@ -25,7 +25,7 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 - The command list: "Hi-Fi everywhere in this song" (`sq.cleanAll`) and "Hi-Fi off everywhere in this song" (`sq.classicAll`).
 
 ### The data
-- Song: `S.sq` = `'classic'` (Hi-Fi off) or `'clean'` (Hi-Fi on). Missing = Hi-Fi off: every song saved before v0.294, the demos, the Fractals song, the templates as saved, and songs built by scripts (`AudioLab.build`). Songs made in the New project window (empty, audio, instruments) start with Hi-Fi on.
+- Song: `S.sq` = `'classic'` (Hi-Fi off) or `'clean'` (Hi-Fi on). Missing = Hi-Fi off: every song saved before v0.296, the demos, the Fractals song, the templates as saved, and songs built by scripts (`AudioLab.build`). Songs made in the New project window (empty, audio, instruments) start with Hi-Fi on.
 - Effect: `f.q` = `'classic'` or `'clean'` (on the device object, beside `type`, `on`, `p`).
 - Instrument: `t.inst.quality`. Not `q`: an instrument's own parameters sit on the same object, and the Clap, the Growl, Vector FM and Orbit already use `q` as a number (filter Q). Everyone reads the quality with `sqOf(device)` (or `SQ_HOOKS.of`), never `.q` directly.
 - Missing on a device = follow the song. New devices (anything added after the song was opened: browser, paste of a device without one, menus, the Assistant, lessons) are stamped `'clean'` (Hi-Fi on), except in a song whose Hi-Fi was turned off by hand (`S.sq==='classic'`), where they are stamped `'classic'`. A new song object (opened, switched, undone, built by a script) is taken as it is: nothing is stamped when a song opens.

@@ -3,7 +3,7 @@
    - per device: the field q on an effect (f.q) and quality on an instrument (t.inst.quality: an instrument's own parameters sit on the
      same object and several already use q as a number: the Clap, Growl, Vector FM and Orbit), 'classic' or 'clean'; missing = follow the
      song; read it with sqOf(device) (SQ_HOOKS.of), never .q directly;
-   - per song: S.sq, 'classic' or 'clean'; missing = 'classic' (every song saved before v0.294, the demos and the Fractals song);
+   - per song: S.sq, 'classic' or 'clean'; missing = 'classic' (every song saved before v0.296, the demos and the Fractals song);
      songs made in the New project window (empty, audio, instruments) start 'clean'; it is the default for devices without their own;
    - Classic is today's bits (the release gate's export check proves it); Clean is the improved sound of that device;
    - new devices (added after the song was opened: browser, paste, menus, the Assistant, lessons) get 'clean', except in a song the user
@@ -21,7 +21,7 @@
    (y = x - x1 + R*y1, R = 1 - 2*pi*5/sr, in double, IIRFilterNode). Classic goes through a gain of exactly 1 (bit-identical). Biased
    shapers of lane L use SQ_HOOKS.dc(ctx) or the same formula in their worklets.
    Nothing here runs per frame: the scan runs in changed(), syncGraph and the offline renders, and is a loop over the devices. */
-const SQ={v:'0.294',LV:1,S:null,known:new Set(),wr:false,
+const SQ={v:'0.296',LV:1,S:null,known:new Set(),wr:false,
  DEV:{clip:'while Asymmetry is not 0, a DC blocker (5 Hz) after the clipper removes the slow offset that asymmetric clipping makes, so it no longer eats headroom or pushes the next limiter on one side.'},
  n:{scan:0,stamp:0}};
 const SQ_HOOKS=window.SQ_HOOKS=Object.assign(window.SQ_HOOKS||{},{
