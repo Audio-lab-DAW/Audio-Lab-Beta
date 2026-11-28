@@ -138,3 +138,14 @@ reused** (section 9.4, rule 1).
 | `mixer.strip.sendPrePost` | send before or after the fader ring (lane K, MX-1; named by XT-DL3) | `.mxsr .mxpp` | 0.295 |
 | `mixer.strip.output` | channel Output button (lane K, MX-1; named by XT-DL3) | `.mx:not(.master) .mxout` | 0.295 |
 | `mixer.master.monoLoss` | Mono loss button (lane D; named by XT-DL3) | `.mx.master [data-niml]` | 0.295 |
+
+## Stem split (lane R, task SG2): written as `data-al` by the code itself
+
+Not yet in `CONTROLS` (its areas are the transport, the track headers and the mixer); lane H adds them when the Workshop covers dialogs.
+
+- `stem.lanes`: the lanes of a stem split (Split sheet, Audio to MIDI) (0.307)
+- `stem.keepWorking`: Keep working button (0.307)
+- `stem.stop`: Stop button (0.307)
+- `stem.discard`: Discard button (0.307)
+- `stem.add`: Add N tracks button (0.307)
+- `stem.lane.keep`: a stem's tick (0.307)

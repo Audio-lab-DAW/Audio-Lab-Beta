@@ -1899,6 +1899,31 @@ body.fx-top #fx.dsh.collapsed .fxbtns{top:auto!important;bottom:-28px}
 .a2df{display:flex;gap:8px;align-items:center}.a2df>span{flex:1}.a2df button{min-height:32px;padding:0 14px}.a2df button.pri{background:var(--blf);color:#fff;border-color:var(--blue)}.a2df button:disabled{opacity:.45}
 .a2dnote{font-size:var(--fs2);color:#a9acb8;line-height:1.4}.a2derr{font-size:var(--fs2);color:#ffb4b4;line-height:1.4}.a2dengs{display:grid;gap:6px}
 .a2de{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);font-size:var(--fs2);color:#e6e8ee}.a2de.dis{opacity:.5}.a2de small{display:block;color:#a9acb8}.a2de em{display:block;font-style:normal;color:#8fb8ff;font-size:var(--fs1);margin-top:2px}
+/* task SG2-2 (lane R): the stem split's lanes (G1), the draft stretch (P1) and the scan over the chunk at work (F1); no backdrop-filter */
+.sgL{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;font-variant-numeric:tabular-nums}
+.sgRo{font:500 11.5px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#e6e8ee;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;min-height:18px}
+.sgRo .ph,.sgSub{color:#8c8f9b;font-family:Inter,system-ui,sans-serif}.sgSub{font-size:11.5px}
+.sgRo .lku,.sgLv .lku{margin-left:2px}
+.sgCol{position:relative;display:flex;flex-direction:column;gap:3px;min-width:0}
+.sgLn{display:grid;grid-template-columns:62px minmax(0,1fr);gap:6px;align-items:stretch;height:34px;min-width:0}
+.sgL.n6 .sgLn{height:26px}.sgLn.mix{height:22px}
+.sgNm{display:flex;align-items:center;gap:5px;font:500 11px Inter,system-ui,sans-serif;color:#e6e8ee;white-space:nowrap;overflow:hidden}
+.sgNm i{width:8px;height:8px;border-radius:2px;flex:none}.sgNm em{font:500 9.5px 'JetBrains Mono',monospace;color:#8c8f9b;font-style:normal;letter-spacing:.06em}
+.sgCv{position:relative;border-radius:3px;overflow:hidden;background:#05070b;min-width:0;box-shadow:inset 0 0 0 var(--lk-hair,1px) rgba(255,255,255,.06)}
+.sgCv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sgLn.off .sgCv{opacity:.35}
+.sgLv{position:absolute;right:4px;top:2px;font:500 9.5px 'JetBrains Mono',monospace;color:#e6e8ee;background:rgba(16,17,22,.72);padding:0 3px;border-radius:2px}
+.sgCk{position:absolute;left:4px;top:3px;margin:0;accent-color:#2f6fe0}
+.sgOv{position:absolute;top:0;bottom:0;right:0;left:68px;pointer-events:none}
+.sgEdge{position:absolute;top:0;bottom:0;width:0;border-left:var(--lk-hair,1px) solid var(--unit,#ffb547);box-shadow:0 0 6px rgba(255,181,71,.55);transition:left calc(var(--ov-mo,1)*120ms) linear}
+.sgEdge b{position:absolute;top:1px;left:3px;font:600 9.5px 'JetBrains Mono',monospace;color:var(--unit,#ffb547);white-space:nowrap;text-shadow:0 0 3px #05070b,0 0 3px #05070b}
+.sgWork{position:absolute;top:0;bottom:0;background:rgba(76,201,240,.13);overflow:hidden}
+.sgWork::after{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent 0,rgba(255,181,71,.2) 50%,transparent 100%);animation:sgScan 1.6s linear infinite}
+body.lite .sgWork,body.lkm1 .sgWork,body.fxstill .sgWork,.sgL.still .sgWork{background:repeating-linear-gradient(135deg,rgba(76,201,240,.16) 0 4px,transparent 4px 8px)}body.lite .sgWork::after,body.lkm1 .sgWork::after,body.fxstill .sgWork::after,.sgL.still .sgWork::after{display:none;animation:none}body.lite .sgEdge,body.lkm1 .sgEdge,body.fxstill .sgEdge,.sgL.still .sgEdge{transition:none}
+@media (prefers-reduced-motion:reduce){.sgWork{background:repeating-linear-gradient(135deg,rgba(76,201,240,.16) 0 4px,transparent 4px 8px)}.sgWork::after{display:none;animation:none}.sgEdge{transition:none}}
+@keyframes sgScan{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.sgAx{display:flex;justify-content:space-between;margin-left:68px;font:500 9.5px 'JetBrains Mono',monospace;color:#8c8f9b}
+.sgSh .sgB{display:block;padding:8px 16px 12px}.sgSh .sh{display:flex;align-items:center;gap:8px}.sgSh .sh b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sgEn{font:500 10.5px 'JetBrains Mono',monospace;color:#8c8f9b}
 .a2dbar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.a2dbar i{display:block;height:100%;background:#4cc9f0;transition:width .2s}
 .a2sr{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);font-size:var(--fs2)}.a2sr>i{width:10px;height:10px;border-radius:50%}.a2sr em{font-style:normal;color:#8a8d99;font-size:var(--fs1)}.a2sr button{min-width:30px;min-height:28px}.a2sr select{min-height:26px}
 /* v0.218 (task AO): while AudioLab is in the background every CSS animation stands still (the class sits on the root element) */
@@ -5117,6 +5142,91 @@ function sgLR(buf){const L=buf.getChannelData(0).slice(),R=(buf.numberOfChannels
 /* the mix's own columns, in the worker */
 async function sgMixCols(buf,cw){const[L,R]=sgLR(buf);const d=await sgReq({t:'mix',L,R,sr:buf.sampleRate,cw},[L.buffer,R.buffer]);return d.cols}
 const SG_HOOKS={onChunk:(job,msg)=>{}};/* for any lane: SG_HOOKS.onChunk(job,msg) is called after every chunk of every stem split job (replace or wrap it) */
+/* ===================== stem split lanes, step 2 (v0.307, task SG2-2, lane R; the user's picks G1, P1, F1) =====================
+   G1: the Split sheet stays open after Split and becomes the loading bar: the mix's spectrogram faint on top (drawn at once, no model
+   needed), then one lane per stem in viridis (INS.cmap, lane E), filled at the true song position as each chunk lands. An amber
+   hairline edge (--unit, --lk-hair) marks the last final sample; the read-out row uses L2 (values in ink, units in amber small caps).
+   P1: the draft stretch of a chunk (its last 1.95 s, cross-faded with the next chunk) is drawn at half strength and repainted.
+   F1: a soft CSS scan over the chunk being worked on; a still hatch under Reduce motion, Motion "Signal only" or Light mode.
+   Nothing runs per frame: one putImageData dirty rectangle per lane per chunk, the edge moves by a 120 ms CSS transition (0 with
+   Reduce motion), the read-out changes once a second while a split runs. When it ends each lane shows its level and a tick
+   (silent stems unticked) and "Add N tracks" makes them. Keep working closes the sheet; the split goes on (card in SG2-3).
+   Jobs: sgJob(o) -> job {kind, name, of, stems:[{name,col,k}], ns, cw, total, phase, n, done, fin, pe, work, mix, cols, st, runs};
+   sgLanes(host, job) draws the layout into host and returns its element; sgJobCols(job,msg) takes a {t:'cols'} message. */
+function sgReduce(){const B=document.body.classList;return B.contains('lite')||B.contains('lkm1')||B.contains('fxstill')||matchMedia('(prefers-reduced-motion: reduce)').matches}
+function sgFmt(s){s=Math.max(0,s);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)}
+function sgFmt0(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function sgJob(o){const quick=o.kind==='quick',sr=quick?o.sr:44100,total=quick?o.len:Math.ceil(o.len*44100/o.sr),N=343980,ST=N-Math.floor(N/4);
+  const j=Object.assign({phase:'wait',done:0,fin:0,pe:0,work:null,mix:null,cols:null,st:null,cw:0,runs:[],t0:performance.now(),lastAt:performance.now(),views:new Set(),ui:new Set(),dl:null,tick:0,bg:false},o);
+  j.sr=sr;j.total=total;j.ns=j.stems.length;j.n=quick?Math.ceil(total/(1<<18)):Math.max(1,Math.ceil(total/ST));j.ST=quick?(1<<18):ST;j.N=quick?(1<<18):N;j.mb=quick?0:NEUM[o.kind].mb;
+  SG2.jobs.add(j);return j}
+function sgSetCw(j,cw){j.cw=Math.max(64,Math.min(2048,Math.round(cw)||512));j.cols=new Uint8Array(j.ns*96*j.cw);j.st=new Uint8Array(j.cw)}
+function sgLut(){return SG2.lut||(SG2.lut=INS.cmap('viridis'))}
+/* alpha per level, as on the pick page: quiet bins fade into the lane's dark background (the stems in viridis, the mix a faint grey) */
+function sgAlpha(){if(!SG2.al){const a=new Uint8Array(256),m=new Uint8Array(256);for(let v=0;v<256;v++){a[v]=Math.round(Math.min(1,v/255*1.7)*255);m[v]=Math.round(Math.pow(v/255,1.2)*.5*255)}SG2.al=[a,m]}return SG2.al}
+/* one dirty rectangle: columns c0..c1 of lane si (-1 = the mix) into the view's canvas */
+function sgPaint(j,v,c0,c1){c0=Math.max(0,c0);c1=Math.min(j.cw,c1);const w=c1-c0;if(w<=0||!v.g)return;const im=v.g.createImageData(w,96),o=im.data,L=sgLut(),cw=j.cw,mix=v.si<0,src=mix?j.mix:j.cols,base=mix?0:v.si*96*cw,draft=!document.body.classList.contains('lite');
+  if(!src)return;const[AS,AM]=sgAlpha();for(let c=0;c<w;c++){const cc=c0+c,s=mix?2:j.st[cc];if(!s||(s===1&&!draft))continue;for(let r=0;r<96;r++){const v=src[base+r*cw+cc],p=(r*w+c)*4;
+    if(mix){o[p]=o[p+1]=o[p+2]=215;o[p+3]=AM[v]}else{const q=v*3;o[p]=L[q];o[p+1]=L[q+1];o[p+2]=L[q+2];o[p+3]=s===2?AS[v]:AS[v]>>1}}}
+  v.g.putImageData(im,c0,0)}
+function sgView(j,cv,si){cv.width=j.cw;cv.height=96;const v={cv,si,g:cv.getContext('2d')};j.views.add(v);sgPaint(j,v,0,j.cw);return v}
+function sgDrop(j,root){for(const v of[...j.views])if(!v.cv.isConnected||(root&&root.contains(v.cv)))j.views.delete(v)}
+function sgJobCols(j,m){const c0=m.fin[0],c2=m.prov[1],n=c2-c0;if(n>0&&j.cols)for(let s=0;s<j.ns;s++)for(let r=0;r<96;r++)j.cols.set(m.cols.subarray((s*96+r)*n,(s*96+r+1)*n),(s*96+r)*j.cw+c0);
+  if(j.st){j.st.fill(2,m.fin[0],m.fin[1]);j.st.fill(1,m.prov[0],m.prov[1])}
+  const now=performance.now();if(j.phase==='run')j.runs.push(now-j.lastAt);j.lastAt=now;j.phase=m.i+1>=m.n?'fin':'run';j.done=m.i+1;j.n=m.n;j.fin=m.s1;j.pe=m.pe;
+  j.work=m.i+1>=m.n?null:[m.s1,Math.min(j.total,m.s1+j.ST)];
+  sgDrop(j);for(const v of j.views)if(v.si>=0)sgPaint(j,v,c0,c2);try{SG_HOOKS.onChunk(j,m)}catch(e){console.warn('SG_HOOKS.onChunk',e)}sgUpd(j)}
+function sgPhase(j,ph,x){if(ph==='dl'){j.phase='dl';j.dl=x}else if((ph==='init'||ph==='cached')&&j.phase!=='init'){j.phase='init'}else if(ph==='run'&&j.phase!=='run'&&j.phase!=='fin'){j.phase='run';j.lastAt=performance.now();if(!j.work)j.work=[0,Math.min(j.total,j.ST)]}else return;sgUpd(j)}
+function sgUpd(j){for(const f of[...j.ui])try{f()}catch(e){console.warn('stem split view',e)}
+  const run=j.phase!=='done'&&j.phase!=='err'&&j.phase!=='stop';if(run&&!j.tick)j.tick=setInterval(()=>{if(!j.ui.size)return;for(const f of j.ui)try{f(1)}catch(e){}},1000);if(!run&&j.tick){clearInterval(j.tick);j.tick=0}}
+function sgEnd(j,ph){j.phase=ph;sgUpd(j);if(ph!=='done')SG2.jobs.delete(j);if(j.tick){clearInterval(j.tick);j.tick=0}
+  if(ph==='done'&&j.runs.length){const m=j.runs.slice(-3).reduce((a,b)=>a+b,0)/Math.min(3,j.runs.length)/1000;UI.sgRate=Object.assign({},UI.sgRate,{[j.kind]:+m.toFixed(3)});saveUI()}}
+/* remaining time: the mean of the last three chunks times the chunks left; before the first chunk this computer's last speed for the model */
+function sgEta(j){if(j.phase==='done'||j.phase==='fin'||j.phase==='err'||j.phase==='stop')return null;const now=performance.now(),left=j.n-j.done;
+  let m=j.runs.length?j.runs.slice(-3).reduce((a,b)=>a+b,0)/Math.min(3,j.runs.length):null,from='';if(m==null){const r=UI.sgRate&&UI.sgRate[j.kind];if(!r)return{ms:null};m=r*1000;from='last'}
+  let rem=left*m;if(j.phase==='run')rem-=Math.min(m*.9,now-j.lastAt);return{ms:Math.max(0,rem),from}}
+const sgU=t=>`<span class="lku">${t}</span>`;
+function sgRoHtml(j,short){const pos=j.fin/j.total*(j.total/j.sr),len=j.total/j.sr,E=sgEta(j),q=j.kind==='quick';let ph='';
+  if(j.phase==='dl')ph=`<span class="ph">Downloading the model (first time only)</span><span>${Math.round((j.dl&&j.dl.mb)||0)} / ${j.mb}${sgU('MB')}</span>`;
+  else if(j.phase==='init')ph=`<span class="ph">Loading the model</span>`;else if(j.phase==='wait')ph=`<span class="ph">Starting</span>`;
+  else if(j.phase==='done'||j.phase==='fin')ph=`<span class="ph">Done</span>`;else if(j.phase==='stop')ph=`<span class="ph">Stopped</span>`;
+  const ch=j.phase==='dl'||j.phase==='init'||j.phase==='wait'?'':`<span>${j.done} / ${j.n}${sgU(q?'blocks':'chunks')}</span>`,cl=j.of?`<span>clip ${j.of.i} of ${j.of.n}</span>`:'';
+  const e=!E?'':E.ms==null?`<span class="ph">estimating…</span>`:`<span>≈ ${sgFmt0(E.ms/1000)}${sgU('left')}</span>${E.from==='last'&&!short?'<span class="ph">from your last split</span>':''}`;
+  if(short)return`${cl}${ch}${e}`;return`${cl}${ph}${ch}<span>${sgFmt(pos)} / ${sgFmt(len)}${sgU('s')}</span>${j.phase==='done'||j.phase==='fin'?`<span>${j.ns}${sgU(j.ns===1?'stem':'stems')}</span>`:e}`}
+/* the layout G1: read-out, mix lane, stem lanes, the edge and the chunk at work over the lane column, the time axis */
+function sgLanes(host,j,o){o=o||{};const el=document.createElement('div');el.className='sgL'+(j.ns>4?' n6':'')+(sgReduce()?' still':'');el.dataset.al='stem.lanes';
+  const len=j.total/j.sr,ax=[0,.25,.5,.75,1].map(f=>`<span>${sgFmt0(f*len)}</span>`).join('');
+  el.innerHTML=`<div class="sgRo" aria-live="off"></div><div class="sgCol"><div class="sgLn mix"><div class="sgNm"><em>MIX</em></div><div class="sgCv"><canvas></canvas></div></div>
+   ${j.stems.map((x,i)=>`<div class="sgLn" data-s="${i}"><div class="sgNm" title="${esc(x.name)}"><i style="background:${x.col}"></i>${esc(x.name)}</div><div class="sgCv"><canvas></canvas><span class="sgLv" hidden></span></div></div>`).join('')}
+   <div class="sgOv"><div class="sgWork" hidden></div><div class="sgEdge" hidden><b></b></div></div></div><div class="sgAx">${ax}</div>
+   <div class="sgSub">${o.sub||(j.kind==='quick'?'Quick split, built in. Each block is final when it is done.':'HTDemucs v4 by Meta on this computer. You can keep working; Stop changes nothing.')}</div>`;
+  host.appendChild(el);if(!j.cw){const r=el.querySelector('.sgLn[data-s] .sgCv').getBoundingClientRect();sgSetCw(j,(r.width||440)*(window.devicePixelRatio||1))}
+  const cvs=[...el.querySelectorAll('.sgCv canvas')];sgView(j,cvs[0],-1);cvs.slice(1).forEach((cv,i)=>sgView(j,cv,i));
+  const ro=el.querySelector('.sgRo'),ed=el.querySelector('.sgEdge'),wk=el.querySelector('.sgWork'),lv=[...el.querySelectorAll('.sgLv')];
+  const f=tickOnly=>{if(!el.isConnected){j.ui.delete(f);sgDrop(j,el);return}ro.innerHTML=sgRoHtml(j,false);if(tickOnly)return;
+    const fin=j.phase==='done'||j.phase==='fin',fr=j.fin/j.total;ed.hidden=fin||(!j.done&&j.phase!=='run');ed.style.left=(fr*100)+'%';ed.firstElementChild.textContent=sgFmt(j.fin/j.sr);
+    wk.hidden=!j.work||fin||j.phase==='err'||j.phase==='stop';if(j.work){wk.style.left=(j.work[0]/j.total*100)+'%';wk.style.width=Math.max(0,(j.work[1]-j.work[0])/j.total*100)+'%'}
+    el.classList.toggle('still',sgReduce());if(j.phase==='done'&&j.lv)j.lv.forEach((d,i)=>{const s=lv[i];if(!s)return;s.hidden=false;s.textContent=d<-60?'silent':d.toFixed(1)+' dB'})};
+  j.ui.add(f);f();return el}
+/* the Split sheet after Split: lanes, Keep working / Stop / Add N tracks */
+function sgSheet(m,j){m.dataset.sg='1';const eng=j.kind==='quick'?'Quick split':'HTDemucs · '+j.ns+(j.ns===1?' stem':' stems');
+  m.innerHTML=`<div class="sheet sgSh" role="dialog" aria-label="Split into stems" style="width:min(580px,94vw)"><div class="sh"><b>Split “${esc(j.name)}”</b><span class="sgEn">${esc(j.kind==='quick'?eng:(j.kind==='n6'?'HTDemucs 6 stems':'HTDemucs 4 stems'))}</span></div><div class="impb sgB"></div>
+   <div class="sf"><button id="sgKeep" data-al="stem.keepWorking" title="Close this window and go on working; the split goes on and tells you when it is done">Keep working</button><span></span><button id="sgStop" data-al="stem.stop" title="Stop the split: nothing is changed">Stop</button><button id="sgDiscard" data-al="stem.discard" hidden title="Close without adding the stems: nothing is changed">Discard</button><button id="sgAdd" class="pri" data-al="stem.add" disabled title="Add the ticked stems as new tracks below the clip (one undo step)">Add stems</button></div></div>`;
+  j.sheet=m;sgLanes(m.querySelector('.sgB'),j);const add=m.querySelector('#sgAdd'),stop=m.querySelector('#sgStop'),keep=m.querySelector('#sgKeep'),dis=m.querySelector('#sgDiscard');
+  const f=()=>{if(!m.isConnected){j.ui.delete(f);return}const d=j.phase==='done';add.disabled=!d;stop.hidden=d;dis.hidden=!d;keep.hidden=d;const n=j.on?j.on.filter(Boolean).length:0;add.textContent=d?`Add ${n} track${n===1?'':'s'}`:'Add stems';add.disabled=!d||!n;
+    if(d&&!m.querySelector('.sgCk'))m.querySelectorAll('.sgLn[data-s]').forEach(r=>{const i=+r.dataset.s,c=document.createElement('input');c.type='checkbox';c.className='sgCk';c.dataset.al='stem.lane.keep';c.checked=!!j.on[i];c.title='Add '+j.stems[i].name+' as a track';c.setAttribute('aria-label','Add '+j.stems[i].name);
+      c.onchange=()=>{j.on[i]=c.checked;r.classList.toggle('off',!c.checked);f()};r.classList.toggle('off',!c.checked);r.querySelector('.sgCv').appendChild(c)})};
+  j.ui.add(f);f();
+  keep.onclick=()=>sgKeep(j);stop.onclick=()=>sgStop(j);dis.onclick=()=>{if(j.pick)j.pick(null)};add.onclick=()=>{if(j.pick&&j.on)j.pick(j.on.map((v,i)=>v?i:-1).filter(i=>i>=0))};
+  m.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();if(j.phase!=='done')sgKeep(j)}});setTimeout(()=>{if(m.isConnected)keep.focus()},30)}
+function sgStop(j){if(j.kind==='quick')sgStopQuick();else sgStopNeural()}
+/* Keep working: the sheet goes away, the split goes on; SG_HOOKS.keep(job) shows it elsewhere (S1, step 3), else the job pill */
+function sgKeep(j){if(j.bg)return;j.bg=true;if(j.sheet){sgDrop(j,j.sheet);j.sheet.remove();j.sheet=null}if(SG_HOOKS.keep)SG_HOOKS.keep(j);else sgPill(j)}
+function sgPill(j){const f=()=>{if(!j.bg||j.card){j.ui.delete(f);return}if(j.phase==='dl')mdJob('stem',`Downloading the stem model, ${j.mb} MB (only the first time)`,j.dl?j.dl.p:0);else if(j.phase==='init')mdJob('stem','Loading the stem model',null);
+    else if(j.phase==='run'||j.phase==='fin')mdJob('stem',j.kind==='quick'?'Splitting into stems':'Separating with HTDemucs',j.done/j.n);else{mdJobEnd('stem');j.ui.delete(f)}};j.ui.add(f);f()}
+function sgLevels(bufs){return bufs.map(b=>{let pk=0;for(let ch=0;ch<b.numberOfChannels;ch++){const d=b.getChannelData(ch);for(let k=0;k<d.length;k+=3){const v=Math.abs(d[k]);if(v>pk)pk=v}}return 20*Math.log10(Math.max(pk,1e-6))})}
+/* several clips dropped with "the same for the other files": the read-out says clip 2 of 3 */
+{const f=importFiles;importFiles=async function(files){const n=[...(files||[])].filter(x=>/^audio\//.test(x.type)||/\.(wav|mp3|aif|aiff|flac|m4a|ogg)$/i.test(x.name)).length;SG2.batch=n>1?{n,k:0}:null;try{return await f.apply(this,arguments)}finally{SG2.batch=null}}}
 /* ===================== neural stem separation: HTDemucs v4 (Meta, MIT weights) running in the browser =====================
    onnxruntime-web (WASM) in a background worker, the model downloaded once from Hugging Face and kept in the browser cache.
    7.8 s chunks with 25% overlap and linear cross-fades (overlap-add), at 44.1 kHz. */
@@ -5163,19 +5273,32 @@ function stemAsk(name){return new Promise(res=>{let m=document.getElementById('s
   m.addEventListener('change',e=>{if(e.target.name==='steng')drawC()});drawC();for(const k of['n4','n6'])neuCached(k).then(c=>{const el=m.querySelector(`[data-cache="${k}"]`);if(el&&c)el.textContent='downloaded'});
   const upd=()=>rs.forEach(r=>{const d=D.find(x=>x[0]===r.dataset.k);r.nextElementSibling.textContent=r.value+(d[2]?' '+d[2]:'')});rs.forEach(r=>r.oninput=upd);
   $('#stReset',m).onclick=()=>{rs.forEach(r=>r.value=D.find(x=>x[0]===r.dataset.k)[5]);upd()};
-  const done=v=>{m.remove();res(v)};$('#stNo',m).onclick=()=>done(null);m.addEventListener('pointerdown',e=>{if(e.target===m)done(null)});
-  $('#stGo',m).onclick=()=>{const P={engine:eng()};rs.forEach(r=>P[r.dataset.k]=+r.value);P.keep=[...m.querySelectorAll('[data-s]')].map(c=>c.checked);if(!P.keep.some(Boolean))return toast('Pick at least one stem.');done(P)}})}
-async function stemsFor(t,c){if(!BUFS.has(c.buf)){toast('The audio for this clip is not loaded.');return}ensureCtx();const src=BUFS.get(c.buf).buf,names0=['Drums','Bass','Vocals','Other'],cols0=['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'];const PS=await stemAsk(c.name||t.name);if(!PS)return;
-  if(PS.engine!=='quick'){const M=NEUM[PS.engine];let lastT=0;const say=m=>{const n=performance.now();if(n-lastT>400){lastT=n;toast(m)}};
-    try{const sgj={kind:PS.engine,name:c.name||t.name},sgc=d=>SG_HOOKS.onChunk(sgj,d);const all=await neuSeparate(src,PS.engine,PS.keep,(ph,p,mb)=>{if(ph==='dl')mdJob('stem',`Downloading the stem model, ${M.mb} MB (only the first time)`,p);else if(ph==='init')mdJob('stem','Loading the stem model',null);else if(ph==='run')mdJob('stem','Separating with HTDemucs',p)},sgc);mdJobEnd('stem');
-      const keepI=PS.keep.map((k,i)=>k?i:-1).filter(i=>i>=0),bufs=all.filter(Boolean);pushUndo();const at=S.tracks.indexOf(t)+1;
-      bufs.forEach((b,j)=>{const i=keepI[j],id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+M.stems[i],M.cols[i]);S.tracks.splice(at+j,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+M.stems[i].toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
-      c.mute=true;changed(true);toast(`Done: ${bufs.length} neural stem track${bufs.length===1?'':'s'} added below. The original clip is muted.`)}
-    catch(e){mdJobEnd('stem');const ok=await askChoice('The neural split could not run',`${e&&e.message||e}. This needs an internet connection the first time (the model and the engine come from Hugging Face and jsDelivr). Use the quick split instead?`,[{label:'Cancel',v:null},{label:'Quick split',v:1,cls:'pri'}]);if(ok){PS.engine='quick';PS.keep=[true,true,true,true];Object.assign(PS,{bass:140,vlo:140,vhi:9000,focus:1.5,smooth:8})}else return}
-    if(PS.engine!=='quick')return}
-  mdJob('stem','Splitting into stems',0);try{const sgj={kind:'quick',name:c.name||t.name};const all=await stemSplit(src,p=>mdJob('stem','Splitting into stems',p),PS,d=>SG_HOOKS.onChunk(sgj,d));mdJobEnd('stem');const bufs=all.filter((b,i)=>PS.keep[i]),names=names0.filter((n,i)=>PS.keep[i]),cols=cols0.filter((n,i)=>PS.keep[i]);
-    pushUndo();const at=S.tracks.indexOf(t)+1;bufs.forEach((b,i)=>{const id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+names[i],cols[i]);S.tracks.splice(at+i,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+names[i].toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
-    c.mute=true;changed(true);toast('Done. '+bufs.length+' stem track'+(bufs.length===1?'':'s')+' added below. The original clip is muted. Quick split is approximate: use it for sketching and remixing.')}catch(e){mdJobEnd('stem');toast('Could not split this audio: '+(e&&e.message||e))}}
+  const done=v=>{if(m.dataset.sg)return;m.remove();res(v)};$('#stNo',m).onclick=()=>done(null);m.addEventListener('pointerdown',e=>{if(e.target===m)done(null)});
+  $('#stGo',m).onclick=()=>{const P={engine:eng()};rs.forEach(r=>P[r.dataset.k]=+r.value);P.keep=[...m.querySelectorAll('[data-s]')].map(c=>c.checked);if(!P.keep.some(Boolean))return toast('Pick at least one stem.');m.dataset.sg='1';P.m=m;res(P)}})}/* task SG2-2: the sheet stays, stemsFor turns it into the lanes */
+/* task SG2-2: the split fills the lanes of the Split sheet (sgSheet); Keep working sends it on in the background; Add N tracks adds the ticked stems */
+async function stemsFor(t,c){if(!BUFS.has(c.buf)){toast('The audio for this clip is not loaded.');return}
+  if([...SG2.jobs].some(j=>j.phase!=='done')){toast('A stem split is already running. Wait for it, or stop it first.');return}
+  ensureCtx();const src=BUFS.get(c.buf).buf,names0=['Drums','Bass','Vocals','Other'],cols0=['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'],of=SG2.batch&&IMPCH&&IMPCH.all?{i:++SG2.batch.k,n:SG2.batch.n}:null;
+  const PS=await stemAsk(c.name||t.name);if(!PS)return;let m=PS.m,j,bufs;delete PS.m;
+  for(;;){const q=PS.engine==='quick',M=q?null:NEUM[PS.engine],names=q?names0:M.stems,cols=q?cols0:M.cols;
+    j=sgJob({kind:PS.engine,name:c.name||t.name,of,len:src.length,sr:src.sampleRate,stems:names.map((n,i)=>({name:n,col:cols[i],k:i})).filter((x,i)=>PS.keep[i])});
+    if(m&&m.isConnected)sgSheet(m,j);else{sgSetCw(j,880);sgKeep(j)}
+    sgMixCols(src,j.cw).then(x=>{j.mix=x;sgDrop(j);for(const v of j.views)if(v.si<0)sgPaint(j,v,0,j.cw)}).catch(()=>{});
+    const onCols=d=>sgJobCols(j,d);onCols.cw=j.cw;onCols.ks=j.stems.map(x=>x.k);
+    try{if(q){sgPhase(j,'run');const all=await stemSplit(src,null,PS,onCols);bufs=all.map((b,i)=>PS.keep[i]?b:null)}
+      else bufs=await neuSeparate(src,PS.engine,PS.keep,(ph,p,mb)=>sgPhase(j,ph,{p,mb}),onCols);break}
+    catch(e){const sh=j.sheet;if(e&&e.stopped){sgEnd(j,'stop');if(sh)sh.remove();toast('Stopped. Nothing was changed.');return}sgEnd(j,'err');
+      if(!q){const ok=await askChoice('The neural split could not run',`${e&&e.message||e}. This needs an internet connection the first time (the model and the engine come from Hugging Face and jsDelivr). Use the quick split instead?`,[{label:'Cancel',v:null},{label:'Quick split',v:1,cls:'pri'}]);
+        if(ok){PS.engine='quick';PS.keep=[true,true,true,true];Object.assign(PS,{bass:140,vlo:140,vhi:9000,focus:1.5,smooth:8});m=j.sheet;if(m)sgDrop(j,m);continue}if(j.sheet)j.sheet.remove();return}
+      if(sh)sh.remove();toast('Could not split this audio: '+(e&&e.message||e));return}}
+  const got=j.stems.map(x=>bufs[x.k]);j.bufs=got;j.lv=sgLevels(got);j.on=j.lv.map(d=>d>-60);const pr=new Promise(r=>j.pick=r);sgEnd(j,'done');
+  const pick=j.bg?j.on.map((v,i)=>v?i:-1).filter(i=>i>=0):await pr;j.pick=null;SG2.jobs.delete(j);
+  if(j.sheet){sgDrop(j,j.sheet);j.sheet.remove();j.sheet=null}
+  if(!pick||!pick.length){j.added=0;if(SG_HOOKS.added)SG_HOOKS.added(j);else toast(pick?'No stem had sound, so nothing was added.':'Nothing was changed.');return}
+  pushUndo();j.undo=UNDO[UNDO.length-1];const at=S.tracks.indexOf(t)+1;
+  pick.forEach((li,n)=>{const x=j.stems[li],b=got[li],id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+x.name,x.col);S.tracks.splice(at+n,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+x.name.toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
+  c.mute=true;changed(true);j.added=pick.length;j.under=t.name;
+  if(SG_HOOKS.added)SG_HOOKS.added(j);else toast(j.kind==='quick'?'Done. '+pick.length+' stem track'+(pick.length===1?'':'s')+' added below. The original clip is muted. Quick split is approximate: use it for sketching and remixing.':`Done: ${pick.length} neural stem track${pick.length===1?'':'s'} added below. The original clip is muted.`)}
 /* tempo guess from onset autocorrelation */
 function guessBpm(buf){try{const sr=buf.sampleRate,x=buf.getChannelData(0),hop=Math.round(sr/100),n=Math.min(Math.floor(x.length/hop),6000),env=new Float32Array(n);let prev=0;for(let i=0;i<n;i++){let e=0;for(let j=0;j<hop;j+=2)e+=Math.abs(x[i*hop+j]||0);const d=e-prev;prev=e;env[i]=d>0?d:0}
     let best=0,bl=0;const sc=[];for(let bpm=70;bpm<=190;bpm+=.5){const lag=6000/bpm;let s=0;for(let m=1;m<=4;m++){const L=lag*m,i0=Math.floor(L),fr=L-i0;for(let i=0;i+i0+1<n;i++)s+=env[i]*(env[i+i0]*(1-fr)+env[i+i0+1]*fr)}sc.push([bpm,s]);if(s>best){best=s;bl=bpm}}
@@ -6982,7 +7105,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.306',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.307',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}

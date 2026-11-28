@@ -6907,3 +6907,10 @@ Step DV-4 of `docs/devices-display-first.md` section 10. Built on 28 Nov while t
 - DV-5 to DV-11: the other devices get their `DVDOCK` entry, `DVTXT` and `DVANC` (their dock and chips) group by group; DV-12 the check of every device.
 - When every place covers a handle (the Compressor with a high Makeup has handles from top to bottom), the dock covers the fewest it can; that handle is reachable with the dock hidden (move the mouse off and on) or from the dock's own fader.
 - Lane K's sidechain source for the Compressor (task MX-3), when released, joins the dock's row like the Sidechain's Rate menu; to be checked then.
+
+## 28 November 2026, task SG2-2 (lane R): G1 lanes in the Split sheet, P1 draft stretch, F1 scan, v0.307
+- G1 in the Split sheet: `stemAsk` resolves with the open sheet, `stemsFor` (rewritten, lane R's) turns it into `sgSheet`: read-out (L2: `.lku` units in amber), the mix lane (grey, drawn at once from `sgMixCols`), one viridis lane per kept stem (`INS.cmap('viridis')`, quiet bins fade into the lane as on the pick page), the amber edge (`--unit`, `--lk-hair`, 120 ms × `--ov-mo`), the chunk at work with the soft scan (F1; a still hatch with Reduce motion, Motion Signal only, still effects or Light mode), the time axis; Keep working / Stop / Add N tracks (ticks per stem, silent ones unticked, levels in dB), Discard.
+- P1: draft columns at half strength, repainted when final (none in Light mode). Nothing per frame: one putImageData per lane per chunk, the read-out once a second while a split runs; `UI.sgRate[kind]` keeps this computer's seconds per chunk for the next estimate; 'estimating…' on a first split; MB of MB during the download (lanes empty, the mix drawn).
+- Several clips (a drop with 'the same for the other files'): 'clip 2 of 3' (a wrapper round `importFiles` counts them, lane F's code unchanged). Only one split at a time.
+- Control ids written as `data-al` (listed in docs/ids.md, section 'Stem split', for lane H to add to `CONTROLS` when the Workshop covers dialogs).
+- Test `tools/ui-tests/taskSG2_2.py`.
