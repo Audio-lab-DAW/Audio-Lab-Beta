@@ -287,3 +287,62 @@ Picked (all go into the random set):
 - Round 2's set (R4 to R8 with S1 and S2) stays in the random set unless round 4 replaces a drawing with its reworked version.
 
 Next: **WS-0d** (Fable), the last iteration as a short pick page; then lane Q builds the final set.
+
+## Round 4 (WS-0d)
+
+Pick page: **AudioLab start screen, the final set**, https://claude.ai/artifact/SFuxSjaes2c7Xqes7yr71L (source `tools/design-lab/ws/round4/`: `start4.src.html`, the drawings `r4a_base.js` to `r4e_new.js`, built by `build4.py` into `start4.html`; screenshots, bench and console check by `shot4.py`). A pick page only: no `index.html`, `desktop/` or `native/` change. The last round: the user answers with one line, `Start screen final: all` or `Start screen final: all except PH4 N2`.
+
+The page: the start screen W1 at the user's window (1254 x 651 points) with one drawing live in its 172 point band and a Shuffle button that picks from the set as the app will (at random, never the same twice in a row); under it one grid of the 18 drawings of this round, all playing, each with one line, its source and its time per picture, a ★ on the five reworked ones; Dark / Light and Ambient / Reduce motion switches (Light and Reduce motion show one still picture, as in the app).
+
+### The final random set: 22 drawings
+- **Dipole field, four versions** (the F1 flow untouched: lines, ball, tilt, Jupiter direction, speed law, timing; count 2 = the build's): **P5 aurora pulse** (`dipP5`), **P3 energy** (`dipP3`), **P2 field strength as density** (`dipP2`), **P4 radiation belt** (`dipP4`). They replace the single S1 dipole and count as four drawings of the set.
+- **Unchanged, already in the app:** S2 moons in resonance (`SPLBG`), R4 wave interference, R6 Lissajous figure, R7 TRAPPIST-1 (`WSR2`).
+- **Phase (replace R5):** PH1 Lorenz attractor, PH2 flow onto the limit cycle, PH3 Poincaré section, **PH4 ★ fractal road to chaos**.
+- **Fourier (replace R8):** **FS1 ★ winding a wave**, FS2 one sound two views, FS3 Gibbs effect, FS4 short in time wide in frequency.
+- **New:** **N1 ★ drum head**, **N2 ★ plucked string**, N3 Mach cone, **N4 ★ hydrogen atom**, N5 gravitational wave, N6 light wave.
+
+### The five reworked drawings
+- **PH4 fractal road to chaos** (`phFrac`). The logistic map x → r x (1 − x): r across, the values x settles on up, brighter where x lands more often (each column: 300 + 150·2ⁿ steps thrown away, 260·2ⁿ plotted, splatted between rows). A line sweeps left to right in 9 s and the diagram appears behind it; after 3.5 s (the next part boxed in amber) it sweeps right to left and the boxed part appears magnified, the same shape again; four levels (1, 4, 21 and 96 times), then back to the whole, 50 s in all. The window of level n runs from 0.15 of its span before the doubling point r_n (3, 3.449490, 3.544090, 3.564407) to the band-merging point m_n (4, 3.678573, 3.592572, 3.574805), with x between f^(2ⁿ)(½) and f^(2ⁿ⁺¹)(½) at m_n: the exact self-similar piece round x = ½. The windows narrow by 4.36, 4.72 and 4.67, towards Feigenbaum's 4.669. The line carries the orbit at its r as amber dots and its r as a read-out. ([Feigenbaum constants](https://en.wikipedia.org/wiki/Feigenbaum_constants), [May 1976](https://doi.org/10.1038/261459a0))
+- **FS1 winding a wave** (`fsWind`): replaces the "atom" (which was a logo outline, not a drawing of an atom). Two periods of a wave (harmonics 2, 3 and 5 with amplitudes 1, 0.55, 0.8) are wound round a circle, k turns to a period: z = f(θ) e^(−ikθ). The amber dot is the curve's centre of mass. At a whole number n it is exactly the Fourier coefficient c_n = (1/2π)∫f e^(−inθ)dθ: it leaps out to half the amplitude of harmonic n, or sits at the centre when the wave has none, and the curve closes on itself. k runs from 0.5 to 6.5 in 20 s, lingering on the whole numbers, and the centre's distance is plotted as it goes, so the spectrum draws itself with peaks at 2, 3 and 5 ("HARMONIC 3 FOUND", "NO HARMONIC 4"). Nothing is approximated and it draws no picture. ([3Blue1Brown, But what is the Fourier transform?](https://www.3blue1brown.com/lessons/fourier-transforms))
+- **N1 drum head** (`drum`): the same six modes J_m(j_mn r) cos(mθ), now struck and swinging: an amber flash at the antinode, then cos(2πft) at 1.25 swings a second for the lowest and the true ratios 1.59, 2.14, 2.30, 2.65, 2.92 for the others, dying away as e^(−t/3 s); 8 s each. Amplitude up from 40 to 46 points, a finer mesh (12 x 60), bright above the resting plane and dim below, the far half fainter, a faint second mesh at the other end of the swing, and a shallow shell with lugs under the hoop so it reads as a drum. ([Russell, Penn State](https://www.acs.psu.edu/drussell/Demos/MembraneCircle/Circle.html))
+- **N2 plucked string** (`string`): the same series b_n = 2 sin(nπp) / (n²π²p(1−p)), now swinging 1.8 times a second (was 0.55) with a fan of its eight earlier positions (1/90 s apart) behind it, so the two running corners stay readable; the high harmonics die more slowly (rate 0.07 + 0.0035 n² per second), so the corners last about four seconds before the shape rounds into the fundamental. ([Wolfe, UNSW](https://newt.phys.unsw.edu.au/jw/strings.html))
+- **N4 hydrogen atom** (`hydro`): no more jittering dots. 2600 points drawn once per state from |ψ|² in space (weight |ψ|² times the distance from the axis, a fixed seed), turning slowly about the atom's axis, which leans 21 degrees towards the viewer; near points bright, far points faint; violet for ψ > 0 and pink for ψ < 0, with a legend; one state fades into the next every 10 s (2p, 3d, 3p, 4d, 4f, 4p, m = 0); scale bar in Bohr radii. ([HyperPhysics](http://hyperphysics.phy-astr.gsu.edu/hbase/quantum/hydwf.html))
+
+### The kept drawings, polished
+- PH1 Lorenz: the view now swings between 14 and 54 degrees about the z axis, so the butterfly is never seen edge-on (in round 3 it folded to a thin Y for seconds at a time, also in the still picture).
+- Every drawing has its own still-picture time (`R4.STILL`: PH4 at rest with the next part boxed, FS1 on "harmonic 5 found", N1 at full swing, N2 just after the release, N4 on 3d).
+- P2, P3, P4, P5, PH2, PH3, FS2, FS3, FS4, N3, N5, N6: the round 3 code, checked again at 100 % in Dark, Light and Reduce motion; sources as in the round 3 section.
+
+### Numbers
+Time for one picture, mean of 240, headless Chromium with software drawing (a GPU is faster), at 2x: in the start screen's band (1020 x 172) and as the splash card (577 x 427). At 60 pictures a second there are 16.7 ms.
+
+| | band ms | card ms | | band ms | card ms |
+|---|---|---|---|---|---|
+| P5 aurora | 0.41 | 0.37 | FS3 Gibbs | 0.16 | 0.11 |
+| P3 energy | 0.30 | 0.27 | FS4 widths | 0.26 | 0.20 |
+| P2 density | 0.52 | 0.52 | N1 drum ★ | 0.24 | 0.24 |
+| P4 belt | 0.26 | 0.25 | N2 string ★ | 0.26 | 0.12 |
+| PH1 Lorenz | 0.36 | 0.19 | N3 Mach | 0.06 | 0.04 |
+| PH2 flow | 0.18 | 0.16 | N4 hydrogen ★ | 0.76 | 0.79 |
+| PH3 Poincaré | 0.28 | 0.25 | N5 chirp | 0.07 | 0.06 |
+| PH4 fractal ★ | 0.02 | 0.02 | N6 light | 0.08 | 0.08 |
+| FS1 winding ★ | 0.11 | 0.11 | S2 moons | 0.03 | 0.02 |
+| FS2 stack | 0.16 | 0.17 | R4 interference | 1.60 | 1.53 |
+| | | | R6 Lissajous / R7 TRAPPIST-1 | 0.09 / 0.04 | 0.09 / 0.03 |
+
+Every round 4 drawing is under 1 ms a picture (the slowest in the whole set is the existing R4 interference at 1.6 ms). One-time work: PH4 draws each level's 760 x 300 picture 48 columns a call while the line sweeps (level 3 is about 1.8 million steps, spread over 16 calls; all at once only for a still picture), FS1 one 351 point spectrum table, N4 2600 points per state on first use, PH3 and PH1 as in round 3. Checked in the page at 1312 points wide (the mock at 100 %): all 22 drawings in W1 in Dark, in Light and with Reduce motion, the five reworked ones at several times of their cycle, the grid, and at 400 points wide in Light: no console errors, no sideways scroll, 60 pictures a second with the whole page drawing in about 2 ms.
+
+### What lane Q builds after the user's yes
+- **Put in** the five `r4*.js` parts as one const beside `WSR2` (for example `WSR4`, the way `ws1_edit.py` puts `r2draw.js` in); `SPLBG` untouched. `R4` needs nothing from round 3.
+- **The final random set** `WS.SET` = `R4.SET`: `dipP5 dipP3 dipP2 dipP4 moons interf liss trap phLor phFlow phPoin phFrac fsWind fsStack fsGibbs fsUnc drum string mach hydro chirp light` (minus whatever the user's line leaves out). `dipole`, `vdp` and `four` leave the set. Picked evenly, never the same twice in a row; the four dipole versions are four entries (so a dipole comes up at about one start in five; if the user wants the dipole as one entry with a random version, that is a two-line change in the pick).
+- **Start screen drawings… in Settings** lists all 22 with their names (`R4.NAME`, plus the four existing names), each with its switch and Only this one, at least one on, default all on; `audiolab-ws-draw` and `WS_HOOKS.settingsRows` follow. A stored choice that names a removed drawing falls back to all on (already the rule); a stored `dipole` may be read as the four dipole versions.
+- **`wsFn` / `wsPal`:** `WSR4.FN[k]`, palette `WSR4.PAL.dip` for the four `dip*` keys and `WSR4.PAL[k]` otherwise; `WSR4.cnt = 1`, `WSR4.dir = 1`. The two string replacements in `ws1_edit.py` that made F1's dots smaller and fewer are no longer needed.
+- **The hand-over from the splash:** when the splash shows its dipole and a dipole version is on, the start screen takes one of the dipole versions that are on (the lines and the flow are the same code, so it stays one picture); moons as today; otherwise the dissolve as today.
+- **Band scale and width:** `R4.BAND[k]`, and the host sets `d.ext` (half the visible width in frame units: band width / 2 / scale; 288.5 in the splash) before each call, also during the hand-over. A shade of the card's colour behind the name for the drawings in `R4.WIDE` (CSS only).
+- **Still picture:** time `R4.STILL[k] || 40` (plus nothing random) in Light, with Reduce motion or at Motion "Signal only". Every drawing is complete on its first call at any time.
+- **Rules as today:** motion only at Motion Ambient, Dark, window shown; nothing per frame once closed. While shown, `phFrac` keeps up to four 760 x 300 canvases and `hydro` two clouds of 2600 points.
+- **Tests:** extend `taskWS_1b.py` (22 entries and names, the fallback for an old stored choice), a still-picture check per drawing (non-empty canvas, no errors), frame time not worse; release through the gate as usual (it touches `index.html`, so it waits for a freeze gap).
+- **The splash (lane G's):** unchanged; the same functions are ready for it.
+
+### Round 4 answer
+(waiting for the user's line)

@@ -1,0 +1,1094 @@
+<meta charset="utf-8">
+<title>AudioLab start screen, the final set</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+
+/* Task WS-0: the start screen pick page. Same family as the DR5, UX2 and UX3 pick pages.
+   Layout: a page of four live mocks of AudioLab's start screen, each drawn at the user's window (2194 x 1139 at 1.75x = 1254 x 651 points) and scaled to fit,
+   then the option families, the research, and the picks bar. The drawings are the splash's own code (SPLBG, copied unchanged from index.html). */
+:root{color-scheme:dark;
+ --bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#ffb547;--blue:#4c8dff;--bar:#0e0e12f2;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2}}
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);margin:0;padding-block:28px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 14px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--mut)}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#1a1200}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--fm);color:var(--mut)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--bg)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:14px;max-width:82ch}
+.how{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--mut)}
+.bar2{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;font-size:12px}
+.lab{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+section.fam{display:flex;flex-direction:column;gap:14px}
+.famh{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.famh .tag{font:500 12px var(--fm);color:var(--acc)}
+/* layout cards with their mock */
+.lay{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:14px;display:flex;flex-direction:column;gap:12px}
+.lay.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ch .id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px}
+.ch .star{color:var(--acc);font-size:14px}
+.ch .sp{flex:1}
+.pk{font:500 12px var(--fm);color:var(--mut);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--ln2);border-radius:7px;padding:3px 9px}
+.picked .pk,.card.picked .pk{color:var(--acc);border-color:var(--acc)}
+.lay ul,.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px;max-width:90ch}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.picked{border-color:var(--acc)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.tbl{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:760px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.05em;background:var(--pn2)}
+tr:last-child td{border-bottom:0}
+.note{border-left:2px solid var(--acc);padding:2px 0 2px 12px;font-size:12.5px;max-width:90ch}
+
+/* ===== the mocks: AudioLab at 1254 x 651 points, scaled. They follow their own Dark / Light switch, as the app does ===== */
+.mkw{position:relative;width:100%;aspect-ratio:1254/651;max-width:100%;border-radius:8px;overflow:hidden;border:1px solid var(--ln2);background:#000}
+.scr{position:absolute;left:0;top:0;width:1254px;height:651px;transform-origin:0 0;transform:scale(var(--s,1));overflow:hidden;
+ --m-bg:#08090d;--m-pn:#101116;--m-pn2:#15161c;--m-ln:rgba(255,255,255,.075);--m-ln2:rgba(255,255,255,.13);--m-ink:#e6e8ee;--m-mut:#8c8f9b;--m-unit:#ffb547;--m-sel:#f5c84c;--m-hov:rgba(255,255,255,.045);--m-grid:rgba(140,170,255,.05);--m-grid2:rgba(140,170,255,.022);--m-a:#4cc9f0;--m-b:#6096ff;--m-p:#a8d8ff;
+ background:var(--m-bg);color:var(--m-ink);font:13px/1.4 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.scr.light{--m-bg:#eceef2;--m-pn:#ffffff;--m-pn2:#f5f6f8;--m-ln:rgba(20,24,40,.10);--m-ln2:rgba(20,24,40,.18);--m-ink:#16181d;--m-mut:#5c606b;--m-unit:#9a6200;--m-sel:#b98a00;--m-hov:rgba(20,24,40,.045);--m-grid:rgba(40,60,120,.07);--m-grid2:rgba(40,60,120,.03);--m-a:#1d7fb0;--m-b:#2f5fd0;--m-p:#2f5fd0}
+.scr *{box-sizing:border-box}
+.scr button{font:inherit;color:inherit;background:none;border:0;padding:0;text-align:left}
+.scr .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--m-grid) 1px,transparent 1px),linear-gradient(90deg,var(--m-grid) 1px,transparent 1px),linear-gradient(var(--m-grid2) 1px,transparent 1px),linear-gradient(90deg,var(--m-grid2) 1px,transparent 1px);background-size:208px 208px,208px 208px,52px 52px,52px 52px;background-position:-1px -1px}
+.scr canvas.pic{position:absolute;display:block}
+.scr .nm{font:600 30px/1 'Space Grotesk',Inter,sans-serif;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.scr .nm i{font-style:normal;background:linear-gradient(90deg,var(--m-a),var(--m-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.scr .nm s{text-decoration:none;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;border:1px solid var(--m-p);color:var(--m-p);border-radius:4px;padding:3px 5px 2px}
+.scr .ver{font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--m-mut);text-transform:uppercase}
+.scr .hd{font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--m-mut)}
+.scr .q{display:flex;align-items:center;gap:8px;border:1px solid var(--m-ln2);border-radius:6px;height:30px;padding:0 10px;background:var(--m-pn2);color:var(--m-mut)}
+.scr .q input{all:unset;flex:1;color:var(--m-ink);font:13px Inter,sans-serif}
+.scr .q input::placeholder{color:var(--m-mut)}
+.scr .q kbd{font:500 10px 'JetBrains Mono',monospace;color:var(--m-mut);border:1px solid var(--m-ln2);border-radius:4px;padding:1px 4px}
+.scr .rl{display:flex;flex-direction:column}
+.scr .rr{display:grid;grid-template-columns:var(--rc,64px minmax(0,1fr) auto);align-items:center;gap:12px;height:var(--rh,44px);padding:0 10px;border-radius:5px;border:1px solid transparent;cursor:pointer;width:100%}
+.scr .rr:hover{background:var(--m-hov)}
+.scr .rr.on{border-color:var(--m-sel);background:color-mix(in srgb,var(--m-sel) 8%,transparent)}
+.scr .rr .tn{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scr .rr .dt{font-size:11.5px;color:var(--m-mut);white-space:nowrap}
+.scr .rr .mt{font:500 11.5px 'JetBrains Mono',monospace;white-space:nowrap;text-align:right;color:var(--m-ink)}
+.scr .u{color:var(--m-unit)}
+.scr .th{position:relative;height:28px;border:1px solid var(--m-ln);border-radius:3px;overflow:hidden;background:color-mix(in srgb,var(--m-bg) 70%,transparent)}
+.scr .th canvas{position:absolute;inset:0;width:100%;height:100%}
+.scr .th .cs{position:absolute;left:0;top:0;bottom:0;width:3px;display:flex;flex-direction:column}
+.scr .th .cs b{flex:1}
+.scr .tile{display:flex;flex-direction:column;gap:3px;border:1px solid var(--m-ln2);border-radius:6px;padding:10px 12px;cursor:pointer;background:color-mix(in srgb,var(--m-pn) 80%,transparent)}
+.scr .tile:hover{border-color:var(--m-mut)}
+.scr .tile b{font-weight:500}
+.scr .tile small{font-size:11.5px;color:var(--m-mut);line-height:1.35}
+.scr .tile.pri{border-color:color-mix(in srgb,var(--m-sel) 55%,transparent)}
+.scr .tile kbd,.scr .chip kbd{font:500 10px 'JetBrains Mono',monospace;color:var(--m-mut);margin-left:auto}
+.scr .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--m-ln2);border-radius:6px;height:32px;padding:0 12px;cursor:pointer;background:color-mix(in srgb,var(--m-pn) 70%,transparent);white-space:nowrap}
+.scr .chip:hover{border-color:var(--m-mut)}
+.scr .sub{font-size:11px;color:var(--m-mut)}
+.scr .keys{font:500 11px 'JetBrains Mono',monospace;color:var(--m-mut);display:flex;gap:16px;white-space:nowrap}
+.scr .keys b{color:var(--m-ink);font-weight:500}
+.scr .sw{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--m-mut);cursor:pointer;white-space:nowrap}
+.scr .sw i{width:26px;height:14px;border-radius:7px;background:var(--m-ln2);position:relative;transition:background 80ms}
+.scr .sw i::after{content:"";position:absolute;left:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--m-mut);transition:transform 80ms}
+.scr .sw.on i{background:color-mix(in srgb,var(--m-sel) 45%,transparent)}
+.scr .sw.on i::after{transform:translateX(12px);background:var(--m-sel)}
+.scr .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--m-pn);border:1px solid var(--m-ln2);border-radius:6px;padding:7px 14px;font-size:12.5px;opacity:0;transition:opacity 120ms;pointer-events:none;white-space:nowrap;z-index:9}
+.scr .toast.on{opacity:1}
+.scr .empty{color:var(--m-mut);font-size:12.5px;padding:10px}
+.scr .hl{position:absolute;background:var(--m-ln)}
+/* the splash replay */
+.scr .spl{position:absolute;left:50%;top:50%;width:577px;height:427px;margin:-213px 0 0 -288px;border-radius:12px;background:radial-gradient(ellipse at 50% 35%,var(--sg,#0f1830),var(--sbg,#070910) 70%,var(--se,#040508));z-index:8;overflow:hidden;transition:all 260ms cubic-bezier(.2,.7,.2,1)}
+.scr .spl canvas{position:absolute;inset:0;width:100%;height:100%}
+.scr .spl .sb{position:absolute;left:30%;right:30%;bottom:46px;height:2px;background:rgba(255,255,255,.08)}
+.scr .spl .sb b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--m-a),var(--m-b))}
+.scr .spl .nm{position:absolute;left:0;right:0;bottom:80px;justify-content:center;color:#eaf1ff}
+.scr .spl.out{opacity:0}
+
+/* picks bar */
+.pbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);border-top:1px solid var(--ln2);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));z-index:50}
+.pbar .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pbar .line{font:500 13px var(--fm);flex:1;min-width:240px;background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:5px 10px;user-select:all;overflow-wrap:anywhere}
+.pbar .fams{display:flex;flex-wrap:wrap;gap:4px}
+.pbar .fams a{font:500 11px var(--fm);color:var(--mut);text-decoration:none;border:1px solid var(--ln2);border-radius:6px;padding:2px 6px}
+.pbar .fams a.set{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.pbar input{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 8px;color:var(--ink);font:12px var(--f);min-width:160px;flex:0 1 220px}
+@media (max-width:760px){h1{font-size:25px}.cards{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+
+/* ===== round 4, the final set (task WS-0d). Layout: one live start screen (W1 at 1254 x 651 points) with Shuffle, then one grid of every drawing playing. ===== */
+.wrap{gap:30px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dc{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dc.off{opacity:.55}
+.dv{position:relative;width:100%;max-width:100%;aspect-ratio:577/294;border-radius:7px;overflow:hidden;background:#05070c;border:0;padding:0;display:block;cursor:pointer}
+.dv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dv.on{outline:2px solid var(--acc);outline-offset:1px}
+.dh{display:flex;align-items:center;gap:8px}
+.dh h3{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.star{color:var(--acc)}
+.dc p{font-size:12.5px;color:var(--mut);max-width:none}
+.dc .ft{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:auto;font-size:12px}
+.sp{flex:1}
+.ms{font:500 11.5px var(--fm);color:var(--mut);white-space:nowrap}
+.ms b{color:var(--acc);font-weight:500}
+.chk{font:500 12px var(--fm);color:var(--acc);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--acc);border-radius:7px;padding:3px 9px;white-space:nowrap}
+.dc.off .chk{color:var(--mut);border-color:var(--ln2)}
+.chk input{accent-color:var(--acc);margin:0}
+.stage{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:12px;display:flex;flex-direction:column;gap:10px}
+.tb{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:12px}
+.btn.big{padding:6px 14px;font-size:13px}
+.now{font-weight:500;font-size:13px;display:inline-flex;gap:8px;align-items:center;min-width:0}
+.auto{display:inline-flex;gap:6px;align-items:center;color:var(--mut);cursor:pointer}
+.auto input{accent-color:var(--acc);margin:0}
+.cap{font-size:12.5px;color:var(--mut);max-width:110ch}
+.cap b{color:var(--ink);font-weight:500}
+.fps{font:500 11.5px var(--fm);color:var(--mut)}
+.fps b{color:var(--acc);font-weight:500}
+.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:96ch}
+.scr .band{position:absolute;overflow:hidden;border-radius:12px 12px 0 0}
+.scr .band canvas{position:absolute;left:0;top:0;width:1020px;height:172px;display:block}
+.scr .w1card{position:absolute;border-radius:12px;background:var(--m-pn);border:1px solid var(--m-ln2)}
+.scr .w1in{position:absolute;overflow:hidden;border-radius:12px}
+.scr .w1shade{position:absolute;left:0;top:0;width:480px;height:172px;pointer-events:none}
+.scr .w1logo{position:absolute}
+.scr .w1ver{position:absolute;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.scr .w1edge{position:absolute;height:1px}
+@media (max-width:900px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.grid3{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · start screen · round 4, the last · task WS-0d · lane Q · 28 November 2026</div>
+ <h1>AudioLab start screen, the final set</h1>
+ <p class="lede">Everything you picked in round 3, finished: the four dipole versions, the phase and Fourier drawings, the six new ones. The six with a <span class="star">★</span> are the ones you asked to have reworked. Press Shuffle to see the start screen come up with a drawing from the set, as the app will at each start.</p>
+ <div class="bar2"><span class="lab">Start screen</span><div class="seg" data-sw="mode"><button data-v="dark">Dark</button><button data-v="light">Light</button></div>
+  <span class="lab" style="margin-left:8px">Motion</span><div class="seg" data-sw="motion"><button data-v="on">Ambient</button><button data-v="still">Reduce motion</button></div>
+  <span class="fps" id="fps" title="How many pictures a second this page draws right now, and the time spent drawing all pictures on screen">… fps</span></div>
+</header>
+
+<section class="fam" id="stage">
+ <div class="stage">
+  <div class="tb"><button class="btn ok big" id="shuf" title="Show another drawing from the set, picked at random, never the same twice in a row">Shuffle</button>
+   <label class="auto" title="Shuffle by itself every 8 seconds"><input type="checkbox" id="auto"> every 8 s</label>
+   <span class="now" id="now"></span><span class="sp"></span><span class="ms" id="sms"></span></div>
+  <div class="mkw"><div class="scr" id="scr"></div></div>
+  <p class="cap" id="cap"></p>
+ </div>
+</section>
+
+<section class="fam" id="set">
+ <div class="famh"><h2>The drawings</h2><span class="mut sm">All playing. Click one to see it in the start screen above. Untick one to leave it out. Each shows the time one picture takes to draw here; at 60 pictures a second there are 16.7 ms.</span></div>
+ <div class="grid3" id="grid"></div>
+ <p class="mut sm" id="kept"></p>
+</section>
+
+<section class="fam" id="builds">
+ <div class="famh"><h2>What gets built after your yes</h2></div>
+ <ul class="plain">
+  <li>The start screen picks one drawing at random at each start from this set, never the same twice in a row. The four dipole versions count as four drawings.</li>
+  <li>Settings, Start screen drawings… lists every drawing with its own switch and Only this one, as today.</li>
+  <li>The old phase portrait and the old Fourier series leave the set; their reworked versions take their place.</li>
+  <li>As today, a drawing moves only at Motion Ambient, in Dark, while the window is shown. In Light and with Reduce motion it is one still picture (the two switches at the top show that here). Nothing is drawn once the start screen is closed.</li>
+ </ul>
+</section>
+</div>
+
+<div class="pbar" role="region" aria-label="Your answer"><div class="in">
+ <div class="line" id="pline"></div>
+ <input id="pnote" type="text" placeholder="Add a note (optional)" aria-label="Note">
+ <button class="btn" id="allon">All in</button>
+ <button class="btn ok" id="copy">Copy line</button><span id="copied" class="mut sm" aria-live="polite"></span>
+</div></div>
+
+<script>
+var SPLBG=(function(){var W=window,D=document,PI=Math.PI,TAU=PI*2,S=null,
+ SPEC_CHANCE=1/3,/* how often the spectrogram comes up, compared with each of the other four */
+ KINDS=['moons','harm','dipole','chart','spec'],
+ /* colours per picture. g, bg, e: the card from its centre to its edge. ink: "Audio". a, b: "Lab" and the bar. d: the bright end of the bar. p: PRO. m, n: the two small lines. L lines, T trails, O dots and the labels that ride on them (red, green, blue) */
+ PAL={moons:{g:'#0f1830',bg:'#070910',e:'#040508',ink:'#eaf1ff',a:'#4cc9f0',b:'#6096ff',d:'#ffc43c',p:'#a8d8ff',m:'#8492b4',n:'#77839f',L:'96,150,255',T:'76,201,240',O:'255,196,60'},
+  harm:{g:'#131738',bg:'#07080f',e:'#040407',ink:'#eef0ff',a:'#78aaff',b:'#a99bff',d:'#e6e9ff',p:'#c6ceff',m:'#8a90b8',n:'#7a7fa3',L:'128,160,255',T:'169,155,255',O:'230,233,255'},
+  dipole:{g:'#0e1a34',bg:'#06080f',e:'#040508',ink:'#eaf0ff',a:'#6096ff',b:'#9fc2ff',d:'#ffc43c',p:'#b9d0ff',m:'#8190b2',n:'#75829f',L:'96,150,255',T:'96,150,255',O:'255,196,60'},
+  chart:{g:'#15182a',bg:'#07080d',e:'#040406',ink:'#f5f1e8',a:'#ffb627',b:'#ffd27a',d:'#fff0cc',p:'#ffd98f',m:'#9296a8',n:'#7f8394',L:'140,170,255',T:'76,201,240',O:'255,182,39'},
+  spec:{g:'#0a1226',bg:'#05070d',e:'#030409',ink:'#eaf6ff',a:'#3fb8e8',b:'#ffd23a',d:'#ffe894',p:'#bfe9ff',m:'#879cb0',n:'#788b9e',L:'63,184,232',T:'63,184,232',O:'255,210,58'}},
+ SPC=[[5,7,13],[20,48,110],[63,184,232],[255,210,58]],BW=220;
+ function K(w){return Math.max(1,Math.min(1.8,w/640))}
+ function dot(c,x,y,r,col){c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+ function lab(c,w,tx,x,y,al,col){c.font='500 '+Math.max(8,Math.min(13,w/72)).toFixed(1)+'px ui-monospace,"SF Mono",Menlo,Consolas,monospace';if('letterSpacing'in c)c.letterSpacing='0.12em';c.textAlign=al;c.textBaseline='middle';c.fillStyle=col;c.fillText(tx,x,y);if('letterSpacing'in c)c.letterSpacing='0px'}
+ var FN={
+ /* Io, Europa and Ganymede: 4, 2 and 1 orbits in the same time. Orbits and Jupiter to scale (5.9, 9.4 and 15 Jupiter radii) */
+ moons:function(c,w,h,t,P){var cx=w/2,cy=h*.345,ro=-.2,ca=Math.cos(ro),sa=Math.sin(ro),A0=Math.min(w*.37,h*.5),rp=A0/15,k=K(w),N=['IO  4','EUROPA  2','GANYMEDE  1'],i;
+  c.lineWidth=1;c.strokeStyle='rgba('+P.L+',.2)';for(i=-1;i<=1;i++){var rr=rp*Math.cos(i*.5),of=rp*Math.sin(i*.5)*.93;c.beginPath();c.ellipse(cx+of*sa,cy-of*ca,rr,rr*.36,ro,0,PI);c.stroke()}
+  c.strokeStyle='rgba('+P.L+',.55)';c.beginPath();c.arc(cx,cy,rp,0,TAU);c.stroke();
+  for(i=0;i<3;i++){var A=A0*[5.9,9.4,15][i]/15,B=A*.36,ph=t*(TAU/(5*[1,2,4][i]))+i*2.1;c.lineWidth=1;c.strokeStyle='rgba('+P.L+',.2)';c.beginPath();c.ellipse(cx,cy,A,B,ro,0,TAU);c.stroke();
+   c.lineWidth=1.5;c.strokeStyle='rgba('+P.T+',.7)';c.beginPath();c.ellipse(cx,cy,A,B,ro,ph-.8,ph);c.stroke();
+   var x=A*Math.cos(ph),y=B*Math.sin(ph),X=cx+x*ca-y*sa,Y=cy+x*sa+y*ca,rt=X>w*.72;dot(c,X,Y,2.3*k,'rgb('+P.O+')');lab(c,w,N[i],X+(rt?-7:7)*k,Y-8*k,rt?'right':'left','rgba('+P.O+',.9)')}},
+ /* a pen on two pendulums that slow down; another interval on each figure (3:2, 4:3, 5:4, 2:1) */
+ harm:function(c,w,h,t,P,d){var T=13,q=Math.floor(t/T),u=t-q*T,cx=w/2,cy=h*.34,A=Math.min(w*.33,h*.5),B=h*.285,N=1500,p=d.p,i,x=0,y=0;
+  if(d.q!==q||!p){d.q=q;if(d.r0==null)d.r0=Math.random()*4|0;var R=[[3,2],[4,3],[5,4],[2,1]][(q+d.r0)%4],s=q+d.r0;p=d.p||(d.p=new Float32Array(N*2+2));
+   for(i=0;i<=N;i++){var tt=i*.035,e=Math.exp(-tt*.035);p[2*i]=(Math.sin(tt*R[0]*1.003+s)*.6+Math.sin(tt*R[1]+1.3)*.4)*e;p[2*i+1]=(Math.sin(tt*R[1]*.998+.6)*.6+Math.sin(tt*R[0]+s*.7)*.4)*e}}
+  var n=Math.round((.3+.7*Math.min(1,u/4.5))*N),f=u>T-2?Math.max(0,(T-u)/2):1;c.beginPath();for(i=0;i<=n;i++){x=cx+A*p[2*i];y=cy+B*p[2*i+1];i?c.lineTo(x,y):c.moveTo(x,y)}
+  c.strokeStyle='rgba('+P.L+','+(.5*f).toFixed(3)+')';c.lineWidth=1;c.lineJoin='round';c.stroke();if(n<N)dot(c,x,y,2*K(w),'rgba('+P.O+',.95)')},
+ /* the field lines of a magnet, r = L sin^2(theta), tilted 10 degrees as at Jupiter; the charges bounce between their two mirror points */
+ dipole:function(c,w,h,t,P){var R=w*.5,rp=R*.058,k=K(w),Ls=[.2,.3,.44,.62,.86,1.2,1.7,2.4],i,j,sg,th,s,r;c.save();c.translate(w/2,h*.345);c.rotate(.17+Math.sin(t*.15)*.03);c.lineWidth=1;
+  for(i=0;i<8;i++){var L=Ls[i]*R,t0=Math.asin(Math.sqrt(rp/L)),sp=PI-2*t0;c.strokeStyle='rgba('+P.L+',.22)';c.beginPath();
+   for(sg=-1;sg<=1;sg+=2)for(j=0;j<=40;j++){th=t0+sp*j/40;s=Math.sin(th);r=L*s*s;j?c.lineTo(sg*r*s,-r*Math.cos(th)):c.moveTo(sg*r*s,-r*Math.cos(th))}c.stroke();
+   for(sg=-1;sg<=1;sg+=2){th=PI/2+sp*.46*Math.sin(t*(.9/(.5+Ls[i]))+i*1.7+(sg>0?0:2.1));s=Math.sin(th);r=L*s*s;dot(c,sg*r*s,-r*Math.cos(th),1.3*k,'rgba('+P.O+',.85)')}}
+  c.strokeStyle='rgba('+P.L+',.2)';c.beginPath();for(i=-1;i<=1;i++){var yy=-rp*Math.sin(i*.55),hw=rp*Math.cos(i*.55);c.moveTo(-hw,yy);c.lineTo(hw,yy)}c.moveTo(0,-rp*1.5);c.lineTo(0,rp*1.5);c.stroke();
+  c.strokeStyle='rgba('+P.L+',.55)';c.beginPath();c.arc(0,0,rp,0,TAU);c.stroke();c.restore();
+  /* the lines fade out behind the name and the bar */c.save();c.globalCompositeOperation='destination-out';c.translate(w/2,h*.86);c.scale(w*.5,h*.35);var g=c.createRadialGradient(0,0,.78,0,0,1);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(-1,-1,2,2);c.restore()},
+ /* three bodies at 1, 2 and 3 times the same rate: the harmonic series drawn as an atom, on a faint grid */
+ chart:function(c,w,h,t,P){var st=w/24,cx=w/2,cy=h*.345,k=K(w),ny=Math.ceil(h/st),RT=Math.min(w*.21,h*.285),i,a,x,y;
+  for(i=-12;i<=12;i++){c.fillStyle='rgba('+P.L+','+(i%4?.022:.05)+')';c.fillRect(Math.round(cx+i*st),0,1,h)}
+  for(i=-ny;i<=ny;i++){c.fillStyle='rgba('+P.L+','+(i%4?.022:.05)+')';c.fillRect(0,Math.round(cy+i*st),w,1)}
+  c.lineWidth=1;c.setLineDash([3,5]);c.strokeStyle='rgba('+P.O+',.1)';c.beginPath();c.moveTo(0,cy+.5);c.lineTo(w,cy+.5);c.moveTo(cx+.5,0);c.lineTo(cx+.5,h*.655);c.stroke();c.setLineDash([]);
+  c.strokeStyle='rgba('+P.L+',.17)';c.beginPath();for(i=0;i<72;i++){a=i/72*TAU;var l=(i%6?3:7)*k,ca=Math.cos(a),sa=Math.sin(a);c.moveTo(cx+ca*RT,cy+sa*RT);c.lineTo(cx+ca*(RT+l),cy+sa*(RT+l))}c.stroke();
+  for(i=0;i<3;i++){var R=RT*[.43,.63,.83][i];a=-t*(TAU/14)*(i+1)+i*1.7;c.lineWidth=1;c.strokeStyle='rgba('+P.L+',.24)';c.beginPath();c.arc(cx,cy,R,0,TAU);c.stroke();
+   c.lineWidth=1.5;c.strokeStyle='rgba('+P.T+',.75)';c.beginPath();c.arc(cx,cy,R,a,a+.7);c.stroke();
+   x=cx+Math.cos(a)*R;y=cy+Math.sin(a)*R;dot(c,x,y,2.3*k,'rgb('+P.O+')');lab(c,w,'H'+(i+1),x+7*k,y-8*k,'left','rgba('+P.O+',.9)')}
+  dot(c,cx,cy,2.6*k,'rgba('+P.O+',.9)')},
+ /* frequency over time, rolling: a made-up 145 BPM pattern on a small picture (220 points wide) that the screen scales up; 30 new columns a second */
+ spec:function(c,w,h,t,P,d){var bh=c.canvas.height,want=BW+Math.floor(t*30),n=0;
+  if(!d.b||d.b.height!==bh){d.b=D.createElement('canvas');d.b.width=BW;d.b.height=bh;d.x=d.b.getContext('2d');d.x.fillStyle='rgb(5,7,13)';d.x.fillRect(0,0,BW,bh);d.col=d.x.createImageData(1,bh);d.m=new Float32Array(bh);d.n=Math.max(0,want-BW)}
+  while(d.n<want&&n++<BW){col(d,bh);d.x.globalCompositeOperation='copy';d.x.drawImage(d.b,-1,0);d.x.globalCompositeOperation='source-over';d.x.putImageData(d.col,BW-1,0)}
+  d.n=Math.max(d.n,want);if(!n&&d.dr)return;d.dr=1;c.globalCompositeOperation='copy';c.drawImage(d.b,0,0);c.globalCompositeOperation='source-over'}};
+ /* one column of the spectrogram: kick, bass with eight overtones, a lead with five, hats, a little noise */
+ function col(d,bh){var tt=(d.n++)/30,beat=(tt/.4138)%1,hb=(tt/.4138+.5)%1,fb=[55,55,65.4,49][Math.floor(tt/.8276)%4],fl=440*Math.pow(2,Math.round(Math.sin(tt*.6)*5)/12),m=d.m,o=d.col.data,ro=(bh-1)/9.966,y,k,ek=Math.exp(-beat*9),eh=Math.exp(-hb*14)*.7;
+  for(y=0;y<bh;y++){var fy=1-y/(bh-1);m[y]=Math.random()*.05+(fy<.26?ek*(1-fy/.26):0)+(fy>.78?eh*Math.random():0)}
+  function sp(f,a,s2){var yc=(bh-1)*(1-Math.log(f/20)/6.9078),y0=Math.max(0,Math.ceil(yc-3)),y1=Math.min(bh-1,Math.floor(yc+3)),y,x;for(y=y0;y<=y1;y++){x=(y-yc)/ro;m[y]+=a*Math.exp(-x*x/s2)}}
+  for(k=1;k<=8;k++)sp(fb*k,.75/Math.sqrt(k)*(.35+.65*beat),.004);for(k=1;k<=5;k++)sp(fl*k,.6/k,.003);
+  for(y=0;y<bh;y++){var v=Math.min(.999,m[y]*1.3)*3,i=v|0,q=v-i,a=SPC[i],b=SPC[i+1],p=y*4;o[p]=a[0]+(b[0]-a[0])*q;o[p+1]=a[1]+(b[1]-a[1])*q;o[p+2]=a[2]+(b[2]-a[2])*q;o[p+3]=255}}
+ function pick(lk,tk){lk=lk||'audiolab-splash-last';var f=null,last=null,w=[],tot=0,i,r;try{f=localStorage.getItem(tk||'audiolab-splash-test');last=localStorage.getItem(lk)}catch(e){}
+  if(KINDS.indexOf(f)>=0)return f;
+  for(i=0;i<KINDS.length;i++){w[i]=KINDS[i]===last?0:KINDS[i]==='spec'?SPEC_CHANCE:1;tot+=w[i]}
+  r=Math.random()*tot;for(i=0;i<KINDS.length;i++){if(w[i]>0){r-=w[i];if(r<0)break}}if(i>=KINDS.length)i=KINDS[0]===last?1:0;
+  try{localStorage.setItem(lk,KINDS[i])}catch(e){}return KINDS[i]}
+ function fit(){var cv=S.cv,w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return false;var z=cv.getBoundingClientRect().width/w,sc=Math.min((W.devicePixelRatio||1)*(z>.3&&z<4?z:1),2,Math.sqrt(2.2e6/(w*h))),pw=Math.round(w*sc),ph=Math.round(h*sc);
+  if(S.k==='spec'){pw=BW;ph=Math.max(60,Math.round(BW*h/w));sc=1}if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}S.d.dr=0;S.w=w;S.h=h;S.sc=sc;return true}
+ function draw(ts){if(!S.w&&!fit())return;var c=S.c;c.setTransform(S.sc,0,0,S.sc,0,0);if(S.k!=='spec')c.clearRect(0,0,S.w,S.h);FN[S.k](c,S.w,S.h,S.still?(S.k==='harm'?8:40+S.off):Math.max(0,(ts-S.t0)/1000)+S.off,PAL[S.k],S.d);S.fr++}
+ /* at most 60 pictures a second (30 in the lighter looks); the frames are asked for by name each time, so the app's background freeze (task AO) holds them too */
+ function tick(ts){if(!S||!S.on)return;S.raf=0;if(!S.el.isConnected){stop();return}var b=D.body;if(b&&(b.classList.contains('lite')||b.classList.contains('lkstill'))){if(!S.lkS){S.lkS=1;var o0=S.still;S.still=true;draw(ts);S.still=o0}S.raf=W.requestAnimationFrame(tick);return}S.lkS=0;var lim=b&&(b.classList.contains('fxstill')||b.classList.contains('lite'))?32:15;if(ts-S.last>=lim){S.last=ts;draw(ts)}S.raf=W.requestAnimationFrame(tick)}
+ function onRs(){if(S&&S.on){S.w=0;if(S.still)draw(0)}}
+ function attach(el,k){var cv=el&&el.querySelector('canvas');if(!cv)return null;if(S&&S.on&&!k)k=S.k;
+  if(!S||!S.on||S.k!==k){if(S&&S.on)stop();k=KINDS.indexOf(k)>=0?k:pick();S={k:k,t0:performance.now(),off:k==='harm'||k==='spec'?0:Math.random()*60,d:{},last:-1e9,fr:0,raf:0,still:false,on:true};try{S.still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}W.addEventListener('resize',onRs)}
+  S.el=el;S.cv=cv;S.c=cv.getContext('2d');S.w=0;var P=PAL[S.k],st=el.style,n;for(n in{g:1,bg:1,e:1,ink:1,a:1,b:1,d:1,p:1,m:1,n:1})st.setProperty('--sp'+n,P[n]);el.setAttribute('data-sp',S.k);
+  draw(performance.now());if(!S.still&&!S.raf)S.raf=W.requestAnimationFrame(tick);return S.k}
+ function stop(){if(!S)return;S.on=false;if(S.raf){try{W.cancelAnimationFrame(S.raf)}catch(e){}S.raf=0}W.removeEventListener('resize',onRs);S.d={}}
+ return{attach:attach,stop:stop,pick:pick,KINDS:KINDS,PAL:PAL,FN:FN,BW:BW,SPEC_CHANCE:SPEC_CHANCE,kind:function(){return S&&S.on?S.k:null},frames:function(){return S?S.fr:0},running:function(){return!!(S&&S.on&&S.raf)}}})();
+
+</script>
+<script>
+/* Task WS-0b (lane Q): round 2 drawings for the start screen's random set, and the corrected dipole flows.
+   Same shape as SPLBG.FN in index.html: fn(c,w,h,t,P,d), drawn in a frame of w x h with the picture centred at (w/2, h*.345), the name below it.
+   P is a palette like SPLBG.PAL (L lines, T trails, O dots and labels, as "r,g,b"), d a per-picture scratch object. Nothing here changes SPLBG. */
+var R2=(function(){var PI=Math.PI,TAU=PI*2,D=document;
+ function K(w){return Math.max(1,Math.min(1.8,w/640))}
+ function dot(c,x,y,r,col){c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+ function lab(c,w,tx,x,y,al,col){c.font='500 '+Math.max(8,Math.min(13,w/72)).toFixed(1)+'px ui-monospace,"SF Mono",Menlo,Consolas,monospace';if('letterSpacing'in c)c.letterSpacing='0.12em';c.textAlign=al;c.textBaseline='middle';c.fillStyle=col;c.fillText(tx,x,y);if('letterSpacing'in c)c.letterSpacing='0px'}
+ function rgba(s,a){return 'rgba('+s+','+(+a).toFixed(3)+')'}
+ /* the lines fade out behind the name and the bar, as in the splash's dipole */
+ function fadeName(c,w,h){c.save();c.globalCompositeOperation='destination-out';c.translate(w/2,h*.86);c.scale(w*.5,h*.35);var g=c.createRadialGradient(0,0,.78,0,0,1);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(-1,-1,2,2);c.restore()}
+ var PAL={
+  chladni:{g:'#0c1f26',bg:'#06090c',e:'#030507',ink:'#e8fbf8',a:'#3fd0c9',b:'#8fe3d0',d:'#ffd27a',p:'#b7efe6',m:'#86a3a6',n:'#748f92',L:'63,208,201',T:'143,227,208',O:'255,210,122'},
+  pend:{g:'#141a33',bg:'#07080f',e:'#040508',ink:'#eef1ff',a:'#7aa2ff',b:'#c3d2ff',d:'#ffc43c',p:'#c9d6ff',m:'#8a92b6',n:'#7980a2',L:'122,162,255',T:'195,210,255',O:'255,196,60'},
+  twodip:{g:'#17143a',bg:'#08070f',e:'#040408',ink:'#f0eeff',a:'#8b7bff',b:'#c4b8ff',d:'#ffc43c',p:'#d2c9ff',m:'#9089b8',n:'#7e78a3',L:'139,123,255',T:'139,123,255',O:'255,196,60'},
+  interf:{g:'#081a2a',bg:'#04080d',e:'#020408',ink:'#e6f8ff',a:'#4cc9f0',b:'#7bf0ff',d:'#ffd27a',p:'#b6ecff',m:'#7f9db0',n:'#708a9c',L:'76,201,240',T:'123,240,255',O:'255,182,39'},
+  vdp:{g:'#0b2019',bg:'#050a08',e:'#030605',ink:'#e8fff3',a:'#3ecf8e',b:'#a3f7c9',d:'#ffd23a',p:'#b8f5d6',m:'#83a597',n:'#729184',L:'62,207,142',T:'163,247,201',O:'255,210,58'},
+  liss:{g:'#1f1708',bg:'#0a0805',e:'#060403',ink:'#fff5e6',a:'#ffb627',b:'#ffd27a',d:'#fff0cc',p:'#ffd98f',m:'#a89a82',n:'#928672',L:'255,182,39',T:'255,210,122',O:'255,240,200'},
+  trap:{g:'#28110e',bg:'#0b0606',e:'#060303',ink:'#fff0ea',a:'#ff7a59',b:'#ffb38a',d:'#ffd6a0',p:'#ffc7b0',m:'#ad9088',n:'#977d76',L:'255,140,110',T:'255,122,89',O:'255,214,160'},
+  four:{g:'#1a1031',bg:'#08060f',e:'#040308',ink:'#f6eeff',a:'#ff7ac8',b:'#b583ff',d:'#ffd23a',p:'#e8c4ff',m:'#9a88b4',n:'#86789f',L:'181,131,255',T:'255,122,200',O:'255,210,58'}};
+ var FN={};
+
+ /* R1 Chladni plate: a square plate held at its centre and bowed. Where it does not move (the nodal lines) the sand stays; where it shakes, the sand is thrown off.
+    Modes of a free square plate, approximated as cos(n pi x)cos(m pi y) -/+ cos(m pi x)cos(n pi y) (Ritz 1909; Paul Bourke). A new mode every 12 s. */
+ var CM=[[1,4,-1],[2,5,1],[1,6,-1],[3,5,1],[2,7,-1],[3,7,1],[1,5,1],[4,6,-1]];
+ function cf(n,m,sg,x,y){var a=PI*n,b=PI*m;return Math.cos(a*x)*Math.cos(b*y)+sg*Math.cos(b*x)*Math.cos(a*y)}
+ function nodal(n,m,sg){var G=80,v=new Float32Array((G+1)*(G+1)),i,j,o=[];for(j=0;j<=G;j++)for(i=0;i<=G;i++)v[j*(G+1)+i]=cf(n,m,sg,i/G,j/G);
+  for(j=0;j<G;j++)for(i=0;i<G;i++){var a=v[j*(G+1)+i],b=v[j*(G+1)+i+1],cc=v[(j+1)*(G+1)+i+1],dd=v[(j+1)*(G+1)+i],p=[];
+   if((a>0)!==(b>0))p.push((i+a/(a-b))/G,j/G);if((b>0)!==(cc>0))p.push((i+1)/G,(j+b/(b-cc))/G);if((cc>0)!==(dd>0))p.push((i+1-cc/(cc-dd))/G,(j+1)/G);if((dd>0)!==(a>0))p.push(i/G,(j+1-dd/(dd-a))/G);
+   if(p.length>=4)o.push(p[0],p[1],p[2],p[3]);if(p.length===8)o.push(p[4],p[5],p[6],p[7])}
+  return new Float32Array(o)}
+ FN.chladni=function(c,w,h,t,P,d){var S=Math.min(w*.44,h*.56),x0=w/2-S/2,y0=h*.345-S/2,k=K(w),T=12,q=Math.floor(t/T),u=t-q*T,M=CM[((q%CM.length)+CM.length)%CM.length],i,N=1300;
+  if(d.q!==q){d.q=q;d.seg=nodal(M[0],M[1],M[2])}var sg=d.seg;
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.32);c.strokeRect(Math.round(x0)+.5,Math.round(y0)+.5,Math.round(S),Math.round(S));
+  c.strokeStyle=rgba(P.L,.22);c.beginPath();var cl=6*k;[[x0,y0,1,1],[x0+S,y0,-1,1],[x0,y0+S,1,-1],[x0+S,y0+S,-1,-1]].forEach(function(e){c.moveTo(e[0]-e[2]*cl*.0,e[1]-e[3]*cl);c.lineTo(e[0]-e[2]*cl*.0,e[1]-e[3]*cl*2.2);c.moveTo(e[0]-e[2]*cl,e[1]);c.lineTo(e[0]-e[2]*cl*2.2,e[1])});c.stroke();
+  dot(c,w/2,h*.345,1.6*k,rgba(P.L,.6));
+  var fa=Math.min(1,u/1.2)*(u>T-1.2?Math.max(0,(T-u)/1.2):1);c.strokeStyle=rgba(P.L,.17*fa);c.beginPath();for(i=0;i<sg.length;i+=4){c.moveTo(x0+sg[i]*S,y0+sg[i+1]*S);c.lineTo(x0+sg[i+2]*S,y0+sg[i+3]*S)}c.stroke();
+  var g=d.g;if(!g||d.gs!==sg&&!d.live){g=d.g=new Float32Array(N*2);for(i=0;i<N;i++){var s=(Math.random()*(sg.length/4)|0)*4,f=Math.random();g[2*i]=sg[s]+(sg[s+2]-sg[s])*f+(Math.random()-.5)*.006;g[2*i+1]=sg[s+1]+(sg[s+3]-sg[s+1])*f+(Math.random()-.5)*.006}d.gs=sg}
+  var dt=d.lt==null?0:Math.min(.05,Math.max(0,t-d.lt));if(dt>0)d.live=1;d.lt=t;
+  if(dt>0){var n=M[0],m=M[1],sgn=M[2],an=PI*n,am=PI*m;for(i=0;i<N;i++){var x=g[2*i],y=g[2*i+1],cnx=Math.cos(an*x),cny=Math.cos(an*y),cmx=Math.cos(am*x),cmy=Math.cos(am*y),snx=Math.sin(an*x),sny=Math.sin(an*y),smx=Math.sin(am*x),smy=Math.sin(am*y),
+    f=cnx*cmy+sgn*cmx*cny,fx=-an*snx*cmy-sgn*am*smx*cny,fy=-am*cnx*smy-sgn*an*cmx*sny,g2=fx*fx+fy*fy+1e-6,a=Math.abs(f),st=Math.min(1,dt*2.2);
+    x+=-f*fx/g2*st*.5+(Math.random()-.5)*a*a*dt*.35;y+=-f*fy/g2*st*.5+(Math.random()-.5)*a*a*dt*.35;g[2*i]=x<0?0:x>1?1:x;g[2*i+1]=y<0?0:y>1?1:y}}
+  c.fillStyle=rgba(P.O,.72);var z=Math.max(1,1.1*k);for(i=0;i<N;i++)c.fillRect(x0+g[2*i]*S-z/2,y0+g[2*i+1]*S-z/2,z,z);
+  lab(c,w,'N '+M[0]+'  M '+M[1],x0+S,y0-11*k,'right',rgba(P.O,.85));lab(c,w,'NODAL LINES',x0,y0-11*k,'left',rgba(P.L,.6))};
+
+ /* R2 Pendulum wave: 15 pendulums, the first swings 51 times in 60 s, each next one once more (Harvard Natural Sciences Lecture Demonstrations).
+    Seen from above, the bobs make travelling waves, scatter, and line up again every 60 s. */
+ FN.pend=function(c,w,h,t,P){var N=15,cx=w/2,cy=h*.345,k=K(w),span=Math.min(w*.62,h*1.05),A=Math.min(h*.2,w*.15),i,j,X=[],Y=[];
+  c.lineWidth=1;c.setLineDash([3,5]);c.strokeStyle=rgba(P.L,.16);c.beginPath();c.moveTo(cx-span/2-14*k,cy+.5);c.lineTo(cx+span/2+14*k,cy+.5);c.stroke();c.setLineDash([]);
+  for(i=0;i<N;i++){var x=cx-span/2+span*i/(N-1),n=51+i;X[i]=x;Y[i]=cy+A*Math.cos(TAU*n*t/60);
+   c.strokeStyle=rgba(P.L,.13);c.beginPath();c.moveTo(Math.round(x)+.5,cy-A);c.lineTo(Math.round(x)+.5,cy+A);c.moveTo(x-3*k,cy-A);c.lineTo(x+3*k,cy-A);c.moveTo(x-3*k,cy+A);c.lineTo(x+3*k,cy+A);c.stroke();
+   c.strokeStyle=rgba(P.T,.4);c.lineWidth=1.5;c.beginPath();for(j=0;j<=5;j++){var tt=t-j*.018,yy=cy+A*Math.cos(TAU*n*tt/60);j?c.lineTo(x,yy):c.moveTo(x,yy)}c.stroke();c.lineWidth=1}
+  c.strokeStyle=rgba(P.L,.3);c.beginPath();c.moveTo(X[0],Y[0]);for(i=1;i<N-1;i++){c.quadraticCurveTo(X[i],Y[i],(X[i]+X[i+1])/2,(Y[i]+Y[i+1])/2)}c.lineTo(X[N-1],Y[N-1]);c.stroke();
+  for(i=0;i<N;i++)dot(c,X[i],Y[i],2.4*k,'rgb('+P.O+')');
+  var sec=((t%60)+60)%60;lab(c,w,'51',X[0],cy+A+14*k,'center',rgba(P.L,.7));lab(c,w,'65 SWINGS IN 60 S',X[N-1],cy+A+14*k,'right',rgba(P.O,.85));lab(c,w,'T '+(sec<10?'0':'')+Math.floor(sec)+' S',X[N-1],cy-A-14*k,'right',rgba(P.O,.85))};
+
+ /* R3 Two magnets side by side: the field lines of two parallel dipoles, found by stepping along B = sum of (3(m.r)r - m)/r^3; the dots flow out of each north pole and back in at a south pole */
+ function b2(x,y,C){var bx=0,by=0,i;for(i=0;i<C.length;i+=2){var rx=x-C[i],ry=y-C[i+1],r2=rx*rx+ry*ry,r=Math.sqrt(r2),r5=r2*r2*r,md=-ry;bx+=3*md*rx/r5;by+=(3*md*ry/r2+1)/(r2*r)}return[bx,by]}
+ FN.twodip=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),rp=w*.034,Dd=w*.14,i,j;
+  if(d.w!==w||d.h!==h){d.w=w;d.h=h;var C=[cx-Dd,cy,cx+Dd,cy],Lines=[],ang=[-70,-52,-36,-22,-10,10,22,36,52,70];
+   for(var q=0;q<2;q++)for(j=0;j<ang.length;j++){var a=ang[j]*PI/180,x=C[2*q]+Math.sin(a)*rp*1.02,y=C[2*q+1]-Math.cos(a)*rp*1.02,pts=[x,y],T=[0],tm=0,ok=false,bp=Math.hypot.apply(null,b2(C[2*q],C[2*q+1]-rp,C));
+    for(i=0;i<4000;i++){var B=b2(x,y,C),bm=Math.hypot(B[0],B[1]),st=1.6;x+=B[0]/bm*st;y+=B[1]/bm*st;tm+=st/(70*k*Math.pow(bm/bp,.2));pts.push(x,y);T.push(tm);
+     if(Math.hypot(x-C[0],y-C[1])<rp||Math.hypot(x-C[2],y-C[3])<rp){ok=true;break}if(x<-w*.7||x>w*1.7||y<-h*.9||y>h*1.9)break}
+    Lines.push({p:new Float32Array(pts),T:new Float32Array(T),tm:tm,ok:ok})}d.L=Lines;d.C=C}
+  c.lineWidth=1;for(i=0;i<d.L.length;i++){var Ln=d.L[i],p=Ln.p;c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(p[0],p[1]);for(j=2;j<p.length;j+=6)c.lineTo(p[j],p[j+1]);c.lineTo(p[p.length-2],p[p.length-1]);c.stroke()}
+  for(i=0;i<d.L.length;i++){var L2=d.L[i],n=Math.max(1,Math.floor(L2.tm/1.1));for(j=0;j<n;j++){var tau=((t+j*L2.tm/n)%L2.tm+L2.tm)%L2.tm,T2=L2.T,lo=0,hi=T2.length-1;while(hi-lo>1){var md=(lo+hi)>>1;if(T2[md]<tau)lo=md;else hi=md}var f=(tau-T2[lo])/((T2[hi]-T2[lo])||1),xx=L2.p[2*lo]+(L2.p[2*hi]-L2.p[2*lo])*f,yy=L2.p[2*lo+1]+(L2.p[2*hi+1]-L2.p[2*lo+1])*f;
+   if(xx>-20&&xx<w+20&&yy>-20&&yy<h+20)dot(c,xx,yy,1.3*k,rgba(P.O,.85))}}
+  for(i=0;i<2;i++){var X=d.C[2*i],Y=d.C[2*i+1];c.strokeStyle=rgba(P.L,.2);c.beginPath();for(j=-1;j<=1;j++){var yy2=Y-rp*Math.sin(j*.55),hw=rp*Math.cos(j*.55);c.moveTo(X-hw,yy2);c.lineTo(X+hw,yy2)}c.moveTo(X,Y-rp*1.5);c.lineTo(X,Y+rp*1.5);c.stroke();c.strokeStyle=rgba(P.L,.55);c.beginPath();c.arc(X,Y,rp,0,TAU);c.stroke();
+   lab(c,w,'N',X,Y-rp*1.5-8*k,'center',rgba(P.O,.85))}
+  fadeName(c,w,h)};
+
+ /* R4 Two-source interference: two sources in step, each a circular wave falling off as 1/sqrt(r). Where crest meets trough the water stays still: the dark lines are hyperbolas */
+ var IW=200;
+ FN.interf=function(c,w,h,t,P,d){var bh=Math.max(40,Math.round(IW*h/w)),cx=w/2,cy=h*.345,k=K(w),sep=w*.075,lam=w*.05,i,x,y;
+  if(!d.b||d.bh!==bh||d.w!==w){d.w=w;d.bh=bh;d.b=D.createElement('canvas');d.b.width=IW;d.b.height=bh;d.x=d.b.getContext('2d');d.im=d.x.createImageData(IW,bh);var n=IW*bh;d.r1=new Float32Array(n);d.r2=new Float32Array(n);d.mk=new Float32Array(n);var sx=w/IW,sy=h/bh;
+   for(y=0;y<bh;y++)for(x=0;x<IW;x++){var X=(x+.5)*sx,Y=(y+.5)*sy,j=y*IW+x,a=Math.hypot(X-(cx-sep),Y-cy),b=Math.hypot(X-(cx+sep),Y-cy);d.r1[j]=a;d.r2[j]=b;
+    var ex=Math.min(1,Math.min(X,w-X)/(w*.16)),ey=Math.min(1,Y/(h*.08)),eb=Math.max(0,Math.min(1,(h*.7-Y)/(h*.16))),rr=Math.hypot((X-cx)/(w*.5),(Y-cy)/(h*.5));d.mk[j]=ex*ey*eb*Math.max(0,1-rr*rr*.55)}}
+  var L=P.L.split(',').map(Number),o=d.im.data,kk=TAU/lam,ph=t*TAU*.55,n2=IW*bh;
+  for(i=0;i<n2;i++){var r1=d.r1[i],r2=d.r2[i],v=Math.cos(kk*r1-ph)/Math.sqrt(1+r1/lam)+Math.cos(kk*r2-ph)/Math.sqrt(1+r2/lam),q=i*4,al=Math.max(0,v)*.62*d.mk[i];o[q]=L[0];o[q+1]=L[1];o[q+2]=L[2];o[q+3]=Math.min(255,al*255)}
+  d.x.putImageData(d.im,0,0);c.save();c.imageSmoothingEnabled=true;c.drawImage(d.b,0,0,w,h);c.restore();
+  dot(c,cx-sep,cy,2.4*k,'rgb('+P.O+')');dot(c,cx+sep,cy,2.4*k,'rgb('+P.O+')');lab(c,w,'S1',cx-sep,cy-12*k,'center',rgba(P.O,.9));lab(c,w,'S2',cx+sep,cy-12*k,'center',rgba(P.O,.9))};
+
+ /* R5 Phase portrait of the Van der Pol oscillator, x'' - mu(1 - x^2)x' + x = 0 with mu 1.2: every start, inside or outside, ends on the same loop, the limit cycle */
+ var MU=1.2;function vf(x,y){return[y,MU*(1-x*x)*y-x]}
+ function rk(s,h2){var a=vf(s[0],s[1]),b=vf(s[0]+a[0]*h2/2,s[1]+a[1]*h2/2),c2=vf(s[0]+b[0]*h2/2,s[1]+b[1]*h2/2),e=vf(s[0]+c2[0]*h2,s[1]+c2[1]*h2);s[0]+=h2/6*(a[0]+2*b[0]+2*c2[0]+e[0]);s[1]+=h2/6*(a[1]+2*b[1]+2*c2[1]+e[1])}
+ function spawn(o){var a=Math.random()*TAU,r=Math.random()<.4?Math.random()*.6+.05:Math.random()*1.2+2.6;o.s=[Math.cos(a)*r,Math.sin(a)*r*1.4];o.age=0;o.tr=[]}
+ FN.vdp=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),bw=Math.min(w*.62,h*1.2),bh=h*.58,sx=bw/6,sy=bh/9,i,j;
+  if(!d.cyc){var s=[2,0];for(i=0;i<3000;i++)rk(s,.01);var pc=[];for(i=0;i<760;i++){rk(s,.01);pc.push(s[0],s[1])}d.cyc=pc;d.p=[];for(i=0;i<34;i++){var o={};spawn(o);var pre=Math.random()*9;for(j=0;j<pre/.02;j++)rk(o.s,.02);o.age=pre;d.p.push(o)}}
+  function X(v){return cx+v*sx}function Y(v){return cy-v*sy}
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(cx-bw/2,cy+.5);c.lineTo(cx+bw/2,cy+.5);c.moveTo(cx+.5,cy-bh/2);c.lineTo(cx+.5,cy+bh/2);for(i=-2;i<=2;i++){c.moveTo(X(i),cy-3*k);c.lineTo(X(i),cy+3*k)}for(i=-4;i<=4;i++){c.moveTo(cx-3*k,Y(i));c.lineTo(cx+3*k,Y(i))}c.stroke();
+  c.strokeStyle=rgba(P.L,.11);c.beginPath();for(i=-6;i<=6;i++)for(j=-4;j<=4;j++){var x=i*.45,y=j*1.0,v=vf(x,y),m=Math.hypot(v[0]*sx,-v[1]*sy)||1,l=5*k;c.moveTo(X(x),Y(y));c.lineTo(X(x)+v[0]*sx/m*l,Y(y)-v[1]*sy/m*l)}c.stroke();
+  var pc2=d.cyc;c.strokeStyle=rgba(P.L,.48);c.lineWidth=1.2;c.beginPath();for(i=0;i<pc2.length;i+=2)i?c.lineTo(X(pc2[i]),Y(pc2[i+1])):c.moveTo(X(pc2[i]),Y(pc2[i+1]));c.closePath();c.stroke();c.lineWidth=1;
+  var dt=d.lt==null?0:Math.min(.05,Math.max(0,t-d.lt));d.lt=t;
+  for(i=0;i<d.p.length;i++){var o2=d.p[i];if(dt>0){var sub=4;for(j=0;j<sub;j++)rk(o2.s,dt*1.1/sub);o2.age+=dt*1.1;o2.tr.push(o2.s[0],o2.s[1]);if(o2.tr.length>44)o2.tr.splice(0,2);if(o2.age>22||Math.abs(o2.s[0])>4||Math.abs(o2.s[1])>6)spawn(o2)}
+   var tr=o2.tr;if(tr.length>3){c.strokeStyle=rgba(P.T,.45);c.beginPath();for(j=0;j<tr.length;j+=2)j?c.lineTo(X(tr[j]),Y(tr[j+1])):c.moveTo(X(tr[j]),Y(tr[j+1]));c.stroke()}
+   if(Math.abs(o2.s[0])<3.1&&Math.abs(o2.s[1])<4.6)dot(c,X(o2.s[0]),Y(o2.s[1]),1.6*k,rgba(P.O,.9))}
+  lab(c,w,'X',cx+bw/2,cy-10*k,'right',rgba(P.L,.7));lab(c,w,'DX/DT',cx+8*k,cy-bh/2+4*k,'left',rgba(P.L,.7));lab(c,w,'LIMIT CYCLE  μ 1.2',cx-bw/2,cy-bh/2+4*k,'left',rgba(P.O,.85))};
+
+ /* R6 Lissajous figure on an oscilloscope: X and Y fed two tones in a simple ratio; a slow phase drift turns the figure. A new ratio every 16 s */
+ var LR=[[3,2],[5,4],[1,2],[3,4],[5,3],[2,3]];
+ FN.liss=function(c,w,h,t,P){var cx=w/2,cy=h*.345,k=K(w),sw=Math.min(w*.46,h*.62*1.25),sh=sw*.8,x0=cx-sw/2,y0=cy-sh/2,T=16,q=Math.floor(t/T),u=t-q*T,R=LR[((q%LR.length)+LR.length)%LR.length],ph=t*.35,i;
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.07);c.beginPath();for(i=1;i<10;i++){var gx=Math.round(x0+sw*i/10)+.5;c.moveTo(gx,y0);c.lineTo(gx,y0+sh)}for(i=1;i<8;i++){var gy=Math.round(y0+sh*i/8)+.5;c.moveTo(x0,gy);c.lineTo(x0+sw,gy)}c.stroke();
+  c.strokeStyle=rgba(P.L,.16);c.beginPath();for(i=0;i<=50;i++){var tx=x0+sw*i/50,ty=y0+sh*i/40;c.moveTo(tx,cy-(i%5?2:4)*k);c.lineTo(tx,cy+(i%5?2:4)*k);if(i<=40){c.moveTo(cx-(i%5?2:4)*k,ty);c.lineTo(cx+(i%5?2:4)*k,ty)}}c.stroke();
+  c.strokeStyle=rgba(P.L,.32);c.strokeRect(Math.round(x0)+.5,Math.round(y0)+.5,Math.round(sw),Math.round(sh));
+  var f=Math.min(1,u/1)*(u>T-1?Math.max(0,T-u):1),ax=sw*.42,ay=sh*.42;c.strokeStyle=rgba(P.L,.38*f);c.beginPath();for(i=0;i<=600;i++){var s=i/600*TAU,x=cx+ax*Math.sin(R[0]*s+ph),y=cy-ay*Math.sin(R[1]*s);i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  var sb=t*1.6;c.lineWidth=1.6;for(i=0;i<24;i++){var s1=sb-i*.05,s2=sb-(i+1)*.05;c.strokeStyle=rgba(P.T,.8*(1-i/24)*f);c.beginPath();c.moveTo(cx+ax*Math.sin(R[0]*s1+ph),cy-ay*Math.sin(R[1]*s1));c.lineTo(cx+ax*Math.sin(R[0]*s2+ph),cy-ay*Math.sin(R[1]*s2));c.stroke()}c.lineWidth=1;
+  dot(c,cx+ax*Math.sin(R[0]*sb+ph),cy-ay*Math.sin(R[1]*sb),2.2*k,rgba(P.O,f));
+  var deg=Math.round(((ph*180/PI)%360+360)%360);lab(c,w,'X '+R[0]+' : Y '+R[1],x0,y0+sh+12*k,'left',rgba(P.O,.85));lab(c,w,'PHASE '+deg+'°',x0+sw,y0+sh+12*k,'right',rgba(P.L,.7))};
+
+ /* R7 TRAPPIST-1: seven Earth-sized planets in a chain of resonances (periods 1.51, 2.42, 4.05, 6.10, 9.21, 12.35, 18.77 days; neighbours 8:5 5:3 3:2 3:2 4:3 3:2). Orbits to scale; 1 day = 0.9 s */
+ var TP=[1.5109,2.4218,4.0496,6.0996,9.2067,12.3529,18.7673],TA=[.01154,.0158,.02227,.02925,.03849,.04683,.06189],TR=[1.12,1.1,.79,.92,1.05,1.13,.76],TN=['B','C','D','E','F','G','H'];
+ FN.trap=function(c,w,h,t,P){var cx=w/2,cy=h*.345,ro=-.2,ca=Math.cos(ro),sa=Math.sin(ro),A0=Math.min(w*.4,h*.56),k=K(w),i;
+  var g=c.createRadialGradient(cx,cy,0,cx,cy,14*k);g.addColorStop(0,rgba(P.O,.55));g.addColorStop(1,rgba(P.O,0));c.fillStyle=g;c.fillRect(cx-14*k,cy-14*k,28*k,28*k);dot(c,cx,cy,2.8*k,'rgb('+P.O+')');
+  var XY=[];for(i=0;i<7;i++){var A=A0*TA[i]/TA[6],B=A*.36,phs=TAU*t/(TP[i]*.9)+i*1.9;c.lineWidth=1;c.strokeStyle=rgba(P.L,.18);c.beginPath();c.ellipse(cx,cy,A,B,ro,0,TAU);c.stroke();
+   c.lineWidth=1.4;c.strokeStyle=rgba(P.T,.6);c.beginPath();c.ellipse(cx,cy,A,B,ro,phs-.7,phs);c.stroke();var x=A*Math.cos(phs),y=B*Math.sin(phs);XY.push([cx+x*ca-y*sa,cy+x*sa+y*ca])}
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.12);c.beginPath();for(i=0;i<7;i++)i?c.lineTo(XY[i][0],XY[i][1]):c.moveTo(XY[i][0],XY[i][1]);c.stroke();
+  for(i=0;i<7;i++){dot(c,XY[i][0],XY[i][1],1.5*TR[i]*k,'rgb('+P.O+')');if(i>=3){var rt=XY[i][0]>w*.72;lab(c,w,TN[i],XY[i][0]+(rt?-7:7)*k,XY[i][1]-8*k,rt?'right':'left',rgba(P.O,.9))}}
+  lab(c,w,'TRAPPIST-1   8:5  5:3  3:2  3:2  4:3  3:2',cx,cy+A0*.36+18*k,'center',rgba(P.L,.62))};
+
+ /* R8 Fourier series: rotating circles, each a harmonic, add up to a square, a sawtooth or a triangle wave (the shapes an oscillator makes). A new wave every 14 s */
+ var FT=[['SQUARE',function(n){return n%2?4/(PI*n):0}],['SAWTOOTH',function(n){return(n%2?2:-2)/(PI*n)}],['TRIANGLE',function(n){return n%2?((n-1)/2%2?-1:1)*8/(PI*PI*n*n):0}]];
+ FN.four=function(c,w,h,t,P){var cy=h*.345,k=K(w),T=14,q=Math.floor(t/T),u=t-q*T,F=FT[((q%3)+3)%3],R0=h*.14,x0=w*.3,om=TAU*.17,xw0=w*.5,xw1=w*.93,sp=(xw1-xw0)/(TAU/om),f=Math.min(1,u/1)*(u>T-1?Math.max(0,T-u):1),i,n,
+   H=[];for(n=1;H.length<6&&n<20;n++){var a=F[1](n);if(a)H.push([n,a*R0])}
+  var px=x0,py=cy;c.lineWidth=1;for(i=0;i<H.length;i++){var r=Math.abs(H[i][1]),an=H[i][0]*om*t,sg=H[i][1]<0?-1:1;c.strokeStyle=rgba(P.L,.2*f+.04);c.beginPath();c.arc(px,py,r,0,TAU);c.stroke();var nx=px+sg*r*Math.cos(an),ny=py-sg*r*Math.sin(an);c.strokeStyle=rgba(P.L,.42*f+.06);c.beginPath();c.moveTo(px,py);c.lineTo(nx,ny);c.stroke();px=nx;py=ny}
+  dot(c,px,py,2.2*k,rgba(P.O,f));c.setLineDash([3,4]);c.strokeStyle=rgba(P.O,.25*f);c.beginPath();c.moveTo(px,py);c.lineTo(xw0,py);c.stroke();c.setLineDash([]);
+  c.strokeStyle=rgba(P.L,.14);c.beginPath();c.moveTo(xw0,cy+.5);c.lineTo(xw1,cy+.5);c.moveTo(xw0+.5,cy-R0*1.35);c.lineTo(xw0+.5,cy+R0*1.35);c.stroke();
+  c.strokeStyle=rgba(P.T,.75*f);c.lineWidth=1.4;c.beginPath();for(var x=xw0;x<=xw1;x+=2){var tt=t-(x-xw0)/sp,y=cy;for(i=0;i<H.length;i++)y-=H[i][1]*Math.sin(H[i][0]*om*tt);x===xw0?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();c.lineWidth=1;
+  lab(c,w,F[0],xw1,cy-R0*1.35,'right',rgba(P.O,.85*f+.1));lab(c,w,'HARMONICS '+H.map(function(e){return e[0]}).join(' '),x0,cy+R0*1.55+6*k,'center',rgba(P.L,.62))};
+
+ /* ===== The dipole: today's drawing with three corrected flows. Field lines r = L sin^2(theta); |B| ~ sqrt(1 + 3 cos^2 theta) / r^3, 2 at the pole's surface, 1 at the equator's.
+    The ball is drawn as a uniformly magnetised sphere: inside it the field is uniform, so each line closes through the ball as a straight chord (Griffiths, ex. 6.1).
+    dir 1 = Jupiter (the field leaves the north half, as Jupiter's dipole points north), -1 = Earth (it leaves the south half). ===== */
+ var Ls=[.2,.3,.44,.62,.86,1.2,1.7,2.4];
+ function dipFrame(c,w,h,t,P,inner){var R=w*.5,rp=R*.058,i,j,sg,th,s,r;c.save();c.translate(w/2,h*.345);c.rotate(.17+Math.sin(t*.15)*.03);c.lineWidth=1;
+  for(i=0;i<8;i++){var L=Ls[i]*R,t0=Math.asin(Math.sqrt(rp/L)),sp=PI-2*t0;c.strokeStyle='rgba('+P.L+',.22)';c.beginPath();for(sg=-1;sg<=1;sg+=2)for(j=0;j<=40;j++){th=t0+sp*j/40;s=Math.sin(th);r=L*s*s;j?c.lineTo(sg*r*s,-r*Math.cos(th)):c.moveTo(sg*r*s,-r*Math.cos(th))}c.stroke()}
+  if(inner){c.strokeStyle='rgba('+P.L+',.12)';c.beginPath();for(i=0;i<8;i++){var x=rp*Math.sqrt(rp/(Ls[i]*R)),y=rp*Math.sqrt(1-rp/(Ls[i]*R));c.moveTo(x,-y);c.lineTo(x,y);c.moveTo(-x,-y);c.lineTo(-x,y)}c.stroke()}
+  c.strokeStyle='rgba('+P.L+',.2)';c.beginPath();for(i=-1;i<=1;i++){var yy=-rp*Math.sin(i*.55),hw=rp*Math.cos(i*.55);c.moveTo(-hw,yy);c.lineTo(hw,yy)}c.moveTo(0,-rp*1.5);c.lineTo(0,rp*1.5);c.stroke();
+  c.strokeStyle='rgba('+P.L+',.55)';c.beginPath();c.arc(0,0,rp,0,TAU);c.stroke();return{R:R,rp:rp}}
+ function endFrame(c,w,h){c.restore();fadeName(c,w,h)}
+ /* a table per line: points (x,y) from the top of the ball out along the line to the bottom, then (F1) up through the ball; t = travel time with speed V (B/2)^g */
+ function tables(w,mode){var R=w*.5,rp=R*.058,k=K(w),out=[],i,j;for(i=0;i<8;i++){var L=Ls[i]*R,t0=Math.asin(Math.sqrt(rp/L)),N=260,X=[],Y=[],B=[],In=[];
+   for(j=0;j<=N;j++){var th=t0+(PI-2*t0)*j/N,s=Math.sin(th),r=L*s*s,cth=Math.cos(th);X.push(r*s);Y.push(-r*cth);B.push(Math.sqrt(1+3*cth*cth)/Math.pow(r/rp,3));In.push(0)}
+   if(mode===1){var xi=rp*Math.sqrt(rp/L),yi=rp*Math.sqrt(1-rp/L);for(j=1;j<24;j++){X.push(xi);Y.push(yi-2*yi*j/24);B.push(2);In.push(1)}X.push(X[0]);Y.push(Y[0]);B.push(B[0]);In.push(1)}
+   var T=[0],tm=0,g=mode===1?.2:0,V=(mode===1?110:46)*k;for(j=1;j<X.length;j++){var ds=Math.hypot(X[j]-X[j-1],Y[j]-Y[j-1]),bm=(B[j]+B[j-1])/2;tm+=ds/(V*Math.pow(bm/2,g));T.push(tm)}
+   out.push({X:X,Y:Y,In:In,T:T,tm:tm})}return out}
+ function at(tb,tau){var T=tb.T,lo=0,hi=T.length-1;while(hi-lo>1){var m=(lo+hi)>>1;if(T[m]<tau)lo=m;else hi=m}var f=(tau-T[lo])/((T[hi]-T[lo])||1);return[tb.X[lo]+(tb.X[hi]-tb.X[lo])*f,tb.Y[lo]+(tb.Y[hi]-tb.Y[lo])*f,tb.In[lo]&&tb.In[hi]]}
+ var api={dir:1};
+ function flow(mode){return function(c,w,h,t,P,d){var k=K(w);if(d.w!==w||d.m!==mode){d.w=w;d.m=mode;d.tb=tables(w,mode)}dipFrame(c,w,h,t,P,mode===1);var dir=api.dir,i,j;
+   for(i=0;i<8;i++){var tb=d.tb[i],gap=mode===1?1.1:Math.max(.5,34*k/(46*k)),n=Math.max(1,Math.floor(tb.tm/gap));for(var sg=-1;sg<=1;sg+=2)for(j=0;j<n;j++){var tau=((t+j*tb.tm/n+(sg>0?0:tb.tm/n/2))%tb.tm+tb.tm)%tb.tm;if(dir<0)tau=tb.tm-tau;var p=at(tb,tau);
+    if(p[2])dot(c,sg*p[0],p[1],.95*k,'rgba('+P.O+',.3)');else dot(c,sg*p[0],p[1],1.3*k,'rgba('+P.O+',.88)')}}
+   endFrame(c,w,h)}}
+ /* F3: the real motion of a trapped charge: it spirals round its line (gyration) and slides along it, slowing where the field gets stronger, until it turns back at its mirror point,
+    where B = B_eq / sin^2(pitch angle at the equator). Total speed stays the same; along the line v_par = v sqrt(1 - B/B_mirror). It also drifts round the planet, out of the page. */
+ function rat(th){var s=Math.sin(th),c2=Math.cos(th);return Math.sqrt(1+3*c2*c2)/Math.pow(s,6)}
+ function trapT(w){var R=w*.5,k=K(w),out=[],AL=[32,52,40,62,36],idx=[2,3,4,5,6],q,j;for(q=0;q<idx.length;q++){var L=Ls[idx[q]]*R,al=AL[q]*PI/180,bm=1/(Math.sin(al)*Math.sin(al)),lo=.02,hi=PI/2;
+   for(j=0;j<60;j++){var m=(lo+hi)/2;if(rat(m)>bm)lo=m;else hi=m}var thm=hi,N=300,X=[],Y=[],T=[0],NX=[],NY=[],BB=[],tm=0;
+   for(j=0;j<=N;j++){var th=thm+(PI-2*thm)*j/N,s=Math.sin(th),r=L*s*s,cth=Math.cos(th);X.push(r*s);Y.push(-r*cth);var tx=2*L*s*cth*s+r*cth,ty=-(2*L*s*cth*cth-r*s),tl=Math.hypot(tx,ty)||1;NX.push(-ty/tl);NY.push(tx/tl);BB.push(rat(th));
+    if(j){var ds=Math.hypot(X[j]-X[j-1],Y[j]-Y[j-1]),vp=Math.sqrt(Math.max(.0016,1-(BB[j]+BB[j-1])/2/bm));tm+=ds/(64*k*vp);T.push(tm)}}
+   out.push({X:X,Y:Y,NX:NX,NY:NY,B:BB,T:T,tm:tm,thm:thm,L:L,bm:bm})}return out}
+ FN.dipF3=function(c,w,h,t,P,d){var k=K(w);if(d.w!==w||!d.tp){d.w=w;d.tp=trapT(w)}dipFrame(c,w,h,t,P,false);var i,j;
+  for(var ii=0;ii<d.tp.length*2;ii++){i=ii>>1;var tb=d.tp[i],sg=ii%2?-1:1,ph0=i*1.37+(ii%2)*.41;
+   c.strokeStyle='rgba('+P.O+',.45)';c.beginPath();[0,tb.X.length-1].forEach(function(e){var x=sg*tb.X[e],y=tb.Y[e],nx=sg*tb.NX[e],ny=tb.NY[e];c.moveTo(x-nx*4*k,y-ny*4*k);c.lineTo(x+nx*4*k,y+ny*4*k)});c.stroke();
+   function pos(tt){var per=2*tb.tm,u=((tt+ph0*tb.tm)%per+per)%per,tau=u<tb.tm?u:per-u,T=tb.T,lo=0,hi=T.length-1;while(hi-lo>1){var m=(lo+hi)>>1;if(T[m]<tau)lo=m;else hi=m}var f=(tau-T[lo])/((T[hi]-T[lo])||1),
+     x=tb.X[lo]+(tb.X[hi]-tb.X[lo])*f,y=tb.Y[lo]+(tb.Y[hi]-tb.Y[lo])*f,b=tb.B[lo]+(tb.B[hi]-tb.B[lo])*f,rho=3.2*k/Math.sqrt(b),off=rho*Math.sin(tt*15+ph0*5);return[sg*(x+tb.NX[lo]*off),y+tb.NY[lo]*off]}
+   c.strokeStyle='rgba('+P.T+',.5)';c.beginPath();for(j=0;j<=16;j++){var p=pos(t-j*.022);j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])}c.stroke();var p0=pos(t);dot(c,p0[0],p0[1],1.4*k,'rgba('+P.O+',.92)')}
+  c.restore();fadeName(c,w,h);var tb3=d.tp[1],a=.17+Math.sin(t*.15)*.03,lx=tb3.X[0],ly=tb3.Y[0];
+  lab(c,w,'MIRROR POINT',w/2+lx*Math.cos(a)-ly*Math.sin(a)+8*k,h*.345+lx*Math.sin(a)+ly*Math.cos(a)-2*k,'left','rgba('+P.O+',.75)')};
+ FN.dipF1=flow(1);FN.dipF2=flow(2);
+ api.PAL=PAL;api.FN=FN;api.KINDS=['chladni','pend','twodip','interf','vdp','liss','trap','four'];
+ return api})();
+
+</script>
+<script>
+/* Task WS-0d (lane Q): round 4 drawings (the final set) for the start screen and the splash. Nothing here changes SPLBG or R2 (WSR2).
+   Same shape as SPLBG.FN: fn(c,w,h,t,P,d), drawn in a frame of w x h (the splash's 577 x 427) with the picture centred at (w/2, h*.345).
+   P is a palette like SPLBG.PAL (L lines, T trails, O dots and labels, as "r,g,b"; the dipole also reads an optional A, the aurora's colour).
+   d is a per-picture scratch object. Two optional hints in d, both set by the host:
+     d.ext  half of the visible width in frame units (the start screen's band is much wider than the splash card); default w/2.
+   Every picture is a pure function of t on its first call (a still frame at any t is complete), then advances by the time between calls.
+   Global options: R4.cnt (0 fewer, 1 today, 2 more: the dipole's particle count), R4.dir (1 Jupiter, -1 Earth). */
+var R4=(function(){var PI=Math.PI,TAU=PI*2,RG={};
+ function K(w){return Math.max(1,Math.min(1.8,w/640))}
+ function dot(c,x,y,r,col){c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+ function lab(c,w,tx,x,y,al,col){c.font='500 '+Math.max(8,Math.min(13,w/72)).toFixed(1)+'px ui-monospace,"SF Mono",Menlo,Consolas,monospace';if('letterSpacing'in c)c.letterSpacing='0.12em';c.textAlign=al;c.textBaseline='middle';c.fillStyle=col;c.fillText(tx,x,y);if('letterSpacing'in c)c.letterSpacing='0px'}
+ function rgba(s,a){return 'rgba('+s+','+(+a).toFixed(3)+')'}
+ function rgb(s){return RG[s]||(RG[s]=s.split(',').map(Number))}
+ function mix(a,b,q){var A=rgb(a),B=rgb(b);q=q<0?0:q>1?1:q;return Math.round(A[0]+(B[0]-A[0])*q)+','+Math.round(A[1]+(B[1]-A[1])*q)+','+Math.round(A[2]+(B[2]-A[2])*q)}
+ /* the lines fade out behind the name and the bar, as in the splash's dipole */
+ function fadeName(c,w,h){c.save();c.globalCompositeOperation='destination-out';c.translate(w/2,h*.86);c.scale(w*.5,h*.35);var g=c.createRadialGradient(0,0,.78,0,0,1);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(-1,-1,2,2);c.restore()}
+ function hash(i){var x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+ /* seconds since the last call; 0 on the first call and after a jump (so a picture rebuilds its state from t) */
+ function step(d,t){var dt=d.lt==null?-1:t-d.lt;d.lt=t;return dt>=0&&dt<.25?dt:-1}
+ function ease(x){x=x<0?0:x>1?1:x;return x*x*(3-2*x)}
+ return{PAL:{},FN:{},BAND:{},NAME:{},STILL:{},cnt:1,dir:1,np:0,U:{K:K,dot:dot,lab:lab,rgba:rgba,rgb:rgb,mix:mix,fadeName:fadeName,hash:hash,step:step,ease:ease}}})();
+
+/* ===== The dipole (S1) with the F1 field flow kept exactly as built in WS-1: out of the north half, along the line, in at the south, up through the ball
+   (Jupiter). Field lines r = L sin^2(theta); |B| ~ sqrt(1 + 3 cos^2 theta) / r^3; speed V (B/2)^0.2; the ball a uniformly magnetised sphere (straight chords inside).
+   Only what a particle looks like changes: the four readings the user picked (P2 density, P3 energy, P4 radiation belt, P5 aurora), which the start screen
+   treats as four drawings of its random set. R4.cnt (0, 1, 2) is the particle count; 1 is the build's. ===== */
+(function(R4){var U=R4.U,PI=Math.PI,TAU=PI*2,K=U.K,dot=U.dot,lab=U.lab,rgba=U.rgba,mix=U.mix,hash=U.hash;
+ var Ls=[.2,.3,.44,.62,.86,1.2,1.7,2.4],GAP=[2.3,1.55,1.05];
+ R4.PAL.dip={g:'#0e1a34',bg:'#06080f',e:'#040508',ink:'#eaf0ff',a:'#6096ff',b:'#9fc2ff',d:'#ffc43c',p:'#b9d0ff',m:'#8190b2',n:'#75829f',L:'96,150,255',T:'96,150,255',O:'255,196,60',A:'120,255,214'};
+ /* the frame: field lines, the chords through the ball, the ball. sub: more lines drawn faintly (P2). Leaves the context rotated; end() restores it */
+ function frame(c,w,h,t,P,sub){var R=w*.5,rp=R*.058,i,j,sg,th,s,r;c.save();c.translate(w/2,h*.345);c.rotate(.17+Math.sin(t*.15)*.03);c.lineWidth=1;
+  if(sub){c.strokeStyle='rgba('+P.L+',.085)';c.beginPath();for(i=0;i<sub.length;i++){var L0=sub[i],a0=Math.asin(Math.sqrt(rp/L0)),s0=PI-2*a0;for(sg=-1;sg<=1;sg+=2)for(j=0;j<=30;j++){th=a0+s0*j/30;s=Math.sin(th);r=L0*s*s;j?c.lineTo(sg*r*s,-r*Math.cos(th)):c.moveTo(sg*r*s,-r*Math.cos(th))}}c.stroke()}
+  for(i=0;i<8;i++){var L=Ls[i]*R,t0=Math.asin(Math.sqrt(rp/L)),sp=PI-2*t0;c.strokeStyle='rgba('+P.L+',.22)';c.beginPath();for(sg=-1;sg<=1;sg+=2)for(j=0;j<=40;j++){th=t0+sp*j/40;s=Math.sin(th);r=L*s*s;j?c.lineTo(sg*r*s,-r*Math.cos(th)):c.moveTo(sg*r*s,-r*Math.cos(th))}c.stroke()}
+  c.strokeStyle='rgba('+P.L+',.12)';c.beginPath();for(i=0;i<8;i++){var x=rp*Math.sqrt(rp/(Ls[i]*R)),y=rp*Math.sqrt(1-rp/(Ls[i]*R));c.moveTo(x,-y);c.lineTo(x,y);c.moveTo(-x,-y);c.lineTo(-x,y)}c.stroke();
+  c.strokeStyle='rgba('+P.L+',.2)';c.beginPath();for(i=-1;i<=1;i++){var yy=-rp*Math.sin(i*.55),hw=rp*Math.cos(i*.55);c.moveTo(-hw,yy);c.lineTo(hw,yy)}c.moveTo(0,-rp*1.5);c.lineTo(0,rp*1.5);c.stroke();
+  c.strokeStyle='rgba('+P.L+',.55)';c.beginPath();c.arc(0,0,rp,0,TAU);c.stroke()}
+ function end(c,w,h){c.restore();U.fadeName(c,w,h)}
+ /* one line as a table (the F1 table of round 2): from the top of the ball out along the line to the bottom, then up through the ball; T = travel time */
+ function mkLine(L,rp,k){var t0=Math.asin(Math.sqrt(rp/L)),N=260,X=[],Y=[],B=[],In=[],j;
+  for(j=0;j<=N;j++){var th=t0+(PI-2*t0)*j/N,s=Math.sin(th),r=L*s*s,cth=Math.cos(th);X.push(r*s);Y.push(-r*cth);B.push(Math.sqrt(1+3*cth*cth)/Math.pow(r/rp,3));In.push(0)}
+  var xi=rp*Math.sqrt(rp/L),yi=rp*Math.sqrt(1-rp/L);for(j=1;j<24;j++){X.push(xi);Y.push(yi-2*yi*j/24);B.push(2);In.push(1)}X.push(X[0]);Y.push(Y[0]);B.push(B[0]);In.push(1);
+  var T=[0],tm=0,V=110*k;for(j=1;j<X.length;j++){var ds=Math.hypot(X[j]-X[j-1],Y[j]-Y[j-1]),bm=(B[j]+B[j-1])/2;tm+=ds/(V*Math.pow(bm/2,.2));T.push(tm)}
+  return{X:X,Y:Y,B:B,In:In,T:T,tm:tm,N:N,L:L}}
+ var O={x:0,y:0,i:0,f:0,inn:0};
+ function at(tb,tau){var T=tb.T,lo=0,hi=T.length-1,m;while(hi-lo>1){m=(lo+hi)>>1;if(T[m]<tau)lo=m;else hi=m}var f=(tau-T[lo])/((T[hi]-T[lo])||1);O.x=tb.X[lo]+(tb.X[hi]-tb.X[lo])*f;O.y=tb.Y[lo]+(tb.Y[hi]-tb.Y[lo])*f;O.i=lo;O.f=f;O.inn=tb.In[lo]&&tb.In[hi];return O}
+ function prep(d,w){if(d.w!==w){d.w=w;var R=w*.5,k=K(w);d.tb=Ls.map(function(l){return mkLine(l*R,R*.058,k)});d.x=null}return d.tb}
+ function wrap(u,tm){return((u%tm)+tm)%tm}
+ /* the F1 schedule: on each line dots evenly spaced in travel time, the two sides half a gap apart. fn(tb, line, side, j, table time, gap between dots) */
+ function each(tbs,t,gap,fn){var dir=R4.dir,n0=0,i,j,sg;for(i=0;i<tbs.length;i++){var tb=tbs[i],n=Math.max(1,Math.floor(tb.tm/gap));n0+=2*n;for(sg=-1;sg<=1;sg+=2)for(j=0;j<n;j++){var tau=wrap(t+j*tb.tm/n+(sg>0?0:tb.tm/n/2),tb.tm);fn(tb,i,sg,j,dir<0?tb.tm-tau:tau,tb.tm/n)}}R4.np=n0;return n0}
+
+ /* P2 field strength as density. Field lines are drawn so that their spacing shows the field's strength (Faraday's picture). Forty more lines, evenly spaced where they
+    leave the ball, are drawn faintly, and every line carries the same flow: the dots crowd exactly where the lines crowd, that is, where the field is strong.
+    A dot dims as it slows down far out (alpha as its speed), so the light per length of line is even and what is left is the crowding of the lines. */
+ var GAP2=[3.7,2.5,1.65];
+ R4.FN.dipP2=function(c,w,h,t,P,d){var k=K(w),R=w*.5,rp=R*.058,i;prep(d,w);if(!d.x){d.x=1;var ta=Math.asin(Math.sqrt(.058/2.4)),tb0=Math.asin(Math.sqrt(.058/.2)),M=40;d.sub=[];for(i=0;i<M;i++){var th=ta+(tb0-ta)*(i+.5)/M,s=Math.sin(th);d.sub.push(rp/(s*s))}d.st=d.sub.map(function(L){return mkLine(L,rp,k)})}
+  frame(c,w,h,t,P,d.sub);var gap=GAP2[R4.cnt],dir=R4.dir,n0=0,j,sg,pi=new Path2D(),po=[new Path2D(),new Path2D(),new Path2D(),new Path2D()],ro=.9*k,ri=.6*k;
+  for(i=0;i<d.st.length;i++){var tb=d.st[i],n=Math.max(1,Math.round(tb.tm/gap));n0+=2*n;for(sg=-1;sg<=1;sg+=2)for(j=0;j<n;j++){var tau=wrap(t+(j+hash(i*7+sg))*tb.tm/n,tb.tm),p=at(tb,dir<0?tb.tm-tau:tau),x=sg*p.x;if(p.inn){pi.moveTo(x+ri,p.y);pi.arc(x,p.y,ri,0,TAU)}else{var v=Math.pow(tb.B[p.i]/2,.2),b=po[v>.62?3:v>.36?2:v>.2?1:0];b.moveTo(x+ro,p.y);b.arc(x,p.y,ro,0,TAU)}}}
+  c.fillStyle='rgba('+P.O+',.3)';c.fill(pi);[.45,.62,.8,.95].forEach(function(a,q){c.fillStyle='rgba('+P.O+','+a+')';c.fill(po[q])});d.np=R4.np=n0;end(c,w,h)};
+
+ /* P3 energy. Belt particles come with a steep spectrum of energies: many slow ones, few fast ones. Size, brightness and colour show a particle's energy
+    (cool and small to hot and large, the hottest with a ring). Above about 1 MeV electrons all move at nearly the speed of light, so they keep the same pace. */
+ R4.FN.dipP3=function(c,w,h,t,P,d){var k=K(w),tbs=prep(d,w),B=[new Path2D(),new Path2D(),new Path2D(),new Path2D()],pi=new Path2D(),pr=new Path2D();frame(c,w,h,t,P);
+  d.np=each(tbs,t,GAP[R4.cnt],function(tb,i,sg,j,tau){var p=at(tb,tau),x=sg*p.x,e=Math.pow(hash(i*31+j*7+sg*3),2.3),r=(.62+1.35*e)*k,b=e<.12?0:e<.34?1:e<.62?2:3;
+   if(p.inn){pi.moveTo(x+r*.7,p.y);pi.arc(x,p.y,r*.7,0,TAU);return}B[b].moveTo(x+r,p.y);B[b].arc(x,p.y,r,0,TAU);if(b===3){pr.moveTo(x+r+2.4*k,p.y);pr.arc(x,p.y,r+2.4*k,0,TAU)}});
+  var C=[rgba(mix(P.T,P.O,.25),.7),rgba(mix(P.T,P.O,.7),.82),rgba(P.O,.92),rgba(P.O,1)],n;c.fillStyle='rgba('+P.O+',.28)';c.fill(pi);for(n=0;n<4;n++){c.fillStyle=C[n];c.fill(B[n])}c.strokeStyle='rgba('+P.O+',.38)';c.lineWidth=1;c.stroke(pr);
+  end(c,w,h);var lx=w*.5+w*.37,ly=h*.345-66*k;lab(c,w,'ENERGY',lx-44*k,ly,'right','rgba('+P.L+',.75)');for(n=0;n<4;n++)dot(c,lx-34*k+n*11*k,ly,(.7+.5*n)*k,C[n]);c.strokeStyle='rgba('+P.O+',.38)';c.beginPath();c.arc(lx-34*k+33*k,ly,4.6*k,0,TAU);c.stroke()};
+
+ /* P4 radiation belt. The flow stays; added are the particles that do not reach the ball: charges trapped on the inner lines, each circling its line and bouncing
+    between two mirror points set by its pitch angle at the equator (B_mirror = B_eq / sin^2 alpha). Together they fill a belt, as at Jupiter and in Earth's Van Allen belts. */
+ function rat(th){var s=Math.sin(th),c2=Math.cos(th);return Math.sqrt(1+3*c2*c2)/Math.pow(s,6)}
+ var NT=[34,60,96];
+ R4.FN.dipP4=function(c,w,h,t,P,d){var k=K(w),R=w*.5,tbs=prep(d,w),i,j,q,sg;if(!d.x){d.x=1;d.tr=[];for(i=0;i<NT[2];i++){var al=(36+44*hash(i*5+1))*PI/180,bm=1/(Math.sin(al)*Math.sin(al)),lo=.05,hi=PI/2;for(j=0;j<40;j++){var m=(lo+hi)/2;if(rat(m)>bm)lo=m;else hi=m}
+    var Lr=.2+.33*hash(i*11+3);d.tr.push({L:Lr*R,lm:PI/2-hi,om:1.9/(.35+Lr*1.6),ph:hash(i*3+7)*TAU,sg:i%2?1:-1,rho:(1.1+5.5*(Lr-.2))*k,wg:15/(.6+Lr*3),g0:hash(i*13)*TAU})}}
+  frame(c,w,h,t,P);var La=.2*R,Lb=.535*R,rp=R*.058;c.fillStyle='rgba('+P.T+',.055)';
+  for(sg=-1;sg<=1;sg+=2){c.beginPath();for(q=0;q<2;q++){var L=q?La:Lb,a0=Math.asin(Math.sqrt(rp/L)),th;for(j=0;j<=30;j++){th=q?PI-a0-(PI-2*a0)*j/30:a0+(PI-2*a0)*j/30;var s=Math.sin(th),r=L*s*s;(j||q)?c.lineTo(sg*r*s,-r*Math.cos(th)):c.moveTo(sg*r*s,-r*Math.cos(th))}}c.closePath();c.fill()}
+  d.np=each(tbs,t,GAP[R4.cnt],function(tb,i,sg,j,tau){var p=at(tb,tau);if(p.inn)dot(c,sg*p.x,p.y,.72*k,'rgba('+P.O+',.3)');else dot(c,sg*p.x,p.y,k,'rgba('+P.O+',.88)')});
+  var n=NT[R4.cnt],pt=new Path2D(),pd=new Path2D(),rd=.95*k;for(i=0;i<n;i++){var o=d.tr[i],pen=0;for(q=5;q>=0;q--){var tt=t-q*.035,th2=PI/2+o.lm*Math.sin(o.om*tt+o.ph),s2=Math.sin(th2),c2=Math.cos(th2),r2=o.L*s2*s2,dr=2*o.L*s2*c2,tx=dr*s2+r2*c2,ty=-dr*c2+r2*s2,tl=Math.hypot(tx,ty)||1,
+     off=o.rho*s2*s2*s2*Math.sin(o.wg*tt+o.g0),x=o.sg*(r2*s2-ty/tl*off),y=-r2*c2+tx/tl*off;pen?pt.lineTo(x,y):pt.moveTo(x,y);pen=1;if(!q){pd.moveTo(x+rd,y);pd.arc(x,y,rd,0,TAU)}}}
+  c.lineWidth=k;c.strokeStyle='rgba('+P.T+',.5)';c.stroke(pt);c.fillStyle=rgba(mix(P.T,'255,255,255',P.A?.45:0),.95);c.fill(pd);c.lineWidth=1;d.np+=n;R4.np=d.np;end(c,w,h);
+  lab(c,w,'RADIATION BELT',w*.5+w*.37,h*.345-66*k,'right','rgba('+P.T+',.8)')};
+
+ /* P5 aurora. Where the lines meet the ball near its poles, the flow runs into the planet's upper air, which glows: the auroral ovals. Each dot is drawn as a streak
+    (its path over the last 70 ms, so fast dots are long), and the foot of its line flashes as it passes through; the two ovals are seen edge-on as short bars. */
+ R4.FN.dipP5=function(c,w,h,t,P,d){var k=K(w),R=w*.5,rp=R*.058,tbs=prep(d,w),dir=R4.dir,A=P.A||P.T,ps=new Path2D(),ph=new Path2D(),pi=new Path2D(),gap=GAP[R4.cnt],i,sg,j;frame(c,w,h,t,P);
+  d.np=each(tbs,t,gap,function(tb,i,sg,j,tau){var p=at(tb,tau),x=sg*p.x,y=p.y;if(p.inn){pi.moveTo(x+.72*k,y);pi.arc(x,y,.72*k,0,TAU);return}ph.moveTo(x+.95*k,y);ph.arc(x,y,.95*k,0,TAU);
+   var u=tau-dir*.07;if(u>0&&u<tb.T[tb.N]){p=at(tb,u);ps.moveTo(x,y);ps.lineTo(sg*p.x,p.y)}});
+  c.lineCap='round';c.lineWidth=1.25*k;c.strokeStyle='rgba('+P.O+',.5)';c.stroke(ps);c.lineCap='butt';c.fillStyle='rgba('+P.O+',.3)';c.fill(pi);c.fillStyle='rgba('+P.O+',.95)';c.fill(ph);
+  /* the feet: a ray up each line and a glow, flashing when a dot goes through (out at the north, in at the south) */
+  for(i=0;i<8;i++){var tb=tbs[i],n=Math.max(1,Math.floor(tb.tm/gap)),per=tb.tm/n;for(sg=-1;sg<=1;sg+=2)for(j=0;j<2;j++){var age=wrap(t+(sg>0?0:per/2)+(dir<0?1:-1)*(j?tb.T[tb.N]:0),per),f=Math.exp(-age/.32),e=j?tb.N:0,stp=j?-1:1,x0=sg*tb.X[e],y0=tb.Y[e],q=e,len=0;
+    c.strokeStyle=rgba(A,.16+.7*f);c.lineWidth=1.3*k;c.beginPath();c.moveTo(x0,y0);while(len<(5+7*f)*k&&q+stp>=0&&q+stp<=tb.N){q+=stp;len=Math.hypot(tb.X[q]-tb.X[e],tb.Y[q]-tb.Y[e]);c.lineTo(sg*tb.X[q],tb.Y[q])}c.stroke();
+    dot(c,x0,y0,(2.2+2.6*f)*k,rgba(A,.07+.2*f));dot(c,x0,y0,1.1*k,rgba(A,.35+.6*f))}}
+  c.lineWidth=1.2*k;c.strokeStyle=rgba(A,.55);c.beginPath();for(j=-1;j<=1;j+=2){[.2,.44].forEach(function(th){c.moveTo(-rp*Math.sin(th),j*rp*Math.cos(th));c.lineTo(rp*Math.sin(th),j*rp*Math.cos(th))})}c.stroke();c.lineWidth=1;
+  end(c,w,h);lab(c,w,'AURORAL OVALS',w*.5+w*.37,h*.345-66*k,'right',rgba(A,.8))};
+ R4.BAND.dipP2=R4.BAND.dipP3=R4.BAND.dipP4=R4.BAND.dipP5=1;
+})(R4);
+
+/* ===== The phase portrait (R5, green) reworked: four pictures of a system's motion drawn in its state space. ===== */
+(function(R4){var U=R4.U,PI=Math.PI,TAU=PI*2,K=U.K,dot=U.dot,lab=U.lab,rgba=U.rgba,mix=U.mix,step=U.step;
+ R4.PAL.ph={g:'#0b2019',bg:'#050a08',e:'#030605',ink:'#e8fff3',a:'#3ecf8e',b:'#a3f7c9',d:'#ffd23a',p:'#b8f5d6',m:'#83a597',n:'#729184',L:'62,207,142',T:'163,247,201',O:'255,210,58'};
+ R4.PAL.phLor=R4.PAL.phFlow=R4.PAL.phPoin=R4.PAL.phFrac=R4.PAL.ph;
+
+ /* PH1 the Lorenz attractor: dx = 10(y - x), dy = x(28 - z) - y, dz = xy - (8/3)z (Lorenz 1963). The faint curve is one long orbit; it never closes and never
+    crosses itself. Nine tracers start 0.001 apart: they travel as one dot for a while, then part and end up anywhere on the butterfly (sensitive dependence).
+    Shown swinging slowly about the z axis (never edge-on, so both wings always read). Time 0.8 units a second; a new start every 24 s. */
+ function lor(s,h){var x=s[0],y=s[1],z=s[2],B=8/3,a1=10*(y-x),b1=x*(28-z)-y,c1=x*y-B*z,x2=x+a1*h/2,y2=y+b1*h/2,z2=z+c1*h/2,a2=10*(y2-x2),b2=x2*(28-z2)-y2,c2=x2*y2-B*z2,
+   x3=x+a2*h/2,y3=y+b2*h/2,z3=z+c2*h/2,a3=10*(y3-x3),b3=x3*(28-z3)-y3,c3=x3*y3-B*z3,x4=x+a3*h,y4=y+b3*h,z4=z+c3*h,a4=10*(y4-x4),b4=x4*(28-z4)-y4,c4=x4*y4-B*z4;
+  s[0]=x+h/6*(a1+2*a2+2*a3+a4);s[1]=y+h/6*(b1+2*b2+2*b3+b4);s[2]=z+h/6*(c1+2*c2+2*c3+c4)}
+ var LZ=null,LN=3800;
+ function lzPath(){if(LZ)return LZ;var s=[1,1,1],i;for(i=0;i<1500;i++)lor(s,.008);LZ=new Float32Array(LN*3);for(i=0;i<LN;i++){lor(s,.008);LZ[3*i]=s[0];LZ[3*i+1]=s[1];LZ[3*i+2]=s[2]}return LZ}
+ R4.FN.phLor=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),sc=Math.min(w*.0066,h*.0089),NTR=9,TL=64,Tc=24,rate=.8,q=Math.floor(t/Tc),u=t-q*Tc,p=lzPath(),i,j,dt=step(d,t);
+  function init(){d.q=q;d.s=[];d.tr=[];d.hx=[];d.ht=[];var b=((q*977)%LN+LN)%LN;for(i=0;i<NTR;i++){d.s.push([p[3*b]+i*.001,p[3*b+1],p[3*b+2]]);d.tr.push([]);d.hx.push([])}d.sim=0}
+  function adv(hh){for(i=0;i<NTR;i++){var s=d.s[i],tr=d.tr[i];lor(s,hh);tr.push(s[0],s[1],s[2]);if(tr.length>TL*3)tr.splice(0,3)}d.sim+=hh;if(d.sim>=d.ht.length*.04){d.ht.push(d.sim);for(i=0;i<NTR;i++)d.hx[i].push(d.s[i][0])}}
+  if(d.q!==q||dt<0){init();var want=u*rate;while(d.sim<want-1e-9)adv(Math.min(.0125,want-d.sim))}else if(dt>0){var hh=dt*rate,n=Math.ceil(hh/.02);for(j=0;j<n;j++)adv(hh/n)}
+  var a=.6+.35*Math.sin(t*.11),ca=Math.cos(a),sa=Math.sin(a),ce=Math.cos(.22),se=Math.sin(.22);
+  function X(x,y){return cx+(x*ca+y*sa)*sc}function Y(x,y,z){return cy-((z-24)*ce+(-x*sa+y*ca)*se)*sc}
+  c.lineWidth=1;c.lineJoin='round';c.strokeStyle=rgba(P.L,.25);c.beginPath();for(i=0;i<LN;i++){var x=p[3*i],y=p[3*i+1],z=p[3*i+2];i?c.lineTo(X(x,y),Y(x,y,z)):c.moveTo(X(x,y),Y(x,y,z))}c.stroke();
+  /* the two fixed points the orbit circles */
+  c.strokeStyle=rgba(P.L,.5);c.beginPath();for(i=-1;i<=1;i+=2){var fx=X(i*8.485,i*8.485),fy=Y(i*8.485,i*8.485,27);c.moveTo(fx-3*k,fy);c.lineTo(fx+3*k,fy);c.moveTo(fx,fy-3*k);c.lineTo(fx,fy+3*k)}c.stroke();
+  var f=Math.min(1,u/.8)*Math.min(1,(Tc-u)/1.2),pa=new Path2D(),pb=new Path2D(),far=0;
+  for(i=0;i<NTR;i++){var tr=d.tr[i],m=tr.length/3,hm=Math.max(0,m-TL/2|0);for(j=0;j<m;j++){var px=X(tr[3*j],tr[3*j+1]),py=Y(tr[3*j],tr[3*j+1],tr[3*j+2]);if(j<hm)j?pa.lineTo(px,py):pa.moveTo(px,py);else{if(j===hm){if(j)pa.lineTo(px,py);pb.moveTo(px,py)}else pb.lineTo(px,py)}}
+   if(i){var s0=d.s[0],s1=d.s[i];far=Math.max(far,Math.hypot(s1[0]-s0[0],s1[1]-s0[1],s1[2]-s0[2]))}}
+  c.strokeStyle=rgba(P.T,.3*f);c.stroke(pa);c.lineWidth=1.3;c.strokeStyle=rgba(P.T,.75*f);c.stroke(pb);c.lineWidth=1;
+  for(i=0;i<NTR;i++){var s2=d.s[i];dot(c,X(s2[0],s2[1]),Y(s2[0],s2[1],s2[2]),1.7*k,rgba(P.O,.95*f))}
+  var bw=Math.min(w*.3,h*.42);lab(c,w,'LORENZ  σ 10  ρ 28  β 8/3',cx-bw,cy-84*k,'left',rgba(P.L,.7));
+  lab(c,w,'9 STARTS 0.001 APART',cx+bw,cy-84*k,'right',rgba(P.O,.85));lab(c,w,'NOW '+(far<.01?far.toFixed(3):far<1?far.toFixed(2):far.toFixed(1))+' APART',cx+bw,cy-70*k,'right',rgba(P.O,.85*f));
+  /* in the wide band: x of each of the nine against time. One line at first, then they part */
+  var E=d.ext||w*.5;if(E>w*.6){var xa=cx+bw+46*k,xb=cx+E-26*k,ln=xb-xa,hs=1.75*k,nh=d.ht.length;c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(xa,cy+.5);c.lineTo(xb,cy+.5);c.moveTo(Math.round(xa)+.5,cy-40*k);c.lineTo(Math.round(xa)+.5,cy+40*k);c.stroke();
+   for(i=NTR-1;i>=0;i--){var hx=d.hx[i];c.strokeStyle=rgba(P.T,(i?.34:.8)*f);c.beginPath();for(j=0;j<nh;j++){var xx=xa+d.ht[j]/(Tc*rate)*ln,yy=cy-hx[j]*hs;j?c.lineTo(xx,yy):c.moveTo(xx,yy)}c.stroke();if(nh)dot(c,xa+d.ht[nh-1]/(Tc*rate)*ln,cy-d.s[i][0]*hs,1.4*k,rgba(P.O,.9*f))}
+   lab(c,w,'X OF EACH START, OVER TIME',xa+6*k,cy-84*k,'left',rgba(P.L,.7))}};
+ R4.BAND.phLor=.82;
+
+ /* PH2 the flow of the Van der Pol oscillator, x'' - mu (1 - x^2) x' + x = 0, over the whole plane (x across, dx/dt up). Streaks follow the flow, coloured by its speed
+    (dim and green where slow, bright where fast); every one of them is drawn onto the same closed loop, the limit cycle. mu breathes between 0.3 and 3:
+    the loop goes from a near circle (a sine tone) to a sharp-cornered relaxation shape. Dashed: the curve where dx/dt stops changing (the nullcline). */
+ function vdp(s,h,mu){var x=s[0],y=s[1],a1=y,b1=mu*(1-x*x)*y-x,x2=x+a1*h/2,y2=y+b1*h/2,a2=y2,b2=mu*(1-x2*x2)*y2-x2,x3=x+a2*h/2,y3=y+b2*h/2,a3=y3,b3=mu*(1-x3*x3)*y3-x3,x4=x+a3*h,y4=y+b3*h,a4=y4,b4=mu*(1-x4*x4)*y4-x4;
+  s[0]=x+h/6*(a1+2*a2+2*a3+a4);s[1]=y+h/6*(b1+2*b2+2*b3+b4)}
+ R4.FN.phFlow=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,sx=44,sy=16,HY=6.1,XM=3.75,mu=1.65+1.35*Math.sin(t*.12),dt=step(d,t),i,j,N=130,HV=6.5;
+  function X(v){return cx+v*sx}function Y(v){return cy-v*sy}
+  function spawn(o){o.x=(Math.random()*2-1)*XM;o.y=(Math.random()*2-1)*HY;o.tr=[X(o.x),Y(o.y)];o.life=1.6+Math.random()*2.6;o.age=0;o.sp=0}
+  function adv(h2){for(i=0;i<d.p.length;i++){var o=d.p[i],tr=o.tr;o.age+=h2;if(o.age>o.life||Math.abs(o.x)>XM||Math.abs(o.y)>HY){tr.splice(0,4);if(tr.length<4)spawn(o);continue}
+    var vx=o.y,vy=mu*(1-o.x*o.x)*o.y-o.x,ux=vx*sx,uy=-vy*sy,m=Math.hypot(ux,uy)||1,sp=Math.min(1,Math.log(1+Math.hypot(vx,vy))/3.6),ds=(22+46*sp)*h2;o.sp=sp;o.x+=ux/m*ds/sx;o.y-=uy/m*ds/sy;
+    var px=X(o.x),py=Y(o.y),n=tr.length;if(n<4||Math.hypot(px-tr[n-4],py-tr[n-3])>3.2){tr.push(px,py);if(tr.length>30)tr.splice(0,2)}else{tr[n-2]=px;tr[n-1]=py}}}
+  if(!d.p||d.n!==N||dt<0){d.n=N;d.p=[];for(i=0;i<N;i++){var o={};spawn(o);o.age=Math.random()*o.life*.6;d.p.push(o)}d.cs=[2,0];d.hv=[];d.hc=0;for(i=0;i<2500;i++)vdp(d.cs,.02,mu);for(j=0;j<HV*60;j++){vdp(d.cs,1/60,mu);d.hv.push(d.cs[1])}for(j=0;j<70;j++)adv(1/60)}
+  else if(dt>0){adv(dt);var ns=Math.max(1,Math.ceil(dt/.02));for(j=0;j<ns;j++)vdp(d.cs,dt/ns,mu);d.hc+=dt*60;while(d.hc>=1){d.hc-=1;d.hv.push(d.cs[1]);if(d.hv.length>HV*60)d.hv.shift()}}
+  /* axes and ticks */
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(X(-XM),cy+.5);c.lineTo(X(XM),cy+.5);c.moveTo(cx+.5,Y(HY));c.lineTo(cx+.5,Y(-HY));for(i=-Math.floor(XM);i<=XM;i++){c.moveTo(X(i),cy-3*k);c.lineTo(X(i),cy+3*k)}for(i=-6;i<=6;i+=2){c.moveTo(cx-3*k,Y(i));c.lineTo(cx+3*k,Y(i))}c.stroke();
+  /* nullcline y = x / (mu (1 - x^2)) */
+  c.setLineDash([3,5]);c.strokeStyle=rgba(P.L,.2);c.beginPath();var pen=0;for(var xv=-XM;xv<=XM;xv+=.04){var den=mu*(1-xv*xv),yv=Math.abs(den)<1e-3?99:xv/den;if(Math.abs(yv)>HY){pen=0;continue}pen?c.lineTo(X(xv),Y(yv)):c.moveTo(X(xv),Y(yv));pen=1}c.stroke();c.setLineDash([]);
+  /* the streaks, in four speed classes */
+  var B=[new Path2D(),new Path2D(),new Path2D(),new Path2D()];for(i=0;i<d.p.length;i++){var tr=d.p[i].tr,b=B[Math.min(3,d.p[i].sp*4|0)];if(tr.length<4)continue;b.moveTo(tr[0],tr[1]);for(j=2;j<tr.length;j+=2)b.lineTo(tr[j],tr[j+1])}
+  var C=[rgba(P.L,.3),rgba(P.L,.55),rgba(P.T,.62),rgba(mix(P.T,P.O,.55),.8)];c.lineJoin='round';for(i=0;i<4;i++){c.strokeStyle=C[i];c.stroke(B[i])}
+  /* the limit cycle at this mu, from the point that rides it */
+  var s=[d.cs[0],d.cs[1]];c.strokeStyle=rgba(P.T,.85);c.lineWidth=1.4;c.beginPath();c.moveTo(X(s[0]),Y(s[1]));for(i=0;i<460;i++){vdp(s,.02,mu);c.lineTo(X(s[0]),Y(s[1]))}c.stroke();c.lineWidth=1;
+  dot(c,X(d.cs[0]),Y(d.cs[1]),2.3*k,rgba(P.O,.95));
+  lab(c,w,'VAN DER POL  μ '+mu.toFixed(2),X(-XM),cy-86*k,'left',rgba(P.O,.85));lab(c,w,'LIMIT CYCLE',X(XM),cy-86*k,'right',rgba(P.T,.8));lab(c,w,'X',X(XM),cy+10*k,'right',rgba(P.L,.7));lab(c,w,'DX/DT',cx+8*k,cy-72*k,'left',rgba(P.L,.7));
+  /* in the wide band: the same motion against time (the newest at the left, level with the dot): a sine at small mu, a buzz at large mu */
+  if(E>w*.6){var xa=X(XM)+34*k,xb=cx+E-26*k,hv=d.hv,nh=hv.length,pv=(xb-xa)/(HV*60);c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(xa,cy+.5);c.lineTo(xb,cy+.5);c.moveTo(Math.round(xa)+.5,Y(HY));c.lineTo(Math.round(xa)+.5,Y(-HY));c.stroke();
+   c.setLineDash([3,4]);c.strokeStyle=rgba(P.O,.3);c.beginPath();c.moveTo(X(d.cs[0]),Y(d.cs[1]));c.lineTo(xa,Y(d.cs[1]));c.stroke();c.setLineDash([]);
+   c.strokeStyle=rgba(P.T,.8);c.lineWidth=1.4;c.beginPath();for(i=0;i<nh;i++){var xx=xa+i*pv,yy=Y(hv[nh-1-i]);i?c.lineTo(xx,yy):c.moveTo(xx,yy)}c.stroke();c.lineWidth=1;dot(c,xa,Y(d.cs[1]),1.8*k,rgba(P.O,.95));
+   lab(c,w,'DX/DT OVER TIME',xa+6*k,cy-86*k,'left',rgba(P.L,.7))}};
+ R4.BAND.phFlow=.84;
+
+ /* PH3 a Poincare section. The driven Duffing oscillator, x'' + 0.3 x' - x + x^3 = 0.5 cos(1.2 t), is chaotic. Photograph it once per turn of the drive, always at
+    the same drive phase, and the points fall on a strange attractor: a sheet stretched and folded over itself. Here 1500 states are shown at one drive phase,
+    and the phase is swept: the sheet stretches, folds and comes back onto itself once per turn (11.6 s). The amber dot is one state and its path. */
+ var DF=null,DN=1500,DW=1.2,DTP=TAU/1.2,DH=DTP/100;
+ function duf(xs,vs,n,tau,h2){var c0=.5*Math.cos(DW*tau),c1=.5*Math.cos(DW*(tau+h2/2)),c2=.5*Math.cos(DW*(tau+h2)),i;for(i=0;i<n;i++){var x=xs[i],v=vs[i],a1=v,b1=-.3*v+x-x*x*x+c0,x2=x+a1*h2/2,v2=v+b1*h2/2,a2=v2,b2=-.3*v2+x2-x2*x2*x2+c1,
+    x3=x+a2*h2/2,v3=v+b2*h2/2,a3=v3,b3=-.3*v3+x3-x3*x3*x3+c1,x4=x+a3*h2,v4=v+b3*h2,a4=v4,b4=-.3*v4+x4-x4*x4*x4+c2;xs[i]=x+h2/6*(a1+2*a2+2*a3+a4);vs[i]=v+h2/6*(b1+2*b2+2*b3+b4)}}
+ function dufSec(){if(DF)return DF;var x=new Float32Array([.1]),v=new Float32Array([.1]),i,j;DF=new Float32Array(DN*2);for(i=-40;i<DN;i++){for(j=0;j<100;j++)duf(x,v,1,j*DH,DH);if(i>=0){DF[2*i]=x[0];DF[2*i+1]=v[0]}}return DF}
+ R4.FN.phPoin=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),sx=Math.min(w*.14,h*.19),sy=sx*1.12,rate=.45,dt=step(d,t),i,tau=(t*rate)%DTP;
+  if(!d.xs||dt<0){var S=dufSec();d.xs=new Float32Array(DN);d.vs=new Float32Array(DN);for(i=0;i<DN;i++){d.xs[i]=S[2*i];d.vs[i]=S[2*i+1]}var n=Math.floor(tau/DH);d.tr=[];for(i=0;i<n;i++){duf(d.xs,d.vs,DN,i*DH,DH);d.tr.push(d.xs[0],d.vs[0])}d.tau=n*DH;if(d.tr.length>180)d.tr.splice(0,d.tr.length-180)}
+  else if(dt>0){duf(d.xs,d.vs,DN,d.tau,dt*rate);d.tau+=dt*rate;d.tr.push(d.xs[0],d.vs[0]);if(d.tr.length>180)d.tr.splice(0,2)}
+  function X(v){return cx+v*sx}function Y(v){return cy-v*sy}
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(X(-2),cy+.5);c.lineTo(X(2),cy+.5);c.moveTo(cx+.5,Y(1.15));c.lineTo(cx+.5,Y(-1.15));for(i=-1;i<=1;i+=2){c.moveTo(X(i),cy-3*k);c.lineTo(X(i),cy+3*k);c.moveTo(cx-3*k,Y(i));c.lineTo(cx+3*k,Y(i))}c.stroke();
+  c.fillStyle=rgba(P.T,.8);var z=Math.max(1,1.25*k),xs=d.xs,vs=d.vs;for(i=0;i<DN;i++)c.fillRect(cx+xs[i]*sx-z/2,cy-vs[i]*sy-z/2,z,z);
+  var tr=d.tr;if(tr.length>3){c.strokeStyle=rgba(P.O,.4);c.beginPath();for(i=0;i<tr.length;i+=2)i?c.lineTo(X(tr[i]),Y(tr[i+1])):c.moveTo(X(tr[i]),Y(tr[i+1]));c.stroke()}
+  dot(c,X(xs[0]),Y(vs[0]),2.2*k,rgba(P.O,.95));
+  /* the drive's phase as a small dial */
+  var ph=DW*d.tau,dx=X(2)-10*k,dy=Y(1.15)+12*k,dr=9*k;c.strokeStyle=rgba(P.L,.45);c.beginPath();c.arc(dx,dy,dr,0,TAU);c.stroke();c.strokeStyle=rgba(P.O,.9);c.beginPath();c.moveTo(dx,dy);c.lineTo(dx+dr*Math.sin(ph),dy-dr*Math.cos(ph));c.stroke();
+  var deg=Math.round(((ph*180/PI)%360+360)%360);lab(c,w,'DRIVE PHASE '+(deg<100?deg<10?'  ':' ':'')+deg+'°',dx-dr-8*k,dy,'right',rgba(P.O,.85));
+  lab(c,w,'POINCARÉ SECTION  DUFFING',X(-2),Y(1.15)+12*k,'left',rgba(P.L,.7));lab(c,w,'X',X(2),cy+10*k,'right',rgba(P.L,.7));lab(c,w,'DX/DT',cx+8*k,Y(1.15)+26*k,'left',rgba(P.L,.7))};
+ R4.BAND.phPoin=.78;
+
+ /* PH4 a fractal in the road to chaos. The logistic map x -> r x (1 - x): for each growth rate r (across) the picture shows where x ends up (up), brighter where it
+    lands more often. One value splits into 2, 4, 8 ... and dissolves into chaos (May 1976). The picture is a fractal: the part round x = 1/2 between a doubling and
+    the point where the bands rejoin is a small copy of the whole. A line sweeps from left to right and the picture appears; it sweeps back and the boxed part appears
+    magnified, the same shape again; and again, four levels deep (to 96 times), then back to the whole. Each copy is close to 4.669 times narrower (Feigenbaum 1978).
+    Windows: r from 0.15 of the span before the doubling point r_n to the band-merging point m_n; x between f^(2^n)(1/2) and f^(2^(n+1))(1/2) at m_n. */
+ var BW=760,BH=300,FRS=[3,3.449490,3.544090,3.564407],FMS=[4,3.678573,3.592572,3.574805],FWN=[],FP=9,FHD=3.5,FDEC=[2,3,4,4];
+ function fwin(n){if(FWN[n])return FWN[n];var r1=FMS[n],r0=FRS[n]-.15*(r1-FRS[n]),x0=0,x1=1,x=.5,i,m=1<<n;if(n){for(i=0;i<m;i++)x=r1*x*(1-x);x0=x;for(i=0;i<m;i++)x=r1*x*(1-x);x1=Math.max(x0,x);x0=Math.min(x0,x)}return FWN[n]={r0:r0,r1:r1,x0:x0,x1:x1}}
+ /* one level as a 760 x 300 picture, drawn column by column in the direction of its sweep (48 columns a call, all of them when all is set) */
+ function flv(d,n,dir,P,all){var o=d.cv[n];if(!o){var cv=document.createElement('canvas');cv.width=BW;cv.height=BH;o=d.cv[n]={cv:cv,x:cv.getContext('2d'),done:0,dir:dir};o.img=o.x.createImageData(1,BH);o.cnt=new Float32Array(BH+1)}
+  if(o.done>=BW)return o;var W=fwin(n),lim=all?BW:Math.min(BW,o.done+48),cnt=o.cnt,m=1<<n,ns=260*m,wu=300+150*m,D=o.img.data,rgb=U.rgb(P.T),j,sx=BH/(W.x1-W.x0);
+  for(;o.done<lim;o.done++){var col=o.dir>0?o.done:BW-1-o.done,r=W.r0+(W.r1-W.r0)*col/(BW-1),x=.5,tot=0;cnt.fill(0);for(j=0;j<wu;j++)x=r*x*(1-x);
+   for(j=0;j<ns;j++){x=r*x*(1-x);if(x>=W.x0&&x<=W.x1){var v=(W.x1-x)*sx-.5,b=v<0?0:v|0,fr=v<0?0:v-b;cnt[b]+=1-fr;cnt[b+1]+=fr;tot++}}
+   for(j=0;j<BH;j++){D[4*j]=rgb[0];D[4*j+1]=rgb[1];D[4*j+2]=rgb[2];D[4*j+3]=cnt[j]>0?Math.min(1,Math.pow(.2*cnt[j]*BH/tot,.62))*240:0}
+   o.x.putImageData(o.img,col,0)}return o}
+ R4.FN.phFrac=function(c,w,h,t,P,d){var wide=(d.ext||0)>w*.6,cx=w/2+(wide?44:0),cy=h*.345,k=K(w),FH=Math.min(w*.74,h*1.02)*.39,FW=wide?FH*3.5:FH/.39,x0=cx-FW/2,y0=cy-FH/2-2*k,SEG=FP+FHD,q=Math.floor(t/SEG),u=t-q*SEG,
+   n=((q%4)+4)%4,pn=(n+3)%4,dir=n%2?-1:1,pr=Math.min(1,u/FP),dt=step(d,t),i,j,W=fwin(n),Wp=fwin(pn);
+  if(d.pc!==P.T){d.pc=P.T;d.cv={}}
+  var cur=flv(d,n,dir,P,dt<0),prev=flv(d,pn,-dir,P,true),f=pr*BW,X=dir>0?x0+pr*FW:x0+(1-pr)*FW;
+  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+  if(pr<1){if(dir>0){if(f>=1)c.drawImage(cur.cv,0,0,f,BH,x0,y0,pr*FW,FH);c.drawImage(prev.cv,f,0,BW-f,BH,X,y0,(1-pr)*FW,FH)}else{c.drawImage(prev.cv,0,0,BW-f,BH,x0,y0,(1-pr)*FW,FH);if(f>=1)c.drawImage(cur.cv,BW-f,0,f,BH,X,y0,pr*FW,FH)}}
+  else c.drawImage(cur.cv,x0,y0,FW,FH);
+  /* the frame: r across, with the two ends of the window named (each end belongs to the level shown there) */
+  var Wl=pr<1&&dir<0?Wp:W,Wr=pr<1&&dir>0?Wp:W,nl=pr<1&&dir<0?pn:n,nr=pr<1&&dir>0?pn:n;
+  c.lineWidth=1;c.strokeStyle=rgba(P.L,.3);c.beginPath();c.moveTo(Math.round(x0)-.5,y0);c.lineTo(Math.round(x0)-.5,y0+FH+4*k);c.moveTo(x0-4*k,Math.round(y0+FH)+.5);c.lineTo(x0+FW,Math.round(y0+FH)+.5);c.moveTo(Math.round(x0+FW)+.5,y0+FH);c.lineTo(Math.round(x0+FW)+.5,y0+FH+4*k);c.stroke();
+  lab(c,w,'R '+Wl.r0.toFixed(FDEC[nl]),x0,y0+FH+11*k,'left',rgba(P.L,.7));lab(c,w,'R '+Wr.r1.toFixed(FDEC[nr]),x0+FW,y0+FH+11*k,'right',rgba(P.L,.7));
+  if(pr<1){/* the sweeping line, with the values x visits at its r */
+   var rc=W.r0+(W.r1-W.r0)*(X-x0)/FW,xo=.5,m=1<<n,seen=0;c.strokeStyle=rgba(P.O,.55);c.beginPath();c.moveTo(X,y0-3*k);c.lineTo(X,y0+FH+3*k);c.stroke();
+   for(j=0;j<300+150*m;j++)xo=rc*xo*(1-xo);c.fillStyle=rgba(P.O,.92);c.beginPath();for(j=0;j<40*m&&seen<28;j++){xo=rc*xo*(1-xo);if(xo>=W.x0&&xo<=W.x1){var yy=y0+(W.x1-xo)/(W.x1-W.x0)*FH;c.moveTo(X+1.5*k,yy);c.arc(X,yy,1.5*k,0,TAU);seen++}}c.fill();
+   var rt=X>x0+FW*.5;lab(c,w,'R '+rc.toFixed(FDEC[n]+1),X+(rt?-7:7)*k,y0+7*k,rt?'right':'left',rgba(P.O,.9))}
+  else if(n<3){/* at rest: the part that comes next, boxed */
+   var Wn=fwin(n+1),a=U.ease((u-FP-.3)/.8),bx=x0+(Wn.r0-W.r0)/(W.r1-W.r0)*FW,bw=(Wn.r1-Wn.r0)/(W.r1-W.r0)*FW,by=y0+(W.x1-Wn.x1)/(W.x1-W.x0)*FH,bh=(Wn.x1-Wn.x0)/(W.x1-W.x0)*FH;
+   c.strokeStyle=rgba(P.O,.85*a);c.strokeRect(Math.round(bx)+.5,Math.round(by)+.5,Math.round(bw),Math.round(bh));lab(c,w,'NEXT',bx+bw/2,by-8*k,'center',rgba(P.O,.85*a))}
+  lab(c,w,'X → R · X (1 − X)',x0+6*k,y0-9*k,'left',rgba(P.L,.7));
+  lab(c,w,n?'THE SAME SHAPE, MAGNIFIED '+Math.round(1.15/(W.r1-W.r0))+' ×':'THE WHOLE PICTURE',x0+FW,y0-9*k,'right',rgba(P.O,.85))};
+ R4.BAND.phFrac=.86;R4.STILL.phFrac=11.6;
+})(R4);
+
+/* ===== The Fourier series (R8, pink) reworked: four pictures of a shape built from sines. ===== */
+(function(R4){var U=R4.U,PI=Math.PI,TAU=PI*2,K=U.K,dot=U.dot,lab=U.lab,rgba=U.rgba,mix=U.mix,ease=U.ease;
+ R4.PAL.fs={g:'#1a1031',bg:'#08060f',e:'#040308',ink:'#f6eeff',a:'#ff7ac8',b:'#b583ff',d:'#ffd23a',p:'#e8c4ff',m:'#9a88b4',n:'#86789f',L:'181,131,255',T:'255,122,200',O:'255,210,58'};
+ R4.PAL.fsWind=R4.PAL.fsStack=R4.PAL.fsGibbs=R4.PAL.fsUnc=R4.PAL.fs;
+
+ /* FS1 how a harmonic is found. Take two periods of a wave f and wind them round a circle, k turns to a period: z = f(angle) e^(-i k angle). For most k the curve balances about the
+    centre. When k is a whole number n, the centre of mass of the curve is exactly the wave's nth Fourier coefficient, c_n = (1/2 pi) integral of f e^(-i n angle):
+    it leaps out to half the amplitude of harmonic n, or sits at the centre when the wave has no such harmonic, and the curve closes on itself. The winding number runs from 0.5 to 6.5 (lingering on
+    the whole numbers) and the distance of the centre of mass is plotted as it goes: the spectrum appears, with peaks at the wave's harmonics 2, 3 and 5. */
+ var WA=[0,0,1,.55,0,.8,0],WS=2.35,WN=480,WF=null,WSP=null,WT=20,WHD=2.6;
+ function wf(){if(WF)return WF;WF=new Float32Array(WN+1);for(var i=0;i<=WN;i++){var s=0,n;for(n=1;n<7;n++)s+=WA[n]*Math.cos(n*2*TAU*i/WN);WF[i]=s/WS}return WF}
+ function wcm(kk,o){var F=wf(),re=0,im=0,i;for(i=0;i<WN;i++){var a=kk*2*TAU*i/WN;re+=F[i]*Math.cos(a);im-=F[i]*Math.sin(a)}o[0]=re/WN;o[1]=im/WN;return o}
+ function wsp(){if(WSP)return WSP;WSP=new Float32Array(351);var o=[0,0];for(var i=0;i<=350;i++){wcm(i*.02,o);WSP[i]=Math.hypot(o[0],o[1])}return WSP}
+ R4.FN.fsWind=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,wide=E>w*.6,F=wf(),SP=wsp(),Tc=WT+WHD,u=((t%Tc)+Tc)%Tc,s=Math.min(1,u/WT),uu=.5+6*s,kk=uu-.13*Math.sin(TAU*uu),fo=Math.min(1,(Tc-u)/.7)*Math.min(1,.3+u/.5),
+   Rw=wide?66:70,ccx=wide?cx-76:cx-128,xs0=wide?cx+56:cx-18,xs1=wide?cx+E*.6:cx+252,ys=cy+(wide?52:58),hs=(wide?86:64)/.213,wx0=wide?cx-E*.6:xs0,wx1=wide?cx-186:xs1,wy=wide?cy-38:cy-56,wa=wide?30:17,i,o=[0,0];
+  function XK(v){return xs0+(xs1-xs0)*v/7}
+  c.lineWidth=1;c.lineJoin='round';
+  /* the wave, one period, with a tick at every full turn of the winding */
+  c.strokeStyle=rgba(P.L,.22);c.beginPath();c.moveTo(wx0,wy+.5);c.lineTo(wx1,wy+.5);c.stroke();
+  c.strokeStyle=rgba(P.O,.6);c.beginPath();for(i=0;i<=2*kk+1e-6;i++){var tx=wx0+(wx1-wx0)*i/(2*kk);c.moveTo(tx,wy-wa-3*k);c.lineTo(tx,wy+wa+3*k)}c.stroke();
+  c.strokeStyle=rgba(P.L,.85);c.lineWidth=1.3;c.beginPath();for(i=0;i<=WN;i+=2){var x=wx0+(wx1-wx0)*i/WN;i?c.lineTo(x,wy-F[i]*wa):c.moveTo(x,wy-F[0]*wa)}c.stroke();c.lineWidth=1;
+  lab(c,w,'TWO PERIODS OF A WAVE',wx0,wy-wa-11*k,'left',rgba(P.L,.7));lab(c,w,'1 TURN',wx0+(wx1-wx0)/(2*kk)+5*k,wy+wa+2*k,'left',rgba(P.O,.8));
+  /* the wave wound round the circle */
+  c.strokeStyle=rgba(P.L,.2);c.beginPath();c.arc(ccx,cy,Rw,0,TAU);c.moveTo(ccx-Rw-5*k,cy+.5);c.lineTo(ccx+Rw+5*k,cy+.5);c.moveTo(ccx+.5,cy-Rw-5*k);c.lineTo(ccx+.5,cy+Rw+5*k);c.stroke();
+  c.strokeStyle=rgba(P.T,.9*fo);c.lineWidth=1.4;c.beginPath();for(i=0;i<=WN;i++){var a=kk*2*TAU*i/WN,zx=ccx+F[i]*Rw*Math.cos(a),zy=cy+F[i]*Rw*Math.sin(a);i?c.lineTo(zx,zy):c.moveTo(zx,zy)}c.stroke();c.lineWidth=1;
+  wcm(kk,o);var mx=ccx+o[0]*Rw,my=cy-o[1]*Rw,mag=Math.hypot(o[0],o[1]);c.strokeStyle=rgba(P.O,.8);c.beginPath();c.moveTo(ccx,cy);c.lineTo(mx,my);c.stroke();dot(c,mx,my,2.6*k,rgba(P.O,1));
+  lab(c,w,kk.toFixed(2)+' TURNS A PERIOD',ccx,cy-Rw-13*k,'center',rgba(P.T,.9));
+  /* the centre of mass against the winding number: the spectrum, as far as it has been measured */
+  c.strokeStyle=rgba(P.L,.28);c.beginPath();c.moveTo(xs0-4*k,ys+.5);c.lineTo(xs1,ys+.5);c.moveTo(Math.round(xs0)-.5,ys);c.lineTo(Math.round(xs0)-.5,ys-.213*hs-6*k);for(i=1;i<=6;i++){c.moveTo(XK(i),ys);c.lineTo(XK(i),ys+4*k)}c.stroke();
+  for(i=1;i<=6;i++)lab(c,w,''+i,XK(i),ys+11*k,'center',WA[i]&&kk>i-.02?rgba(P.O,.9):rgba(P.L,.7));
+  var ne=Math.min(350,Math.floor(kk/.02));c.strokeStyle=rgba(P.T,.92*fo);c.lineWidth=1.5;c.beginPath();for(i=25;i<=ne;i++){i>25?c.lineTo(XK(i*.02),ys-SP[i]*hs):c.moveTo(XK(.5),ys-SP[25]*hs)}c.lineTo(XK(kk),ys-mag*hs);c.stroke();c.lineWidth=1;
+  for(i=1;i<=6;i++)if(WA[i]&&kk>=i)dot(c,XK(i),ys-WA[i]/WS/2*hs,2*k,rgba(P.O,.95*fo));
+  c.setLineDash([2,3]);c.strokeStyle=rgba(P.O,.4);c.beginPath();c.moveTo(XK(kk),ys);c.lineTo(XK(kk),ys-mag*hs);c.stroke();c.setLineDash([]);dot(c,XK(kk),ys-mag*hs,2.3*k,rgba(P.O,1));
+  var near=Math.round(kk),hit=Math.abs(kk-near)<.06&&near>=1&&near<=6;
+  lab(c,w,hit?(WA[near]?'HARMONIC '+near+' FOUND':'NO HARMONIC '+near):'CENTRE OF MASS',xs1,ys-.213*hs-(wide?2:6)*k,'right',rgba(P.O,hit?.95:.75));lab(c,w,'TURNS',xs1,ys+11*k,'right',rgba(P.L,.7))};
+ R4.BAND.fsWind=.86;R4.STILL.fsWind=15;
+
+ /* FS2 one sound, two views. A square, a sawtooth or a triangle wave (front, bright) is the sum of the sine waves stacked behind it, harmonic 1 to 8;
+    seen from the side, the same stack is the spectrum: one bar per harmonic (amber). b_n: square 4/(pi n) for odd n; sawtooth 2/(pi n), alternating sign;
+    triangle 8/(pi n)^2 for odd n, alternating sign. The wave changes every 11 s and the bars glide to the new recipe. */
+ var WV=[['SQUARE',function(n){return n%2?4/(PI*n):0}],['SAWTOOTH',function(n){return(n%2?2:-2)/(PI*n)}],['TRIANGLE',function(n){return n%2?((n-1)/2%2?-1:1)*8/(PI*PI*n*n):0}]];
+ R4.FN.fsStack=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,wide=E>w*.6,NH=8,T=11,q=Math.floor(t/T),u=t-q*T,f=ease((u-(T-1.6))/1.6),Wa=WV[((q%3)+3)%3],Wb=WV[(((q+1)%3)+3)%3],
+   xa=wide?cx-E*.5:w*.07,xb=wide?cx+E*.5:w*.76,dx=9.5,dy=-12.2,y0=cy+50,A=23,kap=TAU/176,om=TAU*.2,n,x,a=[];
+  for(n=1;n<=NH;n++)a[n]=Wa[1](n)*(1-f)+Wb[1](n)*f;
+  c.lineWidth=1;c.lineJoin='round';
+  /* the floor: one base line per harmonic, and the two depth edges */
+  c.strokeStyle=rgba(P.L,.1);c.beginPath();for(n=0;n<=NH;n++){c.moveTo(xa+n*dx,y0+n*dy+.5);c.lineTo(xb+n*dx,y0+n*dy+.5)}c.stroke();
+  c.strokeStyle=rgba(P.L,.28);c.beginPath();c.moveTo(xa,y0);c.lineTo(xa+NH*dx,y0+NH*dy);c.moveTo(xb,y0);c.lineTo(xb+(NH+.6)*dx,y0+(NH+.6)*dy);c.stroke();
+  for(n=NH;n>=1;n--){var am=a[n]*A,al=.16+.6*Math.min(1,Math.abs(a[n])/1.27);c.strokeStyle=rgba(P.L,al);c.beginPath();for(x=xa;x<=xb;x+=3){var yy=y0+n*dy-am*Math.sin(n*(kap*(x-cx)-om*t));x===xa?c.moveTo(x+n*dx,yy):c.lineTo(x+n*dx,yy)}c.stroke()}
+  c.strokeStyle=rgba(P.T,.9);c.lineWidth=1.5;c.beginPath();for(x=xa;x<=xb;x+=2){var s=0,ph=kap*(x-cx)-om*t;for(n=1;n<=NH;n++)s+=a[n]*Math.sin(n*ph);x===xa?c.moveTo(x,y0-s*A):c.lineTo(x,y0-s*A)}c.stroke();
+  /* the spectrum on the end wall */
+  c.lineWidth=2;c.strokeStyle=rgba(P.O,.9);c.beginPath();for(n=1;n<=NH;n++){var bx=Math.round(xb+n*dx)+1,by=y0+n*dy;c.moveTo(bx,by);c.lineTo(bx,by-Math.abs(a[n])*A*1.35-.5)}c.stroke();c.lineWidth=1;
+  for(n=1;n<=NH;n++)dot(c,Math.round(xb+n*dx)+1,y0+n*dy-Math.abs(a[n])*A*1.35-.5,1.6*k,rgba(P.O,.95));
+  lab(c,w,'1',xb+dx+8*k,y0+dy+8*k,'left',rgba(P.O,.85));lab(c,w,'8',xb+8*dx+8*k,y0+8*dy+8*k,'left',rgba(P.O,.85));lab(c,w,'HARMONIC',xb+NH*dx+10*k,y0+NH*dy-A*1.35-10*k,'right',rgba(P.O,.85));
+  lab(c,w,f>.5?Wb[0]:Wa[0],xa+NH*dx,y0+NH*dy-A*1.35-10*k,'left',rgba(P.T,.5+.4*Math.abs(1-2*f)));lab(c,w,'TIME →',xb-6*k,y0+A*1.2+11*k,'right',rgba(P.L,.7))};
+ R4.BAND.fsStack=.86;
+
+ /* FS3 the Gibbs effect. Add odd harmonics one at a time and the sum closes in on a square wave everywhere except at the jump: the overshoot beside it gets
+    narrower but never lower. It stays at 8.95 % of the jump (the Wilbraham-Gibbs constant: peak 1.179 for a wave of +/-1). The earlier sums linger as ghosts.
+    From 1 to 24 terms (harmonic 47) in 18 s, then a rest. */
+ R4.FN.fsGibbs=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,Pp=264,A=44,ST2=.75,NT=24,Tc=NT*ST2+3.5,u=((t%Tc)+Tc)%Tc,nt=Math.min(NT,1+Math.floor(u/ST2)),f=nt>=NT&&u>=NT*ST2?1:ease((u/ST2-(nt-1))/.55),
+   xa=cx-E-2,M=Math.ceil((2*E+4)/1.5)+1,i,j,n,fo=Math.min(1,(Tc-u)/.8)*Math.min(1,.25+u/.6);
+  function sum(nn){var o=new Float32Array(M);for(i=0;i<M;i++){var ph=TAU*(xa+i*1.5-cx)/Pp,s=0;for(n=1;n<=nn;n++)s+=Math.sin((2*n-1)*ph)/(2*n-1);o[i]=s*4/PI}return o}
+  if(d.M!==M||d.q!==Math.floor(t/Tc)||d.nt>nt){d.M=M;d.q=Math.floor(t/Tc);d.nt=0;d.g=[];d.base=null}
+  if(d.nt!==nt){if(d.base&&d.nt===nt-1){var nb=new Float32Array(M),kk=2*d.nt-1;for(i=0;i<M;i++)nb[i]=d.base[i]+4/PI*Math.sin(kk*TAU*(xa+i*1.5-cx)/Pp)/kk;if(d.nt>0){d.g.unshift(nb);if(d.g.length>5)d.g.pop()}d.base=nb}else{d.base=sum(nt-1);d.g=[];for(j=1;j<=5&&nt-j>=1;j++)d.g.push(sum(nt-j))}d.nt=nt}
+  c.lineWidth=1;c.lineJoin='round';
+  /* the square wave aimed at, and the level the overshoot keeps */
+  c.setLineDash([2,4]);c.strokeStyle=rgba(P.L,.22);c.beginPath();var j0=Math.floor((xa-cx)/(Pp/2))-1;for(j=j0;cx+j*Pp/2<cx+E+Pp;j++){var xs=cx+j*Pp/2,up=((j%2)+2)%2===0;c.moveTo(xs,cy+(up?A:-A));c.lineTo(xs,cy+(up?-A:A));c.lineTo(xs+Pp/2,cy+(up?-A:A))}c.stroke();
+  c.strokeStyle=rgba(P.O,.34);c.beginPath();c.moveTo(cx-E,cy-1.179*A);c.lineTo(cx+E,cy-1.179*A);c.moveTo(cx-E,cy+1.179*A);c.lineTo(cx+E,cy+1.179*A);c.stroke();c.setLineDash([]);
+  c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(cx-E,cy+.5);c.lineTo(cx+E,cy+.5);c.stroke();
+  var GA=[.24,.17,.12,.08,.05];for(j=d.g.length-1;j>=1;j--){var g=d.g[j];c.strokeStyle=rgba(P.L,GA[j]*fo);c.beginPath();for(i=0;i<M;i++)i?c.lineTo(xa+i*1.5,cy-g[i]*A):c.moveTo(xa,cy-g[0]*A);c.stroke()}
+  var kk2=2*nt-1,am=f*4/PI/kk2,b=d.base;c.strokeStyle=rgba(P.T,.92*fo);c.lineWidth=1.5;c.beginPath();for(i=0;i<M;i++){var v=b[i]+am*Math.sin(kk2*TAU*(xa+i*1.5-cx)/Pp);i?c.lineTo(xa+i*1.5,cy-v*A):c.moveTo(xa,cy-v*A)}c.stroke();c.lineWidth=1;
+  /* the first peak on each side of every jump: at a quarter period divided by the number of terms */
+  var off=Pp/(4*nt),pv=0;for(n=1;n<=nt;n++)pv+=Math.sin((2*n-1)*TAU*off/Pp)/(2*n-1)*(n===nt?f:1);pv*=4/PI;
+  for(j=j0;cx+j*Pp/2<cx+E+Pp;j++){var xj=cx+j*Pp/2,sg=((j%2)+2)%2===0?1:-1;dot(c,xj+off,cy-sg*pv*A,2*k,rgba(P.O,.95*fo));dot(c,xj-off,cy+sg*pv*A,2*k,rgba(P.O,.95*fo))}
+  lab(c,w,'OVERSHOOT 8.95 %',cx+w*.45,cy-1.179*A-9*k,'right',rgba(P.O,.85));lab(c,w,(nt<10?' ':'')+nt+(nt===1?' TERM ':' TERMS')+'  UP TO HARMONIC '+kk2,cx-w*.45,cy-1.179*A-9*k,'left',rgba(P.L,.75))};
+ R4.BAND.fsGibbs=1;
+
+ /* FS4 short in time, wide in frequency. A train of pulses built from 30 harmonics with a bell-shaped spectrum, a_n = exp(-n^2 / 2 s^2). Narrow the spectrum and the
+    pulse spreads out; widen it and the pulse sharpens to a click. The two widths (amber) always multiply to the same number: dt * df = 1 / (2 pi), the uncertainty
+    relation of every sound. s breathes between 1.6 and 11 harmonics over 18 s. */
+ R4.FN.fsUnc=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,wide=E>w*.6,NH=30,Pp=196,A=64,sg=Math.exp(Math.log(1.6)+(Math.log(11)-Math.log(1.6))*(.5-.5*Math.cos(TAU*t/18))),
+   xa=wide?cx-E*.56:w*.05,xb=wide?cx+E*.16:w*.56,xs=wide?cx+E*.27:w*.64,bs=wide?7.2:6.2,xc=xa+(xb-xa)*.5,yb=cy+40,a=[],sa=0,n,x;
+  for(n=1;n<=NH;n++){a[n]=Math.exp(-n*n/(2*sg*sg));sa+=a[n]}
+  c.lineWidth=1;c.lineJoin='round';c.strokeStyle=rgba(P.L,.26);c.beginPath();c.moveTo(xa,yb+.5);c.lineTo(xb,yb+.5);c.moveTo(xs-4*k,yb+.5);c.lineTo(xs+(NH+1)*bs,yb+.5);c.moveTo(Math.round(xs)-.5,yb);c.lineTo(Math.round(xs)-.5,yb-A-4*k);c.stroke();
+  /* the pulse train: the sum of the 30 harmonics */
+  c.strokeStyle=rgba(P.T,.92);c.lineWidth=1.5;c.beginPath();for(x=xa;x<=xb;x+=2){var ph=TAU*(x-xc)/Pp,s=0;for(n=1;n<=NH;n++)s+=a[n]*Math.cos(n*ph);s/=sa;x===xa?c.moveTo(x,yb-s*A):c.lineTo(x,yb-s*A)}c.stroke();c.lineWidth=1;
+  /* the spectrum and its bell */
+  c.strokeStyle=rgba(P.L,.3);c.beginPath();for(x=0;x<=NH+.5;x+=.5){var v=Math.exp(-x*x/(2*sg*sg));x?c.lineTo(xs+x*bs,yb-v*A):c.moveTo(xs,yb-A)}c.stroke();
+  c.lineWidth=2;c.strokeStyle=rgba(P.T,.85);c.beginPath();for(n=1;n<=NH;n++){var bx=Math.round(xs+n*bs),hh=a[n]*A;if(hh<.6)continue;c.moveTo(bx,yb);c.lineTo(bx,yb-hh)}c.stroke();c.lineWidth=1;
+  /* the two widths: one standard deviation each way in time, one in frequency */
+  var wt=Pp/(TAU*sg),wf=sg*bs,yk=yb+10*k;c.strokeStyle=rgba(P.O,.9);c.beginPath();c.moveTo(xc-wt,yk);c.lineTo(xc+wt,yk);c.moveTo(xc-wt,yk-3*k);c.lineTo(xc-wt,yk+3*k);c.moveTo(xc+wt,yk-3*k);c.lineTo(xc+wt,yk+3*k);
+  c.moveTo(xs,yk);c.lineTo(xs+wf,yk);c.moveTo(xs,yk-3*k);c.lineTo(xs,yk+3*k);c.moveTo(xs+wf,yk-3*k);c.lineTo(xs+wf,yk+3*k);c.stroke();
+  lab(c,w,'ΔT',xc+wt+7*k,yk,'left',rgba(P.O,.9));lab(c,w,'ΔF',xs+wf+7*k,yk,'left',rgba(P.O,.9));
+  lab(c,w,'TIME',xa,yb-A-6*k,'left',rgba(P.L,.7));lab(c,w,'FREQUENCY',xs+(NH+1)*bs,yb-A-6*k,'right',rgba(P.L,.7));lab(c,w,'ΔT · ΔF = 1 / 2π',wide?(xb+xs)/2:xb,yb-A-6*k,wide?'center':'right',rgba(P.O,.85))};
+ R4.BAND.fsUnc=.95;
+})(R4);
+
+/* ===== Six new drawings N1 to N6, each with its own palette. ===== */
+(function(R4){var U=R4.U,PI=Math.PI,TAU=PI*2,K=U.K,dot=U.dot,lab=U.lab,rgba=U.rgba,mix=U.mix,ease=U.ease,step=U.step;
+ R4.PAL.drum={g:'#18220a',bg:'#080a05',e:'#040503',ink:'#f6ffe8',a:'#aadc50',b:'#d6f596',d:'#ffd23a',p:'#d9f2a8',m:'#93a57f',n:'#80916e',L:'170,220,80',T:'214,245,150',O:'255,210,58'};
+ R4.PAL.string={g:'#151b2a',bg:'#07080c',e:'#040407',ink:'#f1f4fb',a:'#9fb6dc',b:'#e0e8f6',d:'#ffc43c',p:'#ccd8ee',m:'#8c93a6',n:'#7b8193',L:'150,175,215',T:'224,232,246',O:'255,196,60'};
+ R4.PAL.mach={g:'#2a0c1a',bg:'#0b0508',e:'#060305',ink:'#ffeef4',a:'#ff5a96',b:'#ff9ac0',d:'#ffd23a',p:'#ffc0d6',m:'#ad8a98',n:'#977885',L:'255,90,150',T:'255,150,190',O:'255,210,58'};
+ R4.PAL.hydro={g:'#14123a',bg:'#07070f',e:'#040408',ink:'#f0eeff',a:'#786eff',b:'#b4a8ff',d:'#ffc43c',p:'#cfc8ff',m:'#8d89b8',n:'#7b77a3',L:'120,110,255',T:'180,170,255',O:'255,196,60'};
+ R4.PAL.chirp={g:'#0c1f26',bg:'#06090c',e:'#030507',ink:'#e8fbf8',a:'#3fd0c9',b:'#8fe3d0',d:'#ffd27a',p:'#b7efe6',m:'#86a3a6',n:'#748f92',L:'63,208,201',T:'143,227,208',O:'255,210,122'};
+ R4.PAL.light={g:'#101a2e',bg:'#06080e',e:'#040508',ink:'#eef4ff',a:'#5ac8ff',b:'#ff6e8c',d:'#ffc43c',p:'#bfe6ff',m:'#8794ad',n:'#76829a',L:'255,110,140',T:'90,200,255',O:'255,196,60'};
+
+ /* N1 a drum head, struck. A round membrane held at its rim moves in modes J_m(j_mn r) cos(m angle) cos(2 pi f t): m still lines across the middle and n - 1 still
+    circles (amber, dashed). Each mode is struck (the amber flash), swings at its own pitch and dies away, as on a real drum. The pitches are not harmonics:
+    1, 1.59, 2.14, 2.30, 2.65, 2.92 times the lowest (the zeros of the Bessel functions), which is why a drum has no clear note. The lowest is shown at 1.25 swings
+    a second and the others at their true ratios. Bright mesh: above the resting plane; dim: below. The faint second mesh is the opposite end of the swing. */
+ var DM=[[0,1,2.4048],[1,1,3.8317],[2,1,5.1356],[0,2,5.5201],[3,1,6.3802],[1,2,7.0156]],DZ={0:[2.4048,5.5201],1:[3.8317,7.0156],2:[5.1356],3:[6.3802]};
+ function bj(m,x){var s=0,i,n=40;for(i=0;i<n;i++){var ta=(i+.5)*PI/n;s+=Math.cos(m*ta-x*Math.sin(ta))}return s/n}
+ R4.FN.drum=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345+2,k=K(w),rho=Math.min(w*.265,h*.36),sq=.4,NR=12,NS=60,T=8,q=Math.floor(t/T),u=t-q*T,mi=((q%6)+6)%6,M=DM[mi],m=M[0],i,j,Hs=24*k;
+  if(d.mi!==mi){d.mi=mi;d.J=[];var mx=0,ia=0;for(i=0;i<=NR;i++)d.J.push(bj(m,M[2]*i/NR));for(i=0;i<=200;i++){var v=Math.abs(bj(m,M[2]*i/200));if(v>mx+1e-9){mx=v;ia=i/200}}for(i=0;i<=NR;i++)d.J[i]/=mx;d.J[NR]=0;d.ra=ia}
+  if(!d.ct){d.ct=[];d.sn=[];for(j=0;j<=NS;j++){d.ct.push(Math.cos(TAU*j/NS));d.sn.push(Math.sin(TAU*j/NS))}}
+  var env=Math.exp(-u/3)*ease((T-u)/.9),A0=46*k*env,A=A0*Math.sin(TAU*1.25*M[2]/2.4048*u),ct=d.ct,sn=d.sn,cm=[],J=d.J;for(j=0;j<=NS;j++)cm.push(Math.cos(m*TAU*j/NS));
+  /* the shell under the hoop */
+  c.lineWidth=1;c.lineJoin='round';c.strokeStyle=rgba(P.L,.3);c.beginPath();c.moveTo(cx-rho,cy);c.lineTo(cx-rho,cy+Hs);c.ellipse(cx,cy+Hs,rho,rho*sq,0,PI,0,true);c.lineTo(cx+rho,cy);c.stroke();
+  c.strokeStyle=rgba(P.L,.16);c.beginPath();for(i=-3;i<=3;i++){var lx=cx+rho*Math.sin(i*.44),ly=cy+rho*sq*Math.cos(i*.44);c.moveTo(lx,ly+3*k);c.lineTo(lx,ly+Hs-3*k)}c.stroke();
+  /* the opposite end of the swing, faintly */
+  var g=new Path2D(),Ag=-A0*(A<0?-1:1);for(i=3;i<NR;i+=3){g.moveTo(cx+rho*i/NR,cy-Ag*J[i]*cm[0]);for(j=1;j<=NS;j++)g.lineTo(cx+rho*i/NR*ct[j],cy+rho*i/NR*sn[j]*sq-Ag*J[i]*cm[j])}
+  for(j=0;j<NS;j+=5){g.moveTo(cx,cy-Ag*J[0]*cm[j]);for(i=1;i<=NR;i++)g.lineTo(cx+rho*i/NR*ct[j],cy+rho*i/NR*sn[j]*sq-Ag*J[i]*cm[j])}c.strokeStyle=rgba(P.L,.13*Math.min(1,env*3));c.stroke(g);
+  /* the mesh: far half first; each piece bright when above the resting plane, dim when below */
+  var B=[new Path2D(),new Path2D(),new Path2D(),new Path2D()];
+  function seg(i1,j1,i2,j2){var z1=A*J[i1]*cm[j1],z2=A*J[i2]*cm[j2],far=sn[j1]+sn[j2]<-1e-9||(i1!==i2&&sn[j1]<0),b=B[(far?0:2)+(z1+z2>0?1:0)];b.moveTo(cx+rho*i1/NR*ct[j1],cy+rho*i1/NR*sn[j1]*sq-z1);b.lineTo(cx+rho*i2/NR*ct[j2],cy+rho*i2/NR*sn[j2]*sq-z2)}
+  for(i=1;i<NR;i++)for(j=0;j<NS;j++)seg(i,j,i,j+1);for(j=0;j<NS;j+=2)for(i=0;i<NR;i++)seg(i,j,i+1,j);
+  c.strokeStyle=rgba(P.L,.2);c.stroke(B[0]);c.strokeStyle=rgba(P.T,.34);c.stroke(B[1]);c.strokeStyle=rgba(P.L,.5);c.stroke(B[2]);c.strokeStyle=rgba(P.T,.85);c.stroke(B[3]);
+  c.strokeStyle=rgba(P.L,.8);c.lineWidth=1.5;c.beginPath();c.ellipse(cx,cy,rho,rho*sq,0,0,TAU);c.stroke();c.lineWidth=1;
+  /* the still lines of this mode, on the resting plane */
+  c.setLineDash([2,3]);c.strokeStyle=rgba(P.O,.25+.45*Math.min(1,env*2.5));c.beginPath();for(j=0;j<m;j++){var a=(PI/2+j*PI)/m;c.moveTo(cx-rho*Math.cos(a),cy-rho*Math.sin(a)*sq);c.lineTo(cx+rho*Math.cos(a),cy+rho*Math.sin(a)*sq)}
+  if(M[1]===2){var rn=DZ[m][0]/M[2]*rho;c.moveTo(cx+rn,cy);c.ellipse(cx,cy,rn,rn*sq,0,0,TAU)}c.stroke();c.setLineDash([]);
+  /* the strike */
+  if(u<.45){var sf=1-u/.45,sx=cx+rho*d.ra,rr=(3+26*(1-sf))*k;c.strokeStyle=rgba(P.O,.9*sf);c.beginPath();c.ellipse(sx,cy,rr,rr*sq,0,0,TAU);c.stroke();dot(c,sx,cy,2.4*k,rgba(P.O,sf))}
+  lab(c,w,'MODE ('+m+','+M[1]+')',cx-rho,cy-rho*sq-24*k,'left',rgba(P.O,.9));lab(c,w,(M[2]/2.4048).toFixed(2)+' × LOWEST',cx+rho,cy-rho*sq-24*k,'right',rgba(P.O,.9))};
+ R4.BAND.drum=.84;R4.STILL.drum=40.72;
+
+ /* N2 a plucked string. Pull a string aside at one point and let go: the corner splits in two and the two run to and fro (d'Alembert), which is the same as the sum
+    of the string's harmonics with b_n = 2 sin(n pi p) / (n^2 pi^2 p (1 - p)) for a pluck at the fraction p. Pluck at 1/3 and every third harmonic is missing; at 1/2
+    all the even ones. The string swings 1.8 times a second here; the fan behind it is where it was over the last 0.09 s, so the shape stays readable while
+    it moves. The high harmonics die first, so the corners round off into the fundamental. Bars: the harmonics 1 to 16 as they ring. A new pluck every 9 s. */
+ var PL=[[1/5,'1/5'],[1/2,'1/2'],[1/3,'1/3'],[1/8,'1/8']],SNH=24,SNJ=160,SF0=1.8,SNG=8;
+ R4.FN.string=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345-6,k=K(w),E=d.ext||w*.5,wide=E>w*.6,xl=wide?cx-E*.8:w*.07,xr=wide?cx+E*.8:w*.93,Ln=xr-xl,H=44,T=9,q=Math.floor(t/T),u=t-q*T,pi=((q%4)+4)%4,p=PL[pi][0],pp=PL[((pi+3)%4)][0],n,j,g,PRE=.9;
+  if(!d.S){d.S=new Float32Array((SNH+1)*(SNJ+1));for(n=1;n<=SNH;n++)for(j=0;j<=SNJ;j++)d.S[n*(SNJ+1)+j]=Math.sin(n*PI*j/SNJ);d.y=new Float32Array(SNJ+1)}
+  function bn(n,pv){return 2*Math.sin(n*PI*pv)/(n*n*PI*PI*pv*(1-pv))}
+  function dec(n,tau){return Math.exp(-tau*(.07+.0035*n*n))}
+  /* the shape at the time uu of this pluck's cycle. While the finger pulls (0.9 s) the old ringing fades and the string is drawn aside; then it is let go */
+  function shape(uu){var y=d.y,e=ease(uu/PRE),tau=uu-PRE;y.fill(0);for(n=1;n<=SNH;n++){var a=uu<PRE?bn(n,pp)*Math.cos(n*TAU*SF0*(T-PRE+uu))*dec(n,T-PRE+uu)*(1-e)+bn(n,p)*e:bn(n,p)*Math.cos(n*TAU*SF0*tau)*dec(n,tau);if(Math.abs(a)<1e-4)continue;var o=n*(SNJ+1);for(j=0;j<=SNJ;j++)y[j]+=a*d.S[o+j]}return y}
+  c.lineWidth=1;c.lineJoin='round';
+  /* the two extreme shapes of the ideal motion, faintly: the pluck and its mirror image half a period later */
+  var xp=xl+Ln*p;c.setLineDash([2,4]);c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(xl,cy);c.lineTo(xp,cy-H);c.lineTo(xr,cy);c.lineTo(xr-Ln*p,cy+H);c.closePath();c.stroke();c.setLineDash([]);
+  c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(xl-10*k,cy+.5);c.lineTo(xr+10*k,cy+.5);c.stroke();
+  /* where the string was: eight earlier shapes, 1/90 s apart */
+  if(u>PRE)for(g=SNG;g>=1;g--){var ug=u-g/90;if(ug<PRE)continue;var yg=shape(ug);c.strokeStyle=rgba(P.L,.46*(1-g/(SNG+1)));c.beginPath();for(j=0;j<=SNJ;j++){var xg=xl+Ln*j/SNJ;j?c.lineTo(xg,cy-yg[j]*H):c.moveTo(xg,cy)}c.stroke()}
+  var y=shape(u);c.strokeStyle=rgba(P.T,.96);c.lineWidth=1.7;c.beginPath();for(j=0;j<=SNJ;j++){var x=xl+Ln*j/SNJ;j?c.lineTo(x,cy-y[j]*H):c.moveTo(x,cy)}c.stroke();c.lineWidth=1;
+  c.strokeStyle=rgba(P.L,.7);c.beginPath();c.moveTo(xl,cy-9*k);c.lineTo(xl,cy+9*k);c.moveTo(xr,cy-9*k);c.lineTo(xr,cy+9*k);c.stroke();dot(c,xl,cy,2*k,rgba(P.L,.9));dot(c,xr,cy,2*k,rgba(P.L,.9));
+  /* the finger */
+  var fy=cy-y[Math.round(p*SNJ)]*H;if(u<PRE){dot(c,xp,fy,2.6*k,rgba(P.O,.95));c.strokeStyle=rgba(P.O,.6);c.beginPath();c.moveTo(xp,fy-5*k);c.lineTo(xp,fy-15*k);c.stroke()}
+  lab(c,w,'PLUCKED AT '+PL[pi][1],xp,cy-H-12*k,p>.4?'center':'left',rgba(P.O,.85));
+  /* the harmonics as they ring */
+  var e2=ease(u/PRE),tau2=u-PRE,bx=cx-8*9.5*k,by=cy+H+36*k;c.strokeStyle=rgba(P.L,.3);c.beginPath();c.moveTo(bx,by+.5);c.lineTo(bx+17*9.5*k,by+.5);c.stroke();c.lineWidth=2;c.strokeStyle=rgba(P.O,.9);c.beginPath();
+  for(n=1;n<=16;n++){var en=u<PRE?Math.abs(bn(n,pp))*dec(n,T-PRE+u)*(1-e2)+Math.abs(bn(n,p))*e2:Math.abs(bn(n,p))*dec(n,tau2),hh=Math.sqrt(en/1.3)*26*k,xx=Math.round(bx+n*9.5*k);if(hh>.7){c.moveTo(xx,by);c.lineTo(xx,by-hh)}}c.stroke();c.lineWidth=1;
+  lab(c,w,'HARMONICS 1 TO 16',bx-8*k,by-8*k,'right',rgba(P.L,.7))};
+ R4.BAND.string=.9;R4.STILL.string=37.04;
+
+ /* N3 Doppler and the Mach cone. A source sends out a wave every 0.14 s; each one spreads at the speed of sound. As the source speeds up the waves bunch ahead
+    of it (a higher pitch) and stretch behind; past Mach 1 it outruns them and they pile into a cone with sin(half angle) = 1 / Mach. The amber line is the true
+    envelope of the circles drawn. The speed swings between Mach 0.4 and 1.6 over 22 s. */
+ R4.FN.mach=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,cs=58,te=.14,life=2.5,NF=Math.ceil(life/te),span=2*E+330,W=TAU/22,i;
+  function Mn(tt){return 1+.6*Math.sin(W*tt)}function Xu(tt){return cs*(tt+.6/W*(1-Math.cos(W*tt)))}function wr(xu){return cx-E-165+((xu%span)+span)%span}
+  var xs=wr(Xu(t)),M=Mn(t),tk=Math.floor(t/te)*te,env=[];
+  c.lineWidth=1;c.setLineDash([3,5]);c.strokeStyle=rgba(P.L,.16);c.beginPath();c.moveTo(cx-E,cy+.5);c.lineTo(cx+E,cy+.5);c.stroke();c.setLineDash([]);
+  for(i=0;i<=NF;i++){var t0=tk-i*te,age=t-t0,r=cs*age,xe=wr(Xu(t0)),al=Math.pow(Math.max(0,1-age/life),1.3);if(al<=0)continue;c.strokeStyle=rgba(P.L,.62*al);c.beginPath();c.arc(xe,cy,Math.max(.1,r),0,TAU);c.stroke();
+   var Me=Mn(t0);if(Me>1.001&&xe<=xs+1)env.push(xe+r/Me,r*Math.sqrt(1-1/(Me*Me)),al)}
+  if(M>1.001&&env.length>3){for(var sg=-1;sg<=1;sg+=2){c.strokeStyle=rgba(P.O,.7);c.beginPath();c.moveTo(xs,cy);for(i=0;i<env.length;i+=3)c.lineTo(env[i],cy+sg*env[i+1]);c.stroke()}}
+  dot(c,xs,cy,2.6*k,rgba(P.O,1));
+  var lx=Math.max(cx-E+70*k,Math.min(cx+E-70*k,xs));lab(c,w,'MACH '+M.toFixed(2),lx,cy-16*k,'center',rgba(P.O,.9));
+  lab(c,w,M>1.001?'CONE HALF ANGLE '+Math.round(Math.asin(1/M)*180/PI)+'°':'WAVES BUNCH AHEAD',cx+w*.45,cy-78*k,'right',rgba(P.O,.85));lab(c,w,M>1.001?'FASTER THAN ITS SOUND':'SLOWER THAN ITS SOUND',cx-w*.45,cy-78*k,'left',rgba(P.L,.75));
+  U.fadeName(c,w,h)};
+ R4.BAND.mach=1;
+
+ /* N4 the hydrogen atom. Where the electron is likely to be found: 2600 points drawn from |psi|^2 in space for the states 2p, 3d, 3p, 4d, 4f, 4p (m = 0), turning
+    slowly about the atom's axis, which leans towards you; near points are brighter than far ones. These are the atom's standing waves, with still surfaces like a
+    drum's; the two tints are the two signs of psi. One state fades into the next every 10 s. The bar gives the scale in Bohr radii (0.0529 nm). */
+ var HS=[[2,1,'2P',10,5],[3,2,'3D',21,10],[3,1,'3P',24,10],[4,2,'4D',36,20],[4,3,'4F',33,20],[4,1,'4P',40,20]],HC=[],HNP=2600;
+ function psi(s,x,z){var r=Math.sqrt(x*x+z*z)+1e-9,ct=z/r,n=s[0],l=s[1],R=n===2?r*Math.exp(-r/2):n===3?(l===2?r*r:r*(6-r))*Math.exp(-r/3):(l===3?r*r*r:l===2?r*r*(12-r):r*(80-20*r+r*r))*Math.exp(-r/4);return R*(l===1?ct:l===2?3*ct*ct-1:ct*(5*ct*ct-3))}
+ /* points of one state: distance from the axis, height, angle about the axis, sign. The weight is |psi|^2 times the distance from the axis (the ring's size) */
+ function hcloud(si){if(HC[si])return HC[si];var S=HS[si],Rm=S[3],sd=si*7919+13,rnd=function(){sd=(sd*48271)%2147483647;return sd/2147483647},mx=0,a,b,i,o={rho:new Float32Array(HNP),z:new Float32Array(HNP),ph:new Float32Array(HNP),sg:new Int8Array(HNP)};
+  for(a=1;a<=70;a++)for(b=0;b<=70;b++){var v=psi(S,a/70*Rm,(b/35-1)*Rm);mx=Math.max(mx,v*v*a/70*Rm)}
+  for(i=0;i<HNP;){var x=rnd()*Rm,z=(rnd()*2-1)*Rm,pv=psi(S,x,z);if(pv*pv*x>rnd()*mx*1.1){o.rho[i]=x;o.z[i]=z;o.ph[i]=rnd()*TAU;o.sg[i]=pv<0?-1:1;i++}}return HC[si]=o}
+ R4.FN.hydro=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),RP=Math.min(w*.148,h*.2),T=10,q=Math.floor(t/T),u=t-q*T,si=((q%6)+6)%6,sp=(si+5)%6,S=HS[si],Sp=HS[sp],e=ease(u/1.8),rv=Sp[3]+(S[3]-Sp[3])*e,sc=RP/rv,
+   ang=t*.2,tl=.36,cT=Math.cos(tl),sT=Math.sin(tl),z1=Math.max(1,1.05*k),z2=Math.max(1.2,1.5*k),i,pass;
+  c.lineWidth=1;c.setLineDash([3,5]);c.strokeStyle=rgba(P.L,.22);c.beginPath();c.moveTo(cx+.5,cy-RP*1.1);c.lineTo(cx+.5,cy+RP*1.1);c.stroke();c.setLineDash([]);
+  var CA=rgba(P.T,1),CB=rgba(P.B||mix(P.L,'255,120,200',.45),1);
+  function cloud(o,al){if(al<=.004)return;var rho=o.rho,zz=o.z,ph=o.ph,sg=o.sg,n=HNP,X=d.X||(d.X=new Float32Array(HNP)),Y=d.Y||(d.Y=new Float32Array(HNP)),D=d.D||(d.D=new Float32Array(HNP));
+   for(i=0;i<n;i++){var a=ph[i]+ang,dy=rho[i]*Math.sin(a);X[i]=cx+rho[i]*Math.cos(a)*sc;Y[i]=cy-(zz[i]*cT-dy*sT)*sc;D[i]=dy}
+   for(pass=0;pass<4;pass++){var near=pass>1,pos=pass%2===0,zs=near?z2:z1;c.fillStyle=pos?CA:CB;c.globalAlpha=al*(near?.95:.3);for(i=0;i<n;i++)if((D[i]>0)===near&&(sg[i]>0)===pos)c.fillRect(X[i]-zs/2,Y[i]-zs/2,zs,zs)}c.globalAlpha=1}
+  cloud(hcloud(sp),1-e);cloud(hcloud(si),e);
+  dot(c,cx,cy,2.4*k,rgba(P.O,.95));
+  var bl=S[4]*sc,bx=cx+RP*1.3,by=cy+RP*.9;c.strokeStyle=rgba(P.O,.85);c.beginPath();c.moveTo(bx,by);c.lineTo(bx+bl,by);c.moveTo(bx,by-3*k);c.lineTo(bx,by+3*k);c.moveTo(bx+bl,by-3*k);c.lineTo(bx+bl,by+3*k);c.stroke();lab(c,w,S[4]+' BOHR RADII',bx,by-10*k,'left',rgba(P.O,.85));
+  lab(c,w,'HYDROGEN  '+S[2],cx-RP*1.3,cy-RP*.9,'right',rgba(P.O,.9));lab(c,w,'N '+S[0]+'  L '+S[1]+'  M 0',cx-RP*1.3,cy-RP*.9+14*k,'right',rgba(P.L,.75));lab(c,w,'AXIS',cx+8*k,cy-RP*1.04,'left',rgba(P.L,.7));
+  dot(c,bx+4*k,by-RP*.5,2.2*k,CA);lab(c,w,'ψ +',bx+12*k,by-RP*.5,'left',rgba(P.L,.75));dot(c,bx+4*k,by-RP*.5+13*k,2.2*k,CB);lab(c,w,'ψ −',bx+12*k,by-RP*.5+13*k,'left',rgba(P.L,.75))};
+ R4.BAND.hydro=.9;R4.STILL.hydro=15;
+
+ /* N5 the first gravitational wave heard on Earth, GW150914 (LIGO, 14 September 2015): two black holes of 36 and 29 suns circling ever faster and merging.
+    The wave's frequency follows f = 35 Hz (tau / 0.17 s)^(-3/8) and its size f^(2/3), with tau the time left to the merger: a chirp from 35 to about 250 Hz in 0.2 s,
+    inside the range of hearing, then the ring-down. Shown 47 times slower. The orbit turns once for every two waves, its size as tau^(1/4). */
+ R4.FN.chirp=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,wide=E>w*.6,T0=8,Tc=11.5,TM=.12,NC=9.52,u=((t%Tc)+Tc)%Tc,A=44,v=52,
+   ox=wide?cx-E*.34:w*.17,xa=wide?cx-E*.19:w*.34,xn=wide?cx+E*.62:w*.9,i,x;
+  function phi(tau){return TAU*NC*(1-Math.pow(Math.max(tau,TM)/T0,.625))}
+  var PM=phi(TM),FR=TAU*5.3;
+  function hOf(uu){uu=((uu%Tc)+Tc)%Tc;var tau=T0-uu;if(tau>TM)return Math.min(1,uu/.7)*Math.pow(tau/T0,-.25)/2.857*Math.cos(phi(tau));var s=TM-tau;return Math.exp(-s/.2)*Math.cos(PM+FR*s)}
+  c.lineWidth=1;c.lineJoin='round';c.strokeStyle=rgba(P.L,.2);c.beginPath();c.moveTo(xa,cy+.5);c.lineTo(xn+14*k,cy+.5);c.stroke();
+  c.strokeStyle=rgba(P.T,.92);c.lineWidth=1.5;c.beginPath();for(x=xa;x<=xn;x+=1.5){var y=cy-A*hOf(u-(xn-x)/v)*Math.min(1,(x-xa)/40);x===xa?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();c.lineWidth=1;
+  var hn=hOf(u);c.setLineDash([2,3]);c.strokeStyle=rgba(P.O,.45);c.beginPath();c.moveTo(xn,cy-A*1.25);c.lineTo(xn,cy+A*1.25);c.stroke();c.setLineDash([]);dot(c,xn,cy-A*hn,2.3*k,rgba(P.O,1));
+  /* the two black holes about their centre of mass */
+  var tau=T0-u,am=44*k;function body(uu,j){var ta=Math.max(TM,T0-uu),a=am*Math.pow(ta/T0,.25),ph=phi(ta)/2+(j?PI:0),r=a*(j?36/65:29/65);return[ox+r*Math.cos(ph),cy-r*Math.sin(ph)*.72]}
+  c.strokeStyle=rgba(P.L,.16);c.beginPath();c.ellipse(ox,cy,am*.5,am*.5*.72,0,0,TAU);c.stroke();
+  if(tau>TM){for(var j=0;j<2;j++){c.strokeStyle=rgba(P.T,.5);c.beginPath();for(i=0;i<=26;i++){var b=body(Math.max(0,u-i*.035),j);i?c.lineTo(b[0],b[1]):c.moveTo(b[0],b[1])}c.stroke();var b0=body(u,j);dot(c,b0[0],b0[1],(j?2.6:3.1)*k,rgba(P.O,1))}}
+  else{var s=TM-tau,f=Math.max(0,1-s/1.6);dot(c,ox,cy,3.9*k,rgba(P.O,1));for(i=0;i<3;i++){var rr=(s-i*.22)*70*k;if(rr>0&&rr<am*1.5){c.strokeStyle=rgba(P.T,.6*f*(1-rr/(am*1.5)));c.beginPath();c.ellipse(ox,cy,rr,rr*.72,0,0,TAU);c.stroke()}}}
+  var fr=tau>TM?35*Math.pow(tau/T0,-.375):250;lab(c,w,tau>TM?'F '+(fr<100?' ':'')+Math.round(fr)+' HZ':s<1.2?'MERGED  250 HZ':'RING-DOWN',xn,cy-A*1.25-9*k,'right',rgba(P.O,.9));
+  lab(c,w,'GW150914  STRAIN',xa,cy-A*1.25-9*k,'left',rgba(P.L,.75));lab(c,w,'36 + 29 SUNS',ox,cy+am*.72+10*k,'center',rgba(P.L,.75));
+  /* 20 ms of real time */
+  var bl=.02*47*v,bx=xn-bl-8*k,by=cy+A*1.25;c.strokeStyle=rgba(P.O,.8);c.beginPath();c.moveTo(bx,by);c.lineTo(bx+bl,by);c.moveTo(bx,by-3*k);c.lineTo(bx,by+3*k);c.moveTo(bx+bl,by-3*k);c.lineTo(bx+bl,by+3*k);c.stroke();lab(c,w,'20 MS',bx-7*k,by,'right',rgba(P.O,.85))};
+ R4.BAND.chirp=.9;
+
+ /* N6 light. A plane electromagnetic wave: the electric field E (up and down) and the magnetic field B (towards and away from you) swing in step, at right angles
+    to each other and to the direction of travel, E x B pointing along it; in vacuum E = c B. One wavelength is marked. */
+ R4.FN.light=function(c,w,h,t,P,d){var cx=w/2,cy=h*.345,k=K(w),E=d.ext||w*.5,lam=168,AE=46,bx=-.52*56,by=.36*56,xa=cx-E-8,xb=cx+E+8,x,ph,pe=new Path2D(),pb=new Path2D(),ee=new Path2D(),eb=new Path2D(),v=.33,n=0;
+  for(x=xa-((xa-cx)%8+8)%8;x<=xb;x+=8){ph=TAU*((x-cx)/lam-v*t);var s=Math.sin(ph);pb.moveTo(x,cy);pb.lineTo(x+bx*s,cy+by*s);pe.moveTo(x,cy);pe.lineTo(x,cy-AE*s)}
+  for(x=xa;x<=xb;x+=3){ph=TAU*((x-cx)/lam-v*t);var s2=Math.sin(ph);n?ee.lineTo(x,cy-AE*s2):ee.moveTo(x,cy-AE*s2);n?eb.lineTo(x+bx*s2,cy+by*s2):eb.moveTo(x+bx*s2,cy+by*s2);n=1}
+  c.lineWidth=1;c.lineJoin='round';c.strokeStyle=rgba(P.L,.3);c.stroke(pb);c.strokeStyle=rgba(P.L,.85);c.lineWidth=1.4;c.stroke(eb);c.lineWidth=1;
+  c.strokeStyle=rgba(P.O,.4);c.beginPath();c.moveTo(xa,cy+.5);c.lineTo(xb,cy+.5);c.stroke();
+  c.strokeStyle=rgba(P.T,.34);c.stroke(pe);c.strokeStyle=rgba(P.T,.92);c.lineWidth=1.4;c.stroke(ee);c.lineWidth=1;
+  /* one wavelength, riding on two crests of E */
+  var xc=cx-lam*.75+((lam*(.25+v*t))%lam+lam)%lam,yk=cy-AE-10*k;c.strokeStyle=rgba(P.O,.9);c.beginPath();c.moveTo(xc,yk);c.lineTo(xc+lam,yk);c.moveTo(xc,yk-3*k);c.lineTo(xc,yk+3*k);c.moveTo(xc+lam,yk-3*k);c.lineTo(xc+lam,yk+3*k);c.stroke();lab(c,w,'λ',xc+lam/2,yk-9*k,'center',rgba(P.O,.9));
+  var ax=cx+w*.44;c.strokeStyle=rgba(P.O,.9);c.beginPath();c.moveTo(ax-7*k,cy-4*k);c.lineTo(ax,cy);c.lineTo(ax-7*k,cy+4*k);c.stroke();lab(c,w,'C',ax+9*k,cy,'left',rgba(P.O,.9));
+  lab(c,w,'E  ELECTRIC',cx-w*.45,cy-AE-22*k,'left',rgba(P.T,.9));lab(c,w,'B  MAGNETIC',cx-w*.45+104*k,cy-AE-22*k,'left',rgba(P.L,.9))};
+ R4.BAND.light=1;
+ /* the drawings that run the full width of the band: the host puts a soft shade of the card's colour behind the name for these */
+ R4.WIDE={fsStack:1,fsGibbs:1,fsUnc:1,string:1,mach:1,light:1};
+ R4.NAME={dipP2:'Dipole field, density',dipP3:'Dipole field, energy',dipP4:'Dipole field, radiation belt',dipP5:'Dipole field, aurora',phLor:'Lorenz attractor',phFlow:'Phase flow',phPoin:'Poincaré section',phFrac:'Fractal road to chaos',
+  fsWind:'Winding a wave',fsStack:'Harmonic stack',fsGibbs:'Gibbs effect',fsUnc:'Time and frequency',drum:'Drum head',string:'Plucked string',mach:'Mach cone',hydro:'Hydrogen atom',chirp:'Gravitational wave',light:'Light wave'};
+ /* the final random set of the start screen, in the order of the Settings list. moons is SPLBG's; interf, liss and trap are WSR2's (round 2), unchanged */
+ R4.SET=['dipP5','dipP3','dipP2','dipP4','moons','interf','liss','trap','phLor','phFlow','phPoin','phFrac','fsWind','fsStack','fsGibbs','fsUnc','drum','string','mach','hydro','chirp','light'];
+})(R4);
+
+</script>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('ws0d-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ws0d-'+k,JSON.stringify(v))}catch(e){}}};
+let SYSREDUCE=false;try{SYSREDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+let MODE='dark',MOTION=SYSREDUCE?'still':'on';
+const still=()=>MODE==='light'||MOTION==='still';
+
+/* ---------- the drawings ---------- */
+const LPAL={L:'40,62,130',T:'29,127,176',O:'170,104,0',A:'29,127,176'};
+const SRC={
+ fline:['Field lines: their spacing shows the strength of the field','https://en.wikipedia.org/wiki/Field_line'],
+ belt:['Van Allen radiation belts: trapped particles and their energies','https://en.wikipedia.org/wiki/Van_Allen_radiation_belt'],
+ fitz:['Fitzpatrick, Plasma Physics: magnetic mirrors and trapped charges','https://farside.ph.utexas.edu/teaching/plasma/Plasma/node23.html'],
+ jup:['Magnetosphere of Jupiter: radiation belts and aurorae','https://en.wikipedia.org/wiki/Magnetosphere_of_Jupiter'],
+ lorenz:['Lorenz 1963, Deterministic nonperiodic flow','https://en.wikipedia.org/wiki/Lorenz_system'],
+ vdp:['Van der Pol oscillator (Scholarpedia)','http://www.scholarpedia.org/article/Van_der_Pol_oscillator'],
+ duff:['Duffing oscillator (Scholarpedia)','http://www.scholarpedia.org/article/Duffing_oscillator'],
+ feig:['Feigenbaum constants and the self-similar period-doubling cascade','https://en.wikipedia.org/wiki/Feigenbaum_constants'],
+ wind:['3Blue1Brown, But what is the Fourier transform? (winding a wave round a circle)','https://www.3blue1brown.com/lessons/fourier-transforms'],
+ fser:['Fourier series of the square, sawtooth and triangle waves (MathWorld)','https://mathworld.wolfram.com/FourierSeries.html'],
+ gibbs:['Gibbs phenomenon and the Wilbraham-Gibbs constant (MathWorld)','https://mathworld.wolfram.com/GibbsPhenomenon.html'],
+ unc:['The uncertainty relation between time and frequency (Gabor 1946)','https://en.wikipedia.org/wiki/Uncertainty_principle#Harmonic_analysis'],
+ drum:['Russell, Vibrational modes of a circular membrane (Penn State)','https://www.acs.psu.edu/drussell/Demos/MembraneCircle/Circle.html'],
+ str:['Wolfe, Strings, standing waves and harmonics (UNSW)','https://newt.phys.unsw.edu.au/jw/strings.html'],
+ mach:['NASA Glenn Research Center, Mach angle','https://www.grc.nasa.gov/www/k-12/airplane/machang.html'],
+ hyd:['Hydrogen wavefunctions (HyperPhysics)','http://hyperphysics.phy-astr.gsu.edu/hbase/quantum/hydwf.html'],
+ gw:['Abbott et al. 2016, Observation of gravitational waves from a binary black hole merger','https://doi.org/10.1103/PhysRevLett.116.061102'],
+ em:['Electromagnetic waves (HyperPhysics)','http://hyperphysics.phy-astr.gsu.edu/hbase/Waves/emwv.html']};
+/* id, key, name, reworked, one line, source */
+const ITEMS=[
+ ['P5','dipP5','Dipole, aurora pulse',false,'The flow along the field lines; where they meet the ball, the auroral ovals flash as each particle passes.','jup'],
+ ['P3','dipP3','Dipole, energy',false,'The same flow with a steep spread of energies: many small cool particles, a few large hot ones.','belt'],
+ ['P2','dipP2','Dipole, field strength',false,'A fine dust on forty more lines: thick where the lines crowd, which is where the field is strong.','fline'],
+ ['P4','dipP4','Dipole, radiation belt',false,'The flow, plus trapped charges that spiral and bounce between two mirror points: a radiation belt.','fitz'],
+ ['PH1','phLor','Lorenz attractor',false,'Nine starts 0.001 apart travel as one dot, then scatter over the butterfly.','lorenz'],
+ ['PH2','phFlow','Flow onto the limit cycle',false,'Every start in the plane ends on the same loop, while μ slowly changes its shape.','vdp'],
+ ['PH3','phPoin','Poincaré section',false,'A chaotic oscillator seen once per turn of its drive: a sheet that stretches and folds.','duff'],
+ ['PH4','phFrac','Fractal road to chaos',true,'A line sweeps to and fro. Behind it the period-doubling fractal appears, each pass a magnified copy of the last.','feig'],
+ ['FS1','fsWind','Winding a wave',true,'A wave wound round a circle. At whole numbers of turns its centre of mass is that harmonic, so the spectrum draws itself.','wind'],
+ ['FS2','fsStack','One sound, two views',false,'The wave in front, the eight sines it is made of behind it, its spectrum on the end wall.','fser'],
+ ['FS3','fsGibbs','Gibbs effect',false,'A square wave built from 1 to 24 harmonics: the overshoot at each jump never drops below 8.95 %.','gibbs'],
+ ['FS4','fsUnc','Short in time, wide in frequency',false,'Narrow the spectrum and the pulse spreads. The two widths always multiply to 1 / 2π.','unc'],
+ ['N1','drum','Drum head',true,'A struck drum skin swinging in six real modes, each at its true pitch, then dying away.','drum'],
+ ['N2','string','Plucked string',true,'A plucked string: two corners run to and fro and round off as the high harmonics die.','str'],
+ ['N3','mach','Mach cone',false,'A source speeds up past Mach 1 and its rings pile into a cone.','mach'],
+ ['N4','hydro','Hydrogen atom',true,'The electron cloud of six states of hydrogen, turning slowly in space.','hyd'],
+ ['N5','chirp','Gravitational wave',false,'GW150914: two black holes spiral together and the wave chirps from 35 to 250 Hz.','gw'],
+ ['N6','light','Light wave',false,'Light: the electric and magnetic fields in step, at right angles, one wavelength marked.','em']];
+/* already in the build from rounds 1 and 2, unchanged; part of the random set, so Shuffle shows them too */
+const KEPT=[['S2','moons','Moons in resonance'],['R4','interf','Wave interference'],['R6','liss','Lissajous figure'],['R7','trap','TRAPPIST-1']];
+const BYID={};for(const it of ITEMS)BYID[it[0]]=it;for(const it of KEPT)BYID[it[0]]=it;
+const OFF=new Set(store.get('off',[]).filter(i=>BYID[i]&&BYID[i].length>3));
+const OLDBAND={moons:.8,interf:.8,liss:.56,trap:.78};
+const fnOf=k=>R4.FN[k]||R2.FN[k]||SPLBG.FN[k],palOf=k=>R4.PAL[k.startsWith('dip')?'dip':k]||R2.PAL[k]||SPLBG.PAL[k],bandOf=k=>R4.BAND[k]||OLDBAND[k]||.7;
+const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',');
+function bgCss(P,x,y){return `radial-gradient(ellipse 75% 75% at ${x.toFixed(1)}% ${y.toFixed(1)}%,${P.g},${P.bg} 70%,${P.e})`}
+
+/* one drawn surface: a card (the splash frame's upper 577 x 294) or the start screen's band (1020 x 172). Both go through paint() */
+const SURF=[];
+function fit(st){const w=st.cv.clientWidth,h=st.cv.clientHeight;if(!w)return false;const z=st.zoom?st.zoom():1,d=Math.min(2,(devicePixelRatio||1)*z),pw=Math.round(w*d),ph=Math.round(h*d);if(st.cv.width!==pw||st.cv.height!==ph){st.cv.width=pw;st.cv.height=ph}st.w=w;st.h=h;st.dpr=d;return true}
+function paint(st,ts){if(!st.w&&!fit(st))return;const light=MODE==='light',k=st.k,P0=palOf(k),P=light?Object.assign({},P0,LPAL):P0,c=st.cv.getContext('2d'),w=st.w,h=st.h;
+ let s,ox,oy,ext;if(st.band){s=bandOf(k);ox=w/2-288.5*s;oy=h*(s<1?.5:.56)-147*s;ext=w/2/s}else{s=w/577;ox=0;oy=0;ext=288.5}
+ const bg=light?'#f4f5f7':bgCss(P0,(ox+288.5*s)/w*100,(oy+147*s)/h*100);if(st.bg!==bg){st.bg=bg;st.box.style.background=bg}
+ const key=k+'|'+light+'|'+still();if(st.key!==key){st.key=key;st.d={}}
+ if(window.__frz!=null)st.d={};st.d.ext=ext;const t=window.__frz!=null?window.__frz:still()?(R4.STILL[k]||40):(ts-st.t0)/1000+st.off;
+ c.setTransform(st.dpr,0,0,st.dpr,0,0);c.clearRect(0,0,w,h);c.save();c.translate(ox,oy);c.scale(s,s);
+ const a=performance.now();try{fnOf(k)(c,577,427,t,P,st.d)}catch(e){console.error(k,e)}const b=performance.now();c.restore();
+ st.acc+=b-a;st.n++;st.last=b-a;if(st.n>=40){st.ms=st.acc/st.n;st.acc=0;st.n=0;if(st.msEl)st.msEl.innerHTML=`<b>${st.ms.toFixed(2)} ms</b> a picture`}}
+function surf(o){const st=Object.assign({d:{},t0:performance.now(),off:20+Math.random()*30,vis:false,acc:0,n:0,w:0,dirty:true},o);SURF.push(st);return st}
+
+/* ---------- the start screen mock (W1): the card 1020 x 607 in a 1254 x 651 window, the drawing in its 172 point band ---------- */
+const C8=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'];
+const RECP=[{n:'Night bus sketch',d:'Today, 23:12',bpm:124,k:['A','minor'],tr:[0,1,2,5,6]},{n:'Shrine Legion edit',d:'Yesterday, 18:40',bpm:145,k:['F','minor'],tr:[3,4,2,0,6,5,1,7]},{n:'Vocal comp, take 3',d:'25 Nov, 21:05',bpm:98,k:['D','major'],tr:[1,1,1,6]},{n:'Kick and bass study',d:'24 Nov, 16:30',bpm:142,k:['F♯','minor'],tr:[3,0]},{n:'Ambient pad ideas',d:'21 Nov, 09:48',bpm:80,k:['E♭','major'],tr:[5,6,7]},{n:'Untitled 4',d:'19 Nov, 22:17',bpm:120,k:null,tr:[0]}];
+const TPL=[['Beat starter','Drums and a bassline, ready to build on.'],['Audio tracks','Vocals, guitar, bass and drums tracks.']],MY=[['My psy start','Kick, Psy Bass, 2 buses, Limiter.'],['Two mics','2 audio tracks, Gate, Compressor.']];
+function wave(cv,i,col){const w=64,h=26;cv.width=w*2;cv.height=h*2;const c=cv.getContext('2d');c.scale(2,2);let s=(i+1)*9301;const r=()=>((s=(s*48271)%2147483647)/2147483647);c.fillStyle=col;c.globalAlpha=.75;for(let x=6;x<w;x+=2){const env=.35+.65*Math.abs(Math.sin(Math.floor(x/w*8)*1.7+i)),a=(r()*.6+.4)*env*h*.42;c.fillRect(x,h/2-a,1,a*2)}}
+const S={cur:null,z:1};
+(function mkStage(){const X=117,Y=22,W=1020,H=607,B=172,scr=$('#scr');
+ scr.innerHTML=`<div class="gridbg"></div><div class="w1card" style="left:${X}px;top:${Y}px;width:${W}px;height:${H}px"></div>
+   <div class="band" style="left:${X}px;top:${Y}px;width:${W}px;height:${B}px"><canvas></canvas><div class="w1shade"></div></div>
+   <div class="w1edge" style="left:${X}px;top:${Y+B}px;width:${W}px"></div>
+   <div class="w1logo" style="left:${X+28}px;top:${Y+B-73}px"><div class="nm">Audio<i>Lab</i><s>PRO</s></div></div><div class="w1ver" style="left:${X+28}px;top:${Y+B-31}px">Digital audio workstation · v0.314</div>
+   <div class="w1in" style="left:${X}px;top:${Y+B}px;width:${W}px;height:${H-B}px">
+    <div style="position:absolute;left:24px;top:16px;width:55%;display:flex;align-items:center;gap:10px"><span class="hd" style="flex:1">Recent projects</span><span class="q" style="width:220px">⌕<span style="flex:1">Type to search</span></span></div>
+    <div style="position:absolute;left:14px;top:54px;width:calc(55% + 10px);display:flex;flex-direction:column">${RECP.map((p,i)=>`<div class="rr${i?'':' on'}" style="--rc:64px minmax(0,1fr) 110px 122px;--rh:42px"><div class="th"><canvas data-w="${i}"></canvas><div class="cs">${p.tr.map(t=>`<b style="background:${C8[t]}"></b>`).join('')}</div></div><span class="tn">${esc(p.n)}</span><span class="dt">${esc(p.d)}</span><span class="mt">${p.bpm}<span class="u"> BPM</span>${p.k?`&nbsp;&nbsp;${esc(p.k[0])}<span class="u"> ${p.k[1]}</span>`:''}</span></div>`).join('')}</div>
+    <div style="position:absolute;left:calc(55% + 48px);right:24px;top:16px;display:flex;flex-direction:column;gap:6px"><span class="hd">Start something new</span>
+     <div class="tile pri"><span style="display:flex;gap:8px"><b>New empty project</b><kbd>⌘N</kbd></span><small>One audio and one instrument track, 120 BPM.</small></div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${TPL.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+     <span class="sub">My templates</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${MY.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+     <div class="tile"><span style="display:flex;gap:8px"><b>Open a file…</b><kbd>⌘O</kbd></span><small>A .audiolab project from your computer.</small></div></div>
+    <div style="position:absolute;left:24px;right:24px;bottom:0;height:44px;border-top:1px solid var(--m-ln);display:flex;align-items:center;gap:16px"><div class="keys"><span><b>↵</b> opens Night bus sketch</span><span><b>↑ ↓</b> choose</span><span><b>type</b> to search</span><span><b>⌘N</b> empty</span><span><b>⌘O</b> open</span></div><span style="flex:1"></span><span class="sw on"><i></i>Show at start-up</span></div></div>`;
+ S.scr=scr;S.mkw=scr.parentNode;S.surf=surf({cv:$('.band canvas',scr),box:$('.band',scr),band:true,k:'dipP5',msEl:$('#sms'),zoom:()=>S.z||1})})();
+function stageLook(){if(!S.cur)return;const L=MODE==='light',it=BYID[S.cur],P=palOf(it[1]);S.scr.classList.toggle('light',L);
+ const nm=$('.w1logo .nm',S.scr);nm.style.color=L?'#16181d':P.ink;$('i',nm).style.backgroundImage=L?'linear-gradient(90deg,#1d7fb0,#2f5fd0)':`linear-gradient(90deg,${P.a},${P.b})`;const s=$('s',nm);s.style.color=s.style.borderColor=L?'#2f5fd0':P.p;
+ const bgc=L?'244,245,247':hexRgb(P.bg);$('.w1shade',S.scr).style.background=R4.WIDE[it[1]]?`radial-gradient(ellipse 310px 96px at 150px 124px,rgba(${bgc},.94) 0,rgba(${bgc},.9) 40%,rgba(${bgc},0) 100%)`:'none';
+ $('.w1ver',S.scr).style.color=L?'#5c606b':P.m||'#8c8f9b';$('.w1edge',S.scr).style.background=L?'rgba(20,24,40,.1)':'rgba(255,255,255,.08)';
+ $$('canvas[data-w]',S.scr).forEach(cv=>{const i=+cv.dataset.w;wave(cv,i,L?'#4a5470':C8[RECP[i].tr[0]])})}
+function show(id,user){const it=BYID[id]||ITEMS[0];S.cur=it[0];S.surf.k=it[1];S.surf.w=0;S.surf.dirty=true;S.surf.acc=0;S.surf.n=0;S.surf.t0=performance.now();
+ $('#now').innerHTML=`<span class="id">${it[0]}</span>${it[3]===true?'<span class="star" title="Reworked in this round">★</span>':''}<span>${esc(it[2])}</span>`;
+ $('#cap').innerHTML=it.length>3?`${esc(it[4])} <a href="${SRC[it[5]][1]}" target="_blank" rel="noopener">Source: ${esc(SRC[it[5]][0])}</a>`:`<b>${esc(it[2])}</b> is in the app already (rounds 1 and 2) and stays in the set as it is.`;
+ $$('#grid .dv').forEach(v=>v.classList.toggle('on',v.dataset.id===it[0]));stageLook();if(user)store.set('show',it[0]);kick()}
+/* Shuffle, as the app will: one drawing of the set at random, never the same twice in a row */
+function setNow(){return ITEMS.filter(i=>!OFF.has(i[0])).map(i=>i[0]).concat(KEPT.map(i=>i[0]))}
+function shuffle(){const L=setNow().filter(i=>i!==S.cur);show(L[Math.floor(Math.random()*L.length)],true)}
+$('#shuf').onclick=shuffle;let autoT=0;$('#auto').onchange=e=>{clearInterval(autoT);if(e.target.checked){shuffle();autoT=setInterval(shuffle,8000)}};
+
+/* ---------- the grid ---------- */
+function mkCard(host,it){const [id,k,t,star,line,src]=it,el=document.createElement('div');el.className='dc';el.dataset.id=id;
+ el.innerHTML=`<div class="dh"><span class="id">${id}</span>${star?'<span class="star" title="Reworked in this round">★</span>':''}<h3 title="${esc(t)}">${esc(t)}</h3><label class="chk"><input type="checkbox" id="pk-${id}" checked> In</label></div>
+  <button class="dv" data-id="${id}" title="Show ${esc(t)} in the start screen above" aria-label="Show ${esc(id)} ${esc(t)} in the start screen above"><canvas></canvas></button>
+  <p>${esc(line)}</p>
+  <div class="ft"><span class="ms">measuring…</span><span class="sp"></span><a href="${SRC[src][1]}" target="_blank" rel="noopener" title="${esc(SRC[src][0])}">Source</a></div>`;
+ host.appendChild(el);const dv=$('.dv',el),st=surf({cv:$('canvas',el),box:dv,k,msEl:$('.ms',el),el,id});
+ dv.onclick=()=>{show(id,true);$('#stage').scrollIntoView({behavior:still()?'auto':'smooth',block:'nearest'})};
+ $('input',el).onchange=e=>{if(e.target.checked)OFF.delete(id);else OFF.add(id);store.set('off',[...OFF]);sync()};return st}
+for(const it of ITEMS)mkCard($('#grid'),it);
+$('#kept').innerHTML='Also in the set, unchanged and already in the app: '+KEPT.map(k=>`<button class="btn" data-kept="${k[0]}">${k[0]} ${esc(k[2])}</button>`).join(' ')+'. That makes 22 drawings in all.';
+$('#kept').onclick=e=>{const b=e.target.closest('[data-kept]');if(b){show(b.dataset.kept,true);$('#stage').scrollIntoView({behavior:still()?'auto':'smooth',block:'nearest'})}};
+
+/* ---------- switches ---------- */
+function setSw(){$$('[data-sw="mode"] button').forEach(b=>b.classList.toggle('on',b.dataset.v===MODE));$$('[data-sw="motion"] button').forEach(b=>b.classList.toggle('on',b.dataset.v===MOTION));
+ for(const st of SURF){st.dirty=true}stageLook();kick()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sw] button');if(!b)return;const sw=b.parentNode.dataset.sw;if(sw==='mode')MODE=b.dataset.v;else MOTION=b.dataset.v;setSw()});
+
+/* ---------- one loop: every surface on screen, up to 60 pictures a second; one still picture each in Light or with Reduce motion ---------- */
+let raf=0,fN=0,fT=0,fMs=0;
+function loop(ts){raf=0;if(document.hidden)return;const s=still();let sum=0;
+ for(const st of SURF){if(!st.vis)continue;if(s&&!st.dirty)continue;st.dirty=false;paint(st,ts);sum+=st.last||0}
+ fN++;fMs+=sum;if(ts-fT>=1000){$('#fps').innerHTML=s?'still pictures':`<b>${Math.round(fN*1000/(ts-fT))} fps</b> · <b>${(fMs/fN).toFixed(1)} ms</b> for everything on screen`;fN=0;fMs=0;fT=ts}
+ if(!s||SURF.some(st=>st.vis&&st.dirty))raf=requestAnimationFrame(loop)}
+function kick(){if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
+document.addEventListener('visibilitychange',kick);
+const io=new IntersectionObserver(es=>{for(const e of es){const st=SURF.find(c=>c.box===e.target);if(st){st.vis=e.isIntersecting;if(st.vis)st.dirty=true}}kick()},{rootMargin:'60px'});
+const ro=new ResizeObserver(es=>{for(const e of es){if(e.target===S.mkw){S.z=e.target.clientWidth/1254;S.scr.style.setProperty('--s',S.z);S.surf.w=0;S.surf.dirty=true;continue}const st=SURF.find(c=>c.box===e.target);if(st){st.w=0;st.dirty=true}}kick()});
+for(const st of SURF){io.observe(st.box);if(!st.band)ro.observe(st.box)}ro.observe(S.mkw);
+
+/* ---------- the line to paste ---------- */
+function sync(){const note=$('#pnote').value.trim(),off=ITEMS.filter(i=>OFF.has(i[0])).map(i=>i[0]);
+ $('#pline').textContent='Start screen final: all'+(off.length?' except '+off.join(' '):'')+(note?' | note: '+note:'');
+ for(const st of SURF){if(!st.el)continue;const on=!OFF.has(st.id);st.el.classList.toggle('off',!on);$('input',st.el).checked=on}}
+$('#pnote').oninput=sync;
+$('#allon').onclick=()=>{OFF.clear();store.set('off',[]);sync()};
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ function sel(){const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(e){}}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{sel();ok()});else{sel();ok()}};
+
+/* a bench for the docs: the mean time of one picture of each drawing, in the band at 2x and in the splash card at 2x */
+window.__bench=function(frames){const out={},cv=document.createElement('canvas'),c=cv.getContext('2d');for(const it of ITEMS.concat(KEPT)){const k=it[1],r={};for(const band of [1,0]){const w=band?1020:577,h=band?172:427;cv.width=w*2;cv.height=h*2;const s=band?bandOf(k):1,ox=band?w/2-288.5*s:0,oy=band?h*(s<1?.5:.56)-147*s:0,d={ext:band?w/2/s:288.5},P=palOf(k);
+   const run=(n,t0)=>{const a=performance.now();for(let i=0;i<n;i++){c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,w,h);c.save();c.translate(ox,oy);c.scale(s,s);fnOf(k)(c,577,427,t0+i/60,P,d);c.restore()}return(performance.now()-a)/n};run(30,20);r[band?'band':'card']=+run(frames||240,20.5).toFixed(3)}out[it[0]]=r}return out};
+/* for the screenshots: show a drawing at a given time (seconds of its own clock) */
+window.__at=function(id,t){window.__frz=t;show(id)};
+
+setSw();sync();show(BYID[store.get('show','')]?store.get('show',''):'P5');kick();
+</script>
