@@ -203,8 +203,13 @@ if A.quick or A.skip_ui: step('b UI tests', not A.promote, 'not run (--quick or 
 else:
     tests = sorted(n for n in os.listdir(os.path.join(NEW, 'tools', 'ui-tests')) if (n.endswith('.py') or n.endswith('_electron.js')) and n not in HELPERS)
     res, regress, old, flaky = {}, [], [], []
+    # a test added after the build's last index.html change belongs to a later release (a lane may push its test while the
+    # freeze holds its index.html): it cannot apply to this build and is skipped with that reason
+    built = int(sh(['git', 'log', '-1', '--format=%ct', '--', 'index.html'], cwd=NEW).stdout.strip() or 0)
+    def added(n): return int((sh(['git', 'log', '--diff-filter=A', '--format=%ct', '--', 'tools/ui-tests/' + n], cwd=NEW).stdout.split() or ['0'])[-1])
     for n in tests:
         if n in SKIP: res[n] = {'skip': SKIP[n]}; say('     skip %s: %s' % (n, SKIP[n])); continue
+        if built and added(n) > built: res[n] = {'skip': 'added after this build'}; say('     skip %s: added after this build (for a later release)' % n); continue
         rc, secs_, fl, tail = run_test(NEW, n, os.path.join(OUT, 'ui', n))
         res[n] = {'rc': rc, 's': secs_, 'fail': fl}
         if rc == 0 and not fl: say('     ok   %s (%d s)' % (n, secs_)); continue

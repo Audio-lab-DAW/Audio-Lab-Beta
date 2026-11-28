@@ -45,7 +45,7 @@ A later desktop app could download the promoted build by its commit instead (the
 - Each test is run with the new build.
 - A failing test is run again on the reference build with the reference's own copy of the test. When it fails there too, it is reported as old, not as a regression.
 - A test that fails on the new build but passes on the reference is run once more on the new build. If it passes then, it is reported as flaky, not as a regression. taskAK's reverb clip, for example, uses random numbers and once came out 0.5 dB off.
-- A new test must pass.
+- A new test must pass. A test added after the build's last `index.html` change is for a later release, so it is skipped with that reason. This happens when a lane pushes its test while the freeze holds its `index.html`.
 - `ui-skip.json` lists the few that are not pass/fail tests or need files that are not in the repository, each with its reason.
 
 **c) The start-up smoke test in the real desktop app** (`smoke_electron.js`)
