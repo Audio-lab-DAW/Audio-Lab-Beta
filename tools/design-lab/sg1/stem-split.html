@@ -1,0 +1,484 @@
+<meta charset="utf-8">
+<title>AudioLab stem split: the loading bar is the spectrogram</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Task SG1 (28 November 2026): the stem split's loading bar is the spectrogram of every stem. Same family as the DR5, UX3, WS and TH1 pick pages.
+   Layout: header and controls, three live layouts (G1 to G3) of the Split dialog, the small versions (S1, S2), the options, measurements, research, sources, picks bar.
+   Every mock runs on the real stems of a 40 s clip of the Fractals song, split by the app's own code; the chunks arrive at the measured times. */
+:root{color-scheme:dark;
+ --bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#8b8b97;--acc:#ffb547;--blue:#4c8dff;--bar:#0e0e12f2;
+ --m-bg:#08090d;--m-pn:#101116;--m-pn2:#15161c;--m-ln:rgba(255,255,255,.075);--m-ln2:rgba(255,255,255,.13);--m-ink:#e6e8ee;--m-mut:#8c8f9b;--m-unit:#ffb547;--m-lane:#05070b;--m-edge:#ffb547;--m-work:rgba(76,201,240,.16);
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2;
+ --m-bg:#eceef2;--m-pn:#ffffff;--m-pn2:#f5f6f8;--m-ln:rgba(20,24,40,.10);--m-ln2:rgba(20,24,40,.18);--m-ink:#16181d;--m-mut:#5c606b;--m-unit:#9a6200;--m-lane:#f3f4f7;--m-edge:#b06d00;--m-work:rgba(29,127,176,.13)}}
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#5d616c;--acc:#9a6200;--blue:#2f6fe0;--bar:#fffffff2;
+ --m-bg:#eceef2;--m-pn:#ffffff;--m-pn2:#f5f6f8;--m-ln:rgba(20,24,40,.10);--m-ln2:rgba(20,24,40,.18);--m-ink:#16181d;--m-mut:#5c606b;--m-unit:#9a6200;--m-lane:#f3f4f7;--m-edge:#b06d00;--m-work:rgba(29,127,176,.13)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f);margin:0;padding-block:28px 170px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 20px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 14px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:80ch}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--mut)}
+.btn.ok{background:var(--acc);border-color:var(--acc);color:#1a1200}
+.seg{display:inline-flex;border:1px solid var(--ln2);border-radius:7px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--fm);color:var(--mut)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--bg)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:14px;max-width:86ch}
+.how{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--mut)}
+.bar2{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:12px}
+.lab{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.chkl{display:inline-flex;gap:6px;align-items:center;font-size:12px;cursor:pointer}
+section.fam{display:flex;flex-direction:column;gap:14px}
+.famh{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.famh .tag{font:500 12px var(--fm);color:var(--acc)}
+.lays{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.lay{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lay.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.ch{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ch .id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px}
+.ch .star{color:var(--acc);font-size:14px}
+.ch h3{flex:1;min-width:0}
+.pk{font:500 12px var(--fm);color:var(--mut);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--ln2);border-radius:7px;padding:3px 9px}
+.picked .pk{color:var(--acc);border-color:var(--acc)}
+.lay ul,.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0;cursor:pointer;text-align:left}
+.card.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.card .ch b{flex:1;min-width:0}
+.card small{color:var(--mut);font-size:12px;line-height:1.45}
+.grp{display:flex;flex-direction:column;gap:8px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.tbl{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:720px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--ln);vertical-align:top}
+td.n{font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+th{font:500 11px var(--fm);color:var(--mut);text-transform:uppercase;letter-spacing:.05em;background:var(--pn2)}
+tr:last-child td{border-bottom:0}
+.note{border-left:2px solid var(--acc);padding:2px 0 2px 12px;font-size:12.5px;max-width:92ch}
+.src{font-size:12.5px;display:flex;flex-direction:column;gap:4px;padding-left:18px;margin:0}
+
+/* ===== the app mock: a Split sheet (lane F's dialog look, no backdrop-filter, the glass engine's rule) ===== */
+.mk{background:var(--m-bg);border:1px solid var(--ln2);border-radius:10px;padding:14px;display:flex;justify-content:center;min-width:0}
+.sheet{width:100%;max-width:520px;background:var(--m-pn);color:var(--m-ink);border:1px solid var(--m-ln2);border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;font:12.5px/1.4 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;min-width:0}
+.sh{padding:10px 12px 8px;border-bottom:1px solid var(--m-ln);display:flex;align-items:center;gap:8px}
+.sh b{font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbody{padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.sf{padding:8px 12px;border-top:1px solid var(--m-ln);display:flex;gap:8px;align-items:center}
+.sf .sp{flex:1}
+.mb{background:var(--m-pn2);border:1px solid var(--m-ln2);border-radius:6px;padding:3px 10px;font:500 12px Inter,system-ui,sans-serif;color:var(--m-ink)}
+.mb.pri{background:#2f6fe0;border-color:#2f6fe0;color:#fff}
+.mb[disabled]{opacity:.45;cursor:default}
+/* read-outs: values in ink with equal-width digits, units in amber small caps (L2) */
+.ro{font:500 11.5px 'JetBrains Mono',ui-monospace,monospace;color:var(--m-ink);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;min-height:18px}
+.u{color:var(--m-unit);font-variant-caps:all-small-caps;font-weight:600;letter-spacing:.04em;margin-left:2px}
+.ro .ph{color:var(--m-mut);font-family:Inter,system-ui,sans-serif}
+/* the lanes */
+.lanes{position:relative;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ln{display:grid;grid-template-columns:62px minmax(0,1fr);gap:6px;align-items:stretch;min-width:0}
+.ln .nm{display:flex;align-items:center;gap:5px;font:500 11px Inter,system-ui,sans-serif;color:var(--m-ink);white-space:nowrap;overflow:hidden}
+.ln .nm i{width:8px;height:8px;border-radius:2px;flex:none}
+.ln .nm em{font:500 9.5px 'JetBrains Mono',monospace;color:var(--m-mut);font-style:normal;letter-spacing:.06em}
+.ln .cv{position:relative;border-radius:3px;overflow:hidden;background:var(--m-lane);min-width:0}
+.ln canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ln.off .cv{opacity:.35}
+.ln .lv{position:absolute;right:4px;top:2px;font:500 9.5px 'JetBrains Mono',monospace;color:var(--m-ink);background:color-mix(in srgb,var(--m-pn) 70%,transparent);padding:0 3px;border-radius:2px}
+.ln .ck{position:absolute;left:4px;top:3px;margin:0;accent-color:#2f6fe0}
+.ln.mixl .cv{opacity:.9}
+.ln.inl{grid-template-columns:minmax(0,1fr)}
+.ln.inl .tagi{position:absolute;left:5px;top:3px;font:600 10px Inter,system-ui,sans-serif;display:flex;gap:4px;align-items:center;z-index:2;text-shadow:0 0 3px var(--m-lane),0 0 3px var(--m-lane)}
+.ln.inl .tagi i{width:7px;height:7px;border-radius:2px}
+/* overlays over the lane column: the done edge (amber hairline) and the chunk being worked on */
+.ovl{position:absolute;top:0;bottom:0;pointer-events:none}
+.edge{width:0;border-left:1px solid var(--m-edge);box-shadow:0 0 6px color-mix(in srgb,var(--m-edge) 60%,transparent);transition:left calc(var(--mo,1)*120ms) linear}
+.edge b{position:absolute;top:-15px;left:-1px;transform:translateX(-50%);font:600 9.5px 'JetBrains Mono',monospace;color:var(--m-edge);white-space:nowrap}
+.work{background:var(--m-work);overflow:hidden}
+.work.f1::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0,color-mix(in srgb,var(--m-edge) 22%,transparent) 50%,transparent 100%);width:40%;animation:sgScan 1.6s linear infinite}
+.work.f2,.still .work.f1{background:repeating-linear-gradient(135deg,var(--m-work) 0 4px,transparent 4px 8px)}
+.still .work.f1::after{display:none}
+@keyframes sgScan{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@media (prefers-reduced-motion:reduce){.work.f1::after{display:none}.work.f1{background:repeating-linear-gradient(135deg,var(--m-work) 0 4px,transparent 4px 8px)}.edge{transition:none}}
+.still .edge{transition:none}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 10px;font:500 11px Inter,system-ui,sans-serif}
+.lgd span{display:inline-flex;gap:5px;align-items:center}
+.lgd i{width:9px;height:9px;border-radius:2px}
+.lgd b{font:500 10.5px 'JetBrains Mono',monospace;color:var(--m-ink)}
+.cvbig{position:relative;height:150px;border-radius:4px;overflow:hidden;background:var(--m-lane)}
+.cvbig canvas{position:absolute;inset:0;width:100%;height:100%}
+.axis{display:flex;justify-content:space-between;font:500 9.5px 'JetBrains Mono',monospace;color:var(--m-mut);padding-left:68px}
+.axis.nl{padding-left:0}
+/* the small versions */
+.arr{position:relative;background:var(--m-bg);border:1px solid var(--ln2);border-radius:10px;height:300px;overflow:hidden;min-width:0}
+.arr .trk{position:absolute;left:0;right:0;height:38px;border-bottom:1px solid var(--m-ln)}
+.arr .clipm{position:absolute;top:5px;bottom:5px;border-radius:4px;opacity:.55}
+.arr .stat{position:absolute;left:0;right:0;bottom:0;height:28px;background:var(--m-pn);border-top:1px solid var(--m-ln);display:flex;align-items:center;gap:10px;padding:0 10px;font:11px Inter,system-ui,sans-serif;color:var(--m-mut)}
+.ncard{position:absolute;right:12px;bottom:40px;width:min(300px,calc(100% - 24px));background:var(--m-pn);border:1px solid var(--m-ln2);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.35);padding:9px 10px;display:flex;flex-direction:column;gap:6px;color:var(--m-ink);font:12px/1.35 Inter,system-ui,sans-serif}
+.ncard .t{display:flex;gap:7px;align-items:center}
+.ncard .t b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ncard .t time{font:500 10px 'JetBrains Mono',monospace;color:var(--m-mut)}
+.strips{display:flex;flex-direction:column;gap:2px}
+.strip{position:relative;height:6px;border-radius:2px;overflow:hidden;background:var(--m-lane)}
+.strip canvas{position:absolute;inset:0;width:100%;height:100%}
+.ncard .a{display:flex;gap:6px;align-items:center}
+.ncard .a .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--m-pn2);border:1px solid var(--m-ln2);border-radius:13px;padding:2px 9px 2px 3px;color:var(--m-ink);font:11px Inter,system-ui,sans-serif}
+.pill .pst{position:relative;width:96px;height:16px;border-radius:3px;overflow:hidden;background:var(--m-lane)}
+.pill .pst canvas{position:absolute;inset:0;width:100%;height:100%}
+.orb{flex:none}
+.orb .o0{fill:none;stroke:var(--m-ln2);stroke-width:2.4}
+.orb .o1{fill:none;stroke:#4cc9f0;stroke-width:2.4;stroke-linecap:round;transition:stroke-dasharray calc(var(--mo,1)*120ms) linear}
+.orb .nu{fill:#ffd23a}
+/* picks bar */
+.pbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);border-top:1px solid var(--ln2);z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
+.pbar .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pbar .line{flex:1 1 420px;min-width:0;font:500 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:6px 9px;overflow-wrap:anywhere}
+.pbar input{flex:0 1 240px;min-width:0;background:var(--pn2);color:var(--ink);border:1px solid var(--ln2);border-radius:7px;padding:5px 8px;font:12px var(--f)}
+@media (max-width:1100px){.lays{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:720px){.lays,.cards,.two{grid-template-columns:1fr}h1{font-size:26px}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · stem split · task SG1 · research and pick page · 28 November 2026</div>
+ <h1>The stem split's loading bar is the spectrogram</h1>
+ <p class="lede">You asked for the loading screen of every stem split to be the spectrograms of the stems being split, appearing live. It can be live and honest: HTDemucs separates a song in chunks of 7.8 s, one after another from the start of the song, and each finished chunk already holds every stem's audio for that stretch. A short spectrogram of that stretch costs about 0.1 % of the chunk's time, so each lane fills to the true position in the song the moment the model gets there. Everything below runs on real stems: a 40 s clip of <b>Fractals</b> (bars 1 to 24: the sung intro over the pad, then kick and bass come in at 0:26) rendered by the app and split by the app's own code, with the chunks arriving at the times measured here.</p>
+ <div class="how"><span><b>1.</b> Watch the three layouts fill (★ = recommended). Switch the engine to see 4 stems, 6 stems or the quick split.</span><span><b>2.</b> Pick a layout, a small version, and the two details.</span><span><b>3.</b> Copy the line at the bottom into the chat.</span></div>
+ <div class="bar2">
+  <span class="lab">Page</span><div class="seg" id="theme"><button data-v="">Auto</button><button data-v="dark">Dark</button><button data-v="light">Light</button></div>
+  <span class="lab">Engine</span><div class="seg" id="eng"><button data-v="n4" class="on">Neural · 4 stems</button><button data-v="n6">Neural · 6 stems</button><button data-v="quick">Quick split</button></div>
+  <span class="lab">Speed</span><div class="seg" id="spd"><button data-v="1" class="on">×1 as measured</button><button data-v="4">×4</button><button data-v="16">×16</button></div>
+  <label class="chkl"><input type="checkbox" id="first"> First split ever (model download first)</label>
+  <label class="chkl"><input type="checkbox" id="still"> Reduce motion</label>
+  <button class="btn ok" id="replay">▶ Replay</button>
+ </div>
+ <p class="mut sm" id="engnote"></p>
+</header>
+
+<section class="fam" id="fam-G">
+ <div class="famh"><span class="tag">G</span><h2>The Split dialog while it works</h2><span class="mut sm">After you press Split the dialog stays open and becomes the loading bar. Keep working sends it to the small card (S below); the work goes on in its worker either way.</span></div>
+ <div class="lays" id="lays"></div>
+ <div class="axis nl mut" style="display:none"></div>
+</section>
+
+<section class="fam" id="fam-S">
+ <div class="famh"><span class="tag">S</span><h2>The small version, while you keep working</h2><span class="mut sm">The same chunks drive these. Shown over a sketch of the arrangement; both follow the layout's colours.</span></div>
+ <div class="two">
+  <div class="grp"><div class="ch"><span class="id">S1</span><span class="star" title="Recommended">★</span><h3>A notification card with a strip per stem</h3><label class="pk"><input type="radio" name="pS" value="S1"> Pick</label></div>
+   <div class="arr" id="arrS1"></div>
+   <p class="mut sm">Lane F's notification stack (N1, bottom right above the transport) holds the job as a card: the orbit with the real progress, the clip's name, one 6 px strip per stem filling with the chunks, the remaining time, Open and Stop. Open brings the dialog back. When it ends the card says what was added and offers Undo.</p></div>
+  <div class="grp"><div class="ch"><span class="id">S2</span><h3>The status pill with one strip</h3><label class="pk"><input type="radio" name="pS" value="S2"> Pick</label></div>
+   <div class="arr" id="arrS2"></div>
+   <p class="mut sm">MD1's job pill (<code>mdJob</code>, the status line) gets a 96 × 16 strip: the mix coloured by the stem that owns each pixel (as G3). Smaller and quieter; no per-stem detail.</p></div>
+ </div>
+</section>
+
+<section class="fam" id="fam-O">
+ <div class="famh"><span class="tag">P · F</span><h2>Two details</h2><span class="mut sm">They apply to every layout above, so you can see them live.</span></div>
+ <div class="cards" id="opts"></div>
+ <div class="note">Why there is a draft stretch: chunks overlap by a quarter (1.95 s). When a chunk finishes, its last 1.95 s will still be cross-faded with the next chunk, so those columns are a draft that changes a little. P1 draws them at half strength and redraws them when the next chunk lands; P2 waits. Either way the amber edge sits at the last final sample.</div>
+</section>
+
+<section class="fam" id="fam-Q">
+ <div class="famh"><span class="tag">Q</span><h2>The quick split</h2></div>
+ <div class="two">
+  <p>The quick DSP split (<code>stemSplit</code>) also works through the song in order, in blocks of 262 144 samples (5.9 s at 44.1 kHz), and each block's four stems are final as soon as it is done (it keeps a 0.23 s margin on both sides). So it uses the same lanes, with no draft stretch, as one fast sweep: on this machine the 40 s clip took <b id="qtot">3.2 s</b>, about 0.08 times the clip's length, so a 4 minute song takes about 19 s here and a few seconds on a recent Mac. Choose <b>Quick split</b> above to watch it.</p>
+  <ul class="src" style="padding-left:18px">
+   <li>Under 1 s (a short clip): no loader at all, the stems simply appear (lane F's rule from NN/g: nothing under 1 s).</li>
+   <li>Today it runs on the page's main thread and pauses the app for about 0.45 s per block. The build should move it into the same worker as the spectrogram columns, or at least yield more often.</li>
+   <li>The quick split has no model to download or load, so the phases before the first chunk are skipped.</li>
+  </ul>
+ </div>
+</section>
+
+<section class="fam" id="fam-W">
+ <div class="famh"><span class="tag">W</span><h2>Where it appears</h2></div>
+ <div class="tbl"><table>
+  <tr><th>Place</th><th>Today</th><th>With this</th></tr>
+  <tr><td>Split into stems… (clip menu, and a drop with "Split into stems")</td><td><code>stemAsk</code> closes, then MD1's pill shows "Separating with HTDemucs" and a percent that moves once a chunk; the stems appear as tracks at the end.</td><td>The sheet stays open and becomes the layout you pick (G). Keep working moves it to the small version (S). The finished lanes become the list of stems (level, tick to keep), then Add creates the tracks as today.</td></tr>
+  <tr><td>Audio to MIDI, "Split into stems first"</td><td>The stems step shows "Splitting <i>clip</i>…" and a 4 px bar (<code>a2dbar</code>) with a percent.</td><td>The same lanes replace the bar. When the split ends each lane turns into its listen row (▶, Convert, Melody, Harmony, Drums), so the picture you watched is the list you choose from.</td></tr>
+  <tr><td>While the model downloads (first time) and loads</td><td>Pill text "Downloading the stem model, 166 MB" with a percent, then "Loading the stem model" with the orbit.</td><td>The lanes are there and empty, the mix's spectrogram already drawn above them (it needs no model), and the read-out says what is happening, in MB for the download.</td></tr>
+  <tr><td>Several clips (Audio to MIDI with many clips)</td><td>One clip at a time.</td><td>Unchanged: one set of lanes for the clip being split, its name in the title, "clip 2 of 3" in the read-out.</td></tr>
+ </table></div>
+</section>
+
+<section class="fam" id="fam-M">
+ <div class="famh"><span class="tag">M</span><h2>Measured in the repo</h2><span class="mut sm" id="mach"></span></div>
+ <div class="tbl"><table id="mtab"></table></div>
+ <div class="note">How: <code>tools/design-lab/sg1/run.py</code> opens the app (v0.294) through the AudioLab bridge, renders beats 0 to 96 of Fractals with <code>renderMix</code> and runs the app's own <code>stemSplit</code> on it with a timer on its progress callback. The neural split in headless Chromium crashed the page while the model loaded (the same 1.2 GB the app needs), so <code>chunks_node.mjs</code> runs the app's worker loop, unchanged (7.8 s chunks, 25 % overlap, linear cross-fades), in Node with the same engine: onnxruntime-web 1.20.1 in WebAssembly, the same model files from Hugging Face, the optimiser off as in the app. The stems on this page are that output. This container has 2 cores; your Mac will be faster, and the app runs with up to 8 threads there when the window is cross-origin isolated (the desktop shell is).</div>
+</section>
+
+<section class="fam" id="fam-R">
+ <div class="famh"><span class="tag">R</span><h2>Research</h2></div>
+ <div class="two">
+  <div class="grp">
+   <h3>How HTDemucs works through a song</h3>
+   <ul class="src">
+    <li>Hybrid Transformer Demucs (Rouard, Massa and Défossez, Meta AI, 2022) is trained on 7.8 s segments of 44.1 kHz stereo; at inference the song is cut into chunks of the training length "with an overlap of 25% and a linear transition from one chunk to the next". The models only support segments up to 7.8 s.</li>
+    <li>Demucs's own <code>apply_model</code> walks the chunks from the start of the song (<code>range(0, length, stride)</code>), weights each with a triangle (power 1, which is linear at 25 % overlap) and divides by the summed weights. The app's worker does the same, so a stretch is final once the next chunk has been added.</li>
+    <li>The shift trick (<code>--shifts</code>) repeats the whole pass with random offsets up to 0.5 s and averages, "SHIFTS times slower" for at most 0.2 dB SDR. The app uses no shifts, which keeps one pass and a clean left-to-right fill. If shifts were ever added, the lanes would fill once per pass, or fill once and brighten.</li>
+    <li>Speed: the paper gives a real-time factor of 1.49 on one CPU core for the 7.8 s model (PyTorch). In WebAssembly here: 24.1 s per chunk on one thread, 13.1 s on two (one chunk moves the edge 5.85 s), so 2.2 to 4.1 times the song's length.</li>
+   </ul>
+  </div>
+  <div class="grp">
+   <h3>How other apps show it</h3>
+   <ul class="src">
+    <li><b>Logic Pro</b> Stem Splitter: no progress picture is described; the stems appear as a summing stack when done (Sound On Sound: "typically half a minute for an average-length song" on Apple silicon).</li>
+    <li><b>Ableton Live 12.3</b>: a status with a task count, "1/2", for decoding and the passes (High Speed is one pass, High Quality several). No picture of the result while it works.</li>
+    <li><b>Serato</b> and <b>Engine DJ</b>: a status message or a per-track icon that turns white when ready; Engine users ask for any progress at all ("no progress is shown when you click the job queue").</li>
+    <li><b>iZotope RX</b> Music Rebalance, <b>FL Studio</b>, <b>UVR</b>, <b>Moises</b>, <b>LALAL.AI</b>: a bar or a job status; online services queue the file and return the stems. None we found draws the stems while they are made.</li>
+    <li>So the spectrogram as the loading bar is new. It also answers the two complaints: you see that it is moving, and you hear (see) early whether the split is any good before it ends.</li>
+   </ul>
+  </div>
+ </div>
+ <div class="grp">
+  <h3>Keeping the drawing cheap</h3>
+  <ul class="src">
+   <li>The worker computes the columns, not the page: when a chunk lands it takes the final stretch of each stem, one 4096-point FFT per column (one column per lane pixel: a 4 minute song in a 480 px lane at 2x is about 23 columns per chunk per stem), folds it into 96 log-frequency rows and posts a small array (about 13 KB for six stems). Measured: 0.1 ms per FFT, so about 30 ms per chunk against a 13 s chunk.</li>
+   <li>One canvas per lane. Each chunk paints only its new columns (one <code>putImageData</code> with a dirty rectangle) and, for P1, repaints the draft stretch. Nothing runs per frame: the amber edge moves by a CSS transition, the chunk being worked on is a CSS gradient (F1) or a still hatch (F2), and the read-out text changes once a second.</li>
+   <li>Reduce motion (the system setting, and the app's Motion setting below Ambient): no moving gradient, no transition on the edge; the lanes still fill, because the fill is the information. Light mode (low power): the same, plus no draft stretch.</li>
+   <li>The mix's own spectrogram above the lanes needs no model, so it is drawn at once, before the download even starts.</li>
+   <li>The remaining time is the mean of the last three chunk times times the chunks left; before the first chunk it uses the speed this computer had last time (saved per model), and on a first ever split it says "estimating" until one chunk is done.</li>
+  </ul>
+ </div>
+</section>
+
+<section class="fam" id="fam-B">
+ <div class="famh"><span class="tag">B</span><h2>Who builds it</h2></div>
+ <ul class="src">
+  <li><b>The splitter</b> (<code>stemSplit</code>, <code>NEUW</code>, <code>neuSeparate</code>, <code>stemAsk</code>, <code>stemsFor</code>) predates the lanes and no lane owns it. The build task (SG2, prefix <code>sg</code>) takes it: the worker posts <code>{t:'cols', i, s0, s1, fin, prov, cols}</code> after each chunk, <code>neuSeparate</code> and <code>stemSplit</code> pass it on through a fifth argument, and <code>SG_HOOKS.onChunk(job, msg)</code> lets others listen.</li>
+  <li><b>Lane F</b> (notifications, dialogs): the small card S1 inside the N1 stack, and the Split sheet's frame. SG2 adds <code>SG_HOOKS.card(job)</code> returning the strips; lane F puts it in the card when OV5 builds <code>notify</code> (until then SG2 draws it under <code>mdJob</code>).</li>
+  <li><b>Lane G</b> (MD1): <code>mdJob</code> keeps the pill; for S2 it gets an optional strip through <code>SG_HOOKS.pill(key)</code>.</li>
+  <li><b>Audio to MIDI</b> (<code>openA2M</code>'s stems step): SG2 replaces <code>a2dbar</code> with the lanes through the same module.</li>
+  <li>Colours: the stem colours of <code>NEUM</code> and the quick split (unchanged), viridis from INS (lane E, read only), the amber edge and units from the LOOK tokens (<code>--unit</code>, L2), W1 hairlines, motion tokens 0 / 50 / 80 / 120 ms (the edge moves in 120 ms).</li>
+ </ul>
+</section>
+
+<section class="fam" id="sources">
+ <div class="famh"><span class="tag">S</span><h2>Sources</h2></div>
+ <ul class="src">
+  <li>Rouard, Massa, Défossez, <a href="https://ar5iv.labs.arxiv.org/html/2211.08553">Hybrid Transformers for Music Source Separation</a> (arXiv 2211.08553): segments, 25 % overlap with linear transition, real-time factors.</li>
+  <li><a href="https://github.com/adefossez/demucs">Demucs README</a>: shifts, overlap, the 7.8 s limit of the transformer models, CPU time about 1.5 times the track.</li>
+  <li>Demucs <code>apply.py</code> (<a href="https://huggingface.co/spaces/Rooc/Vocal-Remover/raw/main/demucs/apply.py">a copy on Hugging Face</a>): chunk order, triangle weights, transition power, shift trick.</li>
+  <li>The ONNX export the app downloads: <a href="https://huggingface.co/StemSplitio/htdemucs-onnx">StemSplitio/htdemucs-onnx</a> and <a href="https://huggingface.co/StemSplitio/htdemucs-6s-onnx">htdemucs-6s-onnx</a>; engine <a href="https://www.npmjs.com/package/onnxruntime-web">onnxruntime-web 1.20.1</a>.</li>
+  <li>Logic Pro: <a href="https://support.apple.com/guide/logicpro/lgcp61bae908/mac">Apple, Stem Splitter</a>; <a href="https://www.soundonsound.com/techniques/logic-pro-how-use-stem-splitter">Sound On Sound, How to use Stem Splitter</a>.</li>
+  <li>Ableton: <a href="https://help.ableton.com/hc/en-us/articles/23730994755996">Stem Separation in Live FAQ</a>; <a href="https://www.ableton.com/en/stem-separation-in-ableton-live/">Stem separation in Ableton Live</a>; <a href="https://cdm.link/ableton-live-12-3-guide/">CDM, Live 12.3 guide</a>.</li>
+  <li><a href="https://support.serato.com/hc/en-us/articles/5700969287183">Serato Stems support</a>; <a href="https://community.enginedj.com/t/stems-super-slow-analysis-no-progress-indicator/60640">Engine DJ community: no progress indicator</a>.</li>
+  <li><a href="https://www.izotope.com/en/learn/stem-separation-music-rebalance">iZotope, RX 12 Music Rebalance</a>; <a href="https://github.com/Anjok07/ultimatevocalremovergui">Ultimate Vocal Remover</a>; <a href="https://www.musicradar.com/music-tech/i-tested-11-of-the-best-stem-separation-tools-and-you-might-already-have-the-winner-in-your-daw">MusicRadar, 11 stem separation tools tested</a> (FL Studio, Moises, LALAL.AI and others).</li>
+  <li>Progress timing (nothing under 1 s, percent beyond 10 s): <a href="https://www.nngroup.com/articles/progress-indicators/">NN/g, Progress indicators</a>, as in lane F's design round 5.</li>
+ </ul>
+</section>
+</div>
+
+<div class="pbar" role="region" aria-label="Your picks"><div class="in">
+ <div class="line" id="pline"></div>
+ <input id="pnote" type="text" placeholder="Add a note (optional)" aria-label="Note">
+ <button class="btn" id="rec">Use the ★ picks</button>
+ <button class="btn ok" id="copy">Copy line</button><span id="copied" class="mut sm" aria-live="polite"></span>
+</div></div>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('sg1-'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('sg1-'+k,JSON.stringify(v))}catch(e){}}};
+const VIRH='44015446075a470d6047136548186a481d6f482374482878472d7b46327e453781443b844240864045883e49893d4e8a3a538b38588c365c8d34608d32648e31688e2f6c8e2d708e2c738e2a778e297b8e277f8e26828e24868e238a8d218e8d20928c1f968b1f9a8a1f9e891fa18721a58523a98326ad812ab07f2fb47c35b7793bbb7542be714ac16d52c5695ac86465cb5e6ece5877d15381d34d8bd64695d840a0da39aadc32b5de2bc0df25cae11fd5e21adfe318eae51af4e61efde725'/* INS.CMH.viridis from index.html (lane E), 64 stops */;
+const ENG={n4:{name:'Neural · 4 stems',stems:['Drums','Bass','Other','Vocals'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5'],mb:166},
+ n6:{name:'Neural · 6 stems',stems:['Drums','Bass','Other','Vocals','Guitar','Piano'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5','#ff9a3c','#b583ff'],mb:136},
+ quick:{name:'Quick split',stems:['Drums','Bass','Vocals','Other'],cols:['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'],mb:0}};
+const LAYS=[
+ {id:'G1',star:true,t:'Lanes under the mix',d:['The mix\'s spectrogram, faint, on top: drawn at once, the reference.','One lane per stem in viridis (INS\'s map), the stem\'s colour as its label.','Each lane fills left to right to the true position; the amber edge carries the time.']},
+ {id:'G2',t:'The mix turns into each stem',d:['Every lane starts as the faint mix.','As chunks land, the mix is replaced by that stem in its own track colour.','You see what each stem took out of the mix. No separate mix row.']},
+ {id:'G3',t:'The mix coloured in by stem',d:['One tall spectrogram of the mix.','Finished columns take the colour of the stem that owns each pixel (shares of the stems\' energy).','Compact; the legend counts each stem\'s share so far.']}];
+const OPTS=[['P','P1',true,'Draft stretch at half strength','The last 1.95 s of a chunk shows at once, dim, and firms up when the next chunk lands.'],['P','P2',false,'Final columns only','The lanes show only what will not change. A slightly later edge, nothing redrawn.'],
+ ['F','F1',true,'A soft scan over the chunk being worked on','A faint gradient moves across the next 5.85 s while the model works on it (CSS only; still under Reduce motion).'],['F','F2',false,'A still hatch','The chunk being worked on is hatched and nothing moves at all between chunks.']];
+let D=null,VIR=null,dec={};
+const CLIP=()=>`Fractals · bars ${Math.floor(D.clip.b0/4)+1}–${Math.floor(D.clip.b1/4)}`;
+const PK=Object.assign({G:null,S:null,P:null,F:null},store.get('picks',{}));
+const UIo=Object.assign({eng:'n4',spd:1,first:false,still:false,theme:''},store.get('ui',{}));
+const opt=k=>PK[k]||(k==='P'?'P1':'F1');
+
+/* ---------- colours ---------- */
+function hexRGB(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function mkVir(){const st=[];for(let i=0;i<VIRH.length;i+=6)st.push(hexRGB(VIRH.slice(i,i+6)));const L=new Uint8Array(768);for(let i=0;i<256;i++){const x=i/255*(st.length-1),a=Math.floor(x),b=Math.min(st.length-1,a+1),q=x-a;for(let c=0;c<3;c++)L[i*3+c]=Math.round(st[a][c]+(st[b][c]-st[a][c])*q)}return L}
+const isLight=()=>{const t=document.documentElement.dataset.theme;return t==='light'||(!t&&matchMedia('(prefers-color-scheme: light)').matches)};
+const laneBg=()=>isLight()?[243,244,247]:[5,7,11];
+function b64(s){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+/* build one full RGBA picture of a lane in a colour mode, then the dim (draft) and ghost versions are derived */
+function picture(mode,arr,col){const C=D.spec.cols,R=D.spec.rows,im=new ImageData(C,R),o=im.data,bg=laneBg(),lt=isLight(),rgb=col?hexRGB(col):null,mix=dec.mix;
+ for(let r=0;r<R;r++)for(let c=0;c<C;c++){const i=r*C+c,p=i*4;let v=(mode==='ghost'?mix[i]:arr[i])/255,cr,cg,cb;
+  if(mode==='vir'){const k=Math.round(v*255)*3,a=lt?Math.min(1,v*1.9):Math.min(1,v*1.7);cr=VIR[k];cg=VIR[k+1];cb=VIR[k+2];cr=bg[0]+(cr-bg[0])*a;cg=bg[1]+(cg-bg[1])*a;cb=bg[2]+(cb-bg[2])*a}
+  else if(mode==='ramp'){v=Math.pow(v,1.15);if(lt){const a=Math.min(1,v*1.6),dk=Math.max(0,v-.6)/.4;cr=bg[0]+(rgb[0]*(1-.45*dk)-bg[0])*a;cg=bg[1]+(rgb[1]*(1-.45*dk)-bg[1])*a;cb=bg[2]+(rgb[2]*(1-.45*dk)-bg[2])*a}
+   else{const a=Math.min(1,v*1.5),w=Math.max(0,v-.62)/.38*.55;cr=bg[0]+(rgb[0]+(255-rgb[0])*w-bg[0])*a;cg=bg[1]+(rgb[1]+(255-rgb[1])*w-bg[1])*a;cb=bg[2]+(rgb[2]+(255-rgb[2])*w-bg[2])*a}}
+  else{/* ghost: the mix in grey */const a=Math.pow(v,1.2)*(lt?.55:.5),g=lt?70:215;cr=bg[0]+(g-bg[0])*a;cg=bg[1]+(g-bg[1])*a;cb=bg[2]+(g-bg[2])*a}
+  o[p]=cr;o[p+1]=cg;o[p+2]=cb;o[p+3]=255}
+ return im}
+function ownPicture(e){const C=D.spec.cols,R=D.spec.rows,im=new ImageData(C,R),o=im.data,bg=laneBg(),lt=isLight(),S=dec[e],cols=ENG[e].cols.map(hexRGB),n=S.length,mix=dec.mix,pw=new Float32Array(n);
+ for(let i=0;i<C*R;i++){let sum=0;for(let k=0;k<n;k++){const p=Math.pow(10,(S[k][i]/255*84-84)/10);pw[k]=p;sum+=p}let cr=0,cg=0,cb=0;for(let k=0;k<n;k++){const s=pw[k]/(sum||1);cr+=cols[k][0]*s;cg+=cols[k][1]*s;cb+=cols[k][2]*s}
+  const b=Math.pow(mix[i]/255,1.1),a=Math.min(1,b*(lt?1.5:1.35)),w=lt?0:Math.max(0,b-.7)/.3*.35,q=i*4;
+  o[q]=bg[0]+(cr+(255-cr)*w-bg[0])*a;o[q+1]=bg[1]+(cg+(255-cg)*w-bg[1])*a;o[q+2]=bg[2]+(cb+(255-cb)*w-bg[2])*a;o[q+3]=255}
+ return im}
+function dimOf(im,base){/* the draft version: half way between the background picture (empty or ghost) and the finished one */const o=new ImageData(im.width,im.height),a=im.data,b=base.data,d=o.data;for(let i=0;i<a.length;i+=4){d[i]=(a[i]+b[i])>>1;d[i+1]=(a[i+1]+b[i+1])>>1;d[i+2]=(a[i+2]+b[i+2])>>1;d[i+3]=255}return o}
+function flat(){const C=D.spec.cols,R=D.spec.rows,im=new ImageData(C,R),bg=laneBg();for(let i=0;i<im.data.length;i+=4){im.data[i]=bg[0];im.data[i+1]=bg[1];im.data[i+2]=bg[2];im.data[i+3]=255}return im}
+
+/* ---------- a lane: one canvas, painted only where something changed ---------- */
+class Lane{constructor(cv,make){this.cv=cv;cv.width=D.spec.cols;cv.height=D.spec.rows;this.g=cv.getContext('2d');this.make=make;this.build()}
+ build(){const m=this.make();this.full=m.full;this.base=m.base;this.dim=dimOf(m.full,m.base);this.fin=0;this.prov=0;this.g.putImageData(this.base,0,0)}
+ to(fin,prov){const C=D.spec.cols;fin=Math.min(C,fin);prov=Math.min(C,Math.max(fin,prov));
+  if(fin<this.fin||prov<this.prov){this.g.putImageData(this.base,0,0);this.fin=0;this.prov=0}
+  if(fin>this.fin)this.g.putImageData(this.full,0,0,this.fin,0,fin-this.fin,D.spec.rows);
+  if(prov>fin)this.g.putImageData(this.dim,0,0,fin,0,prov-fin,D.spec.rows);
+  this.fin=fin;this.prov=prov}
+ rebuild(){const f=this.fin,p=this.prov;this.build();this.to(f,p)}}
+
+/* ---------- the job: real chunk times ---------- */
+const S={eng:'n4',evs:[],t0:0,timer:0,i:-1,phase:'idle',done:0,nc:0,fin:0,prov:0,work:0,dl:0,lastAt:0,runs:[]};
+function timeline(e,first){const T=D.T[e],len=D.clip.len,ev=[];let t=0;
+ if(e==='quick'){let prev=0;T.ends.forEach((x,j)=>{const fin=Math.min(len,(j+1)*T.seg);ev.push({t:x,k:'chunk',i:j,n:T.ends.length,fin,prov:fin,work:Math.min(len,(j+2)*T.seg),dur:x-prev});prev=x});return{ev,start:{work:Math.min(len,T.seg)}}}
+ if(first){const dlms=Math.round(ENG[e].mb/22*1000);for(let k=1;k<=10;k++)ev.push({t:dlms*k/10,k:'dl',p:k/10});t=dlms}
+ ev.push({t,k:'init'});t+=T.init;
+ T.runs.forEach((r,i)=>{t+=r;const last=i===T.nc-1,fin=last?len:Math.min(len,(i+1)*T.ST),prov=Math.min(len,i*T.ST+T.N);ev.push({t,k:'chunk',i,n:T.nc,fin,prov,work:last?len:Math.min(len,(i+2)*T.ST),dur:r})});
+ return{ev,start:{work:Math.min(len,T.ST)}}}
+const s2c=s=>s>=D.clip.len?D.spec.cols:Math.max(0,Math.floor((s-4096)/2048)+1);
+function start(){clearTimeout(S.timer);S.eng=UIo.eng;const tl=timeline(S.eng,UIo.first&&S.eng!=='quick');S.evs=tl.ev;S.i=-1;S.done=0;S.nc=S.eng==='quick'?D.T.quick.ends.length:D.T[S.eng].nc;S.fin=0;S.prov=0;S.runs=[];
+ S.phase=S.eng==='quick'?'run':(UIo.first?'dl':'init');S.dl=0;S.work=S.eng==='quick'?tl.start.work:0;S.t0=performance.now();S.lastAt=0;
+ views.forEach(v=>v.reset());apply();next()}
+function next(){const e=S.evs[S.i+1];if(!e)return;const el=(performance.now()-S.t0)*UIo.spd;S.timer=setTimeout(()=>{S.i++;const x=S.evs[S.i];
+  if(x.k==='dl'){S.phase='dl';S.dl=x.p;if(x.p>=1){}}
+  else if(x.k==='init'){S.phase='init';S.lastAt=x.t}
+  else{S.phase=S.i===S.evs.length-1?'done':'run';S.done=x.i+1;S.fin=x.fin;S.prov=x.prov;S.work=S.phase==='done'?0:x.work;S.runs.push(x.dur);S.lastAt=x.t}
+  if(x.k==='init'&&S.eng!=='quick')S.work=Math.min(D.clip.len,D.T[S.eng].ST);
+  apply();next()},Math.max(0,(e.t-el)/UIo.spd))}
+function eta(){/* remaining real time, shown at the playback speed */if(S.phase==='done'||S.phase==='idle')return null;const now=(performance.now()-S.t0)*UIo.spd;
+ const mean=S.runs.length?S.runs.slice(-3).reduce((a,b)=>a+b,0)/Math.min(3,S.runs.length):null;
+ if(S.eng==='quick'){const m=mean||D.T.quick.tot/S.nc;return{ms:Math.max(0,(S.nc-S.done)*m-(now-S.lastAt))/UIo.spd,est:!mean}}
+ const T=D.T[S.eng];let m=mean;let from='';if(!m){if(UIo.first)return{ms:null};m=T.runs.reduce((a,b)=>a+b,0)/T.runs.length;from='last'}
+ let rem=(S.nc-S.done)*m;if(S.phase==='run'||(S.phase==='init'&&false))rem-=Math.min(m*.9,now-S.lastAt);else if(S.phase==='init')rem+=Math.max(0,T.init-(now-S.lastAt));
+ return{ms:Math.max(0,rem)/UIo.spd,from}}
+const fmt=s=>{s=Math.max(0,s);const m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(1)};
+const fmt0=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const U=t=>`<span class="u">${t}</span>`;
+function readout(short){const len=D.clip.len/D.clip.sr,pos=S.fin/D.clip.sr,E=eta(),ns=ENG[S.eng].stems.length;let ph='';
+ if(S.phase==='dl')ph=`<span class="ph">Downloading the model (first time only)</span><span>${Math.round(S.dl*ENG[S.eng].mb)} / ${ENG[S.eng].mb}${U('MB')}</span>`;
+ else if(S.phase==='init')ph=`<span class="ph">Loading the model</span>`;
+ else if(S.phase==='done')ph=`<span class="ph">Done</span>`;
+ const ch=S.phase==='dl'||S.phase==='init'?'':`<span>${S.done} / ${S.nc}${U(S.eng==='quick'?'blocks':'chunks')}</span>`;
+ const t=`<span>${fmt(pos)} / ${fmt(len)}${U('s')}</span>`;
+ const e=!E?'':E.ms==null?`<span class="ph">estimating…</span>`:`<span>≈ ${fmt0(E.ms/1000)}${U('left')}</span>${E.from==='last'&&!short?'<span class="ph">from your last split</span>':''}`;
+ return short?`${ch}${e}`:`${ph}${ch}${t}${S.phase==='done'?`<span>${ns}${U('stems')}</span>`:e}`}
+function apply(){views.forEach(v=>v.update());tick()}
+function tick(){views.forEach(v=>v.text&&v.text())}
+setInterval(()=>{if(S.phase!=='done'&&S.phase!=='idle')tick()},1000);
+
+/* ---------- views ---------- */
+const views=[];
+function overlays(host,v){const ed=document.createElement('div');ed.className='ovl edge';ed.innerHTML='<b></b>';const wk=document.createElement('div');wk.className='ovl work';host.append(wk,ed);
+ return()=>{const C=D.spec.cols,fc=Math.min(C,s2c(S.fin)),wc=S.work?Math.min(C,s2c(S.work)):fc,showDraft=opt('P')==='P1',pc=showDraft?Math.min(C,s2c(S.prov)):fc;
+  ed.style.left=(fc/C*100)+'%';ed.hidden=S.phase==='done'||(S.phase!=='run'&&fc===0&&S.phase!=='init');ed.firstChild.textContent=fmt(S.fin/D.clip.sr);
+  const wl=Math.max(pc,fc);wk.hidden=!(S.phase==='run'||S.phase==='init')||!S.work;wk.style.left=(fc/C*100)+'%';wk.style.width=Math.max(0,(wc-fc)/C*100)+'%';wk.className='ovl work '+opt('F').toLowerCase()}}
+function sheet(lay,title){const w=document.createElement('div');w.className='mk';w.innerHTML=`<div class="sheet" role="group" aria-label="${lay.id} mock"><div class="sh"><b>Split “${CLIP()}”</b><span class="mono" style="color:var(--m-mut);font-size:10.5px" data-en></span></div><div class="sbody"></div><div class="sf"><button class="mb" data-keep>Keep working</button><span class="sp"></span><button class="mb" data-stop>Stop</button><button class="mb pri" data-add disabled>Add stems</button></div></div>`;return w}
+function laneRow(name,col,inl){const r=document.createElement('div');r.className='ln'+(inl?' inl':'');r.innerHTML=inl?`<div class="cv"><canvas></canvas><span class="tagi"><i style="background:${col}"></i>${name}</span><span class="lv" hidden></span></div>`:`<div class="nm">${col?`<i style="background:${col}"></i>`:''}${col?name:`<em>${name}</em>`}</div><div class="cv"><canvas></canvas><span class="lv" hidden></span></div>`;return r}
+function footer(w,v){const add=$('[data-add]',w),stop=$('[data-stop]',w),keep=$('[data-keep]',w);keep.onclick=()=>document.getElementById('fam-S').scrollIntoView({behavior:UIo.still?'auto':'smooth'});stop.onclick=()=>{clearTimeout(S.timer);S.phase='idle';S.work=0;apply()};add.onclick=()=>{add.textContent='Added (mock)';};
+ return()=>{const d=S.phase==='done';add.disabled=!d;stop.disabled=d||S.phase==='idle';keep.hidden=d;add.textContent=d?`Add ${v.keepN()} track${v.keepN()===1?'':'s'}`:'Add stems';$('[data-en]',w).textContent=ENG[S.eng].name}}
+function dbOf(i){const a=D.spec[S.eng+'_db'];return a?a[i]:-90}
+
+function viewG(lay,host){const w=sheet(lay);host.append(w);const body=$('.sbody',w);const v={lanes:[],kept:[]};let ov=null,ft=footer(w,v);
+ v.keepN=()=>v.kept.filter(Boolean).length;
+ v.reset=()=>{body.innerHTML='';v.lanes=[];const E=ENG[S.eng],ns=E.stems.length,hh=ns>4?26:34;
+  const ro=document.createElement('div');ro.className='ro';body.append(ro);v.ro=ro;
+  const col=document.createElement('div');col.className='lanes';body.append(col);
+  if(lay.id==='G3'){const b=document.createElement('div');b.className='cvbig';b.innerHTML='<canvas></canvas>';col.append(b);
+   const L=new Lane($('canvas',b),()=>({full:ownPicture(S.eng),base:picture('ghost')}));v.lanes.push(L);ov=overlays(b);
+   const lg=document.createElement('div');lg.className='lgd';body.append(lg);v.lg=lg;v.kept=E.stems.map(()=>true)}
+  else{if(lay.id==='G1'){const r=laneRow('MIX');r.classList.add('mixl');r.style.height='22px';col.append(r);const L=new Lane($('canvas',r),()=>({full:picture('ghost'),base:picture('ghost')}));}
+   const lc=document.createElement('div');lc.style.cssText='position:relative;display:flex;flex-direction:column;gap:3px';col.append(lc);
+   E.stems.forEach((n,i)=>{const r=laneRow(n,E.cols[i],lay.id==='G2');r.style.height=hh+'px';lc.append(r);const arr=dec[S.eng][i];
+    const L=new Lane($('canvas',r),()=>lay.id==='G1'?{full:picture('vir',arr),base:flat()}:{full:picture('ramp',arr,E.cols[i]),base:picture('ghost')});L.row=r;v.lanes.push(L)});
+   v.kept=E.stems.map((n,i)=>dbOf(i)>-60);
+   const host2=document.createElement('div');host2.style.cssText='position:absolute;top:0;bottom:0;right:0;left:'+(lay.id==='G2'?'0':'68px');lc.append(host2);ov=overlays(host2)}
+  const ax=document.createElement('div');ax.className='axis'+(lay.id==='G1'?'':' nl');const len=D.clip.len/D.clip.sr;ax.innerHTML=[0,10,20,30,len].map((t,i)=>`<span>${i===4?fmt0(t):t?fmt0(t):'0:00'}</span>`).join('');body.append(ax);
+  const sub=document.createElement('div');sub.className='ro';sub.style.color='var(--m-mut)';sub.innerHTML=`<span class="ph">${S.eng==='quick'?'Quick split, built in. Each block is final when done.':'HTDemucs v4 by Meta on this computer. You can keep working; Stop changes nothing.'}</span>`;body.append(sub)};
+ v.update=()=>{const C=D.spec.cols,fc=s2c(S.fin),pc=opt('P')==='P1'?s2c(S.prov):fc;v.lanes.forEach(L=>L.to(fc,pc));ov&&ov();ft();
+  const d=S.phase==='done';v.lanes.forEach((L,i)=>{if(!L.row)return;const lv=$('.lv',L.row);lv.hidden=!d;lv.textContent=dbOf(i)<-60?'silent':dbOf(i).toFixed(1)+' dB';
+   let ck=$('.ck',L.row);if(d&&!ck){ck=document.createElement('input');ck.type='checkbox';ck.className='ck';ck.setAttribute('aria-label','Keep '+ENG[S.eng].stems[i]);ck.checked=v.kept[i];ck.onchange=()=>{v.kept[i]=ck.checked;L.row.classList.toggle('off',!ck.checked);ft()};$('.cv',L.row).append(ck)}
+   if(!d&&ck){ck.remove();L.row.classList.remove('off')}if(d&&ck)L.row.classList.toggle('off',!v.kept[i])});
+  if(v.lg){const E=ENG[S.eng],fcs=Math.max(1,fc);const tot=E.stems.map(()=>0),R=D.spec.rows,n=E.stems.length,pw=new Float32Array(n);for(let r=0;r<R;r+=2)for(let c=0;c<fcs;c+=2){const i=r*C+c,b=dec.mix[i]/255;let s=0;for(let k=0;k<n;k++){pw[k]=Math.pow(10,(dec[S.eng][k][i]/255*84-84)/10);s+=pw[k]}if(s>0)for(let k=0;k<n;k++)tot[k]+=b*b*pw[k]/s}const sum=tot.reduce((a,b)=>a+b,0)||1;
+   v.lg.innerHTML=E.stems.map((n,k)=>`<span><i style="background:${E.cols[k]}"></i>${n} <b>${fc?Math.round(tot[k]/sum*100):'–'}${fc?'<span class="u">%</span>':''}</b></span>`).join('')}};
+ v.text=()=>{v.ro.innerHTML=readout(false)};
+ v.rebuild=()=>v.lanes.forEach(L=>L.rebuild());
+ return v}
+
+function arrSketch(host){host.innerHTML='';const cols=['#4cc9f0','#7a8bff','#ff6b6b','#3ecf8e','#f5c84c','#b583ff'];for(let i=0;i<6;i++){const t=document.createElement('div');t.className='trk';t.style.top=(i*38)+'px';for(let j=0;j<3;j++){const c=document.createElement('div');c.className='clipm';c.style.background=cols[(i+j)%6];c.style.left=(4+j*31+((i*7)%9))+'%';c.style.width=(18+((i+j)*5)%10)+'%';t.append(c)}host.append(t)}
+ const s=document.createElement('div');s.className='stat';s.innerHTML='<span>145 BPM · 4/4</span><span style="flex:1"></span>';host.append(s);return s}
+const ORB=p=>`<svg class="orb" width="22" height="22" viewBox="-20 -20 40 40" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(p*100)}"><circle class="o0" r="15"/><circle class="o1" r="15" transform="rotate(-90)" pathLength="100" style="stroke-dasharray:${(p*100).toFixed(1)} 100"/><circle class="nu" r="3.6"/></svg>`;
+const prog=()=>S.phase==='done'?1:S.fin/D.clip.len;
+function viewS1(host){const v={};v.reset=()=>{arrSketch(host);const c=document.createElement('div');c.className='ncard';c.innerHTML=`<div class="t"><span data-o></span><b>Splitting “${CLIP()}”</b><time>01:31 UTC</time></div><div class="strips"></div><div class="ro" style="font-size:10.5px"></div><div class="a"><span class="sp"></span><button class="mb">Open</button><button class="mb" data-stop>Stop</button></div>`;host.append(c);
+  const st=$('.strips',c),E=ENG[S.eng];v.lanes=E.stems.map((n,i)=>{const s=document.createElement('div');s.className='strip';s.title=n;s.innerHTML='<canvas></canvas>';st.append(s);return new Lane($('canvas',s),()=>({full:picture('ramp',dec[S.eng][i],E.cols[i]),base:flat()}))});v.c=c;v.ro=$('.ro',c);
+  $('[data-stop]',c).onclick=()=>{clearTimeout(S.timer);S.phase='idle';S.work=0;apply()}};
+ v.update=()=>{const fc=s2c(S.fin),pc=opt('P')==='P1'?s2c(S.prov):fc;v.lanes.forEach(L=>L.to(fc,pc));$('[data-o]',v.c).innerHTML=ORB(prog());$('b',v.c).textContent=S.phase==='done'?`${ENG[S.eng].stems.length} stems added below “Fractals”`:'Splitting “'+CLIP()+'”';$('[data-stop]',v.c).textContent=S.phase==='done'?'Undo':'Stop'};
+ v.text=()=>{v.ro.innerHTML=readout(true)||'<span class="ph">Loading the model</span>'};v.rebuild=()=>v.lanes.forEach(L=>L.rebuild());return v}
+function viewS2(host){const v={};v.reset=()=>{const s=arrSketch(host);const p=document.createElement('span');p.className='pill';p.innerHTML=`<span data-o></span><span data-t></span><span class="pst"><canvas></canvas></span><b data-p style="font:600 10.5px 'JetBrains Mono',monospace"></b>`;s.append(p);v.p=p;
+  v.L=new Lane($('canvas',p),()=>({full:ownPicture(S.eng),base:flat()}))};
+ v.update=()=>{const fc=s2c(S.fin),pc=opt('P')==='P1'?s2c(S.prov):fc;v.L.to(fc,pc);$('[data-o]',v.p).innerHTML=ORB(prog());$('[data-t]',v.p).textContent=S.phase==='done'?'Stems added':S.phase==='dl'?'Downloading the stem model':S.phase==='init'?'Loading the stem model':S.eng==='quick'?'Splitting into stems':'Separating with HTDemucs';$('[data-p]',v.p).innerHTML=Math.round(prog()*100)+'<span class="u">%</span>'};
+ v.rebuild=()=>v.L.rebuild();return v}
+
+/* ---------- build the page ---------- */
+function buildLays(){const h=$('#lays');for(const L of LAYS){const c=document.createElement('div');c.className='lay';c.dataset.id=L.id;c.innerHTML=`<div class="ch"><span class="id">${L.id}</span>${L.star?'<span class="star" title="Recommended">★</span>':''}<h3>${L.t}</h3><label class="pk"><input type="radio" name="pG" value="${L.id}"> Pick</label></div><div data-m></div><ul class="sm">${L.d.map(x=>`<li>${x}</li>`).join('')}</ul>`;h.append(c);views.push(viewG(L,$('[data-m]',c)))}
+ views.push(viewS1($('#arrS1')),viewS2($('#arrS2')));
+ const o=$('#opts');for(const[g,id,star,t,d] of OPTS){const b=document.createElement('button');b.className='card';b.dataset.g=g;b.dataset.id=id;b.innerHTML=`<span class="ch"><span class="id">${id}</span>${star?'<span class="star">★</span>':''}<b>${t}</b></span><small>${d}</small>`;b.onclick=()=>{PK[g]=id;save();apply()};o.append(b)}
+ $$('input[name=pG],input[name=pS]').forEach(r=>r.onchange=()=>{PK[r.name.slice(1)]=r.value;save()})}
+function measTable(){const T=D.T,len=D.clip.len/D.clip.sr,m=a=>a.reduce((x,y)=>x+y,0)/a.length,song=240,nc4=Math.ceil(song*44100/T.n4.ST);
+ const rows=[['The clip','Fractals, beats 0 to 96 at 145 BPM, rendered by the app at 44.1 kHz',len.toFixed(2)+' s'],
+  ['Quick split, whole clip','7 blocks of 262 144 samples, in Chromium, main thread',(T.quick.tot/1000).toFixed(2)+' s ('+(T.quick.tot/1000/len).toFixed(3)+' × the clip)'],
+  ['Quick split, progress callback','once per block: every '+Math.round(m(T.quick.ends.map((x,i)=>x-(T.quick.ends[i-1]||0))))+' ms on average','7 calls'],
+  ['Neural, model load (session create)','166 MB model (4 stems) · 136 MB (6 stems), optimiser off as in the app',(T.n4.init/1000).toFixed(1)+' s · '+(T.n6.init/1000).toFixed(1)+' s'],
+  ['Neural 4 stems, one chunk, 2 threads','7.8 s chunk, the edge moves 5.85 s; mean of 7',(m(T.n4.runs)/1000).toFixed(1)+' s ('+T.n4.runs.map(x=>(x/1000).toFixed(1)).join(', ')+')'],
+  ['Neural 6 stems, one chunk, 2 threads','mean of 7',(m(T.n6.runs)/1000).toFixed(1)+' s ('+T.n6.runs.map(x=>(x/1000).toFixed(1)).join(', ')+')'],
+  ['Neural 4 stems, one chunk, 1 thread','a window that is not cross-origin isolated runs one thread; mean of 2',(m(T.n4_1.runs)/1000).toFixed(1)+' s'],
+  ['Adding a chunk to the stems (overlap-add)','in the worker, per chunk',T.n4.add.slice(1).map(x=>x.toFixed(0)).join(', ')+' ms'],
+  ['Progress callback today (neural)','one message per chunk, so the percent moves every',(m(T.n4.runs)/1000).toFixed(1)+' s here'],
+  ['Spectrogram columns, cost','4096-point FFT: 384 FFTs took '+D.stft.cols64x6.toFixed(0)+' ms; per chunk for 6 stems at ~23 columns','≈ '+(D.stft.cols64x6/384*23*6).toFixed(0)+' ms ('+(D.stft.cols64x6/384*23*6/m(T.n4.runs)*100).toFixed(2)+' % of a chunk)'],
+  ['A 4 minute song','chunks = ⌈240 s × 44 100 ÷ 257 985⌉',nc4+' chunks'],
+  ['A 4 minute song, neural, this machine','load + chunks × mean chunk',fmt0(T.n4.init/1000+nc4*m(T.n4.runs)/1000)+' (2 threads), '+fmt0(T.n4_1.init/1000+nc4*m(T.n4_1.runs)/1000)+' (1 thread)'],
+  ['Memory while splitting','resident size of the engine with the 4-stem model',T.n4.rssMB+' MB']];
+ $('#mtab').innerHTML='<tr><th>What</th><th>How</th><th>Measured</th></tr>'+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="n">${r[2]}</td></tr>`).join('');$('#mach').textContent='On '+D.machine+'.';$('#qtot').textContent=(T.quick.tot/1000).toFixed(1)+' s'}
+
+/* ---------- picks ---------- */
+function save(){store.set('picks',PK);sync()}
+function sync(){$$('.lay').forEach(c=>{const on=PK.G===c.dataset.id;c.classList.toggle('picked',on);$('input',c).checked=on});$$('input[name=pS]').forEach(r=>{r.checked=PK.S===r.value;r.closest('.grp').querySelector('.ch').parentElement.classList.toggle('picked',r.checked)});
+ $$('#opts .card').forEach(b=>b.classList.toggle('picked',opt(b.dataset.g)===b.dataset.id&&!!PK[b.dataset.g]));
+ const n=$('#pnote').value.trim();$('#pline').textContent=`SG1 picks: ${PK.G||'G?'}, ${PK.S||'S?'}, ${PK.P||'P?'}, ${PK.F||'F?'}${n?'. Note: '+n:''}`}
+$('#rec').onclick=()=>{Object.assign(PK,{G:'G1',S:'S1',P:'P1',F:'F1'});save();apply()};
+$('#pnote').oninput=sync;
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ const sel=()=>{const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);m.textContent='Selected: press Copy'};
+ try{navigator.clipboard.writeText(t).then(ok,sel)}catch(e){sel()}};
+
+/* ---------- controls ---------- */
+function segs(){const set=(id,k,cast)=>{$$('#'+id+' button').forEach(b=>{b.classList.toggle('on',String(UIo[k])===b.dataset.v);b.onclick=()=>{UIo[k]=cast(b.dataset.v);store.set('ui',UIo);segs();if(k==='theme'){theme()}else if(k==='eng'){note();start()}else if(k==='spd'){start()}}})};
+ set('theme','theme',String);set('eng','eng',String);set('spd','spd',Number)}
+function theme(){if(UIo.theme)document.documentElement.dataset.theme=UIo.theme;else delete document.documentElement.dataset.theme;views.forEach(v=>v.rebuild&&v.rebuild())}
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(!UIo.theme)views.forEach(v=>v.rebuild&&v.rebuild())});
+function still(){document.body.classList.toggle('still',!!UIo.still);document.body.style.setProperty('--mo',UIo.still?0:1)}
+function note(){const e=UIo.eng,T=D.T[e];$('#engnote').textContent=e==='quick'?`Quick split: ${T.ends.length} blocks, finished in ${(T.tot/1000).toFixed(1)} s here.`:`${ENG[e].name}: ${T.nc} chunks of 7.8 s, ${(T.runs.reduce((a,b)=>a+b,0)/T.runs.length/1000).toFixed(1)} s each here, after ${(T.init/1000).toFixed(1)} s to load the model. At ×1 the whole clip takes about ${fmt0((T.init+T.runs.reduce((a,b)=>a+b,0))/1000)}.`}
+$('#first').checked=UIo.first;$('#still').checked=UIo.still;
+$('#first').onchange=e=>{UIo.first=e.target.checked;store.set('ui',UIo);start()};
+$('#still').onchange=e=>{UIo.still=e.target.checked;store.set('ui',UIo);still()};
+$('#replay').onclick=start;
+
+fetch('sg1-data.json').then(r=>r.json()).then(d=>{D=d;VIR=mkVir();dec.mix=b64(D.spec.mix);for(const k of['quick','n4','n6'])dec[k]=D.spec[k].map(b64);
+ if(UIo.theme)document.documentElement.dataset.theme=UIo.theme;segs();still();note();measTable();buildLays();sync();start()}).catch(e=>{$('#engnote').textContent='The measured data did not load: '+e.message})
+})();
+</script>
