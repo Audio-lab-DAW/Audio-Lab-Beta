@@ -6816,3 +6816,10 @@ Step OV8 of `docs/design-round-5-overlays.md` section 5, the user's pick **K1** 
 
 ### Left
 - CF-2 OLED care (E10 dimmed static brights, E11 dim when idle, E13 card), CF-3 Night mode, CF-4 Focus mode, their Settings rows together through lane B's hooks.
+
+## 28 November 2026, task SG2-1 (lane R): per-chunk spectrogram columns, the quick split in a worker, v0.302
+- `sgColsOf` (one 4096-point FFT per lane column, 96 log rows 32 Hz to 16 kHz, Uint8 dB -84..0, row 0 at the top) and `sgColEnds` (a column is final when its whole window is final) are shared by the page and both workers (their source is copied in).
+- The neural worker `NEUW` posts `{t:'cols', i, n, s0, s1, pe, fin:[c0,c1], prov:[c1,c2], rows:96, ns, cw, cols}` after every chunk (kept stems only, the draft stretch is the overlap the next chunk cross-fades) and `{t:'st',m:'run'}` once the model is loaded; `neuSeparate(buf,kind,keep,prog,onCols)` passes them on (onCols.cw = columns over the clip), can be stopped (`sgStopNeural`), and makes the stem buffers one per task.
+- The quick split runs in a worker (`SGW`: `sgQuickCore` is the old arithmetic, unchanged; `stemSplit(buf,prog,P,onCols)`), one cols message per block; `sgMixCols(buf,cw)` gives the mix's own columns; `sgStopQuick`. `SG_HOOKS.onChunk(job,msg)` for any lane.
+- Measured (2-core container, headless Chromium): a 40 s clip's quick split posts 7 messages, the main thread's longest piece of the split is under 10 ms (the old main-thread split paused about 0.45 s per block); the stems are bit-identical to the old main-thread split; the columns equal sgColsOf on the finished stems (0 of 255 steps apart).
+- Test `tools/ui-tests/taskSG2_1.py` (neural worker on a stand-in engine and model served by the test, same chunking).

@@ -4882,7 +4882,12 @@ const STFT={n:2048,hop:512};
 const STF={cos:null,sin:null,rev:null,win:null,init(){if(this.cos)return;const n=STFT.n,c=new Float32Array(n/2),s=new Float32Array(n/2),r=new Uint16Array(n),w=new Float32Array(n);for(let i=0;i<n/2;i++){c[i]=Math.cos(2*Math.PI*i/n);s[i]=-Math.sin(2*Math.PI*i/n)}let lg=Math.log2(n);for(let i=0;i<n;i++){let x=i,y=0;for(let b=0;b<lg;b++){y=(y<<1)|(x&1);x>>=1}r[i]=y}for(let i=0;i<n;i++)w[i]=.5-.5*Math.cos(2*Math.PI*i/n);this.cos=c;this.sin=s;this.rev=r;this.win=w},
  fft(re,im,inv){const n=STFT.n,r=this.rev,c=this.cos,s=this.sin;for(let i=0;i<n;i++){const j=r[i];if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
   for(let sz=2;sz<=n;sz<<=1){const h=sz>>1,st=n/sz;for(let i=0;i<n;i+=sz){for(let j=0,k=0;j<h;j++,k+=st){const wr=c[k],wi=inv?-s[k]:s[k],a=i+j,b=a+h,tr=re[b]*wr-im[b]*wi,ti=re[b]*wi+im[b]*wr;re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}}}};
-async function stemSplit(buf,prog,P){P=Object.assign({bass:140,vlo:140,vhi:9000,smooth:8,focus:1.5},P||{});STF.init();const N=STFT.n,H=STFT.hop,K=N/2+1,sr=buf.sampleRate,len=buf.length,L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):L;
+/* task SG2-1: the quick split runs in the worker SGW and never pauses the app; prog(p) once per block, onCols(msg) the lanes' columns */
+async function stemSplit(buf,prog,P,onCols){const len=buf.length,sr=buf.sampleRate,[L,R]=sgLR(buf),cw=onCols?(onCols.cw|0)||512:0,Q={};P=P||{};for(const k of['bass','vlo','vhi','smooth','focus'])if(P[k]!=null)Q[k]=+P[k];
+  const d=await sgReq({t:'quick',L,R,sr,P:Q,cw,ks:onCols&&onCols.ks||null},[L.buffer,R.buffer],m=>{if(m.t==='p'){if(prog)prog(m.p)}else if(m.t==='cols'&&onCols)onCols(m)});
+  ensureCtx();const bufs=[];for(const[a,b] of d.out){const bb=ctx.createBuffer(2,len,sr);bb.copyToChannel(a,0);bb.copyToChannel(b,1);bufs.push(bb);await new Promise(r=>setTimeout(r,0))}return bufs}
+/* the quick split's arithmetic (unchanged since v0.2xx), run in the worker SGW (task SG2-1): L and R in, 4 stems x [L,R] out; blk(s0,s1,out) after each block */
+function sgQuickCore(L,R,sr,P,blk){P=Object.assign({bass:140,vlo:140,vhi:9000,smooth:8,focus:1.5},P||{});STF.init();const N=STFT.n,H=STFT.hop,K=N/2+1,len=L.length;
   const out=['drums','bass','vocals','other'].map(()=>[new Float32Array(len),new Float32Array(len)]);
   const SEG=1<<18,MG=H*20,TW=P.smooth,FW=P.smooth,bl=Math.round(P.bass*1.2/(sr/N)),bl0=Math.round(P.bass*.8/(sr/N)),bv1=Math.round(P.vhi/(sr/N)),bv0=Math.round(P.vlo/(sr/N)),ov=1/1.5;
   const re=new Float32Array(N),im=new Float32Array(N);
@@ -4904,16 +4909,70 @@ async function stemSplit(buf,prog,P){P=Object.assign({bass:140,vlo:140,vhi:9000,
         for(let st=0;st<4;st++){const m=mk[st],sl=Lr[o+k]*m,sli=Li[o+k]*m,srr=Rr[o+k]*m,sri=Ri[o+k]*m;zr[st][k]=sl-sri;zi[st][k]=sli+srr;if(k>0&&k<N/2){const k2=N-k;zr[st][k2]=sl+sri;zi[st][k2]=-sli+srr}}}
       for(let st=0;st<4;st++){STF.fft(zr[st],zi[st],true);const A=acc2[st][0],B=acc2[st][1],base=f*H;for(let i=0;i<N;i++){const w=STF.win[i]*ov/N;A[base+i]+=zr[st][i]*w;B[base+i]+=zi[st][i]*w}}}
     for(let st=0;st<4;st++)for(let i=s0;i<s1;i++){const j=i-fs0;out[st][0][i]=acc2[st][0][j];out[st][1][i]=acc2[st][1][j]}
-    if(prog)prog(s1/len);await new Promise(r=>setTimeout(r,0))}
-  return out.map(([a,b])=>{const bb=ctx.createBuffer(2,len,sr);bb.copyToChannel(a,0);bb.copyToChannel(b,1);return bb})}
+    if(blk)blk(s0,s1,out)}
+  return out}
 
+/* ===================== stem split lanes, step 1 (v0.302, task SG2-1, lane R; docs/stem-split-progress.md) =====================
+   The loading bar of a stem split is the spectrogram of every stem, filled at the true song position as the splitter gets there.
+   sgColsOf makes the columns: one 4096-point FFT per column (one column per lane pixel), folded into 96 log-frequency rows from
+   32 Hz to 16 kHz, Uint8 dB (-84 dB = 0, 0 dB = 255; a full-scale sine reads 0 dB), row 0 at the top (16 kHz). It is self-contained:
+   the workers (NEUW and the quick split's SGW) carry a copy of its source.
+   Messages {t:'cols', i, n, s0, s1, pe, fin:[c0,c1], prov:[c1,c2], rows:96, ns, cw, cols}: after chunk (or block) i of n, samples
+   s0..s1 are final; columns c0..c1 are final, c1..c2 are the draft stretch (P1: still to be cross-faded with the next chunk);
+   cols holds them for each kept stem: stem j at j*96*(c2-c0), row r, column c at r*(c2-c0)+(c-c0).
+   stemSplit(buf,prog,P,onCols) and neuSeparate(buf,kind,keep,prog,onCols): onCols(msg) gets every such message; onCols.cw sets
+   the number of columns over the whole clip (default 512). SG_HOOKS.onChunk(job,msg) lets other code listen to every job's chunks.
+   The quick split now runs in a worker (SGW): its blocks were main-thread pauses of about 0.45 s each. */
+function sgColsOf(get,total,sr,cw,c0,c1,out,o,stride){const N=4096,R=96;let T=sgColsOf.T;
+  if(!T||T.sr!==sr){const cs=new Float32Array(N/2),sn=new Float32Array(N/2),rv=new Uint16Array(N),w=new Float32Array(N),lo=new Int32Array(R),hi=new Int32Array(R),bw=sr/N;
+    for(let i=0;i<N/2;i++){cs[i]=Math.cos(2*Math.PI*i/N);sn[i]=-Math.sin(2*Math.PI*i/N)}
+    for(let i=0;i<N;i++){let x=i,y=0;for(let b=0;b<12;b++){y=(y<<1)|(x&1);x>>=1}rv[i]=y;w[i]=.5-.5*Math.cos(2*Math.PI*i/N)}
+    for(let r=0;r<R;r++){const a=Math.round(32*Math.pow(500,r/R)/bw),b=Math.round(32*Math.pow(500,(r+1)/R)/bw);lo[r]=Math.min(N/2,a);hi[r]=Math.min(N/2+1,Math.max(a+1,b))}
+    T=sgColsOf.T={sr,cs,sn,rv,w,lo,hi,re:new Float32Array(N),im:new Float32Array(N),mg:new Float32Array(N/2+1)}}
+  const cs=T.cs,sn=T.sn,rv=T.rv,w=T.w,lo=T.lo,hi=T.hi,re=T.re,im=T.im,mg=T.mg;
+  for(let c=c0;c<c1;c++){const p0=Math.floor((c+.5)*total/cw)-N/2;
+    for(let i=0;i<N;i++){const q=p0+i;re[i]=q>=0&&q<total?get(q)*w[i]:0;im[i]=0}
+    for(let i=0;i<N;i++){const j=rv[i];if(i<j){const t=re[i];re[i]=re[j];re[j]=t}}
+    for(let sz=2;sz<=N;sz<<=1){const h=sz>>1,st=N/sz;for(let i=0;i<N;i+=sz)for(let j=0,k=0;j<h;j++,k+=st){const wr=cs[k],wi=sn[k],a=i+j,b=a+h,tr=re[b]*wr-im[b]*wi,ti=re[b]*wi+im[b]*wr;re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}
+    for(let k=0;k<=N/2;k++)mg[k]=Math.hypot(re[k],im[k])*4/N;
+    for(let r=0;r<R;r++){let m=0;for(let k=lo[r];k<hi[r];k++)if(mg[k]>m)m=mg[k];const v=Math.round((20*Math.log10(m+1e-12)+84)/84*255);out[o+(R-1-r)*stride+(c-c0)]=v<0?0:v>255?255:v}}}
+/* which columns a finished stretch makes final: a column is final when its whole FFT window is inside the final samples */
+function sgColEnds(total,cw,fc,fe,pe){const mid=c=>Math.floor((c+.5)*total/cw);let c1=fc;while(c1<cw&&(fe>=total||mid(c1)+2048<=fe))c1++;let c2=c1;while(c2<cw&&mid(c2)<pe)c2++;return[c1,c2]}
+/* the quick split's worker: the mix's own columns (drawn before any model is there) and the quick split itself, block by block */
+const SG2={seq:0,wh:new Map(),wk:null,neuRej:null,jobs:new Set()};
+function sgWSrc(){return `'use strict';const STFT=${JSON.stringify(STFT)};const STF={cos:null,sin:null,rev:null,win:null,${STF.init.toString()},${STF.fft.toString()}};
+${sgColsOf.toString()}
+${sgColEnds.toString()}
+${sgQuickCore.toString()}
+onmessage=e=>{const d=e.data;try{
+ if(d.t==='mix'){const L=d.L,R=d.R,n=L.length,out=new Uint8Array(96*d.cw);sgColsOf(q=>(L[q]+R[q])*.5,n,d.sr,d.cw,0,d.cw,out,0,d.cw);postMessage({t:'mix',id:d.id,cols:out},[out.buffer]);return}
+ if(d.t==='quick'){const len=d.L.length,cw=d.cw|0,ks=d.ks||[0,1,2,3],nb=Math.ceil(len/(1<<18));let fc=0,fe0=0,i=0;
+  const out=sgQuickCore(d.L,d.R,d.sr,d.P,(s0,s1,O)=>{if(cw){const e=sgColEnds(len,cw,fc,s1,s1),n=e[1]-fc,cols=new Uint8Array(ks.length*96*n);
+     ks.forEach((k,j)=>{const A=O[k][0],B=O[k][1];sgColsOf(q=>(A[q]+B[q])*.5,len,d.sr,cw,fc,e[1],cols,j*96*n,n)});
+     postMessage({t:'cols',id:d.id,i,n:nb,s0:fe0,s1,pe:s1,fin:[fc,e[0]],prov:[e[0],e[1]],rows:96,ns:ks.length,cw,cols},[cols.buffer]);fc=e[0];fe0=s1}
+    i++;postMessage({t:'p',id:d.id,p:s1/len})});
+  const tr=[];for(const O of out)for(const D of O)tr.push(D.buffer);postMessage({t:'done',id:d.id,out},tr)}}
+ catch(err){postMessage({t:'err',id:d.id,m:String(err&&err.message||err)})}};`}
+function sgWorker(){if(!SG2.wk){SG2.wk=new Worker(URL.createObjectURL(new Blob([sgWSrc()],{type:'application/javascript'})));
+    SG2.wk.onmessage=e=>{const h=SG2.wh.get(e.data.id);if(h)h(e.data)};SG2.wk.onerror=e=>{const m=e.message||'the stem split worker failed';for(const h of[...SG2.wh.values()])h({t:'err',m})}}
+  return SG2.wk}
+/* stop every job of the quick worker (Stop in the Split sheet): the worker is thrown away and made again next time */
+function sgStopQuick(){if(SG2.wk){SG2.wk.terminate();SG2.wk=null}for(const h of[...SG2.wh.values()])h({t:'err',m:'stopped',stopped:1})}
+function sgStopNeural(){if(NEUWK){NEUWK.terminate();NEUWK=null}if(SG2.neuRej){const r=SG2.neuRej;SG2.neuRej=null;const e=new Error('stopped');e.stopped=1;r(e)}}
+function sgReq(msg,tr,on){const id=++SG2.seq,w=sgWorker();msg.id=id;return new Promise((res,rej)=>{SG2.wh.set(id,d=>{if(d.t==='done'||d.t==='mix'){SG2.wh.delete(id);res(d)}else if(d.t==='err'){SG2.wh.delete(id);const e=new Error(d.m);if(d.stopped)e.stopped=1;rej(e)}else if(on)on(d)});w.postMessage(msg,tr)})}
+function sgLR(buf){const L=buf.getChannelData(0).slice(),R=(buf.numberOfChannels>1?buf.getChannelData(1):buf.getChannelData(0)).slice();return[L,R]}
+/* the mix's own columns, in the worker */
+async function sgMixCols(buf,cw){const[L,R]=sgLR(buf);const d=await sgReq({t:'mix',L,R,sr:buf.sampleRate,cw},[L.buffer,R.buffer]);return d.cols}
+const SG_HOOKS={onChunk:(job,msg)=>{}};/* for any lane: SG_HOOKS.onChunk(job,msg) is called after every chunk of every stem split job (replace or wrap it) */
 /* ===================== neural stem separation: HTDemucs v4 (Meta, MIT weights) running in the browser =====================
    onnxruntime-web (WASM) in a background worker, the model downloaded once from Hugging Face and kept in the browser cache.
    7.8 s chunks with 25% overlap and linear cross-fades (overlap-add), at 44.1 kHz. */
 const NEUM={n4:{url:'https://huggingface.co/StemSplitio/htdemucs-onnx/resolve/main/htdemucs_fp16weights.onnx',mb:166,stems:['Drums','Bass','Other','Vocals'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5']},
   n6:{url:'https://huggingface.co/StemSplitio/htdemucs-6s-onnx/resolve/main/htdemucs_6s_fp16weights.onnx',mb:136,stems:['Drums','Bass','Other','Vocals','Guitar','Piano'],cols:['#f5c84c','#4c8dff','#3ecf8e','#ff6bb5','#ff9a3c','#b583ff']}};
 const NEUV='1.20.1',NEUBASE=`https://cdn.jsdelivr.net/npm/onnxruntime-web@${NEUV}/dist/`;
-const NEUW=`let ortm=null,sess=null,cur='';/* not called ort: that name is taken by the engine script itself, and a second declaration makes importScripts fail */
+const NEUW=`${sgColsOf.toString()}
+${sgColEnds.toString()}
+let ortm=null,sess=null,cur='';/* not called ort: that name is taken by the engine script itself, and a second declaration makes importScripts fail */
 async function getModel(url){const c=await caches.open('audiolab-models');let r=await c.match(url);if(r){postMessage({t:'st',m:'cached'});return new Uint8Array(await r.arrayBuffer())}
  const res=await fetch(url);if(!res.ok)throw new Error('model download failed ('+res.status+')');const len=+res.headers.get('content-length')||0,rd=res.body.getReader(),parts=[];let got=0,last=0;
  for(;;){const{done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;const now=Date.now();if(now-last>300){last=now;postMessage({t:'dl',p:len?got/len:0,mb:got/1048576})}}
@@ -4923,18 +4982,23 @@ onmessage=async e=>{const d=e.data;try{
  if(cur!==d.url){const m=await getModel(d.url);postMessage({t:'st',m:'init'});sess=await ortm.InferenceSession.create(m,{executionProviders:['wasm'],graphOptimizationLevel:'disabled'})/* with the optimiser on (any level) the engine runs out of memory turning the half-size weights into full-size ones: 'all' failed with an unreadable error, 'basic' crashed the page; with it off the model loads */;cur=d.url}
  const L=d.L,R=d.R,total=L.length,N=343980,OV=Math.floor(N/4),ST=N-OV,nc=Math.max(1,Math.ceil(total/ST)),ns=d.ns,keep=d.keep;
  const out=keep.map(k=>k?[new Float32Array(total),new Float32Array(total)]:null),wt=new Float32Array(total),win=new Float32Array(N).fill(1);for(let i=0;i<OV;i++){win[i]=i/OV;win[N-1-i]=i/OV}
- const cb=new Float32Array(2*N);
+ const cb=new Float32Array(2*N);let fc=0,fe0=0;const cw=d.cw|0,KS=keep.map((k,j)=>k?j:-1).filter(j=>j>=0);postMessage({t:'st',m:'run'});/* task SG2-1: the lanes' columns; 'run': the model is loaded, separating starts */
  for(let i=0;i<nc;i++){const s0=i*ST,e0=Math.min(s0+N,total),cl=e0-s0;if(cl<=0)break;cb.fill(0);cb.set(L.subarray(s0,e0),0);cb.set(R.subarray(s0,e0),N);
   const r=await sess.run({mix:new ortm.Tensor('float32',cb,[1,2,N])}),st=r.stems.data;
   for(let k=0;k<ns;k++){const O=out[k];if(!O)continue;const ro=k*2*N;for(let c=0;c<2;c++){const D=O[c],off=ro+c*N;for(let s=0;s<cl;s++)D[s0+s]+=st[off+s]*win[s]}}
-  for(let s=0;s<cl;s++)wt[s0+s]+=win[s];postMessage({t:'p',p:(i+1)/nc})}
+  for(let s=0;s<cl;s++)wt[s0+s]+=win[s];
+  if(cw){const last=i===nc-1,fe=last?total:Math.min(total,(i+1)*ST),pe=last?total:Math.min(total,s0+N),E=sgColEnds(total,cw,fc,fe,pe),n=E[1]-fc,cols=new Uint8Array(KS.length*96*n);
+   KS.forEach((k,j)=>{const A=out[k][0],B=out[k][1];sgColsOf(q=>(A[q]+B[q])*.5/Math.max(wt[q],1e-8),total,44100,cw,fc,E[1],cols,j*96*n,n)});
+   postMessage({t:'cols',i,n:nc,s0:fe0,s1:fe,pe,fin:[fc,E[0]],prov:[E[0],E[1]],rows:96,ns:KS.length,cw,cols},[cols.buffer]);fc=E[0];fe0=fe}
+  postMessage({t:'p',p:(i+1)/nc})}
  const tr=[];for(const O of out){if(!O)continue;for(const D of O){for(let s=0;s<total;s++)D[s]/=Math.max(wt[s],1e-8);tr.push(D.buffer)}}postMessage({t:'done',out},tr)}catch(err){postMessage({t:'err',m:String(err&&err.message||err)})}};`;
 let NEUWK=null;
 function neuWorker(){if(!NEUWK)NEUWK=new Worker(URL.createObjectURL(new Blob([NEUW],{type:'application/javascript'})));return NEUWK}
 async function neuTo44(buf){if(buf.sampleRate===44100&&buf.numberOfChannels===2)return[buf.getChannelData(0).slice(),buf.getChannelData(1).slice()];const n=Math.ceil(buf.duration*44100),oc=new OfflineAudioContext(2,n,44100),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();const r=await oc.startRendering();return[r.getChannelData(0).slice(),r.getChannelData(1).slice()]}
-async function neuSeparate(buf,kind,keep,prog){const M=NEUM[kind],[L,R]=await neuTo44(buf),w=neuWorker();
-  return new Promise((res,rej)=>{w.onmessage=e=>{const d=e.data;if(d.t==='dl')prog('dl',d.p,d.mb);else if(d.t==='st')prog(d.m,0);else if(d.t==='p')prog('run',d.p);else if(d.t==='err'){rej(new Error(d.m))}else if(d.t==='done'){ensureCtx();res(d.out.map(O=>{if(!O)return null;const b=ctx.createBuffer(2,O[0].length,44100);b.copyToChannel(O[0],0);b.copyToChannel(O[1],1);return b}))}};
-    w.onerror=e=>rej(new Error(e.message||'the separation worker failed'));w.postMessage({base:NEUBASE,url:M.url,L,R,ns:M.stems.length,keep,cores:navigator.hardwareConcurrency||4},[L.buffer,R.buffer])})}
+async function neuSeparate(buf,kind,keep,prog,onCols){const M=NEUM[kind],[L,R]=await neuTo44(buf),w=neuWorker(),cw=onCols?(onCols.cw|0)||512:0;
+  const out=await new Promise((res,rej)=>{SG2.neuRej=rej;w.onmessage=e=>{const d=e.data;if(d.t==='dl')prog('dl',d.p,d.mb);else if(d.t==='st')prog(d.m,0);else if(d.t==='p')prog('run',d.p);else if(d.t==='cols'){if(onCols)onCols(d)}else if(d.t==='err'){SG2.neuRej=null;rej(new Error(d.m))}else if(d.t==='done'){SG2.neuRej=null;res(d.out)}};
+    w.onerror=e=>{SG2.neuRej=null;rej(new Error(e.message||'the separation worker failed'))};w.postMessage({base:NEUBASE,url:M.url,L,R,ns:M.stems.length,keep,cores:navigator.hardwareConcurrency||4,cw},[L.buffer,R.buffer])});
+  ensureCtx();const r=[];for(const O of out){if(!O){r.push(null);continue}const b=ctx.createBuffer(2,O[0].length,44100);b.copyToChannel(O[0],0);b.copyToChannel(O[1],1);r.push(b);await new Promise(q=>setTimeout(q,0))}return r}
 async function neuCached(kind){try{const c=await caches.open('audiolab-models');return!!(await c.match(NEUM[kind].url))}catch(e){return false}}
 function stemAsk(name){return new Promise(res=>{let m=document.getElementById('stq');if(m)m.remove();m=document.createElement('div');m.id='stq';m.className='modal';
   const D=[['bass','Bass cutoff','Hz',60,300,140,'Everything below this goes to the bass.'],['vlo','Voice low edge','Hz',80,500,140,'Lowest frequency the voice stem may take.'],['vhi','Voice high edge','Hz',3000,16000,9000,'Highest frequency the voice stem may take.'],['focus','Voice focus','',.5,3,1.5,'Higher = only sounds dead centre count as voice.'],['smooth','Drum / tone split','',4,16,8,'Higher = drums are cleaner but softer, tones are steadier.']];
@@ -4950,13 +5014,13 @@ function stemAsk(name){return new Promise(res=>{let m=document.getElementById('s
   $('#stGo',m).onclick=()=>{const P={engine:eng()};rs.forEach(r=>P[r.dataset.k]=+r.value);P.keep=[...m.querySelectorAll('[data-s]')].map(c=>c.checked);if(!P.keep.some(Boolean))return toast('Pick at least one stem.');done(P)}})}
 async function stemsFor(t,c){if(!BUFS.has(c.buf)){toast('The audio for this clip is not loaded.');return}ensureCtx();const src=BUFS.get(c.buf).buf,names0=['Drums','Bass','Vocals','Other'],cols0=['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'];const PS=await stemAsk(c.name||t.name);if(!PS)return;
   if(PS.engine!=='quick'){const M=NEUM[PS.engine];let lastT=0;const say=m=>{const n=performance.now();if(n-lastT>400){lastT=n;toast(m)}};
-    try{const all=await neuSeparate(src,PS.engine,PS.keep,(ph,p,mb)=>{if(ph==='dl')mdJob('stem',`Downloading the stem model, ${M.mb} MB (only the first time)`,p);else if(ph==='init')mdJob('stem','Loading the stem model',null);else if(ph==='run')mdJob('stem','Separating with HTDemucs',p)});mdJobEnd('stem');
+    try{const sgj={kind:PS.engine,name:c.name||t.name},sgc=d=>SG_HOOKS.onChunk(sgj,d);const all=await neuSeparate(src,PS.engine,PS.keep,(ph,p,mb)=>{if(ph==='dl')mdJob('stem',`Downloading the stem model, ${M.mb} MB (only the first time)`,p);else if(ph==='init')mdJob('stem','Loading the stem model',null);else if(ph==='run')mdJob('stem','Separating with HTDemucs',p)},sgc);mdJobEnd('stem');
       const keepI=PS.keep.map((k,i)=>k?i:-1).filter(i=>i>=0),bufs=all.filter(Boolean);pushUndo();const at=S.tracks.indexOf(t)+1;
       bufs.forEach((b,j)=>{const i=keepI[j],id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+M.stems[i],M.cols[i]);S.tracks.splice(at+j,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+M.stems[i].toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
       c.mute=true;changed(true);toast(`Done: ${bufs.length} neural stem track${bufs.length===1?'':'s'} added below. The original clip is muted.`)}
     catch(e){mdJobEnd('stem');const ok=await askChoice('The neural split could not run',`${e&&e.message||e}. This needs an internet connection the first time (the model and the engine come from Hugging Face and jsDelivr). Use the quick split instead?`,[{label:'Cancel',v:null},{label:'Quick split',v:1,cls:'pri'}]);if(ok){PS.engine='quick';PS.keep=[true,true,true,true];Object.assign(PS,{bass:140,vlo:140,vhi:9000,focus:1.5,smooth:8})}else return}
     if(PS.engine!=='quick')return}
-  mdJob('stem','Splitting into stems',0);try{const all=await stemSplit(src,p=>mdJob('stem','Splitting into stems',p),PS);mdJobEnd('stem');const bufs=all.filter((b,i)=>PS.keep[i]),names=names0.filter((n,i)=>PS.keep[i]),cols=cols0.filter((n,i)=>PS.keep[i]);
+  mdJob('stem','Splitting into stems',0);try{const sgj={kind:'quick',name:c.name||t.name};const all=await stemSplit(src,p=>mdJob('stem','Splitting into stems',p),PS,d=>SG_HOOKS.onChunk(sgj,d));mdJobEnd('stem');const bufs=all.filter((b,i)=>PS.keep[i]),names=names0.filter((n,i)=>PS.keep[i]),cols=cols0.filter((n,i)=>PS.keep[i]);
     pushUndo();const at=S.tracks.indexOf(t)+1;bufs.forEach((b,i)=>{const id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+names[i],cols[i]);S.tracks.splice(at+i,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+names[i].toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
     c.mute=true;changed(true);toast('Done. '+bufs.length+' stem track'+(bufs.length===1?'':'s')+' added below. The original clip is muted. Quick split is approximate: use it for sketching and remixing.')}catch(e){mdJobEnd('stem');toast('Could not split this audio: '+(e&&e.message||e))}}
 /* tempo guess from onset autocorrelation */
@@ -6765,7 +6829,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.301',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.302',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
