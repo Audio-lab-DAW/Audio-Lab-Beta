@@ -1,0 +1,367 @@
+<title>AudioLab app icon, round 5: K5 and M5 depth</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<!--CSS4-->
+<style>
+/* round 5 additions to round 4's lab sheet */
+:root{--oth:#4cc9f0;--ks:#5fd39a;--ms:#c792ff;--rm:#ff6b6b}
+.card.other{box-shadow:0 0 0 2px var(--oth) inset}
+.pick.other.on{background:var(--oth);color:#001a22;border-color:var(--oth);font-weight:600}
+.pick.ks.on{background:var(--ks);color:#00170b;border-color:var(--ks);font-weight:600}
+.pick.ms.on{background:var(--ms);color:#1a0030;border-color:var(--ms);font-weight:600}
+.scard.ks{box-shadow:0 0 0 2px var(--ks) inset} .scard.ms{box-shadow:0 0 0 2px var(--ms) inset}
+.k-other{color:var(--oth)} .k-ks{color:var(--ks)} .k-ms{color:var(--ms)} .k-rm{color:var(--rm)}
+.famrow{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-radius:12px}
+.famrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.famrow canvas{image-rendering:pixelated}
+.famrow .sep{width:1px;align-self:stretch;background:rgba(127,127,127,.35)}
+.famrow svg{display:block}
+.pk{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.pkg h3{font:600 13.5px var(--sans);margin:0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pkg h3 small{font:500 11.5px var(--sans);color:var(--dim)}
+.pkg h3 .chip{padding:2px 9px;font-size:11px}
+.pkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:10px}
+.pki{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:end;cursor:pointer;min-width:0}
+.pki.rm{opacity:.45;border-color:var(--rm);border-style:dashed}
+.pki img{display:block}
+.pki .big128{grid-column:1/-1;width:100%;max-width:128px;aspect-ratio:1;justify-self:center}
+.pki .t32{width:32px;height:32px;image-rendering:auto}
+.pki .meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pki .meta b{font:600 12.5px var(--sans);overflow-wrap:anywhere}
+.pki .meta span{font:500 10.5px var(--mono);color:var(--dim)}
+.pki label{grid-column:1/-1;display:flex;gap:7px;align-items:center;font-size:12px;color:var(--mute);cursor:pointer}
+.pki input{accent-color:var(--sm);width:15px;height:15px;margin:0}
+.pki .def{position:absolute;top:8px;left:8px;font:600 10px var(--mono);background:var(--star);color:#1a1300;border-radius:5px;padding:1px 6px}
+.count{font:600 12px var(--mono);color:var(--mute)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC7 · 28 NOVEMBER 2026 · ROUND 5</div>
+    <h1>AudioLab app icon, round 5: K5 and M5 depth</h1>
+    <p class="lede">From your note after round 4: <q>Let's pick K5 depth, and let's also go with M5 depth and give me a few variations of those. And when it comes to smaller logos, so smaller than 32, we need a zoomed in version of both. And I'll pick one or the other and then put the other in the settings … and we'll pick them and remove a few that people can pick in the settings.</q></p>
+    <p class="lede">Below: six variations of K5 (K5a to K5f) and six of M5 (M5a to M5f) next to round 4's K5 and M5, each in Orbit night (P2) with Chart paper (P8) on the switch; a bench for the selected design (1024 to 64, the Dock on a dark and a light desktop, macOS 26 Default and Dark); a compare view with a slider; zoomed-in small versions of both families (KS1 to KS3, MS1 to MS3) at 16 and 32 px, 1x and 2x, next to S1 as shipped and next to their big icons; and every icon in today's picker with a keep box. Give one design <b class="k-main">Main</b> (the default icon), one from the other family <b class="k-other">Other</b> (into the picker), one <b class="k-ks">KS</b> and one <b class="k-ms">MS</b>, untick what should leave the picker, then copy the line from the bar.</p>
+  </header>
+
+  <section aria-labelledby="h-k">
+    <div class="sec-h"><h2 id="h-k">K5 depth: K5a to K5f</h2><p>J3's rings with depth. Round 4's K5 is the dashed card. What varies: how deep the glass goes, ring weight and transparency, the nucleus glow, the electron, the field's extent, the light direction. ★ recommended.</p></div>
+    <div class="grid" id="gridK"></div>
+  </section>
+  <section aria-labelledby="h-m">
+    <div class="sec-h"><h2 id="h-m">M5 depth: M5a to M5f</h2><p>J4's field orbits with depth. Round 4's M5 (in the picker today as Field Depth) is the dashed card. The same six moves as the K row, so K5x and M5x pair up.</p></div>
+    <div class="grid" id="gridM"></div>
+  </section>
+
+  <section class="bench" id="bench" aria-labelledby="h-bench">
+    <div class="bench-top">
+      <div class="big wp-light" id="big"></div>
+      <div class="info">
+        <div class="tag" id="bTag"></div>
+        <h2 id="h-bench">Bench</h2>
+        <p class="why" id="bNote"></p>
+        <div class="row" style="margin-top:12px"><span class="seg" id="bSeg"></span><span id="bPicks" class="row"></span><button class="chip" id="bWp" type="button">Wallpaper: light</button></div>
+        <div class="ladder" id="ladder"></div>
+        <p class="note-s">1024 to 128 draw everything; 48 to 96 keep the bold structure (three field lines, heavier rings, no particles; the glass edge thicker). At 32 px and below the small version takes over (KS and MS further down).</p>
+      </div>
+    </div>
+    <div class="mocks">
+      <div class="two">
+        <div><p class="mock-h">Dock, dark desktop (64 pt icons at 2x; the others are invented stand-ins)</p><div class="mock" id="dockD"></div></div>
+        <div><p class="mock-h">Dock, light desktop</p><div class="mock" id="dockL"></div></div>
+      </div>
+      <div><p class="mock-h">macOS 26: Default and Dark</p><div class="mock" id="styles" style="max-width:620px"></div>
+        <p class="note-s" id="stNote"></p></div>
+    </div>
+  </section>
+
+  <section class="cmp" id="cmp" aria-labelledby="h-cmp">
+    <div class="sec-h" style="margin:0"><h2 id="h-cmp">Compare</h2><p>Any two at the same size: the variations, round 4's K5 and M5, J3 as shipped, and the small versions. Drag the slider (or the picture) to wipe; 64 px and below show the real pixels, magnified.</p></div>
+    <div class="cmp-ctl">
+      <label>Left <select id="cA"></select></label><span class="seg" id="cAp"></span>
+      <label>Right <select id="cB"></select></label><span class="seg" id="cBp"></span>
+      <label>Size <select id="cS"></select></label>
+      <button class="chip" id="cMode" type="button">Side by side</button>
+      <button class="chip" id="cWp" type="button">Wallpaper: dark</button>
+    </div>
+    <div class="stagecmp wp-dark" id="cStage"><canvas id="cvB" aria-label="Right design"></canvas><canvas id="cvA" aria-label="Left design"></canvas><span class="lab" id="labA" style="left:8px"></span><span class="lab" id="labB" style="right:8px"></span><div class="divider" id="cDiv"></div><div class="knob" id="cKnob"></div></div>
+    <input type="range" id="cmpRange" min="0" max="100" value="50" aria-label="Wipe between the left and the right design">
+    <div class="sbs" id="cSbs"><figure style="margin:0"><canvas id="sbA"></canvas><figcaption id="sbAl"></figcaption></figure><figure style="margin:0"><canvas id="sbB"></canvas><figcaption id="sbBl"></figcaption></figure></div>
+  </section>
+
+  <section class="smallsec" aria-labelledby="h-s">
+    <div class="sec-h" style="margin:0"><h2 id="h-s">Zoomed-in small versions: KS1 to KS3 and MS1 to MS3</h2><p>For 32 px and below, like W7 and J9: zoomed into the atom, tilted, the field centred on the nucleus and cut by the tile edge, lines in device pixels on the pixel grid, nucleus and electron on whole pixels. Each picture is drawn at its own size, never shrunk. Dashed: S1 as shipped (the small J3 today) and IC6's small M5 (the picker's Field Depth today), not zoomed. Magnified views are the real pixels.</p></div>
+    <div class="row"><span class="seg" id="sSeg"></span></div>
+    <div class="sgrid" id="sgrid"></div>
+    <div>
+      <p class="mock-h">The two families: big icon at 128 and 64, then its small version at 32, 16 and 32 @2x (your Main and Other picks and their KS / MS, or the stars)</p>
+      <div class="two"><div class="famrow wp-dark" id="famD"></div><div class="famrow wp-light" id="famL"></div></div>
+    </div>
+    <div class="two">
+      <div><p class="mock-h">Windows taskbar, 100 % (24 px) and the window title (16 px), with the Main family's small version</p>
+        <div class="strip tbd" id="tbD"></div><div class="strip tbl" id="tbL" style="margin-top:8px"></div></div>
+      <div><p class="mock-h">Browser tab (favicon 16 px, drawn at 32 on a 2x screen)</p>
+        <div class="tabs d" id="tabD"></div><div class="tabs l" id="tabL" style="margin-top:8px"></div></div>
+    </div>
+  </section>
+
+  <section class="pk" aria-labelledby="h-pk">
+    <div class="sec-h" style="margin:0"><h2 id="h-pk">The picker today: keep or remove</h2><p>Every icon in Settings › App icon (61), grouped as in the app, at 128 and 32 px. All are ticked to keep; untick the ones that should leave the picker. Someone who has a removed icon chosen keeps it working. Your Main replaces Dipole Field as the default and your Other is added to the Dipole field group, whatever you tick here.</p></div>
+    <div class="row"><span class="count" id="pkCount"></span><button class="chip" id="pkAll" type="button">Keep all</button></div>
+    <div id="pk"></div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2><p>Click one to load it on the bench (or the small ones into the compare view).</p></div>
+    <div class="recs" id="recs"></div>
+    <p class="note-s" id="weak"></p>
+  </section>
+
+  <section aria-labelledby="h-after" class="after">
+    <h2 id="h-after">After you pick</h2>
+    <ol>
+      <li><b>Main</b> becomes the default app icon through the IC1 pipeline (<span class="mono">mac-icon/AppIcon.icon</span> → <span class="mono">Assets.car</span>), Dark stays navy (the fill only as <span class="mono">fill-specializations</span>); the drawn glass edge stays in the flat files, and in the Icon Composer layer either it or the system's specular, not both. Its small version (KS or MS) is used everywhere at 32 px and below: <span class="mono">icon.icns</span> 16 and 32 pt at 1x and 2x, <span class="mono">icon.ico</span> 16 to 32, the favicons.</li>
+      <li><b>Other</b> goes into the picker's Dipole field group with its own small version at 16, 32, 48.</li>
+      <li>Unticked icons leave the picker list; a user who has one chosen keeps it (the shell still finds its pictures).</li>
+      <li><span class="mono">icon.icns</span>, <span class="mono">icon.ico</span>, <span class="mono">Assets.car</span> and the favicons are made again on the macOS runner (macos-latest); the Dock shows the new icon with the next desktop build.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <code id="line">Round 5 picks: (nothing picked yet)</code>
+    <button class="btn" id="copy" type="button">Copy</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+    <small><b class="k-main">Main</b>: the default icon. <b class="k-other">Other</b>: into the picker. <b class="k-ks">KS</b> and <b class="k-ms">MS</b>: the small versions (the Main family's is the small icon). <b class="k-rm">remove</b>: unticked picker icons. Paste the line into the chat.</small>
+  </div>
+</div>
+
+<script>/*GEOM*/</script>
+<script>/*ICONS3*/</script>
+<script>/*ICONS5*/</script>
+<script>/*SMALL5*/</script>
+<script>/*SMALL6*/</script>
+<script>window.PICKER=/*PICKER*/;</script>
+<script>
+(function(){
+  var A3 = window.AL3, A = window.AL5, SM = window.AL5S, S6 = window.AL6S, PK = window.PICKER, $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var PB = A.PAL;
+  var ALL = {};
+  A.DESIGNS.forEach(function(d){ ALL[d.id] = d; });
+  ALL.J3 = { id: 'J3', name: 'J3 as shipped (v0.270)', note: 'The default icon today.', ref: true, r3: true };
+  SM.IDS.forEach(function(k){ var V = SM.VARIANTS[k]; ALL[k] = { id: k, name: V.name, note: V.note, small: true, fam: V.fam }; });
+  ALL.S1 = { id: 'S1', name: 'S1 as shipped', note: 'The small icon since IC6: S1 of round 4, flat nucleus, rings at 90 %.', small: true, s6: 'ring', fam: 'K5' };
+  ALL.M5s = { id: 'M5s', name: 'IC6 small M5 (picker today)', note: 'Field Depth\'s small version in the picker since IC6: two orbits, centred, not zoomed.', small: true, s6: 'orbit', fam: 'M5' };
+  function bigSvg(id, p, size, frame, style){ if (ALL[id].r3) return A3.svg('J3', style === 'dark' && p === 'P8' ? 'P8N' : p, size, { frame: frame || 'mac' }); return A.svg(id, p, size, { frame: frame || 'mac', style: style }); }
+  function smSvg(id, p, px, frame, o){ var d = ALL[id]; if (d.s6 === 'ring') return S6.ringSmall(p, px, frame || 'full', o); if (d.s6 === 'orbit') return S6.orbitSmall('M5', p, px, frame || 'full', o); return SM.smallSvg(id, p, px, frame || 'full', o); }
+  function anySvg(id, p, size, frame){ if (ALL[id].small) return smSvg(id, p, Math.min(size, 64), frame); return bigSvg(id, p, size, frame || 'full'); }
+
+  var REC = {}; A.RECS.forEach(function(r){ REC[r.d] = r; });
+  var SREC = {}; SM.RECS.forEach(function(r){ SREC[r.s] = r; });
+  var state = { sel: 'K5c', cur: {}, main: null, other: null, ks: null, ms: null, rm: {}, wp: 'light', sp: 'P2', cmp: { a: 'K5', ap: 'P2', b: 'K5c', bp: 'P2', s: 256, pos: 50, side: false, wp: 'dark' } };
+  Object.keys(ALL).forEach(function(k){ state.cur[k] = 'P2'; });
+  var PKIDS = {}; PK.groups.forEach(function(g){ g.icons.forEach(function(i){ PKIDS[i.id] = 1; }); });
+  try { var sv = JSON.parse(localStorage.getItem('al5-picks') || 'null'); if (sv) { ['main', 'other', 'ks', 'ms'].forEach(function(k){ if (sv[k] && ALL[sv[k].d]) state[k] = sv[k]; }); if (sv.cur) Object.keys(sv.cur).forEach(function(k){ if (state.cur[k]) state.cur[k] = sv.cur[k]; }); if (sv.rm) Object.keys(sv.rm).forEach(function(k){ if (PKIDS[k]) state.rm[k] = 1; }); } } catch (e) {}
+  function save(){ try { localStorage.setItem('al5-picks', JSON.stringify({ main: state.main, other: state.other, ks: state.ks, ms: state.ms, cur: state.cur, rm: state.rm })); } catch (e) {} }
+
+  function segHtml(key, cur, attr){ return ['P2', 'P8'].map(function(p){ var P = PB[p]; return '<button type="button" class="' + (cur === p ? 'on' : '') + '" ' + attr + '="' + key + '" data-p="' + p + '" aria-pressed="' + (cur === p) + '" title="' + p + ' ' + esc(P.name) + '"><i style="background:linear-gradient(135deg,' + P.bg[0] + ' 0 55%,' + P.nuc + ' 55% 100%)"></i>' + p + '</button>'; }).join(''); }
+  function isRole(role, id){ var x = state[role]; return !!x && x.d === id && (role === 'ks' || role === 'ms' || x.p === state.cur[id]); }
+  function roleBtns(id){
+    return ['main', 'other'].map(function(r){ var on = isRole(r, id); return '<button type="button" class="pick ' + r + (on ? ' on' : '') + '" data-role="' + r + '" data-id="' + id + '" aria-pressed="' + on + '">' + (r === 'main' ? 'Main' : 'Other') + '</button>'; }).join('');
+  }
+  function card(id){
+    var d = ALL[id], p = state.cur[id], r = REC[id];
+    var cls = 'card' + (d.ref ? ' ref' : '') + (state.sel === id ? ' sel' : '') + (isRole('main', id) ? ' main' : isRole('other', id) ? ' other' : '');
+    return '<div class="' + cls + '" tabindex="0" data-d="' + id + '"><div class="art' + (p === 'P8' ? ' dk' : '') + '">' + bigSvg(id, p, 256) + '</div>' +
+      '<div class="hd"><span class="tag">' + id + '</span><b>' + esc(d.name) + '</b>' + (r ? '<span class="st" title="Recommended">★ ' + r.role + '</span>' : '') + '</div>' +
+      '<p class="note">' + esc(d.note) + '</p>' +
+      '<div class="row"><span class="seg">' + segHtml(id, p, 'data-d') + '</span>' + roleBtns(id) + '</div></div>';
+  }
+  var KROW = ['K5', 'K5a', 'K5b', 'K5c', 'K5d', 'K5e', 'K5f'], MROW = ['M5', 'M5a', 'M5b', 'M5c', 'M5d', 'M5e', 'M5f'];
+  function drawGrids(){ $('gridK').innerHTML = KROW.map(card).join(''); $('gridM').innerHTML = MROW.map(card).join(''); }
+  function onGrid(e){
+    var b = e.target.closest('button');
+    if (b && b.hasAttribute('data-p')) { var id = b.getAttribute('data-d'); state.cur[id] = b.getAttribute('data-p'); state.sel = id; save(); drawAll(); return; }
+    if (b && b.hasAttribute('data-role')) { setRole(b.getAttribute('data-role'), b.getAttribute('data-id')); return; }
+    var c = e.target.closest('.card'); if (c) { state.sel = c.getAttribute('data-d'); drawGrids(); drawBench(); }
+  }
+  ['gridK', 'gridM'].forEach(function(g){
+    $(g).addEventListener('click', onGrid);
+    $(g).addEventListener('keydown', function(e){ var c = e.target.closest('.card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.sel = c.getAttribute('data-d'); drawGrids(); drawBench(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+  });
+  function setRole(role, id){
+    var p = state.cur[id];
+    if (isRole(role, id)) state[role] = null;
+    else { state[role] = (role === 'ks' || role === 'ms') ? { d: id } : { d: id, p: p }; if (role === 'main' || role === 'other') { var o = role === 'main' ? 'other' : 'main'; if (state[o] && state[o].d === id && state[o].p === p) state[o] = null; } }
+    save(); drawGrids(); drawBench(); drawSmall(); drawLine();
+  }
+  function drawLine(){
+    var parts = [], pp = function(x){ return x.d + (x.p !== 'P2' ? ' ' + x.p : ''); };
+    if (state.main) parts.push('main ' + pp(state.main));
+    if (state.other) parts.push('other ' + pp(state.other));
+    if (state.ks || state.ms) parts.push('small ' + [state.ks && state.ks.d, state.ms && state.ms.d].filter(Boolean).join(' '));
+    var rm = Object.keys(state.rm); if (rm.length) parts.push('remove: ' + rm.join(' '));
+    $('line').textContent = 'Round 5 picks: ' + (parts.length ? parts.join(' | ') : '(nothing picked yet)');
+  }
+  $('copy').addEventListener('click', function(){
+    var t = $('line').textContent, b = $('copy');
+    var sel = function(){ var r = document.createRange(); r.selectNodeContents($('line')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected, press Copy'; };
+    try { navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1400); }, sel); } catch (e) { sel(); }
+  });
+  $('clear').addEventListener('click', function(){ state.main = state.other = state.ks = state.ms = null; state.rm = {}; save(); drawAll(); drawPicker(); });
+
+  function rasterInto(cv, svgStr, n, cssW){
+    cv.width = n; cv.height = n; if (cssW) { cv.style.width = cssW + 'px'; cv.style.height = cssW + 'px'; }
+    var img = new Image(), url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+    img.onload = function(){ var g = cv.getContext('2d'); g.clearRect(0, 0, n, n); g.drawImage(img, 0, 0, n, n); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+
+  function drawBench(){
+    var id = state.sel, d = ALL[id], p = state.cur[id], P = PB[p], r = REC[id];
+    $('big').className = 'big wp-' + state.wp; $('big').innerHTML = bigSvg(id, p, 1024);
+    $('bTag').textContent = id + ' · ' + p + ' ' + P.name + ' · ' + (d.fam === 'K5' ? 'K5 family (J3 rings)' : 'M5 family (J4 field orbits)');
+    $('h-bench').textContent = d.name + (r ? '  ★' : '');
+    $('bNote').textContent = d.note + (r ? ' ★ ' + r.why : '');
+    $('bSeg').innerHTML = segHtml(id, p, 'data-d');
+    $('bPicks').innerHTML = roleBtns(id);
+    $('bWp').textContent = 'Wallpaper: ' + state.wp;
+    $('ladder').innerHTML = [[1024, 200], [512, 160], [128, 128], [64, 64]].map(function(z){ return '<figure><div style="width:' + z[1] + 'px;height:' + z[1] + 'px">' + bigSvg(id, p, z[0]).replace(/width="\d+" height="\d+"/, 'width="' + z[1] + '" height="' + z[1] + '"') + '</div><figcaption>' + z[0] + (z[0] > z[1] ? ' (shown at ' + z[1] + ')' : '') + '</figcaption></figure>'; }).join('');
+    var dr = function(z){ return bigSvg(id, p, z); };
+    $('dockD').innerHTML = A.dock(dr, 'dark'); $('dockL').innerHTML = A.dock(dr, 'light');
+    $('styles').innerHTML = A.styles(function(z, st){ return bigSvg(id, p, z, 'mac', st); }, p);
+    $('stNote').textContent = p === 'P2' ? 'P2: Default and Dark are the same navy tile (IC1\'s Icon Composer file gives Dark the same fill, confirmed on macOS 26.7.2), so Dark stays navy. The glass edge and sheen are drawn; on macOS 26 the system can add its own specular instead, not both.'
+      : 'P8 is a light tile: in Dark it takes its proposed P8N entry (paper and ink swapped), which needs its own dark fill and layer in AppIcon.icon. P8 is safest as a picker option.';
+    [['dockD', 2], ['dockL', 2], ['styles', 1]].forEach(function(x){ var s = $(x[0]).querySelector('svg'); s.style.width = '100%'; s.style.maxWidth = (s.getAttribute('width') / x[1]) + 'px'; });
+  }
+  $('bSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); });
+  $('bPicks').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) setRole(b.getAttribute('data-role'), b.getAttribute('data-id')); });
+  $('bWp').addEventListener('click', function(){ state.wp = state.wp === 'light' ? 'dark' : 'light'; drawBench(); });
+
+  var ORDER = ['J3'].concat(KROW, MROW, ['S1', 'KS1', 'KS2', 'KS3', 'M5s', 'MS1', 'MS2', 'MS3']);
+  var SIZES = [1024, 512, 256, 128, 64, 48, 32, 24, 16];
+  function opts(sel){ return ORDER.map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + k + ' · ' + esc(ALL[k].name) + '</option>'; }).join(''); }
+  function drawCmp(){
+    var C = state.cmp;
+    $('cA').innerHTML = opts(C.a); $('cB').innerHTML = opts(C.b);
+    $('cS').innerHTML = SIZES.map(function(z){ return '<option value="' + z + '"' + (z === C.s ? ' selected' : '') + '>' + z + ' px</option>'; }).join('');
+    $('cAp').innerHTML = segHtml('a', C.ap, 'data-c'); $('cBp').innerHTML = segHtml('b', C.bp, 'data-c');
+    var px = C.s <= 64, n = C.s;
+    var note = function(id){ return ALL[id].small && C.s > 64 ? ' (drawn at 64; small versions are for 64 px and below)' : !ALL[id].small && C.s <= 32 ? ' (big drawing at its smallest level; the small version is what ships here)' : ''; };
+    $('cStage').className = 'stagecmp wp-' + C.wp + (px ? ' px' : ''); $('cSbs').className = 'sbs' + (px ? ' px' : '');
+    $('cWp').textContent = 'Wallpaper: ' + C.wp;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), big = Math.min(1024, Math.round(520 * dpr));
+    var nn = function(id){ return ALL[id].small && !px ? 64 : px ? n : big; };
+    rasterInto($('cvA'), anySvg(C.a, C.ap, C.s), nn(C.a)); rasterInto($('cvB'), anySvg(C.b, C.bp, C.s), nn(C.b));
+    rasterInto($('sbA'), anySvg(C.a, C.ap, C.s), nn(C.a)); rasterInto($('sbB'), anySvg(C.b, C.bp, C.s), nn(C.b));
+    $('labA').textContent = C.a + ' ' + C.ap; $('labB').textContent = C.b + ' ' + C.bp;
+    $('sbAl').textContent = C.a + ' ' + C.ap + ' at ' + C.s + ' px' + note(C.a); $('sbBl').textContent = C.b + ' ' + C.bp + ' at ' + C.s + ' px' + note(C.b);
+    $('cSbs').style.background = C.wp === 'dark' ? '#0f1118' : '#dfe5ee'; $('cSbs').style.padding = '12px'; $('cSbs').style.borderRadius = '12px';
+    $('cmp').classList.toggle('side', C.side); $('cMode').textContent = C.side ? 'Slider' : 'Side by side';
+    wipe();
+  }
+  function wipe(){ var v = state.cmp.pos; $('cvA').style.clipPath = 'inset(0 ' + (100 - v) + '% 0 0)'; $('cDiv').style.left = v + '%'; $('cKnob').style.left = v + '%'; $('cmpRange').value = v; }
+  $('cA').addEventListener('change', function(){ state.cmp.a = this.value; drawCmp(); });
+  $('cB').addEventListener('change', function(){ state.cmp.b = this.value; drawCmp(); });
+  $('cS').addEventListener('change', function(){ state.cmp.s = parseInt(this.value, 10); drawCmp(); });
+  [$('cAp'), $('cBp')].forEach(function(el){ el.addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cmp[b.getAttribute('data-c') + 'p'] = b.getAttribute('data-p'); drawCmp(); }); });
+  $('cMode').addEventListener('click', function(){ state.cmp.side = !state.cmp.side; drawCmp(); });
+  $('cWp').addEventListener('click', function(){ state.cmp.wp = state.cmp.wp === 'dark' ? 'light' : 'dark'; drawCmp(); });
+  $('cmpRange').addEventListener('input', function(){ state.cmp.pos = +this.value; wipe(); });
+  (function(){ var st = $('cStage'), drag = false;
+    function at(e){ var r = st.getBoundingClientRect(); state.cmp.pos = Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)); wipe(); }
+    st.addEventListener('pointerdown', function(e){ drag = true; st.setPointerCapture(e.pointerId); at(e); });
+    st.addEventListener('pointermove', function(e){ if (drag) at(e); });
+    st.addEventListener('pointerup', function(){ drag = false; }); st.addEventListener('pointercancel', function(){ drag = false; });
+  })();
+
+  function fig(svgStr, n, cssW, cap, cls){ return '<figure><div class="' + cls + '"><canvas data-svg="' + encodeURIComponent(svgStr) + '" data-n="' + n + '" data-w="' + cssW + '"></canvas></div><figcaption>' + cap + '</figcaption></figure>'; }
+  function hydrate(root){ Array.prototype.forEach.call(root.querySelectorAll('canvas[data-svg]'), function(cv){ rasterInto(cv, decodeURIComponent(cv.getAttribute('data-svg')), +cv.getAttribute('data-n'), +cv.getAttribute('data-w')); }); }
+  function cvs(svgStr, n, w){ return '<canvas data-svg="' + encodeURIComponent(svgStr) + '" data-n="' + n + '" data-w="' + w + '"></canvas>'; }
+  function drawSmall(){
+    var p = state.sp;
+    $('sSeg').innerHTML = '<span class="tag" style="margin-right:8px">PALETTE</span>' + segHtml('s', p, 'data-s');
+    $('sgrid').innerHTML = ['S1', 'KS1', 'KS2', 'KS3', 'M5s', 'MS1', 'MS2', 'MS3'].map(function(id){
+      var d = ALL[id], ref = !!d.s6, role = d.fam === 'K5' ? 'ks' : 'ms', on = isRole(role, id), rec = SREC[id];
+      var bg = p === 'P8' ? 'bgd' : 'bgl';
+      return '<div class="scard' + (ref ? ' ref' : '') + (on ? ' ' + role : '') + '"><div class="hd row"><span class="tag">' + id + '</span><b>' + esc(d.name) + '</b><span class="tag" style="margin-left:8px">' + (d.fam === 'K5' ? 'K5 FAMILY' : 'M5 FAMILY') + '</span>' + (rec ? '<span style="color:var(--star);margin-left:auto">★</span>' : '') + '</div>' +
+        '<div class="pxrow">' +
+        fig(smSvg(id, p, 16), 16, 96, '16 @1x ×6', 'bgd') + fig(smSvg(id, p, 32, 'full', { pt: 16 }), 32, 96, '16 @2x ×3', 'bgd') +
+        fig(smSvg(id, p, 32), 32, 128, '32 @1x ×4', 'bgd') + fig(smSvg(id, p, 64, 'full', { pt: 32 }), 64, 128, '32 @2x ×2', 'bgd') + '</div>' +
+        '<div class="pxrow">' + [16, 20, 24, 32, 48].map(function(z){ return fig(smSvg(id, p, z), z, z, z, bg); }).join('') + fig(smSvg(id, p, 32, 'mac'), 32, 32, 'mac 32', bg) + '</div>' +
+        '<div class="txt"><p class="note" style="color:var(--mute);margin:0;font-size:12px">' + esc(d.note) + (rec ? ' ★ ' + esc(rec.why) : '') + '</p>' +
+        (ref ? '' : '<button type="button" class="pick ' + role + (on ? ' on' : '') + '" data-role="' + role + '" data-id="' + id + '" aria-pressed="' + on + '">' + (role === 'ks' ? 'KS: small of K5' : 'MS: small of M5') + '</button>') + '</div></div>';
+    }).join('');
+    hydrate($('sgrid'));
+    /* the families: K big + KS, M big + MS */
+    var mk = state.main && ALL[state.main.d].fam === 'K5' ? state.main : state.other && ALL[state.other.d].fam === 'K5' ? state.other : { d: 'K5c', p: 'P2' };
+    var mm = state.main && ALL[state.main.d].fam === 'M5' ? state.main : state.other && ALL[state.other.d].fam === 'M5' ? state.other : { d: 'M5c', p: 'P2' };
+    var ks = state.ks ? state.ks.d : 'KS3', ms = state.ms ? state.ms.d : 'MS1';
+    function fam(big, sm){ var bp = big.p;
+      return '<figure>' + bigSvg(big.d, bp, 128) + '<figcaption>' + big.d + ' 128</figcaption></figure>' +
+        '<figure>' + cvs(bigSvg(big.d, bp, 64), 64, 64) + '<figcaption>' + big.d + ' 64</figcaption></figure><span class="sep"></span>' +
+        '<figure>' + cvs(smSvg(sm, bp, 32, 'mac'), 32, 32) + '<figcaption>' + sm + ' 32</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 16, 'mac'), 16, 16) + '<figcaption>' + sm + ' 16</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 64, 'mac', { pt: 32 }), 64, 32) + '<figcaption>' + sm + ' 32 @2x</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 32, 'mac', { pt: 16 }), 32, 16) + '<figcaption>' + sm + ' 16 @2x</figcaption></figure>'; }
+    ['famD', 'famL'].forEach(function(el){
+      $(el).innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;width:100%"><div class="famrow" style="padding:0">' + fam(mk, ks) + '</div><div class="famrow" style="padding:0">' + fam(mm, ms) + '</div><div class="famrow" style="padding:0"><figure>' + bigSvg('J3', 'P2', 128) + '<figcaption>J3 today 128</figcaption></figure><span class="sep"></span><figure>' + cvs(smSvg('S1', 'P2', 32, 'mac'), 32, 32) + '<figcaption>S1 32 (shipped)</figcaption></figure><figure>' + cvs(smSvg('S1', 'P2', 16, 'mac'), 16, 16) + '<figcaption>S1 16</figcaption></figure></div></div>';
+      hydrate($(el));
+    });
+    var mainSm = state.main ? (ALL[state.main.d].fam === 'K5' ? ks : ms) : ks, mp = state.main ? state.main.p : 'P2';
+    var stand = function(i, w){ return A.standSvg(i, 0, 0, w, true).replace(/^<svg /, '<svg xmlns="http://www.w3.org/2000/svg" '); };
+    ['tbD', 'tbL'].forEach(function(el){
+      var h = ''; [0, 1, 3].forEach(function(i){ h += '<span style="display:inline-block;width:24px;height:24px">' + stand(i, 24) + '</span>'; });
+      h += cvs(smSvg(mainSm, mp, 24), 24, 24);
+      [6, 4].forEach(function(i){ h += '<span style="display:inline-block;width:24px;height:24px">' + stand(i, 24) + '</span>'; });
+      h += '<span style="margin-left:auto;display:flex;gap:8px;align-items:center">' + cvs(smSvg(mainSm, mp, 16), 16, 16) + ' AudioLab Pro</span>';
+      $(el).innerHTML = h; hydrate($(el));
+    });
+    ['tabD', 'tabL'].forEach(function(el, i){
+      var t = i ? 'l' : 'd';
+      $(el).innerHTML = '<div class="tab ' + t + '">' + cvs(smSvg(mainSm, mp, 32, 'full', { pt: 16 }), 32, 16) + 'AudioLab Pro</div><div class="tab ' + t + '" style="opacity:.6">' + cvs(smSvg(mainSm, mp, 16), 16, 16) + '1x: AudioLab Pro</div>';
+      hydrate($(el));
+    });
+  }
+  $('sSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.sp = b.getAttribute('data-p'); drawSmall(); });
+  $('sgrid').addEventListener('click', function(e){ var b = e.target.closest('button[data-role]'); if (b) setRole(b.getAttribute('data-role'), b.getAttribute('data-id')); });
+
+  /* the picker review */
+  function drawPicker(){
+    var total = 0;
+    $('pk').innerHTML = PK.groups.map(function(g){
+      return '<div class="pkg"><h3>' + esc(g.name) + ' <small>' + g.icons.length + ' icons</small><button type="button" class="chip" data-g="' + g.key + '" data-all="1">keep all</button><button type="button" class="chip" data-g="' + g.key + '" data-all="0">remove all</button></h3><div class="pkgrid">' +
+        g.icons.map(function(ic){ total++; var rm = !!state.rm[ic.id];
+          return '<div class="pki' + (rm ? ' rm' : '') + '" data-id="' + ic.id + '">' + (ic.id === PK.default ? '<span class="def">DEFAULT</span>' : '') +
+            '<img class="big128" src="' + ic.t128 + '" width="128" height="128" alt="' + esc(ic.name) + ', 128 px" loading="lazy">' +
+            '<img class="t32" src="' + ic.t32 + '" width="32" height="32" alt="' + esc(ic.name) + ', 32 px" loading="lazy">' +
+            '<div class="meta"><b>' + esc(ic.name) + '</b><span>' + esc(ic.id) + ' · ' + esc(ic.code) + (ic.added ? ' · ' + esc(ic.added) : '') + '</span></div>' +
+            '<label><input type="checkbox" data-id="' + ic.id + '"' + (rm ? '' : ' checked') + '> keep</label></div>'; }).join('') + '</div></div>';
+    }).join('');
+    var n = Object.keys(state.rm).length;
+    $('pkCount').textContent = (total - n) + ' kept · ' + n + ' to remove';
+  }
+  $('pk').addEventListener('change', function(e){ var c = e.target.closest('input[type=checkbox]'); if (!c) return; var id = c.getAttribute('data-id'); if (c.checked) delete state.rm[id]; else state.rm[id] = 1; save(); drawPicker(); drawLine(); });
+  $('pk').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-g]');
+    if (b) { var g = PK.groups.filter(function(x){ return x.key === b.getAttribute('data-g'); })[0], keep = b.getAttribute('data-all') === '1'; g.icons.forEach(function(i){ if (keep) delete state.rm[i.id]; else state.rm[i.id] = 1; }); save(); drawPicker(); drawLine(); return; }
+    var t = e.target.closest('.pki'); if (t && !e.target.closest('label')) { var id = t.getAttribute('data-id'); if (state.rm[id]) delete state.rm[id]; else state.rm[id] = 1; save(); drawPicker(); drawLine(); }
+  });
+  $('pkAll').addEventListener('click', function(){ state.rm = {}; save(); drawPicker(); drawLine(); });
+
+  function drawRecs(){
+    var h = A.RECS.map(function(r){ var d = ALL[r.d]; return '<button type="button" class="rec" data-d="' + r.d + '" data-p="' + r.p + '">' + bigSvg(r.d, r.p, 128) + '<span><span class="tag">★ ' + r.d + ' · AS ' + r.role.toUpperCase() + '</span><br><b>' + esc(d.name) + ', ' + esc(PB[r.p].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    h += SM.RECS.map(function(r){ return '<button type="button" class="rec" data-s="' + r.s + '">' + '<canvas data-svg="' + encodeURIComponent(smSvg(r.s, 'P2', 32)) + '" data-n="32" data-w="76" style="image-rendering:pixelated"></canvas><span><span class="tag">★ ' + r.s + ' · SMALL OF ' + ALL[r.s].fam + '</span><br><b>' + esc(ALL[r.s].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    $('recs').innerHTML = h; hydrate($('recs'));
+    $('weak').textContent = 'Weak spots seen in the renders: K5b and M5b\'s glass tubes go grey and soft in P8 (light ink on light paper) and fall back to plain rings below 128 px; the shade of K5b and M5b dirties P8\'s paper; the light edge of KS3 and MS3 hardly shows on P8; K5f and M5f thin out first in the Dock; MS1 to MS3 at 16 px are a nucleus with arcs round it (the orbits only read as orbits from 24 px), KS1 to KS3 at 16 stay close to S1. The drawn glass edge doubles up with macOS 26\'s own specular if Icon Composer\'s is switched on.';
+  }
+  $('recs').addEventListener('click', function(e){ var b = e.target.closest('.rec'); if (!b) return;
+    if (b.hasAttribute('data-s')) { var s = b.getAttribute('data-s'); state.cmp.a = ALL[s].fam === 'K5' ? 'S1' : 'M5s'; state.cmp.b = s; state.cmp.s = 32; drawCmp(); $('cmp').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    state.sel = b.getAttribute('data-d'); state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  function drawAll(){ drawGrids(); drawBench(); drawSmall(); drawLine(); }
+  drawAll(); drawCmp(); drawRecs(); drawPicker();
+})();
+</script>
