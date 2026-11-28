@@ -1,0 +1,337 @@
+<title>AudioLab app icon, round 5c: the Earth and the Moon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<!--CSS4-->
+<style>
+/* round 5c additions to round 4's lab sheet */
+.explain{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:860px){.explain{grid-template-columns:1fr}}
+.explain p{margin:0 0 10px;color:#c9cfdc;max-width:70ch}
+.explain p b{color:var(--fg)}
+.diag{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#070910}
+.diag svg{display:block;width:100%;height:auto}
+.facts{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.facts th,.facts td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.facts th{color:var(--dim);font:600 10.5px var(--mono);letter-spacing:.05em}
+.facts td:first-child{color:var(--fg);white-space:nowrap}
+.facts td{color:var(--mute)}
+.ok{color:var(--sm)} .no{color:#ffb15c}
+.sgrid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.scard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.scard.on{box-shadow:0 0 0 2px var(--sm) inset}
+.scard .hd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.pxrow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.pxrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pxrow canvas{image-rendering:pixelated;display:block}
+.bgd{background:#0f1118;padding:6px;border-radius:8px} .bgl{background:#dfe5ee;padding:6px;border-radius:8px}
+.famrow{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-radius:12px}
+.famrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.famrow canvas{image-rendering:pixelated}
+.famrow .sep{width:1px;align-self:stretch;background:rgba(127,127,127,.35)}
+.famrow svg{display:block}
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.rec{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.rec svg,.rec canvas{flex:none;width:76px;height:76px}
+.rec p{margin:4px 0 0;color:var(--mute);font-size:12px}
+.after ol{color:var(--mute);max-width:90ch;padding-left:20px;margin:6px 0 0}
+.after li{margin-bottom:6px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(10,11,16,.94);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+.bar .in{max-width:1320px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar code{font:600 13px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;flex:1 1 260px;min-width:0;overflow-wrap:anywhere}
+.bar small{color:var(--dim);flex-basis:100%}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#04102a;border-radius:8px;padding:7px 14px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.card.picked{box-shadow:0 0 0 2px var(--star) inset}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC8 · 28 NOVEMBER 2026 · ROUND 5C</div>
+    <h1>AudioLab app icon, round 5c: the Earth and the Moon</h1>
+    <p class="lede">From your note: <q>And how is this field called? And is it the earth or? Let's go with the second M5 logo. Let's pretend that the yellow is the earth and the blue is the moon. Maybe we can do some variations with that information and keep it scientific.</q> Below: eight variations of M5d (E1 to E8) with the yellow as the Earth and the blue as the Moon, every line drawn in 3D and tapered (thicker and brighter where it comes toward you, thinner and fainter where it goes away, hidden where it passes behind the Earth). Pick as many as you like, plus a small version, and copy the line from the bar.</p>
+  </header>
+
+  <section class="explain" aria-labelledby="h-what">
+    <div>
+      <h2 id="h-what">What the field is</h2>
+      <p>It is <b>Earth's magnetic field</b>, drawn as a <b>magnetic dipole</b>: the field of a bar magnet in the Earth's core. Each line follows <span class="mono">r = L sin²θ</span>: it leaves the planet near one pole and comes back near the other, and <b>L</b> is how many Earth radii out it crosses the magnetic equator. So yes, the yellow centre is the Earth: this is the picture in every geophysics textbook.</p>
+      <p>The magnetic axis is tilted against the rotation axis, by <b>about 9°</b> today (9.2° in the 2025 field models; you will often read 11°, its older value). Close to the Earth the field really is a near-perfect dipole; the <b>Van Allen belts</b> sit on its lines at L ≈ 1.5 (inner) and L ≈ 4 to 6 (outer). Further out the <b>solar wind</b> reshapes it: squeezed to about <b>10 Earth radii</b> on the day side (the magnetopause) and stretched into a tail hundreds of Earth radii long on the night side. The whole region is the <b>magnetosphere</b>.</p>
+      <p>The <b>Moon</b> is 0.27 times the Earth's size and 60 Earth radii away, on an orbit tilted about 5° to the Earth's orbit. It is far outside the dipole part, but around full Moon it passes through the magnetotail for about six days each month. In the icons the distances are shortened so it fits the tile; each card says what is to scale.</p>
+      <table class="facts" aria-label="What is to scale">
+        <thead><tr><th>FACT</th><th>REAL</th><th>IN THE ICONS</th></tr></thead>
+        <tbody>
+          <tr><td>Field lines</td><td>dipole, r = L sin²θ</td><td class="ok">exact (E1 to E3, E5 to E7); deformed by a simple model in E4, E8</td></tr>
+          <tr><td>Magnetic tilt</td><td>9.2° from the rotation axis</td><td class="ok">E3 exact; the field leans 12° in the picture, as in M5d</td></tr>
+          <tr><td>Lines drawn</td><td>(any L)</td><td>M5d's: L 2.7, 4.1, 5.9 white; 3.4 to 13.6 fine</td></tr>
+          <tr><td>Van Allen belts</td><td>L 1.2–2 (peak 1.5), L 3–6 (peak 4.5)</td><td class="ok">to scale (E5, E8)</td></tr>
+          <tr><td>Magnetopause</td><td>about 10 Earth radii toward the Sun</td><td><span class="ok">E4 to scale</span>; <span class="no">E8 drawn at 6</span></td></tr>
+          <tr><td>Moon's size</td><td>0.273 Earth radii</td><td><span class="ok">E6, E8 to scale</span>; <span class="no">0.45 to 0.48 elsewhere</span></td></tr>
+          <tr><td>Moon's distance</td><td>60.3 Earth radii</td><td class="no">5 to 9 Earth radii everywhere (at 60 it would sit 4 to 5 tile widths from the Earth)</td></tr>
+          <tr><td>Moon's orbit</td><td>5.1° to the ecliptic</td><td class="ok">5° to the dotted hairline (E2, E5, E6)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="diag" id="diag" role="img" aria-label="Diagram of Earth's magnetosphere: the Sun at the left, the solar wind, the magnetopause, the dipole field lines, the Van Allen belts, the tail and the Moon at true size"></div>
+      <p class="note-s">The diagram: E4's model with the belts, the Earth 30 px across one radius. The Moon is drawn at its true size; its distance is broken (it would be 1,800 px to the right).</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-e">
+    <div class="sec-h"><h2 id="h-e">E1 to E8: M5d as the Earth and the Moon</h2><p>Each in Orbit night (P2) with Chart paper (P8) on the switch. Click a card to load it on the bench; Pick adds it to your line (as many as you like). The dashed card is M5d of round 5 as it was. ★ recommended.</p></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="bench" id="bench" aria-labelledby="h-bench">
+    <div class="bench-top">
+      <div class="big wp-light" id="big"></div>
+      <div class="info">
+        <div class="tag" id="bTag"></div>
+        <h2 id="h-bench">Bench</h2>
+        <p class="why" id="bNote"></p>
+        <div class="row" style="margin-top:12px"><span class="seg" id="bSeg"></span><span id="bPick" class="row"></span><button class="chip" id="bWp" type="button">Wallpaper: light</button></div>
+        <div class="ladder" id="ladder"></div>
+        <p class="note-s">1024 to 128 draw everything; 48 to 96 keep the bold structure (fewer fine lines, heavier lines, a bigger Moon, the glass edge thicker). At 32 px and below a small version takes over (ES1 to ES4, further down).</p>
+      </div>
+    </div>
+    <div class="mocks">
+      <div class="two">
+        <div><p class="mock-h">Dock, dark desktop (64 pt icons at 2x; the others are invented stand-ins)</p><div class="mock" id="dockD"></div></div>
+        <div><p class="mock-h">Dock, light desktop</p><div class="mock" id="dockL"></div></div>
+      </div>
+      <div><p class="mock-h">macOS 26: Default and Dark</p><div class="mock" id="styles" style="max-width:620px"></div><p class="note-s" id="stNote"></p></div>
+    </div>
+  </section>
+
+  <section class="cmp" id="cmp" aria-labelledby="h-cmp">
+    <div class="sec-h" style="margin:0"><h2 id="h-cmp">Compare</h2><p>Any two at the same size: E1 to E8, M5d as picked, and the small versions. Drag the slider (or the picture) to wipe; 64 px and below show the real pixels, magnified.</p></div>
+    <div class="cmp-ctl">
+      <label>Left <select id="cA"></select></label><span class="seg" id="cAp"></span>
+      <label>Right <select id="cB"></select></label><span class="seg" id="cBp"></span>
+      <label>Size <select id="cS"></select></label>
+      <button class="chip" id="cMode" type="button">Side by side</button>
+      <button class="chip" id="cWp" type="button">Wallpaper: dark</button>
+    </div>
+    <div class="stagecmp wp-dark" id="cStage"><canvas id="cvB" aria-label="Right design"></canvas><canvas id="cvA" aria-label="Left design"></canvas><span class="lab" id="labA" style="left:8px"></span><span class="lab" id="labB" style="right:8px"></span><div class="divider" id="cDiv"></div><div class="knob" id="cKnob"></div></div>
+    <input type="range" id="cmpRange" min="0" max="100" value="50" aria-label="Wipe between the left and the right design">
+    <div class="sbs" id="cSbs"><figure style="margin:0"><canvas id="sbA"></canvas><figcaption id="sbAl"></figcaption></figure><figure style="margin:0"><canvas id="sbB"></canvas><figcaption id="sbBl"></figcaption></figure></div>
+  </section>
+
+  <section class="smallsec" aria-labelledby="h-s">
+    <div class="sec-h" style="margin:0"><h2 id="h-s">Zoomed-in small versions: ES1 to ES4</h2><p>For 32 px and below, as round 5's MS: zoomed in, the Earth low left, the outer line cut by the tile edge, the Moon top right; whole-pixel Earth and Moon on the pixel grid, line widths in device pixels, each size drawn at its own size. Magnified views are the real pixels.</p></div>
+    <div class="row"><span class="seg" id="sSeg"></span></div>
+    <div class="sgrid2" id="sgrid"></div>
+    <div>
+      <p class="mock-h">The families: the big icon at 128 and 64, then its small version at 32, 16 and their 2x (your picks, or the stars)</p>
+      <div class="two"><div class="famrow wp-dark" id="famD"></div><div class="famrow wp-light" id="famL"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2><p>Click one to load it on the bench (or the small ones into the compare view).</p></div>
+    <div class="recs" id="recs"></div>
+    <p class="note-s" id="weak"></p>
+  </section>
+
+  <section aria-labelledby="h-after" class="after">
+    <h2 id="h-after">After you pick</h2>
+    <ol>
+      <li>Round 5b (K5a tapered against M5d tapered) runs beside this page; your E picks join that choice as the M5d candidates: one becomes the Main or the Other, the rest can go into the picker's Dipole field group.</li>
+      <li>The chosen E design goes through the IC1 pipeline (<span class="mono">AppIcon.icon</span> → <span class="mono">Assets.car</span>), Dark stays navy (P2's fill as <span class="mono">fill-specializations</span>; a P8 pick needs the P8N entry). Its small version (the ES you pick) is used at 32 px and below.</li>
+      <li>Nothing in the app changes until then: this round only adds <span class="mono">tools/icon-lab/round5c/</span> and its doc.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <code id="line">Round 5c picks: (nothing picked yet)</code>
+    <button class="btn" id="copy" type="button">Copy</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+    <small>Pick any number of E designs (a palette is added when it is not P2) and one or more small versions. Paste the line into the chat.</small>
+  </div>
+</div>
+
+<script>/*ICONS5*/</script>
+<script>/*ICONS5C*/</script>
+<script>/*SMALL5C*/</script>
+<script>
+(function(){
+  var A5 = window.AL5, A = window.AL5C, SM = window.AL5CS, $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var PB = A.PAL, ALL = {};
+  A.DESIGNS.forEach(function(d){ ALL[d.id] = d; });
+  ALL.M5d = { id: 'M5d', name: 'M5d as picked (round 5)', note: 'Round 5\'s M5d, flat lines, the design you picked: the starting point of every E.', ref: true };
+  SM.IDS.forEach(function(k){ var V = SM.VARIANTS[k]; ALL[k] = { id: k, name: V.name, note: V.note, small: true, fam: V.fam }; });
+  function bigSvg(id, p, size, frame, style){ if (id === 'M5d') return A5.svg('M5d', p, size, { frame: frame || 'mac', style: style }); return A.svg(id, p, size, { frame: frame || 'mac', style: style }); }
+  function smSvg(id, p, px, frame, o){ return SM.smallSvg(id, p, px, frame || 'full', o); }
+  function anySvg(id, p, size, frame){ if (ALL[id].small) return smSvg(id, p, Math.min(size, 64), frame); return bigSvg(id, p, size, frame || 'full'); }
+  var REC = {}; A.RECS.forEach(function(r){ REC[r.d] = r; });
+  var SREC = {}; SM.RECS.forEach(function(r){ SREC[r.s] = r; });
+  var ROW = ['M5d'].concat(A.DESIGNS.map(function(d){ return d.id; }));
+  var state = { sel: 'E1', cur: {}, picks: [], small: [], wp: 'light', sp: 'P2', cmp: { a: 'M5d', ap: 'P2', b: 'E1', bp: 'P2', s: 256, pos: 50, side: false, wp: 'dark' } };
+  Object.keys(ALL).forEach(function(k){ state.cur[k] = 'P2'; });
+  try { var sv = JSON.parse(localStorage.getItem('al5c-picks') || 'null'); if (sv) { if (Array.isArray(sv.picks)) state.picks = sv.picks.filter(function(x){ return x && ALL[x.d]; }); if (Array.isArray(sv.small)) state.small = sv.small.filter(function(x){ return ALL[x]; }); if (sv.cur) Object.keys(sv.cur).forEach(function(k){ if (state.cur[k]) state.cur[k] = sv.cur[k]; }); } } catch (e) {}
+  function save(){ try { localStorage.setItem('al5c-picks', JSON.stringify({ picks: state.picks, small: state.small, cur: state.cur })); } catch (e) {} }
+
+  /* the explanatory diagram */
+  (function(){
+    var S = A.X(A.E4, { c: [470, 390], nr: 30, belts: true, beltOp: [0.16, 0.12], wind: [11.8, 13.6, 15.6], windW: 2.4, mpW: 3, moon: { mode: 'xy', x: 1262, y: 390, r: 8.2 }, halo: 14, glow: 2.4,
+      bold: A.E4.bold.map(function(b){ return A.X(b, { w: 5.5 }); }), open: A.E4.open.map(function(o){ return A.X(o, { w: 2.6 }); }), shadow: false, ffGap: 6, ffW: 24 });
+    var U = A.newU(A.DEPSUN), P = PB.P2, body = A.scene(S, P, U), W = 1400, H = 780;
+    var t = function(x, y, s, a, c){ return '<text x="' + x + '" y="' + y + '" fill="' + (c || '#C9D3EA') + '" font-family="Inter,Helvetica,Arial,sans-serif" font-size="22" text-anchor="' + (a || 'start') + '">' + s + '</text>'; };
+    var sun = '<defs><radialGradient id="dsun" cx="0" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFD36A" stop-opacity="0.95"/><stop offset="0.35" stop-color="#FFC43C" stop-opacity="0.35"/><stop offset="1" stop-color="#FFC43C" stop-opacity="0"/></radialGradient>' + Object.keys(U.defs).map(function(k){ return U.defs[k]; }).join('') + '</defs>';
+    var arrows = ''; [250, 330, 450, 530].forEach(function(y){ arrows += '<path d="M40,' + y + 'L110,' + y + 'M100,' + (y - 7) + 'L111,' + y + 'L100,' + (y + 7) + '" stroke="#FFC43C" stroke-opacity="0.75" stroke-width="3" fill="none"/>'; });
+    var brk = '<path d="M1170,360L1185,420M1186,360L1201,420" stroke="#C9D3EA" stroke-width="3"/>';
+    var scale = '<path d="M470,700L770,700M470,690L470,710M770,690L770,710" stroke="#C9D3EA" stroke-width="3"/>' + t(620, 735, '10 Earth radii', 'middle');
+    var labels = t(18, 200, 'Sun, solar wind', 'start', '#FFD36A') + t(160, 120, 'Magnetopause (about 10 Earth radii)') + t(470, 600, 'Earth (lit from the Sun)', 'middle') +
+      t(330, 300, 'Van Allen belts', 'end', '#9DBBFF') + t(760, 140, 'Open lines: the tail lobes') + t(860, 390 - 18, 'Plasma sheet', 'start') + t(1262, 440, 'Moon, true size', 'middle', '#7FDBF7') + t(1262, 466, '60 Earth radii away', 'middle', '#7FDBF7') + t(1178, 340, 'not to scale', 'middle', '#8A90A2');
+    $('diag').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '">' + sun + '<rect width="' + W + '" height="' + H + '" fill="#0B1020"/><rect width="380" height="' + H + '" fill="url(#dsun)"/>' + '<g>' + body + '</g>' + arrows + brk + scale + labels + '</svg>';
+  })();
+
+  function segHtml(key, cur, attr){ return ['P2', 'P8'].map(function(p){ var P = PB[p]; return '<button type="button" class="' + (cur === p ? 'on' : '') + '" ' + attr + '="' + key + '" data-p="' + p + '" aria-pressed="' + (cur === p) + '" title="' + p + ' ' + esc(P.name) + '"><i style="background:linear-gradient(135deg,' + P.bg[0] + ' 0 55%,' + P.nuc + ' 55% 100%)"></i>' + p + '</button>'; }).join(''); }
+  function isPicked(id){ var p = state.cur[id]; return state.picks.some(function(x){ return x.d === id && x.p === p; }); }
+  function pickBtn(id){ if (ALL[id].ref) return ''; var on = isPicked(id); return '<button type="button" class="pick main' + (on ? ' on' : '') + '" data-pick="' + id + '" aria-pressed="' + on + '">' + (on ? 'Picked' : 'Pick') + '</button>'; }
+  function card(id){
+    var d = ALL[id], p = state.cur[id], r = REC[id];
+    var cls = 'card' + (d.ref ? ' ref' : '') + (state.sel === id ? ' sel' : '') + (isPicked(id) ? ' picked' : '');
+    return '<div class="' + cls + '" tabindex="0" data-d="' + id + '"><div class="art' + (p === 'P8' ? ' dk' : '') + '">' + bigSvg(id, p, 256) + '</div>' +
+      '<div class="hd"><span class="tag">' + id + '</span><b>' + esc(d.name) + '</b>' + (r ? '<span class="st" title="Recommended">★</span>' : '') + '</div>' +
+      '<p class="note">' + esc(d.short || d.note) + '</p>' +
+      '<div class="row"><span class="seg">' + segHtml(id, p, 'data-d') + '</span>' + pickBtn(id) + '</div></div>';
+  }
+  function drawGrid(){ $('grid').innerHTML = ROW.map(card).join(''); }
+  $('grid').addEventListener('click', function(e){
+    var b = e.target.closest('button');
+    if (b && b.hasAttribute('data-p')) { var id = b.getAttribute('data-d'); state.cur[id] = b.getAttribute('data-p'); state.sel = id; save(); drawAll(); return; }
+    if (b && b.hasAttribute('data-pick')) { togglePick(b.getAttribute('data-pick')); return; }
+    var c = e.target.closest('.card'); if (c) { state.sel = c.getAttribute('data-d'); drawGrid(); drawBench(); }
+  });
+  $('grid').addEventListener('keydown', function(e){ var c = e.target.closest('.card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.sel = c.getAttribute('data-d'); drawGrid(); drawBench(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+  function togglePick(id){
+    var p = state.cur[id];
+    if (isPicked(id)) state.picks = state.picks.filter(function(x){ return !(x.d === id && x.p === p); });
+    else state.picks.push({ d: id, p: p });
+    save(); drawGrid(); drawBench(); drawSmall(); drawLine();
+  }
+  function drawLine(){
+    var order = A.DESIGNS.map(function(d){ return d.id; });
+    var ps = state.picks.slice().sort(function(a, b){ return order.indexOf(a.d) - order.indexOf(b.d) || (a.p < b.p ? -1 : 1); }).map(function(x){ return x.d + (x.p !== 'P2' ? ' ' + x.p : ''); });
+    var parts = []; if (ps.length) parts.push(ps.join(' ')); if (state.small.length) parts.push('small ' + state.small.slice().sort().join(' '));
+    $('line').textContent = 'Round 5c picks: ' + (parts.length ? parts.join(' | ') : '(nothing picked yet)');
+  }
+  $('copy').addEventListener('click', function(){
+    var t = $('line').textContent, b = $('copy');
+    var sel = function(){ var r = document.createRange(); r.selectNodeContents($('line')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected, press Copy'; };
+    try { navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1400); }, sel); } catch (e) { sel(); }
+  });
+  $('clear').addEventListener('click', function(){ state.picks = []; state.small = []; save(); drawAll(); });
+
+  function rasterInto(cv, svgStr, n, cssW){
+    cv.width = n; cv.height = n; if (cssW) { cv.style.width = cssW + 'px'; cv.style.height = cssW + 'px'; }
+    var img = new Image(), url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+    img.onload = function(){ var g = cv.getContext('2d'); g.clearRect(0, 0, n, n); g.drawImage(img, 0, 0, n, n); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+  function drawBench(){
+    var id = state.sel, d = ALL[id], p = state.cur[id], P = PB[p], r = REC[id];
+    $('big').className = 'big wp-' + state.wp; $('big').innerHTML = bigSvg(id, p, 1024);
+    $('bTag').textContent = id + ' · ' + p + ' ' + P.name;
+    $('h-bench').textContent = d.name + (r ? '  ★' : '');
+    $('bNote').textContent = d.note + (r ? ' ★ ' + r.why : '');
+    $('bSeg').innerHTML = segHtml(id, p, 'data-d');
+    $('bPick').innerHTML = pickBtn(id);
+    $('bWp').textContent = 'Wallpaper: ' + state.wp;
+    $('ladder').innerHTML = [[1024, 200], [512, 160], [128, 128], [64, 64]].map(function(z){ return '<figure><div style="width:' + z[1] + 'px;height:' + z[1] + 'px">' + bigSvg(id, p, z[0]).replace(/width="\d+" height="\d+"/, 'width="' + z[1] + '" height="' + z[1] + '"') + '</div><figcaption>' + z[0] + (z[0] > z[1] ? ' (shown at ' + z[1] + ')' : '') + '</figcaption></figure>'; }).join('');
+    var dr = function(z){ return bigSvg(id, p, z); };
+    $('dockD').innerHTML = A.dock(dr, 'dark'); $('dockL').innerHTML = A.dock(dr, 'light');
+    $('styles').innerHTML = A.styles(function(z, st){ return bigSvg(id, p, z, 'mac', st); }, p);
+    $('stNote').textContent = p === 'P2' ? 'P2: Default and Dark are the same navy tile (IC1\'s Icon Composer file gives Dark the same fill, confirmed on macOS 26.7.2), so Dark stays navy. The glass edge and sheen are drawn; on macOS 26 the system can add its own specular instead, not both.'
+      : 'P8 is a light tile: in Dark it takes its proposed P8N entry (paper and ink swapped), which needs its own dark fill and layer in AppIcon.icon. P8 is safest as a picker option.';
+    [['dockD', 2], ['dockL', 2], ['styles', 1]].forEach(function(x){ var s = $(x[0]).querySelector('svg'); s.style.width = '100%'; s.style.maxWidth = (s.getAttribute('width') / x[1]) + 'px'; });
+  }
+  $('bSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); });
+  $('bPick').addEventListener('click', function(e){ var b = e.target.closest('button[data-pick]'); if (b) togglePick(b.getAttribute('data-pick')); });
+  $('bWp').addEventListener('click', function(){ state.wp = state.wp === 'light' ? 'dark' : 'light'; drawBench(); });
+
+  var ORDER = ROW.concat(SM.IDS), SIZES = [1024, 512, 256, 128, 64, 48, 32, 24, 16];
+  function opts(sel){ return ORDER.map(function(k){ return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + k + ' · ' + esc(ALL[k].name) + '</option>'; }).join(''); }
+  function drawCmp(){
+    var C = state.cmp;
+    $('cA').innerHTML = opts(C.a); $('cB').innerHTML = opts(C.b);
+    $('cS').innerHTML = SIZES.map(function(z){ return '<option value="' + z + '"' + (z === C.s ? ' selected' : '') + '>' + z + ' px</option>'; }).join('');
+    $('cAp').innerHTML = segHtml('a', C.ap, 'data-c'); $('cBp').innerHTML = segHtml('b', C.bp, 'data-c');
+    var px = C.s <= 64, n = C.s;
+    var note = function(id){ return ALL[id].small && C.s > 64 ? ' (drawn at 64; small versions are for 64 px and below)' : !ALL[id].small && C.s <= 32 ? ' (big drawing at its smallest level; the small version is what ships here)' : ''; };
+    $('cStage').className = 'stagecmp wp-' + C.wp + (px ? ' px' : ''); $('cSbs').className = 'sbs' + (px ? ' px' : '');
+    $('cWp').textContent = 'Wallpaper: ' + C.wp;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), big = Math.min(1024, Math.round(520 * dpr));
+    var nn = function(id){ return ALL[id].small && !px ? 64 : px ? n : big; };
+    rasterInto($('cvA'), anySvg(C.a, C.ap, C.s), nn(C.a)); rasterInto($('cvB'), anySvg(C.b, C.bp, C.s), nn(C.b));
+    rasterInto($('sbA'), anySvg(C.a, C.ap, C.s), nn(C.a)); rasterInto($('sbB'), anySvg(C.b, C.bp, C.s), nn(C.b));
+    $('labA').textContent = C.a + ' ' + C.ap; $('labB').textContent = C.b + ' ' + C.bp;
+    $('sbAl').textContent = C.a + ' ' + C.ap + ' at ' + C.s + ' px' + note(C.a); $('sbBl').textContent = C.b + ' ' + C.bp + ' at ' + C.s + ' px' + note(C.b);
+    $('cSbs').style.background = C.wp === 'dark' ? '#0f1118' : '#dfe5ee'; $('cSbs').style.padding = '12px'; $('cSbs').style.borderRadius = '12px';
+    $('cmp').classList.toggle('side', C.side); $('cMode').textContent = C.side ? 'Slider' : 'Side by side';
+    wipe();
+  }
+  function wipe(){ var v = state.cmp.pos; $('cvA').style.clipPath = 'inset(0 ' + (100 - v) + '% 0 0)'; $('cDiv').style.left = v + '%'; $('cKnob').style.left = v + '%'; $('cmpRange').value = v; }
+  $('cA').addEventListener('change', function(){ state.cmp.a = this.value; drawCmp(); });
+  $('cB').addEventListener('change', function(){ state.cmp.b = this.value; drawCmp(); });
+  $('cS').addEventListener('change', function(){ state.cmp.s = parseInt(this.value, 10); drawCmp(); });
+  [$('cAp'), $('cBp')].forEach(function(el){ el.addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.cmp[b.getAttribute('data-c') + 'p'] = b.getAttribute('data-p'); drawCmp(); }); });
+  $('cMode').addEventListener('click', function(){ state.cmp.side = !state.cmp.side; drawCmp(); });
+  $('cWp').addEventListener('click', function(){ state.cmp.wp = state.cmp.wp === 'dark' ? 'light' : 'dark'; drawCmp(); });
+  $('cmpRange').addEventListener('input', function(){ state.cmp.pos = +this.value; wipe(); });
+  (function(){ var st = $('cStage'), drag = false;
+    function at(e){ var r = st.getBoundingClientRect(); state.cmp.pos = Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)); wipe(); }
+    st.addEventListener('pointerdown', function(e){ drag = true; st.setPointerCapture(e.pointerId); at(e); });
+    st.addEventListener('pointermove', function(e){ if (drag) at(e); });
+    st.addEventListener('pointerup', function(){ drag = false; }); st.addEventListener('pointercancel', function(){ drag = false; });
+  })();
+
+  function fig(svgStr, n, cssW, cap, cls){ return '<figure><div class="' + cls + '"><canvas data-svg="' + encodeURIComponent(svgStr) + '" data-n="' + n + '" data-w="' + cssW + '"></canvas></div><figcaption>' + cap + '</figcaption></figure>'; }
+  function hydrate(root){ Array.prototype.forEach.call(root.querySelectorAll('canvas[data-svg]'), function(cv){ rasterInto(cv, decodeURIComponent(cv.getAttribute('data-svg')), +cv.getAttribute('data-n'), +cv.getAttribute('data-w')); }); }
+  function cvs(svgStr, n, w){ return '<canvas data-svg="' + encodeURIComponent(svgStr) + '" data-n="' + n + '" data-w="' + w + '"></canvas>'; }
+  function drawSmall(){
+    var p = state.sp;
+    $('sSeg').innerHTML = '<span class="tag" style="margin-right:8px">PALETTE</span>' + segHtml('s', p, 'data-s');
+    $('sgrid').innerHTML = SM.IDS.map(function(id){
+      var d = ALL[id], on = state.small.indexOf(id) >= 0, rec = SREC[id], bg = p === 'P8' ? 'bgd' : 'bgl';
+      return '<div class="scard' + (on ? ' on' : '') + '"><div class="hd"><span class="tag">' + id + '</span><b>' + esc(d.name) + '</b><span class="tag">FOR ' + esc(d.fam) + '</span>' + (rec ? '<span style="color:var(--star);margin-left:auto">★</span>' : '') + '</div>' +
+        '<div class="pxrow">' + fig(smSvg(id, p, 16), 16, 96, '16 @1x ×6', 'bgd') + fig(smSvg(id, p, 32, 'full', { pt: 16 }), 32, 96, '16 @2x ×3', 'bgd') +
+        fig(smSvg(id, p, 32), 32, 128, '32 @1x ×4', 'bgd') + fig(smSvg(id, p, 64, 'full', { pt: 32 }), 64, 128, '32 @2x ×2', 'bgd') + '</div>' +
+        '<div class="pxrow">' + [16, 20, 24, 32, 48].map(function(z){ return fig(smSvg(id, p, z), z, z, z, bg); }).join('') + fig(smSvg(id, p, 32, 'mac'), 32, 32, 'mac 32', bg) + '</div>' +
+        '<p class="note" style="color:var(--mute);margin:0;font-size:12px">' + esc(d.note) + (rec ? ' ★ ' + esc(rec.why) : '') + '</p>' +
+        '<div><button type="button" class="pick small' + (on ? ' on' : '') + '" data-small="' + id + '" aria-pressed="' + on + '">' + (on ? 'Picked' : 'Pick') + ' ' + id + '</button></div></div>';
+    }).join('');
+    hydrate($('sgrid'));
+    var famOf = function(eid){ return eid === 'E7' ? 'ES2' : (eid === 'E2' || eid === 'E5' || eid === 'E6') ? 'ES3' : (eid === 'E4' || eid === 'E8') ? 'ES4' : 'ES1'; };
+    var bigs = state.picks.length ? state.picks.slice(0, 3) : [{ d: 'E1', p: 'P2' }, { d: 'E7', p: 'P2' }];
+    function fam(big){ var sm = state.small.length ? (state.small.indexOf(famOf(big.d)) >= 0 ? famOf(big.d) : state.small[0]) : famOf(big.d), bp = big.p;
+      return '<div class="famrow" style="padding:0"><figure>' + bigSvg(big.d, bp, 128) + '<figcaption>' + big.d + ' 128</figcaption></figure>' +
+        '<figure>' + cvs(bigSvg(big.d, bp, 64), 64, 64) + '<figcaption>' + big.d + ' 64</figcaption></figure><span class="sep"></span>' +
+        '<figure>' + cvs(smSvg(sm, bp, 32, 'mac'), 32, 32) + '<figcaption>' + sm + ' 32</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 16, 'mac'), 16, 16) + '<figcaption>' + sm + ' 16</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 64, 'mac', { pt: 32 }), 64, 32) + '<figcaption>' + sm + ' 32 @2x</figcaption></figure>' +
+        '<figure>' + cvs(smSvg(sm, bp, 32, 'mac', { pt: 16 }), 32, 16) + '<figcaption>' + sm + ' 16 @2x</figcaption></figure></div>'; }
+    ['famD', 'famL'].forEach(function(el){ $(el).innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;width:100%">' + bigs.map(fam).join('') + '</div>'; hydrate($(el)); });
+  }
+  $('sSeg').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; state.sp = b.getAttribute('data-p'); drawSmall(); });
+  $('sgrid').addEventListener('click', function(e){ var b = e.target.closest('button[data-small]'); if (!b) return; var id = b.getAttribute('data-small'), i = state.small.indexOf(id); if (i >= 0) state.small.splice(i, 1); else state.small.push(id); save(); drawSmall(); drawLine(); });
+
+  function drawRecs(){
+    var h = A.RECS.map(function(r){ var d = ALL[r.d]; return '<button type="button" class="rec" data-d="' + r.d + '" data-p="' + r.p + '">' + bigSvg(r.d, r.p, 128) + '<span><span class="tag">★ ' + r.d + ' · ' + r.p + '</span><br><b>' + esc(d.name) + ', ' + esc(PB[r.p].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    h += SM.RECS.map(function(r){ return '<button type="button" class="rec" data-s="' + r.s + '"><canvas data-svg="' + encodeURIComponent(smSvg(r.s, 'P2', 32)) + '" data-n="32" data-w="76" style="image-rendering:pixelated"></canvas><span><span class="tag">★ ' + r.s + ' · SMALL</span><br><b>' + esc(ALL[r.s].name) + '</b><p>' + esc(r.why) + '</p></span></button>'; }).join('');
+    $('recs').innerHTML = h; hydrate($('recs'));
+    $('weak').textContent = 'Weak spots seen in the renders: E4\'s Earth is small (the price of the true 10-Earth-radii magnetopause), so in the Dock it reads as a field with a dot; E8 is the busiest and its belts turn into soft clouds at 64 px; the true-size Moon of E6 and E8 is about 2 px in the Dock (E6 gives it a glow); E5\'s belts are faint on P2 and strong on P8; the night half of E7 makes the Earth look smaller at 64 px; ES4 at 16 px is a dot with arcs (the tail reads from 24 px); ES3\'s orbit makes a Saturn-like shape at 16 px.';
+  }
+  $('recs').addEventListener('click', function(e){ var b = e.target.closest('.rec'); if (!b) return;
+    if (b.hasAttribute('data-s')) { var s = b.getAttribute('data-s'); state.cmp.a = 'E1'; state.cmp.b = s; state.cmp.s = 32; drawCmp(); $('cmp').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    state.sel = b.getAttribute('data-d'); state.cur[state.sel] = b.getAttribute('data-p'); save(); drawAll(); $('bench').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  function drawAll(){ drawGrid(); drawBench(); drawSmall(); drawLine(); }
+  drawAll(); drawCmp(); drawRecs();
+})();
+</script>
