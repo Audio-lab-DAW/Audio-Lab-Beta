@@ -152,3 +152,6 @@ Built in `tools/design-lab/ws/ws1.js` and `ws1.css`, put into `index.html` by `p
 - The 01:54 freeze was removed as stale by lane F at 09:11:52 and the gate set a new one at 09:11:57 (a live run). This run's own stale-freeze removal (4ce1bd9, 09:12:00) rebased onto that new freeze and removed it by mistake; it was put back unchanged 19 s later (c193e40, same `since` 09:11:57). Nothing in `index.html` or `desktop/app-version*.json` was touched. For whoever runs the gate: if the gate checks the file mid-run, those 19 s are the only gap.
 - `ws1_edit.py` still applies cleanly on main's `index.html` (last changed 27 Nov 22:23, 077de7e): 45 top-level names, no clashes. Tests from the 01:10 checks stand for that file.
 - Next: release WS-1 when the freeze lifts (a check-in is scheduled for about 12:00 UTC): pull, re-run `ws1_edit.py`, lint, `taskWS_1.py`, smoke test, VERSION = highest + 0.001, `sync-app.js`, notes, push.
+
+## WS-1b: choose which drawings appear (step claimed 28 Nov, about 09:25 UTC)
+Built into the WS-1 edit script before WS-1 is released, as the scheduling chat asked: 'Start screen drawings…' under 'Show the start screen at start-up', a switch per drawing and 'Only this one', at least one stays on, default all on.
