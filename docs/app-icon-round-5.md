@@ -175,3 +175,9 @@ As in "What the implementation task does after the pick" above, with these desig
 
 Point `ic6/ship6.py` and `svgs6.js` at `round5/icons5b.js` and `small5b.js`.
 In Icon Composer the tapered rings stay one layer: their depth shading is drawn, so the system's specular stays off for them or is kept faint.
+
+## The user's picker removals (28 November 2026, 01:27 Brussels)
+
+`Round 5 picks: remove: field-orbits field-edge field-depth-paper porthole-field ink-electric charcoal-ember golden-recursion twelvefold lotus-orbits rose-curves spirograph frosted-spirograph neon-spirograph kaleido-tunnel menger-core nested-gyroscope newton-atom electric-seahorse dendrite phyllotaxis-core four-rings deco-medallion manhattan-blueprint concentric-stripes synthwave home-computer pastel-tech laser-grid dalton-1808 dalton-single thomson-1904 rutherford-1911`
+
+These 32 leave the in-app icon picker in the implementation task (after the round 5b, 5c and small-icon picks); a user who has one of them chosen keeps it working. Every other picker icon stays. The user also starts a theme system from these icon palettes (task TH1, docs/research-themes.md).
