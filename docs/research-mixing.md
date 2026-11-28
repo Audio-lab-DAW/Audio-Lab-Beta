@@ -234,3 +234,5 @@ The user: "And we're going to call it dual path latency."
 - Still off by default, turned on in Settings.
 
 - **Update 14:40 Brussels:** the user does NOT want the word "original" ("original is more like for food"). The tag wording is being picked again: do not build the text "AudioLab original"; keep the tag text in one constant (working text "AudioLab technology") so the pick is a one-line change.
+
+- **Tag picked 14:46 Brussels:** the tag text is **AudioLab Pro Technology** (capital P in Pro, capital T in Technology), small and grey with the atom mark next to the Dual Path Latency name in Settings. Tooltip and first-use card line: "AudioLab Pro Technology. Other DAWs turn slow devices off to cut latency; Dual Path Latency keeps them and brings them back in sync." About card: a small "AudioLab Pro Technology" section listing Dual Path Latency, designed by Ilja V. Jakovliev. Never use the word "original".
