@@ -6800,3 +6800,19 @@ Step OV8 of `docs/design-round-5-overlays.md` section 5, the user's pick **K1** 
 - 18 more failures are tests of work not released yet, pushed while the freezes held index.html (27 Nov 22:11 to 28 Nov 10:30), before v0.297's index.html change at 12:32, so the gate's "added after this build" rule could not skip them: `taskCF_1`, `taskDV_3` (DV-3 reverted at 10:02), `taskDV_4`, `taskIN_CD`, `taskMX_2`, `taskMX_3`, `taskNI_5c`, `taskNI_sideb0` (lane D's Fractals export flake fix, waiting), `taskOV8`, `taskSND_1`, `taskSQ3`, `taskST_S10`, `taskST_S5` (edited by ST-S10), `taskUV_1`, `taskUV_2`, `uv_bench_electron.js`, `taskWS_1`, `taskWS_1b`. Not judged against v0.297. Flaky, passed when run again: `taskIC6_electron.js`, `taskNI_2a.py`.
 - For the gate's owner: the skip rule by date no longer works once lanes release in a burst after a freeze. A test needs to say which release it is for (for example a `# for:` line naming the edit script or task, checked against the release commits in the build), or the lanes push the test with their release. Also still open: take only the last line of `require('electron')` output (Electron 45 prints "Downloading Electron binary..." first; this run had Electron installed beforehand).
 - `desktop/app-version.json` and index.html untouched.
+
+## 28 November 2026: v0.301, task CF-1 (lane P, comfort modes: the map's Hide button and its overlay)
+
+### Built
+- A **Hide** button on the map (`#cfMapHide`, right of the caption row; bottom row when the map is on top), with a tooltip, `aria-pressed` while hidden. Command `view.mapHide` (in `XT_CMD_EXTRA`, listed in docs/commands.md).
+- Hidden (`UI.cfMapHide`, `body.cfmh`): the map is out of the layout, so the arrangement and the other panels take its space; nothing draws the map (`drawMap` wrapped).
+- The pointer within 6 px of the edge where the map is docked (window bottom, under the tabs, under the transport, or above panels docked below it) brings it up as an overlay: `position:fixed` at that edge, z-index 20, a `window` face of the glass engine's floating layer (`GLFSEL`), no backdrop-filter; Solid draws it solid. In 80 ms, out 50 ms after 120 ms outside, times lane F's `--ov-mo` (reduced motion: at once). Escape, a resize or a layout change put it away. Right after Hide is clicked it waits until the pointer has left the edge once.
+- Hide again re-docks it at the same place and size.
+- Edit script `tools/design-lab/cf/cf1_edit.py` (with `--commands docs/commands.md --version`), release script `tools/design-lab/cf/cf1_release.sh`.
+
+### Checked
+- `tools/ui-tests/taskCF_1.py` 43/43 on v0.301 (screenshot with Hide off equal to v0.300 outside the button; space given back top and bottom; reveal and leave at all four kinds of edge; glass face; map usable; nothing drawn while hidden; re-dock same rect and same picture; reload keeps it; the command; reduced motion; Solid; idle frame time not worse; no console errors). taskXT_DL2 24/24, lint clean.
+- The gate's quick run on the CF-1 build (as v0.295, 09:58 UTC): smoke 14/14 clean, frame times equal to the reference (p50 16.7, p95 33.3 ms), windows 19 checks, Fractals Kick -19.05560 dB and Bass -35.48685 dB (measured; the gate's reference numbers), repeatable export lines bit-identical. No audio code touched. Smoke `real` and `push1-loop` again before this push: clean.
+
+### Left
+- CF-2 OLED care (E10 dimmed static brights, E11 dim when idle, E13 card), CF-3 Night mode, CF-4 Focus mode, their Settings rows together through lane B's hooks.
