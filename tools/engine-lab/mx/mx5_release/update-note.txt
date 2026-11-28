@@ -1,0 +1,1 @@
+Dual Path Latency (v@VER@), off unless you turn it on in Settings, Audio: the track you play no longer waits for its slow devices. What is ready sounds at once and the slow part joins in time; look-ahead devices use a quick stand-in while you play. Exports stay exact.

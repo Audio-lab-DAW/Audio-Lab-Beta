@@ -8,4 +8,6 @@ One Python edit script per step, `mx<step>.py` (for example `mx1.py`), with uniq
 - MX-3: `mx3.py`, `mx3.js`; release kit `mx3_release/` (after MX-2).
 - MX-4: `mx4.py`, `mx4.js` (main thread: Bass mono, hooks, the switch) and `mx4_wl.js` (the Ducker worklet's Spectral methods, inserted into `abxWLF`); release kit `mx4_release/` (after MX-3). Test: `python3 tools/ui-tests/taskMX_4.py index.html out --base <main + MX-2 + MX-3>` compares the old Ducker modes bit for bit.
 
-Release order while the gate's freezes hold: `mx2_release/release.sh`, then `mx3_release/release.sh`, then `mx4_release/release.sh`, each in a fresh clone of main with no `desktop/release-freeze.json`.
+- MX-5: `mx5.py`, `mx5.js` (Dual Path Latency); release kit `mx5_release/` (after MX-4; it also adds the rows in `docs/settings-ids.md` and `docs/commands.md`). Test: `taskMX_5.py`.
+
+Release order while the gate's freezes hold: `mx2_release/release.sh`, then `mx3_release/release.sh`, then `mx4_release/release.sh`, then `mx5_release/release.sh`, each in a fresh clone of main with no `desktop/release-freeze.json`.

@@ -150,9 +150,11 @@ with sync_playwright() as p:
     ok(m.sum() > 50 and float(np.median(dd)) < .1, 'export equals playback with a keyed Compressor: median %.3f dB, largest %.2f dB (20 ms windows)' % (float(np.median(dd)), float(dd.max())))
     # the dynamic EQ band listens to the kick (live; the export does not render dynamic EQ movement, as before)
     R(r"""(()=>{const f=mkFx('eq');f.p.bands=f.p.bands||[];const b=f.p.bands[0]||(f.p.bands[0]={});Object.assign(b,{on:true,t:'peaking',f:80,g:0,q:1,dyn:true,dr:-9,th:-30});f.p.sc={src:M3.kick.id,tap:'fx'};M3.bass.fx=[f];M3.kick.clips=[M3.clip(M3.burstB)];changed(true);syncGraph();
-      window.__dq=[];const X=NODES.get(M3.bass.id).fxm.get(f.id);ensureCtx();ctx.resume();pos=0;start();const t0=performance.now();const iv=setInterval(()=>{__dq.push([(performance.now()-t0)/1000,X.dyn[0]||0]);if(performance.now()-t0>2200){clearInterval(iv);stop()}},10);return 1})()""")
-    pg.wait_for_timeout(2600); dq = J(R, "__dq")
-    dmin = min(v for t, v in dq if .55 < t < 1.15); dend = max(abs(v) for t, v in dq if 1.7 < t < 2.1)
+      window.__dq=[];const X=NODES.get(M3.bass.id).fxm.get(f.id);ensureCtx();ctx.resume();pos=0;start();const t0=performance.now();const iv=setInterval(()=>{__dq.push([(performance.now()-t0)/1000,X.dyn[0]||0]);if(performance.now()-t0>2500){clearInterval(iv);stop()}},10);return 1})()""")
+    pg.wait_for_timeout(2900); dq = J(R, "__dq")
+    # the windows follow the dip's own start (the burst starts at 0.5 s of the song; playback may start a little after the wall clock: 0.1 s on v0.314)
+    on = next((t for t, v in dq if v < -1), .55); sh = max(0, min(.3, on - .55))
+    dmin = min(v for t, v in dq if .55 + sh < t < 1.15 + sh); dend = max(abs(v) for t, v in dq if 1.7 + sh < t < 2.1 + sh)
     ok(dmin < -3 and dend < .3, 'a dynamic EQ band keyed from the kick dips only while the kick plays (%.1f dB during, %.2f dB after)' % (dmin, dend))
     R("M3.kick.clips=[M3.clip(M3.kickB)];changed(true);0")
 

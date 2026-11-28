@@ -22,6 +22,8 @@ Step MX-3 of `docs/mixing-build.md` (the user's AE3 picks X1 and X4, `docs/resea
 - **Fractals unchanged** (measured on this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; Fractals has no sidechain set, so nothing in it changes.
 - Other UI tests on this build: taskMX_1 (49), taskMX_2 (41), taskAB, taskIN_G (31), taskNI_5b (22) all pass. The release gate's quick run on v0.295 with MX-2 and MX-3 (28 Nov, 10:20 UTC): lint clean (2397 top-level functions, no name twice), start-up smoke test 14 of 14 scenarios clean, idle frame times as before (p50 16.7 ms, p95 50.0 ms), windows 19 checks, Fractals levels and 9 repeatable export lines bit-identical. Re-run at release if main moved on.
 
+- Re-checked on v0.314 + MX-2 (28 November, 17:50 to 18:30 UTC): taskMX_3 40 of 40. Its dynamic EQ check had started to fail (0.31 to 0.56 dB left "after" the kick): the band itself released as before (time constant about 0.17 s), but playback now starts about 0.1 s after the wall clock the test used, so its windows now follow the dip's own start. Nothing in the engine changed for it.
+
 ### Only the user can test
 - Put a Compressor on the bass, click its Sidechain row, choose Kick: the bass dips on every kick. Try "Before its effects" on a kick with a long Limiter: it still lines up.
 - Select a reverb return and turn on "Duck under Kick": the reverb tail moves out of the way of each kick and is back by the next 16th. Change the tempo: it follows.
