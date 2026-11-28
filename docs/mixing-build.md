@@ -152,3 +152,10 @@ S18: export renders in slices (renderMixChunked) so the screen answers within 10
 ## MX-5: the user said yes (28 November, 00:27 Brussels)
 
 Build MX-5 after MX-4, with the user's conditions at the end of docs/research-mixing.md: off by default, turned on in Settings, a subtle "Only in AudioLab" tag, one first-use card, an About entry; working name "Instant Play" until the user picks a name.
+
+## The user's name for MX-5 (28 November 2026, 14:39 Brussels): Dual Path Latency
+
+The user: "And we're going to call it dual path latency."
+- The feature's name in all UI text is **Dual Path Latency** (Settings row, button, menus, tooltip, first-use card, About). Replace the working name "Instant Play" everywhere (one constant). Command ids keep the `mx` prefix.
+- The user wants it shown, subtly, as an AudioLab original that the user developed. Until the user picks otherwise, build the recommended marks: **U1** a small grey "AudioLab original" tag with the atom mark next to the name in Settings; **U2** one tooltip and first-use card line: "An AudioLab original. Other DAWs turn slow devices off to cut latency; AudioLab keeps them and brings them back in sync."; **U3** an "AudioLab originals" section on the About card listing Dual Path Latency, designed by Ilja V. Jakovliev. (U4, a small atom next to the name everywhere, is not built unless picked.)
+- Still off by default, turned on in Settings.
