@@ -31,7 +31,8 @@ JS = r"""/* ---------- task UV-2 (lane O, view engine; the user's UX1 pick S14: 
    Anything else that changed (a setting, the theme, the tracks, the loop, a drag with its ghosts, recording, the zoom) draws in full.
    UV.rest ms after the last tiled frame the arrangement is drawn once in full, so at rest every pixel is a fresh drawing.
    The picture kept is the canvas itself (the playhead has its own layer, PHL), or lane A's snapshot ARRC when that layer is off.
-   On only where a graphics card draws the canvas (UVT.on 'auto', uvGpu): on a software renderer the copies cost more than they save.
+   UVT.on 'auto' (the standard): edits are tiled everywhere (they copy nothing); scrolling only where a graphics card draws the canvas (uvGpu):
+   on a software renderer the copies cost more than they save (measured, task UV-2). true: both everywhere, false: off.
    Hooks: UV_HOOKS.bump() for lane A (any drawing change that the signature below cannot see: drop the kept picture);
    UV_HOOKS.tiles() = what the last frame drew ({mode:'full'|'shift'|'edit', dx, dy in device px, rects [[x,y,w,h]...]}) for the glass engine (part b). */
 const UVT={why:'',on:'auto',gpu:null,bb:null,bbOk:'',base:null,clip:0,force:0,tm:0,insnap:0,bad:0,last:{mode:'full',dx:0,dy:0,rects:null},n:{full:0,shift:0,edit:0},px:{drawn:0,all:0},maxF:.6,sticky:4};
@@ -60,7 +61,7 @@ function uvPrep(){UVT.last={mode:'full',dx:0,dy:0,rects:null};
   /* the picture kept: while the playhead has its own layer (PHL) the canvas holds no playhead: an edit paints over the canvas itself,
      a scroll copies from UVT.bb (a copy taken after frames that moved; copying the canvas onto itself costs three times as much). Else lane A's snapshot ARRC. */
   const own=typeof PHL==='object'&&PHL.on&&!PHL.keep,src=own?(UVT.bbOk===W+'x'+H?UVT.bb:arr):(ARRC&&ARRWH===W+'x'+H?ARRC:null);
-  const B=UVT.base,ok=(UVT.on===true||(UVT.on==='auto'&&uvGpu()))&&!UVT.bad&&!UVT.force&&B&&B.S===S&&B.sig===sig&&B.wh===W+'x'+H&&src&&!(typeof OVW==='object'&&(OVW.on||OVW.a))&&!(play.on&&UI.follow&&(UI.followMode==='center'||UI.followMode==='stay'));
+  const B=UVT.base,ok=!!UVT.on&&!UVT.bad&&!UVT.force&&B&&B.S===S&&B.sig===sig&&B.wh===W+'x'+H&&src&&!(typeof OVW==='object'&&(OVW.on||OVW.a))&&!(play.on&&UI.follow&&(UI.followMode==='center'||UI.followMode==='stay'));
   UVT.why=!ok?(!B?'nobase':B.sig!==sig?'sig':!src?'src':'off'):'';UVT.force=0;UVT.next={vx:V.x,vy:V.y,sig,cl,S,pre,wh:W+'x'+H};if(!ok)return null;
   /* B.vx, B.vy: the view the kept picture shows (it moves by whole device pixels, so its view may differ from V by under half a pixel) */
   const dxU=(B.vx-V.x)*V.ppb,dyU=B.vy-V.y,dx=Math.round(dxU*D),dy=Math.round(dyU*D),moved=Math.abs(dxU)>1e-9||Math.abs(dyU)>1e-9;
@@ -98,6 +99,7 @@ function uvPrep(){UVT.last={mode:'full',dx:0,dy:0,rects:null};
   /* worth it only when most of the picture is kept */
   const RR=uvDedup(R);R.length=0;R.push(...RR);const area=uvArea(R);if(area>W*H*UVT.maxF){UVT.why='area '+(area/W/H).toFixed(2);return null}
   g.save();g.setTransform(1,0,0,1,0,0);
+  if(moved&&!uvShift()){UVT.why='cpu';return null}/* scrolling: tiles only with a graphics card */
   if(moved&&src===arr){UVT.why='nobb';return null}/* no copy kept yet: this frame draws in full and keeps one */
   if(moved&&(dx||dy)){g.save();g.beginPath();g.rect(kx0,ky0,kx1-kx0,ky1-ky0);g.clip();if(!uvOpaque())g.globalCompositeOperation='copy';g.drawImage(src,kx0-dx,ky0-dy,kx1-kx0,ky1-ky0,kx0,ky0,kx1-kx0,ky1-ky0);g.restore()}
   else if(!own){/* the canvas holds last frame's playhead: start from the kept picture */g.save();g.globalCompositeOperation='copy';g.drawImage(src,0,0);g.restore()}
@@ -117,11 +119,13 @@ function uvKeep(){const W=arr.width,H=arr.height;if(!UVT.bb)UVT.bb=document.crea
 function uvGpu(){if(UVT.gpu!=null)return UVT.gpu;let ok=false,name='';try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{failIfMajorPerformanceCaveat:true});
     if(gl){const d=gl.getExtension('WEBGL_debug_renderer_info');name=String(d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));ok=!/swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);const e=gl.getExtension('WEBGL_lose_context');if(e)e.loseContext()}}catch(e){ok=false}
   UVT.gpuName=name;return UVT.gpu=ok}
+/* scroll tiles: on with 'auto' only where a graphics card draws (edits are tiled everywhere: they copy nothing) */
+function uvShift(){return UVT.on===true||(UVT.on==='auto'&&uvGpu())}
 function uvUnclip(){if(UVT.clip){UVT.clip=0;arr.getContext('2d').restore()}}
 {const _uvSnap=arrSnap;arrSnap=function(){uvUnclip();UVT.insnap=1;try{return _uvSnap.apply(this,arguments)}finally{UVT.insnap=0}}}
 {const _uvSnapTo=snapTo;snapTo=function(cv,cache){if(cv===arr&&!UVT.insnap)UVT.base=null;/* someone else kept a copy (it may hold the playhead) */return _uvSnapTo.apply(this,arguments)}}
 {const _uvDa=drawArr;drawArr=function(phOnly){if(phOnly){/* only the playhead: its own layer leaves the canvas alone; anything else drew the canvas again */const f0=typeof PHL==='object'?PHL.n.fast:-1,r=_uvDa.apply(this,arguments);if(typeof PHL!=='object'||PHL.n.fast===f0)UVT.base=null;return r}
-  if(!(UVT.on===true||(UVT.on==='auto'&&uvGpu()))||UVT.bad){UVT.base=null;UVT.bbOk='';UVT.last={mode:'full',dx:0,dy:0,rects:null};UVT.n.full++;return _uvDa.apply(this,arguments)}/* off: lane A's drawing as it was, nothing added */
+  if(!UVT.on||UVT.bad){UVT.base=null;UVT.bbOk='';UVT.last={mode:'full',dx:0,dy:0,rects:null};UVT.n.full++;return _uvDa.apply(this,arguments)}/* off: lane A's drawing as it was, nothing added */
   let p=null;try{p=uvPrep()}catch(e){p=null;UVT.bad=1;console.warn('AudioLab UV-2: tiles off',e)}
   const W=arr.width,H=arr.height;let r;
   try{r=_uvDa.apply(this,arguments)}finally{if(UVT.clip){uvUnclip();UVT.base=null;dirty=true}}
@@ -129,7 +133,7 @@ function uvUnclip(){if(UVT.clip){UVT.clip=0;arr.getContext('2d').restore()}}
   const B0=UVT.base;
   if(N&&q&&!(typeof OVW==='object'&&(OVW.on||OVW.a))&&q.X0===X0&&q.AY===AY&&q.TY===TY&&q.BY===BY&&q.arrW===arrW&&N.wh===arr.width+'x'+arr.height){UVT.base={vx:N.vx,vy:N.vy,sig:N.sig,cl:N.cl,S:N.S,wh:N.wh};
     /* the view moved (or this was a scroll frame) and the tiles are on here: keep a copy for the next one */
-    const mv=UVT.last.mode==='shift'||(B0&&(B0.vx!==V.x||B0.vy!==V.y));if(mv&&!ad&&!RS&&typeof PHL==='object'&&PHL.on&&!PHL.keep)uvKeep();else UVT.bbOk=''}
+    const mv=UVT.last.mode==='shift'||(B0&&(B0.vx!==V.x||B0.vy!==V.y));if(mv&&!ad&&!RS&&uvShift()&&typeof PHL==='object'&&PHL.on&&!PHL.keep)uvKeep();else UVT.bbOk=''}
   else{UVT.base=null;UVT.bbOk='';if(p)dirty=true}/* drawArr laid out differently than the preparation: this frame may be stale, draw again in full */
   UVT.next=null;UVT.px.all+=W*H;
   if(p){UVT.n[UVT.last.mode]++;UVT.px.drawn+=p.area;if(UVT.tm)clearTimeout(UVT.tm);UVT.tm=setTimeout(()=>{UVT.tm=0;UVT.force=1;dirty=true},UV.rest)}

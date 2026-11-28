@@ -34,8 +34,8 @@ async function one(name, file) {
   await run("if(!window.__ub){window.__ub={t:0,n:0};const o=frame0;frame0=function(n){const t=performance.now();try{return o(n)}finally{__ub.t+=performance.now()-t;__ub.n++}}};0");
   wc.debugger.attach('1.3'); await wc.debugger.sendCommand('Performance.enable');
   const metric = async () => { const m = {}; for (const x of (await wc.debugger.sendCommand('Performance.getMetrics')).metrics) m[x.name] = x.value; return m; };
-  for (const on of (res.meta.tiles ? [false, true] : [false])) {
-    if (res.meta.tiles) await run('UVT.on=' + on + ';UVT.force=1;dirty=true;0');
+  for (const on of (res.meta.tiles ? [false, 'auto'] : [false])) {
+    if (res.meta.tiles) await run('UVT.on=' + JSON.stringify(on) + ';UVT.force=1;dirty=true;0');
     await run('V.x=96;V.ppb=24;V.y=0;clampV();dirty=true;0'); await sleep(500);
     const b = JSON.parse(await run(`(()=>{const g=arr.getContext('2d'),r=[],why={};dirty=false;drawArr(false);g.getImageData(0,0,1,1);
       for(let i=0;i<60;i++){V.x+=(i%30<15?6:-6)/V.ppb;clampV();const t=performance.now();drawArr(false);g.getImageData(0,0,1,1);r.push(performance.now()-t);if(typeof UVT==='object'){const k=UVT.last.mode+(UVT.why?':'+UVT.why:'');why[k]=(why[k]||0)+1}}
@@ -44,15 +44,16 @@ async function one(name, file) {
     for (const sc of ['scroll', 'edit']) {
       const drv = sc === 'scroll'
         ? "window.__ud={on:true,k:0};(function f(){if(!__ud.on)return;__ud.k++;V.x+=(Math.floor(__ud.k/90)%2?-1:1)*6/V.ppb;clampV();dirty=true;requestAnimationFrame(f)})();0"
-        : "window.__ud={on:true,k:0};V.x=160;clampV();{let c=null;S.tracks.forEach((t,i)=>{for(const q of t.clips){const G=clipGeom(i,q);if(!c&&G.x>X0+40&&G.x+G.w<arr.width/((window.devicePixelRatio||1)*ZOOM)-40&&G.y>AY+10)c=q}});__ud.c=c}(function f(){if(!__ud.on)return;__ud.k++;if(__ud.c){__ud.c.start+=(__ud.k%2?1:-1);dirty=true}requestAnimationFrame(f)})();0";
+        : "window.__ud={on:true,k:0};V.x=160;clampV();{let c=null;S.tracks.forEach((t,i)=>{for(const q of t.clips){const G=clipGeom(i,q);if(!c&&G.x>X0+20&&G.x<arr.clientWidth-60&&G.y>AY+10&&G.y+G.h<arr.clientHeight-BY)c=q}});__ud.c=c}(function f(){if(!__ud.on)return;__ud.k++;if(__ud.c){__ud.c.start+=(__ud.k%2?1:-1);dirty=true}requestAnimationFrame(f)})();0";
       await run(drv); await sleep(600);
       const m0 = await metric();
+      await run("window.__uw={};if(!window.__uwr&&typeof UVT==='object'){window.__uwr=1;const o=drawArr;drawArr=function(p){const r=o.apply(this,arguments);if(!p){const k=UVT.last.mode+(UVT.why?':'+UVT.why:'');__uw[k]=(__uw[k]||0)+1}return r}};0");
       const r = JSON.parse(await wc.executeJavaScript(`new Promise(res=>{const iv=[];let last=performance.now(),t0=last;const a0=__ub.t,n0=__ub.n;const f=()=>{const n=performance.now();iv.push(n-last);last=n;if(n-t0<4000)requestAnimationFrame(f);else res(JSON.stringify({iv,app:(__ub.t-a0)/Math.max(1,__ub.n-n0)}))};requestAnimationFrame(f)})`));
       const m1 = await metric();
       await run("__ud.on=false;if(__ud.c&&__ud.k%2)__ud.c.start-=1;dirty=true;0"); await sleep(400);
       const iv = r.iv.slice(2).sort((a, b) => a - b), n = iv.length, tot = iv.reduce((a, b) => a + b, 0);
       res.rows.push({ tiles: on, scene: sc, fps: +(n / (tot / 1000)).toFixed(1), med: +iv[n >> 1].toFixed(2), p95: +iv[Math.floor(n * .95)].toFixed(2), app: +r.app.toFixed(2),
-        main: +(((m1.TaskDuration || 0) - (m0.TaskDuration || 0)) * 1000 / n).toFixed(2), modes: res.meta.tiles ? JSON.parse(await run('JSON.stringify(UVT.n)')) : null });
+        main: +(((m1.TaskDuration || 0) - (m0.TaskDuration || 0)) * 1000 / n).toFixed(2), modes: res.meta.tiles ? JSON.parse(await run('JSON.stringify(__uw)')) : null, edited: sc === 'edit' ? await run('!!__ud.c') : undefined });
     }
   }
   wc.debugger.detach(); w.destroy();
@@ -64,7 +65,7 @@ app.whenReady().then(async () => {
   fs.writeFileSync(OUT, JSON.stringify(all, null, 1));
   for (const r of all) {
     console.log('==', r.name, JSON.stringify(r.meta || r.error));
-    for (const x of r.rows || []) console.log(('tiles ' + (x.tiles ? 'on ' : 'off')).padEnd(10), x.scene.padEnd(7), x.scene === 'bench' ? 'one drawing median ' + x.med.toFixed(2) + ' ms, 90% ' + x.p90.toFixed(2) + ', best ' + x.min.toFixed(2) : 'fps ' + x.fps + '  interval median ' + x.med + ' ms, 95% ' + x.p95 + '  app ' + x.app + ' ms/f  main ' + x.main + ' ms/f', x.modes ? JSON.stringify(x.modes) : '');
+    for (const x of r.rows || []) console.log(('tiles ' + (x.tiles ? x.tiles : 'off')).padEnd(11), x.scene.padEnd(7), (x.edited === false ? '(no clip found to edit) ' : '') + (x.scene === 'bench' ? 'one drawing median ' + x.med.toFixed(2) + ' ms, 90% ' + x.p90.toFixed(2) + ', best ' + x.min.toFixed(2) : 'fps ' + x.fps + '  interval median ' + x.med + ' ms, 95% ' + x.p95 + '  app ' + x.app + ' ms/f  main ' + x.main + ' ms/f'), x.modes ? JSON.stringify(x.modes) : '');
   }
   app.quit();
 });

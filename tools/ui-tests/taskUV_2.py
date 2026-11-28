@@ -74,6 +74,9 @@ def main():
         pg.wait_for_timeout(500)
         gpu = R("uvGpu()"); print('graphics card for the canvas:', gpu, R("UVT.gpuName"), '(tiles are on by themselves only with one; switched on here for the test)')
         ck('the tiles are on by themselves only with a graphics card (this machine: %s)' % ('one' if gpu else 'software rendering'), R("UVT.on==='auto'"))
+        if not gpu:
+            r = J("(()=>{const o=[];V.x=96;V.ppb=24;V.y=0;clampV();UVT.force=1;drawArr(false);for(let k=0;k<3;k++){V.x+=7/((window.devicePixelRatio||1)*ZOOM)/V.ppb;drawArr(false);o.push(UVT.last.mode+':'+UVT.why)}const c=S.tracks.find(t=>t.clips.length).clips[0];c.mute=!c.mute;drawArr(false);o.push(UVT.last.mode);c.mute=!c.mute;drawArr(false);o.push(UVT.last.mode);return o})()")
+            ck('standard setting without a graphics card: scrolling draws in full, an edit is tiled', r[:3] == ['full:cpu'] * 3 and r[3] == 'edit', r)
         R("UVT.on=true;0")
         R("window.__fz=frame0;frame0=function(){};0")
 
