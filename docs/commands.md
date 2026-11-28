@@ -101,6 +101,7 @@ macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15); docs/extensions
 | `view.overview` | Song overview on / off | `Shift+O` | `overview` | 0.273 |
 | `view.automation` | Show automation lanes |  | `aut` | 0.273 |
 | `view.closeWindows` | Close all floating windows |  | `closewins` | 0.273 |
+| `view.workshop` | Workshop: advanced settings by id |  |  | 0.295 |
 
 ## Help and tools
 

@@ -135,3 +135,6 @@ reused** (section 9.4, rule 1).
 | `mixer.cables.selectedOnly` | cable legend Selected only switch | `.cablg [data-cl=sel]` | 0.266 |
 | `mixer.cables.style` | cable legend Style switch | `.cablg [data-cl=sty]` | 0.266 |
 | `mixer.cables.clashes` | cable legend Clashes switch | `.cablg [data-ni=clash]` | 0.266 |
+| `mixer.strip.sendPrePost` | send before or after the fader ring (lane K, MX-1; named by XT-DL3) | `.mxsr .mxpp` | 0.295 |
+| `mixer.strip.output` | channel Output button (lane K, MX-1; named by XT-DL3) | `.mx:not(.master) .mxout` | 0.295 |
+| `mixer.master.monoLoss` | Mono loss button (lane D; named by XT-DL3) | `.mx.master [data-niml]` | 0.295 |
