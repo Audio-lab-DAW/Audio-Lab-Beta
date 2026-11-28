@@ -177,3 +177,12 @@ This overrides every "old projects must still load / keep their sound / render b
 The user: "The fractal song is only for testing. I will later convert an older version into a new AudioLab."
 - **Step WS-F (lane Q, after WS-1 is released):** take the Fractals song data (with the Electric Universe vocals) and any other built-in demo song data out of `index.html` entirely. Move them to `tools/test-songs/` (saved in the current project format, R0) and point the release gate, the native lab and every test that used the built-in copy at those files. The app itself ships no song (D6); the start screen offers empty project, templates and recent projects only. Test: `index.html` holds no song audio or song data, the gate's export and load checks still pass from `tools/test-songs/`, and the app file is smaller.
 - The user will convert an older version of the song into the new AudioLab personally later; no task does that.
+
+## Round 3 asked by the user (28 November 2026, 15:09 Brussels): task WS-0c on Fable
+
+The user: "Let's do a round 3 of the start screens in Fable. When it comes to the dipole fields, I like the animation. It's very cool where it comes at the top and at the bottom. Let's rework the particles. Give me a few different particles. Maybe a little bit less particles or some more. I want like a scientific representation. And the phase portrait, which is green, let's rework that in something cooler. It's a little bit too simple. And the pink one, the Fourier series, let's rework that to make it look cooler. Let's go with 6 more suggestions for start screens that look like this."
+- **Keep** the S1 dipole's animation (the flow out of the top and back in at the bottom). **Rework its particles:** several particle styles, each a scientific representation (for example charged particles drifting along field lines with gyration, density by field strength, colour or size by energy or speed), at a few counts (fewer and more than today).
+- **Rework R5 phase portrait** (green): richer and cooler, still a correct dynamical system.
+- **Rework R8 Fourier series** (pink): cooler, still a correct Fourier construction.
+- **Six new drawings** in the same style for the random set.
+- Pick page only (tools/design-lab/ws/round3/); WS-1 is released as built and the round 3 picks replace or add drawings afterwards in a lane Q step.
