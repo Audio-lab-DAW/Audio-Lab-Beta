@@ -263,3 +263,6 @@ Line format: `Start screen round 3: dipole P1 count 2 | phase PH1 | fourier FS1 
 Released 28 Nov 16:03 UTC (78552a4), in the 15:55 gap after the 12:35 freeze. Checked on the v0.303 file itself: lint clean (2499 top-level functions), `taskWS_1.py` 38/38, `taskWS_1b.py` 16/16, desktop smoke test real and keyboard clean (0 errors, 0 state changes, frames p50 16.7 ms, p95 50 ms); screenshots of the start screen with an old profile looked at. The audio path is not touched. start screen complete.
 
 Next for lane Q: round 3 picks (WS-0c, waiting for the user's line) and step WS-F (the song data out of `index.html`, the user's 14:55 decision). Next for others: lane B may move the two rows (`WS_HOOKS.settingsRows`); lane G may let the splash read `audiolab-ws-draw` and draw F1 and R4 to R8 (`WSR2.FN`).
+
+## WS-F: the song data out of index.html (step claimed 28 Nov, about 16:45 UTC)
+Lane Q takes the Fractals song data and any other built-in demo song data out of `index.html` into `tools/test-songs/`, and points the release gate, the native lab and the tests at those files.
