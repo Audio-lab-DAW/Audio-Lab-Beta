@@ -3,6 +3,7 @@
 #include "dev_crush.h"
 #include "dev_dynamics.h"
 #include "dev_eq.h"
+#include "dev_reverb.h"
 #include "dev_modulation.h"
 #include "dev_side.h"
 #include "dev_shape.h"
@@ -36,5 +37,7 @@ void registerCoreDevices() {
     deviceRegistry()["drive"] = mk<shape::Drive>();
     // task NB-N3h: the Timeless delay (a DelayNode feedback loop run quantum by quantum as Chromium pulls it)
     deviceRegistry()["tdelay"] = mk<tdl::TDelay>();
+    // task NB-N3i: the Space reverb (Chromium's ConvolverNode with the app's generated impulse)
+    deviceRegistry()["reverb"] = mk<rvb::SpaceReverb>();
 }
 }  // namespace al

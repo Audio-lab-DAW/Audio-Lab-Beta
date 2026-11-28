@@ -29,7 +29,14 @@ static bool load(const std::string& path, BusGraph& g, size_t& frames, std::vect
     auto chainOf = [&](const JValue& fx, std::unique_ptr<Chain>& ch) -> bool {
         ch.reset(new Chain(g.ctx));
         if (fx.t != JValue::Array) return true;
-        for (auto& d : fx.a) if (!ch->add(d["type"].str(), d["p"], err)) return false;
+        static std::vector<std::unique_ptr<AppRandom>> rnds;   // the app's RND() as the reference seeded it per device (task NB-N3i)
+        for (auto& d : fx.a) {
+            g.ctx.appRandom = nullptr;
+            if (d["seed"].t == JValue::String) { rnds.emplace_back(new AppRandom(d["seed"].str())); g.ctx.appRandom = rnds.back().get(); }
+            const bool ok = ch->add(d["type"].str(), d["p"], err);
+            g.ctx.appRandom = nullptr;
+            if (!ok) return false;
+        }
         return true;
     };
     if (!chainOf(s["masterFx"], g.masterChain)) return false;

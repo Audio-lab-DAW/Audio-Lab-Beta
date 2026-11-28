@@ -469,6 +469,48 @@
    "peak": 1.0661883354187012,
    "webRendersTwiceSame": true,
    "webSamplesDifferingBetweenTwoRenders": 0
+  },
+  "reverbbus": {
+   "quantum": 512,
+   "built": [
+    "a",
+    "m",
+    "g",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "a": 0,
+    "m": 0,
+    "g": 0,
+    "b": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.058194637298584,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 45967
+  },
+  "reverbbus128": {
+   "quantum": 128,
+   "built": [
+    "a",
+    "m",
+    "g",
+    "b",
+    "r"
+   ],
+   "delays": {
+    "a": 0,
+    "m": 0,
+    "g": 0,
+    "b": 0,
+    "r": 0
+   },
+   "largestBus": 4,
+   "peak": 1.053025722503662,
+   "webRendersTwiceSame": false,
+   "webSamplesDifferingBetweenTwoRenders": 43928
   }
  }
 }

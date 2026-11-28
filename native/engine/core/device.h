@@ -20,6 +20,7 @@
 #include <vector>
 #include "jsmath.h"
 #include "params.h"
+#include "apprandom.h"
 #if defined(__x86_64__) || defined(_M_X64)
 #include <xmmintrin.h>
 #endif
@@ -57,6 +58,10 @@ struct RenderContext {
     // The song's tempo and the beat the render starts at (S.bpm and SIDE_B0 in the app): the devices that run in time
     // with the song read them (the Sidechain device's pump, task NB-N3g).
     double bpm = 120, beat0 = 0;
+    // The app's RND() (apprandom.h): seeded as the app seeds it for an export or a test, so the devices that draw
+    // random numbers when they are made (the Space reverb's impulse, task NB-N3i) draw the same ones in the same
+    // order. Null: each such device uses a generator of its own (Math.random's role: any numbers).
+    AppRandom* appRandom = nullptr;
     double currentTime() const { return currentFrame / sampleRate; }
 };
 

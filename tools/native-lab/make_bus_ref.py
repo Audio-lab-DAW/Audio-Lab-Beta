@@ -140,6 +140,15 @@ SCENES["tdelaybus"] = (512, 0.9, [("comp", None, CP_MASTER), ("clip", None, CL_F
                         T("g", kind="group", vol=0.9, fx=[("tdelay", None, TD_WOW)]), T("b", "st_b", vol=0.6, grp="g"),
                         T("r", kind="return", vol=0.6, fx=[("tdelay", None, dict(TD_FRX, mix=100, ping=False))])])
 SCENES["tdelaybus128"] = (128,) + SCENES["tdelaybus"][1:]
+# task NB-N3i: the Space reverb as Fractals has it (the "Plate reverb" return, 100 % wet, fed by sends), on a mono
+# source (stereo out), on a group, after an EQ; the master's compressor and clipper
+RV_FRX = {"decay": 1, "predelay": 15, "damp": 7000, "lowcut": 500, "mix": 100}
+SCENES["reverbbus"] = (512, 0.9, [("comp", None, CP_MASTER), ("clip", None, CL_FRX)],
+                       [T("a", "st_a", vol=0.7, pan=-0.2, fx=[("eq", None, EQ_BELLS)], sends={"r": 0.35}),
+                        T("m", "mono_a", vol=0.8, pan=0.3, fx=[("reverb", None, {"decay": 0.6, "predelay": 5, "damp": 9000, "lowcut": 150, "mix": 30})], sends={"r": 0.2}),
+                        T("g", kind="group", vol=0.9, fx=[("reverb", None, {"decay": 2.2, "predelay": 30, "damp": 4000, "lowcut": 80, "mix": 20})]), T("b", "st_b", vol=0.6, grp="g"),
+                        T("r", kind="return", vol=0.6, fx=[("reverb", None, RV_FRX)])])
+SCENES["reverbbus128"] = (128,) + SCENES["reverbbus"][1:]
 # every ported device somewhere on the buses, two levels of groups, two returns, delay compensation from a limiter
 SCENES["wide"] = (512, 0.7, [("imager", None), ("limit", "loud")],
                   [T("bus", kind="group", vol=0.9, pan=0.05, fx=[("deess", "voc")]), T("sub", kind="group", vol=0.95, grp="bus", fx=[("tstop", None)]),
@@ -157,7 +166,10 @@ JS = r"""async ({sc, b64, N, SR}) => {
   const posted = {}, mk = (d, owner) => { const q = A.mkFx(d.type).p;
       if (d.pre) { const e = (A.FXPRE[d.type] || {})[d.pre]; if (!e) throw new Error('no preset ' + d.type + ' ' + d.pre); Object.assign(q, JSON.parse(JSON.stringify(e[1]))); q.pre = d.pre }
       if (d.extra) Object.assign(q, JSON.parse(JSON.stringify(d.extra)));
-      const x = A.mkFxNode(oc, d.type); x.set(q); (posted[owner] = posted[owner] || []).push({type: d.type, p: JSON.parse(JSON.stringify(x.sp ? x.sp(q) : q)), lat: A.fxLat({type: d.type, on: true, p: q}, SR)}); return x };
+      // the app's RND() seeded for a device that draws random numbers when it is made (the Space reverb's impulse, task NB-N3i)
+      const seed = d.type === 'reverb' ? 'nb-n3i|' + sc.name + '|' + owner + '|' + (posted[owner] || []).length : null;
+      const x = A.mkFxNode(oc, d.type); if (seed) A.setSeed(seed); try { x.set(q) } finally { if (seed) A.setSeed(null) }
+      (posted[owner] = posted[owner] || []).push({type: d.type, p: JSON.parse(JSON.stringify(x.sp ? x.sp(q) : q)), lat: A.fxLat({type: d.type, on: true, p: q}, SR), ...(seed ? {seed} : {})}); return x };
   // renderMix: the master
   const mst = oc.createGain(); mst.gain.value = sc.master; let out = mst;
   for (const d of sc.mfx) { const x = mk(d, '@master'); out.connect(x.in); out = x.out }
@@ -209,7 +221,7 @@ def main():
     for k, x in INPUTS.items(): wav_write(os.path.join(out, "in_%s.wav" % k), x)
     b64 = {k: base64.b64encode(np.ascontiguousarray(x).tobytes()).decode() for k, x in INPUTS.items()}
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat,setB0:v=>{SIDE_B0=v},bpm:()=>S.bpm};1")
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,fxLat,setB0:v=>{SIDE_B0=v},bpm:()=>S.bpm,setSeed:s=>{SEEDR=s==null?null:seedRng(s)}};1")
     only = sys.argv[2].split(",") if len(sys.argv) > 2 and sys.argv[2] else None   # some scenes only; the others' entries are kept
     bpm = al.run("S.bpm")
     info = {"app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N, "scenes": {}}
@@ -217,7 +229,7 @@ def main():
     if only and os.path.exists(old): info["scenes"] = json.load(open(old)).get("scenes", {})
     for name, (Q, master, mfx, tracks) in SCENES.items():
         if only and name not in only: continue
-        sc = {"Q": Q, "master": master, "mfx": [fxd(f) for f in mfx],
+        sc = {"name": name, "Q": Q, "master": master, "mfx": [fxd(f) for f in mfx],
               "tracks": [dict(t, src=({"name": t["src"], "ch": int(INPUTS[t["src"]].shape[0])} if t["src"] else None)) for t in tracks]}
         r = al.js(JS, {"sc": sc, "b64": b64, "N": N, "SR": SR}); r2 = al.js(JS, {"sc": sc, "b64": b64, "N": N, "SR": SR})
         y = np.frombuffer(base64.b64decode(r["out"]), dtype="<f4").reshape(2, N)

@@ -56,7 +56,13 @@ int main(int argc, char** argv) {
             for (auto& d : c["chain"].a) if (d["type"].str() == "side") { ctx.bpm = d["bpm"].num(ctx.bpm); ctx.beat0 = d["beat0"].num(ctx.beat0); }   // the song's tempo (task NB-N3g)
             Chain ch(ctx);
             bool ok = true;
-            for (auto& d : c["chain"].a) if (!ch.add(d["type"].str(), d["p"], err)) { ok = false; break; }
+            std::vector<std::unique_ptr<AppRandom>> rnds;   // the app's RND() as the reference seeded it for each device (task NB-N3i)
+            for (auto& d : c["chain"].a) {
+                ctx.appRandom = nullptr;
+                if (d["seed"].t == JValue::String) { rnds.emplace_back(new AppRandom(d["seed"].str())); ctx.appRandom = rnds.back().get(); }
+                if (!ch.add(d["type"].str(), d["p"], err)) { ok = false; break; }
+            }
+            ctx.appRandom = nullptr;
             const std::string name = c["name"].str();
             if (!ok) { printf("{\"name\":%s,\"ok\":false,\"error\":%s}\n", jstr(name).c_str(), jstr(err).c_str()); bad++; continue; }
             std::vector<float> oL, oR;

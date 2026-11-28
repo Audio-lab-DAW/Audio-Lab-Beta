@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools", "remake"))
 SR = 48000
 N = 128 * 2438  # 312,064 frames, 6.5 s, whole render quanta
 
-TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side", "clip", "drive", "tdelay"]
+TYPES = ["limit", "gate", "trans", "deess", "crush", "chorus", "imager", "fshift", "vocoder", "tstop", "eq", "comp", "side", "clip", "drive", "tdelay", "reverb"]
 # settings no preset uses, so each branch of the code runs at least once (merged over the factory settings)
 EXTRA = {
     "limit": {"x-punchy-notp": {"style": "punchy", "tp": False, "gain": 8, "look": 1.3},
@@ -122,6 +122,15 @@ EXTRA["tdelay"] = {
     "x-long": TD(sync="free", time=2, feedback=50), "x-16th": TD(sync="1/16", width=0), "x-quarter-triplet": TD(sync="1/4 triplet", mix=100),
     "x-dry": TD(mix=0), "x-max-fb": TD(feedback=98, ping=False, drive=60),
 }
+# task NB-N3i: the Space reverb (a ConvolverNode with the app's generated impulse, a pre-delay DelayNode, a highpass):
+# Fractals' "Plate reverb" return, the shortest and longest decay, damping and low cut at their ends, part-wet mixes
+def RV(**k):
+    d = dict(decay=2.2, predelay=15, damp=6000, lowcut=120, mix=25); d.update(k); return d
+EXTRA["reverb"] = {
+    "frx-plate": RV(decay=1, predelay=15, damp=7000, lowcut=500, mix=100),
+    "x-short": RV(decay=0.3, predelay=0, damp=20000, lowcut=20), "x-long": RV(decay=8, predelay=200, damp=1000, lowcut=1000, mix=60),
+    "x-dry": RV(mix=0), "x-wet": RV(mix=100, decay=3.3, damp=2500), "x-odd": RV(decay=1.37, predelay=7.3, damp=4321.6, lowcut=87.5, mix=41),
+}
 CHAINS = {
     "chain-drums": [("gate", "kick"), ("trans", "punch"), ("crush", "12bit"), ("limit", "loud")],
     "chain-voice": [("deess", "voc"), ("gate", "room"), ("limit", "trans")],
@@ -141,6 +150,9 @@ CHAINS = {
     # task NB-N3h: Fractals' Lead (EQ, then the delay) and the delay between worklet devices
     "chain-tdelay-lead": [("eq", "frx01"), ("tdelay", "frx-lead")],
     "chain-tdelay-mix": [("chorus", None), ("tdelay", "x-wow"), ("limit", "trans")],
+    # task NB-N3i: Fractals' return (the plate alone) after an EQ, and the reverb between worklet devices
+    "chain-reverb-eq": [("eq", "frx01"), ("reverb", "frx-plate")],
+    "chain-reverb-mix": [("chorus", None), ("reverb", "x-odd"), ("limit", "trans")],
     "chain-shape": [("drive", "x-half-mix"), ("eq", "x-bells"), ("clip", "x-2x"), ("limit", "loud")],
 }
 
@@ -186,7 +198,7 @@ def make_input():
     return x.astype(np.float32)
 
 
-JS = """async ({b64, N, SR, chain, Q}) => {
+JS = """async ({b64, N, SR, chain, Q, caseName}) => {
   const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0)), f = new Float32Array(raw.buffer);
   const c = Q === 128 ? new OfflineAudioContext(2, N, SR) : new OfflineAudioContext({numberOfChannels: 2, length: N, sampleRate: SR, renderSizeHint: Q});
   if (Q !== 128 && c.renderQuantumSize !== Q) throw new Error('render quantum ' + c.renderQuantumSize + ', asked for ' + Q);
@@ -197,14 +209,19 @@ JS = """async ({b64, N, SR, chain, Q}) => {
   A.setB0(0);   // the beat the render starts at, read by the Sidechain device when it is made
   const bpm = A.bpm();   // the song's tempo as the devices read it now (the app may still be opening Fractals)
   let prev = src;
+  let di = 0;
   for (const d of chain) {
     const q = A.mkFx(d.type).p;
     if (d.pre) { const e = (A.FXPRE[d.type] || {})[d.pre]; if (!e) throw new Error('no preset ' + d.type + ' ' + d.pre); Object.assign(q, JSON.parse(JSON.stringify(e[1]))); q.pre = d.pre }
     if (d.extra) Object.assign(q, d.extra);
     A.setB0(0); const b0Before = A.getB0(), bpmNow = A.bpm();
-    const fx = A.mkFxNode(c, d.type); const b0After = A.getB0(); fx.set(q);
+    // the app's RND() seeded for a device that draws random numbers when it is made (the Space reverb's impulse)
+    const seed = d.type === 'reverb' ? 'nb-n3i|' + caseName + '|' + di : null;
+    const fx = A.mkFxNode(c, d.type); const b0After = A.getB0();
+    if (seed) A.setSeed(seed); try { fx.set(q) } finally { if (seed) A.setSeed(null) }
+    di++;
     // the start beat and tempo the device was made with (the Sidechain device reads both when it is made)
-    posted.push({type: d.type, p: JSON.parse(JSON.stringify(fx.sp ? fx.sp(q) : q)), beat0: b0Before, beat0After: b0After, bpm: bpmNow});
+    posted.push({type: d.type, p: JSON.parse(JSON.stringify(fx.sp ? fx.sp(q) : q)), beat0: b0Before, beat0After: b0After, bpm: bpmNow, ...(seed ? {seed} : {})});
     prev.connect(fx.in); prev = fx.out;
   }
   await A.wlLoad(c);
@@ -225,7 +242,7 @@ def main():
     x = make_input()
     wav_write(os.path.join(out, "in.wav"), x)
     al = AudioLab(os.path.join(ROOT, "index.html")); al.start()
-    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v},getB0:()=>SIDE_B0,bpm:()=>S.bpm};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
+    al.run("window.__alref={FXPRE,mkFx,mkFxNode,wlLoad,setB0:v=>{SIDE_B0=v},getB0:()=>SIDE_B0,bpm:()=>S.bpm,setSeed:s=>{SEEDR=s==null?null:seedRng(s)}};1")   # SIDE_B0: the app's own background renders move it (task NB-N3g)
     presets = al.run("(()=>{const o={};for(const t of %s)o[t]=Object.keys(FXPRE[t]||{});return o})()" % json.dumps(types))
     jobs = []
     for t in types:
@@ -242,7 +259,7 @@ def main():
     cases, info = [], {"bpm": bpm, "beat0": beat0, "quantum": Q, "app": al.version, "userAgent": al.js("() => navigator.userAgent"), "sr": SR, "frames": N,
                        "input_sha256": hashlib.sha256(np.ascontiguousarray(x).tobytes()).hexdigest(), "cases": {}}
     for name, ch in jobs:
-        r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch, "Q": Q})
+        r = al.js(JS, {"b64": b64, "N": N, "SR": SR, "chain": ch, "Q": Q, "caseName": name})
         y = np.frombuffer(base64.b64decode(r["out"]), dtype="<f4").reshape(2, N)
         wav_write(os.path.join(out, "web", name + ".wav"), y)
         cases.append({"name": name, "chain": r["posted"], "bpm": r["bpm"]})
