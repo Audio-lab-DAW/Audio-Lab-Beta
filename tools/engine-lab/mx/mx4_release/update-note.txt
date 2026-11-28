@@ -1,0 +1,1 @@
+Spectral ducking and Bass mono (v@VER@): the Ducker's Listen to has Spectral (32 bands), so a kick takes the bass out only where the kick is; every track and the master get a Bass mono switch (below 120 Hz, or the frequency you pick) that keeps the low end in mono.
