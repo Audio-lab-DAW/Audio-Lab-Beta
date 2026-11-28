@@ -3,6 +3,7 @@
    python3 tools/ui-tests/taskSC_A.py [index.html] [shots-dir]
 No place uses a view yet, so the test makes its own views in a test box and checks the rules: at most 30 pictures a second,
 nothing drawn while hidden, still with Motion other than Ambient, nothing in Light mode or with the setting off, no cost without views."""
+# for: task SC-A (lane G)
 import sys, json, os
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright

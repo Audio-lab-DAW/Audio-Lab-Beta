@@ -2,6 +2,7 @@
 """Task SC-B (science look, lane G): About as the random set Y1: the Earth 3 in 5 (AB1's corner and sheet), the orbit corner 1 in 5,
 the field arcs 1 in 5, chosen at each opening; Earth only in Light mode and with Science drawings off.
    python3 tools/ui-tests/taskSC_B.py [index.html] [shots-dir]"""
+# for: task SC-B (lane G)
 import sys, json, os
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../../../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
