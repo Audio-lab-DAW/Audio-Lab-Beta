@@ -12,7 +12,7 @@ s=open('docs/backlog-log.md').read()
 if 'task LT-3a, fast MIDI notes' not in s:open('docs/backlog-log.md','w').write(s.rstrip('\n')+'\n\n'+e)
 p='docs/latency-build.md';s=open(p).read()
 a='| LT-3a | AE2-3 | L5 | desktop: notes read outside the page, posted into the worklet (the path, one instrument kind) | next |'
-if a in s:rep(p,a,a[:-7]+'| **done**, %s (28 Nov): note to sound during a 200 ms long task 185 to 40 ms (Electron, the armed Lead); needs a new desktop app |'%V)
+if a in s:rep(p,a,a[:-8]+'| **done**, %s (28 Nov): note to sound during a 200 ms long task 185 to 40 ms (Electron, the armed Lead); needs a new desktop app |'%V)
 a='| LT-3b | AE2-3 | L5 | desktop: every worklet instrument, drums, recording and the read-out; the Electron proof | |'
 if a in s:rep(p,a,a[:-3]+'| next |')
 p='docs/device-backlog-2026-11-25.md';s=open(p).read()
