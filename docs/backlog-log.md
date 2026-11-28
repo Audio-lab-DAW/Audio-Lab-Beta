@@ -7113,3 +7113,9 @@ The release gate's freeze (`desktop/release-freeze.json`, since 16:41 UTC) was o
 
 ## task TM0 (lane S, themes): step claimed
 - 28 Nov 2026, 17:33 UTC: TM0 (the plan, docs/themes-build.md) claimed by a scheduled run.
+
+## task TM0 (lane S, themes): the build plan
+- docs/themes-build.md: steps TM1 to TM5 with what each touches, tests and a status table. Ten colour sets in eight themes with stable ids (`orbit` A1 default, `chart` B1, `space` C2 darker and more NASA as `C2N`, `chalk` D2, `blueprint` E2 + E2L, `cutaway` G2, `rutherford` H1, `patent` J2 + J2D); token names on `:root` (`--tm-*`) and in `LOOK.tm`; `tmApply` with no reload and no per-frame work; the Settings row on the Colours page registered in `STT` like lanes J, G, N, Q; settings ids `appearance.theme`, `appearance.themeFollow`, `appearance.iconFollow`; commands `view.themeNext`, `view.themePick`; the gate step as `tools/release-gate/themes_gate.py` reading the shipped `TM_THEMES`; icon link through the public `apicPick` plus a listener for hand picks.
+- For other lanes: lane O, a `UV_HOOKS.flush` for the tile cache would help TM1 (until then TM sets `dirty` and the cache key changes); lane B, TM inserts its block itself unless you prefer an `ST_HOOKS.block`; task RG, TM2 will add step "f) Themes" to docs/release-gate.md for gate.py to call.
+- Test tools/ui-tests/taskTM0.py (`# for: TM0`): 49/49 (plan rows, every picked version's tokens and eight track colours, every icon in desktop/icon-assets/picker, th2 check.py --gate passes). No app code changed.
+- Note: the proxy refuses the new repository name Audio-lab-DAW/Audio-Lab-Pro-Alpha for this scheduled task; the old name audio-lab-beta works (it is the same repository).
