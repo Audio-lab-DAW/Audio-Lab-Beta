@@ -6413,3 +6413,32 @@ The user (27 Nov, 23:04 Brussels), on "AudioLab app icon, round 4": "I like J3, 
 - Checked headless (`shot2.py`): every section dark and Light, M1 to M4 at 0, 25, 50, 75 and 100 %, no console errors.
 - WS-1 waits for the round 2 line (the end of `docs/start-screen.md`).
 
+
+## 28 November 2026: task NB-N3h (the Timeless delay: a DelayNode feedback loop, bit for bit)
+
+Fired by a manual trigger from the scheduling chat at about 23:59 UTC 27 Nov (its note: continue with the next stage unless another NB run pushed a newer stage or claim in the last 30 minutes). The other NB run's last push (d32bba2, 23:52) only added a line to N3g's log, so this run claimed N3h (the tempo delay, Fractals' next device) in `docs/native-mac-build.md` before starting (cd1b563) and left the plate reverb to anyone else. `index.html`, `desktop/` (also `desktop/app-version.json`), `native/host/` and `native/testapp/` untouched; no version. The AE2, AE3, AE4 and AE1 picks in the note are for stages N3 and N4 as planned; nothing in this part touches them.
+
+### Built
+- `native/engine/core/dev_tdelay.h`: the app's `tdelay` (mkFxNode) node for node, from Chromium 158.0.8127.36:
+  - **the delay time**: an a-rate AudioParam with the timeline for `setTargetAtTime` (`audio_param_handler.cc`: the value computed exactly at the event's first frame, then `v += (target - v) * c` per frame; on x86 four frames at a time with the constants c0 to c3 as Chromium unrolls it in SSE, on ARM one at a time; converged after 10 time constants, then the target itself and the events dropped), clamped to [0, 4 s], the wow LFO's GainNode summed in (part 1's oscillator), clamped again;
+  - **the DelayNode** (`delay.cc`, `delay_sse2.cc`, `delay_neon.cc`): a buffer of quantum + 4 s, the quantum copied in first, the read position, index and interpolation in float for whole groups of four frames, the scalar double path for the rest;
+  - **the feedback loop**: `AudioHandler::ProcessIfNecessary` marks a node as processed before it pulls its inputs, so a node pulled again in the same render quantum hands out the quantum before. Each delay's feedback GainNodes read the previous quantum of its shaper, which puts one render quantum of delay into the loop (128 frames, 512 in the export). The loop is computed one whole quantum at a time; calls off that grid hold one quantum (`GridDevice`, now with a block size of its own, reported as `addedLatency`);
+  - GainNodes sample-accurate in the quantum where `.value` was set, silent after that at 0 (skipped by a sum), a copy at 1; the highpass, lowpass and 256-point tanh shaper as the Pro EQ and N3g ported them.
+- `make_ref_core.py`: `tdelay` with 14 extra settings (Fractals' four: Lead, Lead high, Hook, Arp; free and synced times from 1/16 to 2 s, straight feedback, wow on both, hot drive, width 0, dry, 98 % feedback) and chains `chain-tdelay-lead` (Fractals' Lead: EQ then the delay) and `chain-tdelay-mix`. `make_bus_ref.py`: scenes `tdelaybus` and `tdelaybus128` (the Lead as in Fractals with a send, a mono source, a group with wow, a return, the master's compressor and clipper).
+
+### Found (for the lane that owns the app's delays: SND, lane L)
+- **The Timeless delay's ping-pong does not ping-pong.** mkFxNode connects `L.sh.connect(R.cross); R.cross.connect(L.d)` and `R.sh.connect(L.cross); L.cross.connect(R.d)`: each "cross" GainNode takes its own side's shaper back into its own delay. With ping-pong on (`inR` at 0, `self` at 0) the right delay gets nothing, so the right channel stays dry, and the left repeats on itself. Measured in the web engine: in `tdelay-frx-lead` (Fractals' Lead) the right channel equals the dry input sample for sample. Fractals' five delays all have ping-pong on, so they echo only on the left. Probably meant: `L.sh -> L.cross -> R.d` and `R.sh -> R.cross -> L.d`, and `inR` fed for the first hit. Changing it changes Fractals' sound, so it is the owner's and the user's call; the native engine copies the web engine as it is.
+
+### Proven (Linux, this machine, headless Chromium 158)
+- **43 of 43 cases bit for bit** at 7, 33, 128 and 512 frames per call (every preset, the extras).
+- The export's quantum 512: **142 of 142** (tdelay, eq, chorus, limit and the chains) at 512, 128 and 7 frames per call. The first try failed from frame 128 on (the shaper ran one 128-frame sub-block per 512-frame quantum); fixed.
+- Buses: **24 of 24 identical**. ASan+UBSan: 43 of 43 at 128 and 7, buses identical, no reports.
+- Cost: 9 µs per 128 stereo frames (Fractals' Lead setting), about 300 times real time on one core.
+- Two hypotheses about the loop were measured before the right one: the right side running inside the left delay's pull (23 of 43), the other order (23 of 43); then the app's own wiring read again (43 of 43).
+
+### Left
+- Fractals' last device: the plate reverb (`reverb`: a ConvolverNode with a generated impulse, pre-delay, highpass; Chromium's FFT convolver on part 1's FFTFrame).
+- Automation of the delay's parameters while it plays (a later `set()` adds a setTarget event at its quantum; tested only with the first).
+
+### Assumptions
+- A `set()` while playing lands on the quantum it is called in (the page's currentTime is a quantum boundary).
