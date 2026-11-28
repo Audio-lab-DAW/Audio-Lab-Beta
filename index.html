@@ -2376,51 +2376,6 @@ body.lite .sciv{display:none}
 #niMono .nmp{display:flex;flex-direction:column;gap:2px;font-size:var(--fs1)}#niMono .nmpn{color:var(--mut)}#niMono .nmpr{color:#ffb547;cursor:pointer}#niMono .nmpr:hover{text-decoration:underline}
 #niMono .nmempty{grid-column:1/-1;color:var(--mut)}#niMono .nmnote{font-size:var(--fs1);color:var(--mut);line-height:1.35}
 .mxsr{display:flex;align-items:center;gap:4px}.mxsr>.hb{flex:1;min-width:0}.mxpp{flex:none;box-sizing:border-box;width:11px;height:11px;min-width:0;min-height:0;padding:0;margin:0;border-radius:50%;border:2px solid #f5c84c;background:transparent;cursor:pointer}.mxpp.pre{border-color:#4cc9f0;background:rgba(76,201,240,.18)}.mxpp:hover{box-shadow:0 0 0 2px rgba(255,255,255,.16)}.mxpp:focus-visible{outline:2px solid #fff;outline-offset:1px}.hb.mxlp{opacity:.45}.mxout{display:flex;align-items:center;gap:4px;box-sizing:border-box;width:100%;min-height:0;margin:3px 0 0;padding:2px 5px;border-radius:5px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font:var(--fw6) var(--fs1)/12px var(--ffu);color:#9aa0ad;cursor:pointer;text-align:left}.mxout i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--oc,#cfd3db)}.mxout span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mxout b{flex:none;font-weight:400;opacity:.6}.mxout:hover{color:#eef1f6;border-color:rgba(255,255,255,.2)}.mxout.set{color:#eef1f6;border-color:rgba(255,255,255,.18)}.mxout.bad{border-color:#ff6b6b}#mixWin.mxcmp .mx .mxout{display:none}
-/* v0.295 display-first devices, step 3 (task DV-3): On the picture (chips as glass faces, the More drawer) and the Pro EQ's DD3 */
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>:is(.eqside,.dfs,.dvrail,.dvval){display:none!important}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvface{position:absolute;z-index:4;margin:0;box-sizing:border-box;color:#ececf1;background:rgba(28,30,38,.94);border:0;border-radius:10px;box-shadow:inset 0 0 0 var(--lk-hair,1px) rgba(255,255,255,.13),0 4px 14px rgba(0,0,0,.4);transition:opacity .15s ease-out}
-body.dvg #fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvface{background:rgba(34,36,46,.55)}
-/* the preset arrows and Change: top left, clear of the dB scale */
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvpre{left:34px;top:4px;display:flex;align-items:center;gap:4px;padding:2px 4px;width:max-content!important;min-width:0!important;max-width:calc(100% - 80px);flex-wrap:nowrap}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvpre>.kpre{min-width:0;flex:0 1 auto}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvpre select{max-width:150px}
-/* the band editor as a capsule */
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap{display:grid;grid-template-columns:auto auto;align-items:center;gap:4px 10px;padding:5px 8px!important;width:max-content;max-width:calc(100% - 50px);border-radius:14px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqbh{grid-column:1;gap:6px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqbh span{flex:none}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqty{grid-column:2;display:flex;gap:2px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqty button{width:24px;min-height:20px!important}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqkn{grid-column:1/3;gap:2px;align-items:center}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqkn .eqx{width:auto;flex-direction:row;align-items:center;gap:8px;margin-left:8px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>.eqkn .eqx .seg button{padding:0 6px!important}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap>p{display:none!important}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap.eqnone{display:flex;align-items:center;gap:8px;grid-template-columns:none}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap.eqnone>b{white-space:nowrap}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap.dvhint{border-radius:12px;padding:3px 10px!important}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvcap.dvhint>b{font-weight:500;color:rgba(236,236,241,.8)}
-/* Gain: a slim fader at the right edge */
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim{top:58px!important;bottom:6px!important;right:3px!important;width:30px;padding:5px 0 3px!important;opacity:1!important;pointer-events:auto!important;transform:none!important;display:flex;justify-content:center}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim .vb{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:4px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim .vl{display:none}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim .vt{flex:1 1 auto;min-height:0}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim output{font-size:10px;line-height:12px;white-space:nowrap}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dug.dvslim output .lku{display:none}
-/* More: the last button of the preset pill at the top left, the drawer under it */
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb .dvmore{height:20px;min-height:20px;padding:0 8px 0 5px!important;display:inline-flex;align-items:center;gap:3px;flex:none;cursor:pointer}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvface.dvmore{top:4px;left:34px;height:24px;border-radius:12px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb .dvmore svg{width:14px;height:14px;fill:currentColor}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb .dvmore[aria-expanded=true]{color:#7fb0ff}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb .dvmore:focus-visible{outline:2px solid #7fb0ff;outline-offset:1px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw{display:none;z-index:6;top:36px;left:34px;width:258px;max-height:calc(100% - 42px);overflow:auto;scrollbar-width:thin;padding:6px 9px 8px;border-radius:12px;flex-direction:column;gap:5px}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw.on{display:flex}
-body.dvg #fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw{background:rgba(30,32,40,.9)}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw h5{margin:2px 0 0;font:600 11px/1.3 var(--ffu,Inter,system-ui,sans-serif);color:#a3a7b4}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dvdsec{display:flex;flex-wrap:wrap;gap:5px 8px;align-items:center}
-#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .eqov2{position:static!important;display:flex;flex-direction:column;gap:4px;margin:0;padding:0;background:none!important;border:0}
-/* a closed Pro EQ: the eye and the pin stand in the column right of the graph, clear of its "analyzer, tilt" label and the selected band's label */
-#fxin:not(.pinb) .dev.dvf.dvshut[data-dvt=eq]>.devb>.dvtr{top:4px;right:4px;flex-direction:column}
-#fxin:not(.pinb) .dev.dvf.dvshut[data-dvt=eq]:not(.dvpic)>.devb>.dug{padding-top:56px!important}
-@media (prefers-reduced-motion:reduce){#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvface{transition:none}}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6697,7 +6652,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.295',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.294',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -23853,7 +23808,7 @@ addEventListener('keydown',e=>{const b=e.target.closest&&e.target.closest('#fxin
 addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const tg=e.target.closest?e.target:null;if(!tg)return;
   const b=tg.closest('#fxin .dveye');if(b){clearTimeout(DV.lp&&DV.lp.tm);const x=e.clientX,y=e.clientY;DV.lp={x,y,tm:setTimeout(()=>{DV.lp=null;DV.lpDone=performance.now();dvMenu(b.closest('.dev'),x,y)},500)};return}
   const D=tg.closest('#fxin .dev.dvshut');for(const o of document.querySelectorAll('#fxin .dev.dvshow'))if(o!==D)o.classList.remove('dvshow');
-  if(D&&!tg.closest('.dfs,.eqside,.dug,.dvtr,.devh,.dvface')){DV.tap={D,x:e.clientX,y:e.clientY,t:performance.now()}}},true);
+  if(D&&!tg.closest('.dfs,.eqside,.dug,.dvtr,.devh')){DV.tap={D,x:e.clientX,y:e.clientY,t:performance.now()}}},true);
 addEventListener('pointermove',e=>{if(DV.lp&&Math.hypot(e.clientX-DV.lp.x,e.clientY-DV.lp.y)>8){clearTimeout(DV.lp.tm);DV.lp=null}},true);
 addEventListener('pointerup',e=>{if(DV.lp){clearTimeout(DV.lp.tm);DV.lp=null}const T=DV.tap;DV.tap=null;if(!T||e.pointerType==='mouse')return;if(Math.hypot(e.clientX-T.x,e.clientY-T.y)<10&&performance.now()-T.t<400){T.D.classList.toggle('dvshow');dvgDirty()}},true);
 addEventListener('pointercancel',()=>{if(DV.lp){clearTimeout(DV.lp.tm);DV.lp=null}DV.tap=null},true);
@@ -23861,8 +23816,7 @@ addEventListener('pointercancel',()=>{if(DV.lp){clearTimeout(DV.lp.tm);DV.lp=nul
 {const fi=document.getElementById('fxin');if(fi){const upd=e=>{const D=e.target.closest&&e.target.closest('.dev.dvshut');if(D&&!D._dvq){D._dvq=1;requestAnimationFrame(()=>{D._dvq=0;dvVals(D)})}};
   for(const ty of['input','change','pointerup','wheel','keyup'])fi.addEventListener(ty,upd,{capture:true,passive:true});
   fi.addEventListener('mouseout',e=>{const D=e.target.closest&&e.target.closest('.dev.dvshut');if(D&&!D.contains(e.relatedTarget))dvVals(D)},{passive:true});
-  for(const ty of['scroll','mouseover','mouseout','focusin','focusout'])fi.addEventListener(ty,()=>dvgDirty(),{capture:true,passive:true});
- fi.addEventListener('transitionend',e=>{const q=e.target;if(q&&q.matches&&q.matches('.dvrail,.dvface,.dfs,.eqside,.dug,.dvval'))dvgDirty()},{capture:true,passive:true})}
+  for(const ty of['scroll','mouseover','mouseout','focusin','focusout','transitionend'])fi.addEventListener(ty,()=>dvgDirty(),{capture:true,passive:true})}
  addEventListener('resize',()=>dvgDirty(),{passive:true})}
 
 /* ---- the glass over the device displays: one engine canvas over the devices panel (docs/devices-display-first.md section 8) ----
@@ -23886,13 +23840,13 @@ function dvgSync(fi,now){const g=DVG.g,c=DVG.cv;DVG.n.sync++;
   const st=c.style,L=fi.offsetLeft+'px',T=fi.offsetTop+'px',W=fi.clientWidth+'px',H=fi.clientHeight+'px';if(st.left!==L)st.left=L;if(st.top!==T)st.top=T;if(st.width!==W)st.width=W;if(st.height!==H)st.height=H;
   {const rr=getComputedStyle(fi).borderRadius;if(st.borderRadius!==rr)st.borderRadius=rr}
   if(DVG.lens!==gleLens()){DVG.lens=gleLens();g.setLensPreset(DVG.lens)}if(DVG.blur!==gleBlur()){DVG.blur=gleBlur();g.setBlurPreset(DVG.blur)}
-  DVG.fr=new Set();const o=c.getBoundingClientRect(),seen=new Set(),fseen=new Set();
-  for(const R of fi.querySelectorAll(':scope>.dev.dvf>.devb>.dvrail,:scope>.dev.dvf>.devb>.dvface')){if(R.hidden)continue;const r=R.getBoundingClientRect();if(r.width<8||r.height<8||r.right<o.left||r.left>o.right)continue;
+  const o=c.getBoundingClientRect(),seen=new Set(),fseen=new Set();
+  for(const R of fi.querySelectorAll(':scope>.dev.dvf>.devb>.dvrail')){if(R.hidden)continue;const r=R.getBoundingClientRect();if(r.width<8||r.height<8||r.right<o.left||r.left>o.right)continue;
     const op=+getComputedStyle(R).opacity||0,D=R.closest('.dev');if(!R._dvg)R._dvg='r'+(++DVG.n.faces);const id=R._dvg,rect=dvgR(r,o),vis=op>.01;seen.add(id);
-    const k=rect.join(',')+'|'+op.toFixed(2);if(DVG.faces.get(id)!==k){DVG.faces.set(id,k);if(g.hasPanel(id))g.updatePanel(id,{rect,opacity:op,visible:vis});else g.addPanel({id,rect,radius:R._dvgRad||12,kind:R._dvgKind||'window',over:'flats',opacity:op,visible:vis,tintAmount:0,shadow:0})}
+    const k=rect.join(',')+'|'+op.toFixed(2);if(DVG.faces.get(id)!==k){DVG.faces.set(id,k);if(g.hasPanel(id))g.updatePanel(id,{rect,opacity:op,visible:vis});else g.addPanel({id,rect,radius:12,kind:'window',over:'flats',opacity:op,visible:vis,tintAmount:0,shadow:0})}
     if(op<.99&&vis)dvgDirty();if(!vis)continue;
     for(const cv of D.querySelectorAll(':scope>.devb canvas')){if(!cv.width||!cv.height){if(cv.offsetWidth)dvgDirty();continue}const q=cv.getBoundingClientRect();if(q.width<16||q.right<=r.left||q.left>=r.right||q.bottom<=r.top||q.top>=r.bottom)continue;
-      if(!cv._dvgS)cv._dvgS='c'+(++DVG.n.faces);const fk=cv._dvgS,fr=dvgR(q,o),sig=fr.join(',')+'|'+cv.width+'x'+cv.height;fseen.add(fk);if(!R._dvgKind)DVG.fr.add(fk);if(DVG.flats.get(fk)!==sig){DVG.flats.set(fk,sig);g.setFlat(fk,{rect:fr,radius:2,source:cv});DVG.n.flatSet++}}}
+      if(!cv._dvgS)cv._dvgS='c'+(++DVG.n.faces);const fk=cv._dvgS,fr=dvgR(q,o),sig=fr.join(',')+'|'+cv.width+'x'+cv.height;fseen.add(fk);if(DVG.flats.get(fk)!==sig){DVG.flats.set(fk,sig);g.setFlat(fk,{rect:fr,radius:2,source:cv});DVG.n.flatSet++}}}
   for(const id of[...DVG.faces.keys()])if(!seen.has(id)){DVG.faces.delete(id);g.removePanel(id)}
   for(const k of[...DVG.flats.keys()])if(!fseen.has(k)){DVG.flats.delete(k);g.removeFlat(k)}}
 function dvgTick(now){const fi=document.getElementById('fxin'),on=GLE.on&&!!GLE.g&&!!fi&&!!fi.offsetParent&&fi.offsetParent===fi.parentElement&&!!fi.querySelector('.dev.dvf');
@@ -23901,8 +23855,7 @@ function dvgTick(now){const fi=document.getElementById('fxin'),on=GLE.on&&!!GLE.
   if(DVG.lv!==GLE.lv){DVG.lv=GLE.lv;DVG.g.setLevel(GLE.lv==='light'?'light':'glass');dvgDirty()}
   if(now<DVG.hot)dvgSync(fi,now);
   /* the pictures under visible faces: refreshed at a capped rate, only while there are any */
-  const dvLive=!!(play&&play.on),dvHot=now<DVG.hot+2000;if(dvLive)DVG.pT=now;const dvSettle=!dvLive&&now<(DVG.pT||0)+2000;
-  if(DVG.flats.size&&(dvLive||dvHot||dvSettle)&&now-DVG.fT>(dvLive?50:500)){DVG.fT=now;const fr=DVG.fr||new Set();DVG.fN=(DVG.fN||0)+1;for(const k of DVG.flats.keys()){if(dvLive&&!fr.has(k)&&!(dvHot&&DVG.fN%2===0))continue;DVG.g.markFlatDirty(k);DVG.n.flatDirty++}}
+  if(DVG.flats.size&&now-DVG.fT>(play&&play.on?50:500)){DVG.fT=now;for(const k of DVG.flats.keys()){DVG.g.markFlatDirty(k);DVG.n.flatDirty++}}
   DVG.g.render(now)}
 {const _gt=glfTick;glfTick=function(now){const r=_gt.apply(this,arguments);try{dvgTick(now)}catch(e){if(!DVG.err){DVG.err=1;console.error('AudioLab glass engine (devices)',e)}}return r}}
 /* ===== settings step S8 (task ST-S8), v0.275: scope, the marks and the Project group =====
@@ -25372,74 +25325,6 @@ Object.assign(MX_HOOKS,{
   /* the live node at a tap point: 'in' (before effects), 'fx' (after effects), 'fader' (after fader and pan), 'group' (after the bus it plays into) */
   tap(t,pt){if(!ctx||!t)return null;const N=NODES.get(t.id);if(!N)return null;if(pt==='in')return N.in;if(pt==='fx')return N.ut.out;if(pt==='fader')return N.pan;
     if(pt==='group'){const d=mxDestT(t),D=d&&NODES.get(d.id);return D?D.pan:master}return null}});
-/* ===== v0.295: display-first devices, step 3 (task DV-3): On the picture, and the Pro EQ =====
-   docs/devices-display-first.md sections 7 and 10 (the user's pick DD3 for the Pro EQ).
-   On the picture is the closed state where each control sits at the part of the picture it changes, as small glass chips; controls without a place
-   go to a More drawer. It shows only while the rail is closed and the device's mode is On the picture (right-click the eye); the rail open hides it.
-   The mechanism (DVPIC): a device type gets an entry { lay(D, own, B) } that places its own controls (the same elements, so parameters, presets,
-   automation and undo work exactly as on the rail) and returns the drawer's sections; every chip has the class dvface and is a glass face of the
-   devices engine (DVG) over the display's flat picture. Devices without an entry keep hover reveal (the menu says so).
-   Pro EQ: the band editor is a capsule under the selected dot and follows it (above the dot when there is no room under it); several selected bands
-   get the capsule at their middle; with no band selected a small hint sits at the bottom of the graph. Gain is a slim fader at the right edge.
-   The preset arrows and Change float at the top left; the band chips, the analyser, Auto, Scale and Out are in the More drawer.
-   With the rail closed the Pro EQ's pill (pin on top, the eye under it) stands in the column right of the graph, clear of lane E's labels.
-   No sound, parameter or stored value changes here; only where the controls are drawn. */
-const DV3={more:new Set(),n:{lay:0,cap:0,more:0},capQ:0};
-function dvPicOn(D){return D.classList.contains('dvshut')&&D.dataset.dvm==='picture'}
-{const _fr=dvFrame;dvFrame=function(D,t,fl){const r=_fr.apply(this,arguments);try{dvPic(D,t)}catch(e){console.error('AudioLab on the picture',e)}return r}}
-function dvPic(D,t){const B=D.querySelector(':scope>.devb');if(!B||!D.classList.contains('dvf'))return;const own=dvOwnOf(D,t);if(!own)return;const ty=dvType(D,own),P=DVPIC[ty];
-  D.dataset.dvt=ty;
-  /* a closed Pro EQ: the pill stands in the column right of the graph, the pin on top as on every device, the eye under it */
-  if(ty==='eq'&&D.dataset.d==='fx'&&D.classList.contains('dvshut')){const T=B.querySelector(':scope>.dvtr'),pn=T&&T.querySelector(':scope>.pinbtn');if(pn&&pn!==T.firstElementChild)T.prepend(pn)}
-  const on=!!P&&dvPicOn(D);D.classList.toggle('dvpic',on);if(!on)return;DV3.n.lay++;
-  const V=B.querySelector(':scope>.dvval');if(V)V.remove();
-  const more=P.lay(D,own,B)||[];if(more.length)dvPicMore(D,own,B,more);
-  for(const el of B.querySelectorAll(':scope>.dvface'))dvPicFace(el)}
-/* a chip: one glass face of the devices engine; a press on its empty part does not pan the devices panel */
-function dvPicFace(el){if(el._dvp)return;el._dvp=1;el._dvgKind='pill';el._dvgRad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||10;
-  el.addEventListener('pointerdown',e=>{if(!e.target.closest('[data-c],input,select,button,label,.eqc,canvas'))e.stopPropagation()})}
-/* the More drawer: a button at the top right of the picture and a panel with the controls that have no place in it */
-function dvPicMore(D,own,B,secs){const id=D.dataset.d==='fx'?own.id:'inst',open=DV3.more.has(id);
-  const btn=document.createElement('button');btn.type='button';btn.className='dvmore';btn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>More';
-  btn.title='More: the controls that have no place in the picture ('+secs.map(s=>s.head).join(', ')+')';btn.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-haspopup','true');
-  const dr=document.createElement('div');dr.className='dvface dvdrw'+(open?' on':'');dr.setAttribute('role','group');dr.setAttribute('aria-label','More controls');
-  for(const s of secs){const els=(s.els||[]).filter(Boolean);if(!els.length)continue;const h=document.createElement('h5');h.textContent=s.head;const w=document.createElement('div');w.className='dvdsec';w.append(...els);dr.append(h,w)}
-  const pre=B.querySelector(':scope>.dvpre');if(pre)pre.append(btn);else{btn.classList.add('dvface');B.append(btn)}B.append(dr)}
-function dvMoreToggle(D,force){const own=dvOwnOf(D);if(!own)return;const id=D.dataset.d==='fx'?own.id:'inst',on=force===undefined?!DV3.more.has(id):force;DV3.n.more++;
-  if(on)DV3.more.add(id);else DV3.more.delete(id);const dr=D.querySelector(':scope>.devb>.dvdrw'),b=D.querySelector(':scope>.devb .dvmore');
-  if(dr)dr.classList.toggle('on',on);if(b)b.setAttribute('aria-expanded',String(on));dvgDirty();return on}
-addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#fxin .dev.dvpic>.devb .dvmore');if(!b)return;e.preventDefault();e.stopPropagation();
-  const D=b.closest('.dev');if(dvMoreToggle(D)){const f=D.querySelector(':scope>.devb>.dvdrw :is(button,input,select,[tabindex="0"])');if(f&&e.detail===0)f.focus({preventScroll:true})}},true);
-addEventListener('keydown',e=>{if(e.key!=='Escape')return;const dr=e.target.closest&&e.target.closest('#fxin .dev.dvpic>.devb>.dvdrw.on');if(!dr)return;e.preventDefault();e.stopPropagation();const D=dr.closest('.dev');dvMoreToggle(D,false);const b=D.querySelector(':scope>.devb .dvmore');if(b)b.focus({preventScroll:true})},true);
-
-/* ---- Pro EQ on the picture (DD3) ---- */
-DVPIC.eq={lay:dvpEq};
-function dvpEq(D,own,B){const side=B.querySelector(':scope>.eqside'),cv=B.querySelector('canvas.eqv');if(!side||!cv)return[];
-  const pr=side.querySelector(':scope>.dspr'),eqb=side.querySelector(':scope>.eqb'),bands=side.querySelector(':scope>.eqbands'),ov2=side.querySelector('.eqov2');
-  let an=null,au=null;
-  if(pr){an=pr.querySelector('.eqan');au=pr.querySelector(':scope>label.tgl');if(an)an.remove();if(au)au.remove();pr.classList.add('dvface','dvpre');B.append(pr)}
-  if(eqb){eqb.classList.add('dvface','dvcap');
-    if(eqb.classList.contains('eqnone')){const p=eqb.querySelector(':scope>p'),b=eqb.querySelector(':scope>b');
-      if(!eqb.querySelector('.eqrow')){eqb.classList.add('dvhint');if(b)b.textContent='Click a dot to edit its band, double-click the graph to add one'}
-      eqb.title=p?p.textContent.trim():''}
-    else{const del=eqb.querySelector('[data-eq=del]');if(del&&!del.getAttribute('aria-label'))del.setAttribute('aria-label','Delete this band')}
-    B.append(eqb);dvCapPos(D)}
-  const g=B.querySelector(':scope>.dug');if(g)g.classList.add('dvface','dvslim');
-  return[{head:'Bands',els:[bands]},{head:'Analyser',els:[an,au]},{head:'Whole EQ',els:[ov2]}]}
-/* the capsule sits under the selected dot (the dot's place as the EQ's own hit test computes it), above it when there is no room */
-function dvCapPos(D){const B=D.querySelector(':scope>.devb'),C=B&&B.querySelector(':scope>.dvcap'),cv=B&&B.querySelector('canvas.eqv');if(!C||!cv||!cv.offsetWidth)return;
-  const f=dvOwnOf(D);if(!f||!f.p||!f.p.bands)return;DV3.n.cap++;
-  const z=ZOOM||1,cr=cv.getBoundingClientRect(),br=B.getBoundingClientRect(),ox=(cr.left-br.left)/z-B.clientLeft,oy=(cr.top-br.top)/z-B.clientTop,w=cv.clientWidth,h=cv.clientHeight;
-  const gs=(f.p.gs??100)/100,X=vizInst(f),sel=[...eqSel(f)].filter(i=>f.p.bands[i]);
-  const pts=sel.map(i=>{const b=f.p.bands[i],gl=(/shelf|peak|tilt/.test(b.t)?b.g*gs:0)+(X&&X.dyn&&X.dyn[i]||0);return[fX(b.f,w),h/2-gl/24*(h/2-12)]});
-  const cw=C.offsetWidth,ch=C.offsetHeight,BW=B.clientWidth,BH=B.clientHeight;let x,y;
-  if(!pts.length){x=ox+(w-cw)/2;y=oy+h-ch-44}
-  else{const px=pts.reduce((a,q)=>a+q[0],0)/pts.length,lo=Math.max(...pts.map(q=>q[1])),hi=Math.min(...pts.map(q=>q[1]));x=ox+px-cw/2;y=oy+lo+14;if(y+ch>BH-4)y=oy+hi-14-ch}
-  x=Math.max(4,Math.min(x,BW-cw-36));y=Math.max(32,Math.min(y,BH-ch-4));
-  const L=Math.round(x)+'px',T=Math.round(y)+'px';if(C.style.left!==L||C.style.top!==T){C.style.left=L;C.style.top=T;dvgDirty()}}
-/* the capsule follows the dot while it is dragged or scrolled */
-{const fi=document.getElementById('fxin');if(fi){const q=e=>{const D=e.target.closest&&e.target.closest('.dev.eq2.dvpic');if(!D||DV3.capQ)return;if(e.type==='pointermove'&&!e.buttons)return;DV3.capQ=1;requestAnimationFrame(()=>{DV3.capQ=0;dvCapPos(D)})};
-  for(const ty of['pointermove','pointerup','wheel'])fi.addEventListener(ty,q,{capture:true,passive:true})}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
