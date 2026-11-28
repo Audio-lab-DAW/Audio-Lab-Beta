@@ -148,3 +148,9 @@ The user answered three questions (this replaces "R4 parked" above):
 1. **Between versions: bit for bit.** The gate keeps comparing exported test songs bit for bit with the reference. Any difference fails, unless the released step says it changes the sound on purpose (R1); then the gate takes new reference numbers for that step.
 2. **Same song exported twice in the same version: identical.** Two exports in one version must be byte-identical (the deterministic-render check; it catches hidden state, uninitialised buffers and random draws outside SND-R's per-device streams).
 3. **Tolerance about 0.5 dB.** Where a comparison is not bit for bit (a sound step that changes the sound on purpose, and web vs native renders per the 28 Nov device decision), the export must stay within about 0.5 dB in loudness of the previous reference, unless the step says it changes level; bigger jumps fail.
+
+## The user's decision on the Fractals song (28 November 2026, 14:55 Brussels)
+
+The user: "The fractal song is only for testing. I will later convert an older version into a new AudioLab."
+- **Step WS-F (lane Q, after WS-1 is released):** take the Fractals song data (with the Electric Universe vocals) and any other built-in demo song data out of `index.html` entirely. Move them to `tools/test-songs/` (saved in the current project format, R0) and point the release gate, the native lab and every test that used the built-in copy at those files. The app itself ships no song (D6); the start screen offers empty project, templates and recent projects only. Test: `index.html` holds no song audio or song data, the gate's export and load checks still pass from `tools/test-songs/`, and the app file is smaller.
+- The user will convert an older version of the song into the new AudioLab personally later; no task does that.

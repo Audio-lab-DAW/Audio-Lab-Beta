@@ -171,3 +171,9 @@ This overrides every "old projects must still load / keep their sound / render b
 - **The start screen** (lane Q) lists only projects the current format opens; a file it cannot open gets a short plain message, never a crash.
 - **Still kept:** a project saved by the current version reopens with everything; the mixer, timing and sync stay exact; stable ids.
 - From the first public release on, compatibility starts again (projects made by released versions must open); until then, none is needed.
+
+## The user's decision on the Fractals song (28 November 2026, 14:55 Brussels)
+
+The user: "The fractal song is only for testing. I will later convert an older version into a new AudioLab."
+- **Step WS-F (lane Q, after WS-1 is released):** take the Fractals song data (with the Electric Universe vocals) and any other built-in demo song data out of `index.html` entirely. Move them to `tools/test-songs/` (saved in the current project format, R0) and point the release gate, the native lab and every test that used the built-in copy at those files. The app itself ships no song (D6); the start screen offers empty project, templates and recent projects only. Test: `index.html` holds no song audio or song data, the gate's export and load checks still pass from `tools/test-songs/`, and the app file is smaller.
+- The user will convert an older version of the song into the new AudioLab personally later; no task does that.
