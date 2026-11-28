@@ -16,7 +16,7 @@
 - Before every push that touches `index.html`, check that no top-level function name is defined twice (another lane may use the same name: v0.250 has two different `lkSel` functions). Use your task's own name prefix for new top-level functions.
 
 ## Parallel lanes: who owns what (the owner asked on 27 Nov, 19:20: "make sure it makes sense so we don't have any problems overlapping the tasks")
-Up to seventeen tasks edit `index.html` at the same time. Each one owns an area. Change only your own area; if you need something in another lane's area, add a small named hook (`<PREFIX>_HOOKS.<name>`) or a function of your own and write in your log which lane should pick it up. Never rewrite, rename or move another lane's code.
+Up to eighteen tasks edit `index.html` at the same time. Each one owns an area. Change only your own area; if you need something in another lane's area, add a small named hook (`<PREFIX>_HOOKS.<name>`) or a function of your own and write in your log which lane should pick it up. Never rewrite, rename or move another lane's code.
 
 | Lane | Task | Owns | Prefix |
 |---|---|---|---|
@@ -37,6 +37,7 @@ Up to seventeen tasks edit `index.html` at the same time. Each one owns an area.
 | O | UV (view engine, UX1 picks) | how and when the arrangement and editors move and redraw: zoom and scroll input (`zsWheel`, `szStep`, `zoomAround`, `smoothZoom`), header layout during a pinch, the tile cache, fling, coalesced and predicted pointer points; what is drawn stays lane A's | `uv` |
 | P | CF (comfort modes, UX2 wishes) | the map's Hide mode and its overlay, OLED care (dimmed static brights, dim when idle, the card), Night mode, Focus mode; colour changes only as added tokens or a mode class, never another lane's values | `cf` |
 | Q | WS (start screen, the user's D6 answer) | the start screen shown at start-up (recent projects, templates, empty project, open a file), what a fresh install opens (`firstRun`, the auto-loaded demo), drawn in the splash's scientific style (reuse the splash drawings, never change them); the New project dialog stays lane F's, its data (templates, saved projects) is read, not rewritten | `ws` |
+| R | SG2 (stem split loading bar, the user's SG1 picks G1 S1 P1 F1) | the stem splitter (`stemSplit`, `NEUW`, `neuWorker`, `neuSeparate`, `stemAsk`, `stemsFor`), its live spectrogram lanes (`sgLanes`, `sgStrips`) and the Split sheet's contents; lane F keeps the sheet's frame and the notification stack (hook `SG_HOOKS.card`), lane G keeps `mdJob` (hook `SG_HOOKS.pill`), Audio to MIDI's rows get a small hook in the `split(j)` callback | `sg` |
 | - | LK tokens (done) | the `LOOK` object: everybody reads it; only add tokens, never change another lane's values | `lk` |
 
 Before every push: `git pull --rebase`, re-run your edit script on the fresh file, run the lint and the start-up smoke test of `docs/release-gate.md`, and check that no other lane changed the same lines in the last hour (`git log -L` or `git log -S` on your anchors). If two lanes need the same function changed, the second one stops and writes what it needs in its log; the scheduling chat sorts it out.

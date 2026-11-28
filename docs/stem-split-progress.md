@@ -92,3 +92,7 @@ The pick page is measured and live. In every layout the lanes fill at the true p
 - **Audio to MIDI** (`openA2M`'s stems step): SG2 replaces `a2dbar` with `sgLanes` and turns the finished lanes into the `a2sr` rows. This is a small hook in the `split(j)` callback, with no rewrite of the rows.
 - **Lane E** (INS): viridis is read from `INS.cmap('viridis')`, never copied or changed. **LK**: `--unit` and `lkVU` for the units, `--lk-hair` for the edge.
 - Motion: the edge's transition is the 120 ms token, and with Reduce motion (`--ov-mo: 0`) it is 0.
+
+## The user's picks (28 November 2026, 14:53 Brussels)
+
+`SG1 picks: G1, S1, P1, F1` (all four recommendations): **G1** lanes under the mix, **S1** the notification card with a strip per stem, **P1** the draft stretch at half strength, **F1** a soft scan over the chunk being worked on (a still hatch under Reduce motion). Built by task **SG2**, lane R (prefix `sg`, row in CLAUDE.md), as "Who builds it" above says, with the quick split moved off the main thread. Ends 'stem split lanes complete'.
