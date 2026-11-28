@@ -1,0 +1,41 @@
+/* v0.296 display-first devices, step 4 (task DV-4): hover reveal as a bottom dock (DD4), the values line clear of the handles, On the picture for the Compressor, Sidechain, Echo delay and Space reverb */
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock>.devb>:is(.dfs,.dug){position:absolute!important;top:auto!important;right:auto!important;bottom:var(--dvdb,8px)!important;height:var(--dvdh,auto)!important;margin:0!important;box-sizing:border-box}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock>.devb>.dfs{left:var(--dvdl,8px)!important;width:max-content!important;min-width:0!important;max-width:none!important;display:flex!important;flex-direction:row!important;align-items:center;gap:12px;padding:5px 12px 5px 12px!important;overflow:visible!important}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock>.devb>.dug{left:var(--dvgl,8px)!important;width:auto!important;display:flex!important;align-items:center;padding:5px 12px 5px 12px!important;box-shadow:inset var(--lk-hair,1px) 0 0 rgba(255,255,255,.14)}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock>.devb>:is(.dfs,.dug,.dvrail,.dvdpre){opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .15s ease-out,transform .15s ease-out}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.dug,.dvdpre):focus-within))>.devb>:is(.dfs,.dug,.dvdpre){opacity:1;pointer-events:auto;transform:none}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.dug,.dvdpre):focus-within))>.devb>.dvrail{opacity:1;transform:none}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock:is(:hover,.dvshow,:has(>.devb>:is(.dfs,.dug,.dvdpre):focus-within))>.devb>.dvval{opacity:0}
+#fxin:not(.pinb) .dev.dvf.dvshut.dvdock>.devb>.dvrail{border-radius:14px}
+/* the dock's row: knob, then its label over its value */
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dfs :is(.dfc,.fxsl,.pgrid,.pg-kn,.pg-lv){display:flex!important;flex-direction:row!important;align-items:center;gap:12px;height:auto!important;min-height:0!important;width:auto!important;overflow:visible!important;padding:0!important;margin:0!important;flex:none!important;grid-template:none!important;border:0!important;background:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dfs>.ndtb{flex:none!important;width:auto!important;min-width:0!important;flex-wrap:nowrap!important;margin:0!important;padding:0!important;border:0!important;background:none!important;display:flex;align-items:center}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dfs>.ndtb label{display:flex;flex-direction:column;align-items:flex-start;gap:1px;font-size:11px;line-height:13px;color:#a3a7b4}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dfs>.ndtb select{min-height:20px!important;height:20px;font-size:11px;padding:0 4px}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .kn,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .kn{display:grid!important;grid-template-columns:24px auto;grid-template-rows:auto auto;column-gap:6px;row-gap:0;width:auto!important;min-width:0!important;height:auto!important;align-items:center;justify-items:start;margin:0!important}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .kn>svg,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .kn>svg{grid-column:1;grid-row:1/3;width:24px!important;height:24px!important;margin:0!important}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .kn>span,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .kn>span{grid-column:2;grid-row:1;font-size:11px!important;line-height:13px!important;max-width:none!important;color:#a3a7b4}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .kn>output,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .kn>output{grid-column:2;grid-row:2;font-size:11px!important;line-height:13px!important;text-align:left}
+/* faders in the dock and the drawer: a short bar, its label over its value */
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .vb,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .vb{display:grid!important;grid-template-columns:8px auto;grid-template-rows:auto auto;column-gap:7px;row-gap:0;width:auto!important;min-width:0!important;height:30px!important;min-height:0!important;align-items:center;justify-items:start;margin:0!important}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .vb>.vl,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .vb>.vl{grid-column:2;grid-row:1;font-size:11px!important;line-height:13px!important;font-weight:500!important;max-width:none!important;color:#a3a7b4}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .vb>.vt,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .vb>.vt{grid-column:1;grid-row:1/3;width:8px!important;height:28px!important;min-height:0!important;flex:none!important;border-radius:3px}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb :is(.dfs,.dug) .vb>output,#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .vb>output{grid-column:2;grid-row:2;font-size:11px!important;line-height:13px!important}
+/* the preset row: a pill at the top, shown with the dock */
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre{position:absolute;z-index:4;display:flex;align-items:center;gap:4px;padding:2px 4px;margin:0;width:max-content!important;min-width:0!important;border-radius:10px;background:rgba(28,30,38,.94);box-shadow:inset 0 0 0 var(--lk-hair,1px) rgba(255,255,255,.13),0 4px 14px rgba(0,0,0,.4)}
+body.dvg #fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre{background:rgba(34,36,46,.55)}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre select{max-width:150px}
+/* the values line where the frame placed it (clear of the handles) */
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvval[data-dvp]{max-width:calc(100% - 20px)}
+/* On the picture: a chip is the device's own control, laid out in a row */
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip{display:flex!important;flex-direction:row!important;align-items:center;gap:5px;height:26px!important;min-height:0!important;width:max-content!important;min-width:0!important;padding:0 9px 0 4px!important;border-radius:13px!important;white-space:nowrap}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip.kn>svg{order:0;width:18px!important;height:18px!important;margin:0!important;flex:none}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip>:is(span,.vl){order:1;font-size:11px!important;line-height:13px!important;font-weight:500!important;color:#a3a7b4;max-width:none!important}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip>output{order:2;font-size:11px!important;line-height:13px!important;font-weight:600}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip.vb{padding-left:7px!important}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvchip.vb>.vt{order:0;width:5px!important;height:16px!important;min-height:0!important;flex:none!important;border-radius:2px}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvface.dvmore{height:24px;border-radius:12px}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dug{position:static!important;opacity:1!important;transform:none!important;pointer-events:auto!important;padding:0!important;height:auto!important;width:auto!important;margin:0!important;box-shadow:none!important;background:none!important}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dspr{display:flex;align-items:center;gap:4px;flex-wrap:wrap;position:static!important;margin:0!important;padding:0!important}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dspr select{max-width:150px}
+@media (prefers-reduced-motion:reduce){#fxin:not(.pinb) .dev.dvf.dvdock>.devb>*{transition:none!important}}
