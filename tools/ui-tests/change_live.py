@@ -15,6 +15,7 @@ R("window.__lv=function(ms){const N=NODES.get(S.tracks[0].id);if(!N.__a){N.__a=c
 LV=lambda ms=700:al.page.evaluate("ms=>window.__lv(ms)",ms)
 INST="S.tracks[0].inst.preset";CH="S.tracks[0].fx.map(f=>f.type+(f.on?'':'(off)')).join(' > ')"
 SNAP=lambda:R("JSON.stringify([S.tracks[0].inst,S.tracks[0].fx,S.tracks[0].name])")
+R("UI.ibView='cards';1")  # this test drives today's plane of live cards (the catalogue, DS-B1a, has its own test taskDS_B1a.py)
 def pt(k,mode='tile'):
     """a point on tile k that the mouse can really hit (the plane is moved so the tile is in view)"""
     R("chgSee(document.querySelector('#ibPlane .ibc[data-k=\"%s\"]'));1"%k);W(600)
