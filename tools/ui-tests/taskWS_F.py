@@ -9,6 +9,7 @@ Checks:
     a plain message and opens nothing
   - the real start (audiolab-ws-test 1), fresh profile: the start screen, no song loaded, no Fractals request at all
   python3 tools/ui-tests/taskWS_F.py [index.html]"""
+# for: task WS-F (lane Q)
 import sys, os, json, re
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong, songs  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
@@ -88,6 +89,14 @@ with sync_playwright() as p:
     st = J("({on:WS.on,tabs:PJ.list.map(p=>p.name),fr:PJ.list.some(p=>p.file===FRX_FILE)})")
     ck('the start screen, no Fractals song, one Untitled project', st['on'] and not st['fr'] and st['tabs'] == ['Untitled'], st)
     ck('the app asked for no test song file', not reqs, reqs)
+    # R0: a stored project the current format cannot open is not listed; one that still fails to open gets a plain message
+    R("localStorage.setItem('audiolab-saved',JSON.stringify([{name:'Old format',t:Date.now(),S:{bpm:120,tracks:[{name:'x'}]}},{name:'Good one',t:Date.now()-5,S:{bpm:120,tracks:[{name:'y',kind:'inst',clips:[{start:0,len:4,notes:[]}]}]}}]));wsFill&&wsFill();0")
+    names = J("wsRecent().map(r=>r.name)")
+    ck('R0: a project in an old format is not listed, a good one is', 'Old format' not in names and 'Good one' in names, names)
+    R("window.__sp=switchProject;switchProject=()=>{throw new Error('broken project')};window.__nt=wsNewTab;wsNewTab=()=>{throw new Error('broken project')};0")
+    R("wsGo(wsRecent().find(r=>r.name==='Good one'));0"); pg.wait_for_timeout(600)
+    R("switchProject=window.__sp;wsNewTab=window.__nt;0")
+    ck('R0: a project that fails to open gets a plain message, no page error', 'This project could not be opened. It was made with an older AudioLab.' in J('__toasts') and not errs, (J('__toasts'), errs))
     ck('no page or console errors', not errs and not cons, errs + cons); ctx.close()
     b.close()
 

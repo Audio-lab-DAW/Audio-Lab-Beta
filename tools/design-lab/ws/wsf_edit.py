@@ -4,7 +4,7 @@ Takes out DEMO_FRACTALS (the project file), DEMO_VOX (where the vocal samples go
 Electric Universe's recording); they are now tools/test-songs/Fractals_remake.audiolab, fractals.json and vox/*.flac.
 frxProject / openDemoFractals / frxBoot keep their names (the release gate and the tests call them) and read the files from
 window.AL_TEST_SONGS (the Electron tests) or from tools/test-songs/ next to the page (the browser tests, tools/test-songs/alsong.py).
-Every anchor is asserted unique. Run on a fresh index.html:  python3 tools/design-lab/ws/wsf_edit.py [index.html]"""
+Also R0 on the start screen (wsOk, wsGo1). Every anchor is asserted unique. Run on a fresh index.html:  python3 tools/design-lab/ws/wsf_edit.py [index.html]"""
 import sys, re
 P = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 s = open(P, encoding='utf-8').read()
@@ -61,6 +61,13 @@ lit("/* ===================== task AI (v0.220): the Fractals song ships inside t
     "/* ===================== task AI (v0.220): the Fractals song opens at every start under automation (the tests; since WS-1 the app opens the start screen) =====================\n   The project is tools/test-songs/Fractals_remake.audiolab (master -10 dB from v0.220) with its vocal samples (task WS-F: out of this file).")
 lit("A pulled-out project window (CHILD) starts as before. Under automation (navigator.webdriver, the UI tests and the release\n     gate's engine tests) the start is the one before this step (task AI's Fractals song)",
     "A pulled-out project window (CHILD) starts as before. Under automation (navigator.webdriver, the UI tests and the release\n     gate's engine tests) the start is the one before this step (task AI's Fractals song, read from tools/test-songs since WS-F)")
+
+# 6) R0 (the user, 28 Nov 14:37): the start screen lists only projects the current format opens; one that still fails gets a plain message
+lit("function wsRecent(){const out=[],seen=new Set(),M=wsSeenAll();",
+    "/* task WS-F, R0: a stored project the current format opens has a track list, and every track a clip list */\nfunction wsOk(s){try{return!!s&&Array.isArray(s.tracks)&&s.tracks.every(t=>t&&typeof t==='object'&&Array.isArray(t.clips))}catch(e){return false}}\nfunction wsRecent(){const out=[],seen=new Set(),M=wsSeenAll();")
+lit("if(!s||!Array.isArray(s.tracks)||wsIsBlank(p))continue;", "if(!wsOk(s)||wsIsBlank(p))continue;")
+lit("if(!q||!q.S||!Array.isArray(q.S.tracks)||seen.has(q.name))return;", "if(!q||!wsOk(q.S)||seen.has(q.name))return;")
+lit("function wsGo(r){if(r.k==='tab'){", "function wsGo(r){try{wsGo1(r)}catch(e){console.warn('AudioLab start screen: could not open the project',e);toast('This project could not be opened. It was made with an older AudioLab.');try{wsFill()}catch(e2){}}}\nfunction wsGo1(r){if(r.k==='tab'){")
 
 assert 'DEMO_FRACTALS' not in s and 'DEMO_VOX' not in s and 'vox/fractals_vox_' not in s
 open(P, 'w', encoding='utf-8').write(s)
