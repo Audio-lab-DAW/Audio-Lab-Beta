@@ -1,0 +1,10157 @@
+{
+ "rules": [
+  {
+   "id": "T1",
+   "label": "Main text",
+   "kind": "text",
+   "thr": {
+    "lc": 75,
+    "wc": 7
+   },
+   "surfaces": [
+    "bg",
+    "chrome",
+    "ruler",
+    "lane0",
+    "lane1",
+    "laneSel",
+    "panel",
+    "panel2",
+    "strip",
+    "@glass"
+   ]
+  },
+  {
+   "id": "T2",
+   "label": "Labels",
+   "kind": "text",
+   "thr": {
+    "lc": 60,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "chrome",
+    "lane0",
+    "panel",
+    "panel2",
+    "strip",
+    "@glass"
+   ]
+  },
+  {
+   "id": "T3",
+   "label": "Quiet text (11 px, weight 500)",
+   "kind": "text",
+   "thr": {
+    "lc": 45,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "bg",
+    "chrome",
+    "lane0",
+    "panel",
+    "panel2",
+    "strip",
+    "@glass"
+   ]
+  },
+  {
+   "id": "T4",
+   "label": "Disabled text",
+   "kind": "spot",
+   "thr": {
+    "lc": 30
+   },
+   "surfaces": [
+    "panel",
+    "strip"
+   ]
+  },
+  {
+   "id": "T5",
+   "label": "Ruler numbers",
+   "kind": "text",
+   "thr": {
+    "lc": 60,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "ruler"
+   ]
+  },
+  {
+   "id": "T6",
+   "label": "Units (amber, L2) on panels",
+   "kind": "text",
+   "thr": {
+    "lc": 55,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "chrome",
+    "panel",
+    "strip"
+   ]
+  },
+  {
+   "id": "T6d",
+   "label": "Units in displays",
+   "kind": "text",
+   "thr": {
+    "lc": 55,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "T7",
+   "label": "Text on accent buttons",
+   "kind": "text",
+   "thr": {
+    "lc": 60,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "accent"
+   ]
+  },
+  {
+   "id": "T8",
+   "label": "Over read-out in displays",
+   "kind": "text",
+   "thr": {
+    "lc": 45,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "T10",
+   "label": "Text in displays",
+   "kind": "text",
+   "thr": {
+    "lc": 75,
+    "wc": 7
+   },
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "T9",
+   "label": "Over / error text on panels",
+   "kind": "text",
+   "thr": {
+    "lc": 45,
+    "wc": 4.5
+   },
+   "surfaces": [
+    "panel",
+    "strip"
+   ]
+  },
+  {
+   "id": "U1",
+   "label": "Accent (buttons on, links, toggles)",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "bg",
+    "chrome",
+    "panel",
+    "strip"
+   ]
+  },
+  {
+   "id": "U2",
+   "label": "Selection outline (A1)",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "lane0",
+    "laneSel",
+    "panel",
+    "strip"
+   ]
+  },
+  {
+   "id": "U3",
+   "label": "Record button",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "chrome",
+    "panel"
+   ]
+  },
+  {
+   "id": "U4",
+   "label": "Playhead",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "ruler",
+    "lane0",
+    "lane1"
+   ]
+  },
+  {
+   "id": "U5",
+   "label": "Meter segments in their well",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "U6",
+   "label": "Limit colours in displays",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "U9",
+   "label": "Curves and handles in displays",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "display"
+   ]
+  },
+  {
+   "id": "U7",
+   "label": "Focus ring (two colours, best band)",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "bg",
+    "chrome",
+    "ruler",
+    "lane0",
+    "lane1",
+    "laneSel",
+    "panel",
+    "panel2",
+    "strip"
+   ]
+  },
+  {
+   "id": "U8",
+   "label": "Track colours against the lanes (clip edges)",
+   "kind": "ui",
+   "thr": {},
+   "surfaces": [
+    "lane0",
+    "lane1"
+   ]
+  }
+ ],
+ "distinct": [
+  [
+   "accent",
+   "sel",
+   15
+  ],
+  [
+   "sel",
+   "over",
+   15
+  ],
+  [
+   "sel",
+   "rec",
+   15
+  ],
+  [
+   "accent",
+   "rec",
+   15
+  ],
+  [
+   "accent",
+   "ok",
+   10
+  ],
+  [
+   "ph",
+   "sel",
+   10
+  ],
+  [
+   "ph",
+   "rec",
+   15
+  ]
+ ],
+ "cvd_target": 10,
+ "cvd_floor": 6,
+ "themes": [
+  {
+   "id": "A",
+   "key": "orbit-night",
+   "name": "Orbit night",
+   "mode": "dark",
+   "lock": true,
+   "stars": 5,
+   "refs": "J3 P2 (Dipole Field), M5 P2 (Field Depth): today's app",
+   "icons": [
+    "dipole-field",
+    "field-depth"
+   ],
+   "desc": "Today's AudioLab, unchanged: blue-tinted charcoal, see-through clips, yellow selection, amber units. The default.",
+   "t": {
+    "bg": "#101214",
+    "chrome": "#17191C",
+    "ruler": "#272B30",
+    "lane0": "#1E2125",
+    "lane1": "#202328",
+    "laneSel": "#292D33",
+    "panel": "#121216",
+    "panel2": "#18181d",
+    "strip": "#24272E",
+    "display": "#0B0C10",
+    "glass": "#1C1C24",
+    "glassA": 0.5,
+    "line": "#25252c",
+    "grid": "255,255,255",
+    "gridK": 1,
+    "ink": "#ececf1",
+    "lab": "#b7b7c2",
+    "mut": "#8b8b97",
+    "dis": "#5c5e68",
+    "rulerTxt": "#AAB1BB",
+    "accent": "#4c8dff",
+    "onAccent": "#ffffff",
+    "sel": "#f5c84c",
+    "unit": "#ffb547",
+    "rec": "#ff4d4d",
+    "over": "#ff6b6b",
+    "overD": "#ff6b6b",
+    "warn": "#f5c84c",
+    "ok": "#3ecf8e",
+    "ph": "#3ecf8e",
+    "m0": "#12804f",
+    "m1": "#3ecf8e",
+    "m2": "#f5c84c",
+    "m3": "#ff3b3b",
+    "focusIn": "#4c8dff",
+    "focusOut": "#4c8dff",
+    "clipA": 0.36,
+    "unitD": "#ffb547",
+    "accentD": "#4c8dff",
+    "selD": "#f5c84c",
+    "inkD": "#ececf1"
+   },
+   "pal": [
+    "#4c8dff",
+    "#3ecf8e",
+    "#f5c84c",
+    "#ff6b6b",
+    "#ff9a3c",
+    "#b583ff",
+    "#4cc9f0",
+    "#ff7ac8"
+   ],
+   "fit": [],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#ececf1",
+       "surf": "@glass",
+       "bg": "#443C2C",
+       "wc": 9.25,
+       "lc": -86.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 2,
+      "worst": {
+       "tok": "lab",
+       "fg": "#b7b7c2",
+       "surf": "@glass",
+       "bg": "#443C2C",
+       "wc": 5.48,
+       "lc": -55.1,
+       "ok": false
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 11,
+      "worst": {
+       "tok": "mut",
+       "fg": "#8b8b97",
+       "surf": "@glass",
+       "bg": "#443C2C",
+       "wc": 3.23,
+       "lc": -31.8,
+       "ok": false
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 2,
+      "worst": {
+       "tok": "dis",
+       "fg": "#5c5e68",
+       "surf": "strip",
+       "bg": "#24272E",
+       "wc": 2.32,
+       "lc": -16.6,
+       "ok": false
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 1,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#AAB1BB",
+       "surf": "ruler",
+       "bg": "#272B30",
+       "wc": 6.59,
+       "lc": -55.8,
+       "ok": false
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#ffb547",
+       "surf": "strip",
+       "bg": "#24272E",
+       "wc": 8.51,
+       "lc": -67.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#ffb547",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 11.13,
+       "lc": -70.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 1,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#ffffff",
+       "surf": "accent",
+       "bg": "#4c8dff",
+       "wc": 3.2,
+       "lc": -64.2,
+       "ok": false
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#ff6b6b",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 7.04,
+       "lc": -48.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#ececf1",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 16.6,
+       "lc": -95.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#ff6b6b",
+       "surf": "strip",
+       "bg": "#24272E",
+       "wc": 5.39,
+       "lc": -45.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#4c8dff",
+       "surf": "strip",
+       "bg": "#24272E",
+       "wc": 4.67,
+       "lc": -39.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#f5c84c",
+       "surf": "laneSel",
+       "bg": "#292D33",
+       "wc": 8.73,
+       "lc": -72.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#ff4d4d",
+       "surf": "chrome",
+       "bg": "#17191C",
+       "wc": 5.39,
+       "lc": -41.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#3ecf8e",
+       "surf": "ruler",
+       "bg": "#272B30",
+       "wc": 7.14,
+       "lc": -60.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#12804f",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 3.93,
+       "lc": -27.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#ff6b6b",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 7.04,
+       "lc": -48.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#4c8dff",
+       "surf": "display",
+       "bg": "#0B0C10",
+       "wc": 6.11,
+       "lc": -42.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#4c8dff",
+       "surf": "laneSel",
+       "bg": "#292D33",
+       "wc": 4.32,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal0",
+       "fg": "#4c8dff",
+       "surf": "lane1",
+       "bg": "#202328",
+       "wc": 4.92,
+       "lc": -40.4,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 61.2,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 42.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 44.4,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 45.6,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 48.4,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 35.2,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 73.2,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 18.6,
+      "pair": [
+       "#f5c84c",
+       "#ff9a3c"
+      ]
+     },
+     "protan": {
+      "de": 1.0,
+      "pair": [
+       "#4c8dff",
+       "#b583ff"
+      ]
+     },
+     "deutan": {
+      "de": 5.7,
+      "pair": [
+       "#f5c84c",
+       "#ff9a3c"
+      ]
+     },
+     "tritan": {
+      "de": 6.1,
+      "pair": [
+       "#3ecf8e",
+       "#4cc9f0"
+      ]
+     }
+    },
+    "cvd_min": 1.0,
+    "titles": [
+     {
+      "clip": "#4c8dff",
+      "body": "#2F4873",
+      "ink": "#FFFFFF",
+      "wc": 9.15,
+      "lc": -95.3
+     },
+     {
+      "clip": "#3ecf8e",
+      "body": "#2A604B",
+      "ink": "#FFFFFF",
+      "wc": 7.31,
+      "lc": -90.1
+     },
+     {
+      "clip": "#f5c84c",
+      "body": "#6B5D33",
+      "ink": "#FFFFFF",
+      "wc": 6.48,
+      "lc": -87.2
+     },
+     {
+      "clip": "#ff6b6b",
+      "body": "#6F3C3E",
+      "ink": "#FFFFFF",
+      "wc": 8.78,
+      "lc": -94.3
+     },
+     {
+      "clip": "#ff9a3c",
+      "body": "#6F4D2D",
+      "ink": "#FFFFFF",
+      "wc": 7.57,
+      "lc": -91.0
+     },
+     {
+      "clip": "#b583ff",
+      "body": "#544473",
+      "ink": "#FFFFFF",
+      "wc": 8.57,
+      "lc": -93.9
+     },
+     {
+      "clip": "#4cc9f0",
+      "body": "#2F5D6E",
+      "ink": "#FFFFFF",
+      "wc": 7.21,
+      "lc": -89.8
+     },
+     {
+      "clip": "#ff7ac8",
+      "body": "#6F4160",
+      "ink": "#FFFFFF",
+      "wc": 8.07,
+      "lc": -92.5
+     }
+    ],
+    "glass_floor": 0.78,
+    "fails": 6
+   }
+  },
+  {
+   "id": "B",
+   "key": "chart-paper",
+   "name": "Chart paper",
+   "mode": "light",
+   "stars": 5,
+   "refs": "J3 P8, J8 P8, J10 P8 (palette P8: paper #F7F3EA to #E4DCCA, ink #1B2340, nucleus #C8610A, electron #2F6BFF)",
+   "icons": [
+    "dipole-field-paper",
+    "measured-field-paper",
+    "field-dial-paper"
+   ],
+   "desc": "A printed plate: warm chart paper, navy ink, the nucleus orange and the electron blue. Displays and meters sit in navy ink wells.",
+   "t": {
+    "bg": "#E4DCCA",
+    "chrome": "#EAE3D3",
+    "ruler": "#EFE9DC",
+    "lane0": "#F7F3EA",
+    "lane1": "#F2EDE2",
+    "laneSel": "#FBEFC9",
+    "panel": "#FAF7F0",
+    "panel2": "#F1EBDF",
+    "strip": "#EDE6D7",
+    "display": "#1B2340",
+    "glass": "#FAF6EE",
+    "glassA": 0.9,
+    "line": "#CFC5B0",
+    "grid": "27,35,64",
+    "gridK": 1.2,
+    "ink": "#1B2340",
+    "lab": "#3E4560",
+    "mut": "#5B6074",
+    "dis": "#9A9888",
+    "rulerTxt": "#1B2340",
+    "accent": "#2E6AFE",
+    "onAccent": "#FFFFFF",
+    "sel": "#AA7B01",
+    "unit": "#A34E00",
+    "unitD": "#FFB547",
+    "rec": "#D02F2F",
+    "over": "#C42C29",
+    "overD": "#FF6B6B",
+    "warn": "#F2C84B",
+    "ok": "#5AD39A",
+    "ph": "#C8610A",
+    "m0": "#2E9E6B",
+    "m1": "#5AD39A",
+    "m2": "#F2C84B",
+    "m3": "#FF5A4F",
+    "focusIn": "#2F6BFF",
+    "focusOut": "#FFFFFF",
+    "clipA": 0.85,
+    "accentD": "#2E6AFE",
+    "selD": "#C89200",
+    "inkD": "#F7F3EA"
+   },
+   "pal": [
+    "#7D76FB",
+    "#147B5C",
+    "#8F5A08",
+    "#CB5D78",
+    "#6957B5",
+    "#1796AA",
+    "#93006F",
+    "#988941"
+   ],
+   "src": {
+    "t": {
+     "bg": "#E4DCCA",
+     "chrome": "#EAE3D3",
+     "ruler": "#EFE9DC",
+     "lane0": "#F7F3EA",
+     "lane1": "#F2EDE2",
+     "laneSel": "#FBEFC9",
+     "panel": "#FAF7F0",
+     "panel2": "#F1EBDF",
+     "strip": "#EDE6D7",
+     "display": "#1B2340",
+     "glass": "#FAF6EE",
+     "glassA": 0.9,
+     "line": "#CFC5B0",
+     "grid": "27,35,64",
+     "gridK": 1.2,
+     "ink": "#1B2340",
+     "lab": "#3E4560",
+     "mut": "#5F6478",
+     "dis": "#9A9888",
+     "rulerTxt": "#1B2340",
+     "accent": "#2F6BFF",
+     "onAccent": "#FFFFFF",
+     "sel": "#C89200",
+     "unit": "#A8520A",
+     "unitD": "#FFB547",
+     "rec": "#D02F2F",
+     "over": "#C8302C",
+     "overD": "#FF6B6B",
+     "warn": "#F2C84B",
+     "ok": "#5AD39A",
+     "ph": "#C8610A",
+     "m0": "#2E9E6B",
+     "m1": "#5AD39A",
+     "m2": "#F2C84B",
+     "m3": "#FF5A4F",
+     "focusIn": "#2F6BFF",
+     "focusOut": "#FFFFFF",
+     "clipA": 0.85,
+     "accentD": "#2F6BFF",
+     "selD": "#C89200",
+     "inkD": "#F7F3EA"
+    },
+    "pal": [
+     "#2F6BFF",
+     "#1E9E6A",
+     "#C8610A",
+     "#D0343A",
+     "#8A55D6",
+     "#0E8FB0",
+     "#B0407F",
+     "#7A7A2A"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#2F6BFF #1E9E6A #C8610A #D0343A #8A55D6 #0E8FB0 #B0407F #7A7A2A",
+     "now": "#7D76FB #147B5C #8F5A08 #CB5D78 #6957B5 #1796AA #93006F #988941",
+     "note": "smallest CIEDE2000 over four visions 1.6 -> 12.9"
+    },
+    {
+     "tok": "mut",
+     "was": "#5F6478",
+     "now": "#5B6074"
+    },
+    {
+     "tok": "unit",
+     "was": "#A8520A",
+     "now": "#A34E00"
+    },
+    {
+     "tok": "over",
+     "was": "#C8302C",
+     "now": "#C42C29"
+    },
+    {
+     "tok": "sel",
+     "was": "#C89200",
+     "now": "#AA7B01"
+    },
+    {
+     "tok": "accent / onAccent",
+     "was": "#2F6BFF / #FFFFFF",
+     "now": "#2E6AFE / #FFFFFF"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#1B2340",
+       "surf": "bg",
+       "bg": "#E4DCCA",
+       "wc": 11.31,
+       "lc": 82.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#3E4560",
+       "surf": "chrome",
+       "bg": "#EAE3D3",
+       "wc": 7.38,
+       "lc": 75.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#5B6074",
+       "surf": "bg",
+       "bg": "#E4DCCA",
+       "wc": 4.57,
+       "lc": 60.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#9A9888",
+       "surf": "strip",
+       "bg": "#EDE6D7",
+       "wc": 2.34,
+       "lc": 41.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#1B2340",
+       "surf": "ruler",
+       "bg": "#EFE9DC",
+       "wc": 12.75,
+       "lc": 89.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#A34E00",
+       "surf": "chrome",
+       "bg": "#EAE3D3",
+       "wc": 4.5,
+       "lc": 61.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 8.78,
+       "lc": -67.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#FFFFFF",
+       "surf": "accent",
+       "bg": "#2E6AFE",
+       "wc": 4.56,
+       "lc": -76.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 5.56,
+       "lc": -46.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F7F3EA",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 13.93,
+       "lc": -97.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#C42C29",
+       "surf": "strip",
+       "bg": "#EDE6D7",
+       "wc": 4.52,
+       "lc": 62.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#2E6AFE",
+       "surf": "bg",
+       "bg": "#E4DCCA",
+       "wc": 3.34,
+       "lc": 50.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#AA7B01",
+       "surf": "strip",
+       "bg": "#EDE6D7",
+       "wc": 3.05,
+       "lc": 50.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#D02F2F",
+       "surf": "chrome",
+       "bg": "#EAE3D3",
+       "wc": 3.98,
+       "lc": 57.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#C8610A",
+       "surf": "ruler",
+       "bg": "#EFE9DC",
+       "wc": 3.36,
+       "lc": 54.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#2E9E6B",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 4.57,
+       "lc": -37.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 5.56,
+       "lc": -46.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#2E6AFE",
+       "surf": "display",
+       "bg": "#1B2340",
+       "wc": 3.39,
+       "lc": -27.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#2F6BFF",
+       "surf": "bg",
+       "bg": "#E4DCCA",
+       "wc": 3.3,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal7",
+       "fg": "#988941",
+       "surf": "lane1",
+       "bg": "#F2EDE2",
+       "wc": 3.0,
+       "lc": 52.1,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 60.6,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 34.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 34.6,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 44.7,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 53.4,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 16.7,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 19.2,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 14.7,
+      "pair": [
+       "#7D76FB",
+       "#6957B5"
+      ]
+     },
+     "protan": {
+      "de": 13.8,
+      "pair": [
+       "#CB5D78",
+       "#1796AA"
+      ]
+     },
+     "deutan": {
+      "de": 13.0,
+      "pair": [
+       "#147B5C",
+       "#CB5D78"
+      ]
+     },
+     "tritan": {
+      "de": 12.9,
+      "pair": [
+       "#8F5A08",
+       "#93006F"
+      ]
+     }
+    },
+    "cvd_min": 12.9,
+    "titles": [
+     {
+      "clip": "#7D76FB",
+      "body": "#8F89F8",
+      "ink": "#101114",
+      "wc": 6.38,
+      "lc": 47.4
+     },
+     {
+      "clip": "#147B5C",
+      "body": "#368D71",
+      "ink": "#101114",
+      "wc": 4.68,
+      "lc": 36.1
+     },
+     {
+      "clip": "#8F5A08",
+      "body": "#9F712A",
+      "ink": "#101114",
+      "wc": 4.38,
+      "lc": 33.7
+     },
+     {
+      "clip": "#CB5D78",
+      "body": "#D27489",
+      "ink": "#101114",
+      "wc": 5.93,
+      "lc": 44.7
+     },
+     {
+      "clip": "#6957B5",
+      "body": "#7E6EBD",
+      "ink": "#101114",
+      "wc": 4.36,
+      "lc": 33.5
+     },
+     {
+      "clip": "#1796AA",
+      "body": "#39A4B4",
+      "ink": "#101114",
+      "wc": 6.42,
+      "lc": 47.8
+     },
+     {
+      "clip": "#93006F",
+      "body": "#A22481",
+      "ink": "#FFFFFF",
+      "wc": 6.76,
+      "lc": -87.1
+     },
+     {
+      "clip": "#988941",
+      "body": "#A6995A",
+      "ink": "#101114",
+      "wc": 6.59,
+      "lc": 48.5
+     }
+    ],
+    "glass_floor": 0.85,
+    "fails": 0
+   }
+  },
+  {
+   "id": "B2",
+   "key": "chart-paper-night",
+   "name": "Chart paper, night",
+   "mode": "dark",
+   "stars": 4,
+   "refs": "P8N (Chart paper, night: #1E2742 to #0C1020, paper ink #F3EEE2, orange #F08A2C, blue #6E9BFF, field #D9CDB4)",
+   "icons": [
+    "dipole-field-paper",
+    "measured-field-paper",
+    "field-dial-paper"
+   ],
+   "desc": "Chart paper turned over: navy night with paper-coloured ink. B's dark half, for when the system goes dark.",
+   "t": {
+    "bg": "#0C1020",
+    "chrome": "#121729",
+    "ruler": "#1B2238",
+    "lane0": "#141A2C",
+    "lane1": "#171E33",
+    "laneSel": "#222A42",
+    "panel": "#151B2D",
+    "panel2": "#1B2236",
+    "strip": "#1C2338",
+    "display": "#080B15",
+    "glass": "#1A2034",
+    "glassA": 0.85,
+    "line": "#2C3550",
+    "grid": "217,205,180",
+    "gridK": 1,
+    "ink": "#F3EEE2",
+    "lab": "#D9CDB4",
+    "mut": "#A69E8C",
+    "dis": "#817C6D",
+    "rulerTxt": "#D9CDB4",
+    "accent": "#8AAFFE",
+    "onAccent": "#0C1020",
+    "sel": "#F5C84C",
+    "unit": "#FA9438",
+    "rec": "#FF5555",
+    "over": "#FF6B6B",
+    "overD": "#FF6B6B",
+    "warn": "#F5C84C",
+    "ok": "#4FD39A",
+    "ph": "#F08A2C",
+    "m0": "#1F8A5A",
+    "m1": "#4FD39A",
+    "m2": "#F5C84C",
+    "m3": "#FF4D4D",
+    "focusIn": "#6E9BFF",
+    "focusOut": "#0C1020",
+    "clipA": 0.4,
+    "unitD": "#F58F32",
+    "accentD": "#8AAFFE",
+    "selD": "#F5C84C",
+    "inkD": "#F3EEE2"
+   },
+   "pal": [
+    "#776FE9",
+    "#28E7BC",
+    "#F1FB57",
+    "#E02C00",
+    "#E7A26A",
+    "#BAB3FE",
+    "#74AAAC",
+    "#C0667E"
+   ],
+   "src": {
+    "t": {
+     "bg": "#0C1020",
+     "chrome": "#121729",
+     "ruler": "#1B2238",
+     "lane0": "#141A2C",
+     "lane1": "#171E33",
+     "laneSel": "#222A42",
+     "panel": "#151B2D",
+     "panel2": "#1B2236",
+     "strip": "#1C2338",
+     "display": "#080B15",
+     "glass": "#1A2034",
+     "glassA": 0.55,
+     "line": "#2C3550",
+     "grid": "217,205,180",
+     "gridK": 1,
+     "ink": "#F3EEE2",
+     "lab": "#D9CDB4",
+     "mut": "#A49C8A",
+     "dis": "#6B6658",
+     "rulerTxt": "#D9CDB4",
+     "accent": "#6E9BFF",
+     "onAccent": "#0C1020",
+     "sel": "#F5C84C",
+     "unit": "#F08A2C",
+     "rec": "#FF5555",
+     "over": "#FF6B6B",
+     "overD": "#FF6B6B",
+     "warn": "#F5C84C",
+     "ok": "#4FD39A",
+     "ph": "#F08A2C",
+     "m0": "#1F8A5A",
+     "m1": "#4FD39A",
+     "m2": "#F5C84C",
+     "m3": "#FF4D4D",
+     "focusIn": "#6E9BFF",
+     "focusOut": "#0C1020",
+     "clipA": 0.4,
+     "unitD": "#F08A2C",
+     "accentD": "#6E9BFF",
+     "selD": "#F5C84C",
+     "inkD": "#F3EEE2"
+    },
+    "pal": [
+     "#6E9BFF",
+     "#4FC08D",
+     "#F0D35A",
+     "#F06A5E",
+     "#F08A2C",
+     "#B595FF",
+     "#5FD0E6",
+     "#E87AB8"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#6E9BFF #4FC08D #F0D35A #F06A5E #F08A2C #B595FF #5FD0E6 #E87AB8",
+     "now": "#776FE9 #28E7BC #F1FB57 #E02C00 #E7A26A #BAB3FE #74AAAC #C0667E",
+     "note": "smallest CIEDE2000 over four visions 0.8 -> 15.5"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.55,
+     "now": 0.85,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#A49C8A",
+     "now": "#A69E8C"
+    },
+    {
+     "tok": "dis",
+     "was": "#6B6658",
+     "now": "#817C6D"
+    },
+    {
+     "tok": "unit",
+     "was": "#F08A2C",
+     "now": "#FA9438"
+    },
+    {
+     "tok": "unitD",
+     "was": "#F08A2C",
+     "now": "#F58F32"
+    },
+    {
+     "tok": "accent / onAccent",
+     "was": "#6E9BFF / #0C1020",
+     "now": "#8AAFFE / #0C1020"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F3EEE2",
+       "surf": "@glass",
+       "bg": "#262D35",
+       "wc": 12.02,
+       "lc": -92.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#D9CDB4",
+       "surf": "@glass",
+       "bg": "#262D35",
+       "wc": 8.84,
+       "lc": -72.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#A69E8C",
+       "surf": "@glass",
+       "bg": "#262D35",
+       "wc": 5.23,
+       "lc": -45.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#817C6D",
+       "surf": "strip",
+       "bg": "#1C2338",
+       "wc": 3.74,
+       "lc": -30.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#D9CDB4",
+       "surf": "ruler",
+       "bg": "#1B2238",
+       "wc": 10.01,
+       "lc": -74.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FA9438",
+       "surf": "strip",
+       "bg": "#1C2338",
+       "wc": 6.95,
+       "lc": -55.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#F58F32",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 8.29,
+       "lc": -55.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#0C1020",
+       "surf": "accent",
+       "bg": "#8AAFFE",
+       "wc": 8.68,
+       "lc": 60.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 7.08,
+       "lc": -48.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F3EEE2",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 16.97,
+       "lc": -96.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B6B",
+       "surf": "strip",
+       "bg": "#1C2338",
+       "wc": 5.62,
+       "lc": -46.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#8AAFFE",
+       "surf": "strip",
+       "bg": "#1C2338",
+       "wc": 7.16,
+       "lc": -56.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F5C84C",
+       "surf": "laneSel",
+       "bg": "#222A42",
+       "wc": 8.96,
+       "lc": -72.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF5555",
+       "surf": "panel",
+       "bg": "#151B2D",
+       "wc": 5.45,
+       "lc": -42.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#F08A2C",
+       "surf": "ruler",
+       "bg": "#1B2238",
+       "wc": 6.29,
+       "lc": -50.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#1F8A5A",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 4.53,
+       "lc": -31.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 7.08,
+       "lc": -48.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#8AAFFE",
+       "surf": "display",
+       "bg": "#080B15",
+       "wc": 9.02,
+       "lc": -59.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#6E9BFF",
+       "surf": "laneSel",
+       "bg": "#222A42",
+       "wc": 5.27,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#E02C00",
+       "surf": "lane1",
+       "bg": "#171E33",
+       "wc": 3.57,
+       "lc": -29.4,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 53.3,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 42.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 44.0,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 43.9,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 41.2,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 21.3,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 24.5,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 20.5,
+      "pair": [
+       "#776FE9",
+       "#BAB3FE"
+      ]
+     },
+     "protan": {
+      "de": 15.7,
+      "pair": [
+       "#28E7BC",
+       "#E7A26A"
+      ]
+     },
+     "deutan": {
+      "de": 15.5,
+      "pair": [
+       "#74AAAC",
+       "#C0667E"
+      ]
+     },
+     "tritan": {
+      "de": 15.5,
+      "pair": [
+       "#E7A26A",
+       "#C0667E"
+      ]
+     }
+    },
+    "cvd_min": 15.5,
+    "titles": [
+     {
+      "clip": "#776FE9",
+      "body": "#3C3C78",
+      "ink": "#FFFFFF",
+      "wc": 9.95,
+      "lc": -97.1
+     },
+     {
+      "clip": "#28E7BC",
+      "body": "#1C6C66",
+      "ink": "#FFFFFF",
+      "wc": 6.2,
+      "lc": -85.8
+     },
+     {
+      "clip": "#F1FB57",
+      "body": "#6C743D",
+      "ink": "#FFFFFF",
+      "wc": 5.0,
+      "lc": -79.9
+     },
+     {
+      "clip": "#E02C00",
+      "body": "#66211A",
+      "ink": "#FFFFFF",
+      "wc": 11.68,
+      "lc": -99.8
+     },
+     {
+      "clip": "#E7A26A",
+      "body": "#685045",
+      "ink": "#FFFFFF",
+      "wc": 7.44,
+      "lc": -90.7
+     },
+     {
+      "clip": "#BAB3FE",
+      "body": "#565780",
+      "ink": "#FFFFFF",
+      "wc": 6.84,
+      "lc": -88.6
+     },
+     {
+      "clip": "#74AAAC",
+      "body": "#3A545F",
+      "ink": "#FFFFFF",
+      "wc": 8.04,
+      "lc": -92.5
+     },
+     {
+      "clip": "#C0667E",
+      "body": "#59384D",
+      "ink": "#FFFFFF",
+      "wc": 10.01,
+      "lc": -97.3
+     }
+    ],
+    "glass_floor": 0.81,
+    "fails": 0
+   }
+  },
+  {
+   "id": "C",
+   "key": "space-race",
+   "name": "Space Race",
+   "mode": "dark",
+   "stars": 4,
+   "refs": "RC2 Three Rings (graphite #0F141E, steel #8FA1BB, red #C73637, blue #5579C0) and FC4 Space Race (blue #0B3D91, white, red #D53D33)",
+   "icons": [
+    "three-rings",
+    "space-race"
+   ],
+   "desc": "Old school mission control: deep navy, a Space Race blue band for the top bar and transport, steel text, red only for record.",
+   "t": {
+    "bg": "#070E1E",
+    "chrome": "#0A3478",
+    "ruler": "#0E1A33",
+    "lane0": "#0D1730",
+    "lane1": "#0F1A35",
+    "laneSel": "#18264A",
+    "panel": "#0C1630",
+    "panel2": "#122045",
+    "strip": "#111D3A",
+    "display": "#040914",
+    "glass": "#0E1A38",
+    "glassA": 0.83,
+    "line": "#22335A",
+    "grid": "160,180,215",
+    "gridK": 1,
+    "ink": "#F2F4F8",
+    "lab": "#C4CEE0",
+    "mut": "#95A4C2",
+    "dis": "#6F7B95",
+    "rulerTxt": "#C4CEE0",
+    "accent": "#82AFFD",
+    "onAccent": "#070E1E",
+    "sel": "#FFD23A",
+    "unit": "#FFB547",
+    "rec": "#E7493E",
+    "over": "#FF6B5E",
+    "overD": "#FF6B5E",
+    "warn": "#FFD23A",
+    "ok": "#3ECF8E",
+    "ph": "#F2F4F8",
+    "m0": "#12804f",
+    "m1": "#3ecf8e",
+    "m2": "#FFD23A",
+    "m3": "#ff3b3b",
+    "focusIn": "#FFFFFF",
+    "focusOut": "#0B3D91",
+    "clipA": 0.8,
+    "unitD": "#FFB547",
+    "accentD": "#82AFFD",
+    "selD": "#FFD23A",
+    "inkD": "#F2F4F8"
+   },
+   "pal": [
+    "#61A4FF",
+    "#5E8E6B",
+    "#FEE384",
+    "#CF0315",
+    "#F66F1A",
+    "#904FD6",
+    "#3AEDFD",
+    "#DA95B3"
+   ],
+   "src": {
+    "t": {
+     "bg": "#070E1E",
+     "chrome": "#0A3478",
+     "ruler": "#0E1A33",
+     "lane0": "#0D1730",
+     "lane1": "#0F1A35",
+     "laneSel": "#18264A",
+     "panel": "#0C1630",
+     "panel2": "#122045",
+     "strip": "#111D3A",
+     "display": "#040914",
+     "glass": "#0E1A38",
+     "glassA": 0.6,
+     "line": "#22335A",
+     "grid": "160,180,215",
+     "gridK": 1,
+     "ink": "#F2F4F8",
+     "lab": "#C4CEE0",
+     "mut": "#93A2C0",
+     "dis": "#56617A",
+     "rulerTxt": "#C4CEE0",
+     "accent": "#3D7BEA",
+     "onAccent": "#FFFFFF",
+     "sel": "#FFD23A",
+     "unit": "#FFB547",
+     "rec": "#E5473C",
+     "over": "#FF6B5E",
+     "overD": "#FF6B5E",
+     "warn": "#FFD23A",
+     "ok": "#3ECF8E",
+     "ph": "#F2F4F8",
+     "m0": "#12804f",
+     "m1": "#3ecf8e",
+     "m2": "#FFD23A",
+     "m3": "#ff3b3b",
+     "focusIn": "#FFFFFF",
+     "focusOut": "#0B3D91",
+     "clipA": 0.8,
+     "unitD": "#FFB547",
+     "accentD": "#3D7BEA",
+     "selD": "#FFD23A",
+     "inkD": "#F2F4F8"
+    },
+    "pal": [
+     "#5B8FF0",
+     "#3FB68B",
+     "#F2C84B",
+     "#E5473C",
+     "#F08A3C",
+     "#9C7CF0",
+     "#4FC3E8",
+     "#E07AB0"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#5B8FF0 #3FB68B #F2C84B #E5473C #F08A3C #9C7CF0 #4FC3E8 #E07AB0",
+     "now": "#61A4FF #5E8E6B #FEE384 #CF0315 #F66F1A #904FD6 #3AEDFD #DA95B3",
+     "note": "smallest CIEDE2000 over four visions 1.4 -> 15.6"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.83,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#93A2C0",
+     "now": "#95A4C2"
+    },
+    {
+     "tok": "dis",
+     "was": "#56617A",
+     "now": "#6F7B95"
+    },
+    {
+     "tok": "rec",
+     "was": "#E5473C",
+     "now": "#E7493E"
+    },
+    {
+     "tok": "accent / onAccent",
+     "was": "#3D7BEA / #FFFFFF",
+     "now": "#82AFFD / #070E1E"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F2F4F8",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 10.74,
+       "lc": -92.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#C4CEE0",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 7.46,
+       "lc": -68.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#95A4C2",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 4.71,
+       "lc": -45.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#6F7B95",
+       "surf": "strip",
+       "bg": "#111D3A",
+       "wc": 3.92,
+       "lc": -30.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#C4CEE0",
+       "surf": "ruler",
+       "bg": "#0E1A33",
+       "wc": 10.91,
+       "lc": -75.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFB547",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 6.73,
+       "lc": -63.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 11.34,
+       "lc": -70.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#070E1E",
+       "surf": "accent",
+       "bg": "#82AFFD",
+       "wc": 8.71,
+       "lc": 60.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B5E",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 7.13,
+       "lc": -48.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F2F4F8",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 18.09,
+       "lc": -100.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B5E",
+       "surf": "strip",
+       "bg": "#111D3A",
+       "wc": 5.96,
+       "lc": -46.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#82AFFD",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 5.35,
+       "lc": -51.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#FFD23A",
+       "surf": "laneSel",
+       "bg": "#18264A",
+       "wc": 10.27,
+       "lc": -78.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#E7493E",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 3.05,
+       "lc": -29.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#F2F4F8",
+       "surf": "lane1",
+       "bg": "#0F1A35",
+       "wc": 15.64,
+       "lc": -99.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#12804f",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 4.01,
+       "lc": -27.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B5E",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 7.13,
+       "lc": -48.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#82AFFD",
+       "surf": "display",
+       "bg": "#040914",
+       "wc": 9.01,
+       "lc": -58.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#FFFFFF",
+       "surf": "chrome",
+       "bg": "#0A3478",
+       "wc": 11.83,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#CF0315",
+       "surf": "lane1",
+       "bg": "#0F1A35",
+       "wc": 3.02,
+       "lc": -24.4,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 55.3,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 43.3,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 47.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 46.7,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 42.6,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 31.0,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 42.3,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 23.2,
+      "pair": [
+       "#CF0315",
+       "#F66F1A"
+      ]
+     },
+     "protan": {
+      "de": 15.9,
+      "pair": [
+       "#5E8E6B",
+       "#F66F1A"
+      ]
+     },
+     "deutan": {
+      "de": 15.8,
+      "pair": [
+       "#61A4FF",
+       "#904FD6"
+      ]
+     },
+     "tritan": {
+      "de": 15.6,
+      "pair": [
+       "#CF0315",
+       "#F66F1A"
+      ]
+     }
+    },
+    "cvd_min": 15.6,
+    "titles": [
+     {
+      "clip": "#61A4FF",
+      "body": "#5088D6",
+      "ink": "#101114",
+      "wc": 5.24,
+      "lc": 40.0
+     },
+     {
+      "clip": "#5E8E6B",
+      "body": "#4E765F",
+      "ink": "#FFFFFF",
+      "wc": 5.15,
+      "lc": -80.8
+     },
+     {
+      "clip": "#FEE384",
+      "body": "#CEBA73",
+      "ink": "#101114",
+      "wc": 9.8,
+      "lc": 66.4
+     },
+     {
+      "clip": "#CF0315",
+      "body": "#A8071A",
+      "ink": "#FFFFFF",
+      "wc": 7.75,
+      "lc": -89.5
+     },
+     {
+      "clip": "#F66F1A",
+      "body": "#C75D1E",
+      "ink": "#101114",
+      "wc": 4.51,
+      "lc": 35.2
+     },
+     {
+      "clip": "#904FD6",
+      "body": "#7644B5",
+      "ink": "#FFFFFF",
+      "wc": 6.43,
+      "lc": -86.6
+     },
+     {
+      "clip": "#3AEDFD",
+      "body": "#31C2D4",
+      "ink": "#101114",
+      "wc": 8.81,
+      "lc": 61.6
+     },
+     {
+      "clip": "#DA95B3",
+      "body": "#B17C99",
+      "ink": "#101114",
+      "wc": 5.59,
+      "lc": 42.2
+     }
+    ],
+    "glass_floor": 0.81,
+    "fails": 0
+   }
+  },
+  {
+   "id": "D",
+   "key": "chalkboard",
+   "name": "Chalkboard",
+   "mode": "dark",
+   "stars": 4,
+   "refs": "VB3 Chalkboard (slate #344434, chalk) and VA10 Science Fair (green #2E4A3A, cream #D1C6A0, red #AD3528, gold #C6A85A)",
+   "icons": [
+    "chalkboard",
+    "science-fair"
+   ],
+   "desc": "A science fair under a chalkboard: slate green, chalk-white text, chalk pastels for the tracks.",
+   "t": {
+    "bg": "#18221A",
+    "chrome": "#1D2A20",
+    "ruler": "#223026",
+    "lane0": "#25332A",
+    "lane1": "#283729",
+    "laneSel": "#33463A",
+    "panel": "#1F2B22",
+    "panel2": "#273529",
+    "strip": "#26342A",
+    "display": "#0E140F",
+    "glass": "#223026",
+    "glassA": 0.85,
+    "line": "#3A4B3E",
+    "grid": "232,228,212",
+    "gridK": 1.1,
+    "ink": "#ECE8DA",
+    "lab": "#CFCAB6",
+    "mut": "#A5AA96",
+    "dis": "#7B8676",
+    "rulerTxt": "#D1C6A0",
+    "accent": "#8EC5E8",
+    "onAccent": "#14201A",
+    "sel": "#F2D26B",
+    "unit": "#F0B062",
+    "rec": "#E25A4A",
+    "over": "#FF7A66",
+    "overD": "#FF7A66",
+    "warn": "#F2D26B",
+    "ok": "#8FDC8A",
+    "ph": "#F2EDE0",
+    "m0": "#3E9E63",
+    "m1": "#8FDC8A",
+    "m2": "#F2D26B",
+    "m3": "#FF6A55",
+    "focusIn": "#F2EDE0",
+    "focusOut": "#0E140F",
+    "clipA": 0.5,
+    "unitD": "#F0B062",
+    "accentD": "#8EC5E8",
+    "selD": "#F2D26B",
+    "inkD": "#ECE8DA"
+   },
+   "pal": [
+    "#C5E1FF",
+    "#BCCC95",
+    "#FBD639",
+    "#B88D84",
+    "#F07C3D",
+    "#A795DB",
+    "#77BDB8",
+    "#FFFEFA"
+   ],
+   "src": {
+    "t": {
+     "bg": "#18221A",
+     "chrome": "#1D2A20",
+     "ruler": "#223026",
+     "lane0": "#25332A",
+     "lane1": "#283729",
+     "laneSel": "#33463A",
+     "panel": "#1F2B22",
+     "panel2": "#273529",
+     "strip": "#26342A",
+     "display": "#0E140F",
+     "glass": "#223026",
+     "glassA": 0.6,
+     "line": "#3A4B3E",
+     "grid": "232,228,212",
+     "gridK": 1.1,
+     "ink": "#ECE8DA",
+     "lab": "#CFCAB6",
+     "mut": "#A3A894",
+     "dis": "#6A7465",
+     "rulerTxt": "#D1C6A0",
+     "accent": "#8EC5E8",
+     "onAccent": "#14201A",
+     "sel": "#F2D26B",
+     "unit": "#F0B062",
+     "rec": "#E25A4A",
+     "over": "#FF7A66",
+     "overD": "#FF7A66",
+     "warn": "#F2D26B",
+     "ok": "#8FDC8A",
+     "ph": "#F2EDE0",
+     "m0": "#3E9E63",
+     "m1": "#8FDC8A",
+     "m2": "#F2D26B",
+     "m3": "#FF6A55",
+     "focusIn": "#F2EDE0",
+     "focusOut": "#0E140F",
+     "clipA": 0.5,
+     "unitD": "#F0B062",
+     "accentD": "#8EC5E8",
+     "selD": "#F2D26B",
+     "inkD": "#ECE8DA"
+    },
+    "pal": [
+     "#8EC5E8",
+     "#A8DC9A",
+     "#F2DC7A",
+     "#F29BA4",
+     "#F4B072",
+     "#C6B0EA",
+     "#8EE0D6",
+     "#E8E4D4"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#8EC5E8 #A8DC9A #F2DC7A #F29BA4 #F4B072 #C6B0EA #8EE0D6 #E8E4D4",
+     "now": "#C5E1FF #BCCC95 #FBD639 #B88D84 #F07C3D #A795DB #77BDB8 #FFFEFA",
+     "note": "smallest CIEDE2000 over four visions 0.4 -> 13.8"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.85,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#A3A894",
+     "now": "#A5AA96"
+    },
+    {
+     "tok": "dis",
+     "was": "#6A7465",
+     "now": "#7B8676"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#ECE8DA",
+       "surf": "laneSel",
+       "bg": "#33463A",
+       "wc": 8.24,
+       "lc": -82.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#CFCAB6",
+       "surf": "@glass",
+       "bg": "#334036",
+       "wc": 6.63,
+       "lc": -65.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#A5AA96",
+       "surf": "@glass",
+       "bg": "#334036",
+       "wc": 4.56,
+       "lc": -46.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#7B8676",
+       "surf": "strip",
+       "bg": "#26342A",
+       "wc": 3.43,
+       "lc": -30.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#D1C6A0",
+       "surf": "ruler",
+       "bg": "#223026",
+       "wc": 8.1,
+       "lc": -67.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#F0B062",
+       "surf": "strip",
+       "bg": "#26342A",
+       "wc": 6.9,
+       "lc": -61.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#F0B062",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 9.85,
+       "lc": -66.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#14201A",
+       "surf": "accent",
+       "bg": "#8EC5E8",
+       "wc": 9.03,
+       "lc": 66.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7A66",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 7.31,
+       "lc": -51.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#ECE8DA",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 15.21,
+       "lc": -92.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF7A66",
+       "surf": "strip",
+       "bg": "#26342A",
+       "wc": 5.12,
+       "lc": -47.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#8EC5E8",
+       "surf": "strip",
+       "bg": "#26342A",
+       "wc": 7.03,
+       "lc": -62.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F2D26B",
+       "surf": "laneSel",
+       "bg": "#33463A",
+       "wc": 6.84,
+       "lc": -70.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#E25A4A",
+       "surf": "panel",
+       "bg": "#1F2B22",
+       "wc": 4.06,
+       "lc": -35.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#F2EDE0",
+       "surf": "lane1",
+       "bg": "#283729",
+       "wc": 10.77,
+       "lc": -90.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#3E9E63",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 5.58,
+       "lc": -40.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7A66",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 7.31,
+       "lc": -51.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#8EC5E8",
+       "surf": "display",
+       "bg": "#0E140F",
+       "wc": 10.04,
+       "lc": -66.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#F2EDE0",
+       "surf": "laneSel",
+       "bg": "#33463A",
+       "wc": 8.65,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#B88D84",
+       "surf": "lane1",
+       "bg": "#283729",
+       "wc": 4.3,
+       "lc": -40.2,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 45.0,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 37.6,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 42.4,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 49.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 38.6,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 20.7,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 38.8,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 16.6,
+      "pair": [
+       "#C5E1FF",
+       "#FFFEFA"
+      ]
+     },
+     "protan": {
+      "de": 13.8,
+      "pair": [
+       "#B88D84",
+       "#77BDB8"
+      ]
+     },
+     "deutan": {
+      "de": 13.8,
+      "pair": [
+       "#BCCC95",
+       "#B88D84"
+      ]
+     },
+     "tritan": {
+      "de": 13.9,
+      "pair": [
+       "#B88D84",
+       "#F07C3D"
+      ]
+     }
+    },
+    "cvd_min": 13.8,
+    "titles": [
+     {
+      "clip": "#C5E1FF",
+      "body": "#758A94",
+      "ink": "#101114",
+      "wc": 5.23,
+      "lc": 39.7
+     },
+     {
+      "clip": "#BCCC95",
+      "body": "#708060",
+      "ink": "#101114",
+      "wc": 4.45,
+      "lc": 34.1
+     },
+     {
+      "clip": "#FBD639",
+      "body": "#908432",
+      "ink": "#101114",
+      "wc": 4.97,
+      "lc": 38.0
+     },
+     {
+      "clip": "#B88D84",
+      "body": "#6E6057",
+      "ink": "#FFFFFF",
+      "wc": 6.05,
+      "lc": -85.4
+     },
+     {
+      "clip": "#F07C3D",
+      "body": "#8A5834",
+      "ink": "#FFFFFF",
+      "wc": 5.96,
+      "lc": -84.8
+     },
+     {
+      "clip": "#A795DB",
+      "body": "#666482",
+      "ink": "#FFFFFF",
+      "wc": 5.66,
+      "lc": -83.6
+     },
+     {
+      "clip": "#77BDB8",
+      "body": "#4E7871",
+      "ink": "#FFFFFF",
+      "wc": 4.94,
+      "lc": -79.6
+     },
+     {
+      "clip": "#FFFEFA",
+      "body": "#929892",
+      "ink": "#101114",
+      "wc": 6.41,
+      "lc": 47.4
+     }
+    ],
+    "glass_floor": 0.85,
+    "fails": 0
+   }
+  },
+  {
+   "id": "E",
+   "key": "blueprint",
+   "name": "Blueprint",
+   "mode": "dark",
+   "stars": 5,
+   "refs": "VB1 Blueprint (blue #13417A, grid #6888AD, white lines); pairs with VB6 Cutaway Nucleus as its icon",
+   "icons": [
+    "blueprint",
+    "cutaway-nucleus"
+   ],
+   "desc": "A drafting blueprint: Prussian blue paper, white lines, the G3 drafting grid made visible, tracing-paper clips.",
+   "t": {
+    "bg": "#0A2347",
+    "chrome": "#0D2A54",
+    "ruler": "#0F2E5A",
+    "lane0": "#123463",
+    "lane1": "#14376A",
+    "laneSel": "#1C4580",
+    "panel": "#0F2C57",
+    "panel2": "#143466",
+    "strip": "#133263",
+    "display": "#061733",
+    "glass": "#10305E",
+    "glassA": 0.68,
+    "line": "#2D5590",
+    "grid": "200,220,255",
+    "gridK": 1.4,
+    "ink": "#F4F8FF",
+    "lab": "#CADBF2",
+    "mut": "#9CB6DA",
+    "dis": "#6885B1",
+    "rulerTxt": "#CADBF2",
+    "accent": "#DDEBFF",
+    "onAccent": "#0A2347",
+    "sel": "#FFD54A",
+    "unit": "#FFC266",
+    "rec": "#FF5A50",
+    "over": "#FF7A70",
+    "overD": "#FF7A70",
+    "warn": "#FFD54A",
+    "ok": "#5EE0A0",
+    "ph": "#FFFFFF",
+    "m0": "#2FB37A",
+    "m1": "#5EE0A0",
+    "m2": "#FFD54A",
+    "m3": "#FF5A50",
+    "focusIn": "#FFFFFF",
+    "focusOut": "#061733",
+    "clipA": 0.35,
+    "unitD": "#FFC266",
+    "accentD": "#DDEBFF",
+    "selD": "#FFD54A",
+    "inkD": "#F4F8FF"
+   },
+   "pal": [
+    "#BACBFE",
+    "#5BC393",
+    "#FBFFD1",
+    "#F3703E",
+    "#FED170",
+    "#A592FF",
+    "#9EFEF4",
+    "#D28FB6"
+   ],
+   "src": {
+    "t": {
+     "bg": "#0A2347",
+     "chrome": "#0D2A54",
+     "ruler": "#0F2E5A",
+     "lane0": "#123463",
+     "lane1": "#14376A",
+     "laneSel": "#1C4580",
+     "panel": "#0F2C57",
+     "panel2": "#143466",
+     "strip": "#133263",
+     "display": "#061733",
+     "glass": "#10305E",
+     "glassA": 0.6,
+     "line": "#2D5590",
+     "grid": "200,220,255",
+     "gridK": 1.4,
+     "ink": "#F4F8FF",
+     "lab": "#CADBF2",
+     "mut": "#9CB6DA",
+     "dis": "#5E7BA6",
+     "rulerTxt": "#CADBF2",
+     "accent": "#DDEBFF",
+     "onAccent": "#0A2347",
+     "sel": "#FFD54A",
+     "unit": "#FFC266",
+     "rec": "#FF5A50",
+     "over": "#FF7A70",
+     "overD": "#FF7A70",
+     "warn": "#FFD54A",
+     "ok": "#5EE0A0",
+     "ph": "#FFFFFF",
+     "m0": "#2FB37A",
+     "m1": "#5EE0A0",
+     "m2": "#FFD54A",
+     "m3": "#FF5A50",
+     "focusIn": "#FFFFFF",
+     "focusOut": "#061733",
+     "clipA": 0.35,
+     "unitD": "#FFC266",
+     "accentD": "#DDEBFF",
+     "selD": "#FFD54A",
+     "inkD": "#F4F8FF"
+    },
+    "pal": [
+     "#9CC8FF",
+     "#7EE0B0",
+     "#FFE17A",
+     "#FF9A8A",
+     "#FFB86B",
+     "#D2B4FF",
+     "#7FE6F2",
+     "#FF9BD2"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#9CC8FF #7EE0B0 #FFE17A #FF9A8A #FFB86B #D2B4FF #7FE6F2 #FF9BD2",
+     "now": "#BACBFE #5BC393 #FBFFD1 #F3703E #FED170 #A592FF #9EFEF4 #D28FB6",
+     "note": "smallest CIEDE2000 over four visions 0.5 -> 13.8"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.68,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "dis",
+     "was": "#5E7BA6",
+     "now": "#6885B1"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F4F8FF",
+       "surf": "@glass",
+       "bg": "#2B486C",
+       "wc": 8.78,
+       "lc": -90.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#CADBF2",
+       "surf": "@glass",
+       "bg": "#2B486C",
+       "wc": 6.65,
+       "lc": -71.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#9CB6DA",
+       "surf": "@glass",
+       "bg": "#2B486C",
+       "wc": 4.5,
+       "lc": -49.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#6885B1",
+       "surf": "strip",
+       "bg": "#133263",
+       "wc": 3.35,
+       "lc": -30.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#CADBF2",
+       "surf": "ruler",
+       "bg": "#0F2E5A",
+       "wc": 9.58,
+       "lc": -78.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFC266",
+       "surf": "strip",
+       "bg": "#133263",
+       "wc": 7.91,
+       "lc": -70.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFC266",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 11.17,
+       "lc": -75.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#0A2347",
+       "surf": "accent",
+       "bg": "#DDEBFF",
+       "wc": 12.94,
+       "lc": 89.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7A70",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 7.02,
+       "lc": -51.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F4F8FF",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 16.74,
+       "lc": -101.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF7A70",
+       "surf": "strip",
+       "bg": "#133263",
+       "wc": 4.97,
+       "lc": -46.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#DDEBFF",
+       "surf": "strip",
+       "bg": "#133263",
+       "wc": 10.46,
+       "lc": -87.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#FFD54A",
+       "surf": "laneSel",
+       "bg": "#1C4580",
+       "wc": 6.72,
+       "lc": -71.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF5A50",
+       "surf": "panel",
+       "bg": "#0F2C57",
+       "wc": 4.5,
+       "lc": -40.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#FFFFFF",
+       "surf": "lane1",
+       "bg": "#14376A",
+       "wc": 11.77,
+       "lc": -100.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m3",
+       "fg": "#FF5A50",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 5.8,
+       "lc": -44.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7A70",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 7.02,
+       "lc": -51.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "selD",
+       "fg": "#FFD54A",
+       "surf": "display",
+       "bg": "#061733",
+       "wc": 12.62,
+       "lc": -82.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#FFFFFF",
+       "surf": "laneSel",
+       "bg": "#1C4580",
+       "wc": 9.49,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#F3703E",
+       "surf": "lane1",
+       "bg": "#14376A",
+       "wc": 4.03,
+       "lc": -39.4,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 40.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 41.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 45.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 42.2,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 31.5,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 28.5,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 38.7,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 15.1,
+      "pair": [
+       "#BACBFE",
+       "#A592FF"
+      ]
+     },
+     "protan": {
+      "de": 14.0,
+      "pair": [
+       "#5BC393",
+       "#FED170"
+      ]
+     },
+     "deutan": {
+      "de": 13.8,
+      "pair": [
+       "#BACBFE",
+       "#9EFEF4"
+      ]
+     },
+     "tritan": {
+      "de": 14.0,
+      "pair": [
+       "#BACBFE",
+       "#9EFEF4"
+      ]
+     }
+    },
+    "cvd_min": 13.8,
+    "titles": [
+     {
+      "clip": "#BACBFE",
+      "body": "#4D6999",
+      "ink": "#FFFFFF",
+      "wc": 5.53,
+      "lc": -82.8
+     },
+     {
+      "clip": "#5BC393",
+      "body": "#2C6674",
+      "ink": "#FFFFFF",
+      "wc": 6.44,
+      "lc": -86.9
+     },
+     {
+      "clip": "#FBFFD1",
+      "body": "#647B8A",
+      "ink": "#FFFFFF",
+      "wc": 4.43,
+      "lc": -76.2
+     },
+     {
+      "clip": "#F3703E",
+      "body": "#614956",
+      "ink": "#FFFFFF",
+      "wc": 8.09,
+      "lc": -92.6
+     },
+     {
+      "clip": "#FED170",
+      "body": "#656B68",
+      "ink": "#FFFFFF",
+      "wc": 5.45,
+      "lc": -82.5
+     },
+     {
+      "clip": "#A592FF",
+      "body": "#45559A",
+      "ink": "#FFFFFF",
+      "wc": 6.96,
+      "lc": -88.9
+     },
+     {
+      "clip": "#9EFEF4",
+      "body": "#437B96",
+      "ink": "#FFFFFF",
+      "wc": 4.65,
+      "lc": -77.6
+     },
+     {
+      "clip": "#D28FB6",
+      "body": "#555480",
+      "ink": "#FFFFFF",
+      "wc": 7.08,
+      "lc": -89.4
+     }
+    ],
+    "glass_floor": 0.68,
+    "fails": 0
+   }
+  },
+  {
+   "id": "F",
+   "key": "dalton-sphere",
+   "name": "Dalton sphere",
+   "mode": "dark",
+   "stars": 3,
+   "refs": "VC4 Dalton Sphere (cream #E9DDBF, umber sphere #2C2419, engraved hatching)",
+   "icons": [
+    "dalton-sphere"
+   ],
+   "desc": "An engraving: the dark umber of Dalton's sphere as the ground, cream ink, warm muted tracks.",
+   "t": {
+    "bg": "#14100B",
+    "chrome": "#1A150F",
+    "ruler": "#211B13",
+    "lane0": "#221C14",
+    "lane1": "#251F16",
+    "laneSel": "#3A3020",
+    "panel": "#1C1711",
+    "panel2": "#241E15",
+    "strip": "#231D15",
+    "display": "#0C0906",
+    "glass": "#241D14",
+    "glassA": 0.85,
+    "line": "#3D3426",
+    "grid": "233,221,191",
+    "gridK": 1,
+    "ink": "#EDE2C4",
+    "lab": "#D2C5A3",
+    "mut": "#A89C7F",
+    "dis": "#827966",
+    "rulerTxt": "#D2C5A3",
+    "accent": "#E9DDBF",
+    "onAccent": "#1C1711",
+    "sel": "#F5C84C",
+    "unit": "#E8A55A",
+    "rec": "#E5533F",
+    "over": "#FF7360",
+    "overD": "#FF7360",
+    "warn": "#F5C84C",
+    "ok": "#8FCB8A",
+    "ph": "#E9DDBF",
+    "m0": "#4E9A5E",
+    "m1": "#8FCB8A",
+    "m2": "#F2C84B",
+    "m3": "#FF5E4A",
+    "focusIn": "#E9DDBF",
+    "focusOut": "#0C0906",
+    "clipA": 0.45,
+    "unitD": "#E8A55A",
+    "accentD": "#E9DDBF",
+    "selD": "#F5C84C",
+    "inkD": "#EDE2C4"
+   },
+   "pal": [
+    "#E29A19",
+    "#82956B",
+    "#FED69A",
+    "#CA490D",
+    "#769ADB",
+    "#9F8396",
+    "#67EBFA",
+    "#BAB5AE"
+   ],
+   "src": {
+    "t": {
+     "bg": "#14100B",
+     "chrome": "#1A150F",
+     "ruler": "#211B13",
+     "lane0": "#221C14",
+     "lane1": "#251F16",
+     "laneSel": "#3A3020",
+     "panel": "#1C1711",
+     "panel2": "#241E15",
+     "strip": "#231D15",
+     "display": "#0C0906",
+     "glass": "#241D14",
+     "glassA": 0.6,
+     "line": "#3D3426",
+     "grid": "233,221,191",
+     "gridK": 1,
+     "ink": "#EDE2C4",
+     "lab": "#D2C5A3",
+     "mut": "#A69A7E",
+     "dis": "#6E6552",
+     "rulerTxt": "#D2C5A3",
+     "accent": "#E9DDBF",
+     "onAccent": "#1C1711",
+     "sel": "#F5C84C",
+     "unit": "#E8A55A",
+     "rec": "#E5533F",
+     "over": "#FF7360",
+     "overD": "#FF7360",
+     "warn": "#F5C84C",
+     "ok": "#8FCB8A",
+     "ph": "#E9DDBF",
+     "m0": "#4E9A5E",
+     "m1": "#8FCB8A",
+     "m2": "#F2C84B",
+     "m3": "#FF5E4A",
+     "focusIn": "#E9DDBF",
+     "focusOut": "#0C0906",
+     "clipA": 0.45,
+     "unitD": "#E8A55A",
+     "accentD": "#E9DDBF",
+     "selD": "#F5C84C",
+     "inkD": "#EDE2C4"
+    },
+    "pal": [
+     "#D9A066",
+     "#8FB98A",
+     "#E8D27A",
+     "#D9776A",
+     "#9DB4D6",
+     "#C49ACB",
+     "#7FC4BE",
+     "#E3C9A0"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#D9A066 #8FB98A #E8D27A #D9776A #9DB4D6 #C49ACB #7FC4BE #E3C9A0",
+     "now": "#E29A19 #82956B #FED69A #CA490D #769ADB #9F8396 #67EBFA #BAB5AE",
+     "note": "smallest CIEDE2000 over four visions 2.5 -> 15.5"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.85,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#A69A7E",
+     "now": "#A89C7F"
+    },
+    {
+     "tok": "dis",
+     "was": "#6E6552",
+     "now": "#827966"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#EDE2C4",
+       "surf": "laneSel",
+       "bg": "#3A3020",
+       "wc": 10.03,
+       "lc": -83.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#D2C5A3",
+       "surf": "@glass",
+       "bg": "#33291D",
+       "wc": 8.31,
+       "lc": -68.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#A89C7F",
+       "surf": "@glass",
+       "bg": "#33291D",
+       "wc": 5.24,
+       "lc": -45.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#827966",
+       "surf": "strip",
+       "bg": "#231D15",
+       "wc": 3.88,
+       "lc": -30.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#D2C5A3",
+       "surf": "ruler",
+       "bg": "#211B13",
+       "wc": 9.96,
+       "lc": -70.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#E8A55A",
+       "surf": "strip",
+       "bg": "#231D15",
+       "wc": 7.92,
+       "lc": -59.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#E8A55A",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 9.42,
+       "lc": -61.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#1C1711",
+       "surf": "accent",
+       "bg": "#E9DDBF",
+       "wc": 13.19,
+       "lc": 85.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7360",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 7.45,
+       "lc": -50.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#EDE2C4",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 15.39,
+       "lc": -89.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF7360",
+       "surf": "strip",
+       "bg": "#231D15",
+       "wc": 6.26,
+       "lc": -48.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#E9DDBF",
+       "surf": "strip",
+       "bg": "#231D15",
+       "wc": 12.37,
+       "lc": -84.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F5C84C",
+       "surf": "laneSel",
+       "bg": "#3A3020",
+       "wc": 8.16,
+       "lc": -71.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#E5533F",
+       "surf": "panel",
+       "bg": "#1C1711",
+       "wc": 4.78,
+       "lc": -36.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#E9DDBF",
+       "surf": "lane1",
+       "bg": "#251F16",
+       "wc": 12.1,
+       "lc": -84.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#4E9A5E",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 5.78,
+       "lc": -39.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7360",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 7.45,
+       "lc": -50.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "selD",
+       "fg": "#F5C84C",
+       "surf": "display",
+       "bg": "#0C0906",
+       "wc": 12.53,
+       "lc": -76.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#E9DDBF",
+       "surf": "laneSel",
+       "bg": "#3A3020",
+       "wc": 9.58,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#CA490D",
+       "surf": "lane1",
+       "bg": "#251F16",
+       "wc": 3.48,
+       "lc": -28.0,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 17.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 37.7,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 41.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 38.4,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 20.7,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 17.9,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 38.4,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 17.2,
+      "pair": [
+       "#E29A19",
+       "#FED69A"
+      ]
+     },
+     "protan": {
+      "de": 15.5,
+      "pair": [
+       "#769ADB",
+       "#9F8396"
+      ]
+     },
+     "deutan": {
+      "de": 15.5,
+      "pair": [
+       "#82956B",
+       "#BAB5AE"
+      ]
+     },
+     "tritan": {
+      "de": 16.0,
+      "pair": [
+       "#FED69A",
+       "#BAB5AE"
+      ]
+     }
+    },
+    "cvd_min": 15.5,
+    "titles": [
+     {
+      "clip": "#E29A19",
+      "body": "#785516",
+      "ink": "#FFFFFF",
+      "wc": 6.75,
+      "lc": -88.1
+     },
+     {
+      "clip": "#82956B",
+      "body": "#4D523B",
+      "ink": "#FFFFFF",
+      "wc": 8.12,
+      "lc": -92.8
+     },
+     {
+      "clip": "#FED69A",
+      "body": "#857050",
+      "ink": "#FFFFFF",
+      "wc": 4.74,
+      "lc": -78.3
+     },
+     {
+      "clip": "#CA490D",
+      "body": "#6E3011",
+      "ink": "#FFFFFF",
+      "wc": 10.03,
+      "lc": -96.9
+     },
+     {
+      "clip": "#769ADB",
+      "body": "#48556E",
+      "ink": "#FFFFFF",
+      "wc": 7.5,
+      "lc": -90.9
+     },
+     {
+      "clip": "#9F8396",
+      "body": "#5A4A4E",
+      "ink": "#FFFFFF",
+      "wc": 8.32,
+      "lc": -93.3
+     },
+     {
+      "clip": "#67EBFA",
+      "body": "#41797C",
+      "ink": "#FFFFFF",
+      "wc": 4.94,
+      "lc": -79.5
+     },
+     {
+      "clip": "#BAB5AE",
+      "body": "#666159",
+      "ink": "#FFFFFF",
+      "wc": 6.14,
+      "lc": -85.8
+     }
+    ],
+    "glass_floor": 0.84,
+    "fails": 0
+   }
+  },
+  {
+   "id": "G",
+   "key": "cutaway-nucleus",
+   "name": "Cutaway nucleus",
+   "mode": "dark",
+   "stars": 4,
+   "refs": "VB6 Cutaway Nucleus (slate #1A2230, silver #A4B2C8, nucleus red #972C20 and blue #2D62A8)",
+   "icons": [
+    "cutaway-nucleus"
+   ],
+   "desc": "Machined steel: cool slate, silver accent, the nucleus red and blue only where they mean something.",
+   "t": {
+    "bg": "#0F141C",
+    "chrome": "#151B26",
+    "ruler": "#1A2130",
+    "lane0": "#1A2230",
+    "lane1": "#1D2534",
+    "laneSel": "#2A3446",
+    "panel": "#161C27",
+    "panel2": "#1E2533",
+    "strip": "#1F2634",
+    "display": "#080B10",
+    "glass": "#1D2433",
+    "glassA": 0.78,
+    "line": "#2F394C",
+    "grid": "164,178,200",
+    "gridK": 1,
+    "ink": "#EEF2F8",
+    "lab": "#C4CEDD",
+    "mut": "#95A1B6",
+    "dis": "#747E91",
+    "rulerTxt": "#C4CEDD",
+    "accent": "#A4B2C8",
+    "onAccent": "#0F141C",
+    "sel": "#F5C84C",
+    "unit": "#FFB547",
+    "rec": "#E0483A",
+    "over": "#FF6B60",
+    "overD": "#FF6B60",
+    "warn": "#F5C84C",
+    "ok": "#3ECF8E",
+    "ph": "#E6ECF5",
+    "m0": "#12804f",
+    "m1": "#3ecf8e",
+    "m2": "#f5c84c",
+    "m3": "#ff3b3b",
+    "focusIn": "#FFFFFF",
+    "focusOut": "#0F141C",
+    "clipA": 0.4,
+    "unitD": "#FFB547",
+    "accentD": "#A4B2C8",
+    "selD": "#F5C84C",
+    "inkD": "#EEF2F8"
+   },
+   "pal": [
+    "#516BC2",
+    "#12A389",
+    "#C6C069",
+    "#C9335D",
+    "#B67E16",
+    "#9591FD",
+    "#30EDFE",
+    "#FD99B7"
+   ],
+   "src": {
+    "t": {
+     "bg": "#0F141C",
+     "chrome": "#151B26",
+     "ruler": "#1A2130",
+     "lane0": "#1A2230",
+     "lane1": "#1D2534",
+     "laneSel": "#2A3446",
+     "panel": "#161C27",
+     "panel2": "#1E2533",
+     "strip": "#1F2634",
+     "display": "#080B10",
+     "glass": "#1D2433",
+     "glassA": 0.55,
+     "line": "#2F394C",
+     "grid": "164,178,200",
+     "gridK": 1,
+     "ink": "#EEF2F8",
+     "lab": "#C4CEDD",
+     "mut": "#95A1B6",
+     "dis": "#5A6476",
+     "rulerTxt": "#C4CEDD",
+     "accent": "#A4B2C8",
+     "onAccent": "#0F141C",
+     "sel": "#F5C84C",
+     "unit": "#FFB547",
+     "rec": "#E0483A",
+     "over": "#FF6B60",
+     "overD": "#FF6B60",
+     "warn": "#F5C84C",
+     "ok": "#3ECF8E",
+     "ph": "#E6ECF5",
+     "m0": "#12804f",
+     "m1": "#3ecf8e",
+     "m2": "#f5c84c",
+     "m3": "#ff3b3b",
+     "focusIn": "#FFFFFF",
+     "focusOut": "#0F141C",
+     "clipA": 0.4,
+     "unitD": "#FFB547",
+     "accentD": "#A4B2C8",
+     "selD": "#F5C84C",
+     "inkD": "#EEF2F8"
+    },
+    "pal": [
+     "#5B8FE0",
+     "#45B58A",
+     "#E8C252",
+     "#E0605A",
+     "#E8924A",
+     "#A58CE0",
+     "#5CC3DE",
+     "#D97AB5"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#5B8FE0 #45B58A #E8C252 #E0605A #E8924A #A58CE0 #5CC3DE #D97AB5",
+     "now": "#516BC2 #12A389 #C6C069 #C9335D #B67E16 #9591FD #30EDFE #FD99B7",
+     "note": "smallest CIEDE2000 over four visions 1.8 -> 14.8"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.55,
+     "now": 0.78,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "dis",
+     "was": "#5A6476",
+     "now": "#747E91"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#EEF2F8",
+       "surf": "laneSel",
+       "bg": "#2A3446",
+       "wc": 11.14,
+       "lc": -93.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#C4CEDD",
+       "surf": "@glass",
+       "bg": "#1E3544",
+       "wc": 8.02,
+       "lc": -70.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#95A1B6",
+       "surf": "@glass",
+       "bg": "#1E3544",
+       "wc": 4.89,
+       "lc": -45.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#747E91",
+       "surf": "strip",
+       "bg": "#1F2634",
+       "wc": 3.71,
+       "lc": -30.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#C4CEDD",
+       "surf": "ruler",
+       "bg": "#1A2130",
+       "wc": 10.14,
+       "lc": -74.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFB547",
+       "surf": "strip",
+       "bg": "#1F2634",
+       "wc": 8.63,
+       "lc": -67.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 11.22,
+       "lc": -70.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#0F141C",
+       "surf": "accent",
+       "bg": "#A4B2C8",
+       "wc": 8.6,
+       "lc": 60.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B60",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 7.06,
+       "lc": -48.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#EEF2F8",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 17.54,
+       "lc": -98.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B60",
+       "surf": "strip",
+       "bg": "#1F2634",
+       "wc": 5.43,
+       "lc": -45.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#A4B2C8",
+       "surf": "strip",
+       "bg": "#1F2634",
+       "wc": 7.06,
+       "lc": -57.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F5C84C",
+       "surf": "laneSel",
+       "bg": "#2A3446",
+       "wc": 7.9,
+       "lc": -70.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#E0483A",
+       "surf": "panel",
+       "bg": "#161C27",
+       "wc": 4.19,
+       "lc": -33.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#E6ECF5",
+       "surf": "lane1",
+       "bg": "#1D2534",
+       "wc": 12.94,
+       "lc": -92.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#12804f",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 3.97,
+       "lc": -27.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B60",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 7.06,
+       "lc": -48.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#A4B2C8",
+       "surf": "display",
+       "bg": "#080B10",
+       "wc": 9.18,
+       "lc": -59.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#FFFFFF",
+       "surf": "laneSel",
+       "bg": "#2A3446",
+       "wc": 12.51,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#C9335D",
+       "surf": "lane1",
+       "bg": "#1D2534",
+       "wc": 3.01,
+       "lc": -24.9,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 38.2,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 40.2,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 43.6,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 39.4,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 31.9,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 34.0,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 43.6,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 17.1,
+      "pair": [
+       "#516BC2",
+       "#9591FD"
+      ]
+     },
+     "protan": {
+      "de": 14.8,
+      "pair": [
+       "#30EDFE",
+       "#FD99B7"
+      ]
+     },
+     "deutan": {
+      "de": 15.1,
+      "pair": [
+       "#12A389",
+       "#C9335D"
+      ]
+     },
+     "tritan": {
+      "de": 14.8,
+      "pair": [
+       "#B67E16",
+       "#FD99B7"
+      ]
+     }
+    },
+    "cvd_min": 14.8,
+    "titles": [
+     {
+      "clip": "#516BC2",
+      "body": "#303F6A",
+      "ink": "#FFFFFF",
+      "wc": 10.27,
+      "lc": -97.8
+     },
+     {
+      "clip": "#12A389",
+      "body": "#175654",
+      "ink": "#FFFFFF",
+      "wc": 8.41,
+      "lc": -93.3
+     },
+     {
+      "clip": "#C6C069",
+      "body": "#5F6147",
+      "ink": "#FFFFFF",
+      "wc": 6.39,
+      "lc": -86.9
+     },
+     {
+      "clip": "#C9335D",
+      "body": "#602942",
+      "ink": "#FFFFFF",
+      "wc": 11.09,
+      "lc": -99.1
+     },
+     {
+      "clip": "#B67E16",
+      "body": "#584726",
+      "ink": "#FFFFFF",
+      "wc": 8.96,
+      "lc": -94.9
+     },
+     {
+      "clip": "#9591FD",
+      "body": "#4B4E82",
+      "ink": "#FFFFFF",
+      "wc": 7.75,
+      "lc": -91.6
+     },
+     {
+      "clip": "#30EDFE",
+      "body": "#237382",
+      "ink": "#FFFFFF",
+      "wc": 5.46,
+      "lc": -82.3
+     },
+     {
+      "clip": "#FD99B7",
+      "body": "#755266",
+      "ink": "#FFFFFF",
+      "wc": 6.66,
+      "lc": -87.9
+     }
+    ],
+    "glass_floor": 0.78,
+    "fails": 0
+   }
+  },
+  {
+   "id": "H",
+   "key": "rutherford",
+   "name": "Rutherford scattering",
+   "mode": "dark",
+   "stars": 4,
+   "refs": "VC2 Rutherford Scattering (near black #0A0E18, gold traces #E9B751 / #CFA44A, the white nucleus)",
+   "icons": [
+    "rutherford-scattering"
+   ],
+   "desc": "Gold foil in the dark: near-black, gold accent and ruler, selection in the cyan of the scintillation screen.",
+   "t": {
+    "bg": "#07090F",
+    "chrome": "#0B0E16",
+    "ruler": "#10141D",
+    "lane0": "#0F131C",
+    "lane1": "#121620",
+    "laneSel": "#13232A",
+    "panel": "#0D1018",
+    "panel2": "#141822",
+    "strip": "#131721",
+    "display": "#030406",
+    "glass": "#11151E",
+    "glassA": 0.85,
+    "line": "#262A33",
+    "grid": "233,183,81",
+    "gridK": 0.8,
+    "ink": "#F1EBDD",
+    "lab": "#CFC5AE",
+    "mut": "#A3987F",
+    "dis": "#807967",
+    "rulerTxt": "#E9B751",
+    "accent": "#E9B751",
+    "onAccent": "#07090F",
+    "sel": "#66D9F5",
+    "unit": "#F2A65A",
+    "rec": "#FF4D4D",
+    "over": "#FF6B6B",
+    "overD": "#FF6B6B",
+    "warn": "#F5C84C",
+    "ok": "#3ECF8E",
+    "ph": "#F1EBDD",
+    "m0": "#1F8A5A",
+    "m1": "#3ECF8E",
+    "m2": "#F5C84C",
+    "m3": "#FF3B3B",
+    "focusIn": "#66D9F5",
+    "focusOut": "#07090F",
+    "clipA": 0.36,
+    "unitD": "#F2A65A",
+    "accentD": "#E9B751",
+    "selD": "#66D9F5",
+    "inkD": "#F1EBDD"
+   },
+   "pal": [
+    "#FBE227",
+    "#74B4ED",
+    "#AEE1B0",
+    "#F03C6D",
+    "#7670FE",
+    "#FB8F58",
+    "#6FFEF4",
+    "#B66EA4"
+   ],
+   "src": {
+    "t": {
+     "bg": "#07090F",
+     "chrome": "#0B0E16",
+     "ruler": "#10141D",
+     "lane0": "#0F131C",
+     "lane1": "#121620",
+     "laneSel": "#13232A",
+     "panel": "#0D1018",
+     "panel2": "#141822",
+     "strip": "#131721",
+     "display": "#030406",
+     "glass": "#11151E",
+     "glassA": 0.6,
+     "line": "#262A33",
+     "grid": "233,183,81",
+     "gridK": 0.8,
+     "ink": "#F1EBDD",
+     "lab": "#CFC5AE",
+     "mut": "#A0957C",
+     "dis": "#5F5847",
+     "rulerTxt": "#E9B751",
+     "accent": "#E9B751",
+     "onAccent": "#07090F",
+     "sel": "#66D9F5",
+     "unit": "#F2A65A",
+     "rec": "#FF4D4D",
+     "over": "#FF6B6B",
+     "overD": "#FF6B6B",
+     "warn": "#F5C84C",
+     "ok": "#3ECF8E",
+     "ph": "#F1EBDD",
+     "m0": "#1F8A5A",
+     "m1": "#3ECF8E",
+     "m2": "#F5C84C",
+     "m3": "#FF3B3B",
+     "focusIn": "#66D9F5",
+     "focusOut": "#07090F",
+     "clipA": 0.36,
+     "unitD": "#F2A65A",
+     "accentD": "#E9B751",
+     "selD": "#66D9F5",
+     "inkD": "#F1EBDD"
+    },
+    "pal": [
+     "#E9B751",
+     "#5FB8E8",
+     "#5CCB8E",
+     "#FF7A6B",
+     "#B58CFF",
+     "#F28A3C",
+     "#62E0D0",
+     "#F07AC0"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#E9B751 #5FB8E8 #5CCB8E #FF7A6B #B58CFF #F28A3C #62E0D0 #F07AC0",
+     "now": "#FBE227 #74B4ED #AEE1B0 #F03C6D #7670FE #FB8F58 #6FFEF4 #B66EA4",
+     "note": "smallest CIEDE2000 over four visions 3.9 -> 13.8"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.85,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#A0957C",
+     "now": "#A3987F"
+    },
+    {
+     "tok": "dis",
+     "was": "#5F5847",
+     "now": "#807967"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F1EBDD",
+       "surf": "laneSel",
+       "bg": "#13232A",
+       "wc": 13.57,
+       "lc": -92.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#CFC5AE",
+       "surf": "@glass",
+       "bg": "#162129",
+       "wc": 9.54,
+       "lc": -69.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#A3987F",
+       "surf": "@glass",
+       "bg": "#162129",
+       "wc": 5.73,
+       "lc": -45.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#807967",
+       "surf": "strip",
+       "bg": "#131721",
+       "wc": 4.14,
+       "lc": -30.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#E9B751",
+       "surf": "ruler",
+       "bg": "#10141D",
+       "wc": 9.96,
+       "lc": -67.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#F2A65A",
+       "surf": "strip",
+       "bg": "#131721",
+       "wc": 8.85,
+       "lc": -62.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#F2A65A",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 10.14,
+       "lc": -63.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#07090F",
+       "surf": "accent",
+       "bg": "#E9B751",
+       "wc": 10.76,
+       "lc": 69.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 7.39,
+       "lc": -49.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F1EBDD",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 17.26,
+       "lc": -95.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B6B",
+       "surf": "strip",
+       "bg": "#131721",
+       "wc": 6.46,
+       "lc": -48.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#E9B751",
+       "surf": "strip",
+       "bg": "#131721",
+       "wc": 9.69,
+       "lc": -66.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#66D9F5",
+       "surf": "laneSel",
+       "bg": "#13232A",
+       "wc": 9.84,
+       "lc": -72.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF4D4D",
+       "surf": "panel",
+       "bg": "#0D1018",
+       "wc": 5.81,
+       "lc": -42.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#F1EBDD",
+       "surf": "lane1",
+       "bg": "#121620",
+       "wc": 15.21,
+       "lc": -94.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#1F8A5A",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 4.73,
+       "lc": -32.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 7.39,
+       "lc": -49.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#E9B751",
+       "surf": "display",
+       "bg": "#030406",
+       "wc": 11.09,
+       "lc": -67.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#66D9F5",
+       "surf": "laneSel",
+       "bg": "#13232A",
+       "wc": 9.84,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal4",
+       "fg": "#7670FE",
+       "surf": "lane1",
+       "bg": "#121620",
+       "wc": 4.75,
+       "lc": -35.5,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 44.2,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 64.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 68.4,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 38.9,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 36.2,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 26.9,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 38.8,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 18.1,
+      "pair": [
+       "#F03C6D",
+       "#B66EA4"
+      ]
+     },
+     "protan": {
+      "de": 14.4,
+      "pair": [
+       "#7670FE",
+       "#B66EA4"
+      ]
+     },
+     "deutan": {
+      "de": 14.0,
+      "pair": [
+       "#FBE227",
+       "#FB8F58"
+      ]
+     },
+     "tritan": {
+      "de": 13.8,
+      "pair": [
+       "#FB8F58",
+       "#B66EA4"
+      ]
+     }
+    },
+    "cvd_min": 13.8,
+    "titles": [
+     {
+      "clip": "#FBE227",
+      "body": "#645E20",
+      "ink": "#FFFFFF",
+      "wc": 6.64,
+      "lc": -87.8
+     },
+     {
+      "clip": "#74B4ED",
+      "body": "#334D67",
+      "ink": "#FFFFFF",
+      "wc": 8.76,
+      "lc": -94.4
+     },
+     {
+      "clip": "#AEE1B0",
+      "body": "#485D51",
+      "ink": "#FFFFFF",
+      "wc": 7.09,
+      "lc": -89.5
+     },
+     {
+      "clip": "#F03C6D",
+      "body": "#602239",
+      "ink": "#FFFFFF",
+      "wc": 11.76,
+      "lc": -100.1
+     },
+     {
+      "clip": "#7670FE",
+      "body": "#34346D",
+      "ink": "#FFFFFF",
+      "wc": 11.3,
+      "lc": -99.7
+     },
+     {
+      "clip": "#FB8F58",
+      "body": "#644032",
+      "ink": "#FFFFFF",
+      "wc": 9.05,
+      "lc": -95.1
+     },
+     {
+      "clip": "#6FFEF4",
+      "body": "#32686A",
+      "ink": "#FFFFFF",
+      "wc": 6.32,
+      "lc": -86.4
+     },
+     {
+      "clip": "#B66EA4",
+      "body": "#4B344D",
+      "ink": "#FFFFFF",
+      "wc": 11.07,
+      "lc": -99.4
+     }
+    ],
+    "glass_floor": 0.85,
+    "fails": 0
+   }
+  },
+  {
+   "id": "I",
+   "key": "chadwick",
+   "name": "Chadwick",
+   "mode": "light",
+   "stars": 3,
+   "refs": "FF8 Chadwick 1932 (cream #EFE4C8, brown ink #4A2A20, nucleus red #C9402E and blue #2A5AA8)",
+   "icons": [
+    "chadwick-1932"
+   ],
+   "desc": "A 1930s textbook plate: cream paper, brown ink, red and blue protons and neutrons. Warmer and darker-inked than Chart paper.",
+   "t": {
+    "bg": "#E2D5B5",
+    "chrome": "#E8DDC0",
+    "ruler": "#EDE3CA",
+    "lane0": "#F3EAD3",
+    "lane1": "#EFE5CB",
+    "laneSel": "#F7E7B0",
+    "panel": "#F6EFDD",
+    "panel2": "#ECE2C8",
+    "strip": "#EADFC4",
+    "display": "#2A1A14",
+    "glass": "#F4ECD8",
+    "glassA": 0.9,
+    "line": "#C9B992",
+    "grid": "74,42,32",
+    "gridK": 1.2,
+    "ink": "#2E1C15",
+    "lab": "#4A3326",
+    "mut": "#6E5747",
+    "dis": "#A3937A",
+    "rulerTxt": "#2E1C15",
+    "accent": "#2A5AA8",
+    "onAccent": "#FFFFFF",
+    "sel": "#A87400",
+    "unit": "#A6421C",
+    "unitD": "#FFB062",
+    "rec": "#C9402E",
+    "over": "#B8321F",
+    "overD": "#FF6B55",
+    "warn": "#F2C84B",
+    "ok": "#5FCB82",
+    "ph": "#2A5AA8",
+    "m0": "#3E9E5E",
+    "m1": "#6FD08F",
+    "m2": "#F2C84B",
+    "m3": "#FF5A45",
+    "focusIn": "#2A5AA8",
+    "focusOut": "#FFFFFF",
+    "clipA": 0.85,
+    "accentD": "#3767B7",
+    "selD": "#A87400",
+    "inkD": "#F3EAD3"
+   },
+   "pal": [
+    "#6468E2",
+    "#4E7D50",
+    "#A87C0F",
+    "#E44D6A",
+    "#8E5911",
+    "#6C5491",
+    "#0091A2",
+    "#8E0B5F"
+   ],
+   "src": {
+    "t": {
+     "bg": "#E2D5B5",
+     "chrome": "#E8DDC0",
+     "ruler": "#EDE3CA",
+     "lane0": "#F3EAD3",
+     "lane1": "#EFE5CB",
+     "laneSel": "#F7E7B0",
+     "panel": "#F6EFDD",
+     "panel2": "#ECE2C8",
+     "strip": "#EADFC4",
+     "display": "#2A1A14",
+     "glass": "#F4ECD8",
+     "glassA": 0.9,
+     "line": "#C9B992",
+     "grid": "74,42,32",
+     "gridK": 1.2,
+     "ink": "#2E1C15",
+     "lab": "#4A3326",
+     "mut": "#6E5747",
+     "dis": "#A3937A",
+     "rulerTxt": "#2E1C15",
+     "accent": "#2A5AA8",
+     "onAccent": "#FFFFFF",
+     "sel": "#A87400",
+     "unit": "#A8441E",
+     "unitD": "#FFB062",
+     "rec": "#C9402E",
+     "over": "#B8321F",
+     "overD": "#FF6B55",
+     "warn": "#F2C84B",
+     "ok": "#5FCB82",
+     "ph": "#2A5AA8",
+     "m0": "#3E9E5E",
+     "m1": "#6FD08F",
+     "m2": "#F2C84B",
+     "m3": "#FF5A45",
+     "focusIn": "#2A5AA8",
+     "focusOut": "#FFFFFF",
+     "clipA": 0.85,
+     "accentD": "#2A5AA8",
+     "selD": "#A87400",
+     "inkD": "#F3EAD3"
+    },
+    "pal": [
+     "#2A5AA8",
+     "#2E8A55",
+     "#B07A10",
+     "#C9402E",
+     "#C86420",
+     "#7650B0",
+     "#16839A",
+     "#A8407A"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#2A5AA8 #2E8A55 #B07A10 #C9402E #C86420 #7650B0 #16839A #A8407A",
+     "now": "#6468E2 #4E7D50 #A87C0F #E44D6A #8E5911 #6C5491 #0091A2 #8E0B5F",
+     "note": "smallest CIEDE2000 over four visions 1.1 -> 12.1"
+    },
+    {
+     "tok": "unit",
+     "was": "#A8441E",
+     "now": "#A6421C"
+    },
+    {
+     "tok": "accentD",
+     "was": "#2A5AA8",
+     "now": "#3767B7"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#2E1C15",
+       "surf": "bg",
+       "bg": "#E2D5B5",
+       "wc": 11.15,
+       "lc": 79.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#4A3326",
+       "surf": "@glass",
+       "bg": "#EBD9CE",
+       "wc": 8.56,
+       "lc": 76.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#6E5747",
+       "surf": "bg",
+       "bg": "#E2D5B5",
+       "wc": 4.63,
+       "lc": 59.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#A3937A",
+       "surf": "strip",
+       "bg": "#EADFC4",
+       "wc": 2.26,
+       "lc": 38.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#2E1C15",
+       "surf": "ruler",
+       "bg": "#EDE3CA",
+       "wc": 12.71,
+       "lc": 86.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#A6421C",
+       "surf": "chrome",
+       "bg": "#E8DDC0",
+       "wc": 4.55,
+       "lc": 60.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB062",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 9.26,
+       "lc": -67.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#FFFFFF",
+       "surf": "accent",
+       "bg": "#2A5AA8",
+       "wc": 6.72,
+       "lc": -87.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B55",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 5.96,
+       "lc": -46.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F3EAD3",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 13.95,
+       "lc": -92.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#B8321F",
+       "surf": "strip",
+       "bg": "#EADFC4",
+       "wc": 4.51,
+       "lc": 60.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#2A5AA8",
+       "surf": "bg",
+       "bg": "#E2D5B5",
+       "wc": 4.61,
+       "lc": 58.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#A87400",
+       "surf": "strip",
+       "bg": "#EADFC4",
+       "wc": 3.07,
+       "lc": 49.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#C9402E",
+       "surf": "chrome",
+       "bg": "#E8DDC0",
+       "wc": 3.65,
+       "lc": 53.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#2A5AA8",
+       "surf": "ruler",
+       "bg": "#EDE3CA",
+       "wc": 5.26,
+       "lc": 66.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#3E9E5E",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 4.98,
+       "lc": -39.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B55",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 5.96,
+       "lc": -46.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#3767B7",
+       "surf": "display",
+       "bg": "#2A1A14",
+       "wc": 3.01,
+       "lc": -22.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#2A5AA8",
+       "surf": "bg",
+       "bg": "#E2D5B5",
+       "wc": 4.61,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal6",
+       "fg": "#0091A2",
+       "surf": "lane1",
+       "bg": "#EFE5CB",
+       "wc": 3.0,
+       "lc": 49.5,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 52.8,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 28.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 28.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 43.5,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 56.3,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 52.8,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 43.5,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 14.4,
+      "pair": [
+       "#A87C0F",
+       "#8E5911"
+      ]
+     },
+     "protan": {
+      "de": 12.5,
+      "pair": [
+       "#4E7D50",
+       "#A87C0F"
+      ]
+     },
+     "deutan": {
+      "de": 12.1,
+      "pair": [
+       "#4E7D50",
+       "#E44D6A"
+      ]
+     },
+     "tritan": {
+      "de": 12.2,
+      "pair": [
+       "#4E7D50",
+       "#0091A2"
+      ]
+     }
+    },
+    "cvd_min": 12.1,
+    "titles": [
+     {
+      "clip": "#6468E2",
+      "body": "#797CE0",
+      "ink": "#101114",
+      "wc": 5.19,
+      "lc": 39.6
+     },
+     {
+      "clip": "#4E7D50",
+      "body": "#678D64",
+      "ink": "#101114",
+      "wc": 5.01,
+      "lc": 38.2
+     },
+     {
+      "clip": "#A87C0F",
+      "body": "#B38C2C",
+      "ink": "#101114",
+      "wc": 6.03,
+      "lc": 45.2
+     },
+     {
+      "clip": "#E44D6A",
+      "body": "#E6657A",
+      "ink": "#101114",
+      "wc": 5.85,
+      "lc": 44.5
+     },
+     {
+      "clip": "#8E5911",
+      "body": "#9D6F2E",
+      "ink": "#FFFFFF",
+      "wc": 4.42,
+      "lc": -76.0
+     },
+     {
+      "clip": "#6C5491",
+      "body": "#806A9B",
+      "ink": "#FFFFFF",
+      "wc": 4.72,
+      "lc": -78.2
+     },
+     {
+      "clip": "#0091A2",
+      "body": "#249EA9",
+      "ink": "#101114",
+      "wc": 5.88,
+      "lc": 44.5
+     },
+     {
+      "clip": "#8E0B5F",
+      "body": "#9D2C70",
+      "ink": "#FFFFFF",
+      "wc": 6.94,
+      "lc": -88.0
+     }
+    ],
+    "glass_floor": 0.85,
+    "fails": 0
+   }
+  },
+  {
+   "id": "J",
+   "key": "patent-drawing",
+   "name": "Patent drawing",
+   "mode": "light",
+   "stars": 4,
+   "refs": "VB5 Patent Drawing (white #FBFAF6, black ink #535251 lines, dashed)",
+   "icons": [
+    "patent-drawing"
+   ],
+   "desc": "The lightest theme: white drawing board, black ink, a blue pencil for the accent. Displays stay black wells.",
+   "t": {
+    "bg": "#ECEBE6",
+    "chrome": "#F3F2EE",
+    "ruler": "#F7F6F2",
+    "lane0": "#FDFCF9",
+    "lane1": "#F8F7F3",
+    "laneSel": "#FFF7D6",
+    "panel": "#FFFFFF",
+    "panel2": "#F4F3EF",
+    "strip": "#F1F0EB",
+    "display": "#1E1E1D",
+    "glass": "#FFFFFF",
+    "glassA": 0.92,
+    "line": "#CFCDC6",
+    "grid": "40,40,38",
+    "gridK": 1.3,
+    "ink": "#1E1E1D",
+    "lab": "#3A3A38",
+    "mut": "#5F5E5A",
+    "dis": "#A3A29C",
+    "rulerTxt": "#1E1E1D",
+    "accent": "#1F4FB8",
+    "onAccent": "#FFFFFF",
+    "sel": "#9C6F00",
+    "unit": "#9A4A00",
+    "unitD": "#FFB547",
+    "rec": "#C62828",
+    "over": "#B71C1C",
+    "overD": "#FF6B6B",
+    "warn": "#F2C84B",
+    "ok": "#6FD08F",
+    "ph": "#1F4FB8",
+    "m0": "#2E9E5E",
+    "m1": "#6FD08F",
+    "m2": "#F2C84B",
+    "m3": "#FF5A45",
+    "focusIn": "#1F4FB8",
+    "focusOut": "#FFFFFF",
+    "clipA": 0.9,
+    "accentD": "#3163CE",
+    "selD": "#9C6F00",
+    "inkD": "#FDFCF9"
+   },
+   "pal": [
+    "#6659EC",
+    "#5F9682",
+    "#906946",
+    "#8B0109",
+    "#CF7901",
+    "#4E3471",
+    "#2E6D6F",
+    "#742E45"
+   ],
+   "src": {
+    "t": {
+     "bg": "#ECEBE6",
+     "chrome": "#F3F2EE",
+     "ruler": "#F7F6F2",
+     "lane0": "#FDFCF9",
+     "lane1": "#F8F7F3",
+     "laneSel": "#FFF7D6",
+     "panel": "#FFFFFF",
+     "panel2": "#F4F3EF",
+     "strip": "#F1F0EB",
+     "display": "#1E1E1D",
+     "glass": "#FFFFFF",
+     "glassA": 0.92,
+     "line": "#CFCDC6",
+     "grid": "40,40,38",
+     "gridK": 1.3,
+     "ink": "#1E1E1D",
+     "lab": "#3A3A38",
+     "mut": "#5F5E5A",
+     "dis": "#A3A29C",
+     "rulerTxt": "#1E1E1D",
+     "accent": "#1F4FB8",
+     "onAccent": "#FFFFFF",
+     "sel": "#9C6F00",
+     "unit": "#9A4A00",
+     "unitD": "#FFB547",
+     "rec": "#C62828",
+     "over": "#B71C1C",
+     "overD": "#FF6B6B",
+     "warn": "#F2C84B",
+     "ok": "#6FD08F",
+     "ph": "#1F4FB8",
+     "m0": "#2E9E5E",
+     "m1": "#6FD08F",
+     "m2": "#F2C84B",
+     "m3": "#FF5A45",
+     "focusIn": "#1F4FB8",
+     "focusOut": "#FFFFFF",
+     "clipA": 0.9,
+     "accentD": "#1F4FB8",
+     "selD": "#9C6F00",
+     "inkD": "#FDFCF9"
+    },
+    "pal": [
+     "#1F4FB8",
+     "#2E7D4F",
+     "#9A6A00",
+     "#B3261E",
+     "#B85A12",
+     "#6A3FA0",
+     "#0F7488",
+     "#9C3672"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#1F4FB8 #2E7D4F #9A6A00 #B3261E #B85A12 #6A3FA0 #0F7488 #9C3672",
+     "now": "#6659EC #5F9682 #906946 #8B0109 #CF7901 #4E3471 #2E6D6F #742E45",
+     "note": "smallest CIEDE2000 over four visions 1.7 -> 14.7"
+    },
+    {
+     "tok": "accentD",
+     "was": "#1F4FB8",
+     "now": "#3163CE"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#1E1E1D",
+       "surf": "bg",
+       "bg": "#ECEBE6",
+       "wc": 13.98,
+       "lc": 91.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#3A3A38",
+       "surf": "@glass",
+       "bg": "#F7EDED",
+       "wc": 9.93,
+       "lc": 86.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#5F5E5A",
+       "surf": "bg",
+       "bg": "#ECEBE6",
+       "wc": 5.44,
+       "lc": 70.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#A3A29C",
+       "surf": "strip",
+       "bg": "#F1F0EB",
+       "wc": 2.24,
+       "lc": 41.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#1E1E1D",
+       "surf": "ruler",
+       "bg": "#F7F6F2",
+       "wc": 15.43,
+       "lc": 98.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#9A4A00",
+       "surf": "strip",
+       "bg": "#F1F0EB",
+       "wc": 5.49,
+       "lc": 71.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 9.5,
+       "lc": -69.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#FFFFFF",
+       "surf": "accent",
+       "bg": "#1F4FB8",
+       "wc": 7.32,
+       "lc": -89.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 6.01,
+       "lc": -47.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#FDFCF9",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 16.26,
+       "lc": -104.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#B71C1C",
+       "surf": "strip",
+       "bg": "#F1F0EB",
+       "wc": 5.76,
+       "lc": 71.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#1F4FB8",
+       "surf": "bg",
+       "bg": "#ECEBE6",
+       "wc": 6.13,
+       "lc": 72.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#9C6F00",
+       "surf": "strip",
+       "bg": "#F1F0EB",
+       "wc": 3.93,
+       "lc": 61.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#C62828",
+       "surf": "chrome",
+       "bg": "#F3F2EE",
+       "wc": 5.02,
+       "lc": 68.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#1F4FB8",
+       "surf": "ruler",
+       "bg": "#F7F6F2",
+       "wc": 6.77,
+       "lc": 79.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#2E9E5E",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 4.9,
+       "lc": -38.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 6.01,
+       "lc": -47.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#3163CE",
+       "surf": "display",
+       "bg": "#1E1E1D",
+       "wc": 3.02,
+       "lc": -22.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#1F4FB8",
+       "surf": "bg",
+       "bg": "#ECEBE6",
+       "wc": 6.13,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal4",
+       "fg": "#CF7901",
+       "surf": "lane1",
+       "bg": "#F8F7F3",
+       "wc": 3.07,
+       "lc": 54.9,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 56.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 32.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 32.5,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 43.3,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 60.1,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 56.9,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 43.3,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 17.3,
+      "pair": [
+       "#906946",
+       "#CF7901"
+      ]
+     },
+     "protan": {
+      "de": 14.8,
+      "pair": [
+       "#4E3471",
+       "#742E45"
+      ]
+     },
+     "deutan": {
+      "de": 14.9,
+      "pair": [
+       "#2E6D6F",
+       "#742E45"
+      ]
+     },
+     "tritan": {
+      "de": 14.7,
+      "pair": [
+       "#8B0109",
+       "#742E45"
+      ]
+     }
+    },
+    "cvd_min": 14.7,
+    "titles": [
+     {
+      "clip": "#6659EC",
+      "body": "#7569ED",
+      "ink": "#101114",
+      "wc": 4.5,
+      "lc": 34.8
+     },
+     {
+      "clip": "#5F9682",
+      "body": "#6FA08E",
+      "ink": "#101114",
+      "wc": 6.38,
+      "lc": 47.3
+     },
+     {
+      "clip": "#906946",
+      "body": "#9B7858",
+      "ink": "#101114",
+      "wc": 4.69,
+      "lc": 36.0
+     },
+     {
+      "clip": "#8B0109",
+      "body": "#961A21",
+      "ink": "#FFFFFF",
+      "wc": 8.51,
+      "lc": -92.4
+     },
+     {
+      "clip": "#CF7901",
+      "body": "#D4861A",
+      "ink": "#101114",
+      "wc": 6.49,
+      "lc": 48.3
+     },
+     {
+      "clip": "#4E3471",
+      "body": "#60487F",
+      "ink": "#FFFFFF",
+      "wc": 7.69,
+      "lc": -91.4
+     },
+     {
+      "clip": "#2E6D6F",
+      "body": "#437B7D",
+      "ink": "#FFFFFF",
+      "wc": 4.81,
+      "lc": -78.7
+     },
+     {
+      "clip": "#742E45",
+      "body": "#824357",
+      "ink": "#FFFFFF",
+      "wc": 7.27,
+      "lc": -89.8
+     }
+    ],
+    "glass_floor": 0.8,
+    "fails": 0
+   }
+  },
+  {
+   "id": "K",
+   "key": "cyanotype",
+   "name": "Cyanotype",
+   "mode": "dark",
+   "stars": 4,
+   "new": true,
+   "refs": "VB7 Cyanotype (Prussian slate #324C73, pale print #D1E2EF)",
+   "icons": [
+    "cyanotype"
+   ],
+   "desc": "New: a sun print. Softer and lighter than Blueprint, slate-blue ground and pale print lines; the brightest of the dark themes.",
+   "t": {
+    "bg": "#1D2D45",
+    "chrome": "#22344F",
+    "ruler": "#263A57",
+    "lane0": "#2A405F",
+    "lane1": "#2D4464",
+    "laneSel": "#3A5478",
+    "panel": "#243853",
+    "panel2": "#2B4161",
+    "strip": "#2A3F5E",
+    "display": "#111C2D",
+    "glass": "#2A3F5E",
+    "glassA": 0.8,
+    "line": "#45608A",
+    "grid": "209,226,239",
+    "gridK": 1,
+    "ink": "#F2F7FB",
+    "lab": "#D1E2EF",
+    "mut": "#A8C0D6",
+    "dis": "#738CA9",
+    "rulerTxt": "#D1E2EF",
+    "accent": "#D1E2EF",
+    "onAccent": "#1D2D45",
+    "sel": "#FFD86B",
+    "unit": "#FFC27A",
+    "rec": "#FF6A5C",
+    "over": "#FF8577",
+    "overD": "#FF8577",
+    "warn": "#FFD86B",
+    "ok": "#7FE3AE",
+    "ph": "#FFFFFF",
+    "m0": "#3BB27A",
+    "m1": "#7FE3AE",
+    "m2": "#FFD86B",
+    "m3": "#FF6A5C",
+    "focusIn": "#FFFFFF",
+    "focusOut": "#111C2D",
+    "clipA": 0.4,
+    "unitD": "#FFC27A",
+    "accentD": "#D1E2EF",
+    "selD": "#FFD86B",
+    "inkD": "#F2F7FB"
+   },
+   "pal": [
+    "#87ACFE",
+    "#B7EABF",
+    "#FDFC6D",
+    "#F4767D",
+    "#E9B046",
+    "#E6D0F9",
+    "#F5FEFF",
+    "#C3A0BA"
+   ],
+   "src": {
+    "t": {
+     "bg": "#1D2D45",
+     "chrome": "#22344F",
+     "ruler": "#263A57",
+     "lane0": "#2A405F",
+     "lane1": "#2D4464",
+     "laneSel": "#3A5478",
+     "panel": "#243853",
+     "panel2": "#2B4161",
+     "strip": "#2A3F5E",
+     "display": "#111C2D",
+     "glass": "#2A3F5E",
+     "glassA": 0.6,
+     "line": "#45608A",
+     "grid": "209,226,239",
+     "gridK": 1,
+     "ink": "#F2F7FB",
+     "lab": "#D1E2EF",
+     "mut": "#A8C0D6",
+     "dis": "#6D86A3",
+     "rulerTxt": "#D1E2EF",
+     "accent": "#D1E2EF",
+     "onAccent": "#1D2D45",
+     "sel": "#FFD86B",
+     "unit": "#FFC27A",
+     "rec": "#FF6A5C",
+     "over": "#FF8577",
+     "overD": "#FF8577",
+     "warn": "#FFD86B",
+     "ok": "#7FE3AE",
+     "ph": "#FFFFFF",
+     "m0": "#3BB27A",
+     "m1": "#7FE3AE",
+     "m2": "#FFD86B",
+     "m3": "#FF6A5C",
+     "focusIn": "#FFFFFF",
+     "focusOut": "#111C2D",
+     "clipA": 0.4,
+     "unitD": "#FFC27A",
+     "accentD": "#D1E2EF",
+     "selD": "#FFD86B",
+     "inkD": "#F2F7FB"
+    },
+    "pal": [
+     "#A9D2FF",
+     "#9BE3BF",
+     "#FFE38A",
+     "#FFA99A",
+     "#FFC58A",
+     "#D6C2FF",
+     "#9FEAF2",
+     "#FFB0D8"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#A9D2FF #9BE3BF #FFE38A #FFA99A #FFC58A #D6C2FF #9FEAF2 #FFB0D8",
+     "now": "#87ACFE #B7EABF #FDFC6D #F4767D #E9B046 #E6D0F9 #F5FEFF #C3A0BA",
+     "note": "smallest CIEDE2000 over four visions 0.6 -> 13.0"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.8,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "dis",
+     "was": "#6D86A3",
+     "now": "#738CA9"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F2F7FB",
+       "surf": "laneSel",
+       "bg": "#3A5478",
+       "wc": 7.16,
+       "lc": -85.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#D1E2EF",
+       "surf": "@glass",
+       "bg": "#3A4E6B",
+       "wc": 6.38,
+       "lc": -73.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#A8C0D6",
+       "surf": "@glass",
+       "bg": "#3A4E6B",
+       "wc": 4.5,
+       "lc": -52.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#738CA9",
+       "surf": "strip",
+       "bg": "#2A3F5E",
+       "wc": 3.07,
+       "lc": -30.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#D1E2EF",
+       "surf": "ruler",
+       "bg": "#263A57",
+       "wc": 8.68,
+       "lc": -79.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFC27A",
+       "surf": "strip",
+       "bg": "#2A3F5E",
+       "wc": 6.72,
+       "lc": -67.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFC27A",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 10.79,
+       "lc": -75.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#1D2D45",
+       "surf": "accent",
+       "bg": "#D1E2EF",
+       "wc": 10.46,
+       "lc": 81.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF8577",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 7.23,
+       "lc": -54.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F2F7FB",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 15.86,
+       "lc": -100.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF8577",
+       "surf": "strip",
+       "bg": "#2A3F5E",
+       "wc": 4.5,
+       "lc": -46.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#D1E2EF",
+       "surf": "strip",
+       "bg": "#2A3F5E",
+       "wc": 8.03,
+       "lc": -78.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#FFD86B",
+       "surf": "laneSel",
+       "bg": "#3A5478",
+       "wc": 5.62,
+       "lc": -69.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF6A5C",
+       "surf": "panel",
+       "bg": "#243853",
+       "wc": 4.23,
+       "lc": -41.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#FFFFFF",
+       "surf": "lane1",
+       "bg": "#2D4464",
+       "wc": 9.89,
+       "lc": -97.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m3",
+       "fg": "#FF6A5C",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 6.08,
+       "lc": -47.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF8577",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 7.23,
+       "lc": -54.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "selD",
+       "fg": "#FFD86B",
+       "surf": "display",
+       "bg": "#111C2D",
+       "wc": 12.45,
+       "lc": -83.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#FFFFFF",
+       "surf": "laneSel",
+       "bg": "#3A5478",
+       "wc": 7.72,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#F4767D",
+       "surf": "lane1",
+       "bg": "#2D4464",
+       "wc": 3.64,
+       "lc": -38.9,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 34.6,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 37.1,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 40.8,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 40.1,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 26.5,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 26.2,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 36.5,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 13.4,
+      "pair": [
+       "#E6D0F9",
+       "#C3A0BA"
+      ]
+     },
+     "protan": {
+      "de": 13.2,
+      "pair": [
+       "#87ACFE",
+       "#E6D0F9"
+      ]
+     },
+     "deutan": {
+      "de": 13.0,
+      "pair": [
+       "#FDFC6D",
+       "#E9B046"
+      ]
+     },
+     "tritan": {
+      "de": 13.0,
+      "pair": [
+       "#F4767D",
+       "#E9B046"
+      ]
+     }
+    },
+    "cvd_min": 13.0,
+    "titles": [
+     {
+      "clip": "#87ACFE",
+      "body": "#4F6B9F",
+      "ink": "#FFFFFF",
+      "wc": 5.34,
+      "lc": -81.8
+     },
+     {
+      "clip": "#B7EABF",
+      "body": "#628485",
+      "ink": "#101114",
+      "wc": 4.64,
+      "lc": 35.5
+     },
+     {
+      "clip": "#FDFC6D",
+      "body": "#7E8B65",
+      "ink": "#101114",
+      "wc": 5.19,
+      "lc": 39.4
+     },
+     {
+      "clip": "#F4767D",
+      "body": "#7B566B",
+      "ink": "#FFFFFF",
+      "wc": 6.2,
+      "lc": -86.0
+     },
+     {
+      "clip": "#E9B046",
+      "body": "#766D55",
+      "ink": "#FFFFFF",
+      "wc": 5.14,
+      "lc": -80.8
+     },
+     {
+      "clip": "#E6D0F9",
+      "body": "#757A9D",
+      "ink": "#101114",
+      "wc": 4.52,
+      "lc": 34.6
+     },
+     {
+      "clip": "#F5FEFF",
+      "body": "#7B8C9F",
+      "ink": "#101114",
+      "wc": 5.48,
+      "lc": 41.4
+     },
+     {
+      "clip": "#C3A0BA",
+      "body": "#676683",
+      "ink": "#FFFFFF",
+      "wc": 5.52,
+      "lc": -82.9
+     }
+    ],
+    "glass_floor": 0.8,
+    "fails": 0
+   }
+  },
+  {
+   "id": "L",
+   "key": "atomic-age",
+   "name": "Atomic age",
+   "mode": "dark",
+   "stars": 3,
+   "new": true,
+   "refs": "VA4 Sputnik (teal #1F3A4A, cream #E5D8B8, gold #E8B33B, orange #EA6A2E) and VA3 Halftone Print",
+   "icons": [
+    "sputnik",
+    "halftone-print"
+   ],
+   "desc": "New: the 1950s atomic age. Deep teal, cream type, a sea-glass accent and a gold playhead.",
+   "t": {
+    "bg": "#0F1E27",
+    "chrome": "#142833",
+    "ruler": "#18303D",
+    "lane0": "#1A3240",
+    "lane1": "#1C3544",
+    "laneSel": "#284556",
+    "panel": "#152A36",
+    "panel2": "#1C3442",
+    "strip": "#1B3341",
+    "display": "#0A141A",
+    "glass": "#1C3442",
+    "glassA": 0.83,
+    "line": "#2F4B5B",
+    "grid": "229,216,184",
+    "gridK": 1,
+    "ink": "#F2EAD6",
+    "lab": "#E5D8B8",
+    "mut": "#B3A88C",
+    "dis": "#7E8476",
+    "rulerTxt": "#E5D8B8",
+    "accent": "#6FD3C8",
+    "onAccent": "#0F1E27",
+    "sel": "#F2C84B",
+    "unit": "#F0A25A",
+    "rec": "#F2553C",
+    "over": "#FF7360",
+    "overD": "#FF7360",
+    "warn": "#F2C84B",
+    "ok": "#9ED67A",
+    "ph": "#6FD3C8",
+    "m0": "#3E9E63",
+    "m1": "#9ED67A",
+    "m2": "#F2C84B",
+    "m3": "#FF5E4A",
+    "focusIn": "#F2EAD6",
+    "focusOut": "#0A141A",
+    "clipA": 0.45,
+    "unitD": "#F0A25A",
+    "accentD": "#6FD3C8",
+    "selD": "#F2C84B",
+    "inkD": "#F2EAD6"
+   },
+   "pal": [
+    "#D7B202",
+    "#F07C74",
+    "#67D8B4",
+    "#99A9FA",
+    "#AF647B",
+    "#A282AF",
+    "#DAEE99",
+    "#F7CDF2"
+   ],
+   "src": {
+    "t": {
+     "bg": "#0F1E27",
+     "chrome": "#142833",
+     "ruler": "#18303D",
+     "lane0": "#1A3240",
+     "lane1": "#1C3544",
+     "laneSel": "#284556",
+     "panel": "#152A36",
+     "panel2": "#1C3442",
+     "strip": "#1B3341",
+     "display": "#0A141A",
+     "glass": "#1C3442",
+     "glassA": 0.6,
+     "line": "#2F4B5B",
+     "grid": "229,216,184",
+     "gridK": 1,
+     "ink": "#F2EAD6",
+     "lab": "#E5D8B8",
+     "mut": "#B3A88C",
+     "dis": "#6E7466",
+     "rulerTxt": "#E5D8B8",
+     "accent": "#6FD3C8",
+     "onAccent": "#0F1E27",
+     "sel": "#F2C84B",
+     "unit": "#F0A25A",
+     "rec": "#F2553C",
+     "over": "#FF7360",
+     "overD": "#FF7360",
+     "warn": "#F2C84B",
+     "ok": "#9ED67A",
+     "ph": "#6FD3C8",
+     "m0": "#3E9E63",
+     "m1": "#9ED67A",
+     "m2": "#F2C84B",
+     "m3": "#FF5E4A",
+     "focusIn": "#F2EAD6",
+     "focusOut": "#0A141A",
+     "clipA": 0.45,
+     "unitD": "#F0A25A",
+     "accentD": "#6FD3C8",
+     "selD": "#F2C84B",
+     "inkD": "#F2EAD6"
+    },
+    "pal": [
+     "#E8B33B",
+     "#F07A45",
+     "#6FD3C8",
+     "#8FB8F0",
+     "#E36A7A",
+     "#B7A0E8",
+     "#9ED67A",
+     "#F0A0C8"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#E8B33B #F07A45 #6FD3C8 #8FB8F0 #E36A7A #B7A0E8 #9ED67A #F0A0C8",
+     "now": "#D7B202 #F07C74 #67D8B4 #99A9FA #AF647B #A282AF #DAEE99 #F7CDF2",
+     "note": "smallest CIEDE2000 over four visions 1.3 -> 13.6"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.6,
+     "now": 0.83,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "dis",
+     "was": "#6E7466",
+     "now": "#7E8476"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#F2EAD6",
+       "surf": "laneSel",
+       "bg": "#284556",
+       "wc": 8.44,
+       "lc": -84.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#E5D8B8",
+       "surf": "@glass",
+       "bg": "#2A4248",
+       "wc": 7.53,
+       "lc": -74.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#B3A88C",
+       "surf": "@glass",
+       "bg": "#2A4248",
+       "wc": 4.51,
+       "lc": -46.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#7E8476",
+       "surf": "strip",
+       "bg": "#1B3341",
+       "wc": 3.41,
+       "lc": -30.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#E5D8B8",
+       "surf": "ruler",
+       "bg": "#18303D",
+       "wc": 9.71,
+       "lc": -78.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#F0A25A",
+       "surf": "strip",
+       "bg": "#1B3341",
+       "wc": 6.28,
+       "lc": -56.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#F0A25A",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 8.88,
+       "lc": -60.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#0F1E27",
+       "surf": "accent",
+       "bg": "#6FD3C8",
+       "wc": 9.57,
+       "lc": 69.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7360",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 6.98,
+       "lc": -50.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#F2EAD6",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 15.53,
+       "lc": -93.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF7360",
+       "surf": "strip",
+       "bg": "#1B3341",
+       "wc": 4.93,
+       "lc": -45.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#6FD3C8",
+       "surf": "strip",
+       "bg": "#1B3341",
+       "wc": 7.41,
+       "lc": -64.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F2C84B",
+       "surf": "laneSel",
+       "bg": "#284556",
+       "wc": 6.33,
+       "lc": -65.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#F2553C",
+       "surf": "panel",
+       "bg": "#152A36",
+       "wc": 4.34,
+       "lc": -37.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#6FD3C8",
+       "surf": "lane1",
+       "bg": "#1C3544",
+       "wc": 7.2,
+       "lc": -64.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#3E9E63",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 5.56,
+       "lc": -40.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF7360",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 6.98,
+       "lc": -50.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#6FD3C8",
+       "surf": "display",
+       "bg": "#0A141A",
+       "wc": 10.49,
+       "lc": -69.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#F2EAD6",
+       "surf": "laneSel",
+       "bg": "#284556",
+       "wc": 8.44,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal4",
+       "fg": "#AF647B",
+       "surf": "lane1",
+       "bg": "#1C3544",
+       "wc": 3.0,
+       "lc": -26.7,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 36.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 38.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 40.8,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 57.8,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 22.3,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 36.4,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 57.8,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 15.4,
+      "pair": [
+       "#AF647B",
+       "#A282AF"
+      ]
+     },
+     "protan": {
+      "de": 13.8,
+      "pair": [
+       "#AF647B",
+       "#A282AF"
+      ]
+     },
+     "deutan": {
+      "de": 13.6,
+      "pair": [
+       "#99A9FA",
+       "#A282AF"
+      ]
+     },
+     "tritan": {
+      "de": 13.6,
+      "pair": [
+       "#F07C74",
+       "#AF647B"
+      ]
+     }
+    },
+    "cvd_min": 13.6,
+    "titles": [
+     {
+      "clip": "#D7B202",
+      "body": "#6F6C24",
+      "ink": "#FFFFFF",
+      "wc": 5.46,
+      "lc": -82.5
+     },
+     {
+      "clip": "#F07C74",
+      "body": "#7A5357",
+      "ink": "#FFFFFF",
+      "wc": 6.56,
+      "lc": -87.5
+     },
+     {
+      "clip": "#67D8B4",
+      "body": "#3D7D74",
+      "ink": "#FFFFFF",
+      "wc": 4.79,
+      "lc": -78.5
+     },
+     {
+      "clip": "#99A9FA",
+      "body": "#536894",
+      "ink": "#FFFFFF",
+      "wc": 5.56,
+      "lc": -83.0
+     },
+     {
+      "clip": "#AF647B",
+      "body": "#5D485B",
+      "ink": "#FFFFFF",
+      "wc": 8.26,
+      "lc": -93.1
+     },
+     {
+      "clip": "#A282AF",
+      "body": "#575672",
+      "ink": "#FFFFFF",
+      "wc": 7.05,
+      "lc": -89.4
+     },
+     {
+      "clip": "#DAEE99",
+      "body": "#708768",
+      "ink": "#101114",
+      "wc": 4.81,
+      "lc": 36.8
+     },
+     {
+      "clip": "#F7CDF2",
+      "body": "#7D7890",
+      "ink": "#101114",
+      "wc": 4.46,
+      "lc": 34.2
+     }
+    ],
+    "glass_floor": 0.83,
+    "fails": 0
+   }
+  },
+  {
+   "id": "M",
+   "key": "phosphor",
+   "name": "Phosphor",
+   "mode": "dark",
+   "stars": 3,
+   "new": true,
+   "refs": "VC6 Orbital Wireframe (black-green #02100E, phosphor #32B38F to #3EF8C5)",
+   "icons": [
+    "orbital-wireframe"
+   ],
+   "desc": "New: an oscilloscope screen. Black-green ground, phosphor-green accent and traces, amber selection like an amber CRT.",
+   "t": {
+    "bg": "#020B09",
+    "chrome": "#05120F",
+    "ruler": "#071814",
+    "lane0": "#081A15",
+    "lane1": "#0A1D18",
+    "laneSel": "#103028",
+    "panel": "#06140F",
+    "panel2": "#0B1E19",
+    "strip": "#0B1D18",
+    "display": "#010605",
+    "glass": "#0A1C17",
+    "glassA": 0.6,
+    "line": "#16362D",
+    "grid": "50,179,143",
+    "gridK": 1,
+    "ink": "#DDF7EE",
+    "lab": "#AEE3D2",
+    "mut": "#7FB5A4",
+    "dis": "#568275",
+    "rulerTxt": "#8FE6C8",
+    "accent": "#35E4B3",
+    "onAccent": "#02100E",
+    "sel": "#F5D04C",
+    "unit": "#FFB547",
+    "rec": "#FF5A5A",
+    "over": "#FF6B6B",
+    "overD": "#FF6B6B",
+    "warn": "#F5D04C",
+    "ok": "#C5F27C",
+    "ph": "#DDF7EE",
+    "m0": "#1F9E70",
+    "m1": "#35E4B3",
+    "m2": "#F5D04C",
+    "m3": "#FF4D4D",
+    "focusIn": "#35E4B3",
+    "focusOut": "#010605",
+    "clipA": 0.3,
+    "unitD": "#FFB547",
+    "accentD": "#35E4B3",
+    "selD": "#F5D04C",
+    "inkD": "#DDF7EE"
+   },
+   "pal": [
+    "#8BFEDC",
+    "#528CFE",
+    "#F6FBA6",
+    "#F34C06",
+    "#FDBB2E",
+    "#C6B8FD",
+    "#91C4C1",
+    "#D97993"
+   ],
+   "src": {
+    "t": {
+     "bg": "#020B09",
+     "chrome": "#05120F",
+     "ruler": "#071814",
+     "lane0": "#081A15",
+     "lane1": "#0A1D18",
+     "laneSel": "#103028",
+     "panel": "#06140F",
+     "panel2": "#0B1E19",
+     "strip": "#0B1D18",
+     "display": "#010605",
+     "glass": "#0A1C17",
+     "glassA": 0.6,
+     "line": "#16362D",
+     "grid": "50,179,143",
+     "gridK": 1,
+     "ink": "#DDF7EE",
+     "lab": "#AEE3D2",
+     "mut": "#7FB5A4",
+     "dis": "#3F6B5E",
+     "rulerTxt": "#8FE6C8",
+     "accent": "#35E4B3",
+     "onAccent": "#02100E",
+     "sel": "#F5D04C",
+     "unit": "#FFB547",
+     "rec": "#FF5A5A",
+     "over": "#FF6B6B",
+     "overD": "#FF6B6B",
+     "warn": "#F5D04C",
+     "ok": "#C5F27C",
+     "ph": "#DDF7EE",
+     "m0": "#1F9E70",
+     "m1": "#35E4B3",
+     "m2": "#F5D04C",
+     "m3": "#FF4D4D",
+     "focusIn": "#35E4B3",
+     "focusOut": "#010605",
+     "clipA": 0.3,
+     "unitD": "#FFB547",
+     "accentD": "#35E4B3",
+     "selD": "#F5D04C",
+     "inkD": "#DDF7EE"
+    },
+    "pal": [
+     "#35E4B3",
+     "#5FB8FF",
+     "#F5D04C",
+     "#FF7A7A",
+     "#FFA64D",
+     "#C79BFF",
+     "#7FEAF5",
+     "#FF8FD0"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#35E4B3 #5FB8FF #F5D04C #FF7A7A #FFA64D #C79BFF #7FEAF5 #FF8FD0",
+     "now": "#8BFEDC #528CFE #F6FBA6 #F34C06 #FDBB2E #C6B8FD #91C4C1 #D97993",
+     "note": "smallest CIEDE2000 over four visions 1.7 -> 13.7"
+    },
+    {
+     "tok": "dis",
+     "was": "#3F6B5E",
+     "now": "#568275"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#DDF7EE",
+       "surf": "@glass",
+       "bg": "#263627",
+       "wc": 11.35,
+       "lc": -93.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#AEE3D2",
+       "surf": "@glass",
+       "bg": "#263627",
+       "wc": 8.98,
+       "lc": -77.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#7FB5A4",
+       "surf": "@glass",
+       "bg": "#263627",
+       "wc": 5.52,
+       "lc": -50.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#568275",
+       "surf": "strip",
+       "bg": "#0B1D18",
+       "wc": 4.03,
+       "lc": -30.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#8FE6C8",
+       "surf": "ruler",
+       "bg": "#071814",
+       "wc": 12.46,
+       "lc": -80.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFB547",
+       "surf": "strip",
+       "bg": "#0B1D18",
+       "wc": 9.93,
+       "lc": -69.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 11.61,
+       "lc": -70.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#02100E",
+       "surf": "accent",
+       "bg": "#35E4B3",
+       "wc": 11.91,
+       "lc": 75.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 7.35,
+       "lc": -49.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#DDF7EE",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 18.08,
+       "lc": -98.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B6B",
+       "surf": "strip",
+       "bg": "#0B1D18",
+       "wc": 6.29,
+       "lc": -47.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#35E4B3",
+       "surf": "strip",
+       "bg": "#0B1D18",
+       "wc": 10.72,
+       "lc": -74.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#F5D04C",
+       "surf": "laneSel",
+       "bg": "#103028",
+       "wc": 9.49,
+       "lc": -75.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF5A5A",
+       "surf": "panel",
+       "bg": "#06140F",
+       "wc": 6.16,
+       "lc": -44.8,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#DDF7EE",
+       "surf": "lane1",
+       "bg": "#0A1D18",
+       "wc": 15.49,
+       "lc": -97.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#1F9E70",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 6.01,
+       "lc": -40.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 7.35,
+       "lc": -49.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#35E4B3",
+       "surf": "display",
+       "bg": "#010605",
+       "wc": 12.53,
+       "lc": -75.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#35E4B3",
+       "surf": "laneSel",
+       "bg": "#103028",
+       "wc": 8.74,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal3",
+       "fg": "#F34C06",
+       "surf": "lane1",
+       "bg": "#0A1D18",
+       "wc": 4.87,
+       "lc": -38.2,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 35.5,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 45.4,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 46.8,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 72.6,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 21.2,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 29.4,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 48.2,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 16.7,
+      "pair": [
+       "#8BFEDC",
+       "#91C4C1"
+      ]
+     },
+     "protan": {
+      "de": 13.8,
+      "pair": [
+       "#8BFEDC",
+       "#F6FBA6"
+      ]
+     },
+     "deutan": {
+      "de": 13.7,
+      "pair": [
+       "#F6FBA6",
+       "#FDBB2E"
+      ]
+     },
+     "tritan": {
+      "de": 13.7,
+      "pair": [
+       "#8BFEDC",
+       "#91C4C1"
+      ]
+     }
+    },
+    "cvd_min": 13.7,
+    "titles": [
+     {
+      "clip": "#8BFEDC",
+      "body": "#2F5E51",
+      "ink": "#FFFFFF",
+      "wc": 7.39,
+      "lc": -90.4
+     },
+     {
+      "clip": "#528CFE",
+      "body": "#1E3C5B",
+      "ink": "#FFFFFF",
+      "wc": 11.34,
+      "lc": -99.7
+     },
+     {
+      "clip": "#F6FBA6",
+      "body": "#4F5E40",
+      "ink": "#FFFFFF",
+      "wc": 6.98,
+      "lc": -89.1
+     },
+     {
+      "clip": "#F34C06",
+      "body": "#4E2910",
+      "ink": "#FFFFFF",
+      "wc": 12.74,
+      "lc": -101.9
+     },
+     {
+      "clip": "#FDBB2E",
+      "body": "#514A1C",
+      "ink": "#FFFFFF",
+      "wc": 8.95,
+      "lc": -94.9
+     },
+     {
+      "clip": "#C6B8FD",
+      "body": "#41495B",
+      "ink": "#FFFFFF",
+      "wc": 9.02,
+      "lc": -95.1
+     },
+     {
+      "clip": "#91C4C1",
+      "body": "#314D49",
+      "ink": "#FFFFFF",
+      "wc": 9.18,
+      "lc": -95.5
+     },
+     {
+      "clip": "#D97993",
+      "body": "#47363B",
+      "ink": "#FFFFFF",
+      "wc": 11.3,
+      "lc": -99.8
+     }
+    ],
+    "glass_floor": 0.4,
+    "fails": 0
+   }
+  },
+  {
+   "id": "N",
+   "key": "deep-orbit",
+   "name": "Deep orbit",
+   "mode": "dark",
+   "stars": 4,
+   "new": true,
+   "refs": "P2 Orbit night as printed on the icon (tile #132044 to #070910, rings #EAF1FF, nucleus #FFC43C, electron #4CC9F0, field #6096FF)",
+   "icons": [
+    "field-depth",
+    "dipole-field"
+   ],
+   "desc": "New: the icon's own navy. Today's look moved onto P2: navy strips, field-blue accent, nucleus-yellow selection, electron-cyan playhead.",
+   "t": {
+    "bg": "#070910",
+    "chrome": "#0C1228",
+    "ruler": "#101833",
+    "lane0": "#111A36",
+    "lane1": "#131D3B",
+    "laneSel": "#1E2A50",
+    "panel": "#0E1630",
+    "panel2": "#141E3E",
+    "strip": "#132044",
+    "display": "#05070D",
+    "glass": "#132044",
+    "glassA": 0.85,
+    "line": "#26325A",
+    "grid": "96,150,255",
+    "gridK": 0.9,
+    "ink": "#EAF1FF",
+    "lab": "#C3CFEA",
+    "mut": "#8F9EC6",
+    "dis": "#6D7BA2",
+    "rulerTxt": "#C3CFEA",
+    "accent": "#85AEFC",
+    "onAccent": "#070910",
+    "sel": "#FFC43C",
+    "unit": "#FFB547",
+    "rec": "#FF5A5A",
+    "over": "#FF6B6B",
+    "overD": "#FF6B6B",
+    "warn": "#FFC43C",
+    "ok": "#3ECF8E",
+    "ph": "#4CC9F0",
+    "m0": "#12804f",
+    "m1": "#3ecf8e",
+    "m2": "#FFC43C",
+    "m3": "#ff3b3b",
+    "focusIn": "#4CC9F0",
+    "focusOut": "#070910",
+    "clipA": 0.38,
+    "unitD": "#FFB547",
+    "accentD": "#85AEFC",
+    "selD": "#FFC43C",
+    "inkD": "#EAF1FF"
+   },
+   "pal": [
+    "#626AC0",
+    "#1DAA92",
+    "#FEE3AB",
+    "#FE4079",
+    "#CC8614",
+    "#BE8DFE",
+    "#00ECFE",
+    "#FC9AC9"
+   ],
+   "src": {
+    "t": {
+     "bg": "#070910",
+     "chrome": "#0C1228",
+     "ruler": "#101833",
+     "lane0": "#111A36",
+     "lane1": "#131D3B",
+     "laneSel": "#1E2A50",
+     "panel": "#0E1630",
+     "panel2": "#141E3E",
+     "strip": "#132044",
+     "display": "#05070D",
+     "glass": "#132044",
+     "glassA": 0.55,
+     "line": "#26325A",
+     "grid": "96,150,255",
+     "gridK": 0.9,
+     "ink": "#EAF1FF",
+     "lab": "#C3CFEA",
+     "mut": "#8D9CC4",
+     "dis": "#525F85",
+     "rulerTxt": "#C3CFEA",
+     "accent": "#6096FF",
+     "onAccent": "#070910",
+     "sel": "#FFC43C",
+     "unit": "#FFB547",
+     "rec": "#FF5A5A",
+     "over": "#FF6B6B",
+     "overD": "#FF6B6B",
+     "warn": "#FFC43C",
+     "ok": "#3ECF8E",
+     "ph": "#4CC9F0",
+     "m0": "#12804f",
+     "m1": "#3ecf8e",
+     "m2": "#FFC43C",
+     "m3": "#ff3b3b",
+     "focusIn": "#4CC9F0",
+     "focusOut": "#070910",
+     "clipA": 0.38,
+     "unitD": "#FFB547",
+     "accentD": "#6096FF",
+     "selD": "#FFC43C",
+     "inkD": "#EAF1FF"
+    },
+    "pal": [
+     "#4c8dff",
+     "#3ecf8e",
+     "#f5c84c",
+     "#ff6b6b",
+     "#ff9a3c",
+     "#b583ff",
+     "#4cc9f0",
+     "#ff7ac8"
+    ]
+   },
+   "fit": [
+    {
+     "tok": "track colours",
+     "was": "#4c8dff #3ecf8e #f5c84c #ff6b6b #ff9a3c #b583ff #4cc9f0 #ff7ac8",
+     "now": "#626AC0 #1DAA92 #FEE3AB #FE4079 #CC8614 #BE8DFE #00ECFE #FC9AC9",
+     "note": "smallest CIEDE2000 over four visions 1.0 -> 12.8"
+    },
+    {
+     "tok": "glassA",
+     "was": 0.55,
+     "now": 0.85,
+     "note": "raised so the hand-picked text passes over the brightest clip"
+    },
+    {
+     "tok": "mut",
+     "was": "#8D9CC4",
+     "now": "#8F9EC6"
+    },
+    {
+     "tok": "dis",
+     "was": "#525F85",
+     "now": "#6D7BA2"
+    },
+    {
+     "tok": "accent / onAccent",
+     "was": "#6096FF / #070910",
+     "now": "#85AEFC / #070910"
+    }
+   ],
+   "m": {
+    "rules": [
+     {
+      "id": "T1",
+      "label": "Main text",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 14,
+      "fails": 0,
+      "worst": {
+       "tok": "ink",
+       "fg": "#EAF1FF",
+       "surf": "laneSel",
+       "bg": "#1E2A50",
+       "wc": 12.33,
+       "lc": -94.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T2",
+      "label": "Labels",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 10,
+      "fails": 0,
+      "worst": {
+       "tok": "lab",
+       "fg": "#C3CFEA",
+       "surf": "@glass",
+       "bg": "#202A48",
+       "wc": 9.04,
+       "lc": -73.1,
+       "ok": true
+      }
+     },
+     {
+      "id": "T3",
+      "label": "Quiet text (11 px, weight 500)",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 11,
+      "fails": 0,
+      "worst": {
+       "tok": "mut",
+       "fg": "#8F9EC6",
+       "surf": "@glass",
+       "bg": "#202A48",
+       "wc": 5.3,
+       "lc": -45.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T4",
+      "label": "Disabled text",
+      "kind": "spot",
+      "thr": {
+       "lc": 30
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "dis",
+       "fg": "#6D7BA2",
+       "surf": "strip",
+       "bg": "#132044",
+       "wc": 3.8,
+       "lc": -30.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T5",
+      "label": "Ruler numbers",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "rulerTxt",
+       "fg": "#C3CFEA",
+       "surf": "ruler",
+       "bg": "#101833",
+       "wc": 11.19,
+       "lc": -75.9,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6",
+      "label": "Units (amber, L2) on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "unit",
+       "fg": "#FFB547",
+       "surf": "strip",
+       "bg": "#132044",
+       "wc": 9.07,
+       "lc": -68.3,
+       "ok": true
+      }
+     },
+     {
+      "id": "T6d",
+      "label": "Units in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 55,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "unitD",
+       "fg": "#FFB547",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 11.46,
+       "lc": -70.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "T7",
+      "label": "Text on accent buttons",
+      "kind": "text",
+      "thr": {
+       "lc": 60,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "onAccent",
+       "fg": "#070910",
+       "surf": "accent",
+       "bg": "#85AEFC",
+       "wc": 8.96,
+       "lc": 60.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "T8",
+      "label": "Over read-out in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 7.26,
+       "lc": -49.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "T10",
+      "label": "Text in displays",
+      "kind": "text",
+      "thr": {
+       "lc": 75,
+       "wc": 7
+      },
+      "n": 1,
+      "fails": 0,
+      "worst": {
+       "tok": "inkD",
+       "fg": "#EAF1FF",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 17.77,
+       "lc": -98.4,
+       "ok": true
+      }
+     },
+     {
+      "id": "T9",
+      "label": "Over / error text on panels",
+      "kind": "text",
+      "thr": {
+       "lc": 45,
+       "wc": 4.5
+      },
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "over",
+       "fg": "#FF6B6B",
+       "surf": "strip",
+       "bg": "#132044",
+       "wc": 5.74,
+       "lc": -46.6,
+       "ok": true
+      }
+     },
+     {
+      "id": "U1",
+      "label": "Accent (buttons on, links, toggles)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "accent",
+       "fg": "#85AEFC",
+       "surf": "strip",
+       "bg": "#132044",
+       "wc": 7.18,
+       "lc": -56.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U2",
+      "label": "Selection outline (A1)",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "sel",
+       "fg": "#FFC43C",
+       "surf": "laneSel",
+       "bg": "#1E2A50",
+       "wc": 8.8,
+       "lc": -72.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U3",
+      "label": "Record button",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "rec",
+       "fg": "#FF5A5A",
+       "surf": "panel",
+       "bg": "#0E1630",
+       "wc": 5.83,
+       "lc": -44.2,
+       "ok": true
+      }
+     },
+     {
+      "id": "U4",
+      "label": "Playhead",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "ph",
+       "fg": "#4CC9F0",
+       "surf": "lane1",
+       "bg": "#131D3B",
+       "wc": 8.62,
+       "lc": -64.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U5",
+      "label": "Meter segments in their well",
+      "kind": "ui",
+      "thr": {},
+      "n": 4,
+      "fails": 0,
+      "worst": {
+       "tok": "m0",
+       "fg": "#12804f",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 4.05,
+       "lc": -27.7,
+       "ok": true
+      }
+     },
+     {
+      "id": "U6",
+      "label": "Limit colours in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 3,
+      "fails": 0,
+      "worst": {
+       "tok": "overD",
+       "fg": "#FF6B6B",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 7.26,
+       "lc": -49.0,
+       "ok": true
+      }
+     },
+     {
+      "id": "U9",
+      "label": "Curves and handles in displays",
+      "kind": "ui",
+      "thr": {},
+      "n": 2,
+      "fails": 0,
+      "worst": {
+       "tok": "accentD",
+       "fg": "#85AEFC",
+       "surf": "display",
+       "bg": "#05070D",
+       "wc": 9.07,
+       "lc": -58.5,
+       "ok": true
+      }
+     },
+     {
+      "id": "U7",
+      "label": "Focus ring (two colours, best band)",
+      "kind": "ui",
+      "thr": {},
+      "n": 9,
+      "fails": 0,
+      "worst": {
+       "tok": "@focus",
+       "fg": "#4CC9F0",
+       "surf": "laneSel",
+       "bg": "#1E2A50",
+       "wc": 7.27,
+       "lc": null,
+       "ok": true
+      }
+     },
+     {
+      "id": "U8",
+      "label": "Track colours against the lanes (clip edges)",
+      "kind": "ui",
+      "thr": {},
+      "n": 16,
+      "fails": 0,
+      "worst": {
+       "tok": "pal0",
+       "fg": "#626AC0",
+       "surf": "lane1",
+       "bg": "#131D3B",
+       "wc": 3.43,
+       "lc": -26.3,
+       "ok": true
+      }
+     }
+    ],
+    "distinct": [
+     {
+      "a": "accent",
+      "b": "sel",
+      "need": 15,
+      "de": 53.3,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "over",
+      "need": 15,
+      "de": 40.9,
+      "ok": true
+     },
+     {
+      "a": "sel",
+      "b": "rec",
+      "need": 15,
+      "de": 42.1,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "rec",
+      "need": 15,
+      "de": 43.8,
+      "ok": true
+     },
+     {
+      "a": "accent",
+      "b": "ok",
+      "need": 10,
+      "de": 42.7,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "sel",
+      "need": 10,
+      "de": 49.7,
+      "ok": true
+     },
+     {
+      "a": "ph",
+      "b": "rec",
+      "need": 15,
+      "de": 64.0,
+      "ok": true
+     }
+    ],
+    "cvd": {
+     "normal": {
+      "de": 18.6,
+      "pair": [
+       "#FE4079",
+       "#FC9AC9"
+      ]
+     },
+     "protan": {
+      "de": 12.9,
+      "pair": [
+       "#00ECFE",
+       "#FC9AC9"
+      ]
+     },
+     "deutan": {
+      "de": 13.3,
+      "pair": [
+       "#BE8DFE",
+       "#00ECFE"
+      ]
+     },
+     "tritan": {
+      "de": 12.8,
+      "pair": [
+       "#CC8614",
+       "#FC9AC9"
+      ]
+     }
+    },
+    "cvd_min": 12.8,
+    "titles": [
+     {
+      "clip": "#626AC0",
+      "body": "#30386A",
+      "ink": "#FFFFFF",
+      "wc": 11.06,
+      "lc": -99.3
+     },
+     {
+      "clip": "#1DAA92",
+      "body": "#165159",
+      "ink": "#FFFFFF",
+      "wc": 8.92,
+      "lc": -94.6
+     },
+     {
+      "clip": "#FEE3AB",
+      "body": "#6B6662",
+      "ink": "#FFFFFF",
+      "wc": 5.67,
+      "lc": -83.7
+     },
+     {
+      "clip": "#FE4079",
+      "body": "#6B284F",
+      "ink": "#FFFFFF",
+      "wc": 10.29,
+      "lc": -97.4
+     },
+     {
+      "clip": "#CC8614",
+      "body": "#584329",
+      "ink": "#FFFFFF",
+      "wc": 9.33,
+      "lc": -95.8
+     },
+     {
+      "clip": "#BE8DFE",
+      "body": "#534682",
+      "ink": "#FFFFFF",
+      "wc": 8.18,
+      "lc": -92.8
+     },
+     {
+      "clip": "#00ECFE",
+      "body": "#0B6A82",
+      "ink": "#FFFFFF",
+      "wc": 6.18,
+      "lc": -85.5
+     },
+     {
+      "clip": "#FC9AC9",
+      "body": "#6A4B6E",
+      "ink": "#FFFFFF",
+      "wc": 7.38,
+      "lc": -90.4
+     }
+    ],
+    "glass_floor": 0.8,
+    "fails": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,434 @@
+<title>AudioLab themes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a pick sheet in AudioLab's own dark look, like the earlier pick pages. A live stage (arrangement, glass mixer, a device, a menu
+   at the app's 1600 x 830 proportions) drawn from the chosen theme's tokens, then the measured readability of that theme, all themes as
+   cards, how themes work today, the token design, the research with sources, and the picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#a4a8b4;--acc:#3ecf8e;--blue:#6d9dff;--amber:#ffb547;--sel:#f5c84c;--bad:#ff6b6b;--disp:#050507;--bar:#0e0e12f2;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#fffffff2}}
+:root[data-theme="light"]{color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#fffffff2}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);padding-block:28px 150px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 21px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+ul{margin:0;padding-left:18px;max-width:80ch} li{margin:2px 0}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button,select{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px}
+.btn:hover{border-color:var(--mut)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:15px;line-height:1.6}
+.facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12px;color:var(--mut)}
+.facts b{color:var(--ink);font-weight:500}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--ln2);border-radius:7px;overflow:hidden}
+.seg button{background:var(--pn2);border:0;border-right:1px solid var(--ln2);padding:3px 9px;font:500 11.5px var(--f)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--blue);color:#fff}
+.lab{font:500 10.5px var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+/* stage */
+.stage{background:var(--disp);border:1px solid var(--ln);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage .tb{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:#c9ccd6}
+.stage .lab{color:#9a9eab}
+.stage .seg{border-color:#33333d}.stage .seg button{background:#15151a;color:#d7d9e0;border-color:#33333d}.stage .seg button.on{background:#4c8dff;color:#fff}
+.throw{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.thb{flex:none;display:flex;align-items:center;gap:7px;background:#15151a;border:1px solid #33333d;border-radius:8px;padding:4px 9px 4px 5px;color:#d7d9e0;font:500 12px var(--f);white-space:nowrap}
+.thb i{width:22px;height:22px;border-radius:5px;flex:none;border:1px solid rgba(255,255,255,.18)}
+.thb.on{border-color:#4c8dff;box-shadow:inset 0 0 0 1px #4c8dff;color:#fff}
+.thb small{font:500 10px var(--fm);color:#9a9eab}
+.cvwrap{position:relative;width:100%;min-width:0}
+.cvwrap canvas{display:block;width:100%;height:auto;border-radius:6px}
+.stage .note{font:500 11px var(--fm);color:#9a9eab;display:flex;flex-wrap:wrap;gap:4px 18px}
+.stage .note b{color:#ececf1;font-weight:500}
+.icons{display:flex;gap:8px;align-items:center}
+.icons img{width:34px;height:34px;border-radius:8px;display:block}
+/* measurements */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.box h3{font-size:14px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:12px;width:100%}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--ln);white-space:nowrap;font-variant-numeric:tabular-nums;vertical-align:middle}
+th{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+td.wrapc{white-space:normal;min-width:200px}
+.ok{color:var(--acc)} .bad{color:var(--bad)} .base{color:var(--amber)}
+.pill{display:inline-block;font:600 10.5px var(--fm);padding:1px 6px;border-radius:9px;border:1px solid currentColor}
+.sample{display:inline-flex;align-items:center;justify-content:center;min-width:58px;height:22px;padding:0 7px;border-radius:4px;font:500 11px var(--f);border:1px solid rgba(128,128,128,.25)}
+.sw{display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle;border:1px solid rgba(128,128,128,.3)}
+.swrow{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.cvd{display:grid;grid-template-columns:auto 1fr auto;gap:5px 12px;align-items:center;font-size:12px}
+.fit{font:12px/1.5 var(--fm);display:flex;flex-direction:column;gap:3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12px}
+.kv span:nth-child(odd){color:var(--mut)}
+.meter{height:8px;border-radius:4px;background:var(--pn2);position:relative;overflow:hidden;border:1px solid var(--ln)}
+.meter b{position:absolute;inset:0 auto 0 0;background:var(--blue)}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.card canvas{display:block;width:100%;height:auto;cursor:pointer}
+.card .cb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card .hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card .code{font:600 12px var(--fm);color:var(--amber)}
+.card h3{font-size:14px}
+.stars{color:var(--sel);font-size:12px;letter-spacing:1px;margin-left:auto}
+.card .ft{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px;flex-wrap:wrap}
+.card .ft img{width:26px;height:26px;border-radius:6px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:12px;margin-left:auto;cursor:pointer}
+.chk input{width:15px;height:15px;accent-color:var(--blue)}
+.tag{font:500 10.5px var(--fm);color:var(--mut);border:1px solid var(--ln2);border-radius:5px;padding:0 5px}
+/* research */
+.src{font-size:11.5px;color:var(--mut)} .src a{word-break:break-word}
+.cols{columns:2 340px;column-gap:28px} .cols>*{break-inside:avoid;margin-bottom:12px}
+/* picks bar */
+.picks{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);border-top:1px solid var(--ln2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+ padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picks .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.picks .line{flex:1 1 360px;min-width:0;font:500 12.5px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:6px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+.picks select{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:3px 6px;font-size:12px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <!-- Machado, Oliveira and Fernandes 2009, severity 1.0; SVG filters work in linear RGB by default, which is where the matrices apply -->
+ <filter id="cvd-protan"><feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-deutan"><feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.011820 0.042940 0.968881 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-tritan"><feColorMatrix type="matrix" values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.303900 0 0  0 0 0 1 0"/></filter>
+</svg>
+
+<div class="wrap">
+<header class="top">
+ <div class="eyebrow">Task TH1 · research and picks · 28 November 2026</div>
+ <h1>AudioLab themes</h1>
+ <p class="lede">Fourteen themes drawn from your icons, plus the dark half of Chart paper. Each one is one file of colours on top of the LOOK tokens, switches live, and was measured for every text and control pair: WCAG 2.2, APCA, and the track colours under three kinds of colour-vision deficiency. Theme A is today's app, untouched. Pick the ones to build, then copy the line at the bottom.</p>
+ <div class="facts"><span><b>15</b> themes (A to N, B2)</span><span><b>20</b> readability rules, <b>94</b> measured pairs per theme, plus meaning colours and colour vision</span><span><b>14 of 14</b> new themes pass every rule</span><span>Theme A keeps <b>5</b> known misses of today's app</span><span>Measured with <code>tools/design-lab/th1/check.py</code></span></div>
+</header>
+
+<section>
+ <div class="stage" id="stage">
+  <div class="throw" id="throw" role="tablist" aria-label="Theme"></div>
+  <div class="tb">
+   <span class="lab">See as</span><span class="seg" id="vis"><button class="on" data-v="normal">Normal</button><button data-v="protan">Protan</button><button data-v="deutan">Deutan</button><button data-v="tritan">Tritan</button></span>
+   <span class="lab">Glass</span><span class="seg" id="glass"><button class="on" data-g="theme">Theme's floor</button><button data-g="half">Today's 50 %</button><button data-g="solid">Solid</button></span>
+   <span class="lab">Compare</span><span class="seg" id="cmp"><button class="on" data-c="0">Off</button><button data-c="1">Wipe with A</button></span>
+   <span class="icons" id="stIcons" aria-label="Icons that fit this theme"></span>
+  </div>
+  <div class="cvwrap"><canvas id="cv" width="1600" height="830" aria-label="The arrangement, the glass mixer, a compressor and a context menu drawn in the chosen theme"></canvas></div>
+  <div class="tb" id="wipeRow" hidden><span class="lab">Wipe</span><input type="range" id="wipe" min="0" max="100" value="50" style="flex:1;min-width:120px" aria-label="Wipe position"></div>
+  <div class="note" id="stNote"></div>
+ </div>
+</section>
+
+<section id="meas">
+ <div><div class="eyebrow" id="mEy">Measured</div><h2 id="mH">Readability of the theme</h2></div>
+ <p class="mut" id="mDesc"></p>
+ <div class="grid2">
+  <div class="box" style="grid-column:1/-1"><h3>Every rule, worst pair shown</h3><p class="sm mut">Each rule checks its token against every surface it can sit on, including glass over the brightest and darkest clip. The worst pair is shown; the count says how many pairs were checked. Text needs both the WCAG ratio and the APCA level; controls and graphics need 3 : 1 (WCAG 1.4.11).</p><div class="tbl"><table id="mRules"></table></div></div>
+  <div class="box"><h3>Track colours under colour-vision deficiency</h3><p class="sm mut">Smallest CIEDE2000 difference between any two of the eight track colours, simulated with Machado 2009. 10 and up is colour-blind friendly (cols4all), under 6 fails.</p><div class="cvd" id="mCvd"></div></div>
+  <div class="box"><h3>Meaning colours kept apart</h3><p class="sm mut">Selection, record, clip and the accent must never be mistaken for each other (CIEDE2000).</p><div class="tbl"><table id="mDist"></table></div></div>
+  <div class="box"><h3>Glass</h3><div id="mGlass" class="kv"></div><p class="sm mut">The floor is the lowest panel opacity at which main text, labels and quiet text still pass over the brightest clip behind the glass. The glass engine keeps its look (refraction, edge); only its tint never goes below the floor.</p></div>
+  <div class="box"><h3>What the readability fit changed</h3><p class="sm mut">Colours as drawn from the icon, then fitted: only lightness moves, hue stays. Track colours were tuned within a small range for colour-vision safety.</p><div class="fit" id="mFit"></div></div>
+  <div class="box"><h3>Clip titles</h3><p class="sm mut">The title ink on each clip is picked per clip (theme ink, near black or white), whichever reads best.</p><div id="mClips" class="swrow"></div></div>
+ </div>
+</section>
+
+<section>
+ <div><div class="eyebrow">All themes</div><h2>Pick the ones to build</h2></div>
+ <p class="mut">Click a picture to load it in the stage above. Stars are recommendations. The tick adds it to the picks line.</p>
+ <div class="cards" id="cards"></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Icons</div><h2>Icon follows theme</h2></div>
+ <p>Your link between logos and themes. When the switch "Icon follows theme" is on, choosing a theme also sets the Dock and taskbar icon to that theme's first icon; picking an icon yourself in the icon picker turns the link off. Icons and themes that combine:</p>
+ <div class="tbl"><table id="combo"></table></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Today</div><h2>How themes work in AudioLab now</h2></div>
+ <div class="grid2">
+  <div class="box"><h3>Three layers that grew separately</h3><ul class="sm">
+   <li><b>CSS custom properties</b> at the top of the style block: <code>--bg --pn --pn2 --ln --ink --mut --acc --blue</code>, <code>--gtr</code> (strip colour), <code>--glass</code>, and task LK's <code>--sel --unit --meas --lim-warn --lim-over --lk-hair</code>.</li>
+   <li><b>The <code>LOOK</code> object</b> (task LK) that canvas drawers read: grid levels, ink, quiet grey, units amber, selection yellow, limits, density.</li>
+   <li><b><code>TH</code></b>, written by <code>applyTheme()</code> from three sliders (hue 215, tint 25 %, background 40 %): lanes, ruler, grid, map.</li></ul></div>
+  <div class="box"><h3>"Studio themes" already exist</h3><ul class="sm">
+   <li><code>THEMES</code> holds 8 looks of other programs (AudioLab, Live, FL, Cubase, Logic, Bitwig, Pro Tools, Reaper): panel colours, accent, arrangement, clip shape, fader design and meter colours, painted by <code>thPaint()</code>.</li>
+   <li>Light arrangements (Pro Tools style) already force glass to 90 % (<code>thGlass()</code>), the same idea as the glass floor here.</li>
+   <li>"Light mode" in AudioLab today is the performance mode for slow computers (<code>UI.lite</code>), not a colour theme.</li></ul></div>
+  <div class="box"><h3>What would have to change</h3><ul class="sm">
+   <li>index.html has about 4,300 hex colours and 2,400 <code>rgb()</code> literals; only about 1,200 places read a variable. The chrome (panels, text, lines, menus, strips) has to read semantic tokens.</li>
+   <li>Device displays keep their dark wells in every theme. That keeps most of the literal colours (science drawings, meters, scopes) valid and measured against one known dark ground.</li>
+   <li><code>THEMES</code> becomes a list of theme files in one format; the 8 studio looks become the group "Other programs" in the same list.</li>
+   <li>Lane P's Night mode and OLED care stay on top of any theme: Night is a filter, OLED care dims tokens.</li></ul></div>
+ </div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Design</div><h2>The theme system</h2></div>
+ <div class="grid2">
+  <div class="box"><h3>Three tiers</h3><ul class="sm">
+   <li><b>Primitives</b>: each theme's raw colours (the icon's paper, ink, nucleus, electron).</li>
+   <li><b>Semantic tokens</b>, the same names in every theme: surfaces, lines, four text levels, accent, selection, units, record, over, warn, ok, playhead, meter stops, focus ring, glass and its floor, clip opacity, eight track colours.</li>
+   <li><b>Component tokens</b> only where needed, as aliases (<code>strip.name = ink</code>).</li>
+   <li>A theme changes values, never names or meanings (IBM Carbon's rule). Record stays red, selection stays the selection, in every theme.</li></ul></div>
+  <div class="box"><h3>One file per theme, live switch</h3><ul class="sm">
+   <li>Each theme is a JSON file in the W3C Design Tokens format (2025.10: <code>$value</code>, <code>$type</code>, aliases), bundled into index.html at release.</li>
+   <li>Switching writes the tokens once: CSS variables on <code>:root</code>, a fresh <code>LOOK</code>, <code>TH</code>, then one redraw. No reload, nothing per frame; drawers read the same objects as today.</li>
+   <li>Your Hue, Tint and Background sliders stay as "Adjust" on top of any theme, clamped so the rules keep passing.</li>
+   <li>Follows the system light or dark appearance if wanted (a light and a dark theme chosen as a pair, like B and B2).</li></ul></div>
+  <div class="box"><h3>A contrast gate</h3><ul class="sm">
+   <li><code>check.py --gate</code> measures every theme file and fails the release when a rule fails, like GitHub Primer's contrast workflow.</li>
+   <li>94 pairs per theme: WCAG 2.2 ratio, APCA 0.1.9 level, CIEDE2000 under protan, deutan and tritan.</li>
+   <li>Today's theme A is the baseline: its 5 known misses are listed and only new misses fail the gate.</li></ul></div>
+ </div>
+ <div class="box"><h3>The readability rules</h3><div class="tbl"><table id="rulesTbl"></table></div></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Research</div><h2>How others do it</h2></div>
+ <div class="cols sm" id="research"></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Next</div><h2>Proposed tasks after the picks</h2></div>
+ <ul class="sm">
+  <li><b>New lane R, task TM (themes, prefix <code>tm</code>)</b>: the semantic token layer, the theme file format, the switcher (<code>tmApply</code>), "Icon follows theme" through the icon picker's hook, and the contrast gate step in <code>docs/release-gate.md</code>.</li>
+  <li><b>Lane B (Settings)</b>: the Theme row: theme cards, Adjust sliders, Follow system appearance, Icon follows theme.</li>
+  <li><b>Lanes A, E, F, I</b>: each switches its own literal chrome colours to the tokens in its own area, one step each (arrangement and clips; meters and displays read <code>LOOK</code>; menus and dialogs; device frames).</li>
+  <li><b>Lane P</b>: Night and OLED care read the active theme (OLED care has nothing to dim in a light theme).</li>
+ </ul>
+</section>
+</div>
+
+<div class="picks" role="region" aria-label="Your picks">
+ <div class="in">
+  <span class="lab">Default</span><select id="pDef" aria-label="Default theme"></select>
+  <span class="lab">Icon follows theme</span><select id="pIcon" aria-label="Icon follows theme"><option value="yes">yes</option><option value="no">no</option><option value="ask">ask the user</option></select>
+  <div class="line" id="line"></div>
+  <button type="button" class="btn" id="copy">Copy</button>
+ </div>
+</div>
+
+<script>
+const DATA=/*@DATA@*/null;
+const ICONS=/*@ICONS@*/{};
+const $=s=>document.querySelector(s);
+const TH=DATA.themes, byId=Object.fromEntries(TH.map(t=>[t.id,t]));
+/* ---------- colour helpers ---------- */
+const hx=c=>{c=c.replace('#','');if(c.length===3)c=[...c].map(x=>x+x).join('');return[0,2,4].map(i=>parseInt(c.slice(i,i+2),16))};
+const toHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v*t+B[i]*(1-t)))};
+const rgba=(c,a)=>{const v=hx(c);return`rgba(${v[0]},${v[1]},${v[2]},${a})`};
+const lin=v=>(v/=255)<=.04045?v/12.92:((v+.055)/1.055)**2.4;
+const lum=c=>{const[r,g,b]=hx(c).map(lin);return .2126*r+.7152*g+.0722*b};
+const wc=(a,b)=>{let x=lum(a),y=lum(b);if(x<y)[x,y]=[y,x];return(x+.05)/(y+.05)};
+const dark=c=>lum(c)<.18;
+const M={protan:[[.152286,1.052583,-.204868],[.114503,.786281,.099216],[-.003882,-.048116,1.051998]],deutan:[[.367322,.860646,-.227968],[.280085,.672501,.047413],[-.01182,.04294,.968881]],tritan:[[1.255528,-.076749,-.178779],[-.078411,.930809,.147602],[.004733,.691367,.3039]]};
+const gam=v=>{v=Math.max(0,Math.min(1,v));return(v<=.0031308?12.92*v:1.055*v**(1/2.4)-.055)*255};
+const sim=(c,k)=>{if(k==='normal')return c;const v=hx(c).map(lin),m=M[k];return toHex(m.map(r=>gam(r[0]*v[0]+r[1]*v[1]+r[2]*v[2])))};
+const shade=(c,k)=>k>0?mix('#ffffff',c,k):mix('#000000',c,-k);
+function rnd(seed){let s=seed>>>0||1;return()=>((s=Math.imul(s^s>>>15,2246822507)^Math.imul(s^s>>>13,3266489909))>>>0)/4294967296}
+
+/* ---------- the mock: AudioLab at 1600 x 830 (the user's window, scaled), drawn only from the theme's tokens ---------- */
+const W=1600,H=830;
+const TRK=['Kick','Bass','Clap','Snare','Hat','Open hat','Percussion','Lead'];
+function rr(x,c,X,Y,w,h,r){x.beginPath();x.roundRect?x.roundRect(X,Y,w,h,r):x.rect(X,Y,w,h);if(c){x.fillStyle=c;x.fill()}}
+function txt(x,s,X,Y,col,size,wt,al,fam){x.fillStyle=col;x.font=`${wt||400} ${size||11}px ${fam||'Inter,system-ui,sans-serif'}`;x.textAlign=al||'left';x.textBaseline='middle';x.fillText(s,X,Y)}
+function valUnit(x,v,u,X,Y,ink,unit,size,al){x.font=`500 ${size||11}px Inter,system-ui,sans-serif`;const a=x.measureText(v+' ').width;x.font=`600 ${(size||11)*.88}px Inter,system-ui,sans-serif`;const b=x.measureText(u).width;let x0=al==='center'?X-(a+b)/2:al==='right'?X-a-b:X;
+ txt(x,v,x0,Y,ink,size||11,500);txt(x,u,x0+a,Y,unit,(size||11)*.88,600)}
+function bestInk(t,body){return[t.ink,'#101114','#ffffff'].reduce((a,b)=>wc(b,body)>wc(a,body)?b:a)}
+function draw(cv,th,o){
+ o=o||{};const t=th.t,P=th.pal,x=cv.getContext('2d'),s=cv.width/W;x.setTransform(s,0,0,s,0,0);x.filter='none';
+ const isL=!dark(t.lane0),gr=(a)=>`rgba(${t.grid},${Math.min(1,a*t.gridK)})`;
+ // backgrounds
+ x.fillStyle=t.bg;x.fillRect(0,0,W,H);
+ // top bar
+ x.fillStyle=t.chrome;x.fillRect(0,0,W,30);rr(x,t.panel2,8,5,128,20,5);txt(x,'Fractals_remake',16,15,t.ink,11.5,500);txt(x,'×',124,15,t.mut,12);
+ rr(x,null,142,5,20,20,5);x.strokeStyle=t.line;x.stroke();txt(x,'+',152,15,t.lab,13,500,'center');
+ txt(x,'00:00',174,15,t.mut,10.5,500,'left','"JetBrains Mono",monospace');
+ for(let i=0;i<5;i++){rr(x,i===0?rgba(t.accent,.22):null,1440+i*30,6,22,18,5);x.strokeStyle=i?rgba(t.lab,.5):t.accent;x.lineWidth=1.2;x.beginPath();x.arc(1451+i*30,15,4.5,0,6.3);x.stroke()}
+ // ruler + section row
+ const X0=190,BW=44;x.fillStyle=t.ruler;x.fillRect(0,30,W,24);
+ for(let b=0;b<32;b++){const X=X0+b*BW;x.fillStyle=gr(.35);x.fillRect(X,42,1,12);if(b%4===0)txt(x,String(1+b*8),X+3,38,t.rulerTxt,10.5,500)}
+ txt(x,'Tracks',10,42,t.mut,10.5,500);rr(x,t.panel2,74,34,58,16,4);txt(x,'Controls',103,42,t.lab,10,500,'center');
+ const secs=[['Intro',0,4],['Kick and bass',4,8],['Drop 1',8,14],['Groove',14,20],['Break',20,24],['Peak',24,32]];
+ x.fillStyle=t.lane1;x.fillRect(X0,54,W,14);
+ secs.forEach(([n,a,b],i)=>{const c=P[(i*3)%8],X=X0+a*BW;rr(x,rgba(c,isL?.28:.35),X+1,55,(b-a)*BW-2,12,2);x.fillStyle=c;x.fillRect(X+1,55,2,12);txt(x,n,X+7,61.5,t.ink,9.5,500)});
+ // tracks
+ const TY=68,TH=62,sel=1;
+ for(let i=0;i<8;i++){const Y=TY+i*TH,c=P[i];
+  x.fillStyle=i===sel?t.laneSel:(i%2?t.lane1:t.lane0);x.fillRect(X0,Y,W-X0,TH);
+  x.fillStyle=t.panel;x.fillRect(0,Y,X0,TH);if(i===sel){x.fillStyle=rgba(t.sel,.14);x.fillRect(0,Y,X0,TH);x.fillStyle=t.sel;x.fillRect(0,Y,3,TH);x.strokeStyle=rgba(t.sel,.55);x.lineWidth=1;x.strokeRect(.5,Y+.5,X0-1,TH-1)}
+  x.fillStyle=c;x.fillRect(i===sel?4:0,Y+2,4,TH-4);
+  txt(x,String(i+1),14,Y+15,t.mut,10.5,500);txt(x,TRK[i],30,Y+15,t.ink,12,500);
+  valUnit(x,'-1.9','dB',30,Y+36,t.ink,t.unit,10.5);
+  ['M','S','R'].forEach((b,k)=>{const on=(i===3&&k===0),arm=(i===7&&k===2),bx=100+k*24;rr(x,on?t.accent:arm?t.rec:t.panel2,bx,Y+28,20,16,4);txt(x,b,bx+10,Y+36,on?t.onAccent:arm?bestInk(t,t.rec):t.lab,10,600,'center')});
+  x.fillStyle=t.line;x.fillRect(0,Y+TH-1,W,1);
+ }
+ // G3 grid over lanes
+ for(let b=0;b<=32*4;b++){const X=X0+b*BW/4;x.fillStyle=gr(b%16===0?.30:b%4===0?.16:.07);x.fillRect(X,TY,1,TH*8)}
+ for(let i=0;i<8;i++)for(let q=1;q<4;q++){x.fillStyle=gr(.028);x.fillRect(X0,TY+i*TH+q*TH/4,W,1)}
+ // clips
+ const R=rnd(11);
+ for(let i=0;i<8;i++){const Y=TY+i*TH,c=P[i],bg=i===sel?t.laneSel:(i%2?t.lane1:t.lane0),body=mix(c,bg,t.clipA),ink=bestInk(t,body),wave=t.clipA<.6?shade(c,dark(bg)?.45:-.35):rgba(ink,.55);
+  for(let b=(i<2?0:4)+(i%3);b<32;b+=i===0||i===1?2:4){const X=X0+b*BW+1,w=(i<2?2:i===4?2:3)*BW-2;if(X>W)break;
+   rr(x,body,X,Y+2,w,TH-5,3);x.strokeStyle=c;x.lineWidth=1;rr(x,null,X+.5,Y+2.5,w-1,TH-6,3);x.stroke();
+   x.fillStyle=rgba(c,t.clipA<.6?.55:.0);x.fillRect(X,Y+2,w,13);
+   txt(x,`${TRK[i]} ${1+b*8}`,X+5,Y+9,ink,10,500);
+   x.fillStyle=wave;const mid=Y+16+(TH-21)/2,amp=(TH-24)/2;
+   if(i===6||i===7){for(let n=0;n<6;n++){x.fillRect(X+5+n*(w-10)/6,Y+19+((n*7+i)%5)*6,(w-10)/8,3)}}
+   else for(let k=0;k<w-8;k+=2){const a=amp*(.2+.8*Math.abs(Math.sin(k*.21+i)*Math.cos(k*.07+b)))*(i<2&&k%22<8?1:.6);x.fillRect(X+4+k,mid-a,1.2,a*2)}
+   if(i===4&&b===12){x.strokeStyle=t.sel;x.lineWidth=2;rr(x,null,X-.5,Y+1.5,w+1,TH-4,3);x.stroke();x.fillStyle=rgba(t.sel,.12);x.fill()}
+  }}
+ // playhead
+ const PX=X0+26.4*BW;x.fillStyle=t.ph;x.fillRect(PX,30,1.5,TY+TH*8-30);x.beginPath();x.moveTo(PX-5,30);x.lineTo(PX+6.5,30);x.lineTo(PX+.75,38);x.fill();
+ // device panel
+ const DY=TY+TH*8+4;x.fillStyle=t.bg;x.fillRect(0,DY-4,W,4);x.fillStyle=t.panel;x.fillRect(0,DY,W,182);x.fillStyle=t.line;x.fillRect(0,DY,W,1);
+ x.fillStyle=t.panel2;x.fillRect(0,DY+1,180,181);txt(x,'Modulators',12,DY+16,t.ink,11.5,600);rr(x,t.panel,96,DY+8,58,16,4);txt(x,'Macros',125,DY+16,t.lab,10,500,'center');
+ ['Add an LFO, envelope or step','modulator, then click a knob','to make it move.'].forEach((l,k)=>txt(x,l,12,DY+42+k*15,t.mut,10.5,500));
+ // channel tile
+ rr(x,t.strip,192,DY+10,140,164,8);txt(x,'Kick & Bass',204,DY+24,t.ink,11.5,600);txt(x,'Pan',204,DY+46,t.lab,10.5,500);txt(x,'C',318,DY+46,t.ink,10.5,500,'right');
+ rr(x,t.display,204,DY+56,116,8,3);x.fillStyle=t.accent;x.fillRect(262,DY+56,1.5,8);valUnit(x,'-1.9','dB',262,DY+82,t.ink,t.unit,13,'center');
+ rr(x,t.accent,204,DY+100,56,18,4);txt(x,'A',232,DY+109,t.onAccent,10.5,600,'center');rr(x,t.panel2,264,DY+100,56,18,4);txt(x,'B',292,DY+109,t.lab,10.5,600,'center');
+ rr(x,t.panel2,204,DY+124,116,18,4);txt(x,'Undo bounce',262,DY+133,t.dis,10.5,500,'center');txt(x,'(disabled)',262,DY+156,t.dis,9.5,500,'center');
+ // compressor: frame strip + display well
+ const CX=346;rr(x,t.panel2,CX,DY+10,24,164,6);x.save();x.translate(CX+12,DY+92);x.rotate(-Math.PI/2);txt(x,'Compressor',0,0,t.lab,11,600,'center');x.restore();
+ rr(x,t.display,CX+30,DY+10,270,164,6);
+ const dX=CX+30,dY=DY+10,dW=270,dH=164,dk=dark(t.display)?'255,255,255':'0,0,0';
+ for(let k=1;k<6;k++){x.fillStyle=`rgba(${dk},.07)`;x.fillRect(dX+k*dW/6,dY,1,dH);x.fillRect(dX,dY+k*dH/6,dW,1)}
+ x.strokeStyle=t.unitD;x.lineWidth=2;x.beginPath();x.moveTo(dX+12,dY+dH-10);x.lineTo(dX+176,dY+40);x.lineTo(dX+dW-12,dY+18);x.stroke();
+ x.fillStyle=t.selD;x.beginPath();x.arc(dX+176,dY+40,5,0,6.3);x.fill();
+ valUnit(x,'-10.0','dB',dX+12,dY+14,t.inkD,t.unitD,11);
+ txt(x,'· 1.5:1',dX+80,dY+14,t.inkD,11,500);
+ // gain reduction + output meters
+ rr(x,t.display,dX+dW+8,dY,12,dH,3);x.fillStyle=t.m3;x.fillRect(dX+dW+10,dY+2,8,46);
+ rr(x,t.display,dX+dW+24,dY,12,dH,3);const mg=x.createLinearGradient(0,dY+dH,0,dY);mg.addColorStop(0,t.m0);mg.addColorStop(.55,t.m1);mg.addColorStop(.85,t.m2);mg.addColorStop(1,t.m3);x.fillStyle=mg;x.fillRect(dX+dW+26,dY+40,8,dH-42);
+ // controls column
+ const KX=dX+dW+50;txt(x,'Default settings ▾',KX,DY+22,t.ink,11,500);
+ rr(x,t.panel2,KX,DY+36,64,20,5);txt(x,'Change',KX+32,DY+46,t.ink,10.5,500,'center');
+ x.lineWidth=2;x.strokeStyle=t.focusOut;rr(x,null,KX-4,DY+32,72,28,8);x.stroke();x.strokeStyle=t.focusIn;rr(x,null,KX-2,DY+34,68,24,6);x.stroke();
+ [['Ratio','1.5',':1',.3],['Attack','30','ms',.45],['Release','100','ms',.62]].forEach(([n,v,u,f],k)=>{const cx=KX+16+k*62,cy=DY+100;
+  x.lineWidth=3;x.strokeStyle=t.line;x.beginPath();x.arc(cx,cy,13,Math.PI*.75,Math.PI*2.25);x.stroke();x.strokeStyle=t.accent;x.beginPath();x.arc(cx,cy,13,Math.PI*.75,Math.PI*(.75+1.5*f));x.stroke();
+  txt(x,n,cx,DY+74,t.lab,10.5,500,'center');valUnit(x,v,u,cx,DY+128,t.ink,t.unit,10.5,'center')});
+ // EQ device
+ const EX=KX+210;rr(x,t.panel2,EX,DY+10,24,164,6);x.save();x.translate(EX+12,DY+92);x.rotate(-Math.PI/2);txt(x,'Pro EQ',0,0,t.lab,11,600,'center');x.restore();
+ rr(x,t.display,EX+30,DY+10,330,164,6);const eX=EX+30,eY=DY+10;
+ for(let k=1;k<8;k++){x.fillStyle=`rgba(${dk},.07)`;x.fillRect(eX+k*330/8,eY,1,164)}x.fillStyle=`rgba(${dk},.12)`;x.fillRect(eX,eY+82,330,1);
+ x.beginPath();x.moveTo(eX,eY+150);for(let k=0;k<=330;k+=3){x.lineTo(eX+k,eY+150-60*Math.abs(Math.sin(k*.02))*(1-k/420)-10*Math.sin(k*.21)**2)}x.lineTo(eX+330,eY+164);x.lineTo(eX,eY+164);x.fillStyle=rgba(t.accentD,.18);x.fill();
+ x.strokeStyle=t.accentD;x.lineWidth=2;x.beginPath();for(let k=0;k<=330;k+=2){const y=eY+82-26*Math.exp(-(((k-90)/40)**2))+18*Math.exp(-(((k-230)/50)**2));k?x.lineTo(eX+k,y):x.moveTo(eX+k,y)}x.stroke();
+ [[90,1],[230,2]].forEach(([k,n])=>{x.fillStyle=t.selD;x.beginPath();x.arc(eX+k,eY+82-(n===1?26:-18),5,0,6.3);x.fill()});
+ ['100','1k','10k'].forEach((f,k)=>valUnit(x,f,'Hz',eX+40+k*110,eY+154,rgba(t.inkD,.8),t.unitD,9.5));
+ valUnit(x,'+0.4','dB',eX+320,eY+14,t.overD,t.unitD,11,'right');
+ rr(x,null,EX+372,DY+70,110,26,6);x.setLineDash([4,3]);x.strokeStyle=t.line;x.lineWidth=1;x.stroke();x.setLineDash([]);txt(x,'+ Add effect',EX+427,DY+83,t.lab,11,500,'center');
+ // transport
+ const BY=DY+184;x.fillStyle=t.chrome;x.fillRect(0,BY,W,30);x.fillStyle=t.line;x.fillRect(0,BY,W,1);
+ txt(x,'1. 1. 1.  0',60,BY+15,t.ink,12,500,'left','"JetBrains Mono",monospace');
+ x.fillStyle=t.lab;x.fillRect(190,BY+9,10,12);x.fillStyle=t.ok;x.beginPath();x.moveTo(214,BY+8);x.lineTo(226,BY+15);x.lineTo(214,BY+22);x.fill();
+ x.fillStyle=t.rec;x.beginPath();x.arc(246,BY+15,6.5,0,6.3);x.fill();
+ valUnit(x,'145','BPM',290,BY+15,t.ink,t.unit,12);txt(x,'4/4',360,BY+15,t.ink,12,500);rr(x,t.panel2,392,BY+6,40,18,4);txt(x,'Tap',412,BY+15,t.lab,10.5,500,'center');
+ txt(x,'0:00:00.000',470,BY+15,t.ink,12,500,'left','"JetBrains Mono",monospace');
+ rr(x,rgba(t.accent,.16),1150,BY+4,150,22,5);txt(x,'Mixer',1162,BY+15,t.ink,11,600);valUnit(x,'-10.0','dB',1240,BY+15,t.ink,t.unit,11);
+ valUnit(x,'-8.9','LUFS',1330,BY+15,t.ink,t.unit,11);valUnit(x,'34','%',1430,BY+15,t.ink,t.unit,11);valUnit(x,'42','ms',1490,BY+15,t.ink,t.unit,11);
+ // map
+ x.fillStyle=t.bg;x.fillRect(0,BY+30,W,H-BY-30);txt(x,'Map',10,BY+42,t.ink,10.5,600);txt(x,'drag the box to move · pinch to zoom',40,BY+42,t.mut,10,500);
+ for(let i=0;i<8;i++){x.fillStyle=rgba(P[i],.7);x.fillRect(220,BY+38+i*1.6,1360,1)}x.strokeStyle=rgba(t.ink,.6);x.lineWidth=1;x.strokeRect(220.5,BY+36.5,700,14);
+ // context menu (overlay, solid panel)
+ const MX=1250,MY=120,MW=226,items=[['Cut','⌘X'],['Copy','⌘C'],['Duplicate','⌘D','hover'],['Paste','⌘V','dis'],['-'],['Colour','','sw'],['Split at playhead','S'],['-'],['Delete','⌫']];
+ const mh=items.reduce((a,i)=>a+(i[0]==='-'?9:i[2]==='sw'?30:24),10);
+ x.save();x.shadowColor='rgba(0,0,0,.35)';x.shadowBlur=18;x.shadowOffsetY=6;rr(x,t.panel2,MX,MY,MW,mh,10);x.restore();x.strokeStyle=t.line;x.lineWidth=1;rr(x,null,MX+.5,MY+.5,MW-1,mh-1,10);x.stroke();
+ let my=MY+5;items.forEach(([n,k,f])=>{if(n==='-'){x.fillStyle=t.line;x.fillRect(MX+8,my+4,MW-16,1);my+=9;return}
+  if(f==='sw'){txt(x,n,MX+12,my+10,t.ink,11.5,500);P.forEach((c,j)=>{rr(x,c,MX+70+j*18,my+3,14,14,3)});my+=30;return}
+  if(f==='hover')rr(x,t.accent,MX+4,my,MW-8,24,6);
+  const col=f==='hover'?t.onAccent:f==='dis'?t.dis:t.ink,kc=f==='hover'?t.onAccent:f==='dis'?t.dis:t.mut;
+  txt(x,n,MX+12,my+12,col,11.5,500);txt(x,k,MX+MW-12,my+12,kc,11,500,'right');my+=24});
+ // glass mixer: the backdrop softened, the theme's glass tint at its opacity, a hairline edge (the glass engine draws its own refraction)
+ const gx=14,gy=72,gw=880,gh=336,ga=o.glass==='half'?.5:o.glass==='solid'?1:t.glassA;
+ const off=document.createElement('canvas');off.width=Math.ceil(gw*s);off.height=Math.ceil(gh*s);const ox=off.getContext('2d');ox.filter=`blur(${10*s}px)`;ox.drawImage(cv,gx*s,gy*s,gw*s,gh*s,0,0,off.width,off.height);
+ x.save();x.shadowColor='rgba(0,0,0,.4)';x.shadowBlur=24;x.shadowOffsetY=8;rr(x,t.bg,gx,gy,gw,gh,12);x.restore();
+ x.save();rr(x,null,gx,gy,gw,gh,12);x.clip();x.drawImage(off,gx,gy,gw,gh);x.fillStyle=rgba(t.glass,ga);x.fillRect(gx,gy,gw,gh);x.restore();
+ x.strokeStyle=isL?'rgba(0,0,0,.14)':'rgba(255,255,255,.12)';x.lineWidth=1;rr(x,null,gx+.5,gy+.5,gw-1,gh-1,12);x.stroke();
+ const SW=78;for(let k=0;k<10;k++){const sx=gx+8+k*(SW+4),sy=gy+8,master=k===9,c=master?t.lab:P[k%8],nm=master?'Master':(['Kick & Bass','Kick','Bass','Drums','Clap','Snare','Hat','Open hat','Toms'][k]),sh=gh-16;
+  rr(x,rgba(t.strip,.62),sx,sy,SW,sh,7);x.fillStyle=c;x.fillRect(sx+6,sy,SW-12,2);
+  if(k===0){x.strokeStyle=rgba(t.sel,.7);x.lineWidth=1.5;rr(x,null,sx+.75,sy+.75,SW-1.5,sh-1.5,7);x.stroke()}
+  txt(x,master?'':String(k+1),sx+6,sy+14,t.mut,10,500);txt(x,nm.length>10?nm.slice(0,9)+'…':nm,sx+(master?6:16),sy+14,t.ink,10.5,600);
+  if(!master){rr(x,t.panel2,sx+5,sy+26,SW-10,15,3);x.fillStyle=t.ok;x.beginPath();x.arc(sx+12,sy+33.5,2.5,0,6.3);x.fill();txt(x,k%3?'Pro EQ':'Comp.',sx+19,sy+33.5,t.lab,10,500);
+   txt(x,'+ Add effect',sx+SW/2,sy+52,t.mut,10,500,'center');txt(x,'Sends',sx+6,sy+74,t.mut,10,500);rr(x,t.display,sx+5,sy+82,SW-10,24,3);}
+  else{rr(x,t.display,sx+5,sy+26,SW-10,80,4);valUnit(x,'-8.9','LUFS',sx+SW/2,sy+44,t.inkD,t.unitD,11,'center');valUnit(x,'+0.4','dB',sx+SW/2,sy+64,t.overD,t.unitD,10.5,'center');txt(x,'peak',sx+SW/2,sy+82,rgba(t.inkD,.7),9.5,500,'center')}
+  const my0=sy+118,mh2=150;rr(x,t.display,sx+8,my0,14,mh2,3);const lv=.35+.5*((k*37)%10)/10,g2=x.createLinearGradient(0,my0+mh2,0,my0);g2.addColorStop(0,t.m0);g2.addColorStop(.55,t.m1);g2.addColorStop(.85,t.m2);g2.addColorStop(1,t.m3);
+  x.fillStyle=g2;x.fillRect(sx+10,my0+mh2*(1-lv),4,mh2*lv-2);x.fillRect(sx+16,my0+mh2*(1-lv*.92),4,mh2*lv*.92-2);if(master){x.fillStyle=t.m3;x.fillRect(sx+10,my0+2,10,4)}
+  ['+6','0','-6','-12','-24','-40'].forEach((d,j)=>txt(x,d,sx+38,my0+8+j*27,t.mut,9.5,500,'right'));
+  x.fillStyle=t.line;x.fillRect(sx+56,my0+4,2,mh2-8);rr(x,t.ink,sx+46,my0+38,22,8,2);
+  valUnit(x,'-1.9','dB',sx+SW/2,my0+mh2+12,t.ink,t.unit,10.5,'center');
+  ['M','S','R'].forEach((b,j)=>{const on=k===2&&j===1,arm=k===4&&j===2,bx=sx+5+j*23;rr(x,on?t.accent:arm?t.rec:t.panel2,bx,my0+mh2+26,20,15,3);txt(x,b,bx+10,my0+mh2+33.5,on?t.onAccent:arm?bestInk(t,t.rec):t.lab,9.5,600,'center')});
+ }
+ txt(x,'Out: Kick, Bass → Kick & Bass',gx+12,gy+gh-10,t.lab,10,500);
+ if(o.label){rr(x,'rgba(0,0,0,.55)',W-210,H-40,200,30,6);txt(x,o.label,W-110,H-25,'#fff',13,600,'center')}
+}
+
+/* ---------- stage ---------- */
+let cur='A',vis='normal',gmode='theme',cmpOn=false;const cv=$('#cv');
+function sizeCv(c,w){const d=Math.min(2,window.devicePixelRatio||1);c.width=Math.round(w*d);c.height=Math.round(w*d*H/W)}
+function stage(){sizeCv(cv,Math.max(800,Math.min(1600,cv.clientWidth||1260)));const th=byId[cur];draw(cv,th,{glass:gmode});
+ if(cmpOn&&cur!=='A'){const o=document.createElement('canvas');o.width=cv.width;o.height=cv.height;draw(o,byId.A,{glass:gmode});const x=cv.getContext('2d');x.setTransform(1,0,0,1,0,0);const p=+$('#wipe').value/100*cv.width;x.drawImage(o,0,0,p,cv.height,0,0,p,cv.height);x.fillStyle='#fff';x.fillRect(p-1,0,2,cv.height)}
+ cv.style.filter=vis==='normal'?'none':`url(#cvd-${vis})`;
+ $('#stIcons').innerHTML=th.icons.map(i=>ICONS[i]?`<img src="${ICONS[i]}" alt="${i.replace(/-/g,' ')} icon" title="${i}">`:'').join('');
+ $('#stNote').innerHTML=`<span><b>${th.id} ${th.name}</b></span><span>${th.mode}</span><span>glass ${Math.round((gmode==='half'?.5:gmode==='solid'?1:th.t.glassA)*100)} %</span><span>clips ${Math.round(th.t.clipA*100)} % opaque</span><span>from ${th.refs}</span>`;
+ document.querySelectorAll('.thb').forEach(b=>b.classList.toggle('on',b.dataset.id===cur));document.querySelectorAll('.card').forEach(b=>b.classList.toggle('on',b.dataset.id===cur));
+ measure()}
+$('#throw').innerHTML=TH.map(t=>`<button class="thb" role="tab" data-id="${t.id}"><i style="background:linear-gradient(135deg,${t.t.lane0} 0 50%,${t.t.accent} 50% 70%,${t.t.sel} 70%)"></i>${t.id} ${t.name}${t.mode==='light'?' <small>light</small>':''}</button>`).join('');
+$('#throw').addEventListener('click',e=>{const b=e.target.closest('.thb');if(b){cur=b.dataset.id;stage()}});
+const segs=(id,fn)=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(b);stage()});
+segs('#vis',b=>vis=b.dataset.v);segs('#glass',b=>gmode=b.dataset.g);segs('#cmp',b=>{cmpOn=b.dataset.c==='1';$('#wipeRow').hidden=!cmpOn});
+$('#wipe').addEventListener('input',stage);
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(stage,150)});
+
+/* ---------- measurements of the current theme ---------- */
+const fmtLc=v=>v==null?'–':(v>0?'':'−')+Math.abs(v).toFixed(1);
+const lockMiss=th=>th.lock?'<span class="pill base">today, kept</span>':'<span class="pill bad">fails</span>';
+function measure(){const th=byId[cur],m=th.m;
+ $('#mEy').textContent=`Measured · ${th.id}`;$('#mH').textContent=`${th.name}: readability`;$('#mDesc').textContent=th.desc;
+ $('#mRules').innerHTML='<tr><th>Rule</th><th>What</th><th>Worst pair</th><th>On</th><th>WCAG</th><th>APCA Lc</th><th>Needs</th><th>Pairs</th><th></th></tr>'+m.rules.map(r=>{const w=r.worst,need=r.kind==='text'?`${r.thr.wc}:1 and Lc ${r.thr.lc}`:r.kind==='spot'?`Lc ${r.thr.lc}`:'3:1';
+  const smp=r.kind==='ui'?`<span class="sample" style="background:${w.bg}"><span class="sw" style="background:${w.fg};border:0;width:30px;height:10px"></span></span>`:`<span class="sample" style="background:${w.bg};color:${w.fg}">Aa 11 px</span>`;
+  return`<tr><td class="mono">${r.id}</td><td>${r.label}</td><td>${smp}</td><td class="mono sm">${w.surf==='@glass'?'glass':w.surf}</td><td>${w.wc.toFixed(2)}</td><td>${fmtLc(w.lc)}</td><td class="mut">${need}</td><td class="mut">${r.n}</td><td>${r.fails?lockMiss(th)+` <span class="mut">${r.fails}</span>`:'<span class="pill ok">pass</span>'}</td></tr>`}).join('');
+ $('#mCvd').innerHTML=['normal','protan','deutan','tritan'].map(v=>{const d=m.cvd[v].de;return`<span class="mono sm">${v}</span><span class="swrow">${th.pal.map(c=>`<i class="sw" style="background:${sim(c,v)}"></i>`).join('')}</span><span class="${d>=10?'ok':d>=6?'base':'bad'} mono">${d.toFixed(1)}</span>`}).join('');
+ $('#mDist').innerHTML='<tr><th>Pair</th><th></th><th>ΔE</th><th>Needs</th></tr>'+m.distinct.map(d=>`<tr><td>${d.a} / ${d.b}</td><td><i class="sw" style="background:${th.t[d.a]}"></i> <i class="sw" style="background:${th.t[d.b]}"></i></td><td class="${d.ok?'ok':'bad'}">${d.de}</td><td class="mut">${d.need}</td></tr>`).join('');
+ const fl=m.glass_floor;$('#mGlass').innerHTML=`<span>Glass tint</span><span><i class="sw" style="background:${th.t.glass}"></i> <code>${th.t.glass}</code></span><span>Floor</span><span>${fl==null?'none reaches every rule':Math.round(fl*100)+' %'}</span><span>Theme's glass</span><span>${Math.round(th.t.glassA*100)} %</span><span>Today (A)</span><span>50 % (Settings › Transparency)</span>`;
+ const f=th.fit||[];$('#mFit').innerHTML=th.lock?'<span class="mut">Locked: today\'s colours, nothing fitted.</span>':f.length?f.map(e=>e.tok==='track colours'?`<span>track colours: ${e.note}</span>`:`<span>${e.tok}: <i class="sw" style="background:${String(e.was).split(' ')[0]}"></i> ${e.was} → <i class="sw" style="background:${String(e.now).split(' ')[0]}"></i> ${e.now}${e.note?' <span class="mut">('+e.note+')</span>':''}</span>`).join(''):'<span class="mut">Nothing needed fitting.</span>';
+ $('#mClips').innerHTML=m.titles.map(c=>`<span class="sample" style="background:${c.body};color:${c.ink};min-width:74px" title="${c.wc}:1, Lc ${c.lc}">${c.wc.toFixed(1)} : 1</span>`).join('')}
+
+/* ---------- cards ---------- */
+const picked=new Set(['A','B','E','J']);
+$('#cards').innerHTML=TH.map(t=>{const fails=t.m.rules.filter(r=>r.fails).length;return`<div class="card" data-id="${t.id}"><canvas width="640" height="332" aria-label="${t.name} drawn small"></canvas><div class="cb">
+ <div class="hd"><span class="code">${t.id}</span><h3>${t.name}</h3><span class="stars" aria-label="${t.stars} of 5">${'★'.repeat(t.stars)}</span></div>
+ <p class="sm mut">${t.desc}</p><p class="sm"><span class="tag">${t.mode}</span> <span class="tag">${t.new?'new':'from your references'}</span> ${fails?`<span class="tag base">${fails} rules: today's own misses</span>`:'<span class="tag ok">every rule passes</span>'}</p>
+ <div class="ft">${t.icons.map(i=>ICONS[i]?`<img src="${ICONS[i]}" alt="" title="${i}">`:'').join('')}<span class="swrow">${t.pal.map(c=>`<i class="sw" style="background:${c}"></i>`).join('')}</span>
+ <label class="chk"><input type="checkbox" data-pick="${t.id}" ${picked.has(t.id)?'checked':''}> Pick</label></div></div></div>`}).join('');
+document.querySelectorAll('.card').forEach(c=>{draw(c.querySelector('canvas'),byId[c.dataset.id],{});c.querySelector('canvas').addEventListener('click',()=>{cur=c.dataset.id;stage();$('#stage').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})});
+$('#cards').addEventListener('change',e=>{const k=e.target.dataset.pick;if(!k)return;e.target.checked?picked.add(k):picked.delete(k);line()});
+
+/* ---------- combos, rules, research ---------- */
+$('#combo').innerHTML='<tr><th>Theme</th><th>Icons that follow it</th><th>Also combines with</th></tr>'+TH.map(t=>`<tr><td><b>${t.id}</b> ${t.name}</td><td>${t.icons.map(i=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:10px">${ICONS[i]?`<img src="${ICONS[i]}" alt="" style="width:22px;height:22px;border-radius:5px">`:''}<code>${i}</code></span>`).join('')}</td><td class="wrapc sm mut">${({A:'N Deep orbit (same icons, navy look)',B:'B2 as its dark half; J for an all-paper pair',E:'G Cutaway nucleus as its icon (your example), K Cyanotype as a softer blue',D:'science-fair icon on the chalkboard theme',G:'E Blueprint as the theme with this icon',J:'B Chart paper as its warmer sibling',H:'cutaway-nucleus icon also works on near-black',C:'three-rings for a darker, realistic icon'})[t.id]||''}</td></tr>`).join('');
+$('#rulesTbl').innerHTML='<tr><th>Rule</th><th>What</th><th>Measured on</th><th>Needs</th></tr>'+DATA.rules.map(r=>`<tr><td class="mono">${r.id}</td><td>${r.label}</td><td class="wrapc sm mut">${r.surfaces.map(s=>s==='@glass'?'glass over clips':s).join(', ')}</td><td>${r.kind==='text'?`WCAG ${r.thr.wc}:1 and APCA Lc ${r.thr.lc}`:r.kind==='spot'?`APCA Lc ${r.thr.lc}`:'WCAG 3:1'}</td></tr>`).join('')+
+ `<tr><td class="mono">D</td><td>Meaning colours apart</td><td class="wrapc sm mut">${DATA.distinct.map(d=>d[0]+'/'+d[1]).join(', ')}</td><td>CIEDE2000 10 to 15</td></tr><tr><td class="mono">C</td><td>Track colours, colour-vision safe</td><td class="wrapc sm mut">normal, protan, deutan, tritan (Machado 2009)</td><td>smallest ΔE ${DATA.cvd_floor}, target ${DATA.cvd_target}</td></tr>`;
+const RS=/*@RESEARCH@*/[];
+$('#research').innerHTML=RS.map(r=>`<div><h3>${r[0]}</h3><p class="sm">${r[1]}</p><p class="src">${r[2].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join(' · ')}</p></div>`).join('');
+
+/* ---------- picks ---------- */
+function line(){const ids=TH.map(t=>t.id).filter(i=>picked.has(i)),d=$('#pDef'),dv=d.value;d.innerHTML=ids.map(i=>`<option value="${i}">${i} ${byId[i].name}</option>`).join('');d.value=ids.includes(dv)?dv:(ids.includes('A')?'A':ids[0]||'');
+ $('#line').textContent=`Theme picks: ${ids.join(' ')||'none'} | default: ${d.value||'A'} | icons follow theme: ${$('#pIcon').value}`}
+$('#pDef').addEventListener('change',line);$('#pIcon').addEventListener('change',line);
+$('#copy').addEventListener('click',()=>{const s=$('#line').textContent,b=$('#copy'),ok=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1400)};
+ try{navigator.clipboard.writeText(s).then(ok,()=>{getSelection().selectAllChildren($('#line'))})}catch(e){getSelection().selectAllChildren($('#line'))}});
+line();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{stage();document.querySelectorAll('.card').forEach(c=>draw(c.querySelector('canvas'),byId[c.dataset.id],{}))});
+stage();
+</script>
