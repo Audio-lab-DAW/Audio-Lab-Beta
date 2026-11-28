@@ -40,7 +40,11 @@ wr('docs/backlog-log.md', s)
 # Where it stands
 s = rd('docs/device-backlog-2026-11-25.md')
 a = '- Task XT (extensions and the Workshop, lane H, one step per run): '
-assert s.count(a) == 1
-s = s.replace(a, a + '**Step XT-DL3 done**, v%s: the advanced settings list, the first visible part of the Workshop: its own window from the logo menu (Workshop…, marked Advanced, a first-use note on how to undo), every setting by a stable id (102 from Settings, 8 with no control in Settings, 4 locked; `docs/settings-ids.md`), search, filters, ↺ per row, what is kept; Undo\'s depth opened (`edit.undoSteps`). Next: DL4, safe mode. ' % V)
+h = re.search(r'\*\*Step DL3 built and tested, not yet released\*\*.*?the push\. ', s)
+if h:  # the held note of the freeze run gives way to the done note
+    s = s[:h.start()] + s[h.end():]; i = s.index(a)
+    s = s[:i] + '- Task XT (extensions and the Workshop, lane H, one step per run): ' + s[i + len(a):]
+assert s.count(a) >= 1
+s = s.replace(a, a + '**Step XT-DL3 done**, v%s: the advanced settings list, the first visible part of the Workshop: its own window from the logo menu (Workshop…, marked Advanced, a first-use note on how to undo), every setting by a stable id (102 from Settings, 8 with no control in Settings, 4 locked; `docs/settings-ids.md`), search, filters, ↺ per row, what is kept; Undo\'s depth opened (`edit.undoSteps`). Next: DL4, safe mode. ' % V, 1)
 wr('docs/device-backlog-2026-11-25.md', s)
 print('ok', V)
