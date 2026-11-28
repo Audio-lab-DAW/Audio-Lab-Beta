@@ -67,3 +67,4 @@ Stem split loading bar (v0.307): after Split the window stays open and shows the
 Stem split card (v0.309): Keep working sends a running split to a small card with a strip per stem, the time left, Open and Stop; when it ends the card says what was added, with Undo.
 Hi-Fi songs (v0.310): sounds made at another sample rate (built-in sounds, bounces, stems, exports at another rate) are now converted once with a cleaner method, so high notes no longer get a gritty mirror image or lose their top. Songs with Hi-Fi off sound exactly as before.
 Audio to MIDI (v0.311): Split into stems first shows the stems' spectrograms filling in while it splits, and each listen row then shows its stem's picture.
+In the next desktop app, notes from a MIDI keyboard go straight to the instrument of the track you play: they no longer wait while the app is busy drawing or loading (185 ms to 40 ms during a long pause in our test).

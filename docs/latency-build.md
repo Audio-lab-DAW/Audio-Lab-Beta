@@ -13,8 +13,8 @@ Written in step LT-0 (27 November 2026). `index.html`, `desktop/` and `native/` 
 | LT-0 | | | this plan | **done** (27 Nov) |
 | LT-1 | AE2-1 | L1, L2 | output check; playing buffer, Auto that comes back down | **done**, v0.289 (27 Nov): key to sound 41 to 22 ms median (armed Lead, idle); Play keeps the playing buffer (a restart costs 0.13 s) |
 | LT-2 | AE2-2 | L4 | the played track skips delay compensation; recorded notes on the compensated clock | **done**, v0.305 (27 Nov): the armed Lead's compensation 6 ms (52 ms with a resonance suppressor) to 0; recorded notes within 0.1 ms of what was heard (before +18 ms) |
-| LT-3a | AE2-3 | L5 | desktop: notes read outside the page, posted into the worklet (the path, one instrument kind) | next |
-| LT-3b | AE2-3 | L5 | desktop: every worklet instrument, drums, recording and the read-out; the Electron proof | |
+| LT-3a | AE2-3 | L5 | desktop: notes read outside the page, posted into the worklet (the path, one instrument kind) || **done**, v0.312 (28 Nov): note to sound during a 200 ms long task 185 to 40 ms (Electron, the armed Lead); needs a new desktop app |
+| LT-3b | AE2-3 | L5 | desktop: every worklet instrument, drums, recording and the read-out; the Electron proof | next |
 | LT-4 | AE2-5 | L8 | sleep idle tracks | |
 | LT-5a | RA1 | L9 | render ahead: the window renderer and playback as buffers | |
 | LT-5b | RA2 | L9 | render ahead: invalidation (edits, automation, tempo, arming) | |

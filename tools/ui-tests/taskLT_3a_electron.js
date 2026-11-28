@@ -49,9 +49,12 @@ const med = (a) => { const b = [...a].sort((x, y) => x - y); return b.length ? +
   const loud = await R('__pk()'); const rep = await R('JSON.stringify(LTF.rep[LTF.rep.length-1])');
   ok((await R('LTF.n')) === n0 + 1 && loud > 0.01 && quiet < 0.001, 'an injected note sounds on the Lead through the fast path', { quiet, loud, rep });
   /* the page gets the same note through its own Web MIDI: it does not start a second voice */
-  const sk0 = await R('LTF.skip'), pv0 = await R('PVN.n');
+  /* voices the page starts for this note (PVN.n counts every pooled voice in the page, so other playing would show there) */
+  await R("window.__P48=0;{const _p=pvPlay;window.__pvPlay0=_p;pvPlay=function(c,I,ch,p){if(p===48&&c===ctx)__P48++;return _p.apply(this,arguments)}};1");
+  const sk0 = await R('LTF.skip');
   await R("ctlMsg(__D,new Uint8Array([0x90,72,100]));1");
-  ok((await R('LTF.skip')) === sk0 + 1 && (await R('PVN.n')) === pv0 && (await R("LIVE.has('m72')")), 'the page shows and records the note but does not play it again', { skip: await R('LTF.skip') });
+  ok((await R('LTF.skip')) === sk0 + 1 && (await R('__P48')) === 0 && (await R("LIVE.has('m72')")), 'the page shows and records the note but does not play it again', { skip: await R('LTF.skip'), started: await R('__P48'), live: await R("JSON.stringify([...LIVE.keys()])") });
+  await R("pvPlay=window.__pvPlay0;1");
   await inject([0x80, 72, 0]); await R("ctlMsg(__D,new Uint8Array([0x80,72,0]));1"); await sleep(1500);
   ok((await R('__pk()')) < 0.002 && !(await R("LIVE.has('m72')")), 'note off lets the voice go', await R('__pk()'));
   /* controller messages are lane C's */
