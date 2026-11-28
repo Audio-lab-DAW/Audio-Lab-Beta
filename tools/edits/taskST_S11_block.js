@@ -104,7 +104,6 @@ const ST11={done:false,busy:0,q:Promise.resolve(),nt:0,tk:0,
   /* the table: the input moves to Audio, two new rows; old names stay search words */
   {const r=STX.get('inDev');if(r){r.l='Input device';r.pg='audio';r.b='Devices';r.h='The device armed audio tracks record from, in the setup in use. The Recording setup fills it automatically; you can change it here.';r.w=((r.w||'')+' record from input device role card recording setup inputs').trim()}}
   {const r=STX.get('outDev');if(r){r.b='Devices';r.w=((r.w||'')+' listen through role card listening setup dac').trim()}}
-  for(const r of ST11.ROWS)if(!STX.has(r.id)){const x=Object.assign({},r);STT.push(x);STX.set(x.id,x)}
   ST11.paint()},
  ROWS:[{"id":"setupNow","l":"Setup in use","pg":"audio","b":"Devices","sc":"app","k":"UI.st11.on","c":"#st11Seg","t":"cards","d":"listen","h":"Listening plays through the device you listen with; Recording records from your interface and plays where you hear yourself. Switching is instant.","w":"listening setup recording setup listen through record from role cards dac interface mode switch b2"},
   {"id":"armSwitch","l":"Switch to Recording when I arm","pg":"audio","b":"Devices","sc":"app","k":"UI.st11arm","c":"#st11Arm","t":"select","d":"audio","h":"Arming a track switches to the Recording setup by itself, with a short notice and a way back, and goes back to Listening when no such track is armed.","w":"arm armed automatic switch recording setup interface record enable"}],
@@ -134,6 +133,8 @@ const ST11={done:false,busy:0,q:Promise.resolve(),nt:0,tk:0,
   try{if(sw&&(sw.changedO||sw.changedI||!sw.ok))ST11.note('rec',sw);
    if(t&&!t.arm){const s=ST11.S();if(s.on==='rec'&&s.auto&&!(typeof REC==='object'&&REC.on)&&!S.tracks.some(q=>q.arm&&ST11.trig(q))){const r=await ST11.go('listen',{auto:true});if(r.changedO||r.changedI||!r.ok)ST11.note('listen',r)}}}catch(e){console.warn('listening setup (ST-S11)',e)}
   return x}}
+/* the two new rows join the table at once (search, reset, the Workshop's list), with their stable ids (task XT-DL3, docs/settings-ids.md) */
+try{for(const r of ST11.ROWS)if(!STX.has(r.id)){const x=Object.assign({},r);STT.push(x);STX.set(x.id,x)}if(typeof XT_SET_NS==='object'&&XT_SET_NS){XT_SET_NS.setupNow='audio.setupNow';XT_SET_NS.armSwitch='audio.armSwitch'}}catch(e){}
 try{ST11.S()}catch(e){}
 /* a Recording setup AudioLab chose by itself, left over from the last session with nothing armed now, goes back to Listening quietly */
 setTimeout(()=>{try{const s=ST11.S();if(s.on==='rec'&&s.auto&&!S.tracks.some(q=>q.arm&&ST11.trig(q)))ST11.go('listen',{auto:true})}catch(e){}},3000);

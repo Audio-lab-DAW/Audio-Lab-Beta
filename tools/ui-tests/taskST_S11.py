@@ -5,6 +5,7 @@ quiet notice and a way back, disarming the last one goes back; a known device sw
 setting (audio, any, never); device lists as Chromium reports them on macOS and on Windows (fake devices); an older profile loads and its
 input becomes the Recording input; search finds the rows by old and new names; dark and Light level; no console errors.
   python3 tools/ui-tests/taskST_S11.py [repo dir] [out dir]"""
+# for: task ST-S11 (lane B)
 import sys,os,mimetypes,json
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(OUT,exist_ok=True)
@@ -120,6 +121,7 @@ with sync_playwright() as p:
         ck(f'{L}: "an audio track" (recommended) leaves instruments alone',J(pg,"[UI.sink,UI.st11.on]")==['gry','listen']);R(pg,"armTrack(window.__k)")
         # table, reset, search
         R(pg,"(document.getElementById('st11Arm').value='off',document.getElementById('st11Arm').onchange())");ck(f'{L}: reset puts the arm setting back to the recommended one',R(pg,"SETT.reset('armSwitch')") and R(pg,"UI.st11arm")=='audio')
+        ck(f'{L}: the new rows have stable ids',J(pg,"[XT_SET_NS.setupNow,XT_SET_NS.armSwitch]")==['audio.setupNow','audio.armSwitch'])
         ck(f'{L}: Setup in use is a table row whose value reads from the switch',R(pg,"SETT.val('setupNow')")=='listen' and R(pg,"SETT.isDefault('setupNow')")==True)
         for q,want in (('listen through','Output device'),('record from','Record from'),('recording setup','Setup in use'),('arm','Switch to Recording when I arm'),('input device','Input device'),('microphone','Input device')):
             r=search(pg,q);ck(f'{L}: search "{q}" finds {want}',want in r,r)

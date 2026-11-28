@@ -26,4 +26,6 @@ new=("- Task ST (the settings rebuild, one step per run): **steps S1 to S11 done
  "switching is instant with a 25 ms and 30 ms ramp (answer 4); a setting for audio tracks, any track or never. Earlier steps: see the log entries "
  "'task ST-S1' to 'task ST-S10'. Next: S12 (the signal path read-out), then S13 (safe volume synced with the device's own volume).")%V
 wr('docs/device-backlog-2026-11-25.md',dv[:i]+new+dv[j:])
+ids=rd('docs/settings-ids.md');a2='| `audio.outCheck` | Check the output device | `outCheck` | 0.295 |\n';assert ids.count(a2)==1 and '`audio.setupNow`' not in ids
+wr('docs/settings-ids.md',ids.replace(a2,a2+'| `audio.setupNow` | Setup in use (Listening or Recording; task ST-S11) | `setupNow` | %s |\n| `audio.armSwitch` | Switch to Recording when I arm (task ST-S11) | `armSwitch` | %s |\n'%(V,V)))
 print('docs for v%s written'%V)
