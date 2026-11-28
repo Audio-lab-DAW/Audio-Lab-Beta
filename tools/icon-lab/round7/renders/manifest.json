@@ -1,0 +1,79 @@
+{
+ "big": [
+  {
+   "id": "G1",
+   "name": "Belts cut open",
+   "line": "Both belts cut open, the Moon passing",
+   "star": true,
+   "p8": true
+  },
+  {
+   "id": "G2",
+   "name": "Moon on its orbit",
+   "line": "The Moon circles the glass belts",
+   "star": false,
+   "p8": true
+  },
+  {
+   "id": "G3",
+   "name": "Magnetosphere",
+   "line": "Solar wind shapes the field, Moon behind",
+   "star": false,
+   "p8": false
+  },
+  {
+   "id": "G4",
+   "name": "Globe, two axes",
+   "line": "Rotation and magnetic axes, 9 degrees apart",
+   "star": true,
+   "p8": true
+  },
+  {
+   "id": "G5",
+   "name": "From above",
+   "line": "Seen from above: rings, slot and orbit",
+   "star": false,
+   "p8": true
+  },
+  {
+   "id": "G6",
+   "name": "Close-up",
+   "line": "Close on the Earth, the Moon beyond",
+   "star": false,
+   "p8": true
+  },
+  {
+   "id": "G7",
+   "name": "Half shell",
+   "line": "Belts cut in half, field lines shown",
+   "star": true,
+   "p8": true
+  }
+ ],
+ "small": [
+  {
+   "id": "S1",
+   "name": "Field loops",
+   "line": "Field loops reach for the Moon",
+   "star": true
+  },
+  {
+   "id": "S2",
+   "name": "Belt",
+   "line": "A belt between Earth and Moon",
+   "star": true
+  },
+  {
+   "id": "S3",
+   "name": "Orbit",
+   "line": "The orbit passes behind and in front",
+   "star": false
+  },
+  {
+   "id": "S4",
+   "name": "Two bodies",
+   "line": "Only Earth, Moon and glow",
+   "star": false
+  }
+ ]
+}

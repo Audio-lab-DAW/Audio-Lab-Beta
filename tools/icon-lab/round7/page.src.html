@@ -1,0 +1,258 @@
+<title>AudioLab app icon, round 7: the Earth, the Moon and the belts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One dark lab sheet, as rounds 1 to 6, with far less on it: a grid, a row of small icons, a picks bar.
+   Dark in both themes on purpose; the light desktops live inside the mock-ups. */
+:root{
+  --bg:#07080c; --panel:#0e1017; --panel2:#141722; --line:#232838; --fg:#e8ebf2; --ink2:#c9cfdc; --mute:#8a90a2; --dim:#6a7083;
+  --acc:#6096ff; --star:#ffc43c; --other:#4cc9f0; --small:#5fd39a;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 var(--sans);padding-block:24px 150px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+h1{font:700 21px/1.25 var(--sans);margin:0;text-wrap:balance}
+h2{font:600 15px/1.3 var(--sans);margin:0}
+p{margin:0}
+.top{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.lede{color:var(--mute);max-width:70ch;margin-top:6px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,.card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{border:0;background:var(--panel2);padding:6px 11px;font:600 11.5px var(--mono);color:var(--mute);display:flex;align-items:center;gap:6px}
+.seg button i{width:11px;height:11px;border-radius:50%;display:block;border:1px solid rgba(255,255,255,.25)}
+.seg button.on{background:#22283a;color:var(--fg)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:9px;min-width:0;cursor:zoom-in}
+.card.main{box-shadow:0 0 0 2px var(--star) inset} .card.other{box-shadow:0 0 0 2px var(--other) inset} .card.small{box-shadow:0 0 0 2px var(--small) inset}
+.card img.art{width:100%;height:auto;aspect-ratio:1;display:block;border-radius:10px}
+.hd{display:flex;align-items:baseline;gap:8px;min-width:0}
+.hd b{font:600 14px var(--mono)}
+.hd span{color:var(--ink2);min-width:0}
+.hd .st{margin-left:auto;color:var(--star);font-size:14px}
+.btns{display:flex;gap:6px}
+.pick{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 12px;font-size:12px}
+.pick.m.on{background:var(--star);color:#1a1300;border-color:var(--star);font-weight:600}
+.pick.o.on{background:var(--other);color:#001a22;border-color:var(--other);font-weight:600}
+.pick.s.on{background:var(--small);color:#00170b;border-color:var(--small);font-weight:600}
+
+/* the detail view */
+.ov{position:fixed;inset:0;z-index:20;background:rgba(4,5,8,.94);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
+.ov-in{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.ov-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ov-bar .hd{flex:1 1 200px;font-size:14px}
+.ov-bar .hd b{font-size:17px}
+.nav{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 12px;font-size:13px}
+.ov-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:20px;align-items:start}
+@media (max-width:900px){.ov-main{grid-template-columns:1fr}}
+.ov-main>*{min-width:0}
+.big{display:block;width:min(100%,1024px,calc(100vh - 120px));min-width:min(100%,320px);height:auto;aspect-ratio:1;border-radius:14px;margin:0 auto}
+.side{display:flex;flex-direction:column;gap:12px}
+.lab{font:600 11px var(--mono);color:var(--dim);letter-spacing:.06em;margin-bottom:5px}
+.sw{display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:16px 12px;border-radius:12px;border:1px solid var(--line)}
+.sw img{display:block}
+.on-d{background:#15161c} .on-l{background:#dde3ec}
+.wp-dark{background:linear-gradient(160deg,#26304f,#11131d 60%,#1a1426)} .wp-light{background:linear-gradient(160deg,#c9d9ee,#e9e2d4 60%,#d7c7c0)}
+.mk{border-radius:12px;overflow-x:auto;border:1px solid var(--line)}
+.dock{display:flex;justify-content:center;padding:18px 10px 8px;min-width:min-content}
+.dbar{display:flex;gap:4px;align-items:flex-end;padding:5px 6px 10px;border-radius:12px;position:relative}
+.dbar>*{display:block;position:relative;flex:none}
+.dbar .run::after{content:"";position:absolute;left:50%;bottom:-7px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
+.dk-d{color:#eee} .dk-d .dbar{background:rgba(60,62,74,.55);border:1px solid rgba(255,255,255,.14)}
+.dk-l{color:#222} .dk-l .dbar{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85)}
+
+/* small icons */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.scard{cursor:pointer}
+.ones{display:flex;gap:12px;align-items:flex-end;justify-content:center;padding:10px;border-radius:10px}
+.ones img{display:block}
+.mag{display:flex;gap:10px;align-items:flex-end;justify-content:center}
+.px{image-rendering:pixelated;display:block}
+.places{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.places>div{min-width:0}
+.finder{font:13px/1 -apple-system,"SF Pro Text",Inter,sans-serif}
+.finder .r{display:flex;align-items:center;gap:7px;padding:3px 12px;height:22px;white-space:nowrap}
+.finder .r i,.finder .r img{width:16px;height:16px;border-radius:3px;display:block;flex:none}
+.finder .r em{font-style:normal;margin-left:auto;font-size:11.5px;opacity:.6}
+.fd-d{background:#1e1e20;color:#e8e8ea} .fd-d .r:nth-child(odd){background:#262628} .fd-d .r.sel{background:#2b5fd9;color:#fff}
+.fd-l{background:#fff;color:#1d1d1f} .fd-l .r:nth-child(odd){background:#f4f5f7} .fd-l .r.sel{background:#d6e4ff}
+.tabbar{display:flex;align-items:flex-end;gap:0;height:38px;padding:6px 8px 0;font:12px -apple-system,Inter,sans-serif;white-space:nowrap}
+.tabbar .t{display:flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:9px 9px 0 0;min-width:130px}
+.tabbar .t img,.tabbar .t i{width:16px;height:16px;display:block;border-radius:3px;flex:none}
+.tabbar .t s{margin-left:auto;text-decoration:none;opacity:.5}
+.tb-d{background:#1d1e22;color:#b9bcc6} .tb-d .t.on{background:#35363b;color:#fff}
+.tb-l{background:#dee1e6;color:#555} .tb-l .t.on{background:#fff;color:#111}
+
+/* the picks bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(10,12,18,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 10px) max(16px,env(safe-area-inset-left,0px))}
+.bar-in{max-width:1360px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.line{flex:1 1 260px;min-width:0;font:600 13px var(--mono);background:#05060a;border:1px solid var(--line);border-radius:8px;padding:8px 11px;user-select:all;overflow-wrap:anywhere}
+.copy{border:0;background:var(--acc);color:#04102e;font-weight:700;border-radius:8px;padding:8px 16px}
+.hint{color:var(--mute);font-size:12px;flex:1 1 100%}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>AudioLab app icon, round 7: the Earth, the Moon and the belts</h1>
+      <p class="lede">Seven new shapes in real 3D, four small icons. Click a design to see it large and in the Dock.<br>Choose Main, Other and a small icon, then paste the line at the bottom. ★ marks my picks.</p>
+    </div>
+    <div class="seg" id="pal" role="group" aria-label="Palette">
+      <button id="palP2" class="on"><i style="background:#132044"></i>P2 Orbit night</button>
+      <button id="palP8"><i style="background:#F7F3EA"></i>P8 Chart paper</button>
+    </div>
+  </header>
+
+  <section>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>Small icons (16 to 32 px)</h2>
+    <div class="sgrid" id="sgrid"></div>
+    <div class="places">
+      <div><p class="lab">FINDER LIST</p><div class="mk finder fd-d" id="fdD"></div></div>
+      <div><p class="lab">&nbsp;</p><div class="mk finder fd-l" id="fdL"></div></div>
+      <div><p class="lab">BROWSER TAB</p><div class="mk tabbar tb-d" id="tbD"></div><div class="mk tabbar tb-l" id="tbL" style="margin-top:8px"></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="ov-in">
+    <div class="ov-bar">
+      <button class="nav" id="ovPrev" aria-label="Previous design">←</button>
+      <button class="nav" id="ovNext" aria-label="Next design">→</button>
+      <div class="hd" id="ovHd"></div>
+      <button class="pick m" id="ovMain">Main</button>
+      <button class="pick o" id="ovOther">Other</button>
+      <button class="nav" id="ovClose">Close</button>
+    </div>
+    <div class="ov-main">
+      <img class="big" id="ovBig" alt="">
+      <div class="side">
+        <div><p class="lab">128 AND 64 PX</p><div class="sw on-d" id="swD"></div></div>
+        <div><div class="sw on-l" id="swL"></div></div>
+        <div><p class="lab">SMALL DOCK</p><div class="mk wp-dark"><div class="dock dk-d" id="dkD"></div></div></div>
+        <div><div class="mk wp-light"><div class="dock dk-l" id="dkL"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="line" id="line"></div>
+    <button class="copy" id="copy">Copy</button>
+  </div>
+</div>
+
+<script>
+var IMG=/*IMG*/{};
+var MAN=/*MAN*/{};
+var $=function(i){return document.getElementById(i)};
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+var S={pal:'P2',main:MAN.rec.main,other:MAN.rec.other,small:MAN.rec.small,open:null};
+try{var sv=JSON.parse(localStorage.getItem('ic11')||'null');if(sv){['pal','main','other','small'].forEach(function(k){if(sv[k]!==undefined)S[k]=sv[k]})}}catch(e){}
+function save(){try{localStorage.setItem('ic11',JSON.stringify({pal:S.pal,main:S.main,other:S.other,small:S.small}))}catch(e){}}
+function D(id){return MAN.big.filter(function(d){return d.id===id})[0]}
+function palOf(id){var d=D(id);return (S.pal==='P8'&&d&&d.p8)?'P8':'P2'}
+function big(id,k){return IMG[id+'-'+palOf(id)+'-'+k]}
+function sm(id,pt,sc,mac){return IMG[id+'-'+S.pal+'-'+pt+'@'+sc+'x'+(mac?'-mac':'')]}
+
+/* stand-in app icons for the Dock and file icons (invented, not real apps) */
+var STAND=[
+ '<rect width="100" height="100" rx="23" fill="#3D8BF2"/><path d="M20 30h24l5 6h31v38H20z" fill="#E8F2FF"/><path d="M20 42h60v32H20z" fill="#BFDBFF"/>',
+ '<rect width="100" height="100" rx="23" fill="#FFFDF5"/><path d="M0 23A23 23 0 0 1 23 0h54a23 23 0 0 1 23 23v2H0z" fill="#F6C944"/><path d="M16 40h68M16 52h68M16 64h68M16 76h48" stroke="#C9C2AE" stroke-width="2"/>',
+ '<rect width="100" height="100" rx="23" fill="#202124"/><path d="M22 36l15 13-15 13" stroke="#E9E9E9" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M43 66h23" stroke="#E9E9E9" stroke-width="5" stroke-linecap="round"/>',
+ '<rect width="100" height="100" rx="23" fill="#F0435F"/><circle cx="40" cy="67" r="10" fill="#fff"/><path d="M48 67V27l26-7v34" stroke="#fff" stroke-width="5" fill="none"/><circle cx="66" cy="56" r="9" fill="#fff"/>',
+ '<rect width="100" height="100" rx="23" fill="#8E929B"/><circle cx="50" cy="50" r="24" fill="#E7E8EA"/><circle cx="50" cy="50" r="11" fill="#8E929B"/>',
+ '<rect width="100" height="100" rx="23" fill="#2A9BF6"/><rect x="18" y="29" width="64" height="43" rx="4" fill="#fff"/><path d="M19 31l31 24 31-24" stroke="#2A9BF6" stroke-width="3" fill="none"/>'
+];
+function stand(i,px){return '<svg width="'+px+'" height="'+px+'" viewBox="-12 -12 124 124" aria-hidden="true">'+STAND[i%STAND.length]+'</svg>'}
+function dock(host,id){
+  host.innerHTML='';var bar=el('div','dbar');
+  for(var i=0;i<7;i++){
+    if(i===3){var s=el('span','run');var im=el('img');im.src=big(id,'mac-32');im.srcset=big(id,'mac-32')+' 1x, '+big(id,'mac-64')+' 2x';im.width=32;im.height=32;im.alt='AudioLab';im.style.display='block';s.appendChild(im);bar.appendChild(s)}
+    else bar.appendChild(el('span','',stand(i>3?i-1:i,32)));
+  }
+  host.appendChild(bar);
+}
+function setRole(role,id){
+  if(role==='main'){if(S.other===id)S.other=S.main;S.main=id}
+  else if(role==='other'){if(S.main===id)S.main=S.other;S.other=id}
+  else S.small=id;
+  save();draw();
+}
+function pickBtn(cls,label,on,fn){var b=el('button','pick '+cls+(on?' on':''),label);b.setAttribute('aria-pressed',on?'true':'false');b.onclick=function(e){e.stopPropagation();fn()};return b}
+
+function draw(){
+  $('palP2').className=S.pal==='P2'?'on':'';$('palP8').className=S.pal==='P8'?'on':'';
+  var g=$('grid');g.innerHTML='';
+  MAN.big.forEach(function(d){
+    var c=el('div','card'+(S.main===d.id?' main':S.other===d.id?' other':''));c.tabIndex=0;c.setAttribute('role','button');c.setAttribute('aria-label','Open '+d.id+', '+d.name);
+    var im=el('img','art');im.src=big(d.id,'512');im.alt=d.id+' '+d.name;im.width=512;im.height=512;im.loading='lazy';c.appendChild(im);
+    c.appendChild(el('div','hd','<b>'+d.id+'</b><span>'+d.line+'</span>'+(d.star?'<span class="st" title="Recommended">★</span>':'')));
+    var b=el('div','btns');
+    b.appendChild(pickBtn('m','Main',S.main===d.id,function(){setRole('main',d.id)}));
+    b.appendChild(pickBtn('o','Other',S.other===d.id,function(){setRole('other',d.id)}));
+    c.appendChild(b);
+    c.onclick=function(){openD(d.id)};c.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openD(d.id)}};
+    g.appendChild(c);
+  });
+  var sg=$('sgrid');sg.innerHTML='';
+  MAN.small.forEach(function(d){
+    var c=el('div','card scard'+(S.small===d.id?' small':''));
+    var mg=el('div','mag');
+    [[32,2,3],[16,2,4]].forEach(function(a){var im=el('img','px');im.src=sm(d.id,a[0],a[1]);im.width=a[0]*a[1]*a[2]/ (a[0]===16?1:1);im.height=im.width;im.alt='';mg.appendChild(im)});
+    c.appendChild(mg);
+    ['on-d','on-l'].forEach(function(k){var o=el('div','ones '+k);[16,20,24,32].forEach(function(pt){var im=el('img');im.src=sm(d.id,pt,1);im.srcset=sm(d.id,pt,1)+' 1x, '+sm(d.id,pt,2)+' 2x';im.width=pt;im.height=pt;im.alt=d.id+' at '+pt+' px';o.appendChild(im)});c.appendChild(o)});
+    c.appendChild(el('div','hd','<b>'+d.id+'</b><span>'+d.line+'</span>'+(d.star?'<span class="st" title="Recommended">★</span>':'')));
+    var b=el('div','btns');b.appendChild(pickBtn('s','Small',S.small===d.id,function(){setRole('small',d.id)}));c.appendChild(b);
+    c.onclick=function(){setRole('small',d.id)};
+    sg.appendChild(c);
+  });
+  // the real places, with the chosen small icon
+  var rows=[['Drums take 3.wav','2.1 MB',4],['AudioLab','App',-1],['Mix notes.txt','4 KB',1],['Session 12','Folder',0]];
+  [$('fdD'),$('fdL')].forEach(function(h){h.innerHTML='';rows.forEach(function(r){
+    var row=el('div','r'+(r[2]<0?' sel':''));
+    if(r[2]<0){var im=el('img');im.src=sm(S.small,16,1,true);im.srcset=sm(S.small,16,1,true)+' 1x, '+sm(S.small,16,2,true)+' 2x';im.alt='';row.appendChild(im)}
+    else row.appendChild(el('i','',stand(r[2],16)));
+    row.appendChild(el('span','',r[0]));row.appendChild(el('em','',r[1]));h.appendChild(row)})});
+  [$('tbD'),$('tbL')].forEach(function(h){h.innerHTML='';
+    var t=el('div','t on');var im=el('img');im.src=sm(S.small,16,1);im.srcset=sm(S.small,16,1)+' 1x, '+sm(S.small,16,2)+' 2x';im.alt='';t.appendChild(im);t.appendChild(el('span','','AudioLab'));t.appendChild(el('s','','×'));h.appendChild(t);
+    var t2=el('div','t');t2.appendChild(el('i','',stand(5,16)));t2.appendChild(el('span','','Inbox'));h.appendChild(t2)});
+  // the line
+  var p=S.pal==='P8';
+  function nm(id){return id+(p&&D(id).p8?' P8':'')}
+  $('line').textContent='Round 7 picks: main '+nm(S.main)+' | other '+nm(S.other)+' | small '+S.small+(p?' P8':'');
+  if(S.open)fill(S.open);
+}
+function fill(id){
+  var d=D(id);
+  $('ovHd').innerHTML='<b>'+d.id+'</b><span>'+d.name+'. '+d.line+'</span>'+(d.star?'<span class="st">★</span>':'');
+  var b=$('ovBig');b.src=big(id,'1024');b.alt=d.id+' '+d.name+' at 1024 px';
+  [$('swD'),$('swL')].forEach(function(h){h.innerHTML='';[128,64].forEach(function(px){var im=el('img');im.src=big(id,''+px);im.width=px;im.height=px;im.alt=d.id+' at '+px+' px';h.appendChild(im)})});
+  dock($('dkD'),id);dock($('dkL'),id);
+  $('ovMain').className='pick m'+(S.main===id?' on':'');$('ovOther').className='pick o'+(S.other===id?' on':'');
+}
+function openD(id){S.open=id;$('ov').hidden=false;document.body.style.overflow='hidden';fill(id);$('ov').scrollTop=0;$('ovClose').focus()}
+function closeD(){S.open=null;$('ov').hidden=true;document.body.style.overflow=''}
+function step(n){var ids=MAN.big.map(function(d){return d.id});var i=(ids.indexOf(S.open)+n+ids.length)%ids.length;S.open=ids[i];fill(S.open)}
+$('ovClose').onclick=closeD;$('ovPrev').onclick=function(){step(-1)};$('ovNext').onclick=function(){step(1)};
+$('ovMain').onclick=function(){setRole('main',S.open)};$('ovOther').onclick=function(){setRole('other',S.open)};
+$('ov').onclick=function(e){if(e.target===$('ov'))closeD()};
+document.addEventListener('keydown',function(e){if(!S.open)return;if(e.key==='Escape')closeD();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+$('palP2').onclick=function(){S.pal='P2';save();draw()};$('palP8').onclick=function(){S.pal='P8';save();draw()};
+$('copy').onclick=function(){
+  var t=$('line').textContent,b=$('copy');
+  function done(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)}
+  function sel(){var r=document.createRange();r.selectNodeContents($('line'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected';setTimeout(function(){b.textContent='Copy'},1800)}
+  try{navigator.clipboard.writeText(t).then(done,sel)}catch(e){sel()}
+};
+draw();
+</script>
