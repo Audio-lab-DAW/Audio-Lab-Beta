@@ -9,7 +9,7 @@ Source: the user's UX1 picks (27 Nov 2026, 22:02 Brussels), `docs/research-ux-sp
 | Step | Picks | Contents | Status |
 |---|---|---|---|
 | UV-1 | S9, S13, E19 | Direct trackpad: a pinch and a trackpad scroll with a zoom key applied in the frame they arrive in; only notched mouse wheels eased, tau 15 ms (was 40); Speed and Anchor kept. Zoom without page layout: the header keeps its layout during a zoom, rows moved by transforms (each row its own layer), clip pictures scaled from their cache; laid out and drawn once at rest. Calmer Follow page turns. Frame test pinch against scroll. | built and tested, held by the release freeze |
-| UV-2 | S14 | Tiled arrangement: the arrangement picture kept in tiles (track rows by a fixed time span); scrolling draws only the new strip, an edit only the touched tiles; the glass engine reads the tiles (see `docs/glass-engine-plan.md` §3.11, the GS3 strip-shift experiment). The tiles cache what lane A's drawers draw and never change it: a version counter (`UV_HOOKS.bump()` for lane A, plus a signature of the drawing inputs) drops old tiles on any drawing change. Pixel test at rest against the untiled drawing; frame tables for scroll, pinch and an edit while scrolled. | claimed 28 Nov 09:20 UTC |
+| UV-2 | S14 | (a) Tiled arrangement, (b) the glass engine reads the tiles. Tiled arrangement: the arrangement picture kept in tiles (track rows by a fixed time span); scrolling draws only the new strip, an edit only the touched tiles; the glass engine reads the tiles (see `docs/glass-engine-plan.md` §3.11, the GS3 strip-shift experiment). The tiles cache what lane A's drawers draw and never change it: a version counter (`UV_HOOKS.bump()` for lane A, plus a signature of the drawing inputs) drops old tiles on any drawing change. Pixel test at rest against the untiled drawing; frame tables for scroll, pinch and an edit while scrolled. | claimed 28 Nov 09:20 UTC |
 | UV-3 | S10, S11 | Grab and fling with the middle button and on the overview (0.998 per ms glide, rubber band at the ends, stopped by any touch, none with reduced motion); coalesced points (`getCoalescedEvents`) for freehand drawing (automation pencil, piano roll paint); a predicted point (`getPredictedEvents`) for drag ghosts only (never for the committed result). After UV-3: "view engine complete". | |
 
 ## UV-1: what changed in the code
@@ -24,6 +24,19 @@ Source: the user's UX1 picks (27 Nov 2026, 22:02 Brussels), `docs/research-ux-sp
 - Clip pictures during the hold: `drawClipC` is wrapped (lane A's function is not edited): during the hold a clip whose cached picture exists is drawn from that picture scaled to its new size; outside the hold the original runs and the wrapper notes the size its picture was made at. At rest lane A's code draws every picture again at the final zoom.
 - E19: Follow "Page" turns when the playhead reaches 90 % of the view (was 95 %) and moves the view by 80 %, so the last fifth of the old page stays in view and the playhead lands at 10 % (`uvPageTurn`); a playhead outside the view still lands at 5 %. No turn while a pointer edit is held in the arrangement or the piano roll (`uvEditing`); the turn comes when it is let go. The other Follow ways are unchanged.
 - Hook: `UV_HOOKS.holding()` is true while a zoom holds the header (for other lanes' header code that wants to skip work during a pinch).
+
+## UV-2 part a: what changed in the code
+
+- `drawArr` is wrapped (lane A's code is not edited). `uvPrep` runs before it: it lays out what drawArr lays out (X0, AY, the rows), takes a signature of everything that decides the whole picture (`uvSig`: sizes, zoom, rows, tracks, loop, selection range, sections, settings and look, drags, recording, `UV.ver`) and of every clip that can be on screen (`uvClips`: lane A's `clipSig`, selected, hovered, place). Same signature and the view moved: **shift** (the kept copy `UVT.bb` is drawn moved by whole device pixels, a clip region holds the new strip and the bands that do not scroll, `uvR` rectangles). Same signature, view still, clips changed: **edit** (their old and new boxes and their group lane bars). Anything else: **full**.
+- The kept picture's own view (`UVT.base.vx/vy`) moves by whole pixels, so rounding never accumulates; the strips are drawn at the true view, under half a device pixel apart while moving.
+- `arrSnap` is wrapped to lift the clip region before lane A's snapshot; `snapTo` of the canvas by anyone else and `CLC.clear` (clip pictures thrown away) drop the kept picture.
+- 90 ms (`UV.rest`) after the last tiled frame one full drawing: at rest pixel for pixel the untiled drawing.
+- On: `UVT.on='auto'`: edits everywhere, scroll tiles only with a graphics card (`uvGpu`); `true`/`false` force.
+- Hooks: `UV_HOOKS.bump()` (lane A), `UV_HOOKS.tiles()` (glass engine, part b).
+
+## UV-2 part b (next)
+
+The glass engine (`upload()` in the engine) reduces the whole arrangement canvas to its first pyramid level every time the arrangement changed. With `UV_HOOKS.tiles()` it can move its small copy by dx/dy and reduce only the painted rectangles.
 
 ## Measurements
 

@@ -125,7 +125,7 @@ function uvUnclip(){if(UVT.clip){UVT.clip=0;arr.getContext('2d').restore()}}
 {const _uvSnap=arrSnap;arrSnap=function(){uvUnclip();UVT.insnap=1;try{return _uvSnap.apply(this,arguments)}finally{UVT.insnap=0}}}
 {const _uvSnapTo=snapTo;snapTo=function(cv,cache){if(cv===arr&&!UVT.insnap)UVT.base=null;/* someone else kept a copy (it may hold the playhead) */return _uvSnapTo.apply(this,arguments)}}
 {const _uvDa=drawArr;drawArr=function(phOnly){if(phOnly){/* only the playhead: its own layer leaves the canvas alone; anything else drew the canvas again */const f0=typeof PHL==='object'?PHL.n.fast:-1,r=_uvDa.apply(this,arguments);if(typeof PHL!=='object'||PHL.n.fast===f0)UVT.base=null;return r}
-  if(!UVT.on||UVT.bad){UVT.base=null;UVT.bbOk='';UVT.last={mode:'full',dx:0,dy:0,rects:null};UVT.n.full++;return _uvDa.apply(this,arguments)}/* off: lane A's drawing as it was, nothing added */
+  if(!UVT.on||UVT.bad){UVT.base=null;UVT.bbOk='';UVT.why='off';UVT.last={mode:'full',dx:0,dy:0,rects:null};UVT.n.full++;return _uvDa.apply(this,arguments)}/* off: lane A's drawing as it was, nothing added */
   let p=null;try{p=uvPrep()}catch(e){p=null;UVT.bad=1;console.warn('AudioLab UV-2: tiles off',e)}
   const W=arr.width,H=arr.height;let r;
   try{r=_uvDa.apply(this,arguments)}finally{if(UVT.clip){uvUnclip();UVT.base=null;dirty=true}}
