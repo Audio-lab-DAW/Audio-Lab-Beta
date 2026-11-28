@@ -6703,7 +6703,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.296',BUILD='27 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.297',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -27794,27 +27794,47 @@ const FTVS={NB:192,url:null,
   TIP:{cyc:'How long one cycle of the curve is. The cycles start on the bar lines of the song.',snap:'Where points land when you drag them sideways: on 16ths or 32nds of the song, or anywhere.'}};
 const ftVsBeats=p=>{const c=FTVS.CYC.find(q=>q[0]===String(p&&p.cyc));return c?c[2]:1};
 /* the worklet: gain from the song's beat, for every sample */
-const FTVS_WL=`/* ===== AudioLab volume shaper (task FT-F16a) ===== */
+const FTVS_WL=`/* ===== AudioLab volume shaper (tasks FT-F16a and FT-F16b) ===== */
 (()=>{const NB=${FTVS.NB};
 function sOf(T,b){if(T.length<2||b<=0)return b*60/T[0].bpm;let lo=0,hi=T.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(T[m].b<=b)lo=m;else hi=m-1}const p=T[lo],n=T[lo+1],d=b-p.b;if(!n||!p.ramp)return p.s+d*60/p.bpm;const k=(n.bpm-p.bpm)/(n.b-p.b);return Math.abs(k)<1e-9?p.s+d*60/p.bpm:p.s+60/k*Math.log((p.bpm+k*d)/p.bpm)}
 function bOf(T,s){if(T.length<2||s<=0)return s*T[0].bpm/60;let lo=0,hi=T.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(T[m].s<=s)lo=m;else hi=m-1}const p=T[lo],n=T[lo+1],d=s-p.s;if(!n||!p.ramp)return p.b+d*p.bpm/60;const k=(n.bpm-p.bpm)/(n.b-p.b);return Math.abs(k)<1e-9?p.b+d*p.bpm/60:p.b+p.bpm*(Math.exp(k*d/60)-1)/k}
+function bpmAt(T,b){if(T.length<2)return T[0].bpm;let lo=0,hi=T.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(T[m].b<=b)lo=m;else hi=m-1}const p=T[lo],n=T[lo+1];if(!n||!p.ramp)return p.bpm;return p.bpm+(n.bpm-p.bpm)*Math.max(0,Math.min(1,(b-p.b)/(n.b-p.b)))}
 function ev(P,x,sm){let i=0;while(i<P.length-2&&P[i+1].x<=x)i++;const a=P[i],b=P[Math.min(P.length-1,i+1)],dx=Math.max(1e-6,b.x-a.x);let t=(x-a.x)/dx;t=t<0?0:t>1?1:t;if(sm)t=(1-Math.cos(Math.PI*t))/2;const c=a.c||0;t=c>=0?Math.pow(t,1+c*3):1-Math.pow(1-t,1-c*3);return a.y+(b.y-a.y)*t}
+/* FT-F16b: RBJ biquads; a Linkwitz-Riley crossover is two Butterworth stages, its low and high add up to a 2nd-order all-pass */
+function bq(k,f,sr){const w=2*Math.PI*Math.min(f,sr*.45)/sr,cs=Math.cos(w),al=Math.sin(w)/(2*Math.SQRT1_2);let b0,b1,b2;
+ if(k===0){b0=(1-cs)/2;b1=1-cs;b2=b0}else if(k===1){b0=(1+cs)/2;b1=-(1+cs);b2=b0}else{b0=1-al;b1=-2*cs;b2=1+al}const a0=1+al;return[b0/a0,b1/a0,b2/a0,-2*cs/a0,(1-al)/a0]}
 class FtVs extends AudioWorkletProcessor{
- constructor(o){super();const po=(o&&o.processorOptions)||{};this.p=null;this.T=[{b:0,s:0,bpm:120,ramp:0}];this.A=[{t:0,b:0,s:0}];this.g=-1;this.bi=new Float32Array(NB);this.bo=new Float32Array(NB);this.lb=-1;this.loud=0;this.left=0;
+ constructor(o){super();const po=(o&&o.processorOptions)||{};this.p=null;this.T=[{b:0,s:0,bpm:120,ramp:0}];this.A=[{t:0,b:0,s:0,on:1}];this.on=1;this.g=-1;this.bi=new Float32Array(NB);this.bo=new Float32Array(NB);this.lb=-1;this.loud=0;this.left=0;
+  this.tb=[];this.ti=-1;this.lt=-1;this.es=Infinity;this.pk=0;this.arm=1;this.kl=0;this.trg=0;this.C=null;this.st=new Float64Array(36);
   this.apply(po);for(const m of(po.q||[]))this.apply(m);this.port.onmessage=e=>this.apply(e.data)}
- apply(d){if(!d)return;if(d.tm&&d.tm.length)this.T=d.tm;if(d.p){this.p=d.p}
-  if(d.a){const a=d.a;this.A=this.A.filter(x=>x.t<a.t);this.A.push({t:a.t,b:a.b,s:sOf(this.T,a.b)})}
+ apply(d){if(!d)return;if(d.tm&&d.tm.length)this.T=d.tm;if(d.p){const o=this.p;this.p=d.p;if(!o||o.bn!==d.p.bn||o.f1!==d.p.f1||o.f2!==d.p.f2){const sr=sampleRate,f1=d.p.f1||150,f2=d.p.f2||2500;this.C=[bq(0,f1,sr),bq(1,f1,sr),bq(0,f2,sr),bq(1,f2,sr),bq(2,f2,sr)];this.st.fill(0)}}
+  if(d.tb){this.tb=d.tb;this.ti=-1}if(typeof d.lt==='number')this.lt=d.lt;if(typeof d.on==='number'){this.on=d.on;if(!d.on){const t=currentTime;this.A=this.A.filter((x,i)=>!i||x.t<=t);while(this.A.length>1&&this.A[1].t<=t)this.A.shift()}}
+  if(d.a){const a=d.a;this.A=this.A.filter(x=>x.t<a.t);this.A.push({t:a.t,b:a.b,s:sOf(this.T,a.b),on:a.on==null?1:a.on})}
   if(d.tm)for(const a of this.A)a.s=sOf(this.T,a.b)}
+ /* one biquad, transposed direct form II; st holds two values per filter and channel */
+ f(c,o,x){const s=this.st,y=c[0]*x+s[o];s[o]=c[1]*x-c[3]*y+s[o+1];s[o+1]=c[2]*x-c[4]*y;return y}
+ split(x,ch,g,bs,bn){const C=this.C,o=ch*18;let lo=this.f(C[0],o,this.f(C[0],o+2,x)),hi=this.f(C[1],o+4,this.f(C[1],o+6,x));
+  if(bn<3)return lo*(bs[0]?g:1)+hi*(bs[1]?g:1);
+  const md=this.f(C[2],o+8,this.f(C[2],o+10,hi)),hh=this.f(C[3],o+12,this.f(C[3],o+14,hi));lo=this.f(C[4],o+16,lo);return lo*(bs[0]?g:1)+md*(bs[1]?g:1)+hh*(bs[2]?g:1)}
  process(ins,outs){const I=ins[0]||[],O=outs[0],n=O[0].length,p=this.p;const i0=I[0],i1=I[1]||I[0];
   if(!p||!p.pts||p.pts.length<2){for(let c=0;c<O.length;c++){const s=c?i1:i0;if(s)O[c].set(s);else O[c].fill(0)}return true}
   const sr=sampleRate,F=currentFrame,T=this.T,A=this.A,P=p.pts,cy=p.cb,ph=p.ph||0,d=p.d,sm=!!p.sm,k=p.k,flat=T.length<2,bins=this.bi,bout=this.bo,o0=O[0],o1=O[1]||null;let g=this.g,lb=this.lb,loud=0,x=0;
-  for(let i=0;i<n;i++){const tt=(F+i)/sr;while(A.length>1&&A[1].t<=tt)A.shift();const a=A[0];
-   const beat=flat?a.b+(tt-a.t)*T[0].bpm/60:bOf(T,a.s+(tt-a.t));let q=beat/cy+ph;q-=Math.floor(q);x=q;
-   const v=ev(P,q,sm),tg=1-d+d*v;if(g<0||k>=1)g=tg;else g+=(tg-g)*k;
-   const l=i0?i0[i]:0,r=i1?i1[i]:0;o0[i]=l*g;if(o1)o1[i]=r*g;
-   const bb=Math.floor(q*NB);if(bb!==lb){lb=bb;bins[bb]=0;bout[bb]=0}const m=Math.max(l<0?-l:l,r<0?-r:r);if(m>bins[bb])bins[bb]=m;const mo=m*g;if(mo>bout[bb])bout[bb]=mo;if(m>1e-5)loud=1}
-  this.g=g;this.lb=lb;if(loud)this.loud=1;this.left-=n;
-  if(this.left<=0){this.left=Math.round(sr/20);if(this.loud){this.loud=0;this.port.postMessage({bi:bins.slice(),bo:bout.slice(),x})}}
+  const tg=p.tg|0,bn=p.bn|0,bs=p.bs||[1,1,1],sh=bn>1&&!p.all,K=ins[1]||[],k0=K[0],k1=K[1]||K[0],TB=this.tb,nT=TB.length;let ti=this.ti,es=this.es,pk=this.pk,arm=this.arm,kl=this.kl,trg=0;
+  const th=p.th||.063,pkR=Math.exp(-1/(.04*sr)),gap=Math.round(.06*sr),lt=this.lt;let bpm=0;
+  for(let i=0;i<n;i++){const tt=(F+i)/sr;while(A.length>1&&A[1].t<=tt){A.shift();this.on=A[0].on}const a=A[0];
+   const beat=flat?a.b+(tt-a.t)*T[0].bpm/60:bOf(T,a.s+(tt-a.t));let q;
+   if(tg===0){q=beat/cy+ph;q-=Math.floor(q)}
+   else{if(!bpm)bpm=bpmAt(T,beat);let e=Infinity;
+    if(tg===1){if(this.on&&nT){if(ti>=nT||(ti>=0&&TB[ti]>beat)){let lo=0,hi=nT-1;ti=-1;while(lo<=hi){const m=(lo+hi)>>1;if(TB[m]<=beat){ti=m;lo=m+1}else hi=m-1}}while(ti+1<nT&&TB[ti+1]<=beat){ti++;trg=1}if(ti>=0)e=beat-TB[ti]}
+     if(lt>=0&&tt>=lt){const el=(tt-lt)*bpm/60;if(el<e)e=el}}
+    else{const kx=k0?Math.max(k0[i]<0?-k0[i]:k0[i],k1[i]<0?-k1[i]:k1[i]):0;pk=kx>pk?kx:pk*pkR;if(pk<1e-9)pk=0;if(pk>kl)kl=pk;if(es<Infinity)es++;
+     if(arm&&pk>th&&es>=gap){es=0;arm=0;trg=1}else if(!arm&&pk<th*.5)arm=1;if(es<Infinity)e=es/sr*bpm/60}
+    q=e===Infinity?1:Math.min(1,e/cy+ph)}
+   x=q;const v=ev(P,q,sm),tg2=1-d+d*v;if(g<0||k>=1)g=tg2;else g+=(tg2-g)*k;
+   const l=i0?i0[i]:0,r=i1?i1[i]:0;if(sh){o0[i]=this.split(l,0,g,bs,bn);if(o1)o1[i]=this.split(r,1,g,bs,bn)}else{o0[i]=l*g;if(o1)o1[i]=r*g}
+   const bb=Math.min(NB-1,Math.floor(q*NB));if(bb!==lb){lb=bb;bins[bb]=0;bout[bb]=0}const m=Math.max(l<0?-l:l,r<0?-r:r);if(m>bins[bb])bins[bb]=m;const mo=m*g;if(mo>bout[bb])bout[bb]=mo;if(m>1e-5)loud=1}
+  this.g=g;this.lb=lb;this.ti=ti;this.es=es;this.pk=pk;this.arm=arm;this.kl=kl;if(trg)this.trg=1;if(loud||(tg===2&&kl>1e-5))this.loud=1;this.left-=n;
+  if(this.left<=0){this.left=Math.round(sr/20);if(this.loud){this.loud=0;this.port.postMessage({bi:bins.slice(),bo:bout.slice(),x,kl:this.kl,tr:this.trg});this.kl=0;this.trg=0}}
   return true}}
 registerProcessor('al-ftvs',FtVs)})();`;
 function ftVsLoad(c){if(c._ftvsP)return c._ftvsP;if(!c.audioWorklet)return c._ftvsP=Promise.resolve(false);
@@ -27826,18 +27846,27 @@ if(typeof OfflineAudioContext!=='undefined'&&!OfflineAudioContext.prototype._ftv
 const ftVsTm=()=>tmapSegs().map(q=>({b:q.b,s:q.s,bpm:q.bpm,ramp:q.ramp?1:0}));
 /* where the song is: the live context follows the transport (the start and loop jumps lie ahead, the worklet takes them over at their frame); an
    offline render starts at its first beat */
-function ftVsAnchor(c){if(c===ctx)return play.on?{t:play.t0,b:play.b0}:{t:0,b:0};return{t:0,b:(typeof VMOF!=='undefined'&&VMOF.has(c)?VMOF.get(c).b0:SIDE_B0)||0}}
-const ftVsP=(p,sr)=>{const ms=+p.soft||0;return{pts:(p.pts||[]).map(q=>({x:+q.x,y:+q.y,c:+q.c||0})),cb:ftVsBeats(p),ph:(+p.phase||0)/100,d:clamp((p.depth??100)/100,0,1),sm:!!p.smooth,k:ms>0?1-Math.exp(-1/(ms*sr/1000)):1}};
-function ftVsNode(c){const i=c.createGain(),out=c.createGain();i.connect(out);
+const FTVS_TBC=new WeakMap();
+const ftVsBs=p=>{const s=String(p&&p.bs!=null?p.bs:'100');return[0,1,2].map(i=>s[i]==='1'?1:0)};
+const FTVS_TG={song:0,note:1,audio:2};
+function ftVsAnchor(c){if(c===ctx)return play.on?{t:play.t0,b:play.b0,on:1}:{t:0,b:0,on:0};return{t:0,b:(typeof VMOF!=='undefined'&&VMOF.has(c)?VMOF.get(c).b0:SIDE_B0)||0,on:1}}
+/* FT-F16b: what the worklet needs: the curve as before, plus how it starts (tg 0 the bar lines, 1 notes of a track, 2 a track's sound over a level)
+   and the bands (bn 1, 2 or 3; bs which of them follow the curve; all of them shaped is the same as one band, without the crossover) */
+const ftVsP=(p,sr)=>{const ms=+p.soft||0,tg=FTVS_TG[p.trig]||0,bn=Math.max(1,Math.min(3,+p.bnd||1)),bs=ftVsBs(p),all=bs.slice(0,bn).every(Boolean);
+  return{pts:(p.pts||[]).map(q=>({x:+q.x,y:+q.y,c:+q.c||0})),cb:ftVsBeats(p),ph:(+p.phase||0)/100,d:clamp((p.depth??100)/100,0,1),sm:!!p.smooth,k:ms>0?1-Math.exp(-1/(ms*sr/1000)):1,
+    tg,th:Math.pow(10,(isFinite(+p.thr)&&p.thr!==''&&p.thr!=null?+p.thr:-24)/20),bn,bs,all,f1:+p.x1||150,f2:+p.x2||2500}};
+function ftVsNode(c){const i=c.createGain(),out=c.createGain(),key=c.createGain();i.connect(out);
   const off=typeof OfflineAudioContext!=='undefined'&&c instanceof OfflineAudioContext,a0=ftVsAnchor(c);
-  const X={in:i,out,node:null,p:null,q:[],bin:null,bout:null,x:0,tm:0,
+  const X={in:i,out,key,ksrc:null,node:null,p:null,q:[],bin:null,bout:null,x:0,tm:0,kl:0,tr:0,tbs:'',ctx:c,
     send(m){if(X.node)X.node.port.postMessage(m);else X.q.push(m)},
-    set(p){X.p=p;X.send({p:ftVsP(p,c.sampleRate)})},
+    set(p){X.p=p;X.send({p:ftVsP(p,c.sampleRate)});const tb=ftVsTb(p),s=tb.length+':'+(tb.length?tb[0]+','+tb[tb.length-1]+','+tb.reduce((a,b)=>a+b,0):'');if(s!==X.tbs){X.tbs=s;X.send({tb})}},
     resync(){X.send({tm:ftVsTm(),a:ftVsAnchor(c)})}};
   const mk=()=>{if(X.node||!c._ftvsOK)return;try{const P=X.p?ftVsP(X.p,c.sampleRate):null;
-    const n=new AudioWorkletNode(c,'al-ftvs',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',processorOptions:{p:P,tm:ftVsTm(),a:off?a0:ftVsAnchor(c),q:off?[]:X.q.filter(m=>!m.p)}});
-    X.q=[];n.port.onmessage=e=>{const d=e.data;if(d&&d.bi){X.bin=d.bi;X.bout=d.bo;X.x=d.x;X.tm=performance.now()}};try{i.disconnect(out)}catch(e){}i.connect(n);n.connect(out);X.node=n}catch(e){console.warn('volume shaper node',e)}};
-  if(off){(c._ftvsQ=c._ftvsQ||[]).push(mk);ftVsLoad(c)}else ftVsLoad(c).then(mk);
+    const n=new AudioWorkletNode(c,'al-ftvs',{numberOfInputs:2,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',processorOptions:{p:P,tm:ftVsTm(),a:off?a0:ftVsAnchor(c),q:off?[]:X.q.filter(m=>!m.p&&!m.tb),tb:X.p?ftVsTb(X.p):[]}});
+    X.q=[];n.port.onmessage=e=>{const d=e.data;if(d&&d.bi){X.bin=d.bi;X.bout=d.bo;X.x=d.x;X.kl=d.kl||0;if(d.tr)X.tr=performance.now();X.tm=performance.now()}};try{i.disconnect(out)}catch(e){}i.connect(n,0,0);key.connect(n,0,1);n.connect(out);X.node=n}catch(e){console.warn('volume shaper node',e)}};
+  if(off){(c._ftvsQ=c._ftvsQ||[]).push(()=>{mk();ftVsWireOff(c,X)})}
+  else ftVsLoad(c).then(mk);
+  if(off)ftVsLoad(c);
   return X}
 /* a tempo edit while playing moves the song's anchor: the shapers follow (the transport's own resync covers start and loop jumps) */
 {const _t=tmpEdit;tmpEdit=function(){const r=_t.apply(this,arguments);try{setTimeout(ndResync,0)}catch(e){}return r}}
@@ -27876,9 +27905,9 @@ ND('ftvs',{name:'Volume Shaper',vw:560,grp:['Modulation','#3ecf8e'],desc:'Draw h
       for(let k=0;k<NB;k++){const a=Math.min(1,X.bin[k]),o=Math.min(1,X.bout[k]),xx=X0(k/NB);if(a>0){g.fillStyle='rgba(183,183,194,.22)';g.fillRect(xx,B-a*H,Math.max(1,bw-.5),a*H)}if(o>0){g.fillStyle='rgba(62,207,142,.55)';g.fillRect(xx,B-o*H,Math.max(1,bw-.5),o*H)}}g.globalAlpha=1}}
     g.beginPath();for(let k=0;k<=SS;k++){const x=X0(k/SS),y=Y0(gy(k/SS));k?g.lineTo(x,y):g.moveTo(x,y)}g.strokeStyle=col;g.lineWidth=1.6;g.stroke();
     /* where the song is */
-    let ph=null;if(X&&performance.now()-X.tm<300)ph=X.x;else if(play.on&&ctx){let q=curDisp()/cb+(+p.phase||0)/100;ph=q-Math.floor(q)}
+    let ph=ftVsPh(p,X,cb);
     if(ph!=null){const x=Math.round(X0(ph))+.5;g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=1;g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(x,Y0(gy(ph)),3.5,0,7);g.fill()}
-    const cn=(FTVS.CYC.find(q=>q[0]===String(p.cyc))||FTVS.CYC[0])[1];txt(g,'VOLUME',x0,T-5,col,9);txt(g,cn+' per cycle, from the bar line',x0+52,T-5,L.mut,9);
+    const cn=(FTVS.CYC.find(q=>q[0]===String(p.cyc))||FTVS.CYC[0])[1];txt(g,'VOLUME',x0,T-5,col,9);ftVsDrawX(g,w,h,p,X,T,B,x1);txt(g,ftVsCap(p,cn),x0+52,T-5,L.mut,9);
     txt(g,'0 dB',x0+12,T+10,L.mut,8);txt(g,d<1?Math.round(20*Math.log10(Math.max(1e-6,1-d)))+' dB':'-∞ dB',x0+12,B-3,L.mut,8)},
   hnd:(p,w,h)=>{const x0=8,x1=w-8,T=16,B=h-16,W=x1-x0,H=B-T,P=p.pts||[],o=[],cb=ftVsBeats(p),sn=+p.snap||0,step=sn?(4/sn)/cb:0,snap=x=>step?Math.round(x/step)*step:x;
     P.forEach((q,i)=>{const first=i===0,last=i===P.length-1;o.push({x:x0+q.x*W,y:T+(1-q.y)*H,c:'#fff',l:'Point '+(i+1),v:Math.round(q.y*100)+'%',sm:P.length>24?1:0,drag:(x,y)=>{q.y=clamp(1-(y-T)/H,0,1);if(first)P[P.length-1].y=q.y;if(last)P[0].y=q.y;if(!first&&!last){const lo=P[i-1].x,hi=P[i+1].x;q.x=+clamp(snap((x-x0)/W),lo,hi).toFixed(6)}}});
@@ -27886,6 +27915,97 @@ ND('ftvs',{name:'Volume Shaper',vw:560,grp:['Modulation','#3ecf8e'],desc:'Draw h
 /* tooltips on the Length, Snap and Smooth segments controls of the device's bar */
 {const _tb=ndTb;ndTb=function(f){let s=_tb.apply(this,arguments);try{if(f&&f.type==='ftvs'){s=s.replace('<label>Length <','<label title="'+FTVS.TIP.cyc+'">Length <').replace('<label>Snap <','<label title="'+FTVS.TIP.snap+'">Snap <').replace('<label><input type="checkbox" data-x="smooth"','<label title="Round every segment off (an S shape) instead of straight lines"><input type="checkbox" data-x="smooth"')}}catch(e){}return s}}
 FT_HOOKS.volumeShaper={type:'ftvs',beats:ftVsBeats,gainAt:(p,beat)=>{const q0=beat/ftVsBeats(p)+(+p.phase||0)/100,q=q0-Math.floor(q0),d=clamp((p.depth??100)/100,0,1);return 1-d+d*shEval(p.pts||[],q,p.smooth)}};
+/* v0.297 (task FT-F16b): Volume shaper, part 2 (starred card F16). The curve can start on the notes of another track (a ghost kick: a muted
+   MIDI track whose notes only start the curve) or on the hits of another track's sound (the kick itself, after its effects and before its
+   fader, so a muted track still works), and the sound can be split into two or three bands so only the lows follow the curve. Notes are read
+   from the song (sample exact, the same live and in an export; notes played live on that track start it too); a sound trigger is found in the
+   worklet. Old songs: no new fields, so the curve runs on the bar lines over the whole sound, as before (the same arithmetic, bit-identical).
+   New optional fields in f.p: trig ('song', 'note', 'audio'), src (track id; kept in src0 while the curve runs on the bar lines, so the
+   track stays free to sleep), nf (one note only, or all), thr (dB), bnd (1, 2, 3), x1 and x2 (Hz), bs ('100': which bands follow the curve). */
+Object.assign(FTVS.TIP,{trig:'What starts the curve: the bar lines of the song, every note of another track (a ghost kick), or every hit of another track’s sound.',
+  src:'Which track starts the curve. A muted track works too: its notes or its sound still start the curve.',nf:'Start only on one note of that track (the kick of a drum kit), or on every note.',
+  thr:'How loud the other track must get to start the curve. Lower it if hits are missed, raise it if quiet sounds start it too.',
+  bnd:'Split the sound into bands so only some of them follow the curve, for example only the lows duck under the kick.',
+  x1:'Where the low band ends and the next one starts.',x2:'Where the middle band ends and the high band starts.',
+  b0:'The low band follows the curve. Off: it passes unchanged.',b1:'The middle band follows the curve. Off: it passes unchanged.',b2:'The high band follows the curve. Off: it passes unchanged.'});
+const FTVS_X1=[60,80,100,120,150,200,250,300,400,500],FTVS_X2=[800,1000,1500,2000,2500,3000,4000,5000,8000],FTVS_TH=[-48,-42,-36,-30,-24,-18,-12,-6];
+const ftVsHz=f=>f>=1000?(f/1000).toFixed(f%1000?1:0)+' kHz':f+' Hz';
+/* the note triggers of a track, in song beats (sorted, each once); cached until the track's clips change */
+function ftVsTb(p){if(!p||p.trig!=='note'||!p.src)return[];const t=trkById(p.src);if(!t||!t.clips)return[];const nf=p.nf==null||p.nf===''?-1:+p.nf;
+  let sg=nf+'|';for(const c of t.clips)sg+=c.start+','+c.len+','+(c.off||0)+','+(c.mute?1:0)+','+(c.notes?c.notes.length+':'+c.notes.reduce((a,n)=>a+n.s*7+n.p*3+(n.m?1:0),0):'-')+';';
+  const C=FTVS_TBC.get(t);if(C&&C.sg===sg)return C.tb;const o=[];
+  for(const c of t.clips){if(c.mute||!c.notes)continue;let ns=c.notes;try{ns=ccSus(c,mfxNotes(t,c.notes))}catch(e){}const off=c.off||0;
+    for(const n of ns){if(n.m||n.s<off||n.s>=off+c.len)continue;if(nf>=0&&n.p!==nf)continue;o.push(+(c.start+n.s-off).toFixed(9))}}
+  o.sort((a,b)=>a-b);const tb=o.filter((b,i)=>!i||b-o[i-1]>1e-6);FTVS_TBC.set(t,{sg,tb});return tb}
+/* ---- the sound trigger: the other track after its effects, before its fader (the Ducker's tap) ---- */
+const ftVsOwner=f=>{for(const t of S.tracks)if((t.fx||[]).includes(f))return t;return null};
+const ftVsSrcOk=(t,s)=>!!(t&&s&&s!==t&&s.kind!=='group'&&!abxReach(t,s));
+function ftVsWire(){if(!ctx)return;for(const t of S.tracks){const N=NODES.get(t.id);if(!N)continue;for(const f of t.fx||[]){if(f.type!=='ftvs')continue;const X=N.fxm.get(f.id);if(!X||!X.key)continue;
+  const s=f.p&&f.p.trig==='audio'&&f.on?trkById(f.p.src):null,SN=ftVsSrcOk(t,s)?NODES.get(s.id):null,tap=SN&&SN.ut?SN.ut.out:null;if(X.ksrc===tap)continue;
+  if(X.ksrc){try{X.ksrc.disconnect(X.key)}catch(e){}}X.ksrc=tap;if(tap)tap.connect(X.key)}}}
+{const _sg=syncGraph;syncGraph=function(){const r=_sg.apply(this,arguments);try{ftVsWire()}catch(e){console.error('AudioLab volume shaper',e)}return r}}
+/* offline renders: each track's tap is noted while renderMix builds it; the shapers are wired when rendering starts */
+const FTVS_OFF=new WeakMap();
+{const _mu=mxUtilOff;mxUtilOff=function(oc,t){const r=_mu.apply(this,arguments);try{if(t&&t.id){let m=FTVS_OFF.get(oc);if(!m)FTVS_OFF.set(oc,m=new Map());m.set(t.id,r)}}catch(e){}return r}}
+function ftVsWireOff(c,X){try{const p=X.p;if(!p||p.trig!=='audio'||!p.src)return;let f=null,t=null;for(const u of S.tracks)for(const q of u.fx||[])if(q.p===p){f=q;t=u}
+  const s=trkById(p.src),m=FTVS_OFF.get(c),tap=m&&m.get(p.src);if(tap&&ftVsSrcOk(t,s))tap.connect(X.key)}catch(e){console.warn('volume shaper trigger',e)}}
+/* a render builds a trigger track even when it is not heard */
+{const _ak=abxKeys;abxKeys=function(){const s=_ak.apply(this,arguments);try{for(const t of S.tracks)for(const f of t.fx||[])if(f.type==='ftvs'&&f.on&&f.p&&f.p.trig==='audio'&&typeof f.p.src==='string')s.add(f.p.src)}catch(e){}return s}}
+/* ---- the transport: the note triggers stop with the song (the curve rests at its end) and come back with it ---- */
+function ftVsEach(fn){if(!ctx)return;for(const N of NODES.values())for(const x of N.fxm.values())if(x&&x.tbs!==undefined&&x.resync)fn(x)}
+{const _s=start;start=function(){const r=_s.apply(this,arguments);try{setTimeout(()=>ftVsEach(x=>x.resync()),0)}catch(e){}return r}}
+{const _t=stop;stop=function(){const r=_t.apply(this,arguments);try{ftVsEach(x=>x.send({on:0}))}catch(e){}return r}}
+/* notes played live on the trigger track start the curve at once */
+{const _n=noteOn;noteOn=function(pp){const r=_n.apply(this,arguments);try{if(ctx){const ts=liveTracks();if(ts.length)for(const t of S.tracks)for(const f of t.fx||[]){if(f.type!=='ftvs'||!f.on||!f.p||f.p.trig!=='note')continue;
+  const nf=f.p.nf==null||f.p.nf===''?-1:+f.p.nf;if(nf>=0&&nf!==pp)continue;if(!ts.some(u=>u.id===f.p.src))continue;const N=NODES.get(t.id),X=N&&N.fxm.get(f.id);if(X&&X.send)X.send({lt:ctx.currentTime})}}}catch(e){}return r}}
+/* ---- the device's controls (first in its bar): Start, Track, Notes or Level, Bands, Split, band switches ---- */
+function ftVsRow(f){const p=f.p,tg=p.trig||'song',s=p.src?trkById(p.src):null,bn=Math.max(1,Math.min(3,+p.bnd||1)),bs=ftVsBs(p),T=FTVS.TIP,E=esc;
+  const sel=(k,lab,opts,cur,tip)=>`<label title="${E(tip)}">${lab} <select data-x="${k}">${opts.map(([v,n])=>`<option value="${v}"${String(cur)===String(v)?' selected':''}>${E(n)}</option>`).join('')}</select></label>`;
+  let h=sel('trig','Start',[['song','On the bar lines'],['note','On notes of a track'],['audio','On hits of a track']],tg,T.trig);
+  if(tg!=='song'){h+=`<button class="nbtn ftvsrc${s?'':' ftvnone'}" data-nact="src" title="${E(T.src)}">${s?`<i class="ftvd" style="background:${E(s.color||'#888')}"></i>${E(s.name)}`:'Choose a track'}</button>`;
+    if(tg==='note'){const nf=p.nf==null||p.nf===''?-1:+p.nf;h+=`<button class="nbtn" data-nact="nf" title="${E(T.nf)}">${nf<0?'Every note':'Only '+E(ftVsNoteName(s,nf))}</button>`}
+    else h+=sel('thr','Level',FTVS_TH.map(v=>[v,v+' dB']),isFinite(+p.thr)&&p.thr!=null&&p.thr!==''?+p.thr:-24,T.thr)}
+  h+=sel('bnd','Bands',[[1,'Whole sound'],[2,'Two bands'],[3,'Three bands']],bn,T.bnd);
+  if(bn>1){h+=sel('x1','Split',FTVS_X1.map(v=>[v,ftVsHz(v)]),+p.x1||150,T.x1);if(bn>2)h+=sel('x2','and',FTVS_X2.map(v=>[v,ftVsHz(v)]),+p.x2||2500,T.x2);
+    const nm=bn>2?['Low','Mid','High']:['Low','High'];nm.forEach((n,i)=>{const k=bn>2?i:i*2;h+=`<button class="nbtn ftvb${bs[i]?' on':''}" data-nact="b${i}" aria-pressed="${bs[i]?'true':'false'}" title="${E(T['b'+k]||T.b0)}">${n}</button>`})}
+  return`<span class="ftvs2">${h}</span>`}
+const ftVsNoteName=(t,n)=>{try{const I=t&&t.inst;if(I&&I.preset==='drums'&&I.pads){const pd=I.pads[n-36];if(pd&&pd.name)return pd.name}}catch(e){}return noteName(n)};
+{const _tb=ndTb;ndTb=function(f){let s=_tb.apply(this,arguments);try{if(f&&f.type==='ftvs'){const i=s.indexOf('<div class="ndtb">');if(i>=0)s=s.slice(0,i+18)+ftVsRow(f)+s.slice(i+18);else s+='<div class="ndtb">'+ftVsRow(f)+'</div>'}}catch(e){console.warn('volume shaper row',e)}return s}}
+/* the start mode chooses the track: a track is kept in src only while it starts the curve (src makes it keep playing when muted) */
+function ftVsNorm(f){const p=f.p,tg=p.trig||'song';if(tg==='song'){if(p.src){p.src0=p.src;delete p.src}return}
+  if(!p.src&&p.src0&&trkById(p.src0))p.src=p.src0;const me=ftVsOwner(f);if(p.src&&!ftVsSrcOk(me,trkById(p.src)))delete p.src;
+  if(!p.src){const c=S.tracks.filter(q=>ftVsSrcOk(me,q)&&q.kind!=='return'),k=c.find(q=>/ghost/i.test(q.name))||c.find(q=>/kick|\bbd\b/i.test(q.name));if(k)p.src=k.id}}
+fxin.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||!['trig','bnd','pre'].includes(el.dataset.x))return;const dv=el.closest('.dev'),t=curT(),f=dv&&t&&t.fx.find(q=>q.id===dv.dataset.id);if(!f||f.type!=='ftvs')return;
+  setTimeout(()=>{ftVsNorm(f);ftVsApply(f);changed(true)},0)});
+function ftVsBtnXY(f,a){const b=fxin.querySelector(`.dev[data-id="${f.id}"] [data-nact="${a}"]`),r=b?b.getBoundingClientRect():{left:200,bottom:200};return[r.left,r.bottom+4]}
+Object.assign(NACT.ftvs,{
+  src:f=>{const me=ftVsOwner(f),[x,y]=ftVsBtnXY(f,'src'),c=S.tracks.filter(q=>q!==me&&q.kind!=='group');
+    openMenu(x,y,[{head:'Which track starts the curve?'},...c.map(q=>{const ok=ftVsSrcOk(me,q);return{label:q.name,dot:q.color,check:f.p.src===q.id,dis:!ok,
+      sub:ok?(f.p.trig==='audio'?'Each hit of its sound starts the curve':'Each of its notes starts the curve'):(me?me.name:'This track')+' already plays into '+q.name+', so this would make a loop',
+      act:()=>{if(!ok)return;pushUndo();f.p.src=q.id;if(f.p.nf!=null&&f.p.nf!==''&&f.p.trig==='note'){const tb=(q.clips||[]).some(c=>(c.notes||[]).some(n=>n.p===+f.p.nf));if(!tb)delete f.p.nf}ftVsApply(f);changed(true)}}})])},
+  nf:f=>{const s=trkById(f.p.src),[x,y]=ftVsBtnXY(f,'nf'),ps=new Set();for(const c of(s&&s.clips)||[])for(const n of c.notes||[])ps.add(n.p);const L=[...ps].sort((a,b)=>a-b);
+    openMenu(x,y,[{head:'Which notes start the curve?'},{label:'Every note',check:f.p.nf==null||f.p.nf==='',act:()=>{pushUndo();delete f.p.nf;ftVsApply(f);changed(true)}},
+      ...L.map(n=>({label:'Only '+ftVsNoteName(s,n),sub:ftVsNoteName(s,n)!==noteName(n)?noteName(n):'Only this note starts the curve',check:+f.p.nf===n&&f.p.nf!=null&&f.p.nf!=='',act:()=>{pushUndo();f.p.nf=n;ftVsApply(f);changed(true)}}))])},
+  b0:f=>ftVsBand(f,0),b1:f=>ftVsBand(f,1),b2:f=>ftVsBand(f,2)});
+function ftVsBand(f,i){pushUndo();const bn=Math.max(1,Math.min(3,+f.p.bnd||1)),b=ftVsBs(f.p);/* in two bands the buttons are Low (0) and High (1) */b[i]=b[i]?0:1;f.p.bs=b.join('');void bn;ftVsApply(f);changed(true)}
+/* ---- the display: what starts the curve and which band follows it; in Start on hits, the other track's level and the trigger level ---- */
+function ftVsCap(p,cn){const tg=p.trig||'song',s=p.src?trkById(p.src):null,bn=Math.max(1,Math.min(3,+p.bnd||1)),bs=ftVsBs(p),x1=+p.x1||150,x2=+p.x2||2500;
+  let c=tg==='song'?cn+' per cycle, from the bar line':tg==='note'?cn+' from each note of '+(s?s.name:'(choose a track)'):cn+' from each hit of '+(s?s.name:'(choose a track)');
+  if(bn>1){const R=bn>2?['below '+ftVsHz(x1),ftVsHz(x1)+' to '+ftVsHz(x2),'above '+ftVsHz(x2)]:['below '+ftVsHz(x1),'above '+ftVsHz(x1)],on=R.filter((r,i)=>bs[i]);
+    c+=on.length===R.length?'':on.length?', only '+on.join(' and '):', no band shaped'}return c}
+function ftVsPh(p,X,cb){if(X&&performance.now()-X.tm<300)return X.x>=1?null:X.x;if(!play.on||!ctx)return null;const tg=p.trig||'song',b=curDisp();
+  if(tg==='song'){const q=b/cb+(+p.phase||0)/100;return q-Math.floor(q)}
+  if(tg==='note'){const tb=ftVsTb(p);let lo=0,hi=tb.length-1,k=-1;while(lo<=hi){const m=(lo+hi)>>1;if(tb[m]<=b){k=m;lo=m+1}else hi=m-1}if(k<0)return null;const q=(b-tb[k])/cb+(+p.phase||0)/100;return q>=1?null:q}
+  return null}
+function ftVsDrawX(g,w,h,p,X,T,B,x1){if((p.trig||'song')!=='audio')return;const L=lkT(),H=B-T,yv=db=>B-clamp((db+60)/60,0,1)*H,xm=x1-5,live=X&&performance.now()-X.tm<400;
+  g.fillStyle='rgba(255,255,255,.06)';g.fillRect(xm,T,4,H);if(live&&X.kl>0){const y=yv(20*Math.log10(Math.max(1e-6,X.kl)));const s=p.src?trkById(p.src):null;g.fillStyle=s&&s.color||L.ok;g.fillRect(xm,y,4,B-y)}
+  const th=isFinite(+p.thr)&&p.thr!=null&&p.thr!==''?+p.thr:-24,y=Math.round(yv(th))+.5;g.strokeStyle='#f5c84c';g.lineWidth=1;g.beginPath();g.moveTo(xm-3,y);g.lineTo(x1,y);g.stroke();
+  if(X&&X.tr&&performance.now()-X.tr<150){g.fillStyle='rgba(245,200,76,.9)';g.beginPath();g.arc(xm+2,T-8,3,0,7);g.fill()}}
+/* the hook: gainAt knows the note triggers too; audio triggers depend on the sound, so gainAt gives null there */
+FT_HOOKS.volumeShaper={type:'ftvs',beats:ftVsBeats,triggers:p=>ftVsTb(p).slice(),gainAt:(p,beat)=>{const cb=ftVsBeats(p),ph=(+p.phase||0)/100,d=clamp((p.depth??100)/100,0,1),tg=p.trig||'song',P=p.pts||[];let q;
+  if(tg==='audio')return null;if(tg==='note'){const tb=ftVsTb(p);let lo=0,hi=tb.length-1,k=-1;while(lo<=hi){const m=(lo+hi)>>1;if(tb[m]<=beat){k=m;lo=m+1}else hi=m-1}q=k<0?1:Math.min(1,(beat-tb[k])/cb+ph)}
+  else{const q0=beat/cb+ph;q=q0-Math.floor(q0)}return 1-d+d*(q>=1&&P.length?+P[P.length-1].y:shEval(P,q,p.smooth))}};
+document.head.insertAdjacentHTML('beforeend','<style id="ftvsCss">.ndtb .ftvs2{display:contents}.ndtb .nbtn.ftvb.on{background:var(--c,#3ecf8e);color:#0b0c10;border-color:transparent}.ftvs2 .ftvd{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}.ftvs2 .ftvnone{color:var(--warn,#f5c84c)}</style>');
 
 /* ---------------- MIDI utility pack ---------------- */
 const SCL={off:null,major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],phrygian:[0,1,3,5,7,8,10],lydian:[0,2,4,6,7,9,11],mixolydian:[0,2,4,5,7,9,10],harmonic:[0,2,3,5,7,8,11],melodic:[0,2,3,5,7,9,11],pentmaj:[0,2,4,7,9],pentmin:[0,3,5,7,10],blues:[0,3,5,6,7,10],whole:[0,2,4,6,8,10],dim:[0,2,3,5,6,8,9,11],phrygdom:[0,1,4,5,7,8,10],hungarian:[0,2,3,6,7,8,11],chord:[0,4,7]};
