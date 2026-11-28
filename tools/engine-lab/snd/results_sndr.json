@@ -70,5 +70,6 @@
    "rand": 1555.5,
    "plain": 910.3
   }
- }
+ },
+ "gate": "lint clean; start-up smoke test in the desktop app clean in all 14 scenarios; frame times p50 16.7 ms, p95 50.0 ms (reference the same); windows 19 checks; Fractals Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) at master -10 dB and -9.75669 / -25.48699 dB at 0 dB, the same checksums, identical in four renders of this build; every repeatable export line bit-identical to the reference. Step e was marked failed once only because the reference build v0.250's 'Fractals Bass master put back to 0 dB' line differed between its own two renders (a flake of the reference, which can fail a real gate run too); Plant, Sampler, Sampler grains and Drum kit stay unrepeatable on both builds: their randomness is on the main thread, not in the worklets, so SND-R does not touch it"
 }

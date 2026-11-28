@@ -14,7 +14,7 @@ assert '/* ==SNDR-js==' not in s, 'already released'
 V = '%.3f' % (float(prev) + 0.001)
 sh('python3', 'tools/engine-lab/snd/sndr_edit.py', 'index.html', V)
 print(sh('node', 'desktop/scripts/sync-app.js'))
-sh('python3', 'tools/engine-lab/snd/sndr_docs.py', V, prev, sys.argv[1] if len(sys.argv) > 1 else 'see the gate log')
+sh('python3', 'tools/engine-lab/snd/sndr_docs.py', V, prev, sys.argv[1] if len(sys.argv) > 1 else json.load(open(os.path.join(ROOT, 'tools/engine-lab/snd/results_sndr.json')))['gate'])
 print(sh('node', 'tools/release-gate/lint.js', 'index.html'))
 st = sh('git', 'status', '--short'); assert 'app-version.json' not in st.replace('app-version-dev.json', ''), st
 print('ready', prev, '->', V); print(st)
