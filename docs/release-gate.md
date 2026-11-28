@@ -113,3 +113,16 @@ python3 tools/release-gate/gate.py --native native-1.0.0.json --promote --push  
 - `--native-only` changes only the `native` block of `desktop/app-version.json` (`native_block.py write`); nothing else in the manifest moves.
 - An ordinary promotion keeps the block that is already live (`sync-app.js` with `AL_PROMOTE=1`; a new one comes in `AL_NATIVE_BLOCK`). The dev manifest never has one.
 - Shells before MG1 ignore the block (they read only version, sha256, size, minShell and notes).
+
+## The user's decision R1 (28 November 2026, 14:36 Brussels): one sound, no v1 kept
+
+The user: "Let's have each sound improvement have a new sound for everything. No old songs included. What do you mean by keeping the old V1? I don't think that's necessary either."
+
+What changes, for every lane that improves device sound (L SND, N SQ, and NB when it ports):
+- **No v1 kept.** An improvement replaces the old sound, in new and old projects alike. No second code path for the old sound, no per-device algorithm version, no "old projects keep v1 bit-identically". This replaces the "No silent changes" rule at the top of docs/sounds-build.md and the v1/v2 wording in docs/research-engine-sound.md.
+- **The Hi-Fi switch stays, with one meaning only:** on = the heavier extras (oversampling, the finer filters), off = lighter and faster for slow computers or big projects. Off is NOT the exact old sound any more. Improvements that cost no extra CPU are simply the sound, with Hi-Fi on or off.
+- **Old projects** open with the app's normal Hi-Fi default like any project; the one-time "This song was made before Hi-Fi mode was implemented" note is no longer needed (lane N drops it, or never builds it if not yet released).
+- **SND-R** (one random stream per device): no version field; every project uses the new per-device stream.
+- **Tests:** drop the "Classic bit-identical" and "v1 unchanged" tests. Keep: CPU per voice, aliasing numbers, no NaN or silence, level close to before (within about 1 dB unless the step means to change level). The release gate's export check takes new reference numbers after each released sound step (docs/release-gate.md): it still catches crashes, silence, clipping and big level jumps.
+- **Still kept:** old projects must open with all their tracks, notes, devices and settings; the mixer, timing and sync stay exact; stable ids.
+- Work already built with a v1/v2 split may simply delete the v1 path at its next step.
