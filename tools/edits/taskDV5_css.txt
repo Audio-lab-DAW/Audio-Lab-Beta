@@ -1,0 +1,13 @@
+/* v0.300 display-first devices, step 5 (task DV-5): the basic instruments' dock in two rows (the knobs; the envelope and Level), Wave in the preset pill */
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pars{display:block!important;width:auto!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;overflow:visible!important;border:0!important;background:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pars>.pgrid{display:grid!important;grid-template-columns:auto auto!important;grid-template-rows:auto auto!important;gap:6px 14px!important;align-items:center}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pgrid>.pg-kn{grid-column:1/3;grid-row:1;gap:14px!important}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pgrid>.pg-env{grid-column:1;grid-row:2;display:flex!important;flex-direction:row!important;align-items:center;width:auto!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;background:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pgrid>.pg-env>.pgl{display:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pgrid>.pg-env>div{display:flex!important;flex-direction:row!important;align-items:center;gap:12px!important;width:auto!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;grid-template:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dfs .pgrid>.pg-lv{grid-column:2;grid-row:2}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre>.dvdtb{display:flex;align-items:center;margin:0 0 0 4px!important;padding:0 0 0 6px!important;border:0!important;background:none!important;box-shadow:inset var(--lk-hair,1px) 0 0 rgba(255,255,255,.14);width:auto!important;min-width:0!important;flex:none!important}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre>.dvdtb label{display:flex;align-items:center;gap:5px;font-size:11px;color:#a3a7b4;white-space:nowrap}
+#fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre>.dvdtb select{min-height:20px!important;height:20px;font-size:11px;padding:0 4px;max-width:84px}
+#fxin:not(.pinb) .dev.dvf.dvdock[data-d=inst]>.devb>.dvdpre select:not(.dvdtb select){max-width:112px}
+#fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .ndtb{display:flex;flex-wrap:wrap;gap:6px;margin:0!important;padding:0!important;border:0!important;background:none!important;width:auto!important}

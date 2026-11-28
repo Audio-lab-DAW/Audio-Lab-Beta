@@ -7086,3 +7086,23 @@ Fling and "edit while scrolled" have nothing to measure yet (UV-3 and UV-2); the
 
 ### Left
 UV-2 (S14 tiled arrangement with the glass engine reading tiles, the version counter hook for lane A), then UV-3 (S10 fling, S11 coalesced and predicted points), then "view engine complete".
+
+## 28 November 2026: task DV-5, display-first devices, step 5: the synths (lane I), built and tested, NOT released yet
+The release gate's freeze (`desktop/release-freeze.json`, since 16:41 UTC) was on main when the step was ready (16:58), so `index.html` was not pushed. The edit script, its block and CSS and the test are pushed; the release (`python3 tools/edits/taskDV5.py index.html <next version>` on a fresh main, then the usual release steps) follows once the gate lifts the freeze. The next DV run finishes this step first.
+
+### Built
+- **The rule for the synths** (`DVIRULE`): Venom, Plant, Wavetable, Orbit, Vector FM and Bounce start with the rail open (more than about eight controls, or pages); Saw lead, Square lead, Soft pad, Strings, Pluck and Soft keys (eight controls) start closed with hover reveal when the user adds one (the browser's Add or Use, a drop, a click). Old projects, demos, templates and scripts keep what they store.
+- **The basic instruments** (the six above with filter and envelope picture): the picture fills the device; at rest a values line (without Attack and Release, which the picture writes); hover, Tab or a tap shows a glass dock at the bottom in two rows (Cutoff, Resonance, Detune; Attack, Decay, Sustain, Release, Level) with Gain after a hairline, and the preset and Wave as a pill at the top. On the picture: Cutoff and Resonance at the filter's corner, Attack at the envelope's top, Decay, Sustain and Release along it; the preset, Wave, Detune, Level and Gain in More.
+- **Picture under the rail**: Orbit, Vector FM and Bounce already had it; Venom, Plant and Wavetable keep their fixed panels beside the rail. Closed, the big synths show the revealed panel; On the picture falls back to hover reveal on them.
+
+### Tested (on v0.314 + DV-5 as 0.315)
+- `taskDV_5.py` 62 of 62 with the old-project check (the starting state from a real click in the browser, Pluck closed and Wavetable open; a script-built song keeps no state; for each basic instrument the dock hidden at rest, the values line, two rows at the bottom inside the device, the pill with Wave clear of the eye; Tab; a knob and a short fader in the dock; six chips near their places, none over another or over More; More's sections and Detune from it; the eye menu; the rail open; tooltips on every control; the big synths' three states; nothing read or uploaded at rest; values unchanged by switching states; kOpen and kMode saved; an old project from v0.314 opens with the same instruments, values, rails and modes).
+- `taskDV_1.py` 37 of 37, `taskDV_2.py` 21 of 21, `taskDV_3.py` 35 of 35, `taskDV_4.py` 69 of 69 on the same build; lint clean.
+- Frame time (`frametime.py`, Fractals at the user's size, devices panel open): idle main 10.69 ms/f (v0.314) against 10.80 (with DV-5), playing 26.15 against 23.01: the same within the noise of this machine.
+- **Fractals levels unchanged**: Kick -19.05560 dB, Bass -35.48685 dB at master -10 dB (checksums fb577dd5202b, 392ec52590c7); every repeatable export line identical to v0.314 (Saw, Pad, Acid, Wavetable, Venom); Plant, Sampler, Sampler grains and Drum kit move from run to run on one build, as known.
+- Screenshots, looked at: Saw lead, Square lead, Soft pad, Strings, Pluck, Soft keys, Wavetable and Orbit with the rail open, closed at rest, revealed and On the picture, at Glass, Light and Solid.
+
+### Left
+- Release of this step (after the freeze).
+- DV-6 to DV-11, then DV-12. Open points: Wavetable's dot and Venom's dots could carry chips (DV-12); the basic instruments' cutoff label is under the eye's pill (the values line keeps the cutoff for that reason).
+
