@@ -6434,6 +6434,7 @@ Fired by a manual trigger from the scheduling chat at about 23:59 UTC 27 Nov (it
 - The export's quantum 512: **142 of 142** (tdelay, eq, chorus, limit and the chains) at 512, 128 and 7 frames per call. The first try failed from frame 128 on (the shaper ran one 128-frame sub-block per 512-frame quantum); fixed.
 - Buses: **24 of 24 identical**. ASan+UBSan: 43 of 43 at 128 and 7, buses identical, no reports.
 - Cost: 9 µs per 128 stereo frames (Fractals' Lead setting), about 300 times real time on one core.
+- **GitHub, native-ci run 46086849140 (commit 53ebf01), every job green.** Linux: every device case bit for bit at 128 frames in Release and under ASan+UBSan, and at 33; Apple Silicon (macos-latest, against the Mac's own Chromium): every device case bit for bit (the delay time's glide on ARM runs frame by frame, on x86 four at a time: both match their own browser), every bus scene identical, the mixer identical, the nodes 52 of 52.
 - Two hypotheses about the loop were measured before the right one: the right side running inside the left delay's pull (23 of 43), the other order (23 of 43); then the app's own wiring read again (43 of 43).
 
 ### Left
