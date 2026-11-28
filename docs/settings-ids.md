@@ -107,7 +107,7 @@ Every setting of AudioLab has one stable id, shown in the Workshop's settings li
 | `project.songRoot` | Key of this song: root | `songRoot` | 0.295 |
 | `project.songScale` | Key of this song: scale | `songScale` | 0.295 |
 | `project.songLane` | Show the tempo and time signature lane | `songLane` | 0.295 |
-| `project.songHiFi` | Hi-Fi for this song (lane N, task SQ1, named in SQ3) | `songHiFi` | SQ3 |
+| `project.songHiFi` | Hi-Fi for this song (lane N, task SQ1, named in SQ3) | `songHiFi` | 0.310 |
 | `project.newBpm` | Tempo for new projects | `newBpm` | 0.295 |
 | `project.newLufs` | Loudness target for new projects | `newLufs` | 0.295 |
 | `project.newLane` | Show the tempo lane in new projects | `newLane` | 0.295 |

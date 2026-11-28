@@ -1,6 +1,6 @@
-## 28 November 2026, vX.XXX: task SQ3, resample once (lane N, sound quality, the user's AE1 pick Q11)
+## 28 November 2026, v0.310: task SQ3, resample once (lane N, sound quality, the user's AE1 pick Q11)
 
-Fired by the scheduler. Built on 28 Nov while the release gate's freeze (09:11:57 UTC) held index.html, on top of SQ1 (released as vSQ1V just before). Edit script `tools/engine-lab/sq/sq3.py` (inserts `sq3.js` right after SQ1's block; re-runnable, asserted anchors), test `tools/ui-tests/taskSQ3.py` (45 checks).
+Fired by the scheduler. Built on 28 Nov while the release gate's freeze (09:11:57 UTC) held index.html, on top of SQ1 (released as v0.296 just before). Edit script `tools/engine-lab/sq/sq3.py` (inserts `sq3.js` right after SQ1's block; re-runnable, asserted anchors), test `tools/ui-tests/taskSQ3.py` (45 checks).
 
 ### Built
 - With Hi-Fi on for the song (`S.sq==='clean'`), a buffer played at another rate than its own is converted once to that rate with a windowed-sinc resampler (Kaiser, 32 zero crossings, beta 10, cut-off at 0.96 of the lower Nyquist; a polyphase bank of exact phases, each normalised to a sum of 1), in a worker, and cached per rate (a WeakMap on the original buffer). Covered: the built-in sampler and drum sounds (44.1 kHz), bounces (44.1 kHz), the stem splitter's results (44.1 kHz) and its input, songs saved at another rate, and every clip when an export runs at another rate.

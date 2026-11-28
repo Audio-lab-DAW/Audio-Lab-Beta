@@ -10,8 +10,8 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 | Step | What | Status |
 |---|---|---|
 | SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | **done**, v0.296 (released 28 Nov, after the gate's freeze) |
-| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | built and tested (45 of 45 on v0.296 + SQ1 + SQ3, 28 Nov); released after SQ1 with `tools/engine-lab/sq/sq3_release/release.sh` |
-| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | |
+| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | **done**, v0.310 |
+| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | next |
 | SQ4 | The Limiter style "True peak 4x" (Q13: BS.1770 detection with the meter's filter from lane E, 4x final clip); the export safety limiter replaced by it at -1 dBTP (Q14: only exports that would clip change); the export report (Q15: true peak, overs, clipped samples) through lane F's notification or dialog code. Then: sound quality complete | |
 
 (There is no SQ2: al-poly's Hi-Fi oscillators and Acid went to lane L with the picks.)
@@ -52,7 +52,7 @@ The Soft Clipper with Asymmetry not 0: with Hi-Fi on (`clean`), a one-pole DC bl
 - The field: effect `q`, instrument `quality`, song `sq`; missing = follow the song, the song missing = Classic; the stamping rule for new devices.
 - The DC blocker: `y[n] = x[n] - x[n-1] + R*y[n-1]`, `R = 1 - 2*pi*5/sr`, state and arithmetic in double (Chromium's IIRFilterNode runs direct form I in double), output rounded to float, after the Soft Clipper's output gain (after the dry/wet sum), only when Clean and Asymmetry is not 0; the switch takes effect at the next parameter set, the filter's state starts at zero when it is switched in. Classic: no stage at all.
 
-## SQ3: resample once (built; released after SQ1)
+## SQ3: resample once (done, v0.310)
 
 ### What changes
 - With Hi-Fi on for the song (`S.sq==='clean'`), a buffer whose rate is not the rate it plays at is converted once to that rate, in a worker, and the copy is kept per rate. That covers the built-in sampler and drum sounds (made at 44.1 kHz), bounces (rendered at 44.1 kHz), the stem splitter's 44.1 kHz results, songs saved at another rate, and every clip when an export runs at another rate than the engine.
