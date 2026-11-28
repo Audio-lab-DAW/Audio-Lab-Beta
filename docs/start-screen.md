@@ -160,3 +160,14 @@ Built into the WS-1 edit script before WS-1 is released, as the scheduling chat 
 - **For lane G (the splash):** the splash cannot use this choice without a change to `SPLBG`, which is not lane Q's: `SPLBG` paints its first picture before the app's script runs and only knows its own five pictures. The choice is ready for it at first paint as localStorage `audiolab-ws-draw` (a JSON list of the drawings on, written on every change) and as `WS_HOOKS.drawings()`; the R4 to R8 drawings and F1 are in `WSR2.FN`.
 - **Test** `tools/ui-tests/taskWS_1b.py`: 16 of 16 (place under the start screen's row, all on by default, Only this one, the last one locked on, the start screen picks only the drawings on and never twice in a row, the choice survives a reload, All on, the hooks, no page errors). `taskWS_1.py` still 38 of 38; lint clean (2397 top-level functions) on main's `index.html` plus `ws1_edit.py`. No new command (`docs/commands.md` unchanged).
 - Released with WS-1 once the release freeze lifts.
+
+## The user's decision R0 (28 November 2026, 14:37 Brussels): old projects need not open
+
+The user: "It's really not important that the old projects must still open. We're going to ditch all of them. We are not even going to use the old projects at all."
+
+This overrides every "old projects must still load / keep their sound / render bit-identically" rule in every plan doc (sounds-build, features-build, mixing-build, latency-build, comfort-build, quality-build, devices-display-first, ideas-build, the research docs and the release gate):
+- **No migration code and no compatibility paths** for projects saved by earlier versions. A lane may change the saved project format freely; it does not write upgraders, version branches or "if the project is older than..." code. Existing compatibility code may be deleted when a lane next touches that area.
+- **The release gate's test songs** (Fractals, Shrine Legion and the others) are test material, not user projects: when a format or sound change breaks one, the lane that made the change re-saves it in the current format (or the gate takes new reference numbers) in the same step. The gate still checks that the current version saves, reopens its own save and plays it.
+- **The start screen** (lane Q) lists only projects the current format opens; a file it cannot open gets a short plain message, never a crash.
+- **Still kept:** a project saved by the current version reopens with everything; the mixer, timing and sync stay exact; stable ids.
+- From the first public release on, compatibility starts again (projects made by released versions must open); until then, none is needed.

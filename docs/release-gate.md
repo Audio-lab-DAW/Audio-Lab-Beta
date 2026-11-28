@@ -126,3 +126,14 @@ What changes, for every lane that improves device sound (L SND, N SQ, and NB whe
 - **Tests:** drop the "Classic bit-identical" and "v1 unchanged" tests. Keep: CPU per voice, aliasing numbers, no NaN or silence, level close to before (within about 1 dB unless the step means to change level). The release gate's export check takes new reference numbers after each released sound step (docs/release-gate.md): it still catches crashes, silence, clipping and big level jumps.
 - **Still kept:** old projects must open with all their tracks, notes, devices and settings; the mixer, timing and sync stay exact; stable ids.
 - Work already built with a v1/v2 split may simply delete the v1 path at its next step.
+
+## The user's decision R0 (28 November 2026, 14:37 Brussels): old projects need not open
+
+The user: "It's really not important that the old projects must still open. We're going to ditch all of them. We are not even going to use the old projects at all."
+
+This overrides every "old projects must still load / keep their sound / render bit-identically" rule in every plan doc (sounds-build, features-build, mixing-build, latency-build, comfort-build, quality-build, devices-display-first, ideas-build, the research docs and the release gate):
+- **No migration code and no compatibility paths** for projects saved by earlier versions. A lane may change the saved project format freely; it does not write upgraders, version branches or "if the project is older than..." code. Existing compatibility code may be deleted when a lane next touches that area.
+- **The release gate's test songs** (Fractals, Shrine Legion and the others) are test material, not user projects: when a format or sound change breaks one, the lane that made the change re-saves it in the current format (or the gate takes new reference numbers) in the same step. The gate still checks that the current version saves, reopens its own save and plays it.
+- **The start screen** (lane Q) lists only projects the current format opens; a file it cannot open gets a short plain message, never a crash.
+- **Still kept:** a project saved by the current version reopens with everything; the mixer, timing and sync stay exact; stable ids.
+- From the first public release on, compatibility starts again (projects made by released versions must open); until then, none is needed.

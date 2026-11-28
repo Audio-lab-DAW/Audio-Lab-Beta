@@ -752,3 +752,14 @@ The user: "When it comes to effects and instruments for the native engine, they 
 - The devices already proven bit for bit stay so; their tests stay. The mixer, timing, delay compensation and the bridge keep their exactness rules (they are not "how a device sounds").
 - This frees the native devices to use better DSP where it helps (the Hi-Fi cores of lanes L and N, oversampling, band-limited oscillators) without matching the browser's arithmetic; random-drawing devices no longer depend on D2's stream order for the native port.
 - NB: re-plan the remaining N3 device work with this rule (faster: port the algorithm, not Chromium's exact node behaviour), and say in the log which devices are 'exact' and which 'close'.
+
+## The user's decision R0 (28 November 2026, 14:37 Brussels): old projects need not open
+
+The user: "It's really not important that the old projects must still open. We're going to ditch all of them. We are not even going to use the old projects at all."
+
+This overrides every "old projects must still load / keep their sound / render bit-identically" rule in every plan doc (sounds-build, features-build, mixing-build, latency-build, comfort-build, quality-build, devices-display-first, ideas-build, the research docs and the release gate):
+- **No migration code and no compatibility paths** for projects saved by earlier versions. A lane may change the saved project format freely; it does not write upgraders, version branches or "if the project is older than..." code. Existing compatibility code may be deleted when a lane next touches that area.
+- **The release gate's test songs** (Fractals, Shrine Legion and the others) are test material, not user projects: when a format or sound change breaks one, the lane that made the change re-saves it in the current format (or the gate takes new reference numbers) in the same step. The gate still checks that the current version saves, reopens its own save and plays it.
+- **The start screen** (lane Q) lists only projects the current format opens; a file it cannot open gets a short plain message, never a crash.
+- **Still kept:** a project saved by the current version reopens with everything; the mixer, timing and sync stay exact; stable ids.
+- From the first public release on, compatibility starts again (projects made by released versions must open); until then, none is needed.
