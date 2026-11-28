@@ -6886,3 +6886,24 @@ Step LT-2 of `docs/latency-build.md` (research id AE2-2). Edit script `tools/eng
 
 ### Left
 - LT-3a next: notes past the main thread in the desktop app (L5). The S15 "steady timing" pick (UX1) is an LT step after LT-3.
+
+## 28 November 2026, v0.306: task DV-4, display-first devices, step 4: the bottom dock, the values line, On the picture for the Compressor, Sidechain, Echo delay and Space reverb (lane I)
+Step DV-4 of `docs/devices-display-first.md` section 10. Built on 28 Nov while the release gate's freeze held DV-3; released after v0.304 (DV-3) and v0.305 (lane J): `index.html` taken fresh from main and the edit script run again. Edit script `tools/edits/taskDV4.py` with `taskDV4_block.js` and `taskDV4_css.txt` (asserted anchors before `askChoice` and `.dacv`, one asserted change inside lane I's own `dvVals`); test `tools/ui-tests/taskDV_4.py` (71 checks). New names start with `dv`/`DV`.
+
+### Built
+- **Hover reveal is a bottom dock** on the four devices (the user's DD4 with DD1's dock): at rest a clean picture with a values line; under the mouse (or Tab into it, or a tap) the controls rise in one glass row, each knob with its label over its value, Gain after a hairline, and the preset arrows, menu and Change as a pill at the top. The dock sits as low as it can without covering any of the picture's handles, so a dot or the Echo delay's cut bar can still be dragged while it shows.
+- **The values line** leaves out what the picture already writes in words (the Compressor's Threshold and Ratio, the Echo delay's Time, Feedback and Mix, the Reverb's Decay and Pre-delay) and is placed clear of every handle and of the picture's words (on the Compressor, Echo delay and Reverb under the picture's top line, on the Sidechain at the bottom right, clear of its hint).
+- **On the picture** for the four: Threshold and Ratio on the curve, Makeup at the output, Attack and Release at their dots; Time and Mix at the first echo, Feedback at the second, the cuts at the filter band; Pre-delay, Decay, Damp, Mix and Low cut at their dots; Depth and Shape at the pump's dot, Punch at its own. The preset, the Sidechain's Rate and Gain are in More. The chips follow a dragged handle.
+- One placing routine for all of it, from the handles each picture already has, so the groups DV-5 to DV-11 only add a device's anchors and words.
+- A short fader in the dock or on a chip moves over 150 px for its range, like a knob.
+
+### Tested
+- `taskDV_4.py` 71 of 71 (with the old-project check): on each device, at rest the dock hidden and the values line clear of every handle and word and without the picture's own values; on hover one row, label over value, inside the device, over no handle, one glass panel, the preset pill clear of the handles; Tab and a tap reveal it; a knob and a fader in the dock; the Echo delay's low cut and the Compressor's attack dot dragged with the dock shown; On the picture one chip per handle control, each beside its handle, none over another, a handle or More; the Threshold chip follows its dot; More holds the preset and Gain, both work; the eye menu offers On the picture as ready; tooltips on every control (the Sidechain's Rate menu got one); rail open and closed again; engine faces; nothing read, refreshed, uploaded or placed at rest in either mode; Solid; switching states never changes a value; kOpen/kMode saved; an old project opens the same.
+- `taskDV_1.py` 37 of 37, `taskDV_2.py` 21 of 21 on v0.304 + DV-4; `taskDV_3.py` 37 of 37 on v0.305 + DV-4 (and on v0.297 + DV-3 + DV-4); lint clean. `gate.py --here --quick` on v0.297 + DV-3 + DV-4: ALL PASSED (start-up smoke test 14 of 14 in Electron, frame times p50 16.7 ms as the reference, windows 19 checks). Frame time (`frametime.py`, Fractals at the user's size) v0.297 against v0.297 + DV-3 + DV-4: idle 9.7 against 7.5 ms main thread per frame, playing 23.1 against 22.6 ms.
+- **Fractals levels unchanged**: Kick -19.05560 dB, Bass -35.48685 dB at master -10 dB, same checksums; 9 repeatable export lines bit-identical to v0.250.
+- Screenshots, looked at: the four devices with the rail open, the dock revealed and On the picture at Glass, Light and Solid, and at rest.
+
+### Left
+- DV-5 to DV-11: the other devices get their `DVDOCK` entry, `DVTXT` and `DVANC` (their dock and chips) group by group; DV-12 the check of every device.
+- When every place covers a handle (the Compressor with a high Makeup has handles from top to bottom), the dock covers the fewest it can; that handle is reachable with the dock hidden (move the mouse off and on) or from the dock's own fader.
+- Lane K's sidechain source for the Compressor (task MX-3), when released, joins the dock's row like the Sidechain's Rate menu; to be checked then.
