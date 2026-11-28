@@ -202,7 +202,7 @@ def run_test(tree, name, out):
 if A.quick or A.skip_ui: step('b UI tests', not A.promote, 'not run (--quick or --skip-ui)')
 else:
     tests = sorted(n for n in os.listdir(os.path.join(NEW, 'tools', 'ui-tests')) if (n.endswith('.py') or n.endswith('_electron.js')) and n not in HELPERS)
-    res, regress, old = {}, [], []
+    res, regress, old, flaky = {}, [], [], []
     for n in tests:
         if n in SKIP: res[n] = {'skip': SKIP[n]}; say('     skip %s: %s' % (n, SKIP[n])); continue
         rc, secs_, fl, tail = run_test(NEW, n, os.path.join(OUT, 'ui', n))
@@ -211,10 +211,12 @@ else:
         if os.path.exists(os.path.join(REF, 'tools', 'ui-tests', n)):
             rc2, s2, fl2, _ = run_test(REF, n, os.path.join(OUT, 'ui-ref', n)); res[n]['ref'] = {'rc': rc2, 'fail': fl2}
             if rc2 != 0 or fl2: old.append(n); say('     old  %s: fails on v%s too (%s)' % (n, REFV, (fl or [tail.strip().splitlines()[-1] if tail.strip() else 'exit %d' % rc])[0][:160])); continue
+        rc3, s3, fl3, _ = run_test(NEW, n, os.path.join(OUT, 'ui-again', n))   # passes on the reference: once more on the new build
+        if rc3 == 0 and not fl3: flaky.append(n); res[n]['again'] = 'passed'; say('     flaky %s: failed once, passed again (%s)' % (n, ' | '.join(fl)[:160])); continue
         regress.append(n); res[n]['tail'] = tail; say('     FAIL %s (exit %d): %s' % (n, rc, ' | '.join(fl)[:400] or tail[-400:]))
     RES['ui'] = res
     step('b UI tests (%d run, %d skipped)' % (len([x for x in res.values() if 'rc' in x]), len([x for x in res.values() if 'skip' in x])), not regress,
-         ('no regression' + ('; %d also fail on v%s: %s' % (len(old), REFV, ', '.join(old)) if old else '')) if not regress else 'regressions: ' + ', '.join(regress))
+         ('no regression' + ('; %d also fail on v%s: %s' % (len(old), REFV, ', '.join(old)) if old else '') + ('; failed once and passed when run again (tests with random numbers): ' + ', '.join(flaky) if flaky else '')) if not regress else 'regressions: ' + ', '.join(regress))
 
 # ---------- the decision ----------
 RES['passed'] = not RES['fail']; RES['finished'] = time.strftime('%Y-%m-%d %H:%M:%S')

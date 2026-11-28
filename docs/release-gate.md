@@ -44,6 +44,7 @@ A later desktop app could download the promoted build by its commit instead (the
 **b) Every UI test** in `tools/ui-tests` (`*.py` and `*_electron.js`, without the helpers)
 - Each test is run with the new build.
 - A failing test is run again on the reference build with the reference's own copy of the test. When it fails there too, it is reported as old, not as a regression.
+- A test that fails on the new build but passes on the reference is run once more on the new build. If it passes then, it is reported as flaky, not as a regression. taskAK's reverb clip, for example, uses random numbers and once came out 0.5 dB off.
 - A new test must pass.
 - `ui-skip.json` lists the few that are not pass/fail tests or need files that are not in the repository, each with its reason.
 
