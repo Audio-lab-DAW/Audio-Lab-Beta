@@ -10,7 +10,7 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 | Step | What | Status |
 |---|---|---|
 | SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | built and tested (57 of 57 on v0.294 + SQ1, 28 Nov 09:40 UTC); waits for the release freeze (the gate's run since 09:11:57 UTC), then released with `tools/engine-lab/sq/sq1_release/release.sh` |
-| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | **claimed** 28 Nov 09:45 UTC; built as an edit script on top of SQ1 while the freeze holds |
+| SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | built and tested (45 of 45 on v0.294 + SQ1 + SQ3, 28 Nov); released after SQ1 with `tools/engine-lab/sq/sq3_release/release.sh` |
 | SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | |
 | SQ4 | The Limiter style "True peak 4x" (Q13: BS.1770 detection with the meter's filter from lane E, 4x final clip); the export safety limiter replaced by it at -1 dBTP (Q14: only exports that would clip change); the export report (Q15: true peak, overs, clipped samples) through lane F's notification or dialog code. Then: sound quality complete | |
 
@@ -52,10 +52,37 @@ The Soft Clipper with Asymmetry not 0: with Hi-Fi on (`clean`), a one-pole DC bl
 - The field: effect `q`, instrument `quality`, song `sq`; missing = follow the song, the song missing = Classic; the stamping rule for new devices.
 - The DC blocker: `y[n] = x[n] - x[n-1] + R*y[n-1]`, `R = 1 - 2*pi*5/sr`, state and arithmetic in double (Chromium's IIRFilterNode runs direct form I in double), output rounded to float, after the Soft Clipper's output gain (after the dry/wet sum), only when Clean and Asymmetry is not 0; the switch takes effect at the next parameter set, the filter's state starts at zero when it is switched in. Classic: no stage at all.
 
+## SQ3: resample once (built; released after SQ1)
+
+### What changes
+- With Hi-Fi on for the song (`S.sq==='clean'`), a buffer whose rate is not the rate it plays at is converted once to that rate, in a worker, and the copy is kept per rate. That covers the built-in sampler and drum sounds (made at 44.1 kHz), bounces (rendered at 44.1 kHz), the stem splitter's 44.1 kHz results, songs saved at another rate, and every clip when an export runs at another rate than the engine.
+- Hi-Fi off (every loaded song, the demos, the Fractals song) is today's path, untouched: the source gets the very same buffer and Chromium interpolates linearly.
+- Nothing new on screen: the Hi-Fi row's tooltip in Settings > Project adds "With Hi-Fi on, sounds made at another sample rate (built-in sounds, bounces, stems, exports at another rate) are converted once with a cleaner method."
+
+### How (no other lane's code changed)
+- `AudioBufferSourceNode.prototype.buffer`'s setter is wrapped (`sqRsPick`): in a Hi-Fi song it hands the node the copy for its context's rate when there is one. Live, a buffer without a copy yet plays as before and its copy is made in the worker for the next time; copies start as soon as a buffer is loaded or made (`BUFS.set` and `SBUF.set` wrapped on the two Map objects), and for every loaded buffer when the song turns Hi-Fi on or a Hi-Fi song is opened (`sqScan` wrapped).
+- Offline renders that make files wait for the worker first: `renderMix`, `renderMixChunked` (lane K's, wrapped, not changed), `bounceRender` and `neuTo44` (the stem splitter's input). During them a buffer made on demand (a drum sound) is converted on the spot by the same function, so a render never depends on timing. Other offline renders (the map's analysis and the like) use a copy if there is one and never convert on the main thread outside an export.
+- The cache is a WeakMap on the original buffer: a copy goes when its buffer goes. `SQ_HOOKS.resample(buffer, rate)` (promise), `SQ_HOOKS.resampleNow(buffer, rate)` and `SQ_HOOKS.warm(rate)` for other lanes.
+
+### Measured (`tools/ui-tests/taskSQ3.py`, the research doc's analyser `alias_report`, a 0.5 sine, the middle second)
+
+| 44.1 kHz buffer in a 48 kHz render | 1 kHz | 5 kHz | 10 kHz | 15 kHz |
+|---|---|---|---|---|
+| Hi-Fi off (linear, as in the research doc) | -62.4 dB | -33.9 dB | -20.4 dB | -11.1 dB |
+| Hi-Fi on (sinc, once) | -119.8 dB | -119.3 dB | -118.0 dB | -127.4 dB |
+| Level, off / on | -0.015 / 0.000 dB | -0.367 / 0.000 dB | -1.456 / 0.000 dB | -3.121 / 0.000 dB |
+
+Other rates, Hi-Fi off / on: 48 to 96 kHz at 10 kHz -18.8 / -140.3 dB, at 20 kHz -4.6 / -105.4 dB; 48 to 44.1 kHz at 10 kHz -22.2 / -118.9 dB; 44.1 to 96 kHz at 15 kHz -11.1 / -127.4 dB. A constant passes within 2e-6. The linear path also loses top end (-1.5 dB at 10 kHz, -3.1 dB at 15 kHz); the sinc keeps it flat to 21 kHz. A 4-minute stereo 44.1 kHz buffer takes about 4.9 s in the worker (3.0 s on the main thread when no worker can start) on the 2-core cloud machine; the main thread stays free.
+
+### What NB must port
+- The resampler (`sqRsBank`, `sqRsRun`): U/D = out rate / in rate reduced by their gcd; fc = min(1, out/in) * 0.96; W = ceil(32/fc); T = 2W taps; for each phase ph in 0..U-1 the taps t = 0..T-1 sit at d = ph/U + (W-1-t), value sinc(fc*d) * I0(10*sqrt(1-(fc*d/32)^2)) / I0(10) when |fc*d| < 32, else 0 (sinc(0) = 1, sin from fdlibm as V8 uses it, I0 the plain series to 1e-21 relative, at most 63 terms), each phase divided by its own sum. Output i reads input taps j = k-W+1+t (0 outside the buffer), k and ph advanced exactly in integers (ph += D; k += floor(ph/U); ph -= that * U); the sum in double in tap order (no FMA), rounded to float once. Output length ceil(n*U/D).
+- When: only in a Hi-Fi song, for a buffer played at another rate than its own; exports convert every buffer first. NB resamples on load the same way and keeps the copy per rate.
+
 ## Decisions taken without asking (the user can change them)
 - New devices start with Hi-Fi on even in an older song (Q0a and the user's "new devices start with Hi-Fi on"), unless the song's Hi-Fi was turned off by hand; the song setting is the default for devices without their own choice (Q0b).
 - The switch shows only on devices whose Hi-Fi sound differs, so it never switches nothing.
 - The Soft Clipper's blocker runs only while Asymmetry is not 0: a symmetric shaper makes no DC (-98.5 dBFS), and the blocker would otherwise shift the phase of the lowest notes for nothing.
 - A device with Hi-Fi on takes later Hi-Fi improvements of that device when the app updates; Hi-Fi off never changes. If the user wants Clean frozen per version too, a version number next to the field can be added later (`SQ.LV` is reserved for it).
 - The demos made from the New project window ("demo", "beat") open with Hi-Fi off: they are the demos.
+- Resampling follows the song's Hi-Fi, not each device's: the same buffer can feed several devices, and a copy per device would double the memory. The pitched reads (SQ3b) will follow the device.
 - The switch sits in the rail rather than the title strip because the user wants its line next to it, and the side strip (28 px, vertical) has no room for a line.

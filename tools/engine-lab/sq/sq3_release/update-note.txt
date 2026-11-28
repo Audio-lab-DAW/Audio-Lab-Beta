@@ -1,0 +1,1 @@
+Hi-Fi songs (vX.XXX): sounds made at another sample rate (built-in sounds, bounces, stems, exports at another rate) are now converted once with a cleaner method, so high notes no longer get a gritty mirror image or lose their top. Songs with Hi-Fi off sound exactly as before.
