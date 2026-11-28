@@ -1,3 +1,4 @@
+# for: task DV-5
 """Task DV-5: display-first devices, step 5: the synths (docs/devices-display-first.md sections 7 and 10).
   python3 tools/ui-tests/taskDV_5.py [index.html] [out dir] [old index.html for the old-project check]
 Checks: the rule (DVIRULE): Venom, Plant, Wavetable, Orbit, Vector FM, Bounce start with the rail open; Saw lead, Square lead, Soft pad, Strings,
