@@ -96,3 +96,7 @@ The pick page is measured and live. In every layout the lanes fill at the true p
 ## The user's picks (28 November 2026, 14:53 Brussels)
 
 `SG1 picks: G1, S1, P1, F1` (all four recommendations): **G1** lanes under the mix, **S1** the notification card with a strip per stem, **P1** the draft stretch at half strength, **F1** a soft scan over the chunk being worked on (a still hatch under Reduce motion). Built by task **SG2**, lane R (prefix `sg`, row in CLAUDE.md), as "Who builds it" above says, with the quick split moved off the main thread. Ends 'stem split lanes complete'.
+
+## Build (task SG2, lane R, prefix `sg`)
+
+- 28 Nov 2026, 14:00 UTC: **step SG2-1 claimed** (the worker posts per-chunk spectrogram columns; `stemSplit` and `neuSeparate` take `onCols`; the quick split moves into a worker). The release gate's freeze (`desktop/release-freeze.json`, since 12:35:47 UTC) holds `index.html`: the steps are built as edit scripts in `tools/edits/` and released when it lifts.
