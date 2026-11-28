@@ -1,0 +1,600 @@
+<title>AudioLab themes, round 2: the eight picks reworked</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,wght@0,600;1,600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a pick sheet in AudioLab's own dark look, like the first theme page. One live stage (the whole app drawn from the chosen
+   version's tokens, with a menu, a dialog, a tooltip and the glass mixer), a wipe to compare any two, the measured numbers of the version
+   on show, the sixteen versions as Settings-row cards grouped by theme, the Settings row itself, every number in one table, what the
+   round 2 rules and tokens are, and the picks bar fixed at the bottom. */
+:root{color-scheme:dark;--bg:#0a0a0c;--pn:#121216;--pn2:#18181d;--ln:#25252c;--ln2:#33333d;--ink:#ececf1;--mut:#a4a8b4;--acc:#3ecf8e;--blue:#6d9dff;--amber:#ffb547;--sel:#f5c84c;--bad:#ff6b6b;--disp:#050507;--bar:#0e0e12;
+ --f:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--h:'Space Grotesk',Inter,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#ffffff}}
+:root[data-theme="light"]{color-scheme:light;--bg:#eef0f3;--pn:#ffffff;--pn2:#f4f5f7;--ln:#dcdfe5;--ln2:#c9cdd5;--ink:#15161a;--mut:#555a66;--acc:#13945c;--blue:#2f6fe0;--amber:#9a5c00;--sel:#8a6a00;--bad:#c8323a;--disp:#0b0c10;--bar:#ffffff}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:13px/1.55 var(--f);padding-block:28px 190px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+.wide{max-width:1632px;margin:44px auto;width:100%}
+h1{font:600 32px/1.1 var(--h);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 21px/1.2 var(--h);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f);margin:0;text-wrap:balance}
+p{margin:0;max-width:78ch}
+ul{margin:0;padding-left:18px;max-width:80ch} li{margin:2px 0}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.eyebrow{font:500 11px var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+a{color:var(--blue)}
+code,.mono{font-family:var(--fm);font-size:12px}
+button,select,input{font:inherit;color:inherit}
+button,select,label{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:4px 10px;font-weight:500;font-size:12px}
+.btn:hover{border-color:var(--mut)}
+header.top{display:flex;flex-direction:column;gap:12px}
+.lede{font-size:15px;line-height:1.6}
+.facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12px;color:var(--mut)}
+.facts b{color:var(--ink);font-weight:500}
+.lab{font:500 10.5px var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+/* stage: always dark around the mock, whatever the page theme, so every theme is judged on the same ground */
+.stage{background:#050507;border:1px solid var(--ln);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0;color:#d7d9e0}
+.stage .lab{color:#9a9eab}
+.tb{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.tb>span.g{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid #33333d;border-radius:7px;overflow:hidden}
+.seg button{background:#15151a;color:#d7d9e0;border:0;border-right:1px solid #33333d;padding:3px 9px;font:500 11.5px var(--f)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#4c8dff;color:#06080c}
+.stage select{background:#15151a;color:#d7d9e0;border:1px solid #33333d;border-radius:7px;padding:3px 6px;font-size:12px;max-width:100%}
+.throw{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.thb{flex:none;display:flex;align-items:center;gap:7px;background:#15151a;border:1px solid #33333d;border-radius:8px;padding:4px 10px 4px 5px;color:#d7d9e0;font:500 12px var(--f);white-space:nowrap}
+.thb img{width:24px;height:24px;border-radius:6px;flex:none;display:block}
+.thb b{font:600 12px var(--fm);color:#ffb547}
+.thb.on{border-color:#4c8dff;box-shadow:inset 0 0 0 1px #4c8dff;color:#fff}
+.cvscroll{overflow-x:auto;border-radius:6px;min-width:0}
+.cvwrap{position:relative;width:100%;min-width:0;touch-action:pan-y}
+.cvwrap.full{width:1600px}
+.cvwrap canvas{display:block;width:100%;height:auto;border-radius:6px}
+#fade{position:absolute;inset:0;pointer-events:none;opacity:0}
+#fade.go{transition:opacity .2s ease-out}
+.cvwrap.cmp{cursor:ew-resize}
+.note{font:500 11px var(--fm);color:#9a9eab;display:flex;flex-wrap:wrap;gap:4px 18px}
+.note b{color:#ececf1;font-weight:500}
+.dock{display:flex;gap:8px;align-items:center}
+.dock img{width:40px;height:40px;border-radius:9px;display:block}
+/* measurements */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.box h3{font-size:14px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:12px;width:100%}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--ln);white-space:nowrap;font-variant-numeric:tabular-nums;vertical-align:middle}
+th{font:500 10.5px var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+td.wrapc{white-space:normal;min-width:200px}
+tr.cur td{background:var(--pn2)}
+tr.grp td{border-bottom:0;padding-top:12px;font-weight:600}
+.ok{color:var(--acc)} .bad{color:var(--bad)} .base{color:var(--amber)}
+.pill{display:inline-block;font:600 10.5px var(--fm);padding:1px 6px;border-radius:9px;border:1px solid currentColor}
+.sample{display:inline-flex;align-items:center;justify-content:center;min-width:58px;height:22px;padding:0 7px;border-radius:4px;font:500 11px var(--f);border:1px solid rgba(128,128,128,.25)}
+.sw{display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:middle;border:1px solid rgba(128,128,128,.3)}
+.swrow{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.cvd{display:grid;grid-template-columns:auto 1fr auto;gap:5px 12px;align-items:center;font-size:12px}
+.fit{font:12px/1.5 var(--fm);display:flex;flex-direction:column;gap:3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12px}
+.kv span:nth-child(odd){color:var(--mut)}
+/* theme groups and cards */
+.group{display:grid;grid-template-columns:minmax(0,210px) minmax(0,1fr);gap:14px 20px;padding-top:18px;border-top:1px solid var(--ln)}
+.group .gh{display:flex;flex-direction:column;gap:8px;min-width:0}
+.group .gh .ic{display:flex;gap:8px}
+.group .gh img{width:52px;height:52px;border-radius:12px;display:block}
+.group .gh .let{font:600 12px var(--fm);color:var(--amber)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;min-width:0}
+@media (max-width:760px){.group{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:10px;display:flex;flex-direction:column;min-width:0}
+.card.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.card .thumbs{display:flex;gap:10px;padding:12px 12px 0;flex-wrap:wrap}
+.card .cb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:7px;flex:1}
+.card .hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card .code{font:600 12px var(--fm);color:var(--amber)}
+.card h3{font-size:14px}
+.stars{color:var(--sel);font-size:12px;letter-spacing:1px;margin-left:auto}
+.card ul{font-size:12px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font:500 10.5px var(--fm);color:var(--mut);border:1px solid var(--ln2);border-radius:5px;padding:0 5px;white-space:nowrap}
+.tag.ok,.tag.base{border-color:currentColor}
+.tag.ok{color:var(--acc)} .tag.base{color:var(--amber)}
+.card .ft{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:12px;margin-left:auto}
+.chk input{width:15px;height:15px;accent-color:var(--blue)}
+/* the Settings row thumbnail: exactly what Settings would show, 168 x 96 picture plus a caption */
+.srow{border:0;padding:0;background:none;display:flex;flex-direction:column;gap:5px;text-align:left;width:168px;flex:none}
+.srow canvas{display:block;width:168px;height:96px;border-radius:8px;border:1px solid rgba(128,128,128,.35)}
+.srow .cap{display:flex;align-items:center;gap:6px;font:500 11.5px var(--f);min-width:0}
+.srow .cap img{width:16px;height:16px;border-radius:4px;flex:none}
+.srow .cap span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .cap small{font:500 10px var(--fm);color:var(--mut);margin-left:auto;flex:none}
+/* Settings mock (drawn in the theme on show) */
+.setw{border-radius:12px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;min-width:0;border:1px solid var(--s-line);background:var(--s-panel);color:var(--s-ink);font-family:Inter,system-ui,sans-serif}
+.setw .st{font-weight:600;font-size:15px}
+.setw .sl{color:var(--s-lab);font-size:12px}
+.setw .row{display:flex;gap:14px 12px;flex-wrap:wrap;padding:4px 2px 8px}
+.setw .srow{color:var(--s-ink)} .setw .srow .cap small{color:var(--s-mut)}
+.setw .srow.on canvas{outline:2px solid var(--s-sel);outline-offset:2px}
+.setw .srow.on .cap span::after{content:" ✓"}
+.setw .opts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:12.5px;align-items:center}
+.setw .sw2{display:inline-block;width:28px;height:16px;border-radius:8px;background:var(--s-fill);position:relative;vertical-align:-3px;margin-right:6px}
+.setw .sw2::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--s-on)}
+/* picks bar: solid, no blur */
+.picks{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);border-top:1px solid var(--ln2);
+ padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picks .in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.picks .sels{display:flex;flex-wrap:wrap;gap:6px}
+.picks .line{flex:1 1 380px;min-width:0;font:500 12.5px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:6px 10px;overflow-x:auto;white-space:nowrap;user-select:all}
+.picks select{background:var(--pn2);border:1px solid var(--ln2);border-radius:7px;padding:3px 4px;font-size:12px}
+@media (max-width:700px){.picks .sels{display:none}body{padding-bottom:150px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <!-- Machado, Oliveira and Fernandes 2009, severity 1.0; SVG filters work in linear RGB by default, which is where the matrices apply -->
+ <filter id="cvd-protan"><feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-deutan"><feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.011820 0.042940 0.968881 0 0  0 0 0 1 0"/></filter>
+ <filter id="cvd-tritan"><feColorMatrix type="matrix" values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.303900 0 0  0 0 0 1 0"/></filter>
+</svg>
+
+<div class="wrap">
+<header class="top">
+ <div class="eyebrow">Task TH2 · round 2 · 28 November 2026</div>
+ <h1>AudioLab themes, round 2: the eight picks reworked</h1>
+ <p class="lede">Your eight themes, each redrawn in two versions that sit closer to their source. Everything is still done with tokens only: colours, hairlines, the grid, type accents and the glass tint. Every version was measured again, with stricter rules than round 1. Choose one version per theme, then copy the line at the bottom.</p>
+ <div class="facts" id="facts"></div>
+</header>
+</div>
+
+<div class="wide">
+<section>
+ <div class="stage" id="stage">
+  <div class="throw" id="throw" role="tablist" aria-label="Theme"></div>
+  <div class="tb">
+   <span class="g"><span class="lab">Version</span><span class="seg" id="ver"></span></span>
+   <span class="g" id="modeG" hidden><span class="lab">Appearance</span><span class="seg" id="mode"><button type="button" data-m="dark">Dark</button><button type="button" data-m="light">Light</button></span></span>
+   <span class="g"><span class="lab">Compare with</span><select id="cmpSel" aria-label="Compare with another version"></select></span>
+   <span class="g"><span class="lab">See as</span><span class="seg" id="vis"><button type="button" class="on" data-v="normal">Normal</button><button type="button" data-v="protan">Protan</button><button type="button" data-v="deutan">Deutan</button><button type="button" data-v="tritan">Tritan</button></span></span>
+  </div>
+  <div class="tb">
+   <span class="g"><span class="lab">Glass</span><span class="seg" id="glass"><button type="button" class="on" data-g="theme">Version's tint</button><button type="button" data-g="half">Today's 50 %</button><button type="button" data-g="solid">Solid</button></span></span>
+   <span class="g"><span class="lab">Menu, dialog, tooltip</span><span class="seg" id="ovl"><button type="button" class="on" data-o="1">Shown</button><button type="button" data-o="0">Hidden</button></span></span>
+   <span class="g"><span class="lab">Meters</span><span class="seg" id="mot"><button type="button" data-t="live">Moving</button><button type="button" data-t="still">Still</button></span></span>
+   <span class="g"><span class="lab">Size</span><span class="seg" id="size"><button type="button" class="on" data-z="fit">Fit</button><button type="button" data-z="full">100 %</button></span></span>
+   <span class="dock" id="dock" aria-label="App icon that follows this theme"></span>
+  </div>
+  <div class="cvscroll"><div class="cvwrap" id="cvwrap"><canvas id="cv" width="1600" height="806" aria-label="The whole app drawn in the chosen version: arrangement with clips, the glass mixer, devices with their displays, a context menu, an export dialog and a tooltip"></canvas><canvas id="fade" width="16" height="8" aria-hidden="true"></canvas></div></div>
+  <div class="tb" id="wipeRow" hidden><span class="lab" id="wipeL"></span><input type="range" id="wipe" min="0" max="100" value="50" style="flex:1;min-width:120px" aria-label="Wipe position between the two versions"><span class="lab" id="wipeR"></span></div>
+  <div class="note" id="stNote"></div>
+  <div class="note" id="rmNote"></div>
+ </div>
+</section>
+</div>
+
+<div class="wrap">
+<section id="meas">
+ <div><div class="eyebrow" id="mEy">Measured</div><h2 id="mH">Readability of the version</h2></div>
+ <p class="mut" id="mDesc"></p>
+ <div class="grid2">
+  <div class="box" style="grid-column:1/-1"><h3>Every rule, worst pair shown</h3><p class="sm mut">Each rule checks its token against every surface it can sit on, including glass over the brightest and darkest clip. The worst pair is shown; the count says how many pairs were checked. Text needs both the WCAG ratio and the APCA level; controls and graphics need 3 : 1 (WCAG 1.4.11).</p><div class="tbl"><table id="mRules"></table></div></div>
+  <div class="box"><h3>Track colours under colour-vision deficiency</h3><p class="sm mut">Smallest CIEDE2000 difference between any two of the eight track colours, simulated with Machado 2009. 10 and up is colour-blind friendly, under 6 fails.</p><div class="cvd" id="mCvd"></div></div>
+  <div class="box"><h3>Meaning colours kept apart</h3><p class="sm mut">Selection, record, playhead and the accent must never be mistaken for each other (CIEDE2000).</p><div class="tbl"><table id="mDist"></table></div></div>
+  <div class="box"><h3>Glass</h3><div id="mGlass" class="kv"></div><p class="sm mut">The floor is the lowest tint at which main text, labels and quiet text still pass over the brightest clip behind the glass. The glass engine draws all glass (refraction, edge, blur); a theme only sets the tint colour and its strength, never below the floor. Nothing here uses backdrop-filter.</p></div>
+  <div class="box"><h3>What the readability fit changed</h3><p class="sm mut">Colours as drawn by hand, then fitted: only lightness moves, hue stays. Track colours were tuned inside small limits for colour-vision safety.</p><div class="fit" id="mFit"></div></div>
+  <div class="box"><h3>Clip titles</h3><p class="sm mut">The title ink on each clip is picked per clip (theme ink, near black or white). Shown on the plain lane; all three lanes are measured.</p><div id="mClips" class="swrow"></div></div>
+  <div class="box"><h3>Style tokens</h3><p class="sm mut">Everything a version sets besides colours.</p><div id="mStyle" class="kv"></div></div>
+ </div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Sixteen versions</div><h2>Choose one per theme</h2></div>
+ <p class="mut">Each picture is the thumbnail as the Theme row in Settings would show it, at its real size. Click one to load that version in the stage above. Stars are my recommendations; five stars is the version I would ship for that theme. B2 here means version 2 of Chart paper, not the dropped night theme.</p>
+ <div id="groups" style="display:flex;flex-direction:column;gap:22px"></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">Settings</div><h2>The Theme row, with your current picks</h2></div>
+ <p class="mut">Drawn in the version on show. The row follows the picks bar: change a pick below and it changes here.</p>
+ <div class="setw" id="setw"></div>
+</section>
+
+<section>
+ <div><div class="eyebrow">All numbers</div><h2>Every version at a glance</h2></div>
+ <div class="tbl"><table id="allTbl"></table></div>
+ <p class="sm mut">Worst pair per row. Text: WCAG ratio and APCA Lc. Track ΔE: smallest CIEDE2000 between two track colours under normal, protan, deutan and tritan vision. Measured with <code>tools/design-lab/th2/check.py</code>; <code>check.py --gate</code> is the release-gate form.</p>
+</section>
+
+<section>
+ <div><div class="eyebrow">Round 2</div><h2>What changed in the rules and the tokens</h2></div>
+ <div class="grid2">
+  <div class="box"><h3>Seven more rules than round 1</h3><ul class="sm">
+   <li><b>Filled buttons</b> are measured on their own token and against the panel they sit on. In dark themes one blue could not be both a readable line and a fill for white text; splitting it closes today's white-on-blue miss without changing the blue you see on lines and arcs.</li>
+   <li><b>Clip edges</b> must keep 3 : 1 on the selected lane too.</li>
+   <li><b>Clip titles</b> are a rule now (4.5 : 1 and Lc 60 on the title band, all three lanes). Today's app reaches Lc 44 on its green clips.</li>
+   <li><b>Play and "on" green on panels</b>: round 1 only measured green inside displays, and it was too pale on paper.</li>
+   <li><b>Tooltip</b> text and its outline.</li>
+   <li><b>Halation</b>: main text in a dark theme is never pure white.</li>
+   <li><b>Glass</b>: the tint is at or above the measured floor.</li></ul></div>
+  <div class="box"><h3>New tokens</h3><ul class="sm">
+   <li><code>accentFill</code> filled buttons, <code>okS</code> green on panels, <code>selFill</code> the selection's fill (a yellow highlighter in the paper themes, so yellow still means selected), <code>tip</code> <code>tipInk</code> <code>tipEdge</code> tooltips.</li>
+   <li>Style tokens, the only non-colour things a theme may set: capitals for section labels, the numeral face, the title face, dashed minor lines, clip outline width, the strength of the clip title band, the strength of the minor grid.</li>
+   <li>Two extra faces would ship with the app for the type accents: IBM Plex Mono (Space Race read-outs) and Source Serif 4 (Chart paper and Patent drawing titles). Body text stays Inter everywhere.</li></ul></div>
+  <div class="box"><h3>Kept from round 1</h3><ul class="sm">
+   <li>Device displays stay dark wells in every theme, the light ones included.</li>
+   <li>Meanings never change: record and over are red, units amber, ok green, selection yellow (only H1 moves it, because its accent is gold).</li>
+   <li>Glass thickens before text gets whiter. In round 2 quiet text may rise a little first, so most dark versions sit at 60 to 70 % instead of 80 to 85 %.</li>
+   <li>Appearance pairs: E2 and J2 each carry a second half for following the system's light or dark setting.</li></ul></div>
+  <div class="box" id="rmBox"><h3>Reduced motion</h3><ul class="sm" id="rmList"></ul></div>
+ </div>
+ <div class="box"><h3>The readability rules of round 2</h3><div class="tbl"><table id="rulesTbl"></table></div></div>
+</section>
+</div>
+
+<div class="picks" role="region" aria-label="Your picks">
+ <div class="in">
+  <div class="sels" id="pSels"></div>
+  <span class="lab">Default</span><select id="pDef" aria-label="Default theme"></select>
+  <div class="line" id="line"></div>
+  <button type="button" class="btn" id="copy">Copy</button>
+ </div>
+</div>
+
+<script>
+const DATA=/*@DATA@*/null;
+const ICONS=/*@ICONS@*/{};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const TH=DATA.themes, byId=Object.fromEntries(TH.map(t=>[t.id,t]));
+const BASES=[['A','Orbit night'],['B','Chart paper'],['C','Space Race'],['D','Chalkboard'],['E','Blueprint'],['G','Cutaway nucleus'],['H','Rutherford scattering'],['J','Patent drawing']];
+const NEWR=['U1b','U6s','T12','U10','T7','U8'];
+const GROUPNOTE={A:'The default. Round 1 left it untouched with five known misses. A1 closes them without changing what you know; A2 leans into the icons\' navy. A0 is today, still pickable.',
+ B:'Light. From the chart-paper icons: paper, navy ink, nucleus orange, electron blue.',C:'Dark. From the space-race and three-rings icons.',D:'Dark. From the chalkboard and science-fair icons.',
+ E:'Dark, with a light half in E2. From the blueprint icon.',G:'Dark. From the cutaway-nucleus icon.',H:'Dark. From the Rutherford scattering icon.',J:'The lightest theme, with a dark half in J2. From the patent-drawing icon.'};
+const versions=b=>TH.filter(t=>t.base===b&&!t.partner);
+const short=t=>t.name.split(', ').slice(1).join(', ')||t.name;
+/* ---------- colour helpers ---------- */
+const hx=c=>{c=c.replace('#','');if(c.length===3)c=[...c].map(x=>x+x).join('');return[0,2,4].map(i=>parseInt(c.slice(i,i+2),16))};
+const toHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v*t+B[i]*(1-t)))};
+const rgba=(c,a)=>{const v=hx(c);return`rgba(${v[0]},${v[1]},${v[2]},${a})`};
+const lin=v=>(v/=255)<=.04045?v/12.92:((v+.055)/1.055)**2.4;
+const lum=c=>{const[r,g,b]=hx(c).map(lin);return .2126*r+.7152*g+.0722*b};
+const wc=(a,b)=>{let x=lum(a),y=lum(b);if(x<y)[x,y]=[y,x];return(x+.05)/(y+.05)};
+const dark=c=>lum(c)<.18;
+const M={protan:[[.152286,1.052583,-.204868],[.114503,.786281,.099216],[-.003882,-.048116,1.051998]],deutan:[[.367322,.860646,-.227968],[.280085,.672501,.047413],[-.01182,.04294,.968881]],tritan:[[1.255528,-.076749,-.178779],[-.078411,.930809,.147602],[.004733,.691367,.3039]]};
+const gam=v=>{v=Math.max(0,Math.min(1,v));return(v<=.0031308?12.92*v:1.055*v**(1/2.4)-.055)*255};
+const sim=(c,k)=>{if(k==='normal')return c;const v=hx(c).map(lin),m=M[k];return toHex(m.map(r=>gam(r[0]*v[0]+r[1]*v[1]+r[2]*v[2])))};
+const shade=(c,k)=>k>0?mix('#ffffff',c,k):mix('#000000',c,-k);
+const bestInk=(t,body)=>[t.ink,'#101114','#ffffff'].reduce((a,b)=>wc(b,body)>wc(a,body)?b:a);
+
+/* ---------- fonts and icons ---------- */
+const FU='Inter,system-ui,-apple-system,"Segoe UI",sans-serif';
+const FNUM={mono:'"JetBrains Mono",ui-monospace,Menlo,monospace',plex:'"IBM Plex Mono","JetBrains Mono",ui-monospace,Menlo,monospace',ui:FU};
+const FTTL={ui:['',FU],serif:['','"Source Serif 4",Georgia,"Times New Roman",serif'],serifItalic:['italic ','"Source Serif 4",Georgia,"Times New Roman",serif']};
+const IMG={};for(const k in ICONS){const i=new Image();i.src=ICONS[k];IMG[k]=i}
+
+/* ---------- the mock: the whole app at 1600 x 806, drawn only from the version's tokens ---------- */
+const W=1600,H=806;
+const TRK=['Kick','Bass','Clap','Snare','Hat','Open hat','Percussion','Lead'];
+function rr(x,c,X,Y,w,h,r){x.beginPath();x.roundRect?x.roundRect(X,Y,w,h,r):x.rect(X,Y,w,h);if(c){x.fillStyle=c;x.fill()}}
+function txt(x,s,X,Y,col,size,wt,al,fam,track){x.fillStyle=col;x.font=`${wt||400} ${size||11}px ${fam||FU}`;x.textBaseline='middle';
+ if(!track){x.textAlign=al||'left';x.fillText(s,X,Y);return x.measureText(s).width}
+ const sp=track*(size||11),ws=[...s].map(ch=>x.measureText(ch).width),tw=ws.reduce((a,b)=>a+b,0)+sp*(s.length-1);let x0=al==='center'?X-tw/2:al==='right'?X-tw:X;x.textAlign='left';
+ [...s].forEach((ch,i)=>{x.fillText(ch,x0,Y);x0+=ws[i]+sp});return tw}
+function draw(cv,th,o){
+ o=o||{};const t=th.t,P=th.pal,S=th.style,x=cv.getContext('2d'),s=cv.width/W;x.setTransform(s,0,0,s,0,0);x.filter='none';x.globalAlpha=1;x.setLineDash([]);
+ const isL=th.mode==='light',FN=FNUM[S.fNum]||FNUM.mono,FT=FTTL[S.fTitle]||FTTL.ui,meters=o.meters||[];
+ const hp=Math.max(.5,1/s),px=v=>Math.round(v*s)/s;                                         // one device pixel, and snapping to it (W1 hairlines)
+ const gr=a=>`rgba(${t.grid},${Math.min(1,a*t.gridK)})`;
+ const vline=(X,Y,h,c)=>{x.fillStyle=c;x.fillRect(px(X),Y,hp,h)},hline=(X,Y,w,c)=>{x.fillStyle=c;x.fillRect(X,px(Y),w,hp)};
+ const dashV=(X,Y,h,c)=>{x.fillStyle=c;for(let y=Y;y<Y+h;y+=5)x.fillRect(px(X),y,hp,Math.min(3,Y+h-y))};
+ const num=(v,X,Y,col,size,al,wt)=>txt(x,v,X,Y,col,size||11,wt||500,al,FN);
+ const lbl=(v,X,Y,col,size,al,wt)=>S.caps?txt(x,v.toUpperCase(),X,Y,col,(size||10.5)*.9,600,al,FU,.07):txt(x,v,X,Y,col,size||10.5,wt||500,al);
+ const ttl=(v,X,Y,col,size,al)=>{x.fillStyle=col;x.font=`${FT[0]}600 ${size||12}px ${FT[1]}`;x.textAlign=al||'left';x.textBaseline='middle';x.fillText(v,X,Y);return x.measureText(v).width};
+ const valUnit=(v,u,X,Y,ink,unit,size,al)=>{size=size||11;x.font=`500 ${size}px ${FN}`;const a=x.measureText(v).width+size*.32;x.font=`600 ${size*.86}px ${FU}`;const b=x.measureText(u).width;
+  const x0=al==='center'?X-(a+b)/2:al==='right'?X-a-b:X;txt(x,v,x0,Y,ink,size,500,'left',FN);txt(x,u,x0+a,Y+size*.03,unit,size*.86,600);return a+b};
+ const line=(c)=>{x.strokeStyle=c||t.line;x.lineWidth=hp};
+ const meter=(X,Y,w,h,lv,o2)=>{rr(x,t.display,X,Y,w,h,Math.min(3,w/2));const g=x.createLinearGradient(0,Y+h,0,Y);g.addColorStop(0,t.m0);g.addColorStop(.5,t.m1);g.addColorStop(.8,t.m2);g.addColorStop(.93,t.m3);g.addColorStop(1,t.m3);
+  const n=o2&&o2.one?1:2,bw=(w-4-(n-1))/n;for(let k=0;k<n;k++){const l=Math.max(0,Math.min(1,lv*(k?.93:1)));x.fillStyle=g;x.fillRect(X+2+k*(bw+1),Y+2+(h-4)*(1-l),bw,(h-4)*l)}
+  if(o2&&o2.over){x.fillStyle=t.m3;x.fillRect(X+2,Y+2,w-4,3)}};
+ const M2=(X,Y,w,h,lv,o2)=>{meter(X,Y,w,h,lv,o2);meters.push([X,Y,w,h,lv,o2])};
+ const knob=(cx,cy,r,f)=>{x.lineCap='round';x.lineWidth=3;x.strokeStyle=isL?mix(t.ink,t.panel,.22):mix(t.ink,t.panel,.2);x.beginPath();x.arc(cx,cy,r,Math.PI*.75,Math.PI*2.25);x.stroke();x.strokeStyle=t.accent;x.beginPath();x.arc(cx,cy,r,Math.PI*.75,Math.PI*(.75+1.5*f));x.stroke();
+  const a=Math.PI*(.75+1.5*f);x.strokeStyle=t.ink;x.lineWidth=1.6;x.beginPath();x.moveTo(cx+Math.cos(a)*(r-7),cy+Math.sin(a)*(r-7));x.lineTo(cx+Math.cos(a)*(r-2),cy+Math.sin(a)*(r-2));x.stroke();x.lineCap='butt'};
+ const focus=(X,Y,w,h,r)=>{x.lineWidth=2;x.strokeStyle=t.focusOut;rr(x,null,X-4,Y-4,w+8,h+8,r+4);x.stroke();x.strokeStyle=t.focusIn;rr(x,null,X-2,Y-2,w+4,h+4,r+2);x.stroke()};
+ const btn=(lab2,X,Y,w,h,kind)=>{const on=kind==='on',rec=kind==='rec';rr(x,on?t.accentFill:rec?t.rec:t.panel2,X,Y,w,h,4);if(!on&&!rec){line(mix(t.ink,t.line,isL?.12:.1));rr(x,null,X+hp/2,Y+hp/2,w-hp,h-hp,4);x.stroke()}
+  txt(x,lab2,X+w/2,Y+h/2+.5,on?t.onAccent:rec?bestInk(t,t.rec):kind==='dis'?t.dis:t.lab,Math.min(10.5,h*.62),600,'center')};
+ const titleInk=(i,lane)=>{const r=(th.m.titles||[]).find(q=>q.i===i&&q.lane===lane);return r?r.ink:t.ink};
+
+ // ---- backgrounds and top bar
+ x.fillStyle=t.bg;x.fillRect(0,0,W,H);
+ x.fillStyle=t.chrome;x.fillRect(0,0,W,34);
+ const ic=IMG[th.icons[0]];if(ic&&ic.complete&&ic.naturalWidth)x.drawImage(ic,8,5,24,24);
+ rr(x,t.panel2,40,6,150,22,6);txt(x,'Fractals_remake',50,17,t.ink,11.5,500);txt(x,'×',178,17,t.mut,12,500,'center');
+ line(mix(t.ink,t.line,.15));rr(x,null,196.5,6.5,21,21,5);x.stroke();txt(x,'+',207,17,t.lab,13,500,'center');
+ num('00:00',230,17,t.mut,10.5);
+ ['Snap','Loop','Click','Count','Follow'].forEach((n,i)=>{const X=1300+i*58,on=i===1;rr(x,on?t.accentFill:null,X,7,52,20,5);if(!on){line(mix(t.ink,t.line,.18));rr(x,null,X+.5,7.5,51,19,5);x.stroke()}lbl(n,X+26,17.5,on?t.onAccent:t.lab,10.5,'center')});
+ hline(0,34-hp,W,mix(t.line,t.chrome,.6));
+ // ---- ruler and sections
+ const X0=190,BW=44,TY=72,THh=58,sel=1;
+ x.fillStyle=t.ruler;x.fillRect(0,34,W,24);
+ rr(x,rgba(t.accent,isL?.22:.3),X0+8*BW,34,8*BW,5,0);x.fillStyle=t.accent;x.fillRect(X0+8*BW,34,2,9);x.fillRect(X0+16*BW-2,34,2,9);
+ for(let b=0;b<32;b++){const X=X0+b*BW;vline(X,b%4?50:42,b%4?8:16,gr(b%4?.3:.5));if(b%4===0)num(String(b+1),X+4,47,t.rulerTxt,10.5)}
+ lbl('Tracks',10,46,t.mut,10.5);rr(x,t.panel2,74,38,62,16,4);lbl('Controls',105,46.5,t.lab,10,'center');
+ x.fillStyle=t.lane1;x.fillRect(X0,58,W,14);x.fillStyle=t.panel;x.fillRect(0,58,X0,14);
+ [['Intro',0,4],['Kick and bass',4,8],['Drop 1',8,14],['Groove',14,20],['Break',20,24],['Peak',24,32]].forEach(([n,a,b],i)=>{const c=P[(i*3)%8],X=X0+a*BW;rr(x,rgba(c,isL?.2:.3),X+1,59,(b-a)*BW-2,12,2);x.fillStyle=c;x.fillRect(X+1,59,2,12);txt(x,n,X+8,65.5,t.ink,9.5,500)});
+ // ---- tracks: headers and lanes
+ for(let i=0;i<8;i++){const Y=TY+i*THh,c=P[i];
+  x.fillStyle=i===sel?t.laneSel:(i%2?t.lane1:t.lane0);x.fillRect(X0,Y,W-X0,THh);
+  x.fillStyle=t.panel;x.fillRect(0,Y,X0,THh);
+  if(i===sel){x.fillStyle=rgba(t.selFill,isL?.34:.13);x.fillRect(0,Y,X0,THh);x.fillStyle=t.sel;x.fillRect(0,Y,3,THh)}
+  x.fillStyle=c;x.fillRect(i===sel?4:0,Y+2,4,THh-4);
+  num(String(i+1),14,Y+15,t.mut,10.5);txt(x,TRK[i],30,Y+15,t.ink,12,500);
+  valUnit(['-1.9','-3.2','-6.0','-4.4','-9.1','-12.0','-7.5','-2.8'][i],'dB',30,Y+38,t.ink,t.unit,10.5);
+  ['M','S','R'].forEach((b,k)=>btn(b,96+k*24,Y+29,20,17,(i===3&&k===0)?'on':(i===7&&k===2)?'rec':''));
+  M2(174,Y+7,9,THh-14,[.72,.66,.4,.55,.35,.2,.48,.6][i]);
+  hline(0,Y+THh-hp,W,t.line)}
+ // ---- G3 drafting grid in W1 hairlines
+ for(let b=0;b<=32*4;b++){const X=X0+b*BW/4;if(b%16===0)vline(X,TY,THh*8,gr(.32));else if(b%4===0)vline(X,TY,THh*8,gr(.17));else (S.dash?dashV:vline)(X,TY,THh*8,gr(.07*S.gridMinor))}
+ for(let i=0;i<8;i++)for(let q=1;q<4;q++)hline(X0,TY+i*THh+q*THh/4,W-X0,gr(.03*S.gridMinor));
+ vline(X0,34,TY+THh*8-34,t.line);
+ // ---- clips
+ for(let i=0;i<8;i++){const Y=TY+i*THh,c=P[i],lane=i===sel?'laneSel':(i%2?'lane1':'lane0'),bg=t[lane],body=mix(c,bg,t.clipA),ink=titleInk(i,lane),solid=t.clipA>=.6;
+  const wave=solid?rgba(ink,.62):isL?c:shade(c,.3);
+  for(let b=(i<2?0:4)+(i%3);b<32;b+=i<2?2:4){const X=X0+b*BW+1,w=(i<2?2:i===4?2:3)*BW-2;if(X>W)break;
+   rr(x,body,X,Y+2,w,THh-5,3);
+   if(S.clipHead>0){x.save();rr(x,null,X,Y+2,w,THh-5,3);x.clip();x.fillStyle=rgba(c,S.clipHead);x.fillRect(X,Y+2,w,14);x.restore()}
+   x.strokeStyle=c;x.lineWidth=S.edgeW;rr(x,null,X+S.edgeW/2,Y+2+S.edgeW/2,w-S.edgeW,THh-5-S.edgeW,3);x.stroke();
+   txt(x,`${TRK[i]} ${b+1}`,X+6,Y+9.5,ink,10,500);
+   x.fillStyle=wave;const mid=Y+17+(THh-23)/2,amp=(THh-27)/2;
+   if(i===6||i===7){for(let n=0;n<6;n++)x.fillRect(X+6+n*(w-12)/6,Y+21+((n*7+i)%5)*6,(w-12)/8,3)}
+   else for(let k=0;k<w-10;k+=2){const a=amp*(.18+.82*Math.abs(Math.sin(k*.21+i)*Math.cos(k*.07+b)))*(i<2&&k%22<8?1:.6);x.fillRect(X+5+k,mid-a,1.1,a*2)}
+   if(i===4&&b===12){x.fillStyle=rgba(t.selFill,isL?.38:.14);rr(x,null,X,Y+2,w,THh-5,3);x.fill();x.strokeStyle=t.sel;x.lineWidth=2;rr(x,null,X-.5,Y+1.5,w+1,THh-4,4);x.stroke()}
+  }}
+ // ---- playhead
+ const PX=px(X0+26.4*BW);x.fillStyle=t.ph;x.fillRect(PX,34,1.5,TY+THh*8-34);x.beginPath();x.moveTo(PX-5,34);x.lineTo(PX+6.5,34);x.lineTo(PX+.75,42);x.fill();
+ // ---- device panel
+ const DY=TY+THh*8+4;x.fillStyle=t.bg;x.fillRect(0,DY-4,W,4);x.fillStyle=t.panel;x.fillRect(0,DY,W,184);hline(0,DY,W,t.line);
+ x.fillStyle=t.panel2;x.fillRect(0,DY+hp,180,184-hp);ttl('Modulators',12,DY+17,t.ink,12.5);rr(x,t.panel,102,DY+8,62,17,4);lbl('Macros',133,DY+17,t.lab,10,'center');
+ ['Add an LFO, envelope or step','modulator, then click a knob','to make it move.'].forEach((l,k)=>txt(x,l,12,DY+44+k*15,t.mut,10.5,500));
+ btn('+ LFO',12,DY+100,50,18,'');btn('+ Env',68,DY+100,50,18,'');btn('Steps',124,DY+100,44,18,'dis');
+ // channel tile
+ rr(x,t.strip,192,DY+10,140,166,8);ttl('Kick & Bass',204,DY+25,t.ink,12.5);lbl('Pan',204,DY+47,t.lab,10.5);txt(x,'C',320,DY+47,t.ink,10.5,500,'right');
+ rr(x,t.display,204,DY+57,116,8,3);x.fillStyle=t.accentD;x.fillRect(261.5,DY+57,2,8);valUnit('-1.9','dB',262,DY+83,t.ink,t.unit,13,'center');
+ btn('A',204,DY+101,56,18,'on');btn('B',264,DY+101,56,18,'');
+ btn('Undo bounce',204,DY+125,116,18,'dis');txt(x,'nothing to undo',262,DY+158,t.dis,9.5,500,'center');
+ // compressor: frame strip and display well
+ const CX=346;rr(x,t.panel2,CX,DY+10,24,166,6);x.save();x.translate(CX+12.5,DY+93);x.rotate(-Math.PI/2);ttl('Compressor',0,0,t.lab,11.5,'center');x.restore();
+ const dX=CX+30,dY=DY+10,dW=270,dH=166,dk=dark(t.display)?'255,255,255':'0,0,0';rr(x,t.display,dX,dY,dW,dH,6);
+ for(let k=1;k<6;k++){vline(dX+k*dW/6,dY+1,dH-2,`rgba(${dk},${k===3?.14:.08})`);hline(dX+1,dY+k*dH/6,dW-2,`rgba(${dk},${k===3?.14:.08})`)}
+ x.strokeStyle=rgba(t.inkD,.28);x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.moveTo(dX+12,dY+dH-10);x.lineTo(dX+dW-12,dY+12);x.stroke();x.setLineDash([]);
+ x.strokeStyle=t.unitD;x.lineWidth=2;x.lineJoin='round';x.beginPath();x.moveTo(dX+12,dY+dH-10);x.lineTo(dX+176,dY+50);x.lineTo(dX+dW-12,dY+30);x.stroke();
+ x.fillStyle=t.selD;x.beginPath();x.arc(dX+176,dY+50,5,0,6.3);x.fill();
+ let wv=valUnit('-10.0','dB',dX+12,dY+15,t.inkD,t.unitD,11);txt(x,'threshold',dX+20+wv,dY+15,rgba(t.inkD,.72),10,500);
+ valUnit('1.5',': 1',dX+dW-12,dY+15,t.inkD,t.unitD,11,'right');
+ rr(x,t.display,dX+dW+8,dY,13,dH-16,3);x.fillStyle=t.warn;x.fillRect(dX+dW+10,dY+2,9,40);
+ M2(dX+dW+25,dY,13,dH-16,.74);
+ lbl('GR',dX+dW+14.5,dY+dH-6,t.mut,8.5,'center');lbl('Out',dX+dW+31.5,dY+dH-6,t.mut,8.5,'center');
+ // controls column
+ const KX=dX+dW+54;txt(x,'Default settings ▾',KX,DY+23,t.ink,11,500);
+ rr(x,t.panel2,KX,DY+37,66,20,5);txt(x,'Change',KX+33,DY+47.5,t.ink,10.5,500,'center');focus(KX,DY+37,66,20,5);
+ [['Ratio','1.5',': 1',.3],['Attack','30','ms',.45],['Release','100','ms',.62]].forEach(([n,v,u,f],k)=>{const cx=KX+18+k*62,cy=DY+104;knob(cx,cy,13,f);lbl(n,cx,DY+78,t.lab,10.5,'center');valUnit(v,u,cx,DY+132,t.ink,t.unit,10.5,'center')});
+ valUnit('-2.4','dB',KX,DY+160,t.ink,t.unit,10.5);txt(x,'gain reduction',KX+46,DY+160,t.mut,10,500);
+ // EQ
+ const EX=KX+212;rr(x,t.panel2,EX,DY+10,24,166,6);x.save();x.translate(EX+12.5,DY+93);x.rotate(-Math.PI/2);ttl('Pro EQ',0,0,t.lab,11.5,'center');x.restore();
+ const eX=EX+30,eY=DY+10,eW=336;rr(x,t.display,eX,eY,eW,166,6);
+ for(let k=1;k<9;k++)vline(eX+k*eW/9,eY+1,164,`rgba(${dk},${k%3===0?.14:.07})`);for(let k=1;k<4;k++)hline(eX+1,eY+k*166/4,eW-2,`rgba(${dk},${k===2?.16:.07})`);
+ x.save();rr(x,null,eX,eY,eW,166,6);x.clip();x.beginPath();x.moveTo(eX,eY+166);for(let k=0;k<=eW;k+=3)x.lineTo(eX+k,eY+150-62*Math.abs(Math.sin(k*.02))*(1-k/430)-10*Math.sin(k*.21)**2);x.lineTo(eX+eW,eY+166);x.closePath();x.fillStyle=rgba(t.accentD,.2);x.fill();x.restore();
+ x.strokeStyle=t.accentD;x.lineWidth=2;x.beginPath();for(let k=0;k<=eW;k+=2){const y=eY+83-26*Math.exp(-(((k-92)/40)**2))+18*Math.exp(-(((k-234)/50)**2));k?x.lineTo(eX+k,y):x.moveTo(eX+k,y)}x.stroke();
+ [[92,-26],[234,18]].forEach(([k,d])=>{x.fillStyle=t.selD;x.beginPath();x.arc(eX+k,eY+83+d,5,0,6.3);x.fill();x.strokeStyle=t.display;x.lineWidth=1.5;x.stroke()});
+ ['100','1k','10k'].forEach((f,k)=>valUnit(f,'Hz',eX+44+k*112,eY+155,rgba(t.inkD,.85),t.unitD,9.5));
+ valUnit('+0.4','dB',eX+eW-10,eY+15,t.overD,t.unitD,11,'right');txt(x,'over',eX+eW-62,eY+15,t.overD,10,600,'right');
+ x.fillStyle=t.ok;x.beginPath();x.arc(eX+14,eY+15,3.5,0,6.3);x.fill();txt(x,'in range',eX+23,eY+15,rgba(t.inkD,.8),10,500);
+ const AX=eX+eW+14;rr(x,null,AX,DY+72,W-AX-14,40,6);x.setLineDash([4,3]);line(mix(t.ink,t.line,.25));x.stroke();x.setLineDash([]);txt(x,'+ Add effect',AX+(W-AX-14)/2,DY+92,t.lab,11,500,'center');
+ // ---- transport
+ const BY=DY+184;x.fillStyle=t.chrome;x.fillRect(0,BY,W,32);hline(0,BY,W,t.line);
+ num('1. 1. 1.  0',60,BY+16,t.ink,12);
+ x.fillStyle=t.lab;x.fillRect(190,BY+10,11,12);x.fillStyle=t.okS;x.beginPath();x.moveTo(214,BY+9);x.lineTo(227,BY+16);x.lineTo(214,BY+23);x.fill();
+ x.fillStyle=t.rec;x.beginPath();x.arc(247,BY+16,6.5,0,6.3);x.fill();
+ valUnit('145','BPM',290,BY+16,t.ink,t.unit,12);num('4/4',364,BY+16,t.ink,12);btn('Tap',398,BY+7,40,18,'');
+ num('0:00:38.400',470,BY+16,t.ink,12);
+ rr(x,rgba(t.accent,.18),1150,BY+5,156,22,5);txt(x,'Mixer',1162,BY+16,t.ink,11,600);valUnit('-10.0','dB',1238,BY+16,t.ink,t.unit,11);
+ valUnit('-8.9','LUFS',1330,BY+16,t.ink,t.unit,11);valUnit('34','%',1432,BY+16,t.ink,t.unit,11);valUnit('42','ms',1490,BY+16,t.ink,t.unit,11);
+ x.fillStyle=t.okS;x.beginPath();x.arc(1560,BY+16,4,0,6.3);x.fill();txt(x,'OK',1570,BY+16.5,t.lab,10,600);
+ // ---- map and help line
+ x.fillStyle=t.bg;x.fillRect(0,BY+32,W,H-BY-32);lbl('Map',10,BY+47,t.lab,10.5);
+ rr(x,t.panel,56,BY+38,1530,18,3);for(let i=0;i<8;i++){x.fillStyle=rgba(P[i],isL?.85:.75);for(let b=(i<2?0:4)+(i%3);b<32;b+=i<2?2:4)x.fillRect(60+b*47,BY+40+i*1.8,(i<2?2:3)*47-3,1.2)}
+ x.strokeStyle=rgba(t.ink,.7);x.lineWidth=1;x.strokeRect(58.5,BY+37.5,820,19);
+ txt(x,'Drag a clip to move it. Hold ⌥ to copy, ⇧ to keep it on the grid.',10,H-11,t.mut,10.5,500);txt(x,'v0.270',W-10,H-11,t.dis,10,500,'right');
+ if(o.base)return;
+
+ // ---- glass: a softened copy of what is behind, the version's tint at its strength, a hairline edge. (In the app the glass engine draws this.)
+ const ga=o.glass==='half'?.5:o.glass==='solid'?1:t.glassA;
+ const glassPanel=(gx,gy,gw,gh,r)=>{
+  const q=8,sm=document.createElement('canvas');sm.width=Math.max(2,Math.ceil(gw/q));sm.height=Math.max(2,Math.ceil(gh/q));const sx=sm.getContext('2d');sx.imageSmoothingEnabled=true;sx.imageSmoothingQuality='high';
+  const mid=document.createElement('canvas');mid.width=sm.width*3;mid.height=sm.height*3;const mx=mid.getContext('2d');mx.imageSmoothingQuality='high';mx.drawImage(cv,gx*s,gy*s,gw*s,gh*s,0,0,mid.width,mid.height);sx.drawImage(mid,0,0,sm.width,sm.height);
+  x.save();x.shadowColor=isL?'rgba(20,20,30,.28)':'rgba(0,0,0,.5)';x.shadowBlur=28;x.shadowOffsetY=10;rr(x,t.bg,gx,gy,gw,gh,r);x.restore();
+  x.save();rr(x,null,gx,gy,gw,gh,r);x.clip();x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(sm,gx-q/2,gy-q/2,gw+q,gh+q);x.fillStyle=rgba(t.glass,ga);x.fillRect(gx,gy,gw,gh);
+  const hg=x.createLinearGradient(0,gy,0,gy+40);hg.addColorStop(0,isL?'rgba(255,255,255,.5)':'rgba(255,255,255,.07)');hg.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=hg;x.fillRect(gx,gy,gw,40);x.restore();
+  x.strokeStyle=isL?rgba(t.ink,.2):'rgba(255,255,255,.16)';x.lineWidth=1;rr(x,null,gx+.5,gy+.5,gw-1,gh-1,r);x.stroke()};
+ // mixer
+ const gx=200,gy=262,gw=704,gh=270;glassPanel(gx,gy,gw,gh,12);
+ ttl('Mixer',gx+14,gy+15,t.ink,12.5);txt(x,'Out: Kick, Bass → Kick & Bass',gx+62,gy+15.5,t.lab,10.5,500);txt(x,'×',gx+gw-16,gy+15,t.mut,13,500,'center');
+ const SW=72;for(let k=0;k<9;k++){const sx=gx+10+k*(SW+4),sy=gy+28,master=k===8,c=master?t.lab:P[k%8],nm=master?'Master':['Kick & Bass','Kick','Bass','Drums','Clap','Snare','Hat','Open hat'][k],sh=gh-38;
+  rr(x,rgba(t.strip,isL?.7:.6),sx,sy,SW,sh,7);x.fillStyle=c;x.fillRect(sx+7,sy,SW-14,2.5);
+  if(k===1){x.fillStyle=rgba(t.selFill,isL?.3:.1);rr(x,null,sx,sy,SW,sh,7);x.fill();x.strokeStyle=t.sel;x.lineWidth=1.5;rr(x,null,sx+.75,sy+.75,SW-1.5,sh-1.5,7);x.stroke()}
+  if(!master)num(String(k+1),sx+7,sy+15,t.mut,9.5);txt(x,nm.length>9?nm.slice(0,8)+'…':nm,sx+(master?7:18),sy+15,t.ink,10.5,600);
+  if(!master){rr(x,t.panel2,sx+5,sy+26,SW-10,16,3);x.fillStyle=t.okS;x.beginPath();x.arc(sx+12.5,sy+34,2.6,0,6.3);x.fill();txt(x,k%3?'Pro EQ':'Comp.',sx+19,sy+34.5,t.lab,10,500)}
+  else{rr(x,t.display,sx+5,sy+26,SW-10,16,3);valUnit('-8.9','LUFS',sx+SW/2,sy+34.5,t.inkD,t.unitD,9.5,'center')}
+  const my0=sy+50,mh2=124;M2(sx+7,my0,15,mh2,master?.86:.35+.5*((k*37)%10)/10,master?{over:1}:null);
+  ['+6','0','-6','-12','-24'].forEach((d,j)=>num(d,sx+41,my0+7+j*27.5,t.mut,8.5,'right'));
+  x.fillStyle=mix(t.ink,t.strip,isL?.3:.28);x.fillRect(sx+55,my0+3,2,mh2-6);rr(x,t.ink,sx+46,my0+30+((k*13)%5)*6,20,8,2);x.fillStyle=t.strip;x.fillRect(sx+48,my0+33.5+((k*13)%5)*6,16,1);
+  valUnit(master?'+0.4':'-1.9','dB',sx+SW/2,my0+mh2+12,master?t.over:t.ink,t.unit,10.5,'center');
+  ['M','S','R'].forEach((b,j)=>btn(b,sx+4+j*22,my0+mh2+23,20,15,(k===2&&j===1)?'on':(k===4&&j===2)?'rec':''))}
+ if(o.overlays===false)return;
+ // ---- context menu (solid)
+ const MX=958,MY=98,MW=228,items=[['Cut','⌘X'],['Copy','⌘C'],['Duplicate','⌘D','hover'],['Paste','⌘V','dis'],['-'],['Colour','','sw'],['Split at playhead','S'],['Bounce in place','⌘B'],['-'],['Delete','⌫']];
+ const mh=items.reduce((a,i)=>a+(i[0]==='-'?9:i[2]==='sw'?30:24),10);
+ x.save();x.shadowColor=isL?'rgba(20,20,30,.25)':'rgba(0,0,0,.45)';x.shadowBlur=22;x.shadowOffsetY=8;rr(x,t.panel2,MX,MY,MW,mh,10);x.restore();x.strokeStyle=mix(t.ink,t.line,.15);x.lineWidth=1;rr(x,null,MX+.5,MY+.5,MW-1,mh-1,10);x.stroke();
+ let my=MY+5;items.forEach(([n,k,f])=>{if(n==='-'){hline(MX+8,my+4,MW-16,mix(t.ink,t.line,.1));my+=9;return}
+  if(f==='sw'){txt(x,n,MX+12,my+15,t.ink,11.5,500);P.forEach((c,j)=>{rr(x,c,MX+70+j*18,my+8,14,14,3);if(j===4){x.strokeStyle=t.ink;x.lineWidth=1.5;rr(x,null,MX+68.5+j*18,my+6.5,17,17,4.5);x.stroke()}});my+=30;return}
+  if(f==='hover')rr(x,t.accentFill,MX+4,my,MW-8,24,6);
+  const col=f==='hover'?t.onAccent:f==='dis'?t.dis:t.ink,kc=f==='hover'?t.onAccent:f==='dis'?t.dis:t.mut;
+  txt(x,n,MX+12,my+12.5,col,11.5,500);txt(x,k,MX+MW-12,my+12.5,kc,11,500,'right');my+=24});
+ // ---- export dialog (glass)
+ const QX=1232,QY=300,QW=352,QH=232;glassPanel(QX,QY,QW,QH,14);
+ ttl('Export audio',QX+18,QY+24,t.ink,15);txt(x,'×',QX+QW-20,QY+23,t.mut,14,500,'center');
+ const field=(lab2,Y,fn,foc)=>{lbl(lab2,QX+18,Y+12,t.lab,11);rr(x,isL?t.panel:t.panel2,QX+112,Y,QW-130,24,5);line(mix(t.ink,t.line,isL?.3:.25));rr(x,null,QX+112.5,Y+.5,QW-131,23,5);x.stroke();fn(QX+122,Y+12.5);if(foc)focus(QX+112,Y,QW-130,24,5)};
+ field('Format',QY+46,(X,Y)=>{txt(x,'WAV · 24 bit',X,Y,t.ink,11.5,500);txt(x,'▾',QX+QW-30,Y,t.lab,10,500,'center')});
+ field('Loudness',QY+80,(X,Y)=>{const w0=txt(x,'-14.0',X,Y,t.ink,11.5,500,'left',FN);x.fillStyle=t.ink;x.fillRect(X+w0+2,Y-7,1,14);txt(x,'LUFS',X+w0+8,Y+.4,t.unit,9.9,600)},true);
+ rr(x,t.accentFill,QX+112,QY+116,15,15,3.5);x.strokeStyle=t.onAccent;x.lineWidth=1.8;x.lineCap='round';x.lineJoin='round';x.beginPath();x.moveTo(QX+115.5,QY+123.5);x.lineTo(QX+118.5,QY+126.8);x.lineTo(QX+123.6,QY+120.2);x.stroke();x.lineCap='butt';
+ txt(x,'Dither',QX+134,QY+124,t.ink,11.5,500);line(mix(t.lab,t.glass,.9));x.lineWidth=1.2;rr(x,null,QX+200.6,QY+116.6,13.8,13.8,3.5);x.stroke();txt(x,'Stems too',QX+222,QY+124,t.lab,11.5,500);
+ txt(x,'Peak is 0.4 dB over. The limiter will catch it.',QX+18,QY+152,t.over,11,500);
+ txt(x,'3:12 · 44.1 kHz · about 33 MB',QX+18,QY+171,t.mut,11,500);
+ rr(x,t.panel2,QX+QW-178,QY+QH-40,76,26,6);line(mix(t.ink,t.line,.25));rr(x,null,QX+QW-177.5,QY+QH-39.5,75,25,6);x.stroke();txt(x,'Cancel',QX+QW-140,QY+QH-26.5,t.ink,11.5,500,'center');
+ rr(x,t.accentFill,QX+QW-94,QY+QH-40,76,26,6);txt(x,'Export',QX+QW-56,QY+QH-26.5,t.onAccent,11.5,600,'center');
+ // ---- tooltip
+ const TX=1356,TYp=40,TW=206,TTH=44;x.save();x.shadowColor='rgba(0,0,0,.3)';x.shadowBlur=10;x.shadowOffsetY=3;rr(x,t.tip,TX,TYp,TW,TTH,7);x.restore();
+ x.fillStyle=t.tip;x.beginPath();x.moveTo(1384-6,TYp+1);x.lineTo(1384,TYp-6);x.lineTo(1384+6,TYp+1);x.fill();
+ x.strokeStyle=t.tipEdge;x.lineWidth=1;x.beginPath();x.roundRect?x.roundRect(TX+.5,TYp+.5,TW-1,TTH-1,7):x.rect(TX+.5,TYp+.5,TW-1,TTH-1);x.stroke();
+ x.fillStyle=t.tip;x.fillRect(1384-5,TYp-.5,10,2.2);x.strokeStyle=t.tipEdge;x.beginPath();x.moveTo(1384-6,TYp+.5);x.lineTo(1384,TYp-5.5);x.lineTo(1384+6,TYp+.5);x.stroke();
+ txt(x,'Loop',TX+10,TYp+14,t.tipInk,11.5,600);rr(x,rgba(t.tipInk,.16),TX+TW-28,TYp+6,18,16,4);txt(x,'L',TX+TW-19,TYp+14.5,t.tipInk,10.5,600,'center');
+ txt(x,'Repeat bars 9 to 17 while playing.',TX+10,TYp+31,t.tipInk,10.5,500);
+}
+/* moving meters: only the wells are redrawn */
+function drawMeters(cv,th,list,ph){const t=th.t,x=cv.getContext('2d'),s=cv.width/W;x.setTransform(s,0,0,s,0,0);
+ list.forEach(([X,Y,w,h,lv,o2],i)=>{const l=Math.max(.04,Math.min(1,lv*(.86+.14*Math.sin(ph*1.7+i*1.3))+.05*Math.sin(ph*5.1+i*2.9)));
+  x.fillStyle=t.display;x.beginPath();x.roundRect?x.roundRect(X,Y,w,h,Math.min(3,w/2)):x.rect(X,Y,w,h);x.fill();const g=x.createLinearGradient(0,Y+h,0,Y);g.addColorStop(0,t.m0);g.addColorStop(.5,t.m1);g.addColorStop(.8,t.m2);g.addColorStop(.93,t.m3);g.addColorStop(1,t.m3);
+  const n=o2&&o2.one?1:2,bw=(w-4-(n-1))/n;for(let k=0;k<n;k++){const lk=Math.max(0,Math.min(1,l*(k?.93:1)));x.fillStyle=g;x.fillRect(X+2+k*(bw+1),Y+2+(h-4)*(1-lk),bw,(h-4)*lk)}
+  if(o2&&o2.over){x.fillStyle=t.m3;x.fillRect(X+2,Y+2,w-4,3)}})}
+
+/* ---------- the Settings-row thumbnail: 168 x 96, the theme in six strokes ---------- */
+function thumb(cv,th){const t=th.t,P=th.pal,S=th.style,x=cv.getContext('2d'),s=cv.width/168,isL=th.mode==='light';x.setTransform(s,0,0,s,0,0);
+ x.fillStyle=t.bg;x.fillRect(0,0,168,96);x.fillStyle=t.chrome;x.fillRect(0,0,168,10);
+ for(let i=0;i<3;i++){x.fillStyle=i===1?t.accentFill:rgba(t.lab,.55);x.beginPath();x.roundRect?x.roundRect(134+i*10,3,7,4,2):x.rect(134+i*10,3,7,4);x.fill()}
+ x.fillStyle=t.ink;x.fillRect(6,4,22,2);x.fillStyle=t.ruler;x.fillRect(0,10,168,6);
+ for(let i=0;i<4;i++){const Y=16+i*13,lane=i===1?t.laneSel:i%2?t.lane1:t.lane0;x.fillStyle=lane;x.fillRect(30,Y,138,13);x.fillStyle=t.panel;x.fillRect(0,Y,30,13);x.fillStyle=P[[0,1,3,6][i]];x.fillRect(0,Y+1,2,11);
+  x.fillStyle=i===1?t.ink:t.lab;x.fillRect(5,Y+4,14,1.6);x.fillStyle=t.mut;x.fillRect(5,Y+8,8,1.2);x.fillStyle=t.line;x.fillRect(0,Y+12.5,168,.5)}
+ for(let b=0;b<=12;b++){x.fillStyle=`rgba(${t.grid},${Math.min(1,(b%4===0?.32:.12*S.gridMinor)*t.gridK)})`;x.fillRect(30+b*11.5,16,.5,52)}
+ [[0,0,3],[0,4,3],[0,8,4],[1,1,5],[1,7,4],[2,2,2],[2,5,3],[2,9,3],[3,0,4],[3,6,5]].forEach(([i,a,w],n)=>{const c=P[[0,1,3,6][i]],lane=i===1?t.laneSel:i%2?t.lane1:t.lane0,X=30+a*11.5+.5,Y=16+i*13+1.5,ww=w*11.5-1.5;
+  x.fillStyle=mix(c,lane,t.clipA);x.beginPath();x.roundRect?x.roundRect(X,Y,ww,10,1.5):x.rect(X,Y,ww,10);x.fill();x.strokeStyle=c;x.lineWidth=Math.max(.7,S.edgeW*.6);x.stroke();
+  x.fillStyle=t.clipA>=.6?'rgba(255,255,255,.6)':isL?c:shade(c,.3);for(let k=2;k<ww-2;k+=1.6){const a2=1+2.6*Math.abs(Math.sin(k*.5+n));x.fillRect(X+k,Y+5-a2/2,.7,a2)}
+  if(n===6){x.strokeStyle=t.sel;x.lineWidth=1.3;x.beginPath();x.roundRect?x.roundRect(X-.5,Y-.5,ww+1,11,2):x.rect(X-.5,Y-.5,ww+1,11);x.stroke()}});
+ x.fillStyle=t.ph;x.fillRect(112,10,.9,58);
+ x.fillStyle=t.panel;x.fillRect(0,69,168,27);x.fillStyle=t.line;x.fillRect(0,68.5,168,.5);
+ x.fillStyle=t.display;x.beginPath();x.roundRect?x.roundRect(6,73,58,19,2.5):x.rect(6,73,58,19);x.fill();x.strokeStyle=t.accentD;x.lineWidth=1.2;x.beginPath();for(let k=0;k<=54;k+=2){const y=83-5*Math.exp(-(((k-16)/8)**2))+4*Math.exp(-(((k-38)/9)**2));k?x.lineTo(8+k,y):x.moveTo(8+k,y)}x.stroke();
+ x.fillStyle=t.selD;x.beginPath();x.arc(24,78,1.6,0,6.3);x.fill();
+ [0,1].forEach(k=>{x.fillStyle=t.display;x.fillRect(68+k*5,73,4,19);const g=x.createLinearGradient(0,92,0,73);g.addColorStop(0,t.m0);g.addColorStop(.5,t.m1);g.addColorStop(.8,t.m2);g.addColorStop(1,t.m3);x.fillStyle=g;x.fillRect(69+k*5,k?78:75,2,k?13:16)});
+ x.lineCap='round';x.lineWidth=1.8;x.strokeStyle=mix(t.ink,t.panel,.22);x.beginPath();x.arc(90,82.5,6,Math.PI*.75,Math.PI*2.25);x.stroke();x.strokeStyle=t.accent;x.beginPath();x.arc(90,82.5,6,Math.PI*.75,Math.PI*1.7);x.stroke();x.lineCap='butt';
+ x.fillStyle=t.ink;x.font=`600 9px ${FU}`;x.textBaseline='middle';x.textAlign='left';x.fillText('Aa',103,79);x.fillStyle=t.unit;x.font=`600 6.5px ${FU}`;x.fillText('dB',117,79.5);x.fillStyle=t.mut;x.fillRect(103,87,22,1.4);
+ x.fillStyle=t.accentFill;x.beginPath();x.roundRect?x.roundRect(134,75,28,9,2.5):x.rect(134,75,28,9);x.fill();x.fillStyle=t.onAccent;x.fillRect(141,79,14,1.4);x.fillStyle=t.rec;x.beginPath();x.arc(138,89.5,2.2,0,6.3);x.fill();x.fillStyle=t.okS;x.beginPath();x.moveTo(145,87);x.lineTo(149.5,89.5);x.lineTo(145,92);x.fill()}
+function srowHTML(t,cls){return`<button type="button" class="srow ${cls||''}" data-go="${t.id}" title="${t.id} ${t.name}"><canvas width="336" height="192" data-thumb="${t.id}" aria-label="${t.name}, thumbnail"></canvas><span class="cap">${ICONS[t.icons[0]]?`<img src="${ICONS[t.icons[0]]}" alt="">`:''}<span>${t.partner?t.name.split(', ')[1]:BASES.find(b=>b[0]===t.base)[1]}</span><small>${t.mode}</small></span></button>`}
+function paintThumbs(root){(root||document).querySelectorAll('canvas[data-thumb]').forEach(c=>thumb(c,byId[c.dataset.thumb]))}
+
+/* ---------- stage ---------- */
+const picks={A:'A1',B:'B1',C:'C1',D:'D1',E:'E1',G:'G2',H:'H1',J:'J1'};let pDefault='A1';
+let cur='A1',lightHalf=false,vis='normal',gmode='theme',ovl=true,cmpId='',wipe=.5,full=false;
+const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};let live=!RM.matches,liveList=[],raf=0,lastT=0;
+const cv=$('#cv'),fade=$('#fade');
+const shown=()=>{const t=byId[cur];if(!t.pair)return t;const want=lightHalf?'light':'dark';return t.mode===want?t:byId[t.pair]};
+function sizeCv(c){const cssW=full?1600:Math.max(640,Math.min(1600,$('#cvwrap').clientWidth||1260)),d=Math.min(2,Math.max(1,window.devicePixelRatio||1));c.width=Math.round(cssW*d);c.height=Math.round(cssW*d*H/W)}
+function stage(fadeIt){
+ const th=shown();
+ if(fadeIt&&!RM.matches&&live&&cv.width>16){fade.width=cv.width;fade.height=cv.height;fade.getContext('2d').drawImage(cv,0,0);fade.classList.remove('go');fade.style.opacity=1;fade.style.filter=cv.style.filter;void fade.offsetWidth;fade.classList.add('go');fade.style.opacity=0}
+ sizeCv(cv);liveList=[];draw(cv,th,{glass:gmode,overlays:ovl,meters:liveList});
+ const cmp=cmpId&&cmpId!==th.id?byId[cmpId]:null;
+ if(cmp){const o=document.createElement('canvas');o.width=cv.width;o.height=cv.height;draw(o,cmp,{glass:gmode,overlays:ovl});const x=cv.getContext('2d');x.setTransform(1,0,0,1,0,0);const p=Math.round(wipe*cv.width);x.drawImage(o,0,0,p,cv.height,0,0,p,cv.height);
+  const k=cv.width/W;x.fillStyle='#fff';x.fillRect(p-k,0,2*k,cv.height);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(p-2*k,0,k,cv.height);x.fillRect(p+k,0,k,cv.height);
+  x.setTransform(k,0,0,k,0,0);const P0=p/k;x.beginPath();x.arc(P0,H/2,13,0,6.3);x.fillStyle='#fff';x.fill();x.fillStyle='#111';x.beginPath();x.moveTo(P0-8,H/2);x.lineTo(P0-3,H/2-5);x.lineTo(P0-3,H/2+5);x.fill();x.beginPath();x.moveTo(P0+8,H/2);x.lineTo(P0+3,H/2-5);x.lineTo(P0+3,H/2+5);x.fill();
+  const chip=(s2,X,al)=>{x.font=`600 12px ${FU}`;const w=x.measureText(s2).width+16,x0=al==='right'?X-w:X;if(x0<4||x0+w>W-4)return;x.fillStyle='rgba(0,0,0,.72)';x.beginPath();x.roundRect?x.roundRect(x0,H-64,w,24,6):x.rect(x0,H-64,w,24);x.fill();x.fillStyle='#fff';x.textAlign='left';x.textBaseline='middle';x.fillText(s2,x0+8,H-51.5)};
+  chip(cmp.id+' '+cmp.name,P0-12,'right');chip(th.id+' '+th.name,P0+12,'left')}
+ $('#cvwrap').classList.toggle('cmp',!!cmp);$('#wipeRow').hidden=!cmp;if(cmp){$('#wipeL').textContent=cmp.id;$('#wipeR').textContent=th.id}
+ cv.style.filter=vis==='normal'?'none':`url(#cvd-${vis})`;
+ const m=th.m,R=Object.fromEntries(m.rules.map(r=>[r.id,r])),nf=m.rules.filter(r=>r.fails).length;
+ $('#dock').innerHTML=th.icons.slice(0,2).map((i,k)=>ICONS[i]?`<img src="${ICONS[i]}" alt="${i.replace(/-/g,' ')} icon" title="${k?'also fits: ':'icon that follows this theme: '}${i}"${k?' style="opacity:.55;width:28px;height:28px;border-radius:7px"':''}>`:'').join('');
+ $('#stNote').innerHTML=`<span><b>${th.id} ${th.name}</b></span><span>${th.mode}</span><span><b>${m.rules.length-nf} of ${m.rules.length}</b> rules pass${th.lock?' (today\'s own misses kept)':''}</span><span>${m.pairs} pairs</span><span>quiet text <b>${R.T3.worst.wc.toFixed(1)} : 1</b></span><span>clip edge <b>${R.U8.worst.wc.toFixed(2)} : 1</b></span><span>tracks ΔE <b>${m.cvd_min.toFixed(1)}</b></span><span>glass ${Math.round((gmode==='half'?.5:gmode==='solid'?1:th.t.glassA)*100)} % (floor ${Math.round((m.glass_floor||0)*100)} %)</span><span>clips ${Math.round(th.t.clipA*100)} %</span><span>icon <b>${th.icons[0]}</b></span>`;
+ $('#rmNote').innerHTML=`<span>Reduced motion: your system ${RM.matches?'<b>asks for it</b>, so the meters start still and versions switch without a fade':'does not ask for it'}.</span><span>Meters are ${live&&!cmp?'<b>moving</b>':'<b>still</b>'}${cmp&&live?' while comparing':''}.</span>`;
+ $$('.thb').forEach(b=>b.classList.toggle('on',b.dataset.b===byId[cur].base));$$('.card').forEach(b=>b.classList.toggle('on',b.dataset.id===cur));
+ $('#ver').innerHTML=versions(byId[cur].base).map(t=>`<button type="button" class="${t.id===cur?'on':''}" data-id="${t.id}">${t.id} ${short(t)}${t.stars===5?' ★':''}</button>`).join('');
+ $('#modeG').hidden=!byId[cur].pair;$$('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===th.mode));
+ $$('#mot button').forEach(b=>b.classList.toggle('on',(b.dataset.t==='live')===live));
+ measure();settings();allTbl();tick0()}
+function tick0(){cancelAnimationFrame(raf);if(!live||(cmpId&&cmpId!==shown().id))return;const th=shown();const loop=ts=>{if(ts-lastT>70){lastT=ts;drawMeters(cv,th,liveList,ts/1000)}raf=requestAnimationFrame(loop)};raf=requestAnimationFrame(loop)}
+function go(id,scroll){const t=byId[id];if(t.partner){cur=t.pair;lightHalf=t.mode==='light'}else{cur=id;lightHalf=t.pair?t.mode==='light':false}stage(true);if(scroll)$('#stage').scrollIntoView({behavior:RM.matches?'auto':'smooth',block:'start'})}
+$('#throw').innerHTML=BASES.map(([b,n])=>{const t=byId[picks[b]];return`<button type="button" class="thb" role="tab" data-b="${b}">${ICONS[t.icons[0]]?`<img src="${ICONS[t.icons[0]]}" alt="">`:''}<b>${b}</b>${n}</button>`}).join('');
+$('#throw').addEventListener('click',e=>{const b=e.target.closest('.thb');if(b)go(byId[cur].base===b.dataset.b?cur:picks[b.dataset.b]||versions(b.dataset.b)[0].id)});
+$('#ver').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.id)});
+$('#mode').addEventListener('click',e=>{const b=e.target.closest('button');if(b){lightHalf=b.dataset.m==='light';stage(true)}});
+const segs=(id,fn)=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$(id+' button').forEach(q=>q.classList.toggle('on',q===b));fn(b);stage()});
+segs('#vis',b=>vis=b.dataset.v);segs('#glass',b=>gmode=b.dataset.g);segs('#ovl',b=>ovl=b.dataset.o==='1');segs('#mot',b=>live=b.dataset.t==='live');
+segs('#size',b=>{full=b.dataset.z==='full';$('#cvwrap').classList.toggle('full',full)});
+$('#cmpSel').innerHTML='<option value="">Off</option>'+BASES.map(([b,n])=>`<optgroup label="${b} ${n}">${TH.filter(t=>t.base===b).map(t=>`<option value="${t.id}">${t.id} ${short(t)}</option>`).join('')}</optgroup>`).join('');
+$('#cmpSel').addEventListener('change',e=>{cmpId=e.target.value;stage()});
+$('#wipe').addEventListener('input',e=>{wipe=+e.target.value/100;stage()});
+{let drag=false;const mv=e=>{const r=cv.getBoundingClientRect();wipe=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));$('#wipe').value=Math.round(wipe*100);stage()};
+ cv.addEventListener('pointerdown',e=>{if(!cmpId||cmpId===shown().id)return;drag=true;cv.setPointerCapture(e.pointerId);mv(e)});cv.addEventListener('pointermove',e=>{if(drag)mv(e)});['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>drag=false))}
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>stage(),150)});
+if(RM.addEventListener)RM.addEventListener('change',()=>{live=!RM.matches;stage();rmList()});
+
+/* ---------- measurements of the version on show ---------- */
+const fmtLc=v=>v==null?'–':(v>0?'':'−')+Math.abs(v).toFixed(1);
+const lockMiss=th=>th.lock?'<span class="pill base">today, kept</span>':'<span class="pill bad">fails</span>';
+function measure(){const th=shown(),m=th.m,t=th.t;
+ $('#mEy').textContent=`Measured · ${th.id}`;$('#mH').textContent=`${th.name}: readability`;$('#mDesc').textContent=th.desc;
+ $('#mRules').innerHTML='<tr><th>Rule</th><th>What</th><th>Worst pair</th><th>On</th><th>WCAG</th><th>APCA Lc</th><th>Needs</th><th>Pairs</th><th></th></tr>'+m.rules.map(r=>{const w=r.worst,need=r.kind==='text'?`${r.thr.wc} : 1 and Lc ${r.thr.lc}`:r.kind==='spot'?`Lc ${r.thr.lc}`:r.kind==='val'?(r.id==='H1'?'L at most 0.985':'at or above the floor'):'3 : 1';
+  const smp=r.kind==='ui'?`<span class="sample" style="background:${w.bg}"><span class="sw" style="background:${w.fg};border:0;width:30px;height:10px"></span></span>`:`<span class="sample" style="background:${w.bg};color:${w.fg}">Aa 11 px</span>`;
+  return`<tr><td class="mono">${r.id}</td><td>${r.label}</td><td>${smp}</td><td class="mono sm">${w.surf==='@glass'?'glass':w.surf}${w.val?' · '+w.val:''}</td><td>${w.wc.toFixed(2)}</td><td>${fmtLc(w.lc)}</td><td class="mut">${need}</td><td class="mut">${r.n}</td><td>${r.fails?lockMiss(th)+` <span class="mut">${r.fails}</span>`:'<span class="pill ok">pass</span>'}</td></tr>`}).join('');
+ $('#mCvd').innerHTML=['normal','protan','deutan','tritan'].map(v=>{const d=m.cvd[v].de;return`<span class="mono sm">${v}</span><span class="swrow">${th.pal.map(c=>`<i class="sw" style="background:${sim(c,v)}"></i>`).join('')}</span><span class="${d>=10?'ok':d>=6?'base':'bad'} mono">${d.toFixed(1)}</span>`}).join('');
+ $('#mDist').innerHTML='<tr><th>Pair</th><th></th><th>ΔE</th><th>Needs</th></tr>'+m.distinct.map(d=>`<tr><td>${d.a} / ${d.b}</td><td><i class="sw" style="background:${t[d.a]}"></i> <i class="sw" style="background:${t[d.b]}"></i></td><td class="${d.ok?'ok':'bad'}">${d.de}</td><td class="mut">${d.need}</td></tr>`).join('');
+ const fl=m.glass_floor;$('#mGlass').innerHTML=`<span>Glass tint</span><span><i class="sw" style="background:${t.glass}"></i> <code>${t.glass}</code></span><span>Floor</span><span>${fl==null?'none reaches every rule':Math.round(fl*100)+' %'}</span><span>This version</span><span>${Math.round(t.glassA*100)} %</span><span>Round 1</span><span>${({A:'50 % (floor 78 %)',B:'90 %',C:'83 %',D:'85 %',E:'68 %',G:'78 %',H:'85 %',J:'92 %'})[th.base]}</span>`;
+ const f=th.fit||[];$('#mFit').innerHTML=th.lock?'<span class="mut">Locked: today\'s colours, nothing fitted.</span>':f.length?f.map(e=>e.tok==='track colours'?`<span>track colours: ${e.note}</span>`:`<span>${e.tok}: ${/^#/.test(e.was)?`<i class="sw" style="background:${String(e.was).split(' ')[0]}"></i> `:''}${e.was} → ${/^#/.test(e.now)?`<i class="sw" style="background:${String(e.now).split(' ')[0]}"></i> `:''}${e.now}${e.note?' <span class="mut">('+e.note+')</span>':''}</span>`).join(''):'<span class="mut">Nothing needed fitting.</span>';
+ $('#mClips').innerHTML=m.titles.filter(c=>c.lane==='lane0').map(c=>`<span class="sample" style="background:${c.bg};color:${c.ink};min-width:74px" title="Lc ${c.lc}">${c.wc.toFixed(1)} : 1</span>`).join('');
+ const S=th.style;$('#mStyle').innerHTML=`<span>Section labels</span><span>${S.caps?'capitals, tracked':'as today'}</span><span>Numerals</span><span>${({mono:'JetBrains Mono (today)',plex:'IBM Plex Mono',ui:'Inter'})[S.fNum]}</span><span>Titles</span><span>${({ui:'Inter (today)',serif:'Source Serif 4',serifItalic:'Source Serif 4 italic'})[S.fTitle]}</span><span>Minor lines</span><span>${S.dash?'dashed':'solid'}, strength × ${S.gridMinor}</span><span>Grid</span><span><code>${t.grid}</code> × ${t.gridK}</span><span>Clip outline</span><span>${S.edgeW} px</span><span>Clip title band</span><span>${S.clipHead?Math.round(S.clipHead*100)+' %':'none'}</span><span>Clip body</span><span>${Math.round(t.clipA*100)} %</span>`}
+
+/* ---------- groups and cards ---------- */
+const chipsOf=t=>{const m=t.m,R=Object.fromEntries(m.rules.map(r=>[r.id,r])),nf=m.rules.filter(r=>r.fails).length;
+ return`<span class="tag ${nf?'base':'ok'}">${m.rules.length-nf} of ${m.rules.length} rules${nf?': today\'s own misses':''}</span><span class="tag">quiet text ${R.T3.worst.wc.toFixed(1)} : 1</span><span class="tag">clip edge ${R.U8.worst.wc.toFixed(2)} : 1</span><span class="tag">tracks ΔE ${m.cvd_min.toFixed(1)}</span><span class="tag">glass ${Math.round(t.t.glassA*100)} %</span>`};
+$('#groups').innerHTML=BASES.map(([b,n])=>{const vs=versions(b),ics=[...new Set(vs.flatMap(t=>t.icons))];
+ return`<div class="group"><div class="gh"><div class="let">Theme ${b}</div><h3>${n}</h3><div class="ic">${ics.slice(0,3).map(i=>ICONS[i]?`<img src="${ICONS[i]}" alt="${i.replace(/-/g,' ')} icon" title="${i}">`:'').join('')}</div><p class="sm mut">${GROUPNOTE[b]}</p></div>
+ <div class="cards">${vs.map(t=>{const pr=t.pair?byId[t.pair]:null;return`<div class="card" data-id="${t.id}"><div class="thumbs">${srowHTML(t)}${pr?srowHTML(pr):''}</div><div class="cb">
+  <div class="hd"><span class="code">${t.id}</span><h3>${short(t).replace(/^./,c=>c.toUpperCase())}</h3>${t.stars?`<span class="stars" aria-label="${t.stars} of 5 stars">${'★'.repeat(t.stars)}</span>`:'<span class="stars mut" style="letter-spacing:0;color:var(--mut)">baseline</span>'}</div>
+  <p class="sm">${t.desc}</p><ul>${t.what.map(w=>`<li>${w}</li>`).join('')}</ul>
+  <div class="chips"><span class="tag">${t.mode}${pr?' + '+pr.mode+' half':''}</span>${chipsOf(t)}</div>
+  <div class="ft"><button type="button" class="btn" data-go="${t.id}">Show above</button><label class="chk"><input type="radio" name="pick-${b}" value="${t.id}" id="pick-${t.id}" ${picks[b]===t.id?'checked':''}> Pick ${t.id}</label></div></div></div>`}).join('')}</div></div>`}).join('');
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go,true)});
+$('#groups').addEventListener('change',e=>{if(e.target.name&&e.target.name.startsWith('pick-')){picks[e.target.name.slice(5)]=e.target.value;syncPicks()}});
+
+/* ---------- the Settings row, in the version on show ---------- */
+function settings(){const th=shown(),t=th.t,el=$('#setw'),ids=BASES.map(b=>picks[b[0]]).filter(Boolean);
+ for(const[k,v]of Object.entries({line:t.line,panel:t.panel,ink:t.ink,lab:t.lab,mut:t.mut,sel:t.sel,fill:t.accentFill,on:t.onAccent}))el.style.setProperty('--s-'+k,v);
+ el.innerHTML=`<div><div class="st">Appearance</div><div class="sl">Theme</div></div><div class="row">${ids.map(i=>srowHTML(byId[i],i===pDefault?'on':'')).join('')}</div>
+ <div class="opts"><span><span class="sw2"></span>Icon follows theme</span><span><span class="sw2"></span>Follow the system's light or dark setting${ids.some(i=>byId[i].pair)?' ('+ids.filter(i=>byId[i].pair).join(', ')+' have both halves)':' (none of the current picks has both halves)'}</span><span style="color:${t.mut}">Adjust: Hue · Tint · Background</span></div>`;paintThumbs(el)}
+
+/* ---------- all numbers, rules ---------- */
+function allTbl(){const th=shown();$('#allTbl').innerHTML='<tr><th>Version</th><th>Mode</th><th>Rules</th><th>Main text</th><th>Quiet text</th><th>Clip titles</th><th>Clip edge</th><th>Track ΔE N / P / D / T</th><th>Glass (floor)</th><th></th></tr>'+BASES.map(([b,n])=>`<tr class="grp"><td colspan="10">${b} ${n}</td></tr>`+TH.filter(t=>t.base===b).map(t=>{const m=t.m,R=Object.fromEntries(m.rules.map(r=>[r.id,r])),nf=m.rules.filter(r=>r.fails).length,w=k=>`${R[k].worst.wc.toFixed(1)} : 1 <span class="mut">Lc ${fmtLc(R[k].worst.lc)}</span>`,c=m.cvd;
+ return`<tr class="${t.id===th.id?'cur':''}"><td><button type="button" class="btn" data-go="${t.id}">${t.id}</button> ${short(t)}</td><td>${t.mode}</td><td class="${nf?'base':'ok'}">${m.rules.length-nf} of ${m.rules.length}</td><td>${w('T1')}</td><td>${w('T3')}</td><td>${w('T11')}</td><td>${R.U8.worst.wc.toFixed(2)} : 1</td><td>${c.normal.de.toFixed(1)} / ${c.protan.de.toFixed(1)} / ${c.deutan.de.toFixed(1)} / ${c.tritan.de.toFixed(1)}</td><td>${Math.round(t.t.glassA*100)} % (${Math.round((m.glass_floor||0)*100)} %)</td><td class="stars" style="margin:0">${t.stars?'★'.repeat(t.stars):''}</td></tr>`}).join('')).join('')}
+$('#rulesTbl').innerHTML='<tr><th>Rule</th><th>What</th><th>Measured on</th><th>Needs</th></tr>'+DATA.rules.map(r=>`<tr><td class="mono">${r.id}</td><td>${r.label}${NEWR.includes(r.id)?' <span class="tag base">round 2</span>':''}</td><td class="wrapc sm mut">${r.surfaces.map(s=>s==='@glass'?'glass over clips':s).join(', ')}</td><td>${r.kind==='text'?`WCAG ${r.thr.wc} : 1 and APCA Lc ${r.thr.lc}`:r.kind==='spot'?`APCA Lc ${r.thr.lc}`:'WCAG 3 : 1'}</td></tr>`).join('')+
+ `<tr><td class="mono">T11</td><td>Clip titles on their clips <span class="tag base">round 2</span></td><td class="wrapc sm mut">the title band of each of the 8 clips on lane0, lane1, laneSel</td><td>WCAG 4.5 : 1 and APCA Lc 60</td></tr><tr><td class="mono">H1</td><td>Main text is not pure white (dark themes) <span class="tag base">round 2</span></td><td class="wrapc sm mut">ink</td><td>OKLCH L at most 0.985</td></tr><tr><td class="mono">G1</td><td>Glass tint at or above the floor <span class="tag base">round 2</span></td><td class="wrapc sm mut">glass over the lane, the selected lane, the background, the brightest and the darkest clip</td><td>T1, T2, T3 pass on it</td></tr>
+ <tr><td class="mono">D</td><td>Meaning colours apart</td><td class="wrapc sm mut">${DATA.distinct.map(d=>d[0]+'/'+d[1]).join(', ')}</td><td>CIEDE2000 10 to 15</td></tr><tr><td class="mono">C</td><td>Track colours, colour-vision safe</td><td class="wrapc sm mut">normal, protan, deutan, tritan (Machado 2009)</td><td>smallest ΔE ${DATA.cvd_floor}, target ${DATA.cvd_target}</td></tr>`;
+function rmList(){$('#rmList').innerHTML=`<li>Your system's setting right now: <b>${RM.matches?'reduce motion':'no preference'}</b>. This page reads it live.</li><li>With reduced motion the meters in the stage hold still, a version switches without the 0.2 s fade, and scrolling to the stage jumps instead of gliding. Try it with <b>Meters: Still</b> above.</li><li>None of the sixteen versions adds movement: a theme is values only, so the app's Motion setting (Signal only, Signal and transitions, Ambient) works the same in every theme.</li><li>Switching themes in the app is one repaint with no animation of its own.</li>`}
+
+/* ---------- picks ---------- */
+function syncPicks(){$$('#pSels select').forEach(s=>s.value=picks[s.dataset.b]||'');BASES.forEach(([b])=>{const r=$(`#pick-${picks[b]}`);if(r)r.checked=true;else $$(`input[name="pick-${b}"]`).forEach(q=>q.checked=false)});
+ const ids=BASES.map(b=>picks[b[0]]).filter(Boolean),d=$('#pDef');d.innerHTML=ids.map(i=>`<option value="${i}">${i}</option>`).join('');if(!ids.includes(pDefault))pDefault=ids.find(i=>i[0]==='A')||ids[0]||'';d.value=pDefault;
+ $('#line').textContent=`Theme round 2 picks: ${ids.join(' ')||'none'} | default ${pDefault||'none'}`;settings()}
+$('#pSels').innerHTML=BASES.map(([b,n])=>`<select data-b="${b}" id="psel-${b}" aria-label="${n}: version" title="${n}">${TH.filter(t=>t.base===b&&!t.partner).map(t=>`<option value="${t.id}">${t.id}</option>`).join('')}<option value="">${b} –</option></select>`).join('');
+$('#pSels').addEventListener('change',e=>{picks[e.target.dataset.b]=e.target.value;syncPicks()});
+$('#pDef').addEventListener('change',e=>{pDefault=e.target.value;syncPicks()});
+$('#copy').addEventListener('click',()=>{const s=$('#line').textContent,b=$('#copy'),ok=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1400)};
+ try{navigator.clipboard.writeText(s).then(ok,()=>{getSelection().selectAllChildren($('#line'))})}catch(e){getSelection().selectAllChildren($('#line'))}});
+
+const nV=TH.filter(t=>!t.partner&&!t.lock).length,allPass=TH.filter(t=>!t.lock).every(t=>!t.m.rules.some(r=>r.fails));
+$('#facts').innerHTML=`<span><b>8</b> themes, <b>${nV}</b> versions, <b>2</b> with a second appearance</span><span><b>${TH.find(t=>t.mode==='dark'&&!t.lock).m.rules.length}</b> rules, <b>${TH[1].m.pairs}</b> measured pairs per version, plus meaning colours and colour vision</span><span>${allPass?`<b>${TH.filter(t=>!t.lock).length} of ${TH.filter(t=>!t.lock).length}</b> colour sets pass every rule`:'<b class="bad">some rules fail</b>'}</span><span>Today's app (A0) kept as the baseline</span><span>Dropped themes are not shown</span>`;
+function boot(){paintThumbs();syncPicks();rmList();stage()}
+boot();
+const need=['500 12px Inter','600 12px Inter','500 12px "JetBrains Mono"','500 12px "IBM Plex Mono"','600 12px "Source Serif 4"','italic 600 12px "Source Serif 4"'];
+if(document.fonts&&document.fonts.load)Promise.all(need.map(f=>document.fonts.load(f).catch(()=>0))).then(()=>{paintThumbs();stage()});
+Object.values(IMG).forEach(i=>{if(!i.complete)i.addEventListener('load',()=>{clearTimeout(boot.t);boot.t=setTimeout(()=>stage(),60)})});
+</script>

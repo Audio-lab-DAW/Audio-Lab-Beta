@@ -739,3 +739,357 @@ Unconfirmed or guessed: Serum 2's skin format, a track-colour intensity control 
 - Kept: **A** Orbit night (the default), **B** Chart paper, **C** Space Race, **D** Chalkboard, **E** Blueprint, **G** Cutaway nucleus, **H** Rutherford scattering, **J** Patent drawing. Dropped: B2, F, I, K, L, M, N.
 - Icons follow theme: yes (TM3).
 - Next: task **TH2** (on Fable) reworks these eight into a second, higher-quality pick page; the user picks again, then the build lane (task TM, its own new lane, prefix `tm`; lane R is now SG2's) is created. Section 7's lane letter "R" is replaced by the next free letter.
+
+## Round 2 (TH2)
+
+28 November 2026. Pick page artifact "AudioLab themes, round 2: the eight picks reworked": https://claude.ai/artifact/W5Ph6nviNzJVJfSHhqr6Ga. Pick-page task only: nothing in `index.html`, `desktop/` or `native/` was changed. Files: `tools/design-lab/th2/` (`themes_src.py` the versions as drawn, `check.py` fit and measure with `--gate`, `themes.json` and `report.md` results, `page.src.html`, `build.py`, `pick-page.html` the page, `shoot.py` headless renders for review).
+
+The user (28 Nov, 15:05 Brussels): "Theme picks: A B C D E G H J | default: A | icons follow theme: yes. Let's rework these themes that I gave you in Fable and then come back to me." Dropped themes (B2 night, F, I, K, L, M, N) are not shown. Picks line to paste, for example: `Theme round 2 picks: A1 B1 C1 D1 E1 G2 H1 J1 | default A1` (the page's bar builds it; that example is the recommended set).
+
+### What round 2 is
+
+- **Two versions per theme** (A1/A2 ... J1/J2), each shown as the whole app (arrangement with clips and lanes, the glass mixer, devices with their displays, a context menu, an export dialog, a tooltip, meters), with the theme's app icon, and as the thumbnail the Theme row in Settings would show (168 x 96).
+- **A0** is today's app, locked and unchanged, kept as the baseline to compare against and still pickable. **A1** repairs today's misses without changing what the user knows; **A2** adds the icons' navy.
+- **Two versions carry a second appearance** for following the system setting: E2 (dark) with E2L Whiteprint (light), J2 (light) with J2D Photostat (dark). "B2" in round 2 means version 2 of Chart paper, not the dropped night theme.
+- **Tokens only**: colours, hairlines, grid, type accents, glass tint. The style tokens a theme may set besides colours: `caps` (section labels in tracked capitals), `fNum` (numeral face), `fTitle` (title face), `dash` (minor lines dashed), `edgeW` (clip outline width), `clipHead` (strength of the clip title band), `gridMinor` (strength of the minor grid). No decoration.
+- **New colour tokens**: `accentFill` (filled buttons, separate from the line colour `accent`), `okS` (play and "on" green on panels), `selFill` (the selection's fill; a yellow highlighter in the paper themes so yellow still means selected), `tip`, `tipInk`, `tipEdge` (tooltips).
+- **Type accents need two more faces in the app**: IBM Plex Mono (C1, C2 read-outs) and Source Serif 4 (B1, J1 titles). Body text stays Inter.
+- **Glass**: the glass engine draws all glass; a theme sets only the tint and its strength, never below the measured floor; no `backdrop-filter` anywhere (the page itself uses none either). In round 2 quiet text may rise a little before the glass thickens, so most dark versions sit at 60 to 70 % instead of round 1's 78 to 85 %.
+- The page also has: a compare wipe between any two colour sets, Dark and Light for E2 and J2, the three colour-vision simulations, glass at the version's tint / today's 50 % / solid, a 100 % size switch, moving meters that hold still under reduced motion (the system setting is read live; a theme itself adds no motion).
+
+### Rules (round 1's twenty plus seven)
+
+Round 1's rules are imported unchanged from `tools/design-lab/th1/check.py`, with two widenings: **T7** text on filled buttons is measured on `accentFill`; **U8** clip edges must keep 3 : 1 on the selected lane too. New: **U1b** filled buttons 3 : 1 against their panel; **U6s** play and "on" green 3 : 1 on panels (round 1 measured green only inside displays; it was too pale on paper); **T11** clip titles 4.5 : 1 and Lc 60 on the title band of every clip on all three lanes (today's app: Lc 43.7); **T12** tooltip text 7 : 1 and Lc 75; **U10** tooltip outline 3 : 1; **H1** main text in a dark theme is never pure white (OKLCH L at most 0.985); **G1** glass tint at or above the floor. 27 rules and 144 measured pairs per dark version (26 and 143 for light ones), plus the meaning-colour distances and the track colours under four visions. `python3 tools/design-lab/th2/check.py --gate` passes for all 18 fitted colour sets; A0 keeps today's misses (19 of 27: the five of round 1 plus the clip titles, the tooltip outline and the glass floor, which round 1 did not measure as rules).
+
+### Numbers
+
+| Version | Mode | Rules passed | Pairs | Main text (worst) | Quiet text (worst) | Clip titles (worst) | Clip edge (worst) | Track ΔE N / P / D / T | Glass floor | Glass |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A0 Orbit night, today | dark | 19 of 27 (today's misses, kept) | 144 | 9.2 : 1, Lc -86.9 | 3.2 : 1, Lc -31.8 | 5.8 : 1, Lc 43.7 | 4.32 : 1 | 18.6 / 1.0 / 5.7 / 6.1 | 78 % | 50 % |
+| A1 Orbit night, repaired | dark | 27 of 27 | 144 | 11.0 : 1, Lc -90.2 | 4.9 : 1, Lc -45.3 | 4.6 : 1, Lc -76.9 | 3.03 : 1 | 18.1 / 10.1 / 10.0 / 10.0 | 59 % | 60 % |
+| A2 Orbit night, field depth | dark | 27 of 27 | 144 | 11.4 : 1, Lc -91.6 | 5.1 : 1, Lc -46.1 | 4.6 : 1, Lc -76.8 | 3.04 : 1 | 11.2 / 10.2 / 10.2 / 10.2 | 52 % | 60 % |
+| B1 Chart paper, printed plate | light | 26 of 26 | 143 | 11.0 : 1, Lc 80.4 | 4.7 : 1, Lc 60.8 | 4.6 : 1, Lc -76.0 | 4.34 : 1 | 11.2 / 10.3 / 10.3 / 10.3 | 81 % | 86 % |
+| B2 Chart paper, graph sheet | light | 26 of 26 | 143 | 11.8 : 1, Lc 82.5 | 4.9 : 1, Lc 62.9 | 9.3 : 1, Lc 63.6 | 3.02 : 1 | 17.1 / 14.1 / 14.1 / 14.1 | 12 % | 74 % |
+| C1 Space Race, mission control | dark | 27 of 27 | 144 | 9.7 : 1, Lc -90.8 | 4.6 : 1, Lc -46.7 | 4.6 : 1, Lc -77.0 | 3.03 : 1 | 14.6 / 12.9 / 12.8 / 12.9 | 34 % | 70 % |
+| C2 Space Race, three rings | dark | 27 of 27 | 144 | 12.2 : 1, Lc -92.3 | 5.8 : 1, Lc -49.8 | 4.6 : 1, Lc -76.7 | 3.03 : 1 | 15.2 / 14.1 / 14.2 / 14.1 | 31 % | 65 % |
+| D1 Chalkboard, green board | dark | 27 of 27 | 144 | 7.2 : 1, Lc -81.5 | 4.8 : 1, Lc -51.7 | 4.5 : 1, Lc -77.1 | 3.04 : 1 | 18.9 / 12.1 / 12.2 / 12.1 | 61 % | 70 % |
+| D2 Chalkboard, science fair | dark | 27 of 27 | 144 | 7.2 : 1, Lc -78.6 | 4.6 : 1, Lc -47.3 | 4.5 : 1, Lc -77.1 | 3.03 : 1 | 13.7 / 13.2 / 12.9 / 12.9 | 68 % | 70 % |
+| E1 Blueprint, Prussian blue | dark | 27 of 27 | 144 | 7.4 : 1, Lc -87.2 | 5.4 : 1, Lc -60.4 | 5.0 : 1, Lc -79.6 | 3.03 : 1 | 13.0 / 11.6 / 11.0 / 11.0 | 41 % | 72 % |
+| E2 Blueprint, night print | dark | 27 of 27 | 144 | 8.9 : 1, Lc -90.5 | 5.3 : 1, Lc -55.2 | 4.6 : 1, Lc -77.4 | 3.02 : 1 | 18.9 / 17.2 / 17.2 / 17.2 | 50 % | 68 % |
+| E2L Blueprint, whiteprint | light | 26 of 26 | 143 | 10.9 : 1, Lc 83.5 | 4.9 : 1, Lc 64.7 | 8.8 : 1, Lc 61.1 | 3.03 : 1 | 12.8 / 12.2 / 12.1 / 12.2 | 0 % | 74 % |
+| G1 Cutaway nucleus, machined steel | dark | 27 of 27 | 144 | 11.1 : 1, Lc -92.4 | 5.3 : 1, Lc -49.0 | 4.6 : 1, Lc -76.9 | 3.03 : 1 | 13.2 / 11.6 / 11.5 / 11.5 | 46 % | 68 % |
+| G2 Cutaway nucleus, opened core | dark | 27 of 27 | 144 | 11.0 : 1, Lc -92.4 | 5.3 : 1, Lc -49.4 | 4.6 : 1, Lc -77.0 | 3.02 : 1 | 14.9 / 11.1 / 10.8 / 10.7 | 47 % | 68 % |
+| H1 Rutherford scattering, gold foil | dark | 27 of 27 | 144 | 12.8 : 1, Lc -92.0 | 5.7 : 1, Lc -47.2 | 4.6 : 1, Lc -77.0 | 4.53 : 1 | 13.5 / 10.6 / 10.7 / 10.6 | 53 % | 70 % |
+| H2 Rutherford scattering, scintillation | dark | 27 of 27 | 144 | 12.7 : 1, Lc -91.9 | 5.7 : 1, Lc -47.1 | 4.5 : 1, Lc -77.0 | 4.27 : 1 | 15.4 / 13.4 / 13.4 / 13.5 | 53 % | 70 % |
+| J1 Patent drawing, drawing board | light | 26 of 26 | 143 | 14.3 : 1, Lc 92.0 | 5.7 : 1, Lc 71.5 | 8.8 : 1, Lc 61.3 | 3.02 : 1 | 16.1 / 15.7 / 15.8 / 15.7 | 0 % | 72 % |
+| J2 Patent drawing, ink only | light | 26 of 26 | 143 | 14.6 : 1, Lc 91.9 | 5.7 : 1, Lc 71.4 | 9.0 : 1, Lc 62.0 | 3.02 : 1 | 17.6 / 16.0 / 15.8 / 16.0 | 0 % | 72 % |
+| J2D Patent drawing, photostat | dark | 27 of 27 | 144 | 13.1 : 1, Lc -92.6 | 6.1 : 1, Lc -48.7 | 4.6 : 1, Lc -77.2 | 3.77 : 1 | 19.3 / 17.5 / 17.5 / 17.4 | 23 % | 68 % |
+
+
+Every fitted set: track colours at 10.0 or more under normal, protan, deutan and tritan vision (today 1.0 under protan); every clip edge at 3 : 1 or more on both lanes and the selected lane; quiet text at 4.6 : 1 or more everywhere including glass over the brightest clip.
+
+### Recommendations
+
+★★★★★ (the version to ship per theme): **A1, B1, C1, D1, E1, G2, H1, J1**, default **A1**. ★★★★: A2, B2, C2, D2, E2 (with E2L), G1, H2, J2 (with J2D).
+
+### The versions
+
+#### A0 Orbit night, today (dark) (baseline)
+
+Today's app, untouched: the locked baseline with its five known misses. Kept here to compare against and still pickable. Icons that follow it: `dipole-field`, `field-depth`.
+
+Tokens: bg `#101214`, chrome `#17191C`, ruler `#272B30`, lane0 `#1E2125`, lane1 `#202328`, laneSel `#292D33`, panel `#121216`, panel2 `#18181d`, strip `#24272E`, display `#0B0C10`, glass `#1C1C24`, line `#25252c`, ink `#ececf1`, lab `#b7b7c2`, mut `#8b8b97`, dis `#5c5e68`, rulerTxt `#AAB1BB`, inkD `#ececf1`, accent `#4c8dff`, accentFill `#4c8dff`, onAccent `#ffffff`, accentD `#4c8dff`, sel `#f5c84c`, selFill `#f5c84c`, selD `#f5c84c`, unit `#ffb547`, unitD `#ffb547`, rec `#ff4d4d`, over `#ff6b6b`, overD `#ff6b6b`, warn `#f5c84c`, ok `#3ecf8e`, okS `#3ecf8e`, ph `#3ecf8e`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#f5c84c`, m3 `#ff3b3b`, focusIn `#4c8dff`, focusOut `#4c8dff`, tip `#2a2a33`, tipInk `#ececf1`, tipEdge `#6a6c7a`, glass 50 % (floor 78 %), clip body 36 %, grid `255,255,255` × 1.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 55 %, minor grid × 1.
+
+Track colours: `#4c8dff` `#3ecf8e` `#f5c84c` `#ff6b6b` `#ff9a3c` `#b583ff` `#4cc9f0` `#ff7ac8`. Smallest CIEDE2000: normal 18.6, protan 1.0, deutan 5.7, tritan 6.1.
+
+Worst pairs: main text 9.25 : 1, Lc -86.9; labels 5.48 : 1, Lc -55.1; quiet text 3.23 : 1, Lc -31.8; units 8.51 : 1, Lc -67.5; text on filled buttons 3.20 : 1, Lc -64.2; clip titles 5.79 : 1, Lc 43.7; clip edge 4.32 : 1; accent 4.67 : 1; selection 8.73 : 1; record 5.39 : 1; playhead 7.14 : 1. Rules passed: 19 of 27 (kept misses: T2, T3, T4, T5, T7, U10, T11, G1). Meaning colours apart: accent/sel 61.2, sel/over 42.4, sel/rec 44.4, accent/rec 45.6, accent/ok 48.4, ph/sel 35.2, ph/rec 73.2.
+
+#### A1 Orbit night, repaired (dark) ★★★★★
+
+The app you know with its five misses closed. Surfaces, the blue, the yellow selection and the amber units are today's to the digit; only the faint greys rise a step and filled buttons take a slightly deeper blue so their white text reads. Icons that follow it: `dipole-field`, `field-depth`.
+
+Changed from round 1: Quiet grey, disabled grey and ruler numbers one step lighter (lightness only). Filled buttons get their own deeper blue (new token accentFill), white text stays; lines and arcs keep #4c8dff. Track colours nudged apart for red-green colour vision (hue within 16 degrees); the clip title band is a little thinner so titles read. Glass tint at the measured floor, two-colour focus ring.
+
+Tokens: bg `#101214`, chrome `#17191C`, ruler `#272B30`, lane0 `#1E2125`, lane1 `#202328`, laneSel `#292D33`, panel `#121216`, panel2 `#18181d`, strip `#24272E`, display `#0B0C10`, glass `#1A1A22`, line `#25252c`, ink `#ececf1`, lab `#BABAC5`, mut `#9F9FAB`, dis `#7B7D88`, rulerTxt `#B4BAC4`, inkD `#ececf1`, accent `#4c8dff`, accentFill `#2f6fe6`, onAccent `#ffffff`, accentD `#4c8dff`, sel `#f5c84c`, selFill `#f5c84c`, selD `#f5c84c`, unit `#ffb547`, unitD `#ffb547`, rec `#ff4d4d`, over `#ff6b6b`, overD `#ff6b6b`, warn `#f5c84c`, ok `#3ecf8e`, okS `#3ecf8e`, ph `#3ecf8e`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#f5c84c`, m3 `#ff3b3b`, focusIn `#4c8dff`, focusOut `#0B0C10`, tip `#2a2a33`, tipInk `#ececf1`, tipEdge `#737583`, glass 60 % (floor 59 %), clip body 36 %, grid `255,255,255` × 1.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#4874C7` `#45AB88` `#CDB107` `#E44165` `#CA8A48` `#A17FFE` `#20C3E5` `#FE73C4`. Smallest CIEDE2000: normal 18.1, protan 10.1, deutan 10.0, tritan 10.0.
+
+Worst pairs: main text 10.96 : 1, Lc -90.2; labels 6.71 : 1, Lc -60.1; quiet text 4.93 : 1, Lc -45.3; units 8.51 : 1, Lc -67.5; text on filled buttons 4.63 : 1, Lc -77.1; clip titles 4.57 : 1, Lc -76.9; clip edge 3.03 : 1; accent 4.67 : 1; selection 8.73 : 1; record 5.39 : 1; playhead 7.14 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 61.2, sel/over 42.4, sel/rec 44.4, accent/rec 45.6, accent/ok 48.4, ph/sel 35.2, ph/rec 73.2.
+
+Readability fit: smallest CIEDE2000 over four visions 1.0 -> 10.0 (limits: lightness 0.09, chroma 0.045, hue 16 degrees); lab #b7b7c2 → #BABAC5; mut #9a9aa6 → #9F9FAB; dis #6e707b → #7B7D88; tipEdge #6a6c7a → #737583.
+
+#### A2 Orbit night, field depth (dark) ★★★★
+
+Orbit night with the navy of its own icons: the charcoal takes a little more blue and depth, the grid turns field-line blue. Same blue, same yellow, same layout of light and dark. Icons that follow it: `field-depth`, `dipole-field`.
+
+Changed from round 1: Surfaces move from grey-blue charcoal toward the icons' navy (about 8 degrees of hue, more chroma). Grid lines tinted like the dipole field lines. All of A1's repairs.
+
+Tokens: bg `#0A0E16`, chrome `#101620`, ruler `#1D2532`, lane0 `#161C27`, lane1 `#19202B`, laneSel `#222C3C`, panel `#0E121A`, panel2 `#151A24`, strip `#1F2633`, display `#07090E`, glass `#161B27`, line `#242C3A`, ink `#ECEEF3`, lab `#B9BFCC`, mut `#9AA1B1`, dis `#767D8E`, rulerTxt `#B2BBCA`, inkD `#ECEEF3`, accent `#4c8dff`, accentFill `#2f6fe6`, onAccent `#ffffff`, accentD `#4c8dff`, sel `#f5c84c`, selFill `#f5c84c`, selD `#f5c84c`, unit `#ffb547`, unitD `#ffb547`, rec `#ff4d4d`, over `#ff6b6b`, overD `#ff6b6b`, warn `#f5c84c`, ok `#3ecf8e`, okS `#3ecf8e`, ph `#3ecf8e`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#f5c84c`, m3 `#ff3b3b`, focusIn `#4c8dff`, focusOut `#07090E`, tip `#283040`, tipInk `#ECEEF3`, tipEdge `#6B768B`, glass 60 % (floor 52 %), clip body 36 %, grid `170,195,240` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#666AD0` `#7CBC75` `#F5A620` `#E13673` `#DD7927` `#8E81FE` `#17C3F4` `#FD78C7`. Smallest CIEDE2000: normal 11.2, protan 10.2, deutan 10.2, tritan 10.2.
+
+Worst pairs: main text 11.37 : 1, Lc -91.6; labels 7.16 : 1, Lc -62.8; quiet text 5.09 : 1, Lc -46.1; units 8.64 : 1, Lc -67.7; text on filled buttons 4.63 : 1, Lc -77.1; clip titles 4.57 : 1, Lc -76.8; clip edge 3.04 : 1; accent 4.74 : 1; selection 8.87 : 1; record 5.55 : 1; playhead 7.72 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 61.2, sel/over 42.4, sel/rec 44.4, accent/rec 45.6, accent/ok 48.4, ph/sel 35.2, ph/rec 73.2.
+
+Readability fit: smallest CIEDE2000 over four visions 1.0 -> 10.2 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #6C7383 → #767D8E; tipEdge #687388 → #6B768B.
+
+#### B1 Chart paper, printed plate (light) ★★★★★
+
+A lithographed plate: warm chart paper, navy ink, clips printed as flat colour. The nucleus orange is the playhead, the electron blue the accent, titles set in a book serif. Icons that follow it: `dipole-field-paper`, `measured-field-paper`, `field-dial-paper`.
+
+Changed from round 1: Selection is a yellow highlighter fill inside an ochre line, so yellow still means selected on paper. Play and "on" greens get a darker ink for paper (new token okS). Sepia hairlines, serif titles, clip titles pick ink per clip.
+
+Tokens: bg `#E2D9C6`, chrome `#E9E1D0`, ruler `#EEE7D8`, lane0 `#F7F2E8`, lane1 `#F1EBDE`, laneSel `#FBEDC2`, panel `#FAF6EE`, panel2 `#F0E9DB`, strip `#ECE4D4`, display `#1B2340`, glass `#FAF6EE`, line `#CDC2AB`, ink `#1B2340`, lab `#3A4160`, mut `#575C72`, dis `#9A9685`, rulerTxt `#1B2340`, inkD `#F7F2E8`, accent `#2A62F0`, accentFill `#2A62F0`, onAccent `#FFFFFF`, accentD `#6E9BFF`, sel `#9A6B00`, selFill `#FFD84D`, selD `#F5C84C`, unit `#9E4A00`, unitD `#FFB547`, rec `#CC2B2B`, over `#BF2926`, overD `#FF6B6B`, warn `#F2C84B`, ok `#5AD39A`, okS `#1E8A5A`, ph `#C8610A`, m0 `#2E9E6B`, m1 `#5AD39A`, m2 `#F2C84B`, m3 `#FF5A4F`, focusIn `#2A62F0`, focusOut `#FFFFFF`, tip `#1B2340`, tipInk `#F7F2E8`, tipEdge `#1B2340`, glass 86 % (floor 81 %), clip body 90 %, grid `27,35,64` × 1.15.
+
+Style: caps 0, numerals ui, titles serif, dashed minor lines 0, clip outline 1 px, title band 0 %, minor grid × 1.
+
+Track colours: `#6155D6` `#285B4F` `#983A01` `#CC2964` `#4036AB` `#0D708E` `#7E1660` `#59623D`. Smallest CIEDE2000: normal 11.2, protan 10.3, deutan 10.3, tritan 10.3.
+
+Worst pairs: main text 11.00 : 1, Lc 80.4; labels 7.39 : 1, Lc 73.6; quiet text 4.71 : 1, Lc 60.8; units 4.70 : 1, Lc 62.6; text on filled buttons 5.12 : 1, Lc -79.9; clip titles 4.57 : 1, Lc -76.0; clip edge 4.34 : 1; accent 3.65 : 1; selection 3.71 : 1; record 4.09 : 1; playhead 3.30 : 1. Rules passed: 26 of 26. Meaning colours apart: accent/sel 58.1, sel/over 30.6, sel/rec 31.3, accent/rec 44.4, accent/ok 54.6, ph/sel 15.3, ph/rec 19.3.
+
+Readability fit: smallest CIEDE2000 over four visions 1.3 -> 10.3 (limits: lightness 0.09, chroma 0.030, hue 16 degrees).
+
+#### B2 Chart paper, graph sheet (light) ★★★★
+
+The measured-field sheet: cooler paper with a green graph ruling you can count on, clips drawn as ink outlines over a light wash, numerals in a fixed-width face. Icons that follow it: `measured-field-paper`, `dipole-field-paper`, `field-dial-paper`.
+
+Changed from round 1: The drafting grid becomes visible graph paper (green ruling, stronger minor lines). Clips are line work over a wash instead of flat colour, so the grid shows through. Fixed-width numerals, capital section labels.
+
+Tokens: bg `#DEDDCC`, chrome `#E6E5D6`, ruler `#ECEBDE`, lane0 `#F7F6EC`, lane1 `#F1F0E4`, laneSel `#FBEEC0`, panel `#FAF9F1`, panel2 `#EEEDDF`, strip `#E9E8D9`, display `#17203A`, glass `#F9F8F0`, line `#C3C5AE`, ink `#17203A`, lab `#384058`, mut `#555B6C`, dis `#96977F`, rulerTxt `#17203A`, inkD `#F7F6EC`, accent `#2A62F0`, accentFill `#2A62F0`, onAccent `#FFFFFF`, accentD `#6E9BFF`, sel `#946800`, selFill `#FFD84D`, selD `#F5C84C`, unit `#9A4A00`, unitD `#FFB547`, rec `#C92A2A`, over `#BC2724`, overD `#FF6B6B`, warn `#F2C84B`, ok `#5AD39A`, okS `#1B8456`, ph `#C8610A`, m0 `#2E9E6B`, m1 `#5AD39A`, m2 `#F2C84B`, m3 `#FF5A4F`, focusIn `#2A62F0`, focusOut `#FFFFFF`, tip `#17203A`, tipInk `#F7F6EC`, tipEdge `#17203A`, glass 74 % (floor 12 %), clip body 20 %, grid `38,112,92` × 1.7.
+
+Style: caps 1, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 12 %, minor grid × 1.8.
+
+Track colours: `#706EEB` `#199584` `#CB7146` `#BC3251` `#5B10C4` `#0D6A7C` `#722D4E` `#445606`. Smallest CIEDE2000: normal 17.1, protan 14.1, deutan 14.1, tritan 14.1.
+
+Worst pairs: main text 11.75 : 1, Lc 82.5; labels 8.10 : 1, Lc 78.0; quiet text 4.94 : 1, Lc 62.9; units 4.93 : 1, Lc 64.8; text on filled buttons 5.12 : 1, Lc -79.9; clip titles 9.27 : 1, Lc 63.6; clip edge 3.02 : 1; accent 3.73 : 1; selection 4.01 : 1; record 4.30 : 1; playhead 3.39 : 1. Rules passed: 26 of 26. Meaning colours apart: accent/sel 58.0, sel/over 30.6, sel/rec 31.4, accent/rec 44.3, accent/ok 54.6, ph/sel 16.3, ph/rec 19.5.
+
+Readability fit: smallest CIEDE2000 over four visions 2.5 -> 14.1 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### C1 Space Race, mission control (dark) ★★★★★
+
+The control room: night-navy consoles under a band of agency blue for the top bar and transport, white lettering, caution yellow for selection, red for record alone. Read-outs in a console typeface. Icons that follow it: `space-race`, `three-rings`.
+
+Changed from round 1: Buttons that are on are console-blue lamps with dark lettering; clips glow through like today's instead of solid blocks. The blue band is the true #0B3D91 family; record red lifted to stay 3 : 1 on it. IBM Plex Mono numerals and capital labels, like console legends.
+
+Tokens: bg `#060C1A`, chrome `#0B3A86`, ruler `#0C1830`, lane0 `#0B152B`, lane1 `#0D1830`, laneSel `#16254A`, panel `#0A142A`, panel2 `#111E3E`, strip `#101C38`, display `#030712`, glass `#0D1936`, line `#21325A`, ink `#F1F4F9`, lab `#C6D0E2`, mut `#9CABC8`, dis `#6F7B95`, rulerTxt `#C6D0E2`, inkD `#F1F4F9`, accent `#8DB8FF`, accentFill `#8DB8FF`, onAccent `#060C1A`, accentD `#8DB8FF`, sel `#FFD23A`, selFill `#FFD23A`, selD `#FFD23A`, unit `#FFB547`, unitD `#FFB547`, rec `#FF5A4E`, over `#FF7468`, overD `#FF7468`, warn `#FFD23A`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#F1F4F9`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#FFD23A`, m3 `#ff3b3b`, focusIn `#FFFFFF`, focusOut `#0B3D91`, tip `#F1F4F9`, tipInk `#060C1A`, tipEdge `#F1F4F9`, glass 70 % (floor 34 %), clip body 40 %, grid `160,185,225` × 1.
+
+Style: caps 1, numerals plex, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#4D63EB` `#579885` `#D2B208` `#BA5007` `#D87754` `#9A92FC` `#56BECB` `#AB689D`. Smallest CIEDE2000: normal 14.6, protan 12.9, deutan 12.8, tritan 12.9.
+
+Worst pairs: main text 9.70 : 1, Lc -90.8; labels 6.89 : 1, Lc -67.9; quiet text 4.62 : 1, Lc -46.7; units 6.09 : 1, Lc -61.1; text on filled buttons 9.70 : 1, Lc 64.6; clip titles 4.56 : 1, Lc -77.0; clip edge 3.03 : 1; accent 5.31 : 1; selection 10.40 : 1; record 3.48 : 1; playhead 16.00 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 53.4, sel/over 42.5, sel/rec 45.1, accent/rec 45.5, accent/ok 41.5, ph/sel 32.7, ph/rec 38.9.
+
+Readability fit: smallest CIEDE2000 over four visions 1.4 -> 12.8 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### C2 Space Race, three rings (dark) ★★★★
+
+The hardware instead of the room: graphite and brushed steel from the three-rings icon, steel-grey labels, one cool blue and the nucleus red. Quieter and darker than C1. Icons that follow it: `three-rings`, `space-race`.
+
+Changed from round 1: Graphite surfaces instead of the blue band; steel as the quiet text colour. See-through clips like today's. IBM Plex Mono numerals.
+
+Tokens: bg `#090D14`, chrome `#111722`, ruler `#171E2B`, lane0 `#0F141E`, lane1 `#121823`, laneSel `#1D2738`, panel `#0D121A`, panel2 `#151C28`, strip `#19212E`, display `#05070B`, glass `#131A26`, line `#273040`, ink `#E9EEF5`, lab `#BCC7D8`, mut `#97A7BF`, dis `#717C8F`, rulerTxt `#BCC7D8`, inkD `#E9EEF5`, accent `#7C9EE0`, accentFill `#4568B6`, onAccent `#FFFFFF`, accentD `#7C9EE0`, sel `#F2C94C`, selFill `#F2C94C`, selD `#F2C94C`, unit `#FFB547`, unitD `#FFB547`, rec `#E5544C`, over `#FF7468`, overD `#FF7468`, warn `#F2C94C`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#DCE4F0`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#F2C94C`, m3 `#ff3b3b`, focusIn `#FFFFFF`, focusOut `#090D14`, tip `#2A3446`, tipInk `#E9EEF5`, tipEdge `#6B7A92`, glass 65 % (floor 31 %), clip body 34 %, grid `143,161,187` × 1.1.
+
+Style: caps 0, numerals plex, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#6B739A` `#82B08A` `#EAAC22` `#CE325E` `#B77D1E` `#9973F0` `#05CDF6` `#BC94B1`. Smallest CIEDE2000: normal 15.2, protan 14.1, deutan 14.2, tritan 14.1.
+
+Worst pairs: main text 12.15 : 1, Lc -92.3; labels 8.30 : 1, Lc -68.0; quiet text 5.80 : 1, Lc -49.8; units 9.21 : 1, Lc -68.6; text on filled buttons 5.37 : 1, Lc -81.9; clip titles 4.56 : 1, Lc -76.7; clip edge 3.03 : 1; accent 6.03 : 1; selection 9.46 : 1; record 4.88 : 1; playhead 13.05 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 52.3, sel/over 39.9, sel/rec 44.1, accent/rec 42.1, accent/ok 41.7, ph/sel 35.6, ph/rec 40.9.
+
+Readability fit: smallest CIEDE2000 over four visions 1.3 -> 14.1 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #6B7689 → #717C8F; accentFill #4467B5 → #4568B6.
+
+#### D1 Chalkboard, green board (dark) ★★★★★
+
+The board itself: the slate green of the icon, lighter than round 1, with chalk-white writing. Clips are chalk outlines over a light dusting of their colour, tracks in the pastel chalks of the box. Icons that follow it: `chalkboard`, `science-fair`.
+
+Changed from round 1: The board is the icon's green (#344434 family), not a dark green-black. Clips drawn as chalk outlines (1.5 px line, thin fill), grid like wiped chalk. Quiet text lifted so it reads on the lighter board.
+
+Tokens: bg `#1E2920`, chrome `#243026`, ruler `#2A382C`, lane0 `#2E3D30`, lane1 `#314133`, laneSel `#3D5142`, panel `#263328`, panel2 `#2E3C30`, strip `#2D3B2F`, display `#101611`, glass `#2A372C`, line `#46584A`, ink `#F0ECDF`, lab `#D6D1BE`, mut `#B4B8A5`, dis `#869080`, rulerTxt `#DAD4BC`, inkD `#F0ECDF`, accent `#9FD0F0`, accentFill `#9FD0F0`, onAccent `#15211A`, accentD `#9FD0F0`, sel `#F4D56E`, selFill `#F4D56E`, selD `#F4D56E`, unit `#F2B46A`, unitD `#F2B46A`, rec `#F06A58`, over `#FF8A76`, overD `#FF7A66`, warn `#F2D26B`, ok `#8FDC8A`, okS `#8FDC8A`, ph `#F4F0E4`, m0 `#3E9E63`, m1 `#8FDC8A`, m2 `#F2D26B`, m3 `#FF6A55`, focusIn `#F4F0E4`, focusOut `#101611`, tip `#F0ECDF`, tipInk `#1E2920`, tipEdge `#F0ECDF`, glass 70 % (floor 61 %), clip body 26 %, grid `240,236,220` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 0 %, minor grid × 1.
+
+Track colours: `#7EA2C2` `#D4F8C8` `#FBE749` `#BC8F8D` `#EABB7F` `#E8C2FF` `#29CBB2` `#EBEBEB`. Smallest CIEDE2000: normal 18.9, protan 12.1, deutan 12.2, tritan 12.1.
+
+Worst pairs: main text 7.24 : 1, Lc -81.5; labels 6.37 : 1, Lc -67.5; quiet text 4.80 : 1, Lc -51.7; units 6.47 : 1, Lc -61.5; text on filled buttons 10.09 : 1, Lc 72.7; clip titles 4.55 : 1, Lc -77.1; clip edge 3.04 : 1; accent 7.17 : 1; selection 5.95 : 1; record 4.35 : 1; playhead 9.53 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 43.4, sel/over 35.5, sel/rec 40.3, accent/rec 47.3, accent/ok 37.5, ph/sel 21.1, ph/rec 36.0.
+
+Readability fit: smallest CIEDE2000 over four visions 0.4 -> 12.1 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### D2 Chalkboard, science fair (dark) ★★★★
+
+The science-fair model on its felt board: deep forest green, cream lettering, and the model's own paints: nucleon blue for the accent, nucleon red for record, the gold beads for selection. Icons that follow it: `science-fair`, `chalkboard`.
+
+Changed from round 1: Deeper green with cream ink instead of chalk white. Controls in the nucleon blue, record in the nucleon red, selection in the gold of the electrons. Clips in poster-paint colours.
+
+Tokens: bg `#14211A`, chrome `#1B2C22`, ruler `#203427`, lane0 `#24392D`, lane1 `#273D30`, laneSel `#32503E`, panel `#1A2A20`, panel2 `#223528`, strip `#233629`, display `#0B120E`, glass `#1F3126`, line `#395342`, ink `#EFE6C8`, lab `#D1C6A0`, mut `#B2AB8C`, dis `#7F8570`, rulerTxt `#D1C6A0`, inkD `#EFE6C8`, accent `#8DB8F4`, accentFill `#8DB8F4`, onAccent `#10203A`, accentD `#8DB8F4`, sel `#F0CB5A`, selFill `#F0CB5A`, selD `#F0CB5A`, unit `#F0B062`, unitD `#F0B062`, rec `#E86050`, over `#FF8672`, overD `#FF7A66`, warn `#F0CB5A`, ok `#8FDC8A`, okS `#8FDC8A`, ph `#EFE6C8`, m0 `#3E9E63`, m1 `#8FDC8A`, m2 `#F0CB5A`, m3 `#FF6A55`, focusIn `#EFE6C8`, focusOut `#0B120E`, tip `#EFE6C8`, tipInk `#14211A`, tipEdge `#EFE6C8`, glass 70 % (floor 68 %), clip body 30 %, grid `209,198,160` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 0 %, minor grid × 1.
+
+Track colours: `#769CB4` `#98AB7F` `#FEDDA1` `#E5793B` `#FBB501` `#AB91FD` `#2AE3F3` `#CBC9BD`. Smallest CIEDE2000: normal 13.7, protan 13.2, deutan 12.9, tritan 12.9.
+
+Worst pairs: main text 7.15 : 1, Lc -78.6; labels 6.23 : 1, Lc -62.9; quiet text 4.61 : 1, Lc -47.3; units 6.80 : 1, Lc -61.1; text on filled buttons 7.98 : 1, Lc 61.4; clip titles 4.55 : 1, Lc -77.1; clip edge 3.03 : 1; accent 6.31 : 1; selection 5.69 : 1; record 4.35 : 1; playhead 9.36 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 48.1, sel/over 35.4, sel/rec 40.9, accent/rec 44.3, accent/ok 45.0, ph/sel 17.4, ph/rec 38.3.
+
+Readability fit: smallest CIEDE2000 over four visions 0.8 -> 12.9 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### E1 Blueprint, Prussian blue (dark) ★★★★★
+
+A real blueprint: the mid Prussian blue of the icon rather than a navy, white line work, the drafting grid drawn in, clips as tracing paper. Labels in drafting capitals. Icons that follow it: `blueprint`, `cutaway-nucleus`.
+
+Changed from round 1: The paper is the icon's blue (#13417A family); round 1 was two steps darker. Grid clearly visible, as on the sheet; clips are thin washes with a white-ish 1.5 px edge. Capital labels with tracking, fixed-width numerals.
+
+Tokens: bg `#0E3263`, chrome `#113A70`, ruler `#134079`, lane0 `#154380`, lane1 `#174785`, laneSel `#1C5296`, panel `#113A70`, panel2 `#164682`, strip `#15437E`, display `#071B3B`, glass `#123D76`, line `#3F6CA8`, ink `#F5F9FF`, lab `#D2E1F5`, mut `#B4CAE8`, dis `#7F9CC6`, rulerTxt `#D2E1F5`, inkD `#F5F9FF`, accent `#E3EEFF`, accentFill `#E3EEFF`, onAccent `#0E3263`, accentD `#E3EEFF`, sel `#FFD84A`, selFill `#FFD84A`, selD `#FFD84A`, unit `#FFC870`, unitD `#FFC870`, rec `#FF6A5E`, over `#FD9289`, overD `#FF7A70`, warn `#FFD54A`, ok `#6BE5A8`, okS `#6BE5A8`, ph `#FFFFFF`, m0 `#2FB37A`, m1 `#5EE0A0`, m2 `#FFD54A`, m3 `#FF5A50`, focusIn `#FFFFFF`, focusOut `#071B3B`, tip `#F5F9FF`, tipInk `#0E3263`, tipEdge `#F5F9FF`, glass 72 % (floor 41 %), clip body 20 %, grid `205,225,255` × 1.6.
+
+Style: caps 1, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 0 %, minor grid × 1.5.
+
+Track colours: `#BACCFF` `#4BBFAA` `#FEEFC8` `#D19379` `#CCB857` `#A19AFC` `#8DFEF9` `#FFB5CC`. Smallest CIEDE2000: normal 13.0, protan 11.6, deutan 11.0, tritan 11.0.
+
+Worst pairs: main text 7.37 : 1, Lc -87.2; labels 6.86 : 1, Lc -74.7; quiet text 5.44 : 1, Lc -60.4; units 6.44 : 1, Lc -67.5; text on filled buttons 10.84 : 1, Lc 87.7; clip titles 4.98 : 1, Lc -79.6; clip edge 3.03 : 1; accent 8.40 : 1; selection 5.63 : 1; record 4.01 : 1; playhead 9.23 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 39.4, sel/over 39.7, sel/rec 44.5, accent/rec 39.4, accent/ok 30.1, ph/sel 28.4, ph/rec 36.5.
+
+Readability fit: smallest CIEDE2000 over four visions 5.2 -> 11.0 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); over #FF8E84 → #FD9289.
+
+#### E2 Blueprint, night print (dark) ★★★★
+
+The blueprint for long nights: a deeper indigo that rests the eyes, the same white lines and grid. Comes with a light half, the whiteprint, for following the system appearance. Pairs with E2L. Icons that follow it: `blueprint`, `cutaway-nucleus`.
+
+Changed from round 1: Round 1's darker blue, cleaned up: more even steps between surfaces, calmer grid. A light partner (Whiteprint: blue lines on white, the copy that replaced blueprints).
+
+Tokens: bg `#081E40`, chrome `#0B264E`, ruler `#0E2B57`, lane0 `#103160`, lane1 `#123566`, laneSel `#1B457E`, panel `#0D2952`, panel2 `#123363`, strip `#12315F`, display `#051430`, glass `#0F2D5A`, line `#2C548F`, ink `#F2F7FF`, lab `#CADBF2`, mut `#A3BCDE`, dis `#6E8BB8`, rulerTxt `#CADBF2`, inkD `#F2F7FF`, accent `#DDEBFF`, accentFill `#DDEBFF`, onAccent `#081E40`, accentD `#DDEBFF`, sel `#FFD54A`, selFill `#FFD54A`, selD `#FFD54A`, unit `#FFC266`, unitD `#FFC266`, rec `#FF5F55`, over `#FF8278`, overD `#FF7A70`, warn `#FFD54A`, ok `#5EE0A0`, okS `#5EE0A0`, ph `#FFFFFF`, m0 `#2FB37A`, m1 `#5EE0A0`, m2 `#FFD54A`, m3 `#FF5A50`, focusIn `#FFFFFF`, focusOut `#051430`, tip `#F2F7FF`, tipInk `#081E40`, tipEdge `#F2F7FF`, glass 68 % (floor 50 %), clip body 28 %, grid `200,220,255` × 1.3.
+
+Style: caps 1, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 0 %, minor grid × 1.3.
+
+Track colours: `#C7C2FC` `#4FB380` `#FFF8BE` `#DA7819` `#FFCC06` `#8883F8` `#CDFFF7` `#AB8AA5`. Smallest CIEDE2000: normal 18.9, protan 17.2, deutan 17.2, tritan 17.2.
+
+Worst pairs: main text 8.88 : 1, Lc -90.5; labels 7.38 : 1, Lc -73.8; quiet text 5.35 : 1, Lc -55.2; units 8.07 : 1, Lc -70.4; text on filled buttons 13.70 : 1, Lc 90.6; clip titles 4.61 : 1, Lc -77.4; clip edge 3.02 : 1; accent 10.67 : 1; selection 6.76 : 1; record 4.82 : 1; playhead 12.16 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 40.9, sel/over 40.9, sel/rec 44.9, accent/rec 41.6, accent/ok 31.5, ph/sel 28.5, ph/rec 38.0.
+
+Readability fit: smallest CIEDE2000 over four visions 8.6 -> 17.2 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### E2L Blueprint, whiteprint (light) ★★★★
+
+E2's light half: a whiteprint. Cool white sheet, lines and lettering in blueprint-blue ink, the displays kept as blueprint-blue wells. Pairs with E2. Icons that follow it: `blueprint`, `cutaway-nucleus`.
+
+Tokens: bg `#DCE3EE`, chrome `#E5EAF3`, ruler `#ECF0F7`, lane0 `#F8FAFD`, lane1 `#F1F4F9`, laneSel `#FDF1C2`, panel `#FBFCFE`, panel2 `#ECF0F7`, strip `#E7ECF4`, display `#0B2247`, glass `#FAFBFE`, line `#BECADC`, ink `#12295C`, lab `#2C4274`, mut `#4D5F88`, dis `#93A0B8`, rulerTxt `#12295C`, inkD `#F8FAFD`, accent `#1D4FC4`, accentFill `#1D4FC4`, onAccent `#FFFFFF`, accentD `#DDEBFF`, sel `#946800`, selFill `#FFD84D`, selD `#FFD54A`, unit `#9A4A00`, unitD `#FFC266`, rec `#C62828`, over `#B92322`, overD `#FF7A70`, warn `#FFD54A`, ok `#5EE0A0`, okS `#1B8456`, ph `#12295C`, m0 `#2FB37A`, m1 `#5EE0A0`, m2 `#FFD54A`, m3 `#FF5A50`, focusIn `#1D4FC4`, focusOut `#FFFFFF`, tip `#12295C`, tipInk `#F8FAFD`, tipEdge `#12295C`, glass 74 % (floor 0 %), clip body 20 %, grid `27,63,143` × 1.35.
+
+Style: caps 1, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 30 %, minor grid × 1.5.
+
+Track colours: `#606DFF` `#307C54` `#78650E` `#DF3D64` `#BD7D27` `#565AB0` `#1197A3` `#9C4974`. Smallest CIEDE2000: normal 12.8, protan 12.2, deutan 12.1, tritan 12.2.
+
+Worst pairs: main text 10.86 : 1, Lc 83.5; labels 8.13 : 1, Lc 79.9; quiet text 4.92 : 1, Lc 64.7; units 5.19 : 1, Lc 67.9; text on filled buttons 7.08 : 1, Lc -88.8; clip titles 8.79 : 1, Lc 61.1; clip edge 3.03 : 1; accent 5.48 : 1; selection 4.18 : 1; record 4.66 : 1; playhead 12.27 : 1. Rules passed: 26 of 26. Meaning colours apart: accent/sel 56.8, sel/over 30.9, sel/rec 31.3, accent/rec 43.5, accent/ok 61.4, ph/sel 52.2, ph/rec 43.6.
+
+Readability fit: smallest CIEDE2000 over four visions 1.7 -> 12.1 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### G1 Cutaway nucleus, machined steel (dark) ★★★★
+
+The shell of the model: cool slate and brushed silver. Buttons that are on turn silver with dark lettering like engraved caps; red and blue appear only where they mean record and level. Icons that follow it: `cutaway-nucleus`.
+
+Changed from round 1: Steel hairlines one step clearer, surfaces more evenly spaced. Quiet text lifted; glass a little thinner than round 1.
+
+Tokens: bg `#0E131B`, chrome `#141A25`, ruler `#1A2130`, lane0 `#19212F`, lane1 `#1C2433`, laneSel `#293447`, panel `#151B26`, panel2 `#1D2432`, strip `#202838`, display `#07090E`, glass `#1B2231`, line `#313C50`, ink `#EDF1F7`, lab `#C6CFDE`, mut `#9CA8BC`, dis `#747E92`, rulerTxt `#C6CFDE`, inkD `#EDF1F7`, accent `#AEBBCF`, accentFill `#AEBBCF`, onAccent `#0E131B`, accentD `#AEBBCF`, sel `#F5C84C`, selFill `#F5C84C`, selD `#F5C84C`, unit `#FFB547`, unitD `#FFB547`, rec `#E5503F`, over `#FF7468`, overD `#FF6B60`, warn `#F5C84C`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#E6ECF5`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#f5c84c`, m3 `#ff3b3b`, focusIn `#FFFFFF`, focusOut `#0E131B`, tip `#2C3649`, tipInk `#EDF1F7`, tipEdge `#717E95`, glass 68 % (floor 46 %), clip body 40 %, grid `164,178,200` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#6772EE` `#349184` `#C1A80F` `#F18F81` `#D06944` `#949CFA` `#1BB9BF` `#A368A6`. Smallest CIEDE2000: normal 13.2, protan 11.6, deutan 11.5, tritan 11.5.
+
+Worst pairs: main text 11.05 : 1, Lc -92.4; labels 8.15 : 1, Lc -71.4; quiet text 5.32 : 1, Lc -49.0; units 8.41 : 1, Lc -67.3; text on filled buttons 9.59 : 1, Lc 65.7; clip titles 4.58 : 1, Lc -76.9; clip edge 3.03 : 1; accent 7.60 : 1; selection 7.90 : 1; record 4.56 : 1; playhead 13.10 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 37.0, sel/over 39.0, sel/rec 42.1, accent/rec 38.9, accent/ok 31.3, ph/sel 34.0, ph/rec 42.1.
+
+Readability fit: smallest CIEDE2000 over four visions 1.8 -> 11.5 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #737D90 → #747E92; tipEdge #6E7B92 → #717E95.
+
+#### G2 Cutaway nucleus, opened core (dark) ★★★★★
+
+The cut itself: the same slate shell, but controls take the proton blue of the core (the icon's #2D62A8, lifted one step to stand off the panels) and record the neutron red. Silver stays for lines and quiet text. Icons that follow it: `cutaway-nucleus`.
+
+Changed from round 1: Accent is the icon's blue: light blue for lines and arcs, a deeper blue for filled buttons with white text. Slightly warmer, lighter shell so the blue and red read as the inside.
+
+Tokens: bg `#10141B`, chrome `#171C26`, ruler `#1D2330`, lane0 `#1B212D`, lane1 `#1E2531`, laneSel `#2A3447`, panel `#181D27`, panel2 `#202633`, strip `#242B39`, display `#07090E`, glass `#1E2431`, line `#343D4F`, ink `#EEF1F6`, lab `#C8CFDC`, mut `#9FA9BB`, dis `#767F92`, rulerTxt `#C8CFDC`, inkD `#EEF1F6`, accent `#86AEF0`, accentFill `#4075BD`, onAccent `#FFFFFF`, accentD `#86AEF0`, sel `#F5C84C`, selFill `#F5C84C`, selD `#F5C84C`, unit `#FFB547`, unitD `#FFB547`, rec `#E5503F`, over `#FF7468`, overD `#FF6B60`, warn `#F5C84C`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#E6ECF5`, m0 `#12804f`, m1 `#3ecf8e`, m2 `#f5c84c`, m3 `#ff3b3b`, focusIn `#FFFFFF`, focusOut `#10141B`, tip `#2E3748`, tipInk `#EEF1F6`, tipEdge `#727E93`, glass 68 % (floor 47 %), clip body 40 %, grid `174,186,206` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#818BFF` `#529068` `#C9A50A` `#FC829A` `#BE7831` `#8B6FBA` `#24B6D3` `#B980A7`. Smallest CIEDE2000: normal 14.9, protan 11.1, deutan 10.8, tritan 10.7.
+
+Worst pairs: main text 11.04 : 1, Lc -92.4; labels 8.05 : 1, Lc -71.3; quiet text 5.32 : 1, Lc -49.4; units 8.08 : 1, Lc -66.8; text on filled buttons 4.67 : 1, Lc -77.6; clip titles 4.59 : 1, Lc -77.0; clip edge 3.02 : 1; accent 6.30 : 1; selection 7.88 : 1; record 4.46 : 1; playhead 12.96 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 50.7, sel/over 39.0, sel/rec 42.1, accent/rec 45.3, accent/ok 40.9, ph/sel 34.0, ph/rec 42.1.
+
+Readability fit: smallest CIEDE2000 over four visions 2.2 -> 10.7 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #757E90 → #767F92; tipEdge #6F7B90 → #727E93; accentFill #2D62A8 → #4075BD.
+
+#### H1 Rutherford scattering, gold foil (dark) ★★★★★
+
+The experiment in the dark: near-black, the alpha tracks' gold for the accent, the ruler and a faint gold grid, ivory text. Selection is the blue-white flash of the scintillation screen, because gold is taken. Icons that follow it: `rutherford-scattering`.
+
+Changed from round 1: Gold grid traces a little finer; ivory text one step calmer than white. Quiet text lifted; disabled text now passes.
+
+Tokens: bg `#07090F`, chrome `#0B0E16`, ruler `#10141D`, lane0 `#0F131C`, lane1 `#121620`, laneSel `#13232A`, panel `#0D1018`, panel2 `#141822`, strip `#151924`, display `#030406`, glass `#11151E`, line `#272B35`, ink `#F1EBDD`, lab `#CFC5AE`, mut `#A99E85`, dis `#817A69`, rulerTxt `#E9B751`, inkD `#F1EBDD`, accent `#E9B751`, accentFill `#E9B751`, onAccent `#07090F`, accentD `#E9B751`, sel `#66D9F5`, selFill `#66D9F5`, selD `#66D9F5`, unit `#F2A65A`, unitD `#F2A65A`, rec `#FF4D4D`, over `#FF6B6B`, overD `#FF6B6B`, warn `#F5C84C`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#F1EBDD`, m0 `#1F8A5A`, m1 `#3ECF8E`, m2 `#F5C84C`, m3 `#FF3B3B`, focusIn `#66D9F5`, focusOut `#07090F`, tip `#262A34`, tipInk `#F1EBDD`, tipEdge `#7A735F`, glass 70 % (floor 53 %), clip body 36 %, grid `233,183,81` × 0.85.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#E1A73F` `#0CCBFE` `#21AB7C` `#FD4F68` `#9181FC` `#BB7A04` `#8DC1AA` `#B973B4`. Smallest CIEDE2000: normal 13.5, protan 10.6, deutan 10.7, tritan 10.6.
+
+Worst pairs: main text 12.81 : 1, Lc -92.0; labels 8.88 : 1, Lc -68.8; quiet text 5.74 : 1, Lc -47.2; units 8.67 : 1, Lc -62.0; text on filled buttons 10.76 : 1, Lc 69.1; clip titles 4.61 : 1, Lc -77.0; clip edge 4.53 : 1; accent 9.49 : 1; selection 9.84 : 1; record 5.81 : 1; playhead 15.21 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 44.2, sel/over 64.9, sel/rec 68.4, accent/rec 38.9, accent/ok 36.2, ph/sel 26.9, ph/rec 38.8.
+
+Readability fit: smallest CIEDE2000 over four visions 3.9 -> 10.6 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #7E7766 → #817A69.
+
+#### H2 Rutherford scattering, scintillation (dark) ★★★★
+
+The same dark room with the roles turned: gold is the selection, as yellow is in every other theme, and the controls take the cool glow of the zinc-sulphide screen. Ivory ruler, gold grid traces. Icons that follow it: `rutherford-scattering`.
+
+Changed from round 1: Selection stays in the yellow family (gold), so nothing has to be relearned when switching themes. Accent is the screen's blue-green instead of gold.
+
+Tokens: bg `#07090F`, chrome `#0B0E16`, ruler `#10141D`, lane0 `#0F131C`, lane1 `#121620`, laneSel `#241F12`, panel `#0D1018`, panel2 `#141822`, strip `#151924`, display `#030406`, glass `#11151E`, line `#272B35`, ink `#F1EBDD`, lab `#CFC5AE`, mut `#A99E85`, dis `#817A69`, rulerTxt `#D8CDB4`, inkD `#F1EBDD`, accent `#7FD8E6`, accentFill `#7FD8E6`, onAccent `#07090F`, accentD `#7FD8E6`, sel `#F0BE4A`, selFill `#F0BE4A`, selD `#F0BE4A`, unit `#F29A62`, unitD `#F29A62`, rec `#FF4D4D`, over `#FF6B6B`, overD `#FF6B6B`, warn `#F5C84C`, ok `#3ECF8E`, okS `#3ECF8E`, ph `#F1EBDD`, m0 `#1F8A5A`, m1 `#3ECF8E`, m2 `#F5C84C`, m3 `#FF3B3B`, focusIn `#7FD8E6`, focusOut `#07090F`, tip `#262A34`, tipInk `#F1EBDD`, tipEdge `#7A735F`, glass 70 % (floor 53 %), clip body 36 %, grid `233,183,81` × 0.85.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1 px, title band 30 %, minor grid × 1.
+
+Track colours: `#BEBDB7` `#6B93B6` `#93C385` `#F03F34` `#906BFE` `#FAA321` `#1CD3DE` `#C36B83`. Smallest CIEDE2000: normal 15.4, protan 13.4, deutan 13.4, tritan 13.5.
+
+Worst pairs: main text 12.72 : 1, Lc -91.9; labels 8.82 : 1, Lc -68.7; quiet text 5.70 : 1, Lc -47.1; units 8.00 : 1, Lc -58.0; text on filled buttons 12.20 : 1, Lc 75.6; clip titles 4.54 : 1, Lc -77.0; clip edge 4.27 : 1; accent 10.75 : 1; selection 9.51 : 1; record 5.81 : 1; playhead 15.21 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 40.7, sel/over 39.7, sel/rec 41.4, accent/rec 66.0, accent/ok 25.7, ph/sel 23.4, ph/rec 38.8.
+
+Readability fit: smallest CIEDE2000 over four visions 3.9 -> 13.4 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #7E7766 → #817A69.
+
+#### J1 Patent drawing, drawing board (light) ★★★★★
+
+The sheet as filed: a warm white board, black ink, one blue pencil for the controls. Clips are ink outlines over the faintest wash, minor grid lines are dashed like the icon's orbits, titles in an italic book face like figure captions. Icons that follow it: `patent-drawing`.
+
+Changed from round 1: Clips become line drawings (1.5 px ink outline, thin wash) instead of dark blocks: the page stays white. Dashed minor lines, serif italic titles. Selection is a yellow highlighter fill inside an ochre line.
+
+Tokens: bg `#ECEBE6`, chrome `#F3F2EE`, ruler `#F7F6F2`, lane0 `#FDFCF9`, lane1 `#F8F7F3`, laneSel `#FFF6CF`, panel `#FFFFFF`, panel2 `#F3F2EE`, strip `#EFEEE9`, display `#1E1E1D`, glass `#FFFFFF`, line `#CBC9C2`, ink `#1C1C1B`, lab `#3A3A38`, mut `#5C5B57`, dis `#A09F99`, rulerTxt `#1C1C1B`, inkD `#FDFCF9`, accent `#1F4FB8`, accentFill `#1F4FB8`, onAccent `#FFFFFF`, accentD `#7FA6F5`, sel `#8F6500`, selFill `#FFE27A`, selD `#F2C84B`, unit `#964800`, unitD `#FFB547`, rec `#C62828`, over `#B71C1C`, overD `#FF6B6B`, warn `#F2C84B`, ok `#6FD08F`, okS `#1F7A4D`, ph `#1F4FB8`, m0 `#2E9E5E`, m1 `#6FD08F`, m2 `#F2C84B`, m3 `#FF5A45`, focusIn `#1F4FB8`, focusOut `#FFFFFF`, tip `#1C1C1B`, tipInk `#FDFCF9`, tipEdge `#1C1C1B`, glass 72 % (floor 0 %), clip body 14 %, grid `40,40,38` × 1.35.
+
+Style: caps 0, numerals ui, titles serifItalic, dashed minor lines 1, clip outline 1.5 px, title band 22 %, minor grid × 1.4.
+
+Track colours: `#6957FC` `#738E71` `#7E5F02` `#81062B` `#BC8312` `#4B2FAB` `#2F7570` `#55284D`. Smallest CIEDE2000: normal 16.1, protan 15.7, deutan 15.8, tritan 15.7.
+
+Worst pairs: main text 14.29 : 1, Lc 92.0; labels 9.81 : 1, Lc 86.1; quiet text 5.69 : 1, Lc 71.5; units 5.61 : 1, Lc 71.5; text on filled buttons 7.32 : 1, Lc -89.7; clip titles 8.83 : 1, Lc 61.3; clip edge 3.02 : 1; accent 6.13 : 1; selection 4.49 : 1; record 5.02 : 1; playhead 6.77 : 1. Rules passed: 26 of 26. Meaning colours apart: accent/sel 55.2, sel/over 30.7, sel/rec 31.2, accent/rec 43.3, accent/ok 60.1, ph/sel 55.2, ph/rec 43.3.
+
+Readability fit: smallest CIEDE2000 over four visions 3.6 -> 15.7 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### J2 Patent drawing, ink only (light) ★★★★
+
+Technical pen and nothing else: a cooler white, solid hairlines, and black as the accent, so buttons that are on are simply inked in. Blue is kept for the playhead and the focus ring. Comes with a dark half, the photostat. Pairs with J2D. Icons that follow it: `patent-drawing`.
+
+Changed from round 1: Accent is the ink itself: on-buttons are black with white lettering. Solid lines and sans titles: stricter than J1. A dark partner (Photostat: the white-on-black copy of the same sheet).
+
+Tokens: bg `#E9EAEB`, chrome `#F1F2F3`, ruler `#F6F7F8`, lane0 `#FDFDFD`, lane1 `#F6F7F8`, laneSel `#FFF6CF`, panel `#FFFFFF`, panel2 `#F1F2F3`, strip `#ECEDEF`, display `#1A1B1C`, glass `#FFFFFF`, line `#C6C8CB`, ink `#18191B`, lab `#36383B`, mut `#585A5E`, dis `#9C9EA2`, rulerTxt `#18191B`, inkD `#FDFDFD`, accent `#18191B`, accentFill `#18191B`, onAccent `#FFFFFF`, accentD `#F1F2F3`, sel `#8F6500`, selFill `#FFE27A`, selD `#F2C84B`, unit `#964800`, unitD `#FFB547`, rec `#C62828`, over `#B71C1C`, overD `#FF6B6B`, warn `#F2C84B`, ok `#6FD08F`, okS `#1F7A4D`, ph `#1F4FB8`, m0 `#2E9E5E`, m1 `#6FD08F`, m2 `#F2C84B`, m3 `#FF5A45`, focusIn `#1F4FB8`, focusOut `#FFFFFF`, tip `#18191B`, tipInk `#FDFDFD`, tipEdge `#18191B`, glass 72 % (floor 0 %), clip body 14 %, grid `30,32,36` × 1.35.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 22 %, minor grid × 1.2.
+
+Track colours: `#4863FF` `#139C7A` `#91613E` `#7A1302` `#D47614` `#4E2DA9` `#586C71` `#56274A`. Smallest CIEDE2000: normal 17.6, protan 16.0, deutan 15.8, tritan 16.0.
+
+Worst pairs: main text 14.60 : 1, Lc 91.9; labels 10.04 : 1, Lc 86.3; quiet text 5.74 : 1, Lc 71.4; units 5.56 : 1, Lc 71.0; text on filled buttons 17.59 : 1, Lc -106.7; clip titles 8.96 : 1, Lc 62.0; clip edge 3.02 : 1; accent 14.60 : 1; selection 4.45 : 1; record 5.02 : 1; playhead 6.82 : 1. Rules passed: 26 of 26. Meaning colours apart: accent/sel 38.1, sel/over 30.7, sel/rec 31.2, accent/rec 38.7, accent/ok 66.8, ph/sel 55.2, ph/rec 43.3.
+
+Readability fit: smallest CIEDE2000 over four visions 3.6 -> 15.8 (limits: lightness 0.10, chroma 0.050, hue 18 degrees).
+
+#### J2D Patent drawing, photostat (dark) ★★★★
+
+J2's dark half: the photostat negative. Neutral black sheet, white line work, the same single blue for playhead and focus. Pairs with J2. Icons that follow it: `patent-drawing`.
+
+Tokens: bg `#0A0A0B`, chrome `#121213`, ruler `#19191B`, lane0 `#141415`, lane1 `#171719`, laneSel `#27241A`, panel `#101011`, panel2 `#18181A`, strip `#1D1D20`, display `#050506`, glass `#17171A`, line `#2D2D31`, ink `#EDECE7`, lab `#C6C5BF`, mut `#A2A19B`, dis `#7C7B79`, rulerTxt `#C6C5BF`, inkD `#EDECE7`, accent `#EDECE7`, accentFill `#EDECE7`, onAccent `#0A0A0B`, accentD `#EDECE7`, sel `#F2CE5A`, selFill `#F2CE5A`, selD `#F2CE5A`, unit `#FFB547`, unitD `#FFB547`, rec `#FF5A50`, over `#FF7468`, overD `#FF6B6B`, warn `#F2C84B`, ok `#6FD08F`, okS `#6FD08F`, ph `#7FA6F5`, m0 `#2E9E5E`, m1 `#6FD08F`, m2 `#F2C84B`, m3 `#FF5A45`, focusIn `#7FA6F5`, focusOut `#0A0A0B`, tip `#2B2B2F`, tipInk `#EDECE7`, tipEdge `#727170`, glass 68 % (floor 23 %), clip body 20 %, grid `235,235,230` × 1.05.
+
+Style: caps 0, numerals mono, titles ui, dashed minor lines 0, clip outline 1.5 px, title band 30 %, minor grid × 1.2.
+
+Track colours: `#7B6BE7` `#55A477` `#E6DFB4` `#E2461A` `#FFB918` `#B4ACFF` `#A8E3E2` `#AE7D9C`. Smallest CIEDE2000: normal 19.3, protan 17.5, deutan 17.5, tritan 17.4.
+
+Worst pairs: main text 13.12 : 1, Lc -92.6; labels 9.09 : 1, Lc -68.8; quiet text 6.07 : 1, Lc -48.7; units 9.57 : 1, Lc -69.1; text on filled buttons 16.73 : 1, Lc 94.5; clip titles 4.57 : 1, Lc -77.2; clip edge 3.77 : 1; accent 14.22 : 1; selection 10.16 : 1; record 6.09 : 1; playhead 7.25 : 1. Rules passed: 27 of 27. Meaning colours apart: accent/sel 24.8, sel/over 40.4, sel/rec 43.5, accent/rec 37.0, accent/ok 26.0, ph/sel 53.8, ph/rec 43.9.
+
+Readability fit: smallest CIEDE2000 over four visions 2.2 -> 17.4 (limits: lightness 0.10, chroma 0.050, hue 18 degrees); dis #737270 → #7C7B79.
+
+### After the picks
+
+The build task (TM, its own new lane, prefix `tm`) takes the picked versions as theme files in the W3C Design Tokens format, with the round 2 tokens (`accentFill`, `okS`, `selFill`, `tip*`, the style tokens) and `tools/design-lab/th2/check.py --gate` as the release-gate step. If A0 is picked for A, nothing changes for today's look and its misses stay the gate's baseline. Picking E2 or J2 also brings "Follow the system's light or dark setting" for that theme.
