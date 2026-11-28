@@ -10,3 +10,7 @@ To release (the next SC run, once the freeze file is gone from main):
    (taskAB1's two odds checks expect Y1 instead of an even split of two pictures).
 3. Run the lint, `taskSC_B.py`, `taskAB1.py . <out>`, and the start-up smoke test; `node desktop/scripts/sync-app.js`.
 4. Log: `sc_b_log.md` here (replace vVV and the GATE line), update note, "Where it stands"; delete this folder; push.
+
+28 November 2026, 09:1x UTC: re-checked on main v0.294 (applied as v0.295 in a scratch copy): every anchor still unique, lint clean (2354 top-level functions),
+`taskSC_B.py` 19 of 19 (20,000 picks: corner 5935, sheet 6072, orbit 3997, arcs 3996; 23 and 24 pictures a second while open; 0 when closed; no console errors).
+Not pushed: the gate started a new freeze at 09:11:57 UTC. Release unchanged: the steps above, once the freeze is gone.
