@@ -10,6 +10,7 @@ glass engine at Glass (SwiftShader WebGL2, so the engine is on as on the Mac).
 Scenes
   idle       nothing moves, nothing plays
   scroll     the arrangement is scrolled sideways on every frame (what a trackpad does, through the same V.x / dirty path)
+  edit       edit while scrolled (task UV-2): the view in the middle of the song, a clip in view moved by a beat and back on every frame
   pinch      a trackpad pinch over the arrangement: one ctrlKey wheel event per frame (deltaY 4, in for 60 frames, then out), through the
              app's own wheel listener (task UV-1)
   scrollset  the same with Settings open over it (Performance page)
@@ -45,8 +46,9 @@ ap.add_argument('index', nargs='?', default='index.html'); ap.add_argument('--ou
 ap.add_argument('--scen', default='idle,scroll,scrollset,play,playmix'); ap.add_argument('--parts', default='all')
 ap.add_argument('--profile', action='store_true'); ap.add_argument('--reps', type=int, default=1)
 ap.add_argument('--w', type=int, default=2194); ap.add_argument('--h', type=int, default=1139); ap.add_argument('--dsf', type=float, default=1.75)
+ap.add_argument('--pre', default='', help='script run in the app after Fractals is open (e.g. "UVT.on=true" to force the tiles of task UV-2 on)')
 ap.add_argument('--capped', action='store_true', help='keep the 60 Hz frame limit')
-ap.add_argument('--drawbench', action='store_true', help='also time single arrangement drawings (full; and shifted, in the experimental build that had it), each finished by a 1-pixel read-back so the raster work is included')
+ap.add_argument('--drawbench', action='store_true', help='also time single arrangement drawings (full; and shifted: the tiles of task UV-2, or the experimental GS3 build, each finished by a 1-pixel read-back so the raster work is included')
 A = ap.parse_args()
 SRC = open(A.index, encoding='utf-8').read()
 ARGS = ["--autoplay-policy=no-user-gesture-required", "--enable-gpu-rasterization", "--ignore-gpu-blocklist", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
@@ -73,6 +75,10 @@ SCROLL_OFF = "if(window.__ftsc)__ftsc.on=false"
 # pinch driver (task UV-1): a trackpad pinch over the middle of the arrangement, one wheel event with ctrlKey (no Control key down) per frame, in and out
 PINCH_ON = "window.__ftpi={on:true,k:0};(function f(){if(!__ftpi.on)return;__ftpi.k++;const r=arr.getBoundingClientRect(),d=(Math.floor(__ftpi.k/60)%2?1:-1)*4;arr.dispatchEvent(new WheelEvent('wheel',{deltaY:d,ctrlKey:true,clientX:r.left+r.width*.55,clientY:r.top+r.height*.45,bubbles:true,cancelable:true}));requestAnimationFrame(f)})()"
 PINCH_OFF = "if(window.__ftpi)__ftpi.on=false"
+# edit while scrolled (task UV-2): the view in the middle of the song, one clip in view moved by a beat and back on every frame (what a nudge or a
+# piano roll edit does to the arrangement: the clip changes, the view does not), through the same dirty path
+EDIT_ON = "window.__fted={on:true,k:0};V.x=160;clampV();{let c=null;S.tracks.forEach((t,i)=>{for(const q of t.clips){const G=clipGeom(i,q);if(!c&&G.x>X0+40&&G.x+G.w<arr.width/((window.devicePixelRatio||1)*ZOOM)-40&&G.y>AY+10)c=q}});__fted.c=c}(function f(){if(!__fted.on)return;__fted.k++;if(__fted.c){__fted.c.start+=(__fted.k%2?1:-1);dirty=true}requestAnimationFrame(f)})()"
+EDIT_OFF = "if(window.__fted){__fted.on=false;if(__fted.c&&__fted.k%2)__fted.c.start-=1;dirty=true}"
 
 def swaps(buf, wall):
     """frames the compositor really put on the screen per second (each one is the whole window put together again on the Mac)"""
@@ -100,6 +106,7 @@ def main():
         R("openDemoFractals()"); pg.wait_for_timeout(7000); pg.evaluate("()=>{const s=document.getElementById('liteNote');if(s)s.remove()}")
         R("pmSetOn(false)"); pg.wait_for_timeout(1500)
         R("window.__FT={};" + WRAP)
+        if A.pre: print('pre:', A.pre, '->', R(A.pre + ";'done'"), flush=True)
         cdp = ctx.new_cdp_session(pg); cdp.send('Performance.enable')
         meta = json.loads(R("JSON.stringify({v:VERSION,gle:typeof GLE==='object'?{on:GLE.on,lv:GLE.lv}:null,dpr:devicePixelRatio,iw:innerWidth,ih:innerHeight,arr:[arr.width,arr.height],tracks:S.tracks.length,clips:S.tracks.reduce((a,t)=>a+t.clips.length,0)})"))
         meta['cores'] = pg.evaluate("()=>navigator.hardwareConcurrency"); meta['chromium'] = b.version; meta['win'] = A.win
@@ -114,9 +121,11 @@ def main():
             if sc in ('play', 'playmix'): R("UI.follow=false;if(play.on)stop();pos=128;start()"); pg.wait_for_timeout(1200)
             if sc in ('scroll', 'scrollset'): R(SCROLL_ON); pg.wait_for_timeout(400)
             if sc == 'pinch': R(PINCH_ON); pg.wait_for_timeout(400)
+            if sc == 'edit': R(EDIT_ON); pg.wait_for_timeout(400)
         def scene_off(sc):
             if sc in ('scroll', 'scrollset'): R(SCROLL_OFF)
             if sc == 'pinch': R(PINCH_OFF); pg.wait_for_timeout(300)
+            if sc == 'edit': R(EDIT_OFF); pg.wait_for_timeout(300)
             if sc in ('play', 'playmix'): R("stop()")
             if sc == 'scrollset': R("closeSet()")
             if sc == 'playmix': R("{const w=document.getElementById('mixWin');if(w)w.hidden=true}")
@@ -136,12 +145,12 @@ def main():
             return o
         if A.drawbench:
             # one arrangement drawing at a time, scrolled 6 CSS px sideways before each; a 1 px read-back makes the browser finish drawing it, so raster work is counted too
-            DB = r"""(on)=>{const res=[];const g=arr.getContext('2d');const has=typeof ASC==='object'&&'fc' in ASC;if(has){ASC.on=on;ASC.force=1}dirty=false;drawArr(false);g.getImageData(0,0,1,1);
+            DB = r"""(on)=>{const res=[];const g=arr.getContext('2d');const has=typeof ASC==='object'&&'fc' in ASC,uvt=typeof UVT==='object';if(has){ASC.on=on;ASC.force=1}const uv0=uvt?UVT.on:0;if(uvt){UVT.on=on;UVT.force=1}dirty=false;drawArr(false);g.getImageData(0,0,1,1);
               for(let i=0;i<40;i++){V.x+=(i%20<10?6:-6)/V.ppb;clampV();if(has&&on&&ASC.fc>=40)ASC.fc=0;const t=performance.now();drawArr(false);g.getImageData(0,0,1,1);res.push(performance.now()-t)}
-              if(has)ASC.on=true;res.sort((a,b)=>a-b);return{med:res[20],p90:res[36],min:res[0]}}"""
+              if(has)ASC.on=true;if(uvt)UVT.on=uv0;res.sort((a,b)=>a-b);return{med:res[20],p90:res[36],min:res[0]}}"""
             R("UI.follow=false"); pg.wait_for_timeout(300)
             for rep in range(2):
-                for on in ((False, True) if R("typeof ASC==='object'&&'fc' in ASC") else (False,)):
+                for on in ((False, True) if R("typeof ASC==='object'&&'fc' in ASC||typeof UVT==='object'") else (False,)):
                     r = pg.evaluate("(f)=>AudioLab.run('('+f+')('+%s+')')" % ('true' if on else 'false'), DB)
                     res.setdefault('drawbench', []).append(dict(r, shifted=on, rep=rep))
                     print('one drawing of the arrangement, %-8s median %.2f ms, 90%% %.2f ms, best %.2f ms' % ('shifted' if on else 'full', r['med'], r['p90'], r['min']), flush=True)

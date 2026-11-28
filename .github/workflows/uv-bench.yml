@@ -1,0 +1,51 @@
+name: View engine bench (task UV, lane O)
+
+# Measurement only: the arrangement's frame cost in Electron on the macOS runner's graphics path, the build before a UV step
+# against the build with it (the edit scripts in tools/design-lab/uv/ applied to main's index.html in the job).
+# The runner is a virtual Mac with a paravirtual graphics device: before and after compare, the numbers are not the user's M4.
+# Runs only when started by hand. Does not touch the app, the desktop build or the release channel.
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: 'UV step to measure (its edit script is applied on top of the ones before it)'
+        type: string
+        default: '2'
+
+permissions:
+  contents: read
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Machine
+        run: |
+          mkdir -p out
+          { uname -m; sw_vers; sysctl -n machdep.cpu.brand_string; system_profiler SPDisplaysDataType; } | tee out/machine.txt
+
+      - name: Builds (before and after the step)
+        run: |
+          mkdir -p b/before b/after
+          cp index.html b/before/index.html
+          N=${{ inputs.step }}
+          for k in $(seq 1 $((N-1))); do
+            if ! grep -q "task UV-$k (lane O" b/before/index.html; then python3 tools/design-lab/uv/uv_$k.py b/before/index.html; fi
+          done
+          cp b/before/index.html b/after/index.html
+          grep -q "task UV-$N (lane O" b/after/index.html || python3 tools/design-lab/uv/uv_$N.py b/after/index.html
+
+      - name: Electron (the desktop shell's version)
+        run: |
+          ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
+          desktop/node_modules/.bin/electron tools/ui-tests/uv_bench_electron.js "$PWD/out/uv-bench.json" before=b/before/index.html after=b/after/index.html 2> out/stderr.txt | tee out/summary.txt
+          tail -20 out/stderr.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: uv-bench-results
+          path: out
