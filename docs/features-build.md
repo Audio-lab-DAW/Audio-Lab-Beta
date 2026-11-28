@@ -72,7 +72,7 @@ Status column: open, **done vX.XXX**, or gated (waits for something outside lane
 | FT-F9b | Step sequencer clips, part 2: the Roll preset (KBBB for Psy Bass, first hit lower), convert to and from a normal MIDI clip, slide plays legato into Acid and Psy Bass; same render as the equal notes. Push's step lane (C2b) gets these clips. | **done v0.288** (Psy Bass's own slide: lane L, SND-6) |
 | FT-F16a | Volume shaper, part 1: the effect with a drawable curve per 1/4, 1/2 or 1 bar, tempo triggered, drawn live behind the waveform, presets. | **done v0.293** |
 | FT-F16b | Volume shaper, part 2: triggered by notes of another track or by audio, up to three bands. | **done v0.297** |
-| FT-F18a | Kick and bass lab, part 1: the view on a pair of tracks: kick fundamental as a note, bass key, overlap in time, low-band correlation. | open |
+| FT-F18a | Kick and bass lab, part 1: the view on a pair of tracks: kick fundamental as a note, bass key, overlap in time, low-band correlation. | built and tested 28 Nov 17:40 UTC (taskFT_F18a 26/26), waiting for the release freeze to push index.html |
 | FT-F18b | Kick and bass lab, part 2: the bass phase-rotation knob and the one-click suggestions (tune kick, shorten tail, rotate). Folded in from AE3: X15 kick and bass lock (the bass ducks or shapes to the kick from the lab). | open |
 | FT-F20 | Build designer: range of 8, 16 or 32 bars, one Build control writes normal automation (high-pass, reverb send, noise riser, snare roll density, pitch rise, bass filter), four shapes. | open |
 | FT-F25a | Reference A/B, part 1: panel with up to eight references, loudness matched within 0.2 LU, one key flips at the same position or the reference's cue, no click. | open |

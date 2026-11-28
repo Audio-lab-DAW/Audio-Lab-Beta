@@ -1,0 +1,28 @@
+## 28 November 2026, v{V}: Kick and bass lab, part 1: bass line key, tail overlap, low-band correlation (task FT-F18a, lane C)
+Step FT-F18a of `docs/features-build.md` (starred card F18, `docs/research-features-gap.md` section 4 "RF-F18 Kick and bass lab"). Lane D built the lab itself (NI-2a analysis, NI-2b card: the kick's note, the song key, the clash, the gap, the picture, the two fixes) and left `NI_HOOKS.kickBassView.addRow` for lane C, as agreed in FT-0 and NI-0. This step adds only what the card did not have, as one row under its words; lane D's code is not changed.
+
+### Built
+- **Bass line** read-out: the key the bass line itself plays in, from every note of the bass track (longer notes count more; the root gets extra weight; ties go to the song key), out of minor, phrygian, harmonic minor, dorian and major, with how much of it fits. Green when it agrees with the song key, red when not, and the words say how much of the bass the song key covers ("fits A minor best (100 % of its notes), the song key F♯ minor only 65 %"). A bass that plays only one or two notes says so ("plays only F♯, inside the song key").
+- **Tail overlap** read-out: at the worst kick hit of the bar, how long the bass sounds while the kick still rings (its life from the lab's own kick model or measurement; overlapping notes merged), and how much shorter the kick would have to be to end before the next bass note ("150 ms, 175 ms too long"); a bass note still held when the kick hits is named. FT-F18b's "shorten tail" reads this.
+- **Low band** read-out and strip: the kick and the bass each rendered offline for the bar, one track at a time (through their own effects and the master, as heard; the same `renderMixChunked` call the lab already uses), the mono sum of each low-passed at 120 Hz (Butterworth, 4th order, the same filter on both so it shifts neither against the other), correlated while the kick sounds: +1 in phase (they add up), 0 unrelated, -1 out of phase (they cancel), with the level change in dB when the two add up. A strip under the read-outs shows it per 16th of the bar (up and green in phase, down, red and hatched where they cancel, faint where the low band is quiet; the kick's lives shaded). A silent bass (fader at 0) says it cannot cancel.
+- Tooltips on the three read-outs and the strip, a real minus sign, no em dash. Same look as the lab (its read-out boxes and display background), normal and Light level.
+- **Snappy:** nothing per frame; the row is filled when the lab measures; the two renders of one bar are cached (per tracks, bar, master, tempo map, rate), so opening the lab again renders nothing; the strip is drawn once per measurement. No audio nodes in the live graph, nothing saved in the project.
+- `FT_HOOKS.kickBassLab` for F18b: `bassKey`, `overlap`, `corr`, `corrOf`, `low`, `last()`, `stats()`.
+- Code: block "v{V} (task FT-F18a)" before the MIDI utility pack (after lane C's F16b block); edit script `tools/feature-lab/ft/ftF18a.py` with `ftF18a_block.js` (one asserted anchor, every new name checked free), docs script `ftF18a_docs.py`.
+
+### Tested (`tools/ui-tests/taskFT_F18a.py`, headless Chromium, 26 checks, all pass)
+- The pure correlation on known signals: a signal with itself +1 and +3.01 dB, inverted -1, 90 degrees apart 0 and 0 dB, one side silent named. The low-pass: 40 Hz 0.00 dB, 120 Hz -3.01 dB, 480 Hz -48.2 dB.
+- Rolling F♯1 bass in F♯ minor, Kick designer on F♯1, 120 BPM, bar 3: the row shows; Bass line "F♯ in the key"; Tail overlap 150 ms, 175 ms too long, equal to a calculation from the lab's kick life (300 ms) and the bass notes; Low band -0.145, equal to an **independent offline calculation** (both tracks rendered alone, scipy Butterworth 4th order at 120 Hz, correlated over the kick's lives: -0.145, difference under 0.001), level change -0.20 dB equal too; 16 strip values; the strip drawn. Bar 4 equal to the offline calculation too.
+- A bass line in A minor in an F♯ minor song: read as A minor, red, the words "fits A minor best (100 % of its notes), the song key F♯ minor only 65 %"; Low band -0.075, equal to the offline calculation.
+- Opening the lab again renders nothing new (cache); nothing drawn in 1.2 s idle; measuring leaves the project unchanged (tracks JSON equal); a bass at fader 0: "no bass" and the words say it is silent. No console errors.
+- Screenshots looked at: the lab with the new row (normal and Light level) and the A minor case.
+- Lane D's `taskNI_2b.py` 36/36 and `taskNI_2a.py` 56/56, lane C's `taskFT_F16b.py` 37/37, lint clean. {GATE}
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py`): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 and -25.48699 dB at 0 dB; the other instruments the same checksums. No audio code was touched.
+
+### Only the user can test (by ear)
+- Open a psytrance project, main menu > Kick and bass lab. Look at **Low band**: a value near -1 (red, hatched bars in the strip) means the kick and the bass cancel under 120 Hz where they meet; play the bar and listen whether the low end thins out on those 16ths. Mute the bass and listen to the kick alone for comparison.
+- **Tail overlap**: if the kick rings well into the next bass note, try shortening the kick's decay by about the "too long" amount and listen whether the roll gets cleaner.
+- **Bass line**: if it shows red, check whether the song key (the piano roll's scale and root) is the one you meant.
+
+### Left
+- FT-F18b: the bass phase-rotation knob (the low band measured again after it), the one-click suggestions (tune kick, shorten tail by N ms, rotate N degrees), and AE3's X15 kick and bass lock. Next in lane C: **FT-F18b**.
