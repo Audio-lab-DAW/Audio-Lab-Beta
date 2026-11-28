@@ -1,0 +1,298 @@
+<title>AudioLab small icons: how they are made, MS2 and a small M5c</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<!--CSS4-->
+<style>
+/* task IC9 additions to round 4's lab sheet (dark on purpose; light desktops live inside the mock-ups) */
+:root{--ms:#c792ff;--mc:#5fd39a;--ink2:#c9cfdc}
+.how{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:18px}
+.how p{margin:0;max-width:78ch;color:var(--ink2);line-height:1.6}
+.how .answer{font-size:14.5px;color:var(--fg)}
+.ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.ba>div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ba h3{font:600 13px var(--sans);margin:0}
+.ba .pair{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.ba figure,.cell figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:5px}
+.px{image-rendering:pixelated;display:block;border-radius:3px}
+.tech{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:10px;margin:0;padding:0;list-style:none}
+.tech li{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.tech b{display:block;font:600 13px var(--sans);margin-bottom:4px}
+.tech span{color:var(--mute);font-size:12.5px;line-height:1.5}
+.src{font:500 11px var(--mono);color:var(--dim);display:block;margin-top:6px;overflow-wrap:anywhere}
+.src a,.srcs a{color:#8fb3ff}
+.sizes{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.sizes table{border-collapse:collapse;width:100%;min-width:560px;font-size:12.5px}
+.sizes th,.sizes td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.sizes th{font:600 11px var(--mono);color:var(--dim);letter-spacing:.05em}
+.sizes td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sizes tr:last-child td{border-bottom:0}
+.dcards{display:grid;grid-template-columns:1fr;gap:12px}
+.dc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 22px;min-width:0}
+.dc.ref{background:transparent;border-style:dashed}
+.dc.pms{box-shadow:0 0 0 2px var(--ms) inset} .dc.pmc{box-shadow:0 0 0 2px var(--mc) inset}
+@media (max-width:860px){.dc{grid-template-columns:1fr}}
+.dc .hd{grid-column:1/-1;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.dc .hd b{font:600 15px var(--sans)} .dc .hd .nm{color:var(--mute)} .dc .hd .st{color:var(--star)}
+.dc .hd .pick{margin-left:auto}
+.pick.ms.on{background:var(--ms);color:#1a0030;border-color:var(--ms);font-weight:600}
+.pick.mc.on{background:var(--mc);color:#00170b;border-color:var(--mc);font-weight:600}
+.cell{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ones{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:10px 12px;border-radius:10px}
+.mag{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.dc .note{color:var(--mute);font-size:12.5px;line-height:1.5;margin:0;max-width:70ch}
+.k-ms{color:var(--ms)} .k-mc{color:var(--mc)}
+.famrow{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-radius:12px}
+.famrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.famrow .sep{width:1px;align-self:stretch;background:rgba(127,127,127,.35)}
+.famrow .lbl{font:600 11px var(--mono);align-self:center;min-width:64px}
+.wp-dark .lbl{color:#cfd6e4} .wp-light .lbl{color:#2a3040}
+.wp-light figcaption{color:#4a5266}
+.showsel{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mk{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.dock{display:flex;justify-content:center;padding:26px 12px 8px}
+.dock .dbar{display:flex;gap:8px;align-items:flex-end;padding:6px 10px 10px;border-radius:14px;position:relative}
+.dock .dbar>i,.dock .dbar>span{width:32px;height:32px;display:block;position:relative}
+.dock .dbar>i{border-radius:9px;padding:3px;background-clip:content-box!important}
+.dock .dbar>span::after{content:"";position:absolute;left:50%;bottom:-7px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
+.dk-d{background:linear-gradient(135deg,#1a1c26,#0a0b10);color:#eee} .dk-d .bar{background:rgba(60,62,74,.55);border:1px solid rgba(255,255,255,.14)}
+.dk-l{background:linear-gradient(135deg,#eef1f6,#c9d4e4);color:#222} .dk-l .bar{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85)}
+.finder{font:13px/1 -apple-system,"SF Pro Text",Inter,sans-serif}
+.finder .hdr{display:flex;padding:6px 12px;font-size:11px;font-weight:600}
+.finder .r{display:flex;align-items:center;gap:7px;padding:3px 12px;height:22px}
+.finder .r i{width:16px;height:16px;border-radius:3px;display:block;flex:none}
+.finder .r em{font-style:normal;margin-left:auto;font-size:11.5px;opacity:.6}
+.fd-d{background:#1e1e20;color:#e8e8ea} .fd-d .hdr{color:#9a9aa0;border-bottom:1px solid #333} .fd-d .r:nth-child(odd){background:#262628} .fd-d .r.sel{background:#2b5fd9;color:#fff}
+.fd-l{background:#fff;color:#1d1d1f} .fd-l .hdr{color:#6e6e73;border-bottom:1px solid #e3e3e6} .fd-l .r:nth-child(odd){background:#f4f5f7} .fd-l .r.sel{background:#d6e4ff}
+.menubar{display:flex;align-items:center;gap:14px;height:28px;padding:0 12px;font:500 13px -apple-system,Inter,sans-serif}
+.menubar .sp{margin-left:auto}
+.menubar img{display:block}
+.mb-d{background:#2a2b30;color:#eee} .mb-d img{filter:invert(1)}
+.mb-l{background:#e9e9ec;color:#222}
+.tabbar{display:flex;gap:2px;align-items:flex-end;padding:8px 8px 0}
+.tabbar .tb{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px 8px 0 0;font:500 12px Inter,system-ui,sans-serif;min-width:0;max-width:220px}
+.tabbar .tb i{width:16px;height:16px;border-radius:3px;display:block;flex:none}
+.tabbar .tb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-d{background:#202124} .tb-d .tb{color:#bdc1c6} .tb-d .tb.on{background:#35363a;color:#fff}
+.tb-l{background:#dee1e6} .tb-l .tb{color:#444} .tb-l .tb.on{background:#fff;color:#111}
+.win{font:12px "Segoe UI Variable","Segoe UI",Inter,system-ui,sans-serif}
+.win .title{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px}
+.win .title .ctl{margin-left:auto;display:flex;gap:22px;opacity:.7}
+.win .task{display:flex;justify-content:center;gap:4px;padding:4px;height:48px;align-items:center}
+.win .task>i,.win .task>span{width:40px;height:40px;border-radius:5px;display:grid;place-items:center;position:relative}
+.win .task>i b{width:24px;height:24px;border-radius:5px;display:block}
+.win .task>span::after{content:"";position:absolute;bottom:2px;left:50%;width:16px;height:3px;margin-left:-8px;border-radius:2px;background:#4cc2ff}
+.w-d .title{background:#202020;color:#fff} .w-d .task{background:#1c1c1c} .w-d .task>span{background:rgba(255,255,255,.07)}
+.w-l .title{background:#f3f3f3;color:#111} .w-l .task{background:#eef0f4} .w-l .task>span{background:rgba(0,0,0,.05)}
+.srcs{columns:2 340px;gap:24px;font-size:12px;color:var(--mute);padding-left:18px;margin:0}
+.srcs li{break-inside:avoid;margin-bottom:5px}
+.rec{cursor:default}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC9 · 28 NOVEMBER 2026 · SMALL ICONS (16 TO 32 PX)</div>
+    <h1>AudioLab small icons: how they are made, MS2 and a small M5c</h1>
+    <p class="lede">From your note at 01:20: <q>For the zoomed ones: let's try MS2. I want the lit one, not the flat one. And let's try an M5c, the actual one, the non-flat one, and let's do some research on how to make icons like this smaller. And how do you do it? Do you zoom in or whatever? I actually really don't know.</q></p>
+    <p class="lede">Below: the answer in plain words, with a before and after; MS2 developed in four variants (MS2a to MS2d, always the lit nucleus); a small M5c in three (MC1 to MC3, the whole picture, not flat); each drawn by hand for 16, 20, 24 and 32 px at 1x and 2x, shown next to M5c, M5d and S1 (the small icon that ships today), and in the real places on dark and light. Pick one of each; the line at the bottom is what to paste.</p>
+  </header>
+
+  <section class="how" aria-labelledby="h-how">
+    <div class="sec-h" style="margin:0"><h2 id="h-how">How icons are made small</h2></div>
+    <p class="answer">Short answer: designers do zoom in, but in two different senses. First, they work zoomed in on the screen, at 800 to 1600 %, on the actual 16 × 16 or 32 × 32 grid of pixels, and redraw that size by hand. Shrinking the big picture is not enough. Second, the drawing itself is sometimes zoomed: it is cropped to the part people recognise. MS2 does that. The other common move is to keep the whole picture and take detail out: fewer lines, a bigger centre, heavier strokes. The small M5c (MC) does that. Every small size is then checked at 100 % in the places it really shows.</p>
+    <p>Why not simply scale down? A 16 px icon has 256 pixels. Scaled from 1024, every line of M5c becomes thinner than a pixel and turns into grey haze, the fine field lines vanish, and the nucleus shrinks to a smudge. Apple says details "may be hard to discern at smaller sizes" and warns against very thin lines. Microsoft says to "maintain legibility at small sizes". Here is the same M5c both ways:</p>
+    <div class="ba" id="ba"></div>
+    <ul class="tech" id="tech"></ul>
+    <div>
+      <p class="mock-h">Where the small sizes show</p>
+      <div class="sizes"><table>
+        <thead><tr><th>PLACE</th><th>SIZE (POINTS OR PX AT 100 %)</th><th>PIXELS DRAWN</th><th>MASTER USED</th></tr></thead>
+        <tbody>
+          <tr><td>macOS Finder list, sidebar, Spotlight rows, Open dialog</td><td class="n">16 pt</td><td class="n">16 / 32 (Retina)</td><td>16 at 1x and 2x (icns slots icon_16x16, icon_16x16@2x)</td></tr>
+          <tr><td>macOS Finder small icon view, Get Info, smallest Dock</td><td class="n">32 pt</td><td class="n">32 / 64</td><td>32 at 1x and 2x</td></tr>
+          <tr><td>macOS menu bar (only if the app adds an item)</td><td class="n">16 to 18 pt</td><td class="n">template</td><td>a one-colour template glyph; the app icon is not used there</td></tr>
+          <tr><td>Windows title bar, context menu, tray</td><td class="n">16 · 20 · 24 · 32</td><td class="n">at 100 · 125 · 150 · 200 %</td><td>.ico 16, 20, 24, 32</td></tr>
+          <tr><td>Windows taskbar, search, Start all apps</td><td class="n">24 · 30 · 36 · 48</td><td class="n">at 100 · 125 · 150 · 200 %</td><td>.ico 24 (and 32, 48 above it)</td></tr>
+          <tr><td>Browser tab (favicon)</td><td class="n">16 px</td><td class="n">16 / 32</td><td>favicon 16 and 32 (one .ico), or the SVG</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note-s">Apple's current guidance asks for one 1024 picture and lets the system scale it; macOS 26's Icon Composer file has no slot for a hand-drawn 16. Hand-drawn small sizes still go in through the classic route: the .icns file (16 and 32 at 1x and 2x) that AudioLab already ships, and the .ico for Windows. Whether macOS 26 prefers the .icns slots over the Icon Composer file in the Finder list is not verified; the implementation task checks it on a Mac.</p>
+    </div>
+  </section>
+
+  <div class="row" style="justify-content:space-between">
+    <span class="row"><span class="tag">PALETTE</span><span class="seg" id="pSeg"></span></span>
+    <span class="note-s" style="margin:0">Every picture on this page is a real PNG of that many pixels, drawn by code for that size. Magnified views show the pixels as squares.</span>
+  </div>
+
+  <section aria-labelledby="h-ms">
+    <div class="sec-h"><h2 id="h-ms">MS2, developed: MS2a to MS2d (the zoom, always lit)</h2><p>The crop of round 5's MS2: the nucleus low left, the field tilted 24°, the outer orbit cut by the tile edges. Dashed: MS2 as you saw it in round 5. Each row: the four sizes at 1:1 on dark and light (a Retina screen shows the 2x master), then 16 and 32 magnified, 1x and 2x. ★ recommended.</p></div>
+    <div class="dcards" id="gMS"></div>
+  </section>
+
+  <section aria-labelledby="h-mc">
+    <div class="sec-h"><h2 id="h-mc">A small M5c: MC1 to MC3 (the whole picture, not flat)</h2><p>M5c as itself: the nucleus near the middle, orbits left and right that brighten at the poles, the glowing core, the electron on the right. Here the method is simplifying rather than cropping: fewer orbits as it shrinks, a bigger nucleus, near-opaque lines at 16 and 20. Dashed: M5c's own drawing at 128 and 64 px.</p></div>
+    <div class="dcards" id="gMC"></div>
+  </section>
+
+  <section class="smallsec" aria-labelledby="h-fam">
+    <div class="sec-h" style="margin:0"><h2 id="h-fam">Families: the big icon with its small version</h2><p>M5c and M5d at 128 and 64 px, then a small master at 32, 24, 20, 16. Your MS2 and MC picks (or the stars until you pick), and S1 as shipped for reference.</p></div>
+    <div class="two"><div class="famrow wp-dark" id="famD"></div><div class="famrow wp-light" id="famL"></div></div>
+  </section>
+
+  <section class="smallsec" aria-labelledby="h-mk">
+    <div class="sec-h" style="margin:0"><h2 id="h-mk">In the real places</h2><p>At true size on your screen. Other icons are plain stand-ins.</p></div>
+    <div class="row"><span class="tag">SHOWN</span><span class="showsel" id="show"></span></div>
+    <div class="two">
+      <div><p class="mock-h">macOS Dock at its smallest (32 pt), dark desktop</p><div class="mk dock dk-d" id="dockD"></div></div>
+      <div><p class="mock-h">macOS Dock at its smallest, light desktop</p><div class="mk dock dk-l" id="dockL"></div></div>
+      <div><p class="mock-h">Finder list view (16 pt), dark</p><div class="mk finder fd-d" id="fdD"></div></div>
+      <div><p class="mock-h">Finder list view, light</p><div class="mk finder fd-l" id="fdL"></div></div>
+      <div><p class="mock-h">Browser tab (favicon 16 px; 32 on a Retina screen)</p><div class="mk"><div class="tabbar tb-d" id="tabD"></div><div class="tabbar tb-l" id="tabL"></div></div></div>
+      <div><p class="mock-h">Windows 11: title bar (16 px) and taskbar (24 px) at 100 %</p><div class="mk"><div class="win w-d" id="winD"></div><div class="win w-l" id="winL"></div></div></div>
+      <div><p class="mock-h">macOS menu bar: only if AudioLab ever adds a menu bar item</p><div class="mk"><div class="menubar mb-d" id="mbD"></div><div class="menubar mb-l" id="mbL"></div></div>
+        <p class="note-s">The menu bar does not use the app icon. It takes a one-colour "template" image that macOS tints for dark and light. This glyph (the nucleus and one orbit pair) is a sketch of what that would be; AudioLab has no menu bar item today.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2><p>Click to pick.</p></div>
+    <div class="recs" id="recs"></div>
+    <p class="note-s" id="weak"></p>
+  </section>
+
+  <section aria-labelledby="h-after" class="after">
+    <h2 id="h-after">After you pick</h2>
+    <ol>
+      <li>The picked MS2 becomes the small version of the M-family icon you choose as Main or Other in round 5b (M5d picked so far): <span class="mono">icon.icns</span> 16 and 32 pt at 1x and 2x, <span class="mono">icon.ico</span> 16, 20, 24, 32, the <span class="mono">web-16</span> and <span class="mono">web-32</span> favicons, through <span class="mono">ic6/ship6.py</span> with <span class="mono">round5s/small5s.js</span>.</li>
+      <li>The picked MC goes with M5c wherever M5c is used (the picker, if it goes there).</li>
+      <li>The files are made again on the macOS runner; nothing reaches installed apps except through the release gate. Nothing in the app changed in this task.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-src">
+    <h2 id="h-src">Sources</h2>
+    <ul class="srcs" id="srcs"></ul>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="in">
+    <code id="line">Small icon picks: (nothing picked yet)</code>
+    <button class="btn" id="copy" type="button">Copy</button>
+    <button class="btn ghost" id="clear" type="button">Clear</button>
+    <small><b class="k-ms">MS2</b>: the zoomed small icon. <b class="k-mc">MC</b>: the small M5c. Pick one of each (or one only), then paste the line into the chat.</small>
+  </div>
+</div>
+
+<script>window.IMG=/*IMG*/;window.DES=/*DES*/;</script>
+<script>
+(function(){
+  var IMG = window.IMG, DES = window.DES, $ = function(id){ return document.getElementById(id); };
+  var PTS = [16, 20, 24, 32], MS = ['MS2a','MS2b','MS2c','MS2d'], MC = ['MC1','MC2','MC3'];
+  var st = { P: 'P2', ms: null, mc: null, show: null };
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+  /* key of a small master: designs from small5s.js, or the references S1 and MS2 (round 5) */
+  function key(id, pt, s, mac){ var ref = id === 'S1' || id === 'MS2'; return (ref ? 'ref:' : 'small:') + id + '-' + st.P + '-' + pt + '@' + s + 'x' + (mac ? '-mac' : ''); }
+  function src(id, pt, s, mac){ return IMG[key(id, pt, s, mac)]; }
+  function one(id, pt, mac, cls){ return '<img class="' + (cls || '') + '" alt="' + id + ' at ' + pt + '" width="' + pt + '" height="' + pt + '" src="' + src(id, pt, 1, mac) + '" srcset="' + src(id, pt, 1, mac) + ' 1x, ' + src(id, pt, 2, mac) + ' 2x">'; }
+  function mag(id, pt, s, z, cap){ return '<figure><img class="px" alt="' + id + ' ' + pt + ' pt at ' + s + 'x, magnified" width="' + pt * s * z + '" height="' + pt * s * z + '" src="' + src(id, pt, s) + '"><figcaption>' + cap + '</figcaption></figure>'; }
+  function big(d, z){ return IMG['big:' + d + '-' + st.P + '-' + z]; }
+  var REC = { MS2b: 1, MC1: 1 };
+
+  /* before and after */
+  function ba(){
+    function fig(img, w, cap, px){ return '<figure><img class="' + (px ? 'px' : '') + '" alt="' + cap + '" width="' + w + '" height="' + w + '" src="' + img + '"><figcaption>' + cap + '</figcaption></figure>'; }
+    var P = 'P2';
+    $('ba').innerHTML = [16, 32].map(function(z){
+      var sc = IMG['ba:M5c-scaled-' + z], dr = IMG['small:MC1-' + P + '-' + z + '@1x'], m = z === 16 ? 8 : 4;
+      return '<div><h3>' + z + ' px: scaled down (left) and drawn for ' + z + ' (right)</h3><div class="pair">' +
+        fig(sc, z, '1:1', false) + fig(sc, z * m, 'M5c 1024 shrunk, ×' + m, true) + fig(dr, z * m, 'MC1 drawn at ' + z + ', ×' + m, true) + fig(dr, z, '1:1', false) + '</div>' +
+        '<p class="note-s" style="margin:0">' + (z === 16 ? 'Left: the orbits become a grey cloud, the electron a dot of two pixels, the nucleus five. Right: one orbit pair on whole pixels, a six-pixel lit nucleus, the electron given room.' : 'At 32 the shrunk picture still holds its shape but every line is under one pixel wide and soft; the drawn one keeps three orbits at 1.4 px, the nucleus ten pixels.') + '</p></div>';
+    }).join('');
+  }
+  var TECH = [
+    ['Draw each small size separately', 'One master per size range, drawn on its own pixel grid, instead of one picture scaled down. Bjango keeps simplified layers for the smallest sizes and switches them on; Louie Mantia: removing detail from a small icon matters as much as adding it to a big one.', [['Bjango, Mac app icon workflow', 'https://bjango.com/articles/macappiconworkflow/'], ['Louie Mantia, 1024×1024', 'https://lmnt.me/blog/1024x1024.html']]],
+    ['Take detail out', 'Fewer lines, no fine texture, one clear idea. Apple: "Embrace simplicity", a minimal number of shapes. Microsoft: few shapes, few layers, gradients of one or two steps. Here: M5c\'s six field lines and particles go, three orbits become one or two.', [['Apple HIG, App icons', 'https://developer.apple.com/design/human-interface-guidelines/app-icons'], ['Microsoft, App icon design', 'https://learn.microsoft.com/windows/apps/design/iconography/app-icon-design']]],
+    ['Zoom into the part people recognise', 'Crop the picture so the recognisable part fills the tile: here the nucleus with its orbits, cut by the edges. W7, J9, S1 and MS2 do this. No guideline names it as a rule; it is a common way to keep shapes big enough to read.', [['Evil Martians: "a special version of the logo" for 16 px', 'https://evilmartians.com/chronicles/how-to-favicon-in-six-files-that-fit-most-needs']]],
+    ['Thicker lines, more contrast', 'Lines do not shrink in proportion: at 16 px an orbit is one whole pixel, at 32 about 1.4. Apple warns against "extremely thin line weights"; Microsoft asks that at least half of an icon have 3:1 contrast on light and dark. Here the see-through orbits go almost opaque at 16 and 20.', [['Apple HIG, App icons', 'https://developer.apple.com/design/human-interface-guidelines/app-icons'], ['Microsoft, App icon design', 'https://learn.microsoft.com/windows/apps/design/iconography/app-icon-design']]],
+    ['Fit to the pixel grid', 'Edges land on whole pixels so they stay sharp: a round shape of odd width centred on a pixel centre, of even width on a pixel corner; a line\'s outermost point on the grid. Checked again at 2x. Here the nucleus and the electron have whole-pixel diameters and every orbit is scaled a hair so its widest point lands on the grid.', [['Bjango, icon design workflow', 'https://bjango.com/articles/icondesignworkflow/'], ['Material Design icons (whole-number coordinates)', 'https://m1.material.io/style/icons.html']]],
+    ['Keep the family', 'Same colours, same silhouette, same idea at every size, so the 16 px icon still reads as the 1024 one. Apple: keep features consistent across appearances; GNOME: small versions keep the same metaphor. Here: navy tile, gold lit nucleus, cyan electron, pale orbits at every size.', [['GNOME HIG, App icons', 'https://developer.gnome.org/hig/guidelines/app-icons.html']]],
+    ['Treat 2x as its own size', '16 pt on a Retina screen is drawn with 32 × 32 pixels, but it keeps the 16 drawing\'s amount of detail with finer pixels; it is not the 32 pt icon. Lines get about 1.75 times wider, not twice. Bjango lets the 2x reuse the 1x drawing; Mantia notes there is no settled rule. Here every size has a 1x and a 2x master.', [['Bjango, Designing for Retina', 'https://diagnostics.bjango.com/articles/designingforretina/'], ['Louie Mantia, 1024×1024', 'https://lmnt.me/blog/1024x1024.html']]],
+    ['Test where it really shows', 'At 100 %, on the real backgrounds: Dock, Finder list, Windows title bar and taskbar in light and dark, a browser tab. Adobe\'s check: shrink it, look away, glance back.', [['Microsoft, App icon construction (sizes and places)', 'https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-construction'], ['Adobe Design, effective icons part 2', 'https://adobe.design/stories/leading-design/how-to-design-effective-icons-part-2']]]
+  ];
+  function tech(){ $('tech').innerHTML = TECH.map(function(t){ return '<li><b>' + esc(t[0]) + '</b><span>' + esc(t[1]) + '</span><span class="src">' + t[2].map(function(s){ return '<a href="' + s[1] + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a>'; }).join(' · ') + '</span></li>'; }).join(''); }
+
+  function card(id, fam){
+    var ref = id === 'MS2', d = DES[id] || { name: 'MS2 of round 5', note: 'As published in round 5: the nucleus a pixel bigger than MS1, lit, inner and outer orbit cut by the edges. At 16 and 20 px the electron touches the nucleus (fixed in MS2a to MS2d).' };
+    var on = fam === 'ms' ? st.ms === id : st.mc === id;
+    var h = '<div class="dc' + (ref ? ' ref' : '') + (on ? ' p' + fam : '') + '">';
+    h += '<div class="hd"><b>' + id + '</b><span class="nm">' + esc(d.name) + '</span>' + (REC[id] ? '<span class="st">★ recommended</span>' : '') + (ref ? '' : '<button class="pick ' + fam + (on ? ' on' : '') + '" type="button" data-pick="' + fam + ':' + id + '">' + (on ? 'Picked' : 'Pick ' + id) + '</button>') + '</div>';
+    h += '<div class="cell"><div class="ones wp-dark">' + PTS.map(function(p){ return '<figure>' + one(id, p) + '<figcaption>' + p + '</figcaption></figure>'; }).join('') + '</div>' +
+      '<div class="ones wp-light">' + PTS.map(function(p){ return '<figure>' + one(id, p) + '<figcaption>' + p + '</figcaption></figure>'; }).join('') + '</div>' +
+      '<p class="note">' + esc(d.note) + '</p></div>';
+    h += '<div class="cell"><div class="mag">' + mag(id, 16, 1, 8, '16 @1x ×8') + mag(id, 16, 2, 4, '16 @2x ×4') + mag(id, 32, 1, 4, '32 @1x ×4') + mag(id, 32, 2, 2, '32 @2x ×2') + '</div>' +
+      '<div class="mag">' + mag(id, 20, 1, 4, '20 ×4') + mag(id, 24, 1, 4, '24 ×4') + '</div></div>';
+    return h + '</div>';
+  }
+  function refBig(d, txt){
+    return '<div class="dc ref"><div class="hd"><b>' + d + '</b><span class="nm">' + txt + '</span></div><div class="cell"><div class="ones wp-dark">' +
+      [128, 64].map(function(z){ return '<figure><img alt="' + d + ' ' + z + '" width="' + z + '" height="' + z + '" src="' + big(d, z) + '"><figcaption>' + z + '</figcaption></figure>'; }).join('') + '</div></div>' +
+      '<div class="cell"><p class="note">' + (d === 'M5c' ? 'Round 5\'s Glowing core, the big drawing the MC row is made from: three transparent half orbits each side, four fine field lines, particles, the nucleus glow at four radii, the electron with its own glow, the glass edge. Below 128 px it already drops the particles; below 48 every master on this page takes over.' : 'Round 5\'s Field to the edge, picked at 01:13: M5\'s depth with five fine field lines out past the tile edge. MS2 is the zoomed small version of this family.') + '</p></div></div>';
+  }
+  function grids(){
+    $('gMS').innerHTML = card('MS2', 'ms') + MS.map(function(id){ return card(id, 'ms'); }).join('') + refBig('M5d', 'the picked big icon of this family, for scale');
+    $('gMC').innerHTML = refBig('M5c', 'Glowing core, the big icon') + MC.map(function(id){ return card(id, 'mc'); }).join('');
+  }
+  function fam(){
+    var ms = st.ms || 'MS2b', mc = st.mc || 'MC1';
+    function row(bigId, smId, label){ return '<span class="lbl">' + label + '</span>' + [128, 64].map(function(z){ return '<figure><img alt="' + bigId + ' ' + z + '" width="' + z + '" height="' + z + '" src="' + big(bigId, z) + '"><figcaption>' + bigId + ' ' + z + '</figcaption></figure>'; }).join('') + '<span class="sep"></span>' +
+      [32, 24, 20, 16].map(function(p){ return '<figure>' + one(smId, p) + '<figcaption>' + smId + ' ' + p + '</figcaption></figure>'; }).join(''); }
+    function s1(){ return '<span class="lbl">shipped</span>' + [32, 24, 20, 16].map(function(p){ return '<figure>' + one('S1', p) + '<figcaption>S1 ' + p + '</figcaption></figure>'; }).join(''); }
+    var h = '<div class="famrow" style="padding:0">' + row('M5c', mc, 'M5c + ' + mc) + '</div><div class="famrow" style="padding:0">' + row('M5d', ms, 'M5d + ' + ms) + '</div><div class="famrow" style="padding:0">' + s1() + '</div>';
+    $('famD').innerHTML = h; $('famL').innerHTML = h;
+    $('famD').style.flexDirection = $('famL').style.flexDirection = 'column'; $('famD').style.alignItems = $('famL').style.alignItems = 'flex-start';
+  }
+  var STAND = ['#3d7bf6', '#f5a623', '#e9e9ee', '#34c759', '#ff375f', '#8e8e93'];
+  function mocks(){
+    var id = st.show || st.ms || 'MS2b';
+    var dock = STAND.slice(0, 3).map(function(c){ return '<i style="background:' + c + '"></i>'; }).join('') + '<span>' + one(id, 32, true) + '</span>' + STAND.slice(3).map(function(c){ return '<i style="background:' + c + '"></i>'; }).join('');
+    $('dockD').innerHTML = $('dockL').innerHTML = '<div class="dbar">' + dock + '</div>';
+    var rows = [['#8e8e93', 'Ableton Live 12.app', 'Application'], [null, 'AudioLab.app', 'Application', 1], ['#e9e9ee', 'Audio MIDI Setup.app', 'Application'], ['#3d7bf6', 'Automator.app', 'Application'], ['#f5a623', 'Books.app', 'Application']];
+    $('fdD').innerHTML = $('fdL').innerHTML = '<div class="hdr">Name<em style="margin-left:auto;font-style:normal">Kind</em></div>' + rows.map(function(r){ return '<div class="r' + (r[3] ? ' sel' : '') + '">' + (r[0] ? '<i style="background:' + r[0] + '"></i>' : one(id, 16, true)) + '<span>' + r[1] + '</span><em>' + r[2] + '</em></div>'; }).join('');
+    var tabs = '<div class="tb"><i style="background:#4285f4"></i><span>Inbox</span></div><div class="tb on">' + one(id, 16, false) + '<span>AudioLab: Fractals</span></div><div class="tb"><i style="background:#ff375f"></i><span>Docs</span></div>';
+    $('tabD').innerHTML = $('tabL').innerHTML = tabs;
+    var win = '<div class="title">' + one(id, 16, false) + '<span>Fractals - AudioLab</span><span class="ctl"><span>—</span><span>☐</span><span>✕</span></span></div><div class="task">' +
+      ['#0078d4', '#f5a623'].map(function(c){ return '<i><b style="background:' + c + '"></b></i>'; }).join('') + '<span>' + one(id, 24, false) + '</span>' + ['#34c759', '#8e8e93'].map(function(c){ return '<i><b style="background:' + c + '"></b></i>'; }).join('') + '</div>';
+    $('winD').innerHTML = $('winL').innerHTML = win;
+    var mb = '<b>AudioLab</b><span>File</span><span>Edit</span><span>View</span><span class="sp"></span><img alt="menu bar glyph" width="16" height="16" src="' + IMG['tpl:tpl-16@1x'] + '" srcset="' + IMG['tpl:tpl-16@1x'] + ' 1x, ' + IMG['tpl:tpl-16@2x'] + ' 2x"><span>Sat 01:40</span>';
+    $('mbD').innerHTML = $('mbL').innerHTML = mb;
+    $('show').innerHTML = ['S1'].concat(MS, MC).map(function(x){ return '<button class="chip' + (x === id ? ' on' : '') + '" type="button" data-show="' + x + '">' + x + '</button>'; }).join('');
+  }
+  var RECS = [
+    ['MS2b', 'ms', 'The zoom you asked for, made the way the research says small icons should go: heavier lines, near-opaque orbits, a two-pixel-bigger lit nucleus, the light top edge from 24 px. Holds in the Finder list and on a light desktop, where MS2a and MS2c fade.'],
+    ['MC1', 'mc', 'The actual M5c at every size, only with less detail as it shrinks (one orbit pair at 16, two at 20 and 24, three at 32). The clearest family link to the big M5c, and a good answer if the small icon should not be a crop.']
+  ];
+  function recs(){
+    $('recs').innerHTML = RECS.map(function(r){ return '<div class="rec"><img class="px" alt="' + r[0] + '" width="64" height="64" src="' + src(r[0], 32, 2) + '"><div><b>★ ' + r[0] + '</b> <span class="mono" style="color:var(--dim)">' + (DES[r[0]] || {}).name + '</span><p style="margin:4px 0 8px;color:var(--mute);font-size:12px">' + r[2] + '</p><button class="pick ' + r[1] + ((r[1] === 'ms' ? st.ms : st.mc) === r[0] ? ' on' : '') + '" type="button" data-pick="' + r[1] + ':' + r[0] + '">Pick ' + r[0] + '</button></div></div>'; }).join('');
+    $('weak').textContent = 'Weak spots seen in the renders: at 16 px every MS2 is mostly the nucleus and the electron with two arcs (the orbits read as orbits from 20 to 24 px); MS2c\'s see-through orbits are the dimmest at 16; on the Apple grid (a 14 px tile at 16 pt) the MC row gets crowded and MC3 loses its outer orbit; the electron at 16 is three pixels, a small cross rather than a round dot; in P8 the glow tints the paper round the nucleus.';
+  }
+  function srcs(){
+    var L = [['Apple Human Interface Guidelines: App icons', 'https://developer.apple.com/design/human-interface-guidelines/app-icons'], ['Apple: Creating your app icon using Icon Composer', 'https://developer.apple.com/documentation/xcode/creating-your-app-icon-using-icon-composer'], ['Apple: Configuring your app icon using an asset catalog', 'https://developer.apple.com/documentation/xcode/configuring-your-app-icon'], ['macOS icon sizes (MakeAppIcon)', 'https://makeappicon.com/macosicon'], ['Chromium: Mac icons', 'https://chromium.googlesource.com/chromium/src.git/+/fafff21/docs/mac/icons.md'], ['Microsoft: App icon construction', 'https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-construction'], ['Microsoft: App icon design', 'https://learn.microsoft.com/windows/apps/design/iconography/app-icon-design'], ['Material Design (2014): Icons', 'https://m1.material.io/style/icons.html'], ['Bjango: My Mac app icon design workflow', 'https://bjango.com/articles/macappiconworkflow/'], ['Bjango: My icon design workflow', 'https://bjango.com/articles/icondesignworkflow/'], ['Bjango: Designing for Retina', 'https://diagnostics.bjango.com/articles/designingforretina/'], ['Bjango: Smaller Mac app icons', 'https://bjango.com/articles/smallermacappicons/'], ['Louie Mantia: 1024×1024', 'https://lmnt.me/blog/1024x1024.html'], ['John Marstall: The double-drawn method of icon design', 'https://medium.com/bpxl-craft/the-double-drawn-method-of-icon-design-b6d7f1742ad2'], ['Nuno Pinheiro (KDE): Small icons, big problems', 'https://planet.kde.org/nuno-pinheiro-2026-07-19-small-icons-big-problems/'], ['Evil Martians: How to Favicon in 2026', 'https://evilmartians.com/chronicles/how-to-favicon-in-six-files-that-fit-most-needs'], ['GNOME HIG: App icons', 'https://developer.gnome.org/hig/guidelines/app-icons.html'], ['Adobe Design: How to design effective icons, part 2', 'https://adobe.design/stories/leading-design/how-to-design-effective-icons-part-2']];
+    $('srcs').innerHTML = L.map(function(s){ return '<li><a href="' + s[1] + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a></li>'; }).join('');
+  }
+  function line(){ var p = [st.ms, st.mc].filter(Boolean); $('line').textContent = 'Small icon picks: ' + (p.length ? p.join(' ') + (st.P === 'P8' ? ' P8' : '') : '(nothing picked yet)'); }
+  function seg(){ $('pSeg').innerHTML = [['P2', 'Orbit night', '#132044'], ['P8', 'Chart paper', '#F7F3EA']].map(function(p){ return '<button type="button" class="' + (st.P === p[0] ? 'on' : '') + '" data-p="' + p[0] + '"><i style="background:' + p[2] + '"></i>' + p[0] + ' ' + p[1] + '</button>'; }).join(''); }
+  function all(){ seg(); grids(); fam(); mocks(); recs(); line(); }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-pick],[data-p],[data-show]'); if (!t) return;
+    if (t.dataset.p) st.P = t.dataset.p;
+    if (t.dataset.show) st.show = t.dataset.show;
+    if (t.dataset.pick){ var a = t.dataset.pick.split(':'); if (st[a[0]] === a[1]) st[a[0]] = null; else { st[a[0]] = a[1]; if (a[0] === 'ms') st.show = null; } }
+    all();
+  });
+  $('copy').addEventListener('click', function(){ var t = $('line').textContent; try { navigator.clipboard.writeText(t).then(function(){ $('copy').textContent = 'Copied'; setTimeout(function(){ $('copy').textContent = 'Copy'; }, 1400); }, sel); } catch (er) { sel(); } function sel(){ var r = document.createRange(); r.selectNodeContents($('line')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } });
+  $('clear').addEventListener('click', function(){ st.ms = st.mc = st.show = null; all(); });
+  ba(); tech(); srcs(); all();
+})();
+</script>
