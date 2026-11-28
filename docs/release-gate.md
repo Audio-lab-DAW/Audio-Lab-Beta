@@ -154,3 +154,9 @@ The user answered three questions (this replaces "R4 parked" above):
 The user: "The fractal song is only for testing. I will later convert an older version into a new AudioLab."
 - **Step WS-F (lane Q, after WS-1 is released):** take the Fractals song data (with the Electric Universe vocals) and any other built-in demo song data out of `index.html` entirely. Move them to `tools/test-songs/` (saved in the current project format, R0) and point the release gate, the native lab and every test that used the built-in copy at those files. The app itself ships no song (D6); the start screen offers empty project, templates and recent projects only. Test: `index.html` holds no song audio or song data, the gate's export and load checks still pass from `tools/test-songs/`, and the app file is smaller.
 - The user will convert an older version of the song into the new AudioLab personally later; no task does that.
+
+## R5 decided by the user (28 November 2026, 15:01 Brussels): screens are checked by layout
+
+The user: "Let's just do it by layout. It doesn't have to be pixel by pixel."
+- Screenshot checks no longer compare pixel for pixel. They check layout: every control with a stable id is present, visible and inside its panel; nothing overlaps or is clipped; text fits and is readable (contrast); the expected colours and theme tokens are used; Dark and Light both pass. A tolerant image diff may still flag a large visual change for a human look, but it never fails the gate on its own.
+- Lanes no longer re-save reference screenshots for small design changes.
