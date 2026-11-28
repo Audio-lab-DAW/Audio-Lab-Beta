@@ -20,7 +20,7 @@ Step MX-3 of `docs/mixing-build.md` (the user's AE3 picks X1 and X4, `docs/resea
 - **Export equals playback** with a keyed Compressor: median 0.000 dB over 20 ms windows; the largest single window differs by 1.27 dB, on a kick's first milliseconds (live and export start the keyed stage's 32-sample steps at different points).
 - The tails switch, Output menu, cable menus, the row on all five devices, its menu and tap points, Dark and Light, no new timed work, no console errors.
 - **Fractals unchanged** (measured on this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; Fractals has no sidechain set, so nothing in it changes.
-- Other UI tests on this build: taskMX_1 (49), taskMX_2 (41), taskAB, taskIN_G (31), taskNI_5b (22) all pass. @GATE@
+- Other UI tests on this build: taskMX_1 (49), taskMX_2 (41), taskAB, taskIN_G (31), taskNI_5b (22) all pass. The release gate's quick run on v0.295 with MX-2 and MX-3 (28 Nov, 10:20 UTC): lint clean (2397 top-level functions, no name twice), start-up smoke test 14 of 14 scenarios clean, idle frame times as before (p50 16.7 ms, p95 50.0 ms), windows 19 checks, Fractals levels and 9 repeatable export lines bit-identical. Re-run at release if main moved on.
 
 ### Only the user can test
 - Put a Compressor on the bass, click its Sidechain row, choose Kick: the bass dips on every kick. Try "Before its effects" on a kick with a long Limiter: it still lines up.
