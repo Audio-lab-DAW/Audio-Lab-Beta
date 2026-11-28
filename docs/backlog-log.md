@@ -6443,3 +6443,9 @@ Fired by a manual trigger from the scheduling chat at about 23:59 UTC 27 Nov (it
 
 ### Assumptions
 - A `set()` while playing lands on the quantum it is called in (the page's currentTime is a quantum boundary).
+
+## 28 November 2026: taskFT_C2a.py's idle check made exact (lane C, for task RG), no index.html change
+- The check "nothing runs while the Push is still" counted every `setTimeout` on the page in 1.5 s idle (limit under 5). The glass copy (`elSoon` from `gbCopy`) alone gives 4 or 5, so the check failed about half the runs on every build since v0.250 (task RG's two runs of 28 November).
+- Now it counts only the controller layer's own timers: scheduled from a `p1*`, `P1`, `ctl*` or `CTL` function (by the stack), or with such a callback (the Push's repaint after an edit, `p1All`, is scheduled from the `changed` wrapper), or from inside the callback of one. The limit is now under 2. The other timers are listed by their caller in the detail (`[0, 5, {'elSoon': 5}]`).
+- A new check proves the count is real: `changed()` makes the Push repaint through its own timer, and that one is counted (0 then 1).
+- Main (v0.294): **10 of 10 runs pass**, 47 of 47 checks each. Push timers idle: 0 in every run; glass copies 4 or 5 (5 in 7 runs, which the old check failed).
