@@ -1,0 +1,46 @@
+{
+ "name": "Fractals_remake",
+ "file": "Fractals_remake.audiolab",
+ "vox": [
+  [
+   0,
+   "vox/fractals_vox_01.flac"
+  ],
+  [
+   96,
+   "vox/fractals_vox_02.flac"
+  ],
+  [
+   276,
+   "vox/fractals_vox_03.flac"
+  ],
+  [
+   572,
+   "vox/fractals_vox_04.flac"
+  ],
+  [
+   588,
+   "vox/fractals_vox_05.flac"
+  ],
+  [
+   756,
+   "vox/fractals_vox_06.flac"
+  ],
+  [
+   828,
+   "vox/fractals_vox_07.flac"
+  ],
+  [
+   1012,
+   "vox/fractals_vox_08.flac"
+  ],
+  [
+   1076,
+   "vox/fractals_vox_09.flac"
+  ],
+  [
+   1140,
+   "vox/fractals_vox_10.flac"
+  ]
+ ]
+}

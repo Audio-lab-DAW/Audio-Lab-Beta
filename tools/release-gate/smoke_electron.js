@@ -108,6 +108,8 @@ async function run(scen) {
     page.on('pageerror', (e) => res.pageerr.push(String(e).slice(0, 300)));
     if (scen !== 'real') await app.context().addInitScript(initScript(scen));
     else await app.context().addInitScript(initScript('real'));
+    /* task WS-F: the app ships no song; the Fractals test song goes in from tools/test-songs (window.AL_TEST_SONGS) */
+    await app.context().addInitScript(require(path.join(__dirname, '..', 'test-songs', 'alsong.js')).initScript());
     await app.evaluate(({ BrowserWindow }) => { const w = BrowserWindow.getAllWindows()[0]; w.unmaximize(); w.setFullScreen(false); w.setContentSize(2194, 1139); });
     await page.reload();
     await page.waitForFunction(() => window.AudioLab && window.AudioLab.version && window.audiolabHost && window.audiolabHost.ready && window.audiolabHost.ready(), null, { timeout: 120000 });

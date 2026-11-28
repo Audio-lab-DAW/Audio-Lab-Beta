@@ -1,6 +1,7 @@
 # v0.207 (task Y): the centred update window. Usage: python3 updwin.py ../../index.html outdir
 # Over-the-air update (audiolabHost.updateReady) and desktop app updates (audiolabHost.appUpdate) are simulated with a fake audiolabDesktop.
 import sys,json,os
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 src=open(sys.argv[1],encoding='utf-8').read();out=sys.argv[2];os.makedirs(out,exist_ok=True)
 root=os.path.dirname(os.path.abspath(sys.argv[1]))
@@ -17,7 +18,7 @@ with sync_playwright() as p:
         f=os.path.join(root,u)
         if os.path.isfile(f):return r.fulfill(status=200,body=open(f,'rb').read(),content_type='image/png' if f.endswith('.png') else 'application/octet-stream')
         r.fulfill(status=404,body=b'')
-    pg.route('https://app.test/**',app)
+    pg.route('https://app.test/**',alsong(app))
     pg.add_init_script("localStorage.getItem('audiolab-ui')||localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html');pg.wait_for_function("() => window.AudioLab && window.AudioLab.version",timeout=90000);pg.wait_for_timeout(5000)
     run=lambda js:pg.evaluate("js=>window.AudioLab.run(js)",js)

@@ -5,6 +5,7 @@ track works) or by the hits of another track's sound (in the worklet and in an e
 to v0.294, the second row of the device (tooltips, undo, Light), saved with the song.
    python3 tools/ui-tests/taskFT_F16b.py [index.html] [out dir] [old index.html for the bit-identical check]"""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'
@@ -33,7 +34,7 @@ def boot(p, refuse=False, dsf=1, src=None):
     def con(m):
         if (m.type == 'error' and 'fetching the script' not in m.text) or (m.type == 'warning' and 'nominal range' not in m.text and 'GPU stall' not in m.text and 'willReadFrequently' not in m.text): logs.append(m.type + ': ' + m.text[:200])
     pg.on('console', con); pg.on('pageerror', lambda e: logs.append('pageerror: ' + str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=src or SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=src or SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.add_init_script(INIT + (';window.__refuseSysex=1;' if refuse else ';') + FAKE)
     pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=120000); pg.wait_for_timeout(3500)
     pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")

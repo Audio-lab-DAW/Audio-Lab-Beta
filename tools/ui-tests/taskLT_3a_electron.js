@@ -28,6 +28,7 @@ const med = (a) => { const b = [...a].sort((x, y) => x - y); return b.length ? +
   ok(await R("typeof LT_HOOKS.fastNotes==='function'&&!LTF.chan"), 'nothing is made at start (no channel, no listening window)', await R('JSON.stringify(LT_HOOKS.fastNotes())'));
   ok((await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)) === 1, 'one window at start');
   /* the Fractals song, the Lead armed, a plain MIDI keyboard in the controller layer (named as the listening window reports it) */
+  await page.evaluate((T) => { window.AL_TEST_SONGS = T; }, require(path.join(__dirname, '..', 'test-songs', 'alsong.js')).songs()); /* task WS-F: the test song from tools/test-songs */
   await R(`(async()=>{const r=document.getElementById('liteNote');if(r)r.remove();await openDemoFractals();return 1})()`); await sleep(2500);
   const setup = await R(`(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));ensureCtx();await ctx.resume();UI.kbPiano=false;CAPS=false;for(const t of S.tracks)t.arm=false;const lead=S.tracks.find(t=>t.name==='Lead');lead.arm=true;changed(true);syncGraph();
     ctlStart();await w(300);const g=CTL.profs.find(p=>p.id==='generic');window.__D={id:'lt-test',name:'LT Test Keys',man:'',inp:{name:'LT Test Keys'},out:null,prof:g,base:'LT Test Keys'};CTL.devs.set('lt-test',window.__D);

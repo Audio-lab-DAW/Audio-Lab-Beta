@@ -4,6 +4,7 @@ the instrument's preset menu (mouse on the menu, then the keyboard on it), the a
 the Change browser (a click on another instrument, arrow keys, Escape back, Enter to keep), stopped and while playing. After each change, and again
 0.5 s later, both scroll positions must be the same as before, and the device that was changed must still be in view."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'
@@ -16,7 +17,7 @@ def ok(c, m):
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']); pg = b.new_page(viewport={'width': 1280, 'height': 900}); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)[:400]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b'')))
     pg.add_init_script("if(!localStorage.getItem('audiolab-ui'))localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html'); pg.wait_for_timeout(7000)
     pg.evaluate("()=>{const c=document.getElementById('liteNote');if(c)c.remove()}")

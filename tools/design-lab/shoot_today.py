@@ -1,6 +1,7 @@
 # DR2: headless screenshots of today's arrangement, piano roll, browser and transport
 # python3 tools/design-lab/shoot_today.py [index.html]  -> tools/design-lab/today/*.png
 import sys,json,os
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC=sys.argv[1] if len(sys.argv)>1 else 'index.html'
 OUT=os.path.join(os.path.dirname(__file__),'today')
@@ -8,7 +9,7 @@ src=open(SRC,encoding='utf-8').read()
 def page(b,lite):
     pg=b.new_page(viewport={'width':1600,'height':900},device_scale_factor=1);errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:200]))
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps({'splash':False,'lat3':1,'lite':lite,'liteMan':lite}))
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(4000)
     # hold the look: the headless machine is slow, so the app would switch itself to Light mode

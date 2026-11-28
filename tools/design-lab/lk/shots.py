@@ -11,6 +11,7 @@ At the user's size (2194 x 1139 CSS px at 1.75x), Fractals open. For Dark (glass
 With --dens: the arrangement at each density (dens-<name>.png), Dark only.
 Not committed: the pictures (the script makes them again)."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1]; OUT = sys.argv[2]; os.makedirs(OUT, exist_ok=True)
 DENS = sys.argv[sys.argv.index('--dens') + 1].split(',') if '--dens' in sys.argv else []
@@ -21,7 +22,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(args=ARGS); ctx = b.new_context(viewport={'width': 2194, 'height': 1139}, device_scale_factor=1.75); pg = ctx.new_page(); logs = []
     pg.on('console', lambda m: logs.append(m.text[:300]) if m.type == 'error' and 'fetching the script' not in m.text else None)
     pg.on('pageerror', lambda e: logs.append('pageerror: ' + str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.add_init_script(INIT); pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=90000); pg.wait_for_timeout(3000)
     R = lambda c: pg.evaluate("c=>AudioLab.run(c)", c)
     clean = lambda: pg.evaluate("()=>{for(const i of['splash','liteNote','toast']){const s=document.getElementById(i);if(s&&i!=='toast')s.remove();else if(s)s.style.display='none'}}")

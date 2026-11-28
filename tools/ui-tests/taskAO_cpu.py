@@ -3,6 +3,7 @@ Reads the processor time of the browser's processes from Linux (/proc/<pid>/stat
 process, audio service), in % of one core. The page's visibility and focus are emulated, as in taskAO.py. Works on older versions too (they do not
 react, which is the "before"). The numbers of the real desktop app come from taskAO_electron.js."""
 import sys, os, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'; SECS = float(sys.argv[2]) if len(sys.argv) > 2 else 20
 SRC = open(F, encoding='utf-8').read(); CLK = os.sysconf('SC_CLK_TCK')
@@ -37,7 +38,7 @@ with sync_playwright() as p:
     mark = '--al-mark=%d' % os.getpid()
     b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required', mark]); pg = b.new_page(viewport={'width': 1600, 'height': 1000}); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b'')))
     pg.add_init_script(INIT); pg.goto('https://app.test/index.html'); pg.wait_for_timeout(8000)
     R = lambda c: pg.evaluate("c=>window.AudioLab.run(c)", c)
     R("(()=>{const c=document.getElementById('liteNote');if(c)c.remove();pmSetOn(false);if(typeof AOG!=='undefined')AOG.boot=0;return 1})()")

@@ -8,6 +8,7 @@ one cols message per chunk, the draft stretch of chunk i is the overlap the next
 stems' spectrogram, the first split shows the download, the second says cached; Stop ends a split and the next one works;
 SG_HOOKS.onChunk sees every chunk of a split started from the clip menu's path (stemsFor). No console errors."""
 import sys, os, json, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC = open(sys.argv[1] if len(sys.argv) > 1 else 'index.html', encoding='utf-8').read()
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -42,7 +43,7 @@ def page(p, src):
         hits['ort'] += 1; r.fulfill(body=FAKE_ORT, content_type='application/javascript', headers={'access-control-allow-origin': '*'})
     ctx.route('https://huggingface.co/**', model)
     ctx.route('https://cdn.jsdelivr.net/**', ort)
-    ctx.route('https://app.test/**', lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body=''))
+    ctx.route('https://app.test/**', alsong(lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body='')))
     pg.goto('https://app.test/'); pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=90000); pg.wait_for_timeout(2500)
     return b, pg, errs, hits
 # the quick split's stems, hashed (to compare builds)

@@ -5,6 +5,7 @@ an older profile reads back through SETT; find() knows synonyms; draw() makes a 
 no visible change: the Settings window's structure and text are the same as the previous version, page by page. Dark and Light level, no console errors.
   python3 tools/ui-tests/taskST_S4.py [repo dir] [out dir] [previous index.html]"""
 import sys,os,mimetypes,json,re
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';OLD=sys.argv[3] if len(sys.argv)>3 else None;os.makedirs(OUT,exist_ok=True)
 N=[0,0];FAIL=[]
@@ -22,7 +23,7 @@ J=lambda pg,c:json.loads(R(pg,"JSON.stringify("+c+")"))
 def ctx(b,lite,old,page='index.html'):
     c=b.new_context(viewport={'width':1600,'height':1000});pg=c.new_page();errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'net::' not in m.text and errs.append('console '+m.text[:200]))
-    pg.route('https://app.test/**',serve)
+    pg.route('https://app.test/**',alsong(serve))
     u=dict(old,order=['arr','fx','tr','map'],splash=False,lat3=1,lite=lite,liteMan=lite)
     pg.add_init_script("if(!sessionStorage.getItem('t4')){sessionStorage.setItem('t4','1');localStorage.setItem('audiolab-ui',JSON.stringify(%s))}"%json.dumps(u))
     pg.goto('https://app.test/'+page);pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(3000)

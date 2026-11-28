@@ -7,6 +7,7 @@ Pixel check, per case: A = the page with the panels' own elements made transpare
 B = the same with the engine canvas hidden too (only the sharp layers). Under the glass A must be frosted (no fine detail: nothing sharp lies on top of
 the engine's face) and differ from B (the engine draws there); outside the glass A must equal B (nothing blurred where there is no glass)."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 from PIL import Image, ImageChops, ImageStat
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
@@ -25,7 +26,7 @@ with sync_playwright() as p:
     def con(m):
         if m.type == 'error' and 'fetching the script' not in m.text: logs.append(m.text[:300])
     pg.on('console', con); pg.on('pageerror', lambda e: logs.append('pageerror: ' + str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.add_init_script(INIT); pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=90000); pg.wait_for_timeout(4000)
     R = lambda c: pg.evaluate("c=>AudioLab.run(c)", c)
     pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")

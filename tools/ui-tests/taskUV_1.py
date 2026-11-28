@@ -21,6 +21,7 @@ Checks:
   python3 tools/ui-tests/taskUV_1.py [repo dir] [out dir]
 """
 import sys, os, json, time, hashlib
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -47,7 +48,7 @@ def main():
         ctx = b.new_context(viewport={'width': 2194, 'height': 1139}, device_scale_factor=1.75); pg = ctx.new_page(); errs = []
         pg.on('console', lambda m: errs.append(m.text[:200]) if m.type == 'error' and 'fetching the script' not in m.text else None)
         pg.on('pageerror', lambda e: errs.append('pageerror: ' + str(e)[:300]))
-        pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+        pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
         pg.add_init_script(INIT); pg.set_default_timeout(300000)
         pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=120000); pg.wait_for_timeout(4000)
         pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")

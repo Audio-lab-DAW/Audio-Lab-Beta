@@ -1,4 +1,5 @@
 import sys,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 A=open('wl.js').read();B=open('wl3.js').read()
 names=['al-imager']
@@ -9,7 +10,7 @@ const r=await c.startRendering();return [Array.from(r.getChannelData(0)),Array.f
 import numpy as np
 with sync_playwright() as p:
     b=p.chromium.launch();pg=b.new_page()
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body='<html></html>'))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body='<html></html>')))
     pg.goto('https://app.test/index.html')
     for nm in names:
         x=np.array(pg.evaluate(JS,[A,nm]));y=np.array(pg.evaluate(JS,[B,nm]));x2=np.array(pg.evaluate(JS,[A,nm]))

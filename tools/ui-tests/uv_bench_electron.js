@@ -27,6 +27,7 @@ async function one(name, file) {
   await wc.executeJavaScript("localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}));1"); await w.loadFile(file).catch(() => { });
   await until('!!(window.AudioLab&&AudioLab.version)', 120000); await sleep(4000);
   await wc.executeJavaScript("for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()};1");
+  await wc.executeJavaScript('window.AL_TEST_SONGS=' + JSON.stringify(require(path.join(__dirname, '..', 'test-songs', 'alsong.js')).songs()) + ';1'); /* task WS-F: the test song from tools/test-songs */
   await run('openDemoFractals()'); await sleep(8000); await wc.executeJavaScript("{const s=document.getElementById('liteNote');if(s)s.remove()};1");
   await run('pmSetOn(false);UI.follow=false;if(play.on)stop();0'); await until("AudioLab.run('!MAP.busy&&!MAP.tm&&!MAP.et')", 90000); await sleep(1000);
   console.log('  Fractals open');

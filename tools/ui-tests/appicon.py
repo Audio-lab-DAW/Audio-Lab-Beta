@@ -2,6 +2,7 @@
   python3 tools/ui-tests/appicon.py [repo dir] [out dir]
 Serves the repository folder as https://app.test/, so the favicons and desktop/icon-assets/picker/ load like on the website."""
 import sys, os, json, mimetypes
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT = sys.argv[1] if len(sys.argv) > 1 else '.'
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'
@@ -19,7 +20,7 @@ HOST = """window.__calls=[];window.audiolabDesktop={isDesktop:true,platform:'dar
 OLD = """window.audiolabDesktop={isDesktop:true,platform:'darwin',version:()=>Promise.resolve('0.190.0'),onDock:()=>{},onFromChild:()=>{},onDockHover:()=>{},dac:null};"""
 def boot(b, init=None):
     ctx = b.new_context(viewport={'width': 1500, 'height': 950}, device_scale_factor=2); pg = ctx.new_page(); errs = []
-    pg.on('pageerror', lambda e: errs.append(str(e)[:300])); pg.route('https://app.test/**', serve)
+    pg.on('pageerror', lambda e: errs.append(str(e)[:300])); pg.route('https://app.test/**', alsong(serve))
     pg.add_init_script("if(!localStorage.getItem('audiolab-ui'))localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     if init: pg.add_init_script(init)
     pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=60000); pg.wait_for_timeout(2500)

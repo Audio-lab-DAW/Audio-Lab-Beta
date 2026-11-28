@@ -5,6 +5,7 @@ finds the notes, moves them, corrects them, renders through the app's engine and
 independent of the tracker. Also: live engine in exports (hard tune, choir), bit-identical renders, pop chain, the fake microphone
 (Live and Record), screenshots of the device and the editor."""
 import sys, os, json, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'remake'))
 from alab import AudioLab
@@ -25,7 +26,7 @@ class AL(AudioLab):
             u = route.request.url
             if u.endswith("/") or u.endswith("index.html"): route.fulfill(body=src, content_type="text/html")
             else: route.fulfill(status=404, body="")
-        self.page.route("https://app.test/**", handle)
+        self.page.route("https://app.test/**", alsong(handle))
         self.page.goto("https://app.test/")
         self.page.wait_for_function("() => window.AudioLab && window.AudioLab.version", timeout=60000)
         self.page.wait_for_timeout(2500)

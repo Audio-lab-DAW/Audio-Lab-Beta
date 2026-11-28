@@ -1,6 +1,7 @@
 # Visualizer docks and sharpness, the map / visualizer right-click menu, the glass preview loops, the overview zoom (v0.194, task U).
 #   python3 tools/ui-tests/taskU.py [index.html] [outdir] [part ...]   parts: viz menu glass zoom (default: all)
 import sys,os,json,time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 idx=sys.argv[1] if len(sys.argv)>1 else 'index.html';out=sys.argv[2] if len(sys.argv)>2 else '/tmp/taskU';os.makedirs(out,exist_ok=True)
 parts=set(sys.argv[3:]);want=lambda k:not parts or k in parts
@@ -8,7 +9,7 @@ src=open(idx,encoding='utf-8').read().encode()
 def boot(p,scale=1):
     b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']);pg=b.new_page(viewport={'width':1600,'height':1000},device_scale_factor=scale);errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:300]))
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=60000);pg.wait_for_timeout(4500)
     R=lambda c:pg.evaluate("c=>AudioLab.run(c)",c)

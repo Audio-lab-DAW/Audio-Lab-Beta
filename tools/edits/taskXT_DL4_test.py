@@ -4,6 +4,7 @@ Fails when safe mode deletes or rewrites a customisation, when it does not start
 back, when Reset my customisations keeps no backup or cannot be undone, or when any of it costs something with nothing customised.
   python3 tools/ui-tests/taskXT_DL4.py [index.html] [out dir]"""
 import sys, os, json, re, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC = open(sys.argv[1] if len(sys.argv) > 1 else 'index.html', encoding='utf-8').read()
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -18,7 +19,7 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append(str(e)[:300]))
     pg.on('console', lambda m: errs.append('console: ' + m.text[:300]) if m.type == 'error' and 'fetching the script' not in m.text and 'Failed to load resource' not in m.text else None)
     pg.add_init_script(INIT)
-    pg.route('https://app.test/**', lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body='')))
     R = lambda c: pg.evaluate('c => AudioLab.run(c)', c); J = lambda c: json.loads(R('JSON.stringify(' + c + ')'))
     def ready(t=2500):
         pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=90000); pg.wait_for_timeout(t)

@@ -5,6 +5,7 @@ at most 30 and 60 a second while open, one still picture at the Light level and 
 the list, the buttons, Esc, Settings > General. Screenshots go to the out dir.
   python3 tools/ui-tests/taskAB1.py [repo dir] [out dir]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(OUT,exist_ok=True)
 N=[0,0];FAIL=[]
@@ -19,7 +20,7 @@ def serve(route):
 R=lambda pg,c:pg.evaluate("c=>window.AudioLab.run(c)",c)
 def page(b,w,h,dpr=1,lite=False,**kw):
     c=b.new_context(viewport={'width':w,'height':h},device_scale_factor=dpr,**kw);pg=c.new_page();errs=[]
-    pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and errs.append('console '+m.text[:200]));pg.route('https://app.test/**',serve)
+    pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and errs.append('console '+m.text[:200]));pg.route('https://app.test/**',alsong(serve))
     pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps({'splash':False,'lat3':1,'lite':lite,'liteMan':lite}))
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(2500)
     R(pg,'UI.lite=%s;UI.liteMan=%s;applyLite()'%(('true','true') if lite else ('false','false')));pg.wait_for_timeout(300)

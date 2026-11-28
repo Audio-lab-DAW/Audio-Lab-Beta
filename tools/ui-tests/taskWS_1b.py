@@ -9,6 +9,7 @@ Checks (at the user's size, 1254 x 651 CSS px at 1.75x = 2194 x 1139):
   - screenshots dark and Light of the open line; no page errors
   python3 tools/ui-tests/taskWS_1b.py [index.html] [out dir]"""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 HERE = os.path.dirname(os.path.abspath(__file__))
 IDX = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, '..', '..', 'index.html'))
@@ -25,7 +26,7 @@ def ck(name, ok, info=''):
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
     ctx = b.new_context(viewport={'width': 1254, 'height': 651}, device_scale_factor=1.75)
-    ctx.route('https://app.test/**', lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.endswith('/') else r.fulfill(status=404, body=''))
+    ctx.route('https://app.test/**', alsong(lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.endswith('/') else r.fulfill(status=404, body='')))
     ctx.add_init_script("localStorage.setItem('audiolab-ws-test','1')")
     pg = ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)[:300]))

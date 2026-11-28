@@ -1,13 +1,14 @@
 # Effect levels, since v0.186 on the Settings tab "Performance" (Light mode switch and the slider Lightest | Lighter, Optimised, Full effects).
 # Usage: python3 tools/ui-tests/fxlevels.py index.html outdir
 import sys,json,os
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 src=open(sys.argv[1],encoding='utf-8').read();out=sys.argv[2];os.makedirs(out,exist_ok=True)
 errs=[]
 with sync_playwright() as p:
     b=p.chromium.launch();pg=b.new_page(viewport={'width':1600,'height':1000})
     pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:errs.append('console: '+m.text) if m.type=='error' and 'fetching the script' not in m.text else None)
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script("localStorage.getItem('audiolab-ui')||localStorage.setItem('audiolab-ui',JSON.stringify({order:['arr','fx','tr','map'],splash:false,lat3:1,pm:{on:true,st:2,user:true}}))")
     pg.goto('https://app.test/index.html');pg.wait_for_function("() => window.AudioLab && window.AudioLab.version",timeout=90000);pg.wait_for_timeout(6000)
     run=lambda js:pg.evaluate("js=>window.AudioLab.run(js)",js)

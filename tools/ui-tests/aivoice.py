@@ -8,6 +8,7 @@ Measures: speaker similarity before and after (WavLM-base-plus-sv cosine, see /t
 pitch line (a synthetic sung phrase with known notes, measured by FFT), clicks, time, memory, the original clip unchanged, page errors,
 screenshots of the AI window in the web, old-app and ready states."""
 import sys, os, json, time, subprocess, hashlib, base64, urllib.request
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 import numpy as np, soundfile as sf
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'remake'))
 from alab import AudioLab
@@ -34,7 +35,7 @@ class AL(AudioLab):
                 route.fulfill(body=r.read(), content_type='application/json'); return
             if u.endswith("/") or u.endswith("index.html"): route.fulfill(body=src, content_type="text/html")
             else: route.fulfill(status=404, body="")
-        self.page.route("https://app.test/**", handle); self.page.goto("https://app.test/")
+        self.page.route("https://app.test/**", alsong(handle)); self.page.goto("https://app.test/")
         self.page.wait_for_function("() => window.AudioLab && window.AudioLab.version", timeout=60000); self.page.wait_for_timeout(2500)
         self.version = self.js("() => AudioLab.version"); return self
 

@@ -1,4 +1,5 @@
 import os, sys, json, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 INDEX = os.environ.get('ALAB_INDEX', '/home/claude/audio-lab-beta/index.html')
 GPU_ARGS = ["--autoplay-policy=no-user-gesture-required", "--enable-gpu-rasterization", "--ignore-gpu-blocklist",
@@ -33,7 +34,7 @@ def launch(p, dsf=1, w=1600, h=1000):
     ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=dsf)
     pg = ctx.new_page()
     src = open(INDEX, encoding='utf-8').read()
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=src) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=src) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.goto('https://app.test/index.html')
     pg.wait_for_function("() => window.AudioLab && window.AudioLab.version", timeout=90000)
     pg.wait_for_timeout(2500)

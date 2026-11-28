@@ -1,6 +1,7 @@
 # task AI (v0.220): AudioLab starts with the Fractals song as the only open song (shipped inside the app, master -10 dB).
 #   python3 tools/ui-tests/taskAI.py index.html [old index.html (v0.219) to compare the song against]
 import sys,os,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..')
 f=sys.argv[1] if len(sys.argv)>1 else os.path.join(ROOT,'index.html');oldf=sys.argv[2] if len(sys.argv)>2 else None
@@ -17,7 +18,7 @@ def page(path,vox):
         if u.endswith('/') or u.endswith('index.html'):route.fulfill(body=src,content_type='text/html')
         elif vox and '/vox/' in u:route.fulfill(body=open(os.path.join(ROOT,'vox',u.rsplit('/',1)[1]),'rb').read(),content_type='audio/wav')
         else:route.fulfill(status=404,body='')
-    pg.route("https://app.test/**",h);return pg
+    pg.route("https://app.test/**",alsong(h));return pg
 def boot(pg,reload=False):
     (pg.reload() if reload else pg.goto("https://app.test/"))
     pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=60000)

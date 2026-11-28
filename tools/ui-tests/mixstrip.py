@@ -1,12 +1,13 @@
 # mixer strip rework (task S1, v0.194): python3 tools/ui-tests/mixstrip.py index.html
 # pan styles and the live balance marker, width field with test signals, master pin, compact height, double-click and double right-click
 import sys,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F=sys.argv[1] if len(sys.argv)>1 else 'index.html'
 def boot(p,w=1920,h=1080):
     src=open(F,encoding='utf-8').read();b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']);pg=b.new_page(viewport={'width':w,'height':h});errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:400]))
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script("if(!localStorage.getItem('audiolab-ui'))localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html');pg.wait_for_timeout(9000);pg.evaluate("()=>{const c=document.getElementById('liteNote');if(c)c.remove()}");return b,pg,errs
 def run(pg,c): return pg.evaluate("c=>window.AudioLab.run(c)",c)

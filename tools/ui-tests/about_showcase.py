@@ -2,6 +2,7 @@
 no em dashes, no sideways scroll, Settings > General > About opens it.
   python3 tools/ui-tests/about_showcase.py [repo dir] [out dir] [width] [height]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';W=int(sys.argv[3]) if len(sys.argv)>3 else 1500;H=int(sys.argv[4]) if len(sys.argv)>4 else 950
 def serve(route):
@@ -14,7 +15,7 @@ with sync_playwright() as p:
     for mode in ['normal','light']:
         lite = mode=='light'
         c=b.new_context(viewport={'width':W,'height':H},device_scale_factor=1);pg=c.new_page();errs=[]
-        pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.route('https://app.test/**',serve)
+        pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.route('https://app.test/**',alsong(serve))
         pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps({'splash':False,'lat3':1,'lite':lite,'liteMan':lite}))
         pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=60000);pg.wait_for_timeout(2500)
         pg.evaluate("l=>AudioLab.run('UI.lite='+l+';UI.liteMan='+l+';applyLite()')", 'true' if lite else 'false');pg.wait_for_timeout(300)

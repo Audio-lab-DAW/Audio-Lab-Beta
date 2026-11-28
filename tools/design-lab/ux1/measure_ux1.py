@@ -24,6 +24,7 @@ Frame times (continuous input for --win seconds, real input events): scroll, pin
 mixer open, with the computer-keyboard key latency measured while playing (the 'latency when playing' the user names).
 """
 import sys, json, time, argparse, statistics as stt
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ap = argparse.ArgumentParser()
 ap.add_argument('index', nargs='?', default='index.html'); ap.add_argument('--out', default='ux1.json')
@@ -54,7 +55,7 @@ def main():
         b = p.chromium.launch(args=ARGS)
         ctx = b.new_context(viewport={'width': A.w, 'height': A.h}, device_scale_factor=A.dsf); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)[:200]))
-        pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+        pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
         pg.add_init_script(INIT)
         pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=120000); pg.wait_for_timeout(4000)
         pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")

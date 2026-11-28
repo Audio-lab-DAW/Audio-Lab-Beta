@@ -3,6 +3,7 @@
 the field arcs 1 in 5, chosen at each opening; Earth only in Light mode and with Science drawings off.
    python3 tools/ui-tests/taskSC_B.py [index.html] [shots-dir]"""
 import sys, json, os
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../../../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 SH = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != '-' else None
@@ -20,7 +21,7 @@ with sync_playwright() as p:
     ctx = p.chromium.launch(args=ARGS).new_context(viewport={'width': 1400, 'height': 900}, device_scale_factor=2); pg = ctx.new_page()
     pg.on('console', lambda m: logs.append(m.text[:300]) if m.type == 'error' and 'fetching the script' not in m.text and 'icons.json' not in m.text else None)
     pg.on('pageerror', lambda e: logs.append('pageerror: ' + str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=src) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=src) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.add_init_script(INIT); pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=90000); pg.wait_for_timeout(3000)
     pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")
     R = lambda c: pg.evaluate("c=>AudioLab.run(c)", c)

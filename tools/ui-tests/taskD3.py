@@ -8,6 +8,7 @@ Fonts: requests to Google Fonts are blocked so that every run uses the same Inte
 Then: python3 tools/ui-tests/taskD3_compare.py BEFORE_OUT AFTER_OUT   (BEFORE = the same run on the version before)
 With CENSUS=taskD3_probe.js and a --probe copy of the app (tools/edits/taskD3.py) the run measures line heights for taskD3_pins.py."""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=sys.argv[1];OUT=sys.argv[2];W=int(sys.argv[3]);H=int(sys.argv[4]);LITE=sys.argv[5]=='1';FILT=sys.argv[6] if len(sys.argv)>6 else ''
 os.makedirs(OUT,exist_ok=True)
@@ -19,7 +20,7 @@ CENSUS=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),os.environ.g
 ERRS=[]
 def page(b):
     c=b.new_context(viewport={'width':W,'height':H});pg=c.new_page()
-    pg.on('pageerror',lambda e:ERRS.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'ERR_FAILED' not in m.text and ERRS.append('console '+m.text[:200]));pg.route('https://app.test/**',serve);pg.route('https://fonts.googleapis.com/**',lambda r:r.abort());pg.route('https://fonts.gstatic.com/**',lambda r:r.abort())
+    pg.on('pageerror',lambda e:ERRS.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'ERR_FAILED' not in m.text and ERRS.append('console '+m.text[:200]));pg.route('https://app.test/**',alsong(serve));pg.route('https://fonts.googleapis.com/**',lambda r:r.abort());pg.route('https://fonts.gstatic.com/**',lambda r:r.abort())
     pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps({'splash':False,'lat3':1,'lite':LITE,'liteMan':LITE}))
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(2500)
     pg.evaluate("c=>window.AudioLab.run(c)",'UI.lite=%s;UI.liteMan=%s;applyLite()'%(('true','true') if LITE else ('false','false')));pg.wait_for_timeout(300)

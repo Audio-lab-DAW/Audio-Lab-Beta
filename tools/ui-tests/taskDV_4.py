@@ -11,6 +11,7 @@ picture as ready; the rail open shows the rail (no dock, no chips) and keeps the
 at rest; switching states never changes a value; kOpen/kMode saved; an old project opens the same; screenshots of the three states at Glass,
 Light and Solid; no console errors."""
 import sys, os, json, math
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC = open(sys.argv[1] if len(sys.argv) > 1 else 'index.html', encoding='utf-8').read()
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -30,7 +31,7 @@ def page(p, src):
     pg.on('pageerror', lambda e: errs.append(str(e)[:300]))
     pg.on('console', lambda m: errs.append('console: ' + m.text[:300]) if m.type == 'error' else None)
     pg.add_init_script(INIT)
-    pg.route('https://app.test/**', lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.endswith('/') or r.request.url.endswith('index.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.endswith('/') or r.request.url.endswith('index.html') else r.fulfill(status=404, body='')))
     pg.goto('https://app.test/'); pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=60000); pg.wait_for_timeout(2500)
     return b, pg, errs
 with sync_playwright() as p:

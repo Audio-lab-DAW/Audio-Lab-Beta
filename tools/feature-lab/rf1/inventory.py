@@ -2,6 +2,7 @@
 'Under the hood' feature rows, and takes screenshots of the main views.
   python3 tools/feature-lab/rf1/inventory.py [repo dir] [out dir]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else 'tools/feature-lab/rf1/shots'
 os.makedirs(OUT,exist_ok=True)
@@ -13,7 +14,7 @@ def serve(route):
 with sync_playwright() as p:
     b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
     c=b.new_context(viewport={'width':1500,'height':950},device_scale_factor=1);pg=c.new_page();errs=[]
-    pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.route('https://app.test/**',serve)
+    pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.route('https://app.test/**',alsong(serve))
     pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps({'splash':False,'lat3':1}))
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=60000);pg.wait_for_timeout(3000)
     pg.evaluate("()=>{const n=document.getElementById('liteNote');n&&n.remove()}")

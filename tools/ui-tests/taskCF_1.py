@@ -8,6 +8,7 @@ is under the pointer, drawn at its size); it goes away when the pointer leaves; 
 Hide again re-docks it at the same place and size; the choice survives a reload; the command view.mapHide; reduced motion shows and hides at once;
 Solid draws the overlay solid; idle frame time not worse than the old build; no console errors."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC = open(sys.argv[1] if len(sys.argv) > 1 else 'index.html', encoding='utf-8').read()
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -32,7 +33,7 @@ def page(p, src, reduced=False):
         f = os.path.join(ROOT, u.split('https://app.test/', 1)[1])
         if os.path.isfile(f): return r.fulfill(path=f)
         r.fulfill(status=404, body='')
-    pg.route('https://app.test/**', serve)
+    pg.route('https://app.test/**', alsong(serve))
     pg.goto('https://app.test/'); pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=60000); pg.wait_for_timeout(3500)
     return b, pg, errs
 FT = """new Promise(res=>{const t=[];let l=0;const f=n=>{if(l)t.push(n-l);l=n;if(t.length<120)requestAnimationFrame(f);else{t.sort((a,b)=>a-b);res([t[60],t[114]])}};requestAnimationFrame(f)})"""

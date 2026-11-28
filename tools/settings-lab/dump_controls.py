@@ -2,6 +2,7 @@
 The table in index.html (STT, task ST-S4) is built from this dump and the audit (docs/settings-audit.md); rerun to check it.
   python3 tools/settings-lab/dump_controls.py [index.html] [out.json]"""
 import sys,os,json,mimetypes
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else 'index.html');ROOT=os.path.dirname(F);OUT=sys.argv[2] if len(sys.argv)>2 else 'controls.json'
 def serve(route):
@@ -20,7 +21,7 @@ JS=r"""()=>{const out=[];const T=typeof TIPS!=='undefined'?TIPS:{};
     val:el.type==='checkbox'?el.checked:(el.tagName==='BUTTON'?null:el.value),opts:el.tagName==='SELECT'?[...el.options].map(o=>[o.value,o.textContent.trim()]):null,hidden:!el.offsetParent&&!sec.hidden?1:0})}}
  return out}"""
 with sync_playwright() as p:
-    b=p.chromium.launch();c=b.new_context(viewport={'width':1600,'height':1000});pg=c.new_page();pg.route('https://app.test/**',serve)
+    b=p.chromium.launch();c=b.new_context(viewport={'width':1600,'height':1000});pg=c.new_page();pg.route('https://app.test/**',alsong(serve))
     pg.add_init_script("if(!sessionStorage.getItem('d4')){sessionStorage.setItem('d4','1');localStorage.setItem('audiolab-ui',JSON.stringify({order:['arr','fx','tr','map'],splash:false,lat3:1}))}")
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(3000)
     pg.evaluate("()=>AudioLab.run(\"openSettings('general')\")");pg.wait_for_timeout(800)

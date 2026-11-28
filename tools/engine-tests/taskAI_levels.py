@@ -4,6 +4,7 @@ and peak, true peak and loudness of the whole song after the master.
   python3 tools/engine-tests/taskAI_levels.py [index.html] [--vox] [--quick]
 --vox serves the vox/*.wav files next to the app (versions before 0.220 fetch the vocal samples); --quick skips the whole song."""
 import sys, os, json, hashlib
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 import numpy as np
 from scipy.signal import resample_poly
 import pyloudnorm as pyln
@@ -24,7 +25,7 @@ def start():
         if u.endswith("/") or u.endswith("index.html"): route.fulfill(body=src, content_type="text/html")
         elif VOX and "/vox/" in u: route.fulfill(body=open(os.path.join(ROOT, "vox", u.rsplit("/", 1)[1]), "rb").read(), content_type="audio/wav")
         else: route.fulfill(status=404, body="")
-    al.page.route("https://app.test/**", handle); al.page.goto("https://app.test/")
+    al.page.route("https://app.test/**", alsong(handle)); al.page.goto("https://app.test/")
     al.page.wait_for_function("() => window.AudioLab && window.AudioLab.version", timeout=60000)
     for i in range(300):
         if al.page.evaluate("() => AudioLab.run(\"S.tracks.some(t=>t.name==='Vocals (original)')&&S.tracks.some(t=>t.name==='Lead low')\")"): break

@@ -6,6 +6,7 @@ Export audio has no Save, Save as, Open and links to Project file, which keeps a
 no console errors. Normal and Light level, screenshots to the out dir.
   python3 tools/ui-tests/taskST_S1.py [repo dir] [out dir]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(OUT,exist_ok=True)
 N=[0,0];FAIL=[]
@@ -22,7 +23,7 @@ OLD={'order':['arr','fx','tr','map'],'splash':False,'lat3':1,'dac':'gryphon','mt
 def page(b,lite):
     c=b.new_context(viewport={'width':1600,'height':1000},device_scale_factor=1);pg=c.new_page();errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'net::' not in m.text and errs.append('console '+m.text[:200]))
-    pg.route('https://app.test/**',serve)
+    pg.route('https://app.test/**',alsong(serve))
     o=dict(OLD,lite=lite,liteMan=lite);pg.add_init_script("localStorage.setItem('audiolab-ui',JSON.stringify(%s))"%json.dumps(o))
     pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(3000)
     pg.evaluate("()=>{const n=document.getElementById('liteNote');n&&n.remove()}")

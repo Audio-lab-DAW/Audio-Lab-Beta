@@ -7,6 +7,7 @@
 # 5. fader drag follows the pointer every frame, Shift fine without a jump
 # 6. bottom edge: the tab changes the cable area, the rest of the edge and the corner resize the window
 import sys,os,json,math
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','remake'))
 import numpy as np
 from playwright.sync_api import sync_playwright
@@ -15,7 +16,7 @@ def boot(p,w=2560,h=1100):
     src=open(f,encoding='utf-8').read()
     b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']);pg=b.new_page(viewport={'width':w,'height':h});errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:400]));pg.on('console',lambda m:errs.append('C:'+m.text[:300]) if m.type=='error' and 'net::' not in m.text and '404' not in m.text and 'fetching the script' not in m.text else None)
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script("if(!localStorage.getItem('audiolab-ui'))localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html');pg.wait_for_timeout(9000)
     return b,pg,errs,(lambda c:pg.evaluate("c=>window.AudioLab.run(c)",c))

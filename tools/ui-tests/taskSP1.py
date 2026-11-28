@@ -3,6 +3,7 @@
 # then the timing (never closes before loading is done, closes by itself about 1.5 s after, click and key only in that last stretch), the random pick,
 # the frame rate, the freeze gate, reduce motion, the Show now preview and the splash switched off.
 import sys,os,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 f=sys.argv[1] if len(sys.argv)>1 else 'index.html';out=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(out,exist_ok=True)
 src=open(f,encoding='utf-8').read().encode();fails=[];n=[0]
@@ -15,7 +16,7 @@ window.__T={ev:[]};new MutationObserver(()=>{const s=document.getElementById('sp
 def page(b,w=1280,h=720,kind=None,ui='{lat3:1}',thr=1,**kw):
     cx=b.new_context(viewport={'width':w,'height':h},**kw);pg=cx.new_page();errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:errs.append('C:'+m.text[:300]) if m.type=='error' and 'net::' not in m.text and '404' not in m.text and 'fetching the script' not in m.text else None)
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body=src) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b''))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body=src) if r.request.url.endswith('.html') else r.fulfill(status=404,body=b'')))
     pg.add_init_script(INIT%(ui,("localStorage.setItem('audiolab-splash-test','%s');"%kind) if kind else "localStorage.removeItem('audiolab-splash-test');"))
     if thr>1:pg.context.new_cdp_session(pg).send('Emulation.setCPUThrottlingRate',{'rate':thr})
     return cx,pg,errs

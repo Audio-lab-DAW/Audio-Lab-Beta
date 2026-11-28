@@ -12,6 +12,7 @@ the app, render through the app's real audio engine, and save the result as an .
     al.save("song.audiolab"); al.stop()
 """
 import base64, json, os, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 import numpy as np
 from playwright.sync_api import sync_playwright
 
@@ -41,7 +42,7 @@ class AudioLab:
             else:
                 route.fulfill(status=404, body="")
 
-        self.page.route("https://app.test/**", handle)
+        self.page.route("https://app.test/**", alsong(handle))
         self.page.goto("https://app.test/")
         self.page.wait_for_function("() => window.AudioLab && window.AudioLab.version", timeout=60000)
         self.page.wait_for_timeout(2500)

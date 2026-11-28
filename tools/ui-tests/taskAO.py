@@ -10,6 +10,7 @@ events), every native requestAnimationFrame, setInterval and setTimeout call-bac
 - an armed track keeps the audio engine on and says why; the two switches in Settings work and have tooltips; a page that never had the focus is left alone;
 - an export started and then sent to the background finishes with the same samples; Fractals demo levels unchanged."""
 import sys, os, json, base64, hashlib, time
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 import numpy as np
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
@@ -59,7 +60,7 @@ def open_page(p, host=False, scale=1):
     b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']); pg = b.new_page(viewport={'width': 1600, 'height': 1000}, device_scale_factor=scale); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)[:400]))
     pg.on('console', lambda m: errs.append('console: ' + m.text[:300]) if m.type == 'error' and '404' not in m.text and 'fetching the script' not in m.text else None)
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b'')))
     pg.add_init_script(INIT + (HOST if host else ''))
     pg.goto('https://app.test/index.html'); pg.wait_for_timeout(8000)
     R = lambda c: pg.evaluate("c=>window.AudioLab.run(c)", c)

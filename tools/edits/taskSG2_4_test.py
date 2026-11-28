@@ -5,6 +5,7 @@ stem) where the 4 px bar was (the bar hidden), the lanes fill chunk by chunk and
 listen row (▶, Convert, mode) holds its stem's spectrogram, painted to the end, in the stem's order; ▶ and Convert still work;
 Cancel changes nothing; no console errors."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 SRC = open(sys.argv[1] if len(sys.argv) > 1 else 'index.html', encoding='utf-8').read()
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'; os.makedirs(OUT, exist_ok=True)
@@ -38,7 +39,7 @@ def page(p, src, reduced=False, ort_ok=True, delay=40):
         r.fulfill(body=bytes([ns, delay]) + bytes(n - 2), headers={'content-length': str(n), 'access-control-allow-origin': '*'}, content_type='application/octet-stream')
     cx.route('https://huggingface.co/**', model)
     cx.route('https://cdn.jsdelivr.net/**', lambda r: r.fulfill(body=FAKE_ORT, content_type='application/javascript', headers={'access-control-allow-origin': '*'}) if ort_ok else r.fulfill(status=404, body=''))
-    cx.route('https://app.test/**', lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body=''))
+    cx.route('https://app.test/**', alsong(lambda r: r.fulfill(body=src, content_type='text/html') if r.request.url.split('?')[0].endswith('/') else r.fulfill(status=404, body='')))
     pg.goto('https://app.test/'); pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=90000); pg.wait_for_timeout(2500)
     R = lambda c: pg.evaluate('c => AudioLab.run(c)', c); J = lambda c: json.loads(R('JSON.stringify(' + c + ')'))
     JA = lambda c: json.loads(R('(async()=>JSON.stringify(await ' + c + '))()'))

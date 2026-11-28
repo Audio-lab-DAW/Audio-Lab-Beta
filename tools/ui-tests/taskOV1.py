@@ -4,6 +4,7 @@
 At the user's size (2194 x 1139 CSS px at 1.75x) with Fractals: Dark (glass), Light mode, the Solid glass level, reduced motion and
 Motion 'Signal only'. Keyboard paths, focus, menu entries still running their commands, open times. SwiftShader: correctness only."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 OUT = sys.argv[2] if len(sys.argv) > 2 else ''
@@ -20,7 +21,7 @@ def load(p, logs, reduced=False):
     ctx = b.new_context(viewport={'width': 2194, 'height': 1139}, device_scale_factor=1.75, reduced_motion='reduce' if reduced else 'no-preference'); pg = ctx.new_page()
     pg.on('console', lambda m: logs.append(m.text[:300]) if m.type == 'error' and 'fetching the script' not in m.text else None)
     pg.on('pageerror', lambda e: logs.append('pageerror: ' + str(e)[:300]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC) if r.request.url.endswith('.html') else r.fulfill(status=404, body='')))
     pg.add_init_script(INIT); pg.goto('https://app.test/index.html'); pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version", timeout=90000); pg.wait_for_timeout(3000)
     pg.evaluate("()=>{for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()}}")
     R = lambda c: pg.evaluate("c=>AudioLab.run(c)", c)

@@ -5,6 +5,7 @@ first time, going back by itself, Keep, Go back, closing Settings keeps; a devic
 settings by their old names; an older profile loads; dark and Light level; no console errors.
   python3 tools/ui-tests/taskST_S10.py [repo dir] [out dir]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(OUT,exist_ok=True)
 N=[0,0];FAIL=[]
@@ -30,7 +31,7 @@ with sync_playwright() as p:
         L='light' if lite else 'dark'
         c=b.new_context(viewport={'width':1600,'height':1000});pg=c.new_page();errs=[]
         pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'net::' not in m.text and 'icons.json' not in m.text and errs.append('console '+m.text[:200]))
-        pg.route('https://app.test/**',serve)
+        pg.route('https://app.test/**',alsong(serve))
         u=dict(order=['arr','fx','tr','map'],splash=False,lat3=1,lite=lite,liteMan=lite,recOff=7,keepAwake=True,headroom=-3,hq=False,rq='auto')
         pg.add_init_script("if(!sessionStorage.getItem('t10')){sessionStorage.setItem('t10','1');localStorage.setItem('audiolab-ui',JSON.stringify(%s))}"%json.dumps(u))
         pg.goto('https://app.test/index.html');pg.wait_for_function("()=>window.AudioLab&&window.AudioLab.version",timeout=90000);pg.wait_for_timeout(2500)

@@ -5,6 +5,7 @@ piano roll tool, snap, chord, ghost and lane come back after a restart; scale an
 Dark and Light level, screenshots to the out dir, no console errors.
   python3 tools/ui-tests/taskST_S2.py [repo dir] [out dir]"""
 import sys,os,mimetypes,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 ROOT=os.path.abspath(sys.argv[1] if len(sys.argv)>1 else '.');OUT=sys.argv[2] if len(sys.argv)>2 else '.';os.makedirs(OUT,exist_ok=True)
 N=[0,0];FAIL=[]
@@ -23,7 +24,7 @@ def boot(pg):
 def ctx(b,lite,old=None):
     c=b.new_context(viewport={'width':1600,'height':1000});pg=c.new_page();errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)[:300]));pg.on('console',lambda m:m.type=='error' and 'fetching the script' not in m.text and 'net::' not in m.text and errs.append('console '+m.text[:200]))
-    pg.route('https://app.test/**',serve)
+    pg.route('https://app.test/**',alsong(serve))
     u=dict(old or {},order=['arr','fx','tr','map'],splash=False,lat3=1,lite=lite,liteMan=lite)
     pg.add_init_script("if(!sessionStorage.getItem('t2')){sessionStorage.setItem('t2','1');localStorage.setItem('audiolab-ui',JSON.stringify(%s))}"%json.dumps(u))
     boot(pg);return c,pg,errs

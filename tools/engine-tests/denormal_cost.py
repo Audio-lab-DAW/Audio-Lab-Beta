@@ -1,10 +1,11 @@
 import sys,json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 wl=open(sys.argv[1]).read()
 names=sys.argv[2].split(',')
 with sync_playwright() as p:
     b=p.chromium.launch();pg=b.new_page()
-    pg.route('https://app.test/**',lambda r:r.fulfill(status=200,content_type='text/html',body='<html></html>'))
+    pg.route('https://app.test/**',alsong(lambda r:r.fulfill(status=200,content_type='text/html',body='<html></html>')))
     pg.goto('https://app.test/index.html')
     for nm in names:
         r=pg.evaluate("""async([wl,nm])=>{const sr=48000,T=75,c=new OfflineAudioContext(2,sr*T,sr);await c.audioWorklet.addModule(URL.createObjectURL(new Blob([wl],{type:'text/javascript'})));

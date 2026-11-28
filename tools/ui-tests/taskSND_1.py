@@ -7,6 +7,7 @@ old Auto Filter to Clean moves its sound through the processor (LFO and envelope
 no console errors. Then the before and after numbers (tools/engine-lab/snd/snd1_measure.py) if given as a third argument.
   python3 tools/ui-tests/taskSND_1.py [index.html] [out dir]"""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 HERE = os.path.dirname(os.path.abspath(__file__))
 IDX = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
@@ -57,7 +58,7 @@ with sync_playwright() as pw:
     pg.on('console', lambda m: errs.append('console: ' + m.text[:300]) if m.type == 'error' and 'fetching the script' not in m.text and 'Failed to load resource' not in m.text else None)
     pg.add_init_script(INIT)
     pg.add_init_script("window.__sndF=0;const _AWN=window.AudioWorkletNode;if(_AWN)window.AudioWorkletNode=class extends _AWN{constructor(c,n,o){super(c,n,o);if(n==='al-snd-filter')window.__sndF++}}")
-    pg.route('https://app.test/**', lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.endswith('/') else r.fulfill(status=404, body=''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(body=SRC, content_type='text/html') if r.request.url.endswith('/') else r.fulfill(status=404, body='')))
     pg.goto('https://app.test/'); pg.wait_for_function('() => window.AudioLab && window.AudioLab.version', timeout=90000); pg.wait_for_timeout(2500)
     R = lambda c: pg.evaluate('c => AudioLab.run(c)', c); J = lambda c: json.loads(R('JSON.stringify(' + c + ')'))
     ok(tuple(map(int, R('VERSION').split('.'))) >= (0, 289), 'version 0.289 or later', R('VERSION'))

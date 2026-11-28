@@ -6,6 +6,7 @@ Fractals demo at 1600 x 1000, normal and Light mode:
 - the Clap designer has only dials and the Level fader like the Snare, Hat and Tom designers, and each designer's preset row is one line;
 - the pill folds and opens the panel, tooltips on every control, no page errors. Screenshots (2x) of each state."""
 import sys, os, json
+import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 else 'index.html'
 OUT = sys.argv[2] if len(sys.argv) > 2 else '.'
@@ -28,7 +29,7 @@ OVL = """(()=>{const fx=document.getElementById('fxin'),b=document.getElementByI
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']); pg = b.new_page(viewport={'width': 1600, 'height': 1000}, device_scale_factor=2); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)[:400]))
-    pg.route('https://app.test/**', lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b''))
+    pg.route('https://app.test/**', alsong(lambda r: r.fulfill(status=200, content_type='text/html', body=SRC.encode()) if r.request.url.endswith('.html') else r.fulfill(status=404, body=b'')))
     pg.add_init_script("if(!localStorage.getItem('audiolab-ui'))localStorage.setItem('audiolab-ui',JSON.stringify({splash:false,lat3:1}))")
     pg.goto('https://app.test/index.html'); pg.wait_for_timeout(7000)
     pg.evaluate("()=>{const c=document.getElementById('liteNote');if(c)c.remove()}")
