@@ -7110,3 +7110,6 @@ The release gate's freeze (`desktop/release-freeze.json`, since 16:41 UTC) was o
 - DL3 is out (v0.295), so this run tried to release DL4: applied to main v0.314 as v0.315 and every check passed (taskXT_DL4 43/43, DL1 21/21, DL2 24/24, DL3 50/50, OV2b 26/26, lint clean, `gate.py --here --quick --skip-ui --ref 0.314` ALL PASSED, Fractals Kick -9.75669 dB and Bass -25.48699 dB measured, unchanged). At the push the gate's freeze (`desktop/release-freeze.json`, 16:41:15 UTC) was on main, so nothing of index.html, update notes or the docs that hold only with it went out.
 - Found and fixed for the release: the start screen's row `wsStart` (lane Q) had no stable settings id, `taskXT_DL3.py` 48/50 on main; `tools/edits/taskXT_DL4_wsid.py` names it `general.wsStart` (lane H's registry). The results are in `tools/edits/taskXT_DL4_log.md`, which the release appends.
 - Next XT run, once the freeze is gone: `python3 tools/edits/taskXT_DL4.py index.html` (prints the version), `python3 tools/edits/taskXT_DL4_wsid.py <v>`, `python3 tools/edits/taskXT_DL4_release.py <v>`, `node desktop/scripts/sync-app.js`, the checks, the freeze check right before the push.
+
+## task TM0 (lane S, themes): step claimed
+- 28 Nov 2026, 17:33 UTC: TM0 (the plan, docs/themes-build.md) claimed by a scheduled run.
