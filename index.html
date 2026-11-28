@@ -1924,6 +1924,17 @@ body.lite .sgWork,body.lkm1 .sgWork,body.fxstill .sgWork,.sgL.still .sgWork{back
 @keyframes sgScan{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
 .sgAx{display:flex;justify-content:space-between;margin-left:68px;font:500 9.5px 'JetBrains Mono',monospace;color:#8c8f9b}
 .sgSh .sgB{display:block;padding:8px 16px 12px}.sgSh .sh{display:flex;align-items:center;gap:8px}.sgSh .sh b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sgEn{font:500 10.5px 'JetBrains Mono',monospace;color:#8c8f9b}
+/* task SG2-3 (lane R): S1, the stem split's card with a strip per stem, in the job pill's place until lane F's notification stack exists; solid, no backdrop-filter */
+#sgCard{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483000;width:min(320px,92vw);background:#101116;border:1px solid rgba(255,255,255,.14);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.5);padding:9px 10px;display:flex;flex-direction:column;gap:6px;color:#e6e8ee;font:12px/1.35 Inter,system-ui,sans-serif;transition:bottom calc(var(--ov-mo,1)*120ms) var(--ov-ease,ease-out)}
+#sgCard.up{bottom:70px}
+#sgCard .sgCt{display:flex;gap:7px;align-items:center}#sgCard .sgCt b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+#sgCard .sgCo{display:inline-flex;width:24px;height:24px;flex:none}
+#sgCard .sgCx{background:none;border:0;color:#8c8f9b;cursor:pointer;padding:0 2px;font-size:12px}#sgCard .sgCx:hover{color:#e6e8ee}
+.sgSts{display:flex;flex-direction:column;gap:2px}.sgSs{position:relative;height:6px;border-radius:2px;overflow:hidden;background:#05070b}.sgSs canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sgPs{display:inline-block;width:96px;height:16px;vertical-align:middle}.sgPst{gap:1px;height:16px}.sgPst .sgSs{flex:1;height:auto;border-radius:1px}
+#sgCard .sgCr{font-size:10.5px;min-height:15px}
+#sgCard .sgCa{display:flex;gap:6px;align-items:center}#sgCard .sgCa span{flex:1}
+#sgCard .sgCa button{background:#15161c;border:1px solid rgba(255,255,255,.13);border-radius:6px;padding:2px 10px;color:#e6e8ee;font:500 11.5px Inter,system-ui,sans-serif;cursor:pointer}#sgCard .sgCa button:hover{border-color:#8c8f9b}
 .a2dbar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.a2dbar i{display:block;height:100%;background:#4cc9f0;transition:width .2s}
 .a2sr{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);font-size:var(--fs2)}.a2sr>i{width:10px;height:10px;border-radius:50%}.a2sr em{font-style:normal;color:#8a8d99;font-size:var(--fs1)}.a2sr button{min-width:30px;min-height:28px}.a2sr select{min-height:26px}
 /* v0.218 (task AO): while AudioLab is in the background every CSS animation stands still (the class sits on the root element) */
@@ -5228,6 +5239,36 @@ function sgPill(j){const f=()=>{if(!j.bg||j.card){j.ui.delete(f);return}if(j.pha
 function sgLevels(bufs){return bufs.map(b=>{let pk=0;for(let ch=0;ch<b.numberOfChannels;ch++){const d=b.getChannelData(ch);for(let k=0;k<d.length;k+=3){const v=Math.abs(d[k]);if(v>pk)pk=v}}return 20*Math.log10(Math.max(pk,1e-6))})}
 /* several clips dropped with "the same for the other files": the read-out says clip 2 of 3 */
 {const f=importFiles;importFiles=async function(files){const n=[...(files||[])].filter(x=>/^audio\//.test(x.type)||/\.(wav|mp3|aif|aiff|flac|m4a|ogg)$/i.test(x.name)).length;SG2.batch=n>1?{n,k:0}:null;try{return await f.apply(this,arguments)}finally{SG2.batch=null}}}
+/* ===================== stem split lanes, step 3 (v0.309, task SG2-3, lane R; the user's pick S1) =====================
+   S1: Keep working sends the split to a small card with the orbit (MD1's mdOrb, the real progress), the clip name, a 6 px strip per
+   stem (the same columns, one putImageData per strip per chunk), the time left, Open (back to the sheet) and Stop. When it ends it
+   says what was added and offers Undo. Lane F's notification stack (OV5's notify) does not exist yet, so the card is drawn here, in
+   the job pill's place; when OV5 builds notify({kind,text,action,keep}) lane F puts SG_HOOKS.card(job) (the strips) into its card.
+   Lane G: SG_HOOKS.pill(key) gives MD1's pill a 96 x 16 strip of the running split (key 'stem'), or null. */
+function sgStrips(host,j,cls){const el=document.createElement('div');el.className=cls||'sgSts';el.innerHTML=j.stems.map(x=>`<div class="sgSs" title="${esc(x.name)}"><canvas></canvas></div>`).join('');host.appendChild(el);
+  [...el.querySelectorAll('canvas')].forEach((cv,i)=>sgView(j,cv,i));return el}
+function sgDoneText(j){const n=j.added||0;if(!n)return j.lv&&j.pickNull?'Nothing was changed.':'No stem had sound, so nothing was added.';return j.kind==='quick'?'Done. '+n+' stem track'+(n===1?'':'s')+' added below. The original clip is muted. Quick split is approximate: use it for sketching and remixing.':`Done: ${n} neural stem track${n===1?'':'s'} added below. The original clip is muted.`}
+function sgCard(j){let c=document.getElementById('sgCard');if(c)c.remove();mdJobEnd('stem');c=document.createElement('div');c.id='sgCard';c.setAttribute('role','status');c.dataset.al='stem.card';j.card=c;
+  c.innerHTML=`<div class="sgCt"><span class="sgCo"></span><b></b><button class="sgCx" data-al="stem.card.close" title="Close this card; the split goes on" aria-label="Close">✕</button></div><div class="sgCs"></div><div class="sgRo sgCr"></div>
+   <div class="sgCa"><span></span><button data-al="stem.card.open" data-sg="open" title="Show the split's lanes again">Open</button><button data-al="stem.card.stop" data-sg="stop" title="Stop the split: nothing is changed">Stop</button><button data-al="stem.card.undo" data-sg="undo" hidden title="Take the new stem tracks out again">Undo</button></div>`;
+  document.body.appendChild(c);sgStrips(c.querySelector('.sgCs'),j);const o=c.querySelector('.sgCo'),b=c.querySelector('b'),ro=c.querySelector('.sgCr'),op=c.querySelector('[data-sg=open]'),st=c.querySelector('[data-sg=stop]'),un=c.querySelector('[data-sg=undo]');let ok=null;
+  const f=tickOnly=>{if(!c.isConnected){j.ui.delete(f);sgDrop(j,c);return}if(j.phase==='stop'||j.phase==='err'){sgCardClose(j);return}ro.innerHTML=sgRoHtml(j,true)||'<span class="ph">'+(j.phase==='dl'?'Downloading the model':j.phase==='init'?'Loading the model':'Starting')+'</span>';
+    const pl=document.getElementById('mdJob');c.classList.toggle('up',!!(pl&&!pl.hidden));if(tickOnly)return;
+    const p=j.phase==='dl'?(j.dl&&j.dl.p)||0:j.phase==='init'||j.phase==='wait'?null:j.phase==='done'?1:j.fin/j.total,k=p==null?'o':'p';if(ok!==k){ok=k;o.innerHTML=mdOrb(24,p,'Stem split progress')}else if(p!=null)mdOrbSet(o,p);
+    b.textContent=j.phase==='dl'?'Downloading the stem model':'Splitting “'+j.name+'”';st.hidden=j.phase==='done';op.hidden=j.phase==='done'};
+  j.ui.add(f);f();
+  c.querySelector('.sgCx').onclick=()=>sgCardClose(j);st.onclick=()=>sgStop(j);
+  op.onclick=()=>{sgCardClose(j);j.bg=false;let m=document.getElementById('stq');if(m)m.remove();m=document.createElement('div');m.id='stq';m.className='modal';document.body.appendChild(m);sgSheet(m,j)};
+  un.onclick=()=>{if(UNDO.length&&UNDO[UNDO.length-1]===j.undo){undo();toast('The stem tracks were taken out again.')}else toast('Other changes came after the split: use Undo in the Edit menu.');sgCardClose(j)}}
+function sgCardClose(j){const c=j.card;j.card=null;if(c){sgDrop(j,c);c.remove()}clearTimeout(j.cardT)}
+/* the end of a split sent on with Keep working: the card says what was added (Undo), or the toast as before */
+function sgAdded(j){if(!j.card||!j.card.isConnected){toast(sgDoneText(j));return}const c=j.card,n=j.added||0;
+  c.querySelector('b').textContent=n?`${n} stem${n===1?'':'s'} added below “${j.under||j.name}”`:'No stem had sound';c.querySelector('.sgCr').innerHTML=n?'<span class="ph">The original clip is muted.</span>':'<span class="ph">Nothing was added.</span>';
+  c.querySelector('[data-sg=undo]').hidden=!n;c.querySelector('[data-sg=stop]').hidden=true;c.querySelector('[data-sg=open]').hidden=true;mdOrbSet(c.querySelector('.sgCo'),1);clearTimeout(j.cardT);j.cardT=setTimeout(()=>sgCardClose(j),20000)}
+SG_HOOKS.keep=j=>sgCard(j);SG_HOOKS.added=j=>sgAdded(j);
+/* for lane F (OV5's notify) and lane G (MD1's pill) */
+SG_HOOKS.card=j=>{const d=document.createElement('div');sgStrips(d,j);return d};
+SG_HOOKS.pill=key=>{if(key!=='stem')return null;const j=[...SG2.jobs].find(x=>x.bg&&x.phase!=='done');if(!j)return null;const d=document.createElement('span');d.className='sgPs';sgStrips(d,j,'sgSts sgPst');return d};
 /* ===================== neural stem separation: HTDemucs v4 (Meta, MIT weights) running in the browser =====================
    onnxruntime-web (WASM) in a background worker, the model downloaded once from Hugging Face and kept in the browser cache.
    7.8 s chunks with 25% overlap and linear cross-fades (overlap-add), at 44.1 kHz. */
@@ -5295,7 +5336,7 @@ async function stemsFor(t,c){if(!BUFS.has(c.buf)){toast('The audio for this clip
   const got=j.stems.map(x=>bufs[x.k]);j.bufs=got;j.lv=sgLevels(got);j.on=j.lv.map(d=>d>-60);const pr=new Promise(r=>j.pick=r);sgEnd(j,'done');
   const pick=j.bg?j.on.map((v,i)=>v?i:-1).filter(i=>i>=0):await pr;j.pick=null;SG2.jobs.delete(j);
   if(j.sheet){sgDrop(j,j.sheet);j.sheet.remove();j.sheet=null}
-  if(!pick||!pick.length){j.added=0;if(SG_HOOKS.added)SG_HOOKS.added(j);else toast(pick?'No stem had sound, so nothing was added.':'Nothing was changed.');return}
+  if(!pick||!pick.length){j.added=0;j.pickNull=!pick;if(SG_HOOKS.added)SG_HOOKS.added(j);else toast(pick?'No stem had sound, so nothing was added.':'Nothing was changed.');return}
   pushUndo();j.undo=UNDO[UNDO.length-1];const at=S.tracks.indexOf(t)+1;
   pick.forEach((li,n)=>{const x=j.stems[li],b=got[li],id=addBuf(b),nt=mkTrack('audio',null,t.name+' · '+x.name,x.col);S.tracks.splice(at+n,0,nt);nt.clips.push(mkClip({start:c.start,len:c.len,off:c.off,name:c.name+' ('+x.name.toLowerCase()+')',buf:id,dur:b.duration,gain:c.gain||0,fi:c.fi||0,fo:c.fo||0}))});
   c.mute=true;changed(true);j.added=pick.length;j.under=t.name;
@@ -7106,7 +7147,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.308',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.309',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}

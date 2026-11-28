@@ -6947,3 +6947,8 @@ Step 5 of the lane order (picks `... TM1 TC1 TS1 ...`): the meter **TM1**, the C
 
 ### What is left
 - Next run: **DS-B1** browser (B3 look, BR2, BP1), then DS-B2 (BM2), DS-A1 with GL1 if the lines picks are in, then DS-A2 and DS-T1 (MD1 is out, v0.271).
+
+## 28 November 2026, task SG2-3 (lane R): S1 card with a strip per stem, hooks for lanes F and G, v0.309
+- S1: Keep working sends the split to `#sgCard` (`sgCard`, in the job pill's place, solid, `.up` when MD1's pill shows): the orbit (`mdOrb`/`mdOrbSet`, the real progress), the clip name, one 6 px strip per stem (`sgStrips`, one putImageData per strip per chunk), chunks and time left, Open (the sheet again with every lane so far) and Stop; at the end '3 stems added below “Loop”' with Undo (only while the split is the last undo step), closing by itself after 20 s.
+- Hooks: `SG_HOOKS.card(job)` returns the strips element **for lane F** (put it in OV5's `notify` card when it exists; then the card here can go), `SG_HOOKS.pill(key)` returns a 96 × 16 strip for key 'stem' while a split runs in the background (null otherwise) **for lane G** (MD1's `mdJob` pill may show it), `SG_HOOKS.keep(job)`, `SG_HOOKS.added(job)`.
+- Test `tools/ui-tests/taskSG2_3.py`.

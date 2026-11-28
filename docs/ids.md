@@ -149,3 +149,8 @@ Not yet in `CONTROLS` (its areas are the transport, the track headers and the mi
 - `stem.discard`: Discard button (0.307)
 - `stem.add`: Add N tracks button (0.307)
 - `stem.lane.keep`: a stem's tick (0.307)
+- `stem.card`: the stem split card (0.309)
+- `stem.card.close`: its ✕ (0.309)
+- `stem.card.open`: Open (0.309)
+- `stem.card.stop`: Stop (0.309)
+- `stem.card.undo`: Undo (0.309)
