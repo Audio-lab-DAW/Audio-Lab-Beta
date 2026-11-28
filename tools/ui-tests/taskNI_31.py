@@ -10,6 +10,7 @@ with a 12 dB/oct high-pass at 150 Hz, the 50 Hz rumble down by 15 dB or more, th
 cut; a second cut does nothing; Undo restores a bit-identical render; an existing Pro EQ is reused; idle does nothing; tooltips;
 no em dashes; no console errors; screenshots (test song; Fractals).
   python3 tools/ui-tests/taskNI_31.py [repo dir] [out dir]"""
+# for: task NI-31 (lane D)
 import sys, os, hashlib, json
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'remake'))

@@ -10,6 +10,7 @@ against a direct render; a clean mix lists nothing; a master over -1 dBFS is a p
 selects the track, Journey opens the level journey of that track; an edit measures again; idle does nothing; a render of Hot bit-identical
 before and after; screenshots (test song, Fractals, the Light level); tooltips; no em dashes; no console errors.
   python3 tools/ui-tests/taskNI_7b.py [repo dir] [out dir]"""
+# for: task NI-7b (lane D)
 import sys, os, hashlib, re
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'remake'))
