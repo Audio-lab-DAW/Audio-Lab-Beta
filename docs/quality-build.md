@@ -11,7 +11,7 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 |---|---|---|
 | SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | **done**, v0.296 (released 28 Nov, after the gate's freeze) |
 | SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | **done**, v0.310 |
-| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | next |
+| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | claimed 28 Nov 16:40 UTC (part a: the Sampler's Classic and One shot modes and the drum designers' key tracking; part b: the grain, emit and vgrain worklets) |
 | SQ4 | The Limiter style "True peak 4x" (Q13: BS.1770 detection with the meter's filter from lane E, 4x final clip); the export safety limiter replaced by it at -1 dBTP (Q14: only exports that would clip change); the export report (Q15: true peak, overs, clipped samples) through lane F's notification or dialog code. Then: sound quality complete | |
 
 (There is no SQ2: al-poly's Hi-Fi oscillators and Acid went to lane L with the picks.)
