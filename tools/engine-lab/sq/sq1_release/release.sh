@@ -22,4 +22,4 @@ p='docs/device-backlog-2026-11-25.md';s=open(p).read();i=s.index('- Task SQ (sou
 PY
 node desktop/scripts/sync-app.js | tail -1
 node tools/release-gate/lint.js index.html | tail -1
-echo "now: python3 tools/ui-tests/taskSQ1.py index.html, then commit 'v$NEW: task SQ1 ...' and push"
+echo "now: python3 tools/ui-tests/taskSQ1.py ., then commit 'v$NEW: task SQ1 ...' and push"
