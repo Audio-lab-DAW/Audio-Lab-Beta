@@ -108,3 +108,12 @@ Round 2 picks line format: `Start screen round 2: R1 R2 R6 R8 | dipole F1 Jupite
 
 ### Round 2 picks
 (waiting for the user's line; WS-1 builds W1 T1 D3 P1 with these picks)
+
+## The user's round 2 picks (28 November 2026, 01:46 Brussels)
+
+**Start screen round 2: R4 R5 R6 R7 R8 | dipole F1 Jupiter | motion M1 1000 ms smooth**
+
+- **The random set:** S1 dipole field and S2 moons in resonance (round 1) plus **R4, R5, R6, R7, R8** from round 2.
+- **The dipole:** particle flow **F1**, in the **Jupiter** option as the page names it. The user also wants the S1 dipole's particles **a little smaller and fewer** ("let's have the particles a little smaller and a little less particles").
+- **The hand-over:** **M1, 1000 ms, smooth** easing: one fluid motion from the splash into the start screen (the drawing moves up, the logo and the 'Digital Audio Workstation' text move to the left, the recent projects slide up from the bottom).
+- With round 1's **W1 T1 D3 P1**. WS-1 builds all of this.
