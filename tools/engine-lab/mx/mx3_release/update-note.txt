@@ -1,0 +1,1 @@
+Sidechain from anything (v@VER@): Compressor, Gate, Multiband, OTT and the EQ's dynamic bands have a Sidechain row: pick the kick (or any track, before or after its effects or fader) and the device reacts to it. Returns get a "Duck under the kick" switch that keeps reverb and delay tails out of the kick's way, also offered when you draw a cable.

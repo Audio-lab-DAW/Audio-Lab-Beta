@@ -1,0 +1,33 @@
+## 28 November 2026, v@VER@: task MX-3, sidechain from anything and Duck under the kick (lane K, mixing engine)
+Step MX-3 of `docs/mixing-build.md` (the user's AE3 picks X1 and X4, `docs/research-mixing.md`, with the user's note: the tails Ducker is also offered whenever a cable is drawn). Edit script `tools/engine-lab/mx/mx3.py` with `mx3.js` (asserted unique anchors: `abxReach`, `abxKeys`, MX-1's `links`, four in MX-2's `mxSolve`, two in `renderMix`, three named fields; new JS before `askChoice`, new CSS before `.dacv`; needs MX-2), test `tools/ui-tests/taskMX_3.py` (40 checks). Built and tested on 28 Nov while MX-2 waited for the release gate's freeze; released after MX-2.
+
+### What each device had (the inventory MX-3 starts with)
+- **Compressor**: the browser's `DynamicsCompressorNode`, no key input. **Multiband** (3-band and Mid/Side): five browser compressors. **OTT**: three browser compressors. **Gate**: a worklet (`al-gate`) with one input. **EQ dynamic bands**: measured on the main thread (`DYNEQ`, analysers on a band-pass of the input), live only.
+
+### Built
+- **X1, a Sidechain row** under the presets of Compressor, Gate, Multiband, OTT and EQ (small, grey, "Sidechain ● Own sound ▾"; tooltip). Its menu (`mxScPick`, on `abxPickSrc`'s rules): "Its own sound", then every other track except groups and tracks it would loop with, each with its tap points: after its effects (the usual, as the Ducker), after its fader, before its effects, and after any one of its devices. Data: `f.p.sc = {src, tap, dev}`; absent, the device is exactly as before.
+- **Keyed engines**: the browser compressors stay in the path but are set neutral (0 dB threshold, no knee, 1:1: a pure 6 ms delay) and a keyed stage after them (worklet `al-mxkey`) runs the same algorithm as the browser's compressor (Chromium's kernel: knee curve, ratio, automatic make-up, detector, adaptive release) measured from the key; the 6 ms pre-delay gives the same look-ahead. Keyed from a copy of its own sound, the Compressor matches the browser's compressor on a steady tone (-19.55 against -19.55 dB). Multiband and OTT split the key with the same crossovers (Mid/Side: the key's mid and side). The Gate switches to `al-mxgate`, the Gate's own processor reading the level from a second input. The EQ's dynamic bands measure the key instead of their input.
+- **One loop check** for every key (`abxReach` now counts sidechains as well as Duckers): "Bass already plays into Kick, so this would make a loop."
+- **MX-2's compensation on every key**, live and in export, with the tap point: a key taken before the kick's 5 ms Limiter, after it, or after one device ducks at the same moment of the song.
+- **X4, Duck under the kick, tuned for tails**: a switch in each return's first device ("Duck under Kick"), the same in the Output menu of the return's mixer strip, and a choice in the cable menu whenever a cable is drawn to a track ("Duck under Kick, tuned for tails"; a cable to a track with a Compressor also offers "Compressor on Bass listens to Kick"). It puts a Ducker last on the return: attack 0.5 ms, no hold, back in one 16th at the song tempo (125 ms at 120 BPM, re-tuned when the tempo changes), listening to the lows of the kick (the track named Kick, or lane D's kick analysis when present, else you pick). Its cable is drawn like any Ducker's.
+- **Hooks** (`MX_HOOKS`): `scBadge(t,f)` for lane I's title strip (the source's name, colour and tap point), `scSet`, `scCan`, `scPick`, `kick`, `duckTails(ret,kick)` and `duckTailsOff` for lane D's masking cables and lane C; `links()` lists every key with its tap point.
+- Three named fields so the keyed stage can reach inside, nothing else changed in those functions: the Compressor's inner output (`mxG`), OTT's band compressors (`mxB`), a worklet effect's inner output in `wk` (`mxO`).
+
+### Tested (`tools/ui-tests/taskMX_3.py`, headless Chromium, 40 checks, all pass)
+- A steady 80 Hz bass and a 60 Hz kick (silent, only a key), every device keyed from the kick, against the same scene with the kick removed: **Compressor** 32.2 dB less bass within 10 ms of each kick, 0.00 dB between the kicks; **Multiband** (low band) 30.8 / 0.00 dB; **OTT** 37.4 / 0.00 dB; **Gate** open on the kicks (-18.5 dB), closed between (-80 dB); a **dynamic EQ band** dips -9.0 dB while the kick plays and is back within 0.25 dB after (live).
+- Tap points: before or after the kick's Limiter and after one device duck at the same moment (42 to 44 ms after 0.2 s, output delay taken out); after its fader, a kick turned all the way down drives nothing (0.00 dB), turned up it does (33.1 dB).
+- A Compressor without a source renders bit-identically (78f928cc0250 before and after a source was set and removed); live, the device is the browser's compressor again. Loops refused in plain words.
+- **Export equals playback** with a keyed Compressor: median 0.000 dB over 20 ms windows; the largest single window differs by 1.27 dB, on a kick's first milliseconds (live and export start the keyed stage's 32-sample steps at different points).
+- The tails switch, Output menu, cable menus, the row on all five devices, its menu and tap points, Dark and Light, no new timed work, no console errors.
+- **Fractals unchanged** (measured on this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; Fractals has no sidechain set, so nothing in it changes.
+- Other UI tests on this build: taskMX_1 (49), taskMX_2 (41), taskAB, taskIN_G (31), taskNI_5b (22) all pass. @GATE@
+
+### Only the user can test
+- Put a Compressor on the bass, click its Sidechain row, choose Kick: the bass dips on every kick. Try "Before its effects" on a kick with a long Limiter: it still lines up.
+- Select a reverb return and turn on "Duck under Kick": the reverb tail moves out of the way of each kick and is back by the next 16th. Change the tempo: it follows.
+
+### Left
+- The export does not render the EQ's dynamic band movement (it did not before MX-3 either): a keyed dynamic band is heard while playing only. For the lane that owns the EQ (render the dynamic bands offline), then the key comes along.
+- `al-mxgate` repeats the Gate's level detection with a second input: if lane L changes the Gate's processor, the keyed one should follow (or lane L gives `al-gate` a second input and MX drops `al-mxgate`).
+- Lane I: show `MX_HOOKS.scBadge(t,f)` in the title strip (`DV_HOOKS.scBadge`). Lane D: call `MX_HOOKS.duckTails` from the masking cables' own menu if they draw one. VST3 sidechain buses come with the native engine (task NB).
+- Next in lane K: **MX-4** (the Ducker's Spectral focus, Bass mono, `MX_HOOKS.bandFilter`), then **MX-5** (Instant Play: the user said yes on 28 November).
