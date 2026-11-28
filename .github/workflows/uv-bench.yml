@@ -41,8 +41,9 @@ jobs:
       - name: Electron (the desktop shell's version)
         run: |
           ( cd desktop && npm ci --no-audit --no-fund > ../out/npm-ci.txt 2>&1 ) || { tail -5 out/npm-ci.txt; exit 1; }
-          desktop/node_modules/.bin/electron tools/ui-tests/uv_bench_electron.js "$PWD/out/uv-bench.json" before=b/before/index.html after=b/after/index.html 2> out/stderr.txt | tee out/summary.txt
-          tail -20 out/stderr.txt
+          set +e
+          ELECTRON_ENABLE_LOGGING=1 desktop/node_modules/.bin/electron tools/ui-tests/uv_bench_electron.js "$PWD/out/uv-bench.json" before="$PWD/b/before/index.html" after="$PWD/b/after/index.html" > out/summary.txt 2> out/stderr.txt
+          echo "electron exit $?"; cat out/summary.txt; echo '--- stderr (last 40 lines)'; tail -40 out/stderr.txt
 
       - uses: actions/upload-artifact@v4
         if: always()

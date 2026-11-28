@@ -13,9 +13,13 @@ app.commandLine.appendSwitch('disable-frame-rate-limit'); app.commandLine.append
 app.commandLine.appendSwitch('force-device-scale-factor', '1.75'); app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 const argv = process.argv.slice(process.argv.findIndex(a => a.endsWith('uv_bench_electron.js')) + 1);
 const OUT = argv[0], BUILDS = argv.slice(1).map(a => { const i = a.indexOf('='); return [a.slice(0, i), path.resolve(a.slice(i + 1))]; });
+app.on('window-all-closed', () => { });   /* one window per build: closing one must not end the run */
+process.on('uncaughtException', e => { console.log('uncaught', e && e.stack || e); });
+console.log('uv bench: builds', JSON.stringify(BUILDS), 'electron', process.versions.electron);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function one(name, file) {
+  console.log('build', name, file);
   const w = new BrowserWindow({ width: 1600, height: 900, show: true, enableLargerThanScreen: true, useContentSize: true, webPreferences: { backgroundThrottling: false } });
   const wc = w.webContents, run = c => wc.executeJavaScript('AudioLab.run(' + JSON.stringify(c) + ')');
   const until = async (c, ms) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (await wc.executeJavaScript(c)) return true; } catch (e) { } await sleep(500); } return false; };
@@ -25,6 +29,7 @@ async function one(name, file) {
   await wc.executeJavaScript("for(const i of['splash','liteNote']){const s=document.getElementById(i);if(s)s.remove()};1");
   await run('openDemoFractals()'); await sleep(8000); await wc.executeJavaScript("{const s=document.getElementById('liteNote');if(s)s.remove()};1");
   await run('pmSetOn(false);UI.follow=false;if(play.on)stop();0'); await until("AudioLab.run('!MAP.busy&&!MAP.tm&&!MAP.et')", 90000); await sleep(1000);
+  console.log('  Fractals open');
   const res = { name, meta: JSON.parse(await run("JSON.stringify({v:VERSION,arr:[arr.width,arr.height],dpr:devicePixelRatio,tiles:typeof UVT==='object',gpu:typeof uvGpu==='function'?[uvGpu(),UVT.gpuName]:null,tracks:S.tracks.length})")), rows: [] };
   await run("if(!window.__ub){window.__ub={t:0,n:0};const o=frame0;frame0=function(n){const t=performance.now();try{return o(n)}finally{__ub.t+=performance.now()-t;__ub.n++}}};0");
   wc.debugger.attach('1.3'); await wc.debugger.sendCommand('Performance.enable');
