@@ -2667,6 +2667,7 @@ body.dvg #fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre{background:rgba(34,36,46
 #fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dspr{display:flex;align-items:center;gap:4px;flex-wrap:wrap;position:static!important;margin:0!important;padding:0!important}
 #fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dspr select{max-width:150px}
 @media (prefers-reduced-motion:reduce){#fxin:not(.pinb) .dev.dvf.dvdock>.devb>*{transition:none!important}}
+#dsStat{position:absolute;left:50%;top:0;height:100%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;font:400 11px/1 Inter,system-ui,sans-serif;color:#8b8b97;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:1}#dsStat[hidden]{display:none}#dsStat>i{width:6px;height:6px;border-radius:50%;background:#5a5d68;flex:none}#dsStat[data-s=ok]>i{background:#3ecf8e}#dsStat[data-s=chg]>i{background:#f5c84c}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -7105,7 +7106,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.307',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.308',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -7127,8 +7128,8 @@ function cpuInit(){if(!ctx||CPU.ref)return;CPU.ref={a:ctx.currentTime,p:performa
 function cpuFrame(work){const now=performance.now();CPU.ui=CPU.ui*.9+Math.min(1,work/16.7)*.1;cpuInit();
   if(ctx&&CPU.ref&&ctx.state==='running'){const da=ctx.currentTime-CPU.ref.a,dp=(now-CPU.ref.p)/1000;if(dp>.5){if(dp-da>Math.max(.03,(ctx.baseLatency||.01)*2)&&document.visibilityState==='visible'){CPU.drop++;CPU.dropT=now}CPU.ref={a:ctx.currentTime,p:now}}}else if(ctx)CPU.ref={a:ctx.currentTime,p:now};
   if(RB.on){rbTouch(0);const n=performance.now();if(!RB.w0){RB.w0=n;RB.a0=RB.acc}else if(n-RB.w0>400){RB.cpu=Math.min(1,(RB.acc-RB.a0)/((n-RB.w0)*Math.max(1,navigator.hardwareConcurrency||4)));RB.w0=n;RB.a0=RB.acc}}else RB.cpu=0;
-  const load=Math.min(1,Math.max(CPU.pk??CPU.aud??0,CPU.ui,RB.cpu,CPU.aud==null?Math.min(1,VOICES.size/1500):0));CPU.i=(CPU.i+1)%120;CPU.hist[CPU.i]=load;
-  if(now-CPU.last<100)return;CPU.last=now;const cv=$('#cpuC');if(!cv)return;{/* it sits inside the glass top bar: an unchanged graph is not redrawn (each redraw makes the bar's glass recalculate) */const pv=Math.round(load*50),bd=!!cpuBad();if(pv===CPU.dv&&bd===CPU.db&&now-(CPU.dt||0)<1000){const pop=$('#cpuPop');if(pop&&!pop.hidden&&now-(CPU.pf||0)>=500){CPU.pf=now;cpuPopFill()}return}CPU.dv=pv;CPU.db=bd;CPU.dt=now}const{g,w,h}=fit(cv),bad=cpuBad();g.fillStyle='#050608';g.fillRect(0,0,w,h);g.beginPath();for(let k=0;k<120;k++){const v=CPU.hist[(CPU.i+1+k)%120],x=k/119*w,y=h-1-v*(h-2);k?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fillStyle=bad?'rgba(255,77,77,.5)':'rgba(62,207,142,.35)';g.fill();
+  const load=Math.min(1,Math.max(CPU.pk??CPU.aud??0,CPU.ui,RB.cpu,CPU.aud==null?Math.min(1,VOICES.size/1500):0));CPU.i=(CPU.i+1)%120;CPU.hist[CPU.i]=load;dsT2CpuPush(load,now);
+  if(now-CPU.last<100)return;CPU.last=now;const cv=$('#cpuC');if(!cv)return;{/* it sits inside the glass top bar: an unchanged graph is not redrawn (each redraw makes the bar's glass recalculate) */const pv=Math.round(load*50),bd=!!cpuBad();if(pv===CPU.dv&&bd===CPU.db&&now-(CPU.dt||0)<1000&&!(DST2.n!==DST2.dn&&dsAC3())){const pop=$('#cpuPop');if(pop&&!pop.hidden&&now-(CPU.pf||0)>=500){CPU.pf=now;cpuPopFill()}return}CPU.dv=pv;CPU.db=bd;CPU.dt=now}const bad=cpuBad();if(dsAC3())dsT2Cpu(cv,bad);else{DST2.k='';const{g,w,h}=fit(cv);g.fillStyle='#050608';g.fillRect(0,0,w,h);g.beginPath();for(let k=0;k<120;k++){const v=CPU.hist[(CPU.i+1+k)%120],x=k/119*w,y=h-1-v*(h-2);k?g.lineTo(x,y):g.moveTo(x,y)}g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fillStyle=bad?'rgba(255,77,77,.5)':'rgba(62,207,142,.35)';g.fill()}
   lkOut($('#cpuV'),Math.round(load*100)+'%');$('#cpu').classList.toggle('bad',!!bad);const pop=$('#cpuPop');if(pop&&!pop.hidden&&now-(CPU.pf||0)>=500){CPU.pf=now;cpuPopFill()}}
 function cpuBad(){const now=performance.now(),load=CPU.hist[CPU.i];if(load>.85)return'The computer is close to its limit: '+Math.round(load*100)+'%.';if(now-CPU.dropT<3000)return'Audio dropped out (crackle). Try a bigger buffer in the Control Panel.';if(now-CPU.lateT<3000)return'Notes were scheduled late: the app could not keep up.';if(ctx&&UI.sr&&ctx.sampleRate!==UI.sr)return'Sample rate mismatch: asked for '+UI.sr/1000+' kHz but running at '+ctx.sampleRate/1000+' kHz.';return''}
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#appRst,#engRst');if(!b||e.button!==0)return;e.preventDefault();e.stopPropagation();if(b.id==='appRst')restartApp();else{wdLog('Restarted by you');restartAudio();cpuPopFill()}},true);/* on press: the panel refreshes itself while open, which could swallow a click */
@@ -27023,6 +27024,44 @@ function dvChipPlace(D,own,B){own=own||dvOwnOf(D);if(!own)return;const ty=dvType
   for(const ty of['pointermove','pointerup','wheel','input','change'])addEventListener(ty,q,{capture:true,passive:true})}}
 /* a fader in the dock, on a chip or in the drawer is short: dragged over 150 px for its whole range, as a knob is, not over its own few pixels */
 addEventListener('pointermove',()=>{if(typeof cd==='undefined'||!cd||cd._dv4||!cd.el||!cd.el.classList||!cd.el.classList.contains('vb'))return;cd._dv4=1;if(cd.el.closest('#fxin .dev.dvdock,#fxin .dev.dvpic'))cd.h=Math.max(cd.h,150)},true);
+/* task DS-T2 (lane A, design round 2, TM1, TC1, TS1): the transport meter with a dB scale and hold, the CPU as the
+   last 10 seconds as a line, the top bar's status line (audio format and save state). Only the AudioLab look; drawn
+   only on change. DS_HOOKS.status: a function returning extra text for the status line (X10's signal path, task SC-K). */
+const DS_HOOKS={status:null};
+const DST2={h:new Float32Array(40),i:0,n:0,dn:-1,acc:0,t:0,k:''};
+/* TM1: ticks above, two bars (lane E's INS.mbar with the RMS core), labels under; sx is the meter's own dB to x */
+function dsT2Mtr(g,w,h,sx){const tk=3,lb=h>=20?7:0,y0=tk+1,bh=Math.max(2,(h-y0-lb-1)/2),y1=y0+bh+1;
+  INS.mbar(g,0,y0,w,bh,sx(MT2.l)/w,INM.rfr(anL,v=>sx(v)/w),meters.gr,true);INS.mbar(g,0,y1,w,bh,sx(MT2.r)/w,INM.rfr(anR,v=>sx(v)/w),meters.gr,true);
+  g.fillStyle='#fff';g.fillRect(sx(MT2.hl)-1,y0,2,bh);g.fillRect(sx(MT2.hr)-1,y1,2,bh);
+  for(const d of[-48,-36,-24,-12,-6,-3,0]){const x=Math.round(sx(d));g.fillStyle=d===0?'rgba(255,77,77,.9)':d%12===0?'rgba(255,255,255,.55)':'rgba(255,255,255,.3)';g.fillRect(x,0,1,d%12===0?tk:tk-1)}
+  g.fillStyle='rgba(255,77,77,.55)';g.fillRect(Math.round(sx(0)),y0,1,bh*2+1);
+  if(lb){g.font='500 7px Inter,system-ui,sans-serif';g.textBaseline='alphabetic';g.textAlign='center';g.fillStyle='rgba(236,236,241,.5)';
+    for(const d of[-48,-24,-12,0])g.fillText(d?String(d).replace('-','−'):'0',Math.min(w-3,Math.round(sx(d))+.5),h-1);g.textAlign='left'}}
+function dsT2Unit(){return dsAC3()?' dBFS':' dB'}
+/* TC1: the highest load of every 250 ms, 40 of them = the last 10 seconds */
+function dsT2CpuPush(load,now){DST2.acc=Math.max(DST2.acc,load);if(now-DST2.t<250)return;DST2.t=now;DST2.i=(DST2.i+1)%40;DST2.h[DST2.i]=DST2.acc;DST2.acc=0;DST2.n++}
+function dsT2Cpu(cv,bad){const r=fitRect(cv),H=r.height/ZOOM,ys=[];for(let k=0;k<40;k++){const v=Math.min(1,Math.max(0,DST2.h[(DST2.i+1+k)%40]));ys.push(Math.round((H-1.5-v*(H-3))*2))}
+  const key=r.width+'|'+r.height+'|'+(bad?1:0)+'|'+ys.join(','),now=performance.now();if(key===DST2.k&&cv.width>1){DST2.dn=DST2.n;return}
+  if(!play.on&&!bad&&DST2.k&&now-(DST2.dt||0)<1000)return;/* stopped: the line catches up once a second at most, as the old graph */DST2.dn=DST2.n;DST2.k=key;DST2.dt=now;
+  const{g,w,h}=fit(cv);g.fillStyle='#050608';g.fillRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.12)';g.fillRect(0,h-1,w,1);
+  g.beginPath();for(let k=0;k<40;k++){const x=k/39*(w-1)+.5,y=ys[k]/2;k?g.lineTo(x,y):g.moveTo(x,y)}g.strokeStyle=bad?'#ff4d4d':'rgba(62,207,142,.9)';g.lineWidth=1.2;g.lineJoin='round';g.stroke()}
+/* TS1: the status line */
+function dsT2Ago(t){const m=Math.floor((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':Math.floor(m/60)+' h ago'}
+function dsT2Stat(){const tb=$('#ptabs');if(!tb)return;let el=$('#dsStat');
+  if(!el){el=document.createElement('div');el.id='dsStat';el.setAttribute('role','status');el.innerHTML='<i></i><span></span>';el.title='Audio format of the engine and whether this project is saved to its file. Save with ⌘S.';tb.appendChild(el)}
+  if(!dsAC3()||!PJ){if(!el.hidden){el.hidden=true;try{TMRC=null}catch(e){}}return}
+  const p=PJ.list.find(q=>q.id===PJ.cur),fmt=ctx?(ctx.sampleRate/1000)+' kHz · 32-bit float':'audio engine not started',
+    st=!p?'':p.dirty?'unsaved changes':p.file&&p.savedAt?'saved '+dsT2Ago(p.savedAt):'not saved to a file yet',
+    sc=!p?'':p.dirty?'chg':p.file&&p.savedAt?'ok':'none';
+  let x='';try{if(typeof DS_HOOKS.status==='function')x=DS_HOOKS.status()||''}catch(e){}
+  const txt=[fmt,x,st].filter(Boolean).join(' · ');
+  const h0=el.hidden;let ch=false;if(el.dataset.t!==txt){el.dataset.t=txt;el.lastChild.textContent=txt;ch=true}if(el.dataset.s!==sc){el.dataset.s=sc}
+  el.hidden=false;const a=el.getBoundingClientRect(),pl=$('#ptl'),cb=tb.querySelector(':scope>.cb');
+  const lt=pl&&pl.lastElementChild?pl.lastElementChild.getBoundingClientRect().right:0,ad=$('#pAdd'),lr=ad?ad.getBoundingClientRect().right:lt,rt=cb?cb.getBoundingClientRect().left:Infinity;
+  if(Math.max(lt,lr)+12>a.left||rt-12<a.right)el.hidden=true;
+  if(ch||h0!==el.hidden){try{TMRC=null;TMFX=-1e9}catch(e){}}}/* the playhead time in the bar hides behind it like behind a tab (tmRects) */
+setInterval(()=>{try{if(document.visibilityState==='visible')dsT2Stat()}catch(e){}},5000);
+setTimeout(()=>{try{dsT2Stat();const m=$('#mtr');if(m&&!m.title)m.title='Master peak meter, left and right, on a dBFS scale (−48 to 0). The white marks hold the peaks; the thin core is the RMS level.';const c=$('#cpuC');if(c&&!c.title)c.title='CPU load over the last 10 seconds. Click for the performance panel.'}catch(e){}},1500);
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -27054,7 +27093,7 @@ function tabMenu(id,x,y){const p=PJ.list.find(q=>q.id===id);if(!p)return;const g
 let ECO=null;
 function ecoCheck(){if(CHILD)return;const n=PCOUNT();if(n>=3&&!ECO){ECO={prev:!!UI.lite};if(!UI.lite&&(WEAKHW||WEAKFPS)&&UI.liteMan!==false){UI.lite=true;applyLite();liteNotice('three projects are open on a slower computer')}}else if(n<3&&ECO){const pv=ECO.prev;ECO=null;if(!pv&&UI.lite){UI.lite=false;applyLite()}}
   for(const r of PW.values())pwSend(r,{type:'lite',on:!!UI.lite})}
-function renderTabs(){setTimeout(fileUI,0);setTimeout(ecoCheck,0);$('#ptl').innerHTML=PJ.list.map(p=>`<button class="ptab${p.id===PJ.cur?' on':''}" role="tab" aria-selected="${p.id===PJ.cur}" data-p="${p.id}" title="Double-click to rename">${p.dirty?'<em class="ud" title="Unsaved changes">●</em>':''}<span>${esc(p.name)}</span><i data-x="${p.id}" title="Close project" aria-label="Close ${esc(p.name)}">✕</i></button>`).join('')}
+function renderTabs(){setTimeout(fileUI,0);setTimeout(()=>{try{dsT2Stat()}catch(e){}},0);setTimeout(ecoCheck,0);$('#ptl').innerHTML=PJ.list.map(p=>`<button class="ptab${p.id===PJ.cur?' on':''}" role="tab" aria-selected="${p.id===PJ.cur}" data-p="${p.id}" title="Double-click to rename">${p.dirty?'<em class="ud" title="Unsaved changes">●</em>':''}<span>${esc(p.name)}</span><i data-x="${p.id}" title="Close project" aria-label="Close ${esc(p.name)}">✕</i></button>`).join('')}
 function switchProject(id){if(id===PJ.cur)return;stop();const cur=PJ.list.find(p=>p.id===PJ.cur);if(cur){cur.S=S;cur.undo=UNDO;cur.redo=REDO;cur.view={...V}}
   const nx=PJ.list.find(p=>p.id===id);PJ.cur=id;S=nx.S;UNDO=nx.undo||[];REDO=nx.redo||[];if(nx.view)Object.assign(V,nx.view);else initFit=false;selT=S.tracks[0]?S.tracks[0].id:null;selC=null;pos=0;closePR();syncTransportUI();{const d0=DIRTY_ON;DIRTY_ON=false;changed(true);DIRTY_ON=d0}CLC.clear();renderTabs();saveProjects()}
 $('#ptl').onclick=e=>{const x=e.target.closest('[data-x]');if(x){e.stopPropagation();askCloseProject(x.dataset.x);return}
@@ -27287,13 +27326,14 @@ function meters(dt){
   const now=performance.now();if(dl>=MT2.hl||dr>=MT2.hr||now-MT2.ht>mtrHold()){MT2.hl=Math.max(dl,now-MT2.ht>mtrHold()?-90:MT2.hl);MT2.hr=Math.max(dr,now-MT2.ht>mtrHold()?-90:MT2.hr);MT2.ht=now}
   const pk=Math.max(dl,dr);if(pk>MT2.max)MT2.max=pk;if(pk>0){MT2.over=Math.max(MT2.over,pk);$('#peakBox').classList.add('clip')}if(pk>-6&&typeof NI_clipSeen==='function')NI_clipSeen('master',pk);
   const sx=d=>clamp((d+60)/66,0,1)*w,bh=(h-5)/2;
-  if(!(w>2))return;const mk=mc.width+'|'+mc.height+'|'+Math.round(sx(MT2.l)*4)+'|'+Math.round(sx(MT2.r)*4)+'|'+Math.round(sx(MT2.hl)*4)+'|'+Math.round(sx(MT2.hr)*4)+'|'+Math.round(INM.rfr(anL,v=>sx(v))*4)+'|'+Math.round(INM.rfr(anR,v=>sx(v))*4),same=mk===meters.k;meters.k=mk;/* v0.228: nothing new to show, nothing drawn (it drew 120 times a second, also in silence) */
+  if(!(w>2))return;const mk=mc.width+'|'+mc.height+'|'+Math.round(sx(MT2.l)*4)+'|'+Math.round(sx(MT2.r)*4)+'|'+Math.round(sx(MT2.hl)*4)+'|'+Math.round(sx(MT2.hr)*4)+'|'+Math.round(INM.rfr(anL,v=>sx(v))*4)+'|'+Math.round(INM.rfr(anR,v=>sx(v))*4)+'|'+dsAC3(),same=mk===meters.k;meters.k=mk;/* v0.228: nothing new to show, nothing drawn (it drew 120 times a second, also in silence) */
   if(!same){g.fillStyle='#050608';g.fillRect(0,0,w,h);
   if(!meters.gr||meters.gw!==w){const gr=g.createLinearGradient(0,0,w,0);for(const[d,c] of lvStops())gr.addColorStop(clamp(sx(d)/w,0,1),c);meters.gr=gr;meters.gw=w}
   const bar=(d,y,an)=>INS.mbar(g,0,y,w,bh,sx(d)/w,INM.rfr(an,v=>sx(v)/w),meters.gr,true);/* IN-M: M2, the RMS core */
+  if(dsAC3())dsT2Mtr(g,w,h,sx);else{/* task DS-T2: TM1 above */
   bar(MT2.l,2,anL);bar(MT2.r,3+bh,anR);g.fillStyle='#fff';g.fillRect(sx(MT2.hl)-1,2,2,bh);g.fillRect(sx(MT2.hr)-1,3+bh,2,bh);
-  g.fillStyle='rgba(255,255,255,.35)';for(const d of[-48,-36,-24,-12,-6,-3,0])g.fillRect(sx(d),0,1,h);g.fillStyle='rgba(255,77,77,.8)';g.fillRect(sx(0),0,1,h)}
-  {const s1=(pk<=-89?'-∞':(pk>0?'+':'')+pk.toFixed(1))+' dB';if(meters.a!==s1){meters.a=s1;lkOut($('#pkNow'),s1)}}
+  g.fillStyle='rgba(255,255,255,.35)';for(const d of[-48,-36,-24,-12,-6,-3,0])g.fillRect(sx(d),0,1,h);g.fillStyle='rgba(255,77,77,.8)';g.fillRect(sx(0),0,1,h)}}
+  {const s1=(pk<=-89?'-∞':(pk>0?'+':'')+pk.toFixed(1))+dsT2Unit();if(meters.a!==s1){meters.a=s1;lkOut($('#pkNow'),s1)}}
   if(!mPop.hidden)drawMasterPop();
   {const s2=MT2.over>0?`CLIP +${MT2.over.toFixed(1)} dB`:'max '+(MT2.max<=-89?'-∞':MT2.max.toFixed(1));if(meters.b!==s2){meters.b=s2;$('#pkMax').textContent=s2}}
 }
