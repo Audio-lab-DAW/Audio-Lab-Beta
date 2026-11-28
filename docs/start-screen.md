@@ -258,3 +258,6 @@ Line format: `Start screen round 3: dipole P1 count 2 | phase PH1 | fourier FS1 
 
 ### Round 3 picks
 (waiting for the user's line)
+
+## Released: v0.303 (WS-1 with WS-1b)
+start screen complete. Next for others: lane B may move the two rows (`WS_HOOKS.settingsRows`); lane G may let the splash read `audiolab-ws-draw` and draw F1 and R4 to R8 (`WSR2.FN`).
