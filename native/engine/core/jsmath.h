@@ -12,6 +12,7 @@
 #ifndef AL_MATH_SYSTEM
 #include "shared/math/cos.h"  // native/third_party/llvm-libc (the include path is set by CMake)
 #include "shared/math/exp.h"
+#include "shared/math/log.h"
 #include "shared/math/log10.h"
 #include "shared/math/sin.h"
 #endif
@@ -76,6 +77,15 @@ inline double cos(double x) { return LIBC_NAMESPACE::shared::cos(x); }
 inline double exp(double x) { return LIBC_NAMESPACE::shared::exp(x); }
 inline double log10(double x) { return LIBC_NAMESPACE::shared::log10(x); }
 #endif
+// Math.log: LLVM's libc too (task NB-N3j: V8's ieee754::log; glibc's log differs from the browser's on 10 of 300,000
+// arguments of the Kick's kind, Chromium's fdlibm on 3,498). Math.tanh: V8 calls the system's own (std::tanh): 0 of
+// 300,000 differ on Linux, Chromium's fdlibm::tanh differs on 101 (so the system's, Apple's on the Mac).
+#ifdef AL_MATH_SYSTEM
+inline double log(double x) { return std::log(x); }
+#else
+inline double log(double x) { return LIBC_NAMESPACE::shared::log(x); }
+#endif
+inline double tanh(double x) { return std::tanh(x); }
 inline double pow(double x, double y) {
     if (std::isnan(y)) return NAN;
     if (std::isinf(y) && (x == 1 || x == -1)) return NAN;

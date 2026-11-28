@@ -18,6 +18,7 @@
 #include "core/webnodes.h"
 #include "core/bufsrc.h"
 #include "core/nodes_auto.h"
+#include "core/inst_kick.h"
 
 using namespace al;
 
@@ -65,6 +66,15 @@ static std::unique_ptr<cr::BufferSource> mkSrc(const JValue& s, double sr, unsig
 }
 // task NB-N3j: the timeline, buffer source, automated gain and biquad cases
 static bool runAuto(const JValue& c, double sr, size_t Q, size_t N, std::vector<float>& out) {
+    if (c["kick"].t == JValue::Object) {   // the Kick designer's hit (kickRender), task NB-N3j
+        const JValue& p = c["kick"]; kick::KickParams I;
+        I.tune = p["tune"].num(33); I.start = p["start"].num(2400); I.sweep = p["sweep"].num(.045); I.bend = p["bend"].num(82);
+        I.len = p["len"].num(.17); I.tail = p["tail"].num(34); I.click = p["click"].num(55); I.drive = p["drive"].num(12);
+        I.ctype = p["ctype"].t == JValue::String ? p["ctype"].s : std::string();
+        out = kick::render(I, sr, c["tr"].num(0));
+        out.resize(N, 0.f);
+        return true;
+    }
     out.assign(((N + Q - 1) / Q) * Q, 0.f);
     std::vector<float> q(Q), o(Q);
     float* qp[1] = {q.data()}; float* op[1] = {o.data()};

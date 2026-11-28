@@ -120,7 +120,12 @@ jobs:
           mkdir -p out/nodes-asan/native && cp -r out/nodes/web out/nodes/cases.json out/nodes-asan/
           build-asan/alnodes out/nodes-asan/cases.json out/nodes-asan/native > /dev/null
           python3 tools/native-lab/compare_nodes.py out/nodes-asan | tail -1 | tee -a out/nodes-compare.txt
-          test "$(grep -c '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt)" = 2
+          # task NB-N3j: the Kick designer's hit (kickRender, from the app itself) and the maths functions it calls
+          python3 tools/native-lab/math_probe.py out/math && build/almathprobe out/math/math_vals.bin | tee out/math-probe.json
+          python3 tools/native-lab/make_ref_kick.py out/kick | tail -1
+          build/alnodes out/kick/cases.json out/kick/native > /dev/null
+          python3 tools/native-lab/compare_nodes.py out/kick | tail -1 | tee -a out/nodes-compare.txt
+          test "$(grep -c '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt)" = 3
       - name: 'Every ported device against the web engine, bit for bit (Release; sanitizers at 128 and 7 frames per call)'
         run: |
           run() { # build blocksize dir
@@ -244,8 +249,13 @@ jobs:
           build/alnodes out/nodes/cases.json out/nodes/native > /dev/null
           python3 tools/native-lab/compare_nodes.py out/nodes > out/nodes-compare-all.txt || true
           { grep -v ' bit for bit$' out/nodes-compare-all.txt | head -20; tail -1 out/nodes-compare-all.txt; } | tee out/nodes-compare.txt
+          python3 tools/native-lab/math_probe.py out/math && build/almathprobe out/math/math_vals.bin | tee out/math-probe.json   # task NB-N3j: Math.log and Math.tanh too
+          python3 tools/native-lab/make_ref_kick.py out/kick | tail -1   # task NB-N3j: the Kick's hit on the Mac (Apple's pow and tanh)
+          build/alnodes out/kick/cases.json out/kick/native > /dev/null
+          python3 tools/native-lab/compare_nodes.py out/kick | tail -1 | tee out/kick-compare.txt
           grep -q '^\([0-9]*\) of \1 cases bit for bit' out/core-compare.txt   # every case (task NB-N3e added the Pro EQ: 289; N3g the Soft Clipper and the Drive)
           grep -q '^\([0-9]*\) of \1 node cases bit for bit' out/nodes-compare.txt
+          grep -q '^\([0-9]*\) of \1 node cases bit for bit' out/kick-compare.txt
           build/alrender list | grep -q '"clip"'   # the shapers were built (cargo was found)
           grep -qx 'ALL IDENTICAL' out/bus.txt
           grep -qx 'ALL IDENTICAL' out/mix-macref.txt

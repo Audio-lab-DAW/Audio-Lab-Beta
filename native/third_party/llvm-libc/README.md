@@ -21,3 +21,8 @@ the same functions so that its devices give the browser's bits on every system.
   `memcpy` they use). 13 files added from the same commit, paths unchanged, found by compiling for `aarch64` until
   nothing was missing. The ARM build uses fused multiply-add inside these functions; they are correctly rounded, so the
   results are the same bits (the Mac job's maths probe is the check).
+
+- `log` (task NB-N3j, 28 November 2026): `shared/math/log.h` and `src/__support/math/log.h` added from the same commit
+  (everything else they include was already here). V8's `Math.log` is LLVM's (src/base/ieee754.cc); glibc's `log` differs
+  from the browser's on 13 of 400,000 arguments, Chromium's fdlibm on about 1 %. The maths probe now covers `log` and
+  `tanh` (V8 calls the system's `tanh`, so the engine does too).
