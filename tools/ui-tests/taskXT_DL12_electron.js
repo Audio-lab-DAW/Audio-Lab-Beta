@@ -4,6 +4,7 @@
    Checks that xtSandboxRun works there, that the sandbox frame runs in its own process (so a script that eats memory cannot take the
    window down), that the network, eval, the desktop bridge and the page's globals are out of reach (a local server counts requests),
    that an endless loop is stopped while the window keeps drawing, and that a memory bomb dies alone. */
+// for: task XT-DL12 (lane H)
 const { _electron } = require('playwright');
 const path = require('path'), os = require('os'), fs = require('fs'), http = require('http');
 const DIR = path.resolve(process.argv.slice(2).find((a) => !a.startsWith('--')) || path.join(__dirname, '..', '..', 'desktop'));

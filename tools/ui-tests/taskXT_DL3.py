@@ -3,6 +3,7 @@ Fails when a released settings id disappears, when a setting has no stable id (a
 docs/settings-ids.md), when the list stops changing settings through Settings' own controls, when a value out of range or a locked
 value is accepted, or when the Workshop costs anything before it is opened.
   python3 tools/ui-tests/taskXT_DL3.py [index.html] [out dir]"""
+# for: task XT-DL3 (lane H)
 import sys, os, json, re
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright

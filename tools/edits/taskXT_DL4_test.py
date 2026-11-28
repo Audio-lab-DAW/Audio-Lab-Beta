@@ -3,6 +3,7 @@ Fails when safe mode deletes or rewrites a customisation, when it does not start
 (the menu, Shift at start, the offer after a start that did not finish), when "What is changed" misses a kind or its ✕ does not put one
 back, when Reset my customisations keeps no backup or cannot be undone, or when any of it costs something with nothing customised.
   python3 tools/ui-tests/taskXT_DL4.py [index.html] [out dir]"""
+# for: task XT-DL4 (lane H)
 import sys, os, json, re, time
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright

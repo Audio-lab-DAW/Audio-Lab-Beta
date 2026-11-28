@@ -3,6 +3,7 @@ Fails when a command id listed in docs/commands.md disappears (a retired id must
 when the registry has a command not listed there (a new SCA row needs a namespaced id and a row in docs/commands.md), or when
 runCommand, the aliases or the keyboard shortcuts stop working. Nothing visible changes: the Settings shortcut list is the same.
   python3 tools/ui-tests/taskXT_DL2.py [index.html] [out dir]"""
+# for: task XT-DL2 (lane H)
 import sys, os, json, re
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright

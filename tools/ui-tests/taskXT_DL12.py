@@ -6,6 +6,7 @@ sound keeps playing), "wait or stop", a memory bomb (its process dies, the page 
 for it no frame, worker or listener exists. Run twice: as the browser version, and cross-origin isolated as the desktop app serves it.
 Chromium is started with site isolation on, as Chrome and Electron have it (Playwright turns it off by default).
   python3 tools/ui-tests/taskXT_DL12.py [index.html] [out dir] [--quick]   (--quick leaves out the memory bomb)"""
+# for: task XT-DL12 (lane H)
 import sys, os, json, threading, http.server, time
 from playwright.sync_api import sync_playwright
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]

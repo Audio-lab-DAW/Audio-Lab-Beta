@@ -4,6 +4,7 @@ docs/ids.md disappears from CONTROLS (a retired id must stay in CONTROL_ALIAS an
 Scenario: the Fractals song, the track header layout "Everything", an automation lane open, every extra transport module
 added, the mixer open with its sends, monitor, A/B and cable legend; then the same after the areas are built again.
   python3 tools/ui-tests/taskXT_DL1.py [index.html] [out dir]"""
+# for: task XT-DL1 (lane H)
 import sys, os, json, re
 import sys as _ws_sys, os as _ws_os; _ws_sys.path.insert(0, _ws_os.path.join(_ws_os.path.dirname(_ws_os.path.abspath(__file__)), '../test-songs')); from alsong import alsong  # task WS-F: the test songs
 from playwright.sync_api import sync_playwright
