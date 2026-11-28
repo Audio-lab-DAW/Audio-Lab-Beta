@@ -1,0 +1,4 @@
+/* task SG2-4 (lane R): Audio to MIDI's split shows the lanes; done, each lane sits in its listen row */
+.sgA2h{margin:4px 0}.sgA2h .sgSub{display:none}
+.a2sr.sgA2{grid-template-columns:auto auto minmax(54px,auto) minmax(0,1fr) auto auto auto}
+.sgA2l{position:relative;height:26px;border-radius:3px;overflow:hidden;background:#05070b;min-width:60px}.sgA2l canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
