@@ -6659,3 +6659,111 @@ Tenth step of the settings rebuild (`docs/settings-round-1.md`, S10, depends on 
 
 ### What is left
 S11 (audio devices in the picked design B2: role cards Listen through and Record from, the Listening and Recording setups, the switch on arming with a quiet notice and a way back) next, then S12 to S19. S11 to S13 carry the 27 November answers (Mac and Windows equally, the device's own volume synced through the desktop helper, instant switching for known devices with a click-free ramp, the 1.5 s fade only for new or returning devices). The "Volume on the DAC" text on the DAC page still says the link needs the desktop app on a Mac; S13 replaces it with the synced volume for both systems. Performance and the Glass block stay with the glass chain (G4).
+
+## 28 November 2026, v0.299: task NI-5c, the clash measure that knows the beat (lane D, AE3 pick X16, improves I12)
+
+The AE3 picks for lane D are now in the plan: NI-5c is X16, NI-7b is X23, NI-31 is X18, and NI-20b is X27, which waits for lane C's F29 scenes. X16 is starred and improves the masking cables that already exist, so it ran first. Edit script `tools/feature-lab/ni/ni_5c.py` with `ni_5c_block.js` (anchored; needs NI-8), test `tools/ui-tests/taskNI_5c.py` (22 checks, all pass). It was built and tested on v0.293 while the release gate's freeze held `index.html`.
+
+### Built
+- **Timing for every clash cable.** NI-5a finds clash candidates from the per-beat average, and in a rolling bass (KBBB) that average flags every kick and bass. Kick and bass share 40 to 120 Hz but take turns inside each beat. Now each candidate is checked in time:
+  - both tracks are rendered offline on their own over the 8 beats around the playhead (NI-7's one-track render, after fader and pan, 22.05 kHz)
+  - each render is split into NI-5a's 1/3-octave bands (two cascaded band-passes) and the level followed every 11.6 ms
+  - a moment counts when both are loud in the clash's band at once: each within 10 dB of its own top in those bars, and within 12 dB of each other
+  - the share = those moments / the moments either one is loud
+- **Under 25%: "take turns".** The cable is drawn thin and dashed and labelled "Kick and Bass take turns, 48 to 76 Hz". It is not counted in the legend, and it sorts after the real clashes.
+- **A real clash:** the cable's thickness is scaled by the share.
+- **Tooltips:** each one gives the share and says the number is an estimate.
+- **The clash card has a pair view:** both tracks in the band over the 8 beats, with beat and bar lines (LOOK grid tokens), the moments they are loud together shaded magenta, and "Loud together 9% of the time: they take turns".
+  - A take-turns card offers no fix ("Nothing to fix here: they already take turns"). In a low band it offers the kick and bass lab instead.
+  - A real clash keeps NI-5b's two fixes.
+- **Kept and cheap:**
+  - The timing is kept per track and window under NI-3's piece key, so an edit measures again only the edited track.
+  - It is measured in the background by NI-3's rules: not during an export, and while playing only with a quiet CPU.
+  - Nothing is worked out while the playhead stands still.
+  - Nothing is added to the audio path.
+  - `NI_HOOKS.clashTiming` (`gate(c, beat)`, `get(track, window)`).
+
+### Checked
+- **Test song** (145 BPM, 16 beats):
+  - **Kick**: a 55 Hz hit on every beat, 110 ms with a 70 ms decay.
+  - **Bass**: 55 Hz notes on the three 16ths after each kick, 85 ms each.
+  - **Pad** (400 Hz) and **Lead** (410 Hz, 2 dB quieter), all through.
+- **Results**:
+  - The per-beat average flags both pairs. With the timing, Kick and Bass are loud together **9%** of the time ("take turns"), Pad and Lead **100%**. The real clash comes first, and the legend counts 1.
+  - The take-turns cable is dashed and 1.2 px wide; the Pad and Lead cable is 5.4 px.
+  - Both cards show the pair view and the share. The take-turns card offers the kick and bass lab, not a fix; the Pad and Lead card keeps the two fixes.
+  - A second look renders nothing. An edit of Lead's fader renders Lead's window once, and nothing else.
+  - The song is unchanged and a render of Bass is bit-identical.
+- **Also:** `taskNI_5a.py` 34 of 34, `taskNI_5b.py` 22 of 22. Lint clean. Tooltips on the new parts; no em dashes; no audio nodes; no console errors.
+- **Fractals levels unchanged** (`tools/engine-tests/export_same.py` on this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) with the master at -10 dB; -9.75669 (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB. One of two runs read the Bass at 0 dB as -26.74 dB, the known run-to-run noise of that line, noted in NI-3.
+- **Re-checked (28 Nov, 09:20 to 09:50 UTC):** re-checked on v0.294 while the gate's freeze of 09:11:57 UTC held `index.html`: the edit script re-applied cleanly; `taskNI_5c.py` 22 of 22, `taskNI_5a.py` 34 of 34, `taskNI_5b.py` 22 of 22, `taskXT_DL2.py` 24 of 24 (`ni.monoLoss` now listed); lint clean; the start-up smoke test in the real desktop app (`smoke_electron.js`, 20 s per scenario, run directly because `gate.py` cannot find the v0.250 release commit in the rewritten history): **14 of 14 scenarios clean**, frame times p50 16.7 / p95 50 ms; Fractals levels unchanged on this build (measured again: Kick -19.05560 dB fb577dd5202b, Bass -35.48685 dB 392ec52590c7 at -10 dB; -9.75669 dB 0496bb147f6c and -25.48699 dB 09e0415bec5e at 0 dB, the references of the newest RG entry).
+- **Screenshots looked at**: the mixer with both cables (normal and Light level), the take-turns card and the clash card.
+
+### Limits and what only the user can judge
+- The window is 8 beats; a pair that clashes only in another part of the song shows its numbers where the playhead is.
+- The 25% line and the 10 dB "loud" line are first guesses.
+- **What to try**: turn Clashes on in the mixer's cable lane on a rolling-bass drop. The kick and bass cable should now say "take turns" if the bass leaves room for the kick. Click it to see the two curves. Say whether 25% is the right line.
+
+### Left
+Next: NI-9, the harmonic ruler (I5); then NI-31 (X18 high-pass hints), NI-7b (X23 gain staging check).
+
+## 28 November 2026, v0.299: task NI-9, the harmonic ruler (lane D, idea I5)
+
+Idea I5 is complete. Edit script `tools/feature-lab/ni/ni_9.py` with `ni_9_block.js` (anchored; needs NI-5c), test `tools/ui-tests/taskNI_9.py` (27 checks, all pass). Built on v0.297 while the release gate's freeze of 12:35 UTC held `index.html`, released together with NI-5c and the Fractals export fix.
+
+### Built
+- **A piano strip along the bottom of every live spectrum view**: the Spectrum device, the spectrum overlay and the Visualizer's spectrum (everything lane E's drawer `INS.spec` draws at its full or middle size; the small mixer-size views get none, there is no room).
+  - octave cells with C1 to C9 named where there is room, black keys where a semitone is at least 1.6 px wide, the song key's notes lit as a thin yellow line along the bottom
+  - **the five strongest peaks** of the live trace marked on the strip and named above it with note and cents: "A2 0 c", "G♯7 -12 c"; names that would touch go on a second row
+  - **amber**: the peak's note is outside the song key (lane C's project key when it exists, otherwise the piano roll's scale and root, as the kick and bass lab reads it); no amber when no scale is set
+  - **red, with "rings"**: the pitch keeps sounding for more than a beat after the rest of the sound faded by 6 dB more than it did, and it fades itself (a held note that does not fade is a note, not a ringing resonance); the rest of the sound must have been within 12 dB of the pitch when it started, so the click of a tone starting is not a hit
+- **How the peaks are found**: from the bins the view has already read this frame (lane E's shared FFT read, nothing new on the audio side): local maxima standing 8 dB over the 1/6 octave around them, within 54 dB of the loudest, one per 70 cents, refined by a parabola through the top bin and its neighbours (with the analyser's Blackman window that is within about 0.01 bin of a steady tone: 110 Hz reads 110.02 Hz at FFT 8192).
+- **Snappy**: the peaks are found at most 8 times a second per view (3 at the Light level), the drawing is a few rectangles and up to five names; nothing is found or drawn when the view is not live (stopped Visualizer, closed overlay) or the ruler is off.
+- **Lane E's code is not changed**: `INS.spec` is wrapped once from lane D's block after it is defined (its own function kept as `INS.spec.niBase`); the ruler draws into the view's canvas after lane E's drawer.
+- **The switch** (on by default): the main menu (right-click the logo: Harmonic ruler: on / off), the command `ni.harmonicRuler`, a settings row `ni.harmonicRuler` in `NI_SETTINGS` (S4 shape, key `UI.niHr`, page Display, block Analysis) for lane B to show.
+- **Hooks**: `NI_HOOKS.harmonicRuler(g, box, peaks, o)` draws a ruler into any canvas (box: x, y, w, h of the strip, lo and hi of the log axis); `NI_HOOKS.harmonicPeaks(an, lo, hi, st)` finds the named peaks of an analyser and keeps their history in `st`. For lane A or lane I if a rebuilt device display wants the ruler, and for NI-11 Ask the mix.
+
+### Changed from the plan
+- The plan said the red "rings longer than a beat" would come from NI-3's cache. It is measured on the live trace instead: the cache is per track and per beat, while a spectrum view shows whatever passes through its device or the master, and the live trace needs no background analysis. The cache stays for NI-11.
+
+### Checked
+- `taskNI_9.py` 27 of 27: A2 named "A2 0 c" and measured within 0.05 Hz; A4, D♯6 and G♯7 -12 c named right; four peaks and no false ones; in A minor D♯6 and G♯7 amber, A2 and A4 not, and no amber without a scale; steady tones never red; a 200 Hz tone ringing after a noise burst red as "G3 +35 c rings", and not before a beat has passed; off draws and finds nothing while the view plays, on again draws; at most 8 finds a second (measured 3 to 8), 3 at the Light level; the Visualizer (FFT 4096, smoothed) names A2 within 2 c; the hook draws into a plain canvas; a render bit-identical with the ruler on and off; no em dashes; no console errors.
+- `taskIN_S.py` (lane E's spectrum): 33 of 34 with the ruler; the one failure ("averaging by time … one time constant", a timing check) fails the same way on v0.297 without lane D's changes (32 of 34 there, the Visualizer's hold check also timing).
+- `taskNI_5c.py` 22 of 22, `taskNI_sideb0.py` 6 of 6, `taskXT_DL1.py` 21 of 21 (run alone; with three browsers at once its "one pass is cheap" timing check went over), `taskXT_DL2.py` with `ni.harmonicRuler` listed in `docs/commands.md`; lint clean.
+- Fractals levels unchanged (measured, `export_same.py` on this build): Kick -19.05560 dB (fb577dd5202b), Bass -35.48685 dB (392ec52590c7) at -10 dB; -9.75669 dB (0496bb147f6c) and -25.48699 dB (09e0415bec5e) at 0 dB, the references of the newest RG entries; the voice engine lines unchanged.
+- Screenshots looked at: the Spectrum device with the four tones (A2 and A4 white, D♯6 and G♯7 amber), with the ringing tone (red "G3 +35 c rings"), with the ruler off, at the Light level; the Visualizer's spectrum docked at the bottom.
+
+### Limits and what only the user can judge
+- Try it: put a Spectrum device on the bass or on the master and play; the strongest notes are named under the curve. On a kick, a red "rings" name is a resonance worth a narrow cut; an amber name on a bass is a note outside the key.
+- The thresholds are first guesses: 8 dB to count as a peak, 6 dB for "the rest faded more", one beat. Busy full mixes give many peaks; only the five loudest are named.
+- Low notes need a fine FFT: at the Spectrum device's 2048 setting a bin is 21.5 Hz wide, so peaks under about 100 Hz may be named a few cents off or merge; 8192 (the default) and up are fine.
+- Whether the ruler should be on by default (it is) and whether its strip covers too much of the curve's foot is the user's call; one click in the main menu turns it off.
+
+### Left
+NI-31 (X18 high-pass hints), NI-7b (X23 gain staging check), NI-10a and b (I7 draw the arc), NI-11a and b (I31 Ask the mix), NI-12 and on (control tape, Time Machine, undo here, habits, blind shoot-out, listening lenses, ear-fatigue, morph pad, phrase rings, activity glow, variations, transitions, explain mode, recipe cards, fill the gap, NI-29); NI-20b and NI-25a/b stay gated on lane C (F29, F25a).
+
+## 28 November 2026, v0.299: the Fractals export flake found and fixed (lane D, for task RG; one line in lane K's `renderMix`)
+
+The scheduling chat asked lane D to fix this first (task RG's entries of 28 November): in about 1 render in 8, "Fractals Bass, master put back to 0 dB" of `tools/engine-tests/export_same.py` gave -26.74483 dB (a6774faed0a9) instead of -25.48699 dB (09e0415bec5e). NI-6 (v0.269) was the first suspect. It was not NI-6: the log shows the same value on v0.215 (task AI's entry), before any lane D code.
+
+### The cause
+- The Bass of Fractals goes through the **Sidechain** effect (`side`: a pump locked to the beat). In an offline render it is built in sync with the global `SIDE_B0`, the beat the render starts at.
+- `renderMix` set `SIDE_B0=b0` and then awaited `wlLoad(oc)` (loading the worklets into the new offline context). The pump is built after that await.
+- Any other `renderMix` that starts during the await overwrites `SIDE_B0`. The overview map's background render (`renderMix(..., fast)` in pieces after the song loads) does that for a few seconds after start-up, and the pieces of `renderMixChunked` run two or three at a time.
+- The pump was then built on another render's start beat: the Bass ducked on the wrong phase. A shift by a whole number of beats does not show (the pump repeats every beat), so it only flaked when the other start beat was off the beat grid.
+- Shown on the old file: within one page, the 4th of 4 identical Bass renders gave -26.74483 dB (12 pages, 1 bad); the two renders are the same up to sample 5023, then differ on every beat. Setting `SIDE_B0` to 64.5 or 7.37 while a render waits gives -27.43 and -26.12 dB.
+
+### The fix
+- `renderMix` sets `SIDE_B0=b0` again right after the await; from there to `startRendering()` the build is synchronous, so nothing can come in between. One statement, in lane K's `renderMix` (the scheduling chat asked lane D to fix it; lane K: please keep it if you rebuild `renderMix`).
+- NI-7's own render (`NI_jourRender`, lane D) now also sets `SIDE_B0` before it makes its context, so the Volume Shaper's offline origin (`VMOF`, read when the context is made) is its own.
+- Edit script `tools/feature-lab/ni/ni_sideb0.py`, test `tools/ui-tests/taskNI_sideb0.py`.
+
+### Proof
+- **`export_same.py` 20 of 20 runs identical** on the 9 repeatable lines (Fractals Kick and Bass at -10 dB and at 0 dB, Saw, Pad, Acid, Wavetable, Venom): Bass at 0 dB -25.48699 dB (09e0415bec5e) in all 20. Plant, Sampler, Sampler grains and Drum kit move from run to run as before (free-running randomness, listed as not repeatable in `gate.py`).
+- The stress repro (4 Bass renders straight after start-up, 14 pages): 56 of 56 renders the reference (the old file: 1 bad in 48).
+- `taskNI_sideb0.py` forces the race three ways (`SIDE_B0` changed right after the call, changed while the worklets load, a real second render off the beat grid started in the same task): **the old file fails all three** (-27.43, -26.12, -26.12 dB), the fixed file passes 6 of 6.
+
+### What changes for the user
+- **Exports of songs with the Sidechain effect that are longer than 32 beats can change**, toward the right sound: a long export is rendered in pieces two or three at a time, and a piece could get its neighbour's start beat. Fractals' Bass from beat 0 to 160, compared piece by piece with one unbroken render: before, the piece at beats 120 to 144 differed by up to 0.1 (the pump on the wrong phase); now every piece is within 0.01 like the others (the usual seam of the pieces, from compressors starting fresh). The release gate's export lines (32 beats in one render) are unchanged.
+- Nothing else in the sound changes; the live playback never used this path.
+- Release check (28 Nov, 15:47 UTC, right after the freeze lifted at v0.298, ST-S10): the three edit scripts re-applied on the fresh main as v0.299; `taskNI_9.py` 27/27, `taskNI_sideb0.py` 6/6, `taskXT_DL2.py` 24/24, lint clean. The start-up smoke test in the real desktop app (`smoke_electron.js`, 14 scenarios, 20 s each) ran on the same three scripts over v0.297 during the freeze: all 14 clean, frame time p50 16.7 ms.

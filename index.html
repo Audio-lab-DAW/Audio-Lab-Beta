@@ -2442,6 +2442,10 @@ body.lite .sciv{display:none}
 #set .st10lk{background:none;border:0;padding:0;min-height:0;height:auto;color:#8ab4ff;cursor:pointer;font:inherit;text-decoration:underline;text-underline-offset:2px}
 #set .st10ex{margin-top:6px}
 #set .st10out #outSel{flex:0 1 auto;min-width:0;max-width:62%;height:auto;min-height:26px}
+/* lane D (task NI-5c): clashes that take turns, and the pair view in the clash card */
+#mixWin svg.cabs .nicc.nitn{stroke-dasharray:2 4;opacity:.5}
+#niClashPop .nicgv{display:flex;flex-direction:column;gap:3px;margin:2px 0 8px}#niClashPop .nicgv canvas{width:100%;height:64px;border-radius:4px;display:block;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+#niClashPop .nicgt{font-size:var(--fs1);color:var(--mut);font-variant-numeric:tabular-nums}#niClashPop .nicgt b{color:#f3c4ff}#niClashPop .nicgt.tn b{color:#4cc9f0}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6718,7 +6722,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.298',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.299',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -7929,6 +7933,7 @@ $('#bLogo').addEventListener('contextmenu',e=>{e.preventDefault();const p=curP()
    {label:'Kick and bass lab…',sub:'is the kick in tune with the bass?',ic:I('M3 15h14M6 15V9M10 15V5M14 15v-4','#ff6b6b'),act:()=>NI_kbOpen()},
    {label:'Level journey…',sub:'the level after each device of the selected track',ic:I('M6 3v14M6 6h8M6 10h5M6 14h9','#4cc9f0'),act:()=>NI_jourOpen()},
    {label:'Mono loss…',sub:'what each track loses in mono, and which tracks cancel',ic:I('M3 12h4l3-7 4 14 3-7h4','#4cc9f0'),act:()=>NI_mlOpen()},
+   {label:NI_hrOn()?'Harmonic ruler: on':'Harmonic ruler: off',sub:'note names of the strongest peaks under every spectrum view',ic:I('M2 15h16M4 15V9M7 15V6M10 15V10M13 15V5M16 15V11','#f5c84c'),act:()=>NI_hrShow(!NI_hrOn())},
    {label:'Undo',key:'⌘Z',crow:'undo',crowL:'Undo',dis:!UNDO.length,ic:I('M7 7H13a4 4 0 0 1 0 8H8M7 7l3-3M7 7l3 3'),act:()=>undo()},
    {label:'Stop all sound (panic)',ic:I('M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM5 5l10 10','#ff5a5a'),act:()=>panic()},
    {label:'Restart',sub:'the audio engine, or the whole app',ic:I('M16 10a6 6 0 1 1-2-4.5M16 3v3.5h-3.5','#3ecf8e'),kids:[
@@ -8179,7 +8184,7 @@ let EXCANCEL=false;function exCancel(){if(!EXR||EXCANCEL)return;EXCANCEL=true;tr
 /* offline renders (export, freeze, bounce) in blocks of 512 samples: measured 47 % less time than 128 on the Fractals demo. UI.rqOff=128 turns it off. */
 const RQOK=(()=>{try{return new OfflineAudioContext({numberOfChannels:1,length:1024,sampleRate:48000,renderSizeHint:512}).renderQuantumSize===512}catch(e){return false}})();let RQOFF=128;
 async function renderMix(sr,b0,b1,tail,lim,only,fast,prog){SIDE_B0=b0;RQOFF=RQOK?(UI.rqOff||512):128;
-  const spb=60/S.bpm,len=Math.max(.1,secSpan(b0,b1)+tail),oc=quietMeters(RQOFF>128?new OfflineAudioContext({numberOfChannels:2,length:Math.ceil(len*sr),sampleRate:sr,renderSizeHint:RQOFF}):new OfflineAudioContext(2,Math.ceil(len*sr),sr));await wlLoad(oc);if(S.seed==null)S.seed=(Math.random()*1e9)|0;SEEDR=UI.exSeed===false?null:seedRng(S.seed+'|'+b0.toFixed(6)+'|'+b1.toFixed(6)+'|'+(only||'')+'|'+sr);try{
+  const spb=60/S.bpm,len=Math.max(.1,secSpan(b0,b1)+tail),oc=quietMeters(RQOFF>128?new OfflineAudioContext({numberOfChannels:2,length:Math.ceil(len*sr),sampleRate:sr,renderSizeHint:RQOFF}):new OfflineAudioContext(2,Math.ceil(len*sr),sr));await wlLoad(oc);SIDE_B0=b0;/* SIDE_B0 again after the await: another render may have set it meanwhile (fix of the Fractals export flake, 28 Nov) */if(S.seed==null)S.seed=(Math.random()*1e9)|0;SEEDR=UI.exSeed===false?null:seedRng(S.seed+'|'+b0.toFixed(6)+'|'+b1.toFixed(6)+'|'+(only||'')+'|'+sr);try{
   const mst=oc.createGain();mst.gain.value=fast?1:masterGain();let out=mst;SPDEST.set(oc,mst);
   for(const f of fast?[]:S.mfx||[]){if(!f.on)continue;const x=mkFxNode(oc,f.type);x.set(f.p);out.connect(x.in);out=x.out}
   if(lim){const l=oc.createDynamicsCompressor();l.threshold.value=-1;l.knee.value=0;l.ratio.value=20;l.attack.value=.001;l.release.value=.08;out.connect(l);out=l}
@@ -22427,7 +22432,7 @@ function NI_clTick(force){const C=NI.clash,w=document.getElementById('mixWin');i
   NI_clDraw()}
 /* the clash cables, as one group in the cable lane's SVG */
 function NI_clDraw(){const C=NI.clash,w=document.getElementById('mixWin');const G=CAB.G,sv=w&&w.querySelector('.mxs>svg.cabs');if(!sv||!G){C.drawn='';return}
-  const key=C.list.map(c=>c.a.id+c.b.id+c.m0+'-'+c.m1+':'+Math.round(c.s)+(c.duck?'d':'')).join('|')+'|'+(G.sy2??G.sy)+'|'+G.H+'|'+G.right;
+  const key=C.list.map(c=>c.a.id+c.b.id+c.m0+'-'+c.m1+':'+Math.round(c.s)+(c.duck?'d':'')+(c.turns?'t':c.gate?'g'+Math.round(c.gate.share*20):'')).join('|')+'|'+(G.sy2??G.sy)+'|'+G.H+'|'+G.right;
   NI_clLegend();if(key===C.drawn&&sv.querySelector('.nicg'))return;C.drawn=key;
   let g=sv.querySelector('.nicg');if(!g){g=document.createElementNS(CABSVG,'g');g.setAttribute('class','nicg');
     g.addEventListener('pointerover',e=>{const p=e.target.closest('.nich');if(!p)return;g.classList.add('hov');const c=g.querySelector('.nicc[data-n="'+p.dataset.n+'"]');if(c)c.classList.add('hi')});
@@ -22440,9 +22445,9 @@ function NI_clDraw(){const C=NI.clash,w=document.getElementById('mixWin');const 
   for(const t of sv.querySelectorAll(':scope>.clg .clab')){try{const q=t.getBBox();if(q.width)occ.push([q.x,q.x+q.width,q.y+q.height-2])}catch(_){}}
   /* the strongest clash hangs lowest, its label under its curve (over it in a short lane); a label that would cover another one is left to the tooltip */
   C.list.forEach((c,i)=>{const A=P.get(c.a.id),B=P.get(c.b.id);if(!A||!B)return;const x1=A.cx+3,x2=B.cx-3;
-    const rm=room>=34?room-12:room,sag=clamp(rm*(n>1?.55+.45*(n-i)/n:1),10,rm),d=cabPath(x1,sy,x2,sy,sag),wd=(1.4+4.6*clamp(c.s/36,0,1)).toFixed(2);
-    back+=`<path class="nicb" d="${d}" stroke-width="${(+wd+2.4).toFixed(2)}"/>`;front+=`<path class="nicc${c.duck?' nidk':''}" data-n="${i}" d="${d}" stroke-width="${wd}"/>`;
-    const tx=c.duck?`${c.b.name} ducks under ${c.a.name}, ${c.range}`:`${c.a.name} vs ${c.b.name}, ${c.range}`,tw=cs2Tw(tx),ly=room>=34?sy+sag+3+ +wd/2+8:sy+sag-3-+wd/2,lx=clamp((x1+x2)/2-tw/2,4,Math.max(4,G.right-tw));
+    const rm=room>=34?room-12:room,sag=clamp(rm*(n>1?.55+.45*(n-i)/n:1),10,rm),d=cabPath(x1,sy,x2,sy,sag),wd=(c.turns?1.2:1.4+4.6*clamp(c.s*(c.gate?c.gate.share:1)/36,0,1)).toFixed(2);
+    back+=`<path class="nicb" d="${d}" stroke-width="${(+wd+2.4).toFixed(2)}"/>`;front+=`<path class="nicc${c.duck?' nidk':''}${c.turns?' nitn':''}" data-n="${i}" d="${d}" stroke-width="${wd}"/>`;
+    const tx=c.turns?`${c.a.name} and ${c.b.name} take turns, ${c.range}`:c.duck?`${c.b.name} ducks under ${c.a.name}, ${c.range}`:`${c.a.name} vs ${c.b.name}, ${c.range}`,tw=cs2Tw(tx),ly=room>=34?sy+sag+3+ +wd/2+8:sy+sag-3-+wd/2,lx=clamp((x1+x2)/2-tw/2,4,Math.max(4,G.right-tw));
     const free=y=>!occ.some(o=>Math.abs(o[2]-y)<11&&lx<o[1]+4&&lx+tw>o[0]-4),yy=[ly,ly-11,ly-22].find(y=>y>sy+14&&free(y));
     if(yy!=null){occ.push([lx,lx+tw,yy]);lab+=`<text class="nicl" x="${lx.toFixed(1)}" y="${yy.toFixed(1)}">${esc(tx)}</text>`}
     hit+=`<path class="nich" data-n="${i}" d="${d}"><title>${esc(NI_clWords(c))} Click for the numbers.</title></path>`});
@@ -22452,11 +22457,11 @@ function NI_clWords(c){return`${c.a.name} and ${c.b.name} both sit at ${c.range}
 function NI_clLegend(){const w=document.getElementById('mixWin'),lg=w&&w.querySelector('.cablg');if(!lg)return;let b=lg.querySelector('.niclb');
   if(!b){b=document.createElement('button');b.type='button';b.className='cl2 niclb';b.dataset.ni='clash';const em=lg.querySelector('em');lg.insertBefore(b,em||null);
     b.addEventListener('click',e=>{e.stopPropagation();mxsSet('niClash',mxsO().niClash?0:1);if(mxsO().niClash)NI_clRun();else NI_clStop();try{cabSoon()}catch(_){}})}
-  const on=!!mxsO().niClash,C=NI.clash,cnt=on?(C.meas&&!C.list.length?'…':String(C.list.filter(c=>!c.duck).length)):'',h=`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 2Q13 9 25 2" stroke="${NI_CL_COL}" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>Clashes${on?` <b>${cnt}</b>`:''}`;
+  const on=!!mxsO().niClash,C=NI.clash,cnt=on?(C.meas&&!C.list.length?'…':String(C.list.filter(c=>!c.duck&&!c.turns).length)):'',h=`<svg viewBox="0 0 26 8" width="26" height="8"><path d="M1 2Q13 9 25 2" stroke="${NI_CL_COL}" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>Clashes${on?` <b>${cnt}</b>`:''}`;
   if(b._h!==h){b._h=h;b.innerHTML=h}b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));
   /* the button takes its room from the hint at the end, so the legend keeps its width (the normal cables' labels keep their room) */
   const em=lg.querySelector('em');if(em&&em.offsetParent){em.style.maxWidth='';const nat=em.offsetWidth,bw=b.offsetWidth+10;em.style.maxWidth=Math.max(0,nat-bw)+'px';em.hidden=nat-bw<24}
-  b.title=`Clashes: a magenta cable joins two channels that fight in the same frequency band at the playhead (both loud there, close in level). Thicker means a bigger clash. The 12 loudest channels are compared, or with Selected only the selected channel against all. Measured from the song in the background${on&&C.meas?', still measuring this part':''}. Click to ${on?'hide':'show'} them.`}
+  b.title=`Clashes: a magenta cable joins two channels that fight in the same frequency band at the playhead (both loud there, close in level). Thicker means a bigger clash; a thin dashed cable means the two take turns inside the beat (kick and bass in a rolling bass), which is not counted. The 12 loudest channels are compared, or with Selected only the selected channel against all. Measured from the song in the background${on&&C.meas?', still measuring this part':''}. Click to ${on?'hide':'show'} them.`}
 /* the card for one clash (NI-5b adds the fixes through NI_HOOKS.clashPop) */
 function NI_clPopClose(){const p=document.getElementById('niClashPop');if(p)p.remove();document.removeEventListener('pointerdown',NI_clPopOut,true)}
 function NI_clPopOut(e){const p=document.getElementById('niClashPop');if(p&&!p.contains(e.target))NI_clPopClose()}
@@ -22642,7 +22647,7 @@ function NI_jourRange(){const L=S.loop&&S.loopRange&&S.loopRange.b>S.loopRange.a
   const p=play.on?curDisp():pos,bar=barPos(Math.max(0,p)+1e-6).bar,a=Math.max(0,bar-4);return{b0:barStart(a),b1:barStart(a+8),how:'8 bars around the playhead'}}
 /* render one track with a tap after every step; o.taps: the steps to tap (indices into the step list), at most 15 per render */
 async function NI_jourRender(t,b0,b1,steps,taps){const sr=taps.sr||NI_JOUR_SR,pre=Math.min(b0,8),bs=b0-pre,len=secSpan(bs,b1)+.02,nT=taps.length;
-  const oc=quietMeters(new OfflineAudioContext(2*nT,Math.ceil(len*sr),sr));await wlLoad(oc);SIDE_B0=bs;if(S.seed==null)S.seed=(Math.random()*1e9)|0;
+  SIDE_B0=bs;const oc=quietMeters(new OfflineAudioContext(2*nT,Math.ceil(len*sr),sr));await wlLoad(oc);SIDE_B0=bs;if(S.seed==null)S.seed=(Math.random()*1e9)|0;
   SEEDR=UI.exSeed===false?null:seedRng(S.seed+'|'+bs.toFixed(6)+'|'+b1.toFixed(6)+'|'+t.id+'|'+sr);
   try{const D=oc.destination;D.channelCount=2*nT;D.channelCountMode='explicit';D.channelInterpretation='discrete';const mg=oc.createChannelMerger(2*nT);mg.connect(D);
     const tapAt=new Map(taps.map((k,i)=>[k,i])),tap=(node,k)=>{const i=tapAt.get(k);if(i==null)return;const up=oc.createGain();up.channelCount=2;up.channelCountMode='explicit';up.channelInterpretation='speakers';
@@ -22834,6 +22839,142 @@ function NI_mlMxBtn(w){const m=w&&w.querySelector('.mx.master .mxmon');if(!m||m.
 NI.mono.open=NI_mlOpen;NI.mono.close=()=>NI_mlClose(false);NI.mono.measure=NI_mlMeasure;NI.mono.tracks=NI_mlTracks;NI.mono.pairsOf=NI_mlPairs;
 NI_HOOKS.mxMon=NI_mlMxBtn;NI_HOOKS.monoLoss={open:NI_mlOpen,measure:o=>NI_mlMeasure(o),tracks:(b0,b1)=>NI_mlTracks(b0,b1)};
 /* ===== end of lane D NI-8 ===== */
+/* ===== lane D (task NI-5c): X16 the clash measure that knows the beat (AE3 pick, improves I12 masking cables) =====
+   NI-5a finds clash candidates from NI-3's per-beat cache, which averages a whole beat: in a rolling psytrance bass (KBBB) kick and bass
+   share 40 to 120 Hz but take turns inside each beat, so the average flags them. Here each candidate is checked in time: both tracks are
+   rendered offline on their own over the 8 beats around the playhead (NI-7's one-track render, after fader and pan, 22.05 kHz), split into
+   the 1/3-octave bands with a band-pass and followed every 11.6 ms; a pair counts as a clash only for the share of moments when both are
+   loud in that band at once. Kept per track and window under NI-3's piece key, so an edit measures again only what it touched. */
+NI.cg={mem:new Map(),q:[],busy:false,ready:0,renders:0};
+const NI_CG_W=8,NI_CG_SR=22050,NI_CG_HOP=256,NI_CG_TURN=.25;
+function NI_cgKey(t,w){const p=Math.floor(w*NI_CG_W/NI_AN_SEG),k=NI_anKey(t,p);return k===''?'':k+'|cg'+w}
+/* the band levels of one render: d[f*NB+m] in dB, a frame every 256 samples (11.6 ms), bands of NI-5a (1/3 octave) */
+function NI_cgWork(L,R,sr){const NB=NI_CL_NB,H=NI_CG_HOP,n=Math.min(L.length,R.length),nf=Math.floor(n/H),d=new Float32Array(nf*NB).fill(-140),x=new Float32Array(n);
+  for(let i=0;i<n;i++)x[i]=(L[i]+R[i])*.5;
+  for(let m=0;m<NB;m++){const[fa,fb]=NI_clEdges(m);if(fb>=sr*.45)continue;const fc=Math.sqrt(fa*fb),Q=fc/(fb-fa),w0=2*Math.PI*fc/sr,al=Math.sin(w0)/(2*Q),a0=1+al,b0=al/a0,b2=-al/a0,a1=-2*Math.cos(w0)/a0,a2=(1-al)/a0;
+    let x1=0,x2=0,y1=0,y2=0,u1=0,u2=0,v1=0,v2=0;
+    for(let f=0;f<nf;f++){let s=0;const e=(f+1)*H;for(let i=f*H;i<e;i++){const xi=x[i],y=b0*xi+b2*x2-a1*y1-a2*y2;x2=x1;x1=xi;y2=y1;y1=y;const v=b0*y+b2*u2-a1*v1-a2*v2;u2=u1;u1=y;v2=v1;v1=v;s+=v*v}
+      d[f*NB+m]=10*Math.log10(2*s/H+1e-14)}}
+  return{nf,NB,d,sr,hop:H}}
+/* the band levels of a track in window w (beats 8w to 8w+8): the result, '' if silent there, or null (queued) */
+function NI_cgGet(t,w){const k=NI_cgKey(t,w);if(k==='')return'';const r=NI.cg.mem.get(k);if(r)return r;NI_cgQueue(t,w,k);return null}
+function NI_cgQueue(t,w,k){const G=NI.cg;if(!G.q.some(x=>x.k===k))G.q.push({t,w,k,pj:PJ&&PJ.cur});if(!G.busy)NI_cgPump()}
+async function NI_cgPump(){const G=NI.cg;if(G.busy)return;G.busy=true;
+  try{while(G.q.length){const why=NI_anHold();if(why){await NI_anSleep(800);continue}
+      const it=G.q.shift();if(it.pj!==(PJ&&PJ.cur)||!S.tracks.includes(it.t)||G.mem.has(it.k)||NI_cgKey(it.t,it.w)!==it.k)continue;
+      let r;try{r=await NI_mlRender(it.t,it.w*NI_CG_W,(it.w+1)*NI_CG_W,NI_CG_SR)}catch(e){console.warn('NI clash timing render',e);continue}
+      if(NI_cgKey(it.t,it.w)!==it.k){G.q.push(it);continue}/* the track changed while it rendered */
+      G.mem.set(it.k,NI_cgWork(r.L,r.R,r.sr||NI_CG_SR));G.renders++;G.ready++;if(G.mem.size>300)G.mem.delete(G.mem.keys().next().value);
+      try{if(NI_clOn()){NI.clash.drawn='';NI_clTick(true)}}catch(e){}
+      await NI_anSleep(play.on?600:15)}}
+  finally{G.busy=false}}
+/* the timing of one clash: how often both are loud in its band at the same moment over the window around the beat */
+function NI_cgGate(c,beat){const w=Math.floor(Math.max(0,beat)/NI_CG_W),ea=NI_cgGet(c.a,w),eb=NI_cgGet(c.b,w);c.gate=null;c.turns=false;if(!ea||!eb)return null;
+  const NB=NI_CL_NB,n=Math.min(ea.nf,eb.nf),pa=new Float32Array(n),pb=new Float32Array(n),co=new Uint8Array(n);let ma=-140,mb=-140;
+  for(let f=0;f<n;f++){let sa=0,sb=0;for(let m=c.m0;m<=c.m1;m++){sa+=Math.pow(10,ea.d[f*NB+m]/10);sb+=Math.pow(10,eb.d[f*NB+m]/10)}pa[f]=10*Math.log10(sa+1e-14);pb[f]=10*Math.log10(sb+1e-14);if(pa[f]>ma)ma=pa[f];if(pb[f]>mb)mb=pb[f]}
+  /* loud: within 10 dB of its own top in this window; a clash moment: both loud and within 12 dB of each other */
+  let both=0,either=0;for(let f=0;f<n;f++){const A=pa[f]>=ma-10&&pa[f]>-100,B=pb[f]>=mb-10&&pb[f]>-100;if(A||B)either++;if(A&&B&&Math.abs(pa[f]-pb[f])<=NI_CL_GAP){both++;co[f]=1}}
+  const share=either?both/either:0;c.gate={share,w,b0:w*NI_CG_W,b1:(w+1)*NI_CG_W,pa,pb,co,ma,mb,hop:ea.hop,sr:ea.sr};c.turns=share<NI_CG_TURN;return c.gate}
+{const _at=NI_clashAt;NI_clashAt=function(beat){const R=_at.apply(this,arguments);for(const c of R.list)NI_cgGate(c,R.beat);
+  R.list.sort((p,q)=>(p.turns-q.turns)||(q.s*(q.gate?q.gate.share:1)-p.s*(p.gate?p.gate.share:1)));R.timing=R.list.some(c=>!c.gate);return R};NI.clash.at=NI_clashAt}
+const NI_cgPct=v=>Math.round(v*100)+'%';
+{const _w=NI_clWords;NI_clWords=function(c){const g=c.gate;if(!g)return _w(c)+' (When each one plays inside the beat is still being measured.)';const a=NI_bb(g.b0),b=NI_bb(g.b1);
+  if(c.turns)return`${c.a.name} and ${c.b.name} both use ${c.range}, but they take turns: both are loud there at the same moment only ${NI_cgPct(g.share)} of the time (bars ${a.bar} to ${b.bar-1}), so this is not a real clash. An estimate.`;
+  return _w(c)+` Both are loud there at the same moment ${NI_cgPct(g.share)} of the time (bars ${a.bar} to ${b.bar-1}). An estimate.`}}
+/* the pair view in the clash card: both tracks in the clash's band over the window, the moments they are loud together shaded */
+function NI_cgDraw(cv,c){const g=c.gate,dpr=Math.min(2,(window.devicePixelRatio||1)*(typeof ZOOM==='number'?ZOOM:1)),W=cv.clientWidth||296,H=cv.clientHeight||64,L=lkT();
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.fillStyle='#05070b';x.fillRect(0,0,W,H);if(!g)return;
+  const n=g.pa.length,top=Math.max(g.ma,g.mb)+4,lo=top-40,X=f=>f/Math.max(1,n-1)*W,Y=v=>H-2-clamp((v-lo)/40,0,1)*(H-4);
+  x.fillStyle='rgba(232,107,255,.28)';for(let f=0;f<n;f++)if(g.co[f])x.fillRect(X(f),0,Math.max(1,W/n+.5),H);
+  /* beats (and the bar line) from the song's tempo */
+  for(let i=0;i<=NI_CG_W;i++){const fx=secSpan(g.b0,g.b0+i)*g.sr/g.hop,xx=Math.round(X(fx))+.5,bar=barPos(g.b0+i+1e-6).inBar<1e-3;x.strokeStyle=bar?L.gMaj:L.gMid;x.lineWidth=L.hair(dpr);x.beginPath();x.moveTo(xx,0);x.lineTo(xx,H);x.stroke()}
+  const line=(p,col)=>{x.strokeStyle=col;x.lineWidth=1.25;x.beginPath();for(let f=0;f<n;f++){const yy=Y(p[f]);if(f)x.lineTo(X(f),yy);else x.moveTo(X(f),yy)}x.stroke()};
+  line(g.pa,c.a.color||'#cfd3db');line(g.pb,c.b.color||'#9aa3b5')}
+{const _p=NI_HOOKS.clashPop;NI_HOOKS.clashPop=function(c,p){const g=c.gate,box=document.createElement('div');box.className='nicgv';
+  if(g){const a=NI_bb(g.b0),b=NI_bb(g.b1);box.innerHTML=`<canvas title="${esc(c.a.name)} and ${esc(c.b.name)} in ${esc(c.range)} over bars ${a.bar} to ${b.bar-1}, beat by beat. Shaded: the moments both are loud there at once."></canvas>
+      <div class="nicgt${c.turns?' tn':''}" title="The share of the moments either one is loud in this band when both are loud at once (within 12 dB of each other). Under ${NI_cgPct(NI_CG_TURN)} they take turns. An estimate from the song, every 11.6 ms.">Loud together <b>${NI_cgPct(g.share)}</b> of the time${c.turns?': they take turns':''}</div>`}
+  else box.innerHTML=`<div class="nicgt" title="Each track is rendered on its own over these bars in the background">When each one plays inside the beat: still measuring…</div>`;
+  const first=p.querySelector('.nicpr');p.insertBefore(box,first||p.querySelector('.nicpb'));if(c.turns){const h=p.querySelector('p');if(h)h.textContent=`Both use this band, but they take turns inside the beat, so the quieter one is not covered for long.`}
+  const cv=box.querySelector('canvas');if(cv)NI_cgDraw(cv,c);const r=_p?_p(c,p):undefined;
+  /* they take turns: nothing to fix in this band; the kick and bass lab for the low end */
+  if(c.turns){const f=p.querySelector('.nicpf');if(f){f.innerHTML=`<p>Nothing to fix here: they already take turns.${c.mk<=6?' If the low end still sounds muddy, the kick and bass lab shows the tuning and the gaps.':''}</p>`+(c.mk<=6&&typeof NI_kbOpen==='function'?`<button type="button" data-ncg="kb" title="Open the kick and bass lab: the kick's pitch, the bass notes and the gaps between them">Open the kick and bass lab<small>Tuning, beating and the gap after each kick</small></button>`:'');
+    const b=f.querySelector('[data-ncg]');if(b)b.onclick=e=>{e.stopPropagation();NI_clPopClose();NI_kbOpen()}}}
+  return r}}
+NI.cg.get=NI_cgGet;NI.cg.gate=NI_cgGate;NI.cg.work=NI_cgWork;NI_HOOKS.clashTiming={gate:(c,beat)=>NI_cgGate(c,beat),get:NI_cgGet};
+/* ===== end of lane D NI-5c ===== */
+/* ===== lane D (task NI-9): I5 harmonic ruler =====
+   A piano strip along the bottom of every spectrum view drawn by lane E's INS.spec (the Spectrum device, the spectrum overlay, the
+   Visualizer), the five strongest peaks of the live trace labelled with note and cents ("A2 0 c"); peaks outside the song key in amber,
+   peaks that keep ringing for more than a beat after the rest of the sound (at least as loud as the pitch
+   within 12 dB when it started) faded by 6 dB more than the pitch did, while the pitch itself fades too (a held note that does not
+   fade is a note, not a ringing resonance), in red. Drawn into the view's own canvas after lane E's
+   drawer (INS.spec is wrapped once, its code is not changed); nothing is drawn or computed while the view is not live (stopped, closed),
+   the peaks are found at most 8 times a second per view (3 at the Light level) from the bins the view has already read this frame.
+   Switch: UI.niHr (on unless set to false), command ni.harmonicRuler, main menu, Settings row ni.harmonicRuler.
+   NI_HOOKS.harmonicRuler(g, box, peaks, o) draws a ruler into any canvas, NI_HOOKS.harmonicPeaks(an, lo, hi, st) finds the peaks. */
+NI.hr={v:1,runs:0,draws:0,wrapped:false};
+const NI_HR_COL={ink:'#ececf1',key:'#ffb547',ring:'#ff6b6b'};
+function NI_hrOn(){return!(typeof UI==='object'&&UI&&UI.niHr===false)}
+/* a frequency as note and cents: {m, r, c, name: "A2", txt: "A2 0 c" / "A2 +12 c" / "A2 −8 c"} */
+function NI_hrNote(f){const m=NI_midi(f),r=Math.round(m),c=Math.round((m-r)*100),name=NI_PCN[((r%12)+12)%12]+(Math.floor(r/12)-1);return{m,r,c,name,txt:name+' '+(c>0?'+'+c:c<0?'−'+(-c):'0')+' c'}}
+/* the peaks of an analyser's bins (dB, as INS.fft returns them): local maxima standing 8 dB over the 1/6 octave around them, refined by a
+   parabola through the top bin and its neighbours (with the analyser's Blackman window the frequency is within 0.01 bin of a steady
+   tone); one per 70 cents, the strongest first. D: the bins; sr, fft: the analyser's rate and size. */
+function NI_hrFind(D,sr,fft,lo,hi,n){n=n||5;const N=D.length,bh=sr/fft,k0=Math.max(3,Math.ceil(Math.max(lo,25)/bh)),k1=Math.min(N-3,Math.floor(Math.min(hi,sr/2*.95)/bh));let top=-1e9;
+  for(let k=k0;k<=k1;k++)if(D[k]>top)top=D[k];if(!(top>-140))return[];const thr=Math.max(-130,top-54),c=[];
+  for(let k=k0;k<=k1;k++){const v=D[k];if(!(v>thr&&v>D[k-1]&&v>=D[k+1]))continue;const w=Math.max(4,Math.round(k*(Math.pow(2,1/12)-1)));let mn=1e9;
+    for(let i=Math.max(1,k-w);i<=Math.min(N-1,k+w);i++)if(D[i]<mn)mn=D[i];if(v-mn<8)continue;
+    const a=D[k-1],e=D[k+1],dn=a-2*v+e;let p=0;if(isFinite(a)&&isFinite(e)&&dn<0)p=Math.max(-.5,Math.min(.5,.5*(a-e)/dn));c.push({hz:(k+p)*bh,db:v-.25*(a-e)*p,k})}
+  c.sort((x,y)=>y.db-x.db);const out=[];for(const q of c){if(out.some(o=>Math.abs(1200*Math.log2(q.hz/o.hz))<70))continue;out.push(q);if(out.length>=n)break}return out}
+/* the level of everything but the peaks (dB), for the ringing check */
+function NI_hrRest(D,sr,fft,lo,hi,pk){const bh=sr/fft,k0=Math.max(1,Math.ceil(lo/bh)),k1=Math.min(D.length-1,Math.floor(hi/bh));let s=0;
+  for(let k=k0;k<=k1;k++){let near=false;for(const q of pk)if(Math.abs(k-q.k)<=4){near=true;break}if(!near)s+=Math.pow(10,D[k]/10)}return 10*Math.log10(s+1e-20)}
+/* the peaks of a view, kept in the view's own state: found at most every 125 ms (333 ms at the Light level); each peak remembers since when
+   it sounds at that pitch (within 35 cents), its loudest level and the loudest level of the rest since then */
+NI.hr.peaks=function(an,lo,hi,st){if(!an||!st)return[];const now=performance.now(),H=st.niHr||(st.niHr={t:0,pk:[],tr:[]}),iv=INS.lite()?333:125;
+  if(now-H.t<iv)return H.pk;H.t=now;NI.hr.runs++;const D=INS.fft(an),sr=an.context&&an.context.sampleRate||(typeof ctx==='object'&&ctx&&ctx.sampleRate)||48000,fft=an.fftSize||D.length*2,pk=NI_hrFind(D,sr,fft,lo,hi,5),rest=NI_hrRest(D,sr,fft,lo,hi,pk),
+    beat=60/Math.max(20,(typeof S==='object'&&S&&S.bpm)||120)*1000,K=NI_hrKey(),tr=[];
+  for(const q of pk){const nt=NI_hrNote(q.hz);let o=H.tr.find(x=>Math.abs(1200*Math.log2(q.hz/x.hz))<35);
+    if(o){o.hz=q.hz;o.vMax=Math.max(o.vMax,q.db);o.rMax=Math.max(o.rMax,rest)}else o={hz:q.hz,t0:now,vMax:q.db,rMax:rest};tr.push(o);
+    const age=(now-o.t0)/beat,fade=(o.rMax-rest)-(o.vMax-q.db);q.note=nt;q.out=!!(K&&K.pcs&&!K.pcs.includes(((nt.r%12)+12)%12));q.beats=age;q.ring=age>1&&fade>=6&&o.vMax-q.db>=1&&o.rMax>-125&&o.rMax>=o.vMax-12}
+  H.tr=tr;H.pk=pk;return pk};
+NI_HOOKS.harmonicPeaks=NI.hr.peaks;
+/* the song key, read at most once a second */
+function NI_hrKey(){const now=performance.now(),H=NI.hr;if(!H.kt||now-H.kt>1000){H.kt=now;try{H.key=NI_key()}catch(e){H.key=null}}return H.key}
+/* the ruler: a piano strip across the box (x, y, w, h: the strip itself) on the view's log axis lo..hi, octave cells with C named where
+   there is room, black keys where a semitone is at least 1.6 px wide, the key's notes lit, the peaks marked on the strip and named above it.
+   o: {size: 'full' | 'mid', top (the highest y a label may use)} */
+function NI_hrDraw(g,b,pk,o){o=o||{};const L=INS.look(),K=Math.log(b.hi/b.lo),X=f=>b.x+b.w*Math.log(f/b.lo)/K,sw=b.w*Math.log(2)/12/K,key=NI_hrKey();NI.hr.draws++;
+  g.save();g.beginPath();g.rect(b.x,b.y-60,b.w,b.h+60);g.clip();
+  g.fillStyle='rgba(5,7,12,.82)';g.fillRect(b.x,b.y,b.w,b.h);
+  const m0=Math.floor(NI_midi(b.lo)),m1=Math.ceil(NI_midi(b.hi));
+  for(let m=m0;m<=m1;m++){const pc=((m%12)+12)%12,xa=X(NI_hz(m-.5)),xb=X(NI_hz(m+.5));
+    if(sw>=1.6){const blk=[1,3,6,8,10].includes(pc);if(blk){g.fillStyle='rgba(0,0,0,.75)';g.fillRect(xa,b.y,xb-xa,b.h*.58)}else{g.fillStyle='rgba(255,255,255,.07)';g.fillRect(xa,b.y,xb-xa,b.h)}}
+    if(key&&key.pcs&&key.pcs.includes(pc)&&sw>=1.6){g.fillStyle='rgba(245,200,76,.28)';g.fillRect(xa,b.y+b.h-2,Math.max(1,xb-xa-.5),2)}
+    if(pc===0){const x=X(NI_hz(m-.5));g.fillStyle=L.tick;g.fillRect(Math.round(x),b.y,1,b.h);const oc=Math.floor(m/12)-1,ow=sw*12;
+      if(ow>=18&&oc>=0){g.font='7px '+L.mono;g.textBaseline='middle';g.textAlign='left';g.fillStyle=L.mut;g.fillText('C'+oc,x+2,b.y+b.h/2+.5)}}}
+  g.strokeStyle='rgba(255,255,255,.14)';g.lineWidth=1;g.strokeRect(b.x+.5,b.y+.5,b.w-1,b.h-1);
+  /* the peaks: a mark on the strip, the name above it (two rows when names would touch) */
+  const list=pk.filter(q=>q.hz>=b.lo&&q.hz<=b.hi).map(q=>({q,x:X(q.hz),c:q.ring?NI_HR_COL.ring:q.out?NI_HR_COL.key:NI_HR_COL.ink})).sort((a,c)=>a.x-c.x);
+  g.font=(o.size==='full'?8:7)+'px '+L.mono;g.textBaseline='bottom';g.textAlign='center';const rowH=o.size==='full'?10:9,ends=[-1e9,-1e9];
+  for(const it of list){const t=it.q.note.txt+(it.q.ring?' rings':''),tw=g.measureText(t).width+6;let r=it.x-tw/2>ends[0]+2?0:1;if(r===1&&it.x-tw/2<=ends[1]+2)r=0;ends[r]=it.x+tw/2;
+    const ly=b.y-2-r*rowH,lx=Math.max(b.x+tw/2,Math.min(b.x+b.w-tw/2,it.x));
+    if(o.top!=null&&ly-rowH<o.top)continue;
+    g.fillStyle='rgba(5,7,12,.78)';g.fillRect(lx-tw/2,ly-rowH+1,tw,rowH-1);g.fillStyle=it.c;g.fillText(t,lx,ly);
+    g.fillRect(Math.round(it.x)-.5,b.y,1.5,b.h);g.beginPath();g.moveTo(it.x,b.y+b.h-1);g.lineTo(it.x-3,b.y+b.h+3);g.lineTo(it.x+3,b.y+b.h+3);g.closePath();g.fill()}
+  g.restore();NI.hr.last=list.map(it=>({t:it.q.note.txt+(it.q.ring?' rings':''),c:it.c,hz:it.q.hz}));return list.length}
+NI_HOOKS.harmonicRuler=(g,box,peaks,o)=>NI_hrDraw(g,box,peaks||[],o);
+/* lane E's drawer, wrapped once: after it drew a live view of size 'full' or 'mid', the ruler goes along the bottom of its graticule */
+function NI_hrWrap(){if(NI.hr.wrapped||typeof INS!=='object'||typeof INS.spec!=='function')return false;const base=INS.spec;
+  INS.spec=function(g,x,y,w,h,o){const r=base.apply(this,arguments);try{NI_hrAfter(g,w,h,o,r)}catch(e){if(!NI.hr.err){NI.hr.err=1;console.warn('harmonic ruler',e)}}return r};INS.spec.niBase=base;NI.hr.wrapped=true;return true}
+function NI_hrAfter(g,w,h,o,r){if(!o||!r||!NI_hrOn())return;const T=o.tr&&o.tr[0];if(o.live===false||!T||!T.an)return;const sz=o.size||(h>=150&&w>=320?'full':h>=96&&w>=200?'mid':'mini');if(sz==='mini')return;
+  const lo=o.lo||20,hi=o.hi||20000,st=o.st||T.st;if(!st)return;const pk=NI.hr.peaks(T.an,lo,hi,st),sh=sz==='full'?12:10;if(r.gw<120||r.gh<60)return;
+  NI_hrDraw(g,{x:r.gx,y:r.gy+r.gh-sh,w:r.gw,h:sh,lo,hi},pk,{size:sz,top:r.gy+2})}
+if(!NI_hrWrap())setTimeout(NI_hrWrap,0);
+function NI_hrShow(on){UI.niHr=!!on;try{saveUI()}catch(e){}if(typeof toast==='function')toast(on?'Harmonic ruler on: the strongest notes of the sound under every spectrum view':'Harmonic ruler off')}
+window.NI_SETTINGS=window.NI_SETTINGS||[];
+NI_SETTINGS.push({id:'ni.harmonicRuler',label:'Harmonic ruler under spectrum views',page:'Display',block:'Analysis',scope:'app',key:'niHr',default:true,help:'A piano strip along the bottom of every spectrum view: the five strongest peaks named with note and cents, amber outside the song key, red when a pitch keeps ringing for more than a beat.',search:['harmonic','ruler','note','cents','pitch','peak','spectrum','key','resonance','ring']});
+/* ===== end of lane D NI-9 ===== */
 /* ===== task LK (lane A): look tokens =====
    One object LOOK (and the CSS custom properties at the top of the style block, see the LK block before .dacv) holds the look values that the drawers read
    instead of literals, so later tasks (DS design round 2, MD1, SC, DV) change values here, not in the drawers. The user's DR3 picks (27 Nov):
@@ -26159,6 +26300,7 @@ const SCA=[
  {id:'ni.energyArc',g:'view',l:'Energy arc on / off (loudness, tracks playing and brightness over the song)',d:'',ic:'M2 15c3 0 3-8 6-8s3 5 5 5 3-7 5-7',run:()=>NI_arcShow(!UI.niArc)},
  {id:'ni.levelJourney',g:'view',l:'Level journey of the selected track (level after each device)',d:'',ic:'M6 3v14M6 6h8M6 10h5M6 14h9',run:()=>NI_jourOpen()},
  {id:'ni.monoLoss',g:'view',l:'Mono loss map (what each track loses in mono, band by band)',d:'',ic:'M3 12h4l3-7 4 14 3-7h4',run:()=>NI_mlOpen()},
+ {id:'ni.harmonicRuler',g:'view',l:'Harmonic ruler on / off (note names of the strongest peaks under every spectrum view)',d:'',ic:'M2 15h16M4 15V9M7 15V6M10 15V10M13 15V5M16 15V11',run:()=>NI_hrShow(!NI_hrOn())},
  {id:'tour',g:'help',l:'Guided tour',d:'F1',nat:1,ic:'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM8 8a2 2 0 1 1 3 1.7c-.7.4-1 .9-1 1.6M10 14v.5',run:()=>{if(typeof tutSet==='function')tutSet(true)}}
 ];
 const SCM=new Map(SCA.map(a=>[a.id,a]));
