@@ -30,6 +30,8 @@ edit('docs/device-backlog-2026-11-25.md', _ws)
 
 edit('desktop/update-notes.txt', lambda s: "Browser: instruments and effects in a searchable list with categories; the chosen sound shows its waveform, key, tempo and presets (arrow keys step and play), and can start on the next bar. Cards brings back the big live cards.\n" + s)
 
+edit('docs/ids.md', lambda s: s.replace(' (DS-B1a)\n', ' (%s)\n' % V))
+
 ENTRY = open('tools/design-lab/ds/entry_b1a.md', encoding='utf-8').read().replace('{V}', V).replace('{GATE}', GATE)
 edit('docs/backlog-log.md', lambda s: s.rstrip('\n') + '\n\n' + ENTRY)
 print('docs for v' + V)

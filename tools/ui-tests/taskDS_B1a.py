@@ -6,6 +6,7 @@ Checks: the catalogue behind openBrowser, openFxBrowser and Change; categories w
 arrow keys choose and play; the preview's waveform (rendered offline once, cached), time scale and scrub line; presets with
 left and right; Enter adds, uses and keeps; Escape in Change puts the old sound back; Cards and List; other looks keep
 today's browser; no console errors."""
+# for: task DS-B1a (lane A)
 import sys, json, os
 from playwright.sync_api import sync_playwright
 F = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else 'index.html'
@@ -148,6 +149,12 @@ with sync_playwright() as p:
     ok(0 <= tt['wait'] <= tt['bar'] + 0.06, 'In tempo: the preview starts on the next bar', tt)
     R("play.on&&toggle()"); W(300)
 
+    ids = J("[...new Set([...document.querySelectorAll('[data-al^=\"browser.\"]')].map(e=>e.dataset.al))]")
+    R("openBrowser(null);1"); W(700); R("document.querySelector('#dsbRows .dsbr[data-k=\"plant\"]').click()"); W(900)
+    ids = J("[...new Set([...document.querySelectorAll('[data-al^=\"browser.\"]')].map(e=>e.dataset.al))].sort()")
+    want = sorted(['browser.search', 'browser.category', 'browser.row', 'browser.view', 'browser.close', 'browser.preset', 'browser.inTempo', 'browser.play', 'browser.device'])
+    ok(ids == want, 'every new control has its stable id (docs/ids.md)', ids)
+    R("$('#ib').hidden=true"); W(300)
     bad = [l for l in logs if 'AudioContext' not in l]
     ok(not bad, 'no console errors', bad[:5])
     print('%d checks, %d failed' % (N[0], len(FAIL)))

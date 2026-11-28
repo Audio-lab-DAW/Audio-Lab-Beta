@@ -154,3 +154,17 @@ Not yet in `CONTROLS` (its areas are the transport, the track headers and the mi
 - `stem.card.open`: Open (0.309)
 - `stem.card.stop`: Stop (0.309)
 - `stem.card.undo`: Undo (0.309)
+
+## Instrument and Effects browser, catalogue (lane A, task DS-B1a): written as `data-al` by the code itself
+
+Not yet in `CONTROLS` (its areas are the transport, the track headers and the mixer); lane H adds them when the Workshop covers dialogs.
+
+- `browser.search`: the search field (DS-B1a)
+- `browser.category`: a category on the left, All included (DS-B1a)
+- `browser.row`: an instrument's or effect's row (DS-B1a)
+- `browser.view`: Cards (in the catalogue) and List (in the cards) (DS-B1a)
+- `browser.close`: the catalogue's ✕ (DS-B1a)
+- `browser.preset`: a preset in the preview (DS-B1a)
+- `browser.inTempo`: In tempo, next bar (DS-B1a)
+- `browser.play`: play the preview again (DS-B1a)
+- `browser.device`: the live device in the preview (DS-B1a)
