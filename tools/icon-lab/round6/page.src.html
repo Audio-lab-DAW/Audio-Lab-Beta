@@ -1,0 +1,519 @@
+<title>AudioLab app icon, round 6: K5a, the Earth and Moon, and the small icons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* One dark lab sheet, as rounds 1 to 5: the K row, the E row, the bench, the compare view, the small icons on real
+   places, the picks bar fixed at the bottom. Dark in both themes on purpose; light desktops live inside the mock-ups. */
+:root{
+  --bg:#07080c; --panel:#0e1017; --panel2:#141722; --line:#232838; --fg:#e8ebf2; --ink2:#c9cfdc; --mute:#8a90a2; --dim:#6a7083;
+  --acc:#6096ff; --star:#ffc43c; --other:#4cc9f0; --sk:#c792ff; --se:#5fd39a;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 var(--sans);padding-block:28px 190px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1{font:700 22px/1.25 var(--sans);margin:0;text-wrap:balance}
+h2{font:600 16px/1.3 var(--sans);margin:0;text-wrap:balance}
+h3{font:600 13px/1.3 var(--sans);margin:0}
+p{margin:0}
+.lede{color:var(--mute);max-width:86ch;margin-top:8px}
+.lede q{color:var(--ink2)}
+.tag{font:600 11px var(--mono);color:var(--dim);letter-spacing:.06em}
+.sec-h{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.sec-h p{color:var(--mute);font-size:12.5px;max-width:92ch}
+button,select{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,.card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel2);padding:5px 10px;font:600 11.5px var(--mono);color:var(--mute);display:flex;align-items:center;gap:6px}
+.seg button i{width:11px;height:11px;border-radius:50%;display:block;border:1px solid rgba(255,255,255,.25)}
+.seg button.on{background:#22283a;color:var(--fg)}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:4px 11px;font-size:12px;color:var(--mute)}
+.chip.on{color:var(--fg);border-color:var(--acc)}
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(7,8,12,.92);backdrop-filter:blur(8px);padding:8px 0;border-bottom:1px solid var(--line);justify-content:space-between}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.card.ref{background:transparent;border-style:dashed}
+.card.sel{border-color:var(--acc)}
+.card.main{box-shadow:0 0 0 2px var(--star) inset} .card.other{box-shadow:0 0 0 2px var(--other) inset}
+.card img.art{width:100%;height:auto;aspect-ratio:1;display:block;border-radius:10px}
+.card .hd{display:flex;align-items:baseline;gap:8px}
+.card .hd b{font:600 14px var(--sans)}
+.card .hd span{color:var(--mute);min-width:0}
+.card .hd .st{margin-left:auto;color:var(--star);font-size:13px;white-space:nowrap}
+.card .note{color:var(--mute);font-size:12px;line-height:1.45}
+.pick{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:4px 10px;font-size:12px}
+.pick.main.on{background:var(--star);color:#1a1300;border-color:var(--star);font-weight:600}
+.pick.other.on{background:var(--other);color:#001a22;border-color:var(--other);font-weight:600}
+.pick.sk.on{background:var(--sk);color:#1a0030;border-color:var(--sk);font-weight:600}
+.pick.se.on{background:var(--se);color:#00170b;border-color:var(--se);font-weight:600}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:20px}
+.bench-top{display:grid;grid-template-columns:minmax(0,512px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.bench-top{grid-template-columns:1fr}}
+.bench-top>*{min-width:0}
+.big{border-radius:14px;display:block;width:100%;height:auto;aspect-ratio:1}
+.info h2{font-size:19px}
+.info .why{color:var(--ink2);margin-top:8px;max-width:66ch}
+.ladder{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-top:16px;padding:14px;border-radius:12px}
+figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+figcaption{font:500 10.5px var(--mono);color:var(--dim)}
+.wp-dark{background:linear-gradient(135deg,#1a1c26,#0a0b10)} .wp-light{background:linear-gradient(135deg,#eef1f6,#c9d4e4)}
+.wp-light figcaption{color:#4a5266} .wp-dark figcaption{color:#9aa1b3}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+.two>div{min-width:0}
+.mock-h{font:600 12px var(--sans);color:var(--mute);margin-bottom:6px}
+.note-s{color:var(--dim);font-size:11.5px;max-width:96ch}
+.full{overflow:auto;max-height:70vh;border-radius:12px;border:1px solid var(--line)}
+.full img{display:block;width:1024px;height:1024px;max-width:none}
+
+/* the Dock */
+.mk{border-radius:12px;overflow-x:auto;border:1px solid var(--line)}
+.dock{display:flex;justify-content:center;padding:26px 12px 10px;min-width:min-content}
+.dbar{display:flex;gap:6px;align-items:flex-end;padding:6px 8px 12px;border-radius:22px;position:relative}
+.dbar>*{display:block;position:relative;flex:none}
+.dbar .run::after{content:"";position:absolute;left:50%;bottom:-8px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
+.dk-d{color:#eee} .dk-d .dbar{background:rgba(60,62,74,.55);border:1px solid rgba(255,255,255,.14)}
+.dk-l{color:#222} .dk-l .dbar{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85)}
+.dbar.sm{border-radius:12px;padding:5px 6px 10px;gap:4px}
+.styles{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.styles figure{padding:14px 8px}
+.styles .l{background:#dde3ec} .styles .d{background:#15161c}
+.styles .l figcaption{color:#333} .styles .d figcaption{color:#ddd}
+.styles img{width:min(100%,200px);height:auto}
+
+/* compare */
+.cmp-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cmp-ctl label{display:flex;gap:6px;align-items:center;color:var(--mute);font-size:12px}
+select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--fg)}
+.stage{position:relative;width:min(100%,640px);aspect-ratio:1;margin:0 auto;border-radius:14px;overflow:hidden;touch-action:none;cursor:ew-resize;display:grid;place-items:center}
+.stage img{position:absolute;display:block}
+.stage.px img{image-rendering:pixelated}
+.stage .lab{position:absolute;top:8px;font:600 11px var(--mono);background:rgba(0,0,0,.6);color:#fff;padding:2px 7px;border-radius:6px;pointer-events:none}
+.stage .divider{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.4);pointer-events:none}
+.stage .knob{position:absolute;bottom:10px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none}
+input[type=range]{width:min(100%,640px);display:block;margin:0 auto;accent-color:var(--acc)}
+
+/* science table */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.tbl table{border-collapse:collapse;width:100%;min-width:620px;font-size:12.5px}
+.tbl th,.tbl td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font:600 11px var(--mono);color:var(--dim);letter-spacing:.05em}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{color:var(--ink2);white-space:nowrap}
+.tbl td{color:var(--mute)}
+
+/* small icons */
+.dcards{display:grid;grid-template-columns:1fr;gap:12px}
+.dc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:12px 22px;min-width:0}
+@media (max-width:860px){.dc{grid-template-columns:1fr}}
+.dc.psk{box-shadow:0 0 0 2px var(--sk) inset} .dc.pse{box-shadow:0 0 0 2px var(--se) inset}
+.dc .hd{grid-column:1/-1;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.dc .hd b{font:600 15px var(--sans)} .dc .hd .nm{color:var(--mute)} .dc .hd .st{color:var(--star)}
+.dc .hd .pick{margin-left:auto}
+.dc .note{grid-column:1/-1;color:var(--mute);font-size:12.5px;max-width:86ch}
+.cell{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ones{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:10px 12px;border-radius:10px}
+.mag{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.px{image-rendering:pixelated;display:block;border-radius:3px}
+.places{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:14px}
+.places>div{min-width:0}
+.finder{font:13px/1 -apple-system,"SF Pro Text",Inter,sans-serif}
+.finder .hdr{display:flex;padding:6px 12px;font-size:11px;font-weight:600}
+.finder .r{display:flex;align-items:center;gap:7px;padding:3px 12px;height:22px;white-space:nowrap}
+.finder .r i,.finder .r img{width:16px;height:16px;border-radius:3px;display:block;flex:none}
+.finder .r em{font-style:normal;margin-left:auto;font-size:11.5px;opacity:.6}
+.fd-d{background:#1e1e20;color:#e8e8ea} .fd-d .hdr{color:#9a9aa0;border-bottom:1px solid #333} .fd-d .r:nth-child(odd){background:#262628} .fd-d .r.sel{background:#2b5fd9;color:#fff}
+.fd-l{background:#fff;color:#1d1d1f} .fd-l .hdr{color:#6e6e73;border-bottom:1px solid #e3e3e6} .fd-l .r:nth-child(odd){background:#f4f5f7} .fd-l .r.sel{background:#d6e4ff}
+.menubar{display:flex;align-items:center;gap:14px;height:28px;padding:0 12px;font:500 13px -apple-system,Inter,sans-serif;white-space:nowrap;overflow:hidden}
+.menubar .sp{margin-left:auto}
+.menubar img{display:block;width:16px;height:16px}
+.mb-d{background:#2a2b30;color:#eee} .mb-d img{filter:invert(1)}
+.mb-l{background:#e9e9ec;color:#222}
+.tabbar{display:flex;gap:2px;align-items:flex-end;padding:8px 8px 0}
+.tabbar .tb{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px 8px 0 0;font:500 12px Inter,system-ui,sans-serif;min-width:0;max-width:220px}
+.tabbar .tb i,.tabbar .tb img{width:16px;height:16px;border-radius:3px;display:block;flex:none}
+.tabbar .tb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-d{background:#202124} .tb-d .tb{color:#bdc1c6} .tb-d .tb.on{background:#35363a;color:#fff}
+.tb-l{background:#dee1e6} .tb-l .tb{color:#444} .tb-l .tb.on{background:#fff;color:#111}
+.win{font:12px "Segoe UI Variable","Segoe UI",Inter,system-ui,sans-serif}
+.win .title{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;white-space:nowrap}
+.win .title img{width:16px;height:16px;display:block}
+.win .title .ctl{margin-left:auto;display:flex;gap:22px;opacity:.7}
+.win .task{display:flex;justify-content:center;gap:4px;padding:4px;height:48px;align-items:center}
+.win .task>*{width:40px;height:40px;border-radius:5px;display:grid;place-items:center;position:relative}
+.win .task i b{width:24px;height:24px;border-radius:5px;display:block}
+.win .task img{width:24px;height:24px;display:block}
+.win .task .run::after{content:"";position:absolute;bottom:2px;left:50%;width:16px;height:3px;margin-left:-8px;border-radius:2px;background:#4cc2ff}
+.w-d .title{background:#202020;color:#fff} .w-d .task{background:#1c1c1c} .w-d .task .run{background:rgba(255,255,255,.07)}
+.w-l .title{background:#f3f3f3;color:#111} .w-l .task{background:#eef0f4} .w-l .task .run{background:rgba(0,0,0,.05)}
+.famrow{display:flex;flex-direction:column;gap:18px;padding:14px;border-radius:12px}
+.famrow .fr{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.famrow .lbl{font:600 11px var(--mono);align-self:center;min-width:92px}
+.wp-dark .lbl{color:#cfd6e4} .wp-light .lbl{color:#2a3040}
+.recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px;list-style:none;margin:0;padding:0}
+.recs li{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;min-width:0}
+.recs img{width:64px;height:64px;border-radius:14px;flex:none}
+.recs b{display:block;font:600 13px var(--sans)} .recs b i{color:var(--star);font-style:normal}
+.recs span{color:var(--mute);font-size:12.5px}
+.steps{margin:0;padding-left:20px;color:var(--mute);max-width:92ch;display:flex;flex-direction:column;gap:5px}
+.steps b{color:var(--ink2);font-weight:600}
+
+/* the picks bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(14,16,23,.96);border-top:1px solid var(--line);backdrop-filter:blur(10px);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar-in{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.slots{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.slot{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:10px;padding:4px 9px 4px 5px;background:var(--panel2);font-size:12px;min-width:0}
+.slot img{width:28px;height:28px;border-radius:7px;display:block}
+.slot .k{font:600 10px var(--mono);letter-spacing:.05em}
+.slot.main .k{color:var(--star)} .slot.other .k{color:var(--other)} .slot.sk .k{color:var(--sk)} .slot.se .k{color:var(--se)}
+.line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.line code{font:600 12.5px var(--mono);background:#05060a;border:1px solid var(--line);border-radius:8px;padding:7px 10px;flex:1 1 300px;min-width:0;overflow-wrap:anywhere;user-select:all}
+.btn{border:1px solid var(--acc);background:var(--acc);color:#04102c;font-weight:600;border-radius:8px;padding:7px 14px}
+.btn.gh{background:transparent;color:var(--fg);border-color:var(--line);font-weight:500}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">TASK IC10 · 28 NOVEMBER 2026 · ROUNDS 5B, 5C AND THE SMALL ICONS, REDONE AS ONE</div>
+    <h1>AudioLab app icon, round 6: K5a, the Earth and Moon, and the small icons</h1>
+    <p class="lede">From your note at 14:33: <q>Let's consolidate icon round 5b, icon round 5c, and small icons together into a Fable task. And let's redo them in Fable. And then I'm going to pick.</q> So this page replaces those three. Everything on it was drawn again: the rings, orbits and field lines are round tubes in space now, painted pixel by pixel through one camera, so the taper, the dimming with distance and what passes in front of what all come from the same geometry.</p>
+    <p class="lede">On the page: <b>K6a to K6d</b> (your K5a with real rings), <b>E6a to E6e</b> (your M5d as the Earth and the Moon), a bench and a compare slider for any two, then the <b>small icons</b> for 32 px and below (KS6 to KS8 for the atom, ES5 to ES7 for the Earth) on the places where they really show. Give one design <b>Main</b> and one from the other family <b>Other</b> (it goes into the icon picker), pick one small icon per family, and paste the line from the bar at the bottom.</p>
+  </header>
+
+  <div class="row sticky">
+    <span class="row"><span class="tag">PALETTE</span><span class="seg" id="pSeg"></span></span>
+    <span class="note-s">Every picture is a real render of that many pixels, drawn for that size. Stars mark the recommendations.</span>
+  </div>
+
+  <section aria-labelledby="h-k">
+    <div class="sec-h"><h2 id="h-k">K6: K5a with real rings (tapered, never flat)</h2>
+      <p>Each ring is a round tube on a circle in space, tilted 65 degrees, seen through a camera. Where it comes toward you it is thick and white, where it goes away it is thin and dim, and at every crossing the nearer ring passes in front. The three rings are nested like a gyroscope (3.5 % apart), so they never run through each other. K5a's soft glass, glow and field are kept. Dashed: K5a as you picked it, flat.</p></div>
+    <div class="grid" id="gK"></div>
+  </section>
+
+  <section aria-labelledby="h-e">
+    <div class="sec-h"><h2 id="h-e">E6: M5d as the Earth (yellow) and the Moon (blue)</h2>
+      <p>The field of M5d is the Earth's magnetic field: a dipole, each line r = L sin²θ. Here every line lies in a real plane through the magnetic axis; the right side comes toward you, the left goes away behind the Earth. Dashed: M5d as you picked it, flat.</p></div>
+    <div class="grid" id="gE"></div>
+    <div class="tbl" style="margin-top:12px"><table>
+      <thead><tr><th>WHAT</th><th>REAL</th><th>IN THE ICONS</th></tr></thead>
+      <tbody>
+        <tr><td>Field lines</td><td>near the Earth a dipole, r = L sin²θ</td><td>exact in E6a, E6b, E6c, E6e. E6d traces a model field: the dipole, an image dipole on the Sun's side that squeezes it, and a tail current sheet.</td></tr>
+        <tr><td>Lines drawn</td><td>any L</td><td>white at L = 2.7, 4.1 and 5.9 Earth radii (M5d's), fine lines from 3.4 to 13.6</td></tr>
+        <tr><td>Magnetic axis</td><td>9.2° from the rotation axis (2025)</td><td>exact in E6c (dashed rotation axis, solid magnetic axis); the field leans 12° in the picture, as in M5d</td></tr>
+        <tr><td>Magnetopause</td><td>about 10 Earth radii on a quiet day, pushed in to 6 or 7 by a strong solar storm</td><td>E6d: 7 Earth radii (a storm), so the Earth can stay large; shape after Shue et al. 1997</td></tr>
+        <tr><td>Moon, size</td><td>0.273 Earth radii</td><td>0.48 (0.5 in E6d), so it still reads in the Dock</td></tr>
+        <tr><td>Moon, distance</td><td>60.3 Earth radii</td><td>3 to 9: at its true distance it would sit four tile widths away</td></tr>
+        <tr><td>Moon's orbit</td><td>5.1° to the ecliptic</td><td>exact in E6e, against the dotted ecliptic</td></tr>
+        <tr><td>Sunlight</td><td>parallel, so every body shows the same phase</td><td>E6b, E6d, E6e: one light direction for the Earth, the Moon and the tubes</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-bench">
+    <div class="bench-top">
+      <img class="big" id="bBig" alt="">
+      <div class="info">
+        <div class="tag" id="bTag"></div>
+        <h2 id="h-bench"></h2>
+        <p class="why" id="bWhy"></p>
+        <div class="row" style="margin-top:12px"><button class="pick main" id="bMain">Main</button><button class="pick other" id="bOther">Other</button><button class="chip" id="bFull" aria-expanded="false">Show 1024 at 100 %</button></div>
+        <div class="ladder wp-dark" id="bLadD"></div>
+        <div class="ladder wp-light" id="bLadL" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div class="full" id="bFullBox" hidden><img id="bFullImg" alt=""></div>
+    <div class="two">
+      <div><p class="mock-h">Dock, dark desktop (64 pt)</p><div class="mk wp-dark"><div class="dock dk-d" id="dockD"></div></div></div>
+      <div><p class="mock-h">Dock, light desktop (64 pt)</p><div class="mk wp-light"><div class="dock dk-l" id="dockL"></div></div></div>
+    </div>
+    <div>
+      <p class="mock-h">macOS 26 icon styles</p>
+      <div class="styles" id="styles"></div>
+      <p class="note-s" id="stylesNote" style="margin-top:6px"></p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-cmp">
+    <div class="sec-h" style="margin:0"><h2 id="h-cmp">Compare any two</h2><p>Drag the line, or use the slider under the picture. The list holds every design in both palettes, plus K5a and M5d as you picked them.</p></div>
+    <div class="cmp-ctl">
+      <label>Left <select id="cA"></select></label>
+      <label>Right <select id="cB"></select></label>
+      <label>Size <select id="cS"><option value="1024">1024</option><option value="512">512</option><option value="128">128 (×4)</option><option value="64">64 (×8)</option></select></label>
+    </div>
+    <div class="stage" id="stage"><img id="sB" alt=""><img id="sA" alt=""><span class="lab" id="lA" style="left:8px"></span><span class="lab" id="lB" style="right:8px"></span><i class="divider" id="sDiv"></i><i class="knob" id="sKnob"></i></div>
+    <input type="range" id="cR" min="0" max="100" value="50" aria-label="Position of the dividing line">
+  </section>
+
+  <section aria-labelledby="h-small">
+    <div class="sec-h"><h2 id="h-small">The small icons: 32 px and below</h2>
+      <p>A small icon is not the big one scaled down: at 16 px every line of the big picture is thinner than a pixel and turns into haze. Each design below is drawn again for 16, 20, 24 and 32, at 1x and at 2x (Retina), with the nucleus and the Moon on whole pixels and the lines given in pixels. The nucleus is always lit, never a flat disc. First row: the real pixels on a dark and a light ground. Second row: the same pixels magnified.</p></div>
+    <div class="dcards" id="gS"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-places">
+    <div class="sec-h" style="margin:0"><h2 id="h-places">On the real places</h2><p>Every icon here is at its true size. Choose which small icon to show:</p></div>
+    <div class="row" id="showSel"></div>
+    <div class="places">
+      <div><p class="mock-h">Dock at its smallest (32 pt), dark and light</p><div class="mk wp-dark"><div class="dock dk-d" id="sdD"></div></div><div class="mk wp-light" style="margin-top:8px"><div class="dock dk-l" id="sdL"></div></div></div>
+      <div><p class="mock-h">Finder list (16 pt), dark and light</p><div class="two"><div class="mk finder fd-d" id="fdD"></div><div class="mk finder fd-l" id="fdL"></div></div></div>
+      <div><p class="mock-h">Browser tab (16 px)</p><div class="mk tabbar tb-d" id="tbD"></div><div class="mk tabbar tb-l" id="tbL" style="margin-top:8px"></div></div>
+      <div><p class="mock-h">Windows title bar (16 px) and taskbar (24 px)</p><div class="two"><div class="mk win w-d" id="wD"></div><div class="mk win w-l" id="wL"></div></div></div>
+      <div><p class="mock-h">macOS menu bar (a one-colour template)</p><div class="mk menubar mb-d" id="mbD"></div><div class="mk menubar mb-l" id="mbL" style="margin-top:8px"></div>
+        <p class="note-s" style="margin-top:6px">AudioLab has no menu bar item today. If it gets one, macOS wants a one-colour template there, not the app icon: this is the small icon's mark alone.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-fam">
+    <div class="sec-h"><h2 id="h-fam">Main and other: the two families</h2><p>One family becomes the default app icon, with its small version everywhere at 32 px and below. The other goes into Settings, App icon, with its own small version. Each row: the big icon at 128 and 64, then its small icon at 32, 24, 20 and 16. The rows follow your picks (the stars until you pick).</p></div>
+    <div class="two"><div class="famrow wp-dark" id="famD"></div><div class="famrow wp-light" id="famL"></div></div>
+  </section>
+
+  <section aria-labelledby="h-rec">
+    <div class="sec-h"><h2 id="h-rec">Recommendations</h2></div>
+    <ul class="recs" id="recs"></ul>
+  </section>
+
+  <section aria-labelledby="h-next">
+    <div class="sec-h"><h2 id="h-next">After you paste the line</h2></div>
+    <ol class="steps">
+      <li><b>Main</b> becomes the default app icon everywhere at 48 px and up. Dark stays navy on macOS 26.</li>
+      <li><b>Its small icon</b> replaces today's small icon everywhere at 32 px and below: Finder list, the smallest Dock, Windows title bar and taskbar, the browser tab.</li>
+      <li><b>Other</b> goes into Settings, App icon, with its own small icon.</li>
+      <li>The <b>32 icons</b> you removed in round 5 leave the picker. Someone who has one chosen keeps it.</li>
+      <li>The Mac, Windows and browser icon files are rebuilt on the Mac build machine. The Dock shows the new icon with the next desktop build.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="bar" role="region" aria-label="Your picks">
+  <div class="bar-in">
+    <div class="slots" id="slots"></div>
+    <div class="line"><code id="lineOut"></code><button class="btn" id="copy">Copy the line</button><button class="btn gh" id="swap">Swap main and other</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var IMG=/*IMG*/{}, DES=/*DES*/{}, SML=/*SML*/{};
+var K=['K6a','K6b','K6c','K6d'], E=['E6a','E6b','E6c','E6d','E6e'], REF={K:'K5a',E:'M5d'};
+var SK=['KS6','KS7','KS8'], SE=['ES5','ES6','ES7'], PTS=[16,20,24,32];
+DES.K5a={fam:'K',name:'K5a as picked',short:'flat rings, round 5',note:'K5a (soft glass) as you picked it in round 5: flat, even rings. Here for comparison.',ref:true};
+DES.M5d={fam:'E',name:'M5d as picked',short:'flat orbits, round 5',note:'M5d (field to the edge) as you picked it in round 5: flat, even orbits. Here for comparison.',ref:true};
+var RECS=[
+ {role:'main',d:'K6a',s:'KS6',why:'The atom people know, now a real object: woven tubes, thick and white toward you, thin and dim behind. It holds in the Dock and at 64 px. Small: KS6, the crop you already use, with the new rings.'},
+ {role:'other',d:'E6b',s:'ES5',why:'The Earth and the Moon lit by one Sun: the day and night sides say "planet" at once, and the field is true. Small: ES5, your MS2, lit and tapered.'},
+ {role:'main',d:'K6d',s:'KS6',why:'If the rings should have the weight of the shipped Ocean Yellow logo: the boldest taper, with a highlight along each tube.'},
+ {role:'other',d:'E6d',s:'ES7',why:'The most scientific picture: the real shape of the magnetosphere with the Moon in the tail. Best in the picker or the About window; the Earth is smaller.'}
+];
+var st={pal:'P2',sel:'K6a',main:null,other:null,sk:null,se:null,show:'KS6'};
+try{var sv=JSON.parse(localStorage.getItem('al-ic10')||'null');if(sv)for(var k in sv)if(k in st)st[k]=sv[k];}catch(e){}
+function save(){try{localStorage.setItem('al-ic10',JSON.stringify(st));}catch(e){}}
+function $(id){return document.getElementById(id);}
+function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function big(id,pal,px){return IMG[id+'-'+pal+'-'+px];}
+function sm(id,pal,pt,sc,mac){return IMG[id+'-'+pal+'-'+pt+'@'+sc+'x'+(mac?'-mac':'')];}
+/* a small icon at its true size: the 2x drawing on a Retina screen */
+function smImg(id,pal,pt,mac,cls){var i=el('img',cls||'');i.src=sm(id,pal,pt,1,mac);i.srcset=sm(id,pal,pt,1,mac)+' 1x, '+sm(id,pal,pt,2,mac)+' 2x';i.width=pt;i.height=pt;i.alt=id+' at '+pt+' px';return i;}
+function fig(node,cap){var f=el('figure');f.appendChild(node);f.appendChild(el('figcaption','',cap));return f;}
+function famOf(id){return DES[id]?DES[id].fam:SML[id].fam;}
+function label(p){return p?p.id+(p.pal!=='P2'?' '+p.pal:''):'';}
+
+/* palette switch */
+[['P2','Orbit night','#132044'],['P8','Chart paper','#F7F3EA']].forEach(function(p){
+  var b=el('button','', '<i style="background:'+p[2]+'"></i>'+p[0]+' '+p[1]);b.dataset.p=p[0];b.onclick=function(){st.pal=p[0];save();render();};$('pSeg').appendChild(b);});
+
+function card(id){
+  var d=DES[id],c=el('div','card'+(d.ref?' ref':''));c.tabIndex=0;c.dataset.id=id;
+  var im=el('img','art');im.alt=id+', '+d.name;c.appendChild(im);
+  c.appendChild(el('div','hd','<b>'+id+'</b><span>'+d.name+'</span>'+(d.star?'<span class="st" title="Recommended">★</span>':'')));
+  c.appendChild(el('p','note',d.short));
+  if(!d.ref){var r=el('div','row');
+    ['main','other'].forEach(function(role){var b=el('button','pick '+role,role==='main'?'Main':'Other');b.onclick=function(ev){ev.stopPropagation();setRole(role,id);};r.appendChild(b);});
+    c.appendChild(r);}
+  c.onclick=function(){st.sel=id;save();render();$('h-bench').scrollIntoView({block:'center',behavior:'smooth'});};
+  c.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();c.onclick();}};
+  return c;
+}
+function setRole(role,id){
+  var cur=st[role];
+  if(cur&&cur.id===id&&cur.pal===st.pal){st[role]=null;}
+  else{st[role]={id:id,pal:st.pal};var o=role==='main'?'other':'main';
+    if(st[o]&&famOf(st[o].id)===famOf(id))st[o]=null;   /* main and other come from different families */
+  }
+  save();render();
+}
+$('gK').appendChild(card('K5a'));K.forEach(function(id){$('gK').appendChild(card(id));});
+$('gE').appendChild(card('M5d'));E.forEach(function(id){$('gE').appendChild(card(id));});
+
+/* stand-in app icons for the Docks (invented, not real apps) */
+var STAND=[
+ '<rect width="100" height="100" rx="23" fill="#3D8BF2"/><path d="M20 30h24l5 6h31v38H20z" fill="#E8F2FF"/><path d="M20 42h60v32H20z" fill="#BFDBFF"/>',
+ '<rect width="100" height="100" rx="23" fill="#F4F6F9"/><circle cx="50" cy="50" r="34" fill="#2F7BF5"/><path d="M16 50h68M50 16v68M26 29c16 7 32 7 48 0M26 71c16-7 32-7 48 0" stroke="#fff" stroke-width="2.2" fill="none"/><ellipse cx="50" cy="50" rx="15" ry="34" stroke="#fff" stroke-width="2.2" fill="none"/>',
+ '<rect width="100" height="100" rx="23" fill="#FFFDF5"/><path d="M0 23A23 23 0 0 1 23 0h54a23 23 0 0 1 23 23v2H0z" fill="#F6C944"/><path d="M16 40h68M16 52h68M16 64h68M16 76h48" stroke="#C9C2AE" stroke-width="2"/>',
+ '<rect width="100" height="100" rx="23" fill="#202124"/><path d="M22 36l15 13-15 13" stroke="#E9E9E9" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M43 66h23" stroke="#E9E9E9" stroke-width="5" stroke-linecap="round"/>',
+ '<rect width="100" height="100" rx="23" fill="#F0435F"/><circle cx="40" cy="67" r="10" fill="#fff"/><path d="M48 67V27l26-7v34" stroke="#fff" stroke-width="5" fill="none"/><circle cx="66" cy="56" r="9" fill="#fff"/>',
+ '<rect width="100" height="100" rx="23" fill="#8E929B"/><circle cx="50" cy="50" r="25" fill="none" stroke="#E7E8EA" stroke-width="14" stroke-dasharray="9 7"/><circle cx="50" cy="50" r="24" fill="#E7E8EA"/><circle cx="50" cy="50" r="11" fill="#8E929B"/>',
+ '<rect width="100" height="100" rx="23" fill="#2A9BF6"/><rect x="18" y="29" width="64" height="43" rx="4" fill="#fff"/><path d="M19 31l31 24 31-24" stroke="#2A9BF6" stroke-width="3" fill="none"/>'
+];
+function stand(i,px){return '<svg width="'+px+'" height="'+px+'" viewBox="-12 -12 124 124" aria-hidden="true"><g>'+STAND[i%STAND.length]+'</g></svg>';}
+function dock(host,src,srcset,px,small){
+  host.innerHTML='';var bar=el('div','dbar'+(small?' sm':''));
+  for(var i=0;i<8;i++){
+    if(i===3){var s=el('span','run');var im=el('img');im.src=src;if(srcset)im.srcset=srcset;im.width=px;im.height=px;im.alt='AudioLab';im.style.display='block';s.appendChild(im);bar.appendChild(s);}
+    else{bar.appendChild(el('span','',stand(i>3?i-1:i,px)));}
+  }
+  host.appendChild(bar);
+}
+
+function renderBench(){
+  var id=st.sel,d=DES[id],pal=st.pal;
+  $('bBig').src=big(id,pal,1024);$('bBig').alt=id+' '+pal+' at 1024';
+  $('bFullImg').src=big(id,pal,1024);
+  $('bTag').textContent=(d.fam==='K'?'K FAMILY · THE ATOM':'E FAMILY · THE EARTH AND THE MOON')+' · '+pal;
+  $('h-bench').textContent=id+'  '+d.name;
+  $('bWhy').textContent=d.note;
+  $('bMain').hidden=$('bOther').hidden=!!d.ref;
+  $('bMain').className='pick main'+(st.main&&st.main.id===id&&st.main.pal===pal?' on':'');
+  $('bOther').className='pick other'+(st.other&&st.other.id===id&&st.other.pal===pal?' on':'');
+  [['bLadD'],['bLadL']].forEach(function(h){var host=$(h[0]);host.innerHTML='';
+    [[512,256],[128,128],[64,64]].forEach(function(s){var im=el('img');im.src=big(id,pal,s[0]);im.width=s[1];im.height=s[1];im.alt='';im.style.borderRadius=(s[1]*0.22)+'px';
+      host.appendChild(fig(im,s[0]===512?'512 (shown at 256 pt)':s[0]+' px'));});});
+  var hasMac=!d.ref;
+  $('dockD').parentNode.parentNode.parentNode.hidden=!hasMac;$('styles').parentNode.hidden=!hasMac;
+  if(hasMac){
+    dock($('dockD'),IMG[id+'-'+pal+'-mac-128'],null,64);dock($('dockL'),IMG[id+'-'+pal+'-mac-128'],null,64);
+    var S=$('styles');S.innerHTML='';
+    var a=el('img');a.src=IMG[id+'-'+pal+'-mac-256'];a.alt='';var f1=fig(a,'Default');f1.className='l';S.appendChild(f1);
+    var b=el('img');b.src=pal==='P8'?IMG[id+'-P8-mac-256-dark']:IMG[id+'-P2-mac-256'];b.alt='';var f2=fig(b,pal==='P8'?'Dark (the P8N entry)':'Dark (stays navy)');f2.className='d';S.appendChild(f2);
+    $('stylesNote').textContent=pal==='P8'?'Chart paper is a light tile, so its Dark entry is P8N: paper and ink swapped, the same orange and blue made lighter. Tinted and Clear are the system\'s own treatment and cannot keep the colours.':'Dark stays navy: the icon carries its own Dark entry with the same fill, so macOS does not turn the tile black. Tinted and Clear are the system\'s own treatment and cannot keep the colours.';
+  }
+}
+$('bMain').onclick=function(){setRole('main',st.sel);};$('bOther').onclick=function(){setRole('other',st.sel);};
+$('bFull').onclick=function(){var b=$('bFullBox');b.hidden=!b.hidden;this.setAttribute('aria-expanded',String(!b.hidden));this.textContent=b.hidden?'Show 1024 at 100 %':'Hide the 100 % view';};
+
+/* compare */
+var CMP=[];['K6a','K6b','K6c','K6d','K5a','E6a','E6b','E6c','E6d','E6e','M5d'].forEach(function(id){['P2','P8'].forEach(function(p){CMP.push(id+' '+p);});});
+[$('cA'),$('cB')].forEach(function(s,i){CMP.forEach(function(v){var o=el('option','',v+(DES[v.split(' ')[0]].ref?' (as picked)':''));o.value=v;s.appendChild(o);});s.value=i?'K6a P2':'K5a P2';s.onchange=renderCmp;});
+$('cS').onchange=renderCmp;
+function renderCmp(){
+  var a=$('cA').value.split(' '),b=$('cB').value.split(' '),s=+$('cS').value,stage=$('stage');
+  var w=stage.clientWidth,z=s>=512?Math.min(1,w/s)*1:(s===128?4:8),px=Math.min(w,s>=512?w:s*z);
+  stage.classList.toggle('px',s<512);
+  [['sA',a],['sB',b]].forEach(function(e){var im=$(e[0]);im.src=big(e[1][0],e[1][1],s);im.style.width=px+'px';im.style.height=px+'px';});
+  $('lA').textContent=a.join(' ');$('lB').textContent=b.join(' ');
+  setDiv(+$('cR').value);
+}
+function setDiv(v){var stage=$('stage'),w=stage.clientWidth,im=$('sA'),iw=parseFloat(im.style.width)||w,off=(w-iw)/2,x=w*v/100;
+  var cut=Math.max(0,Math.min(iw,x-off));im.style.clipPath='inset(0 '+(iw-cut)+'px 0 0)';$('sDiv').style.left=x+'px';$('sKnob').style.left=x+'px';}
+$('cR').oninput=function(){setDiv(+this.value);};
+(function(){var stage=$('stage'),drag=false;
+  function mv(ev){var r=stage.getBoundingClientRect(),v=Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100));$('cR').value=v;setDiv(v);}
+  stage.addEventListener('pointerdown',function(ev){drag=true;stage.setPointerCapture(ev.pointerId);mv(ev);});
+  stage.addEventListener('pointermove',function(ev){if(drag)mv(ev);});
+  stage.addEventListener('pointerup',function(){drag=false;});stage.addEventListener('pointercancel',function(){drag=false;});
+  window.addEventListener('resize',renderCmp);})();
+
+/* small icon cards */
+function smallCard(id){
+  var d=SML[id],role=d.fam==='K'?'sk':'se',c=el('div','dc');c.dataset.id=id;
+  var hd=el('div','hd','<b>'+id+'</b><span class="nm">'+d.name+'</span>'+(d.star?'<span class="st" title="Recommended">★</span>':''));
+  var b=el('button','pick '+role,d.fam==='K'?'Small for the atom':'Small for the Earth');b.onclick=function(){var cur=st[role];st[role]=(cur&&cur.id===id&&cur.pal===st.pal)?null:{id:id,pal:st.pal};st.show=id;save();render();};hd.appendChild(b);c.appendChild(hd);
+  c.appendChild(el('div','cell real'));c.appendChild(el('div','cell magn'));
+  c.appendChild(el('p','note',d.note));
+  return c;
+}
+SK.concat(SE).forEach(function(id){$('gS').appendChild(smallCard(id));});
+function renderSmall(){
+  var pal=st.pal;
+  Array.prototype.forEach.call($('gS').children,function(c){
+    var id=c.dataset.id,role=SML[id].fam==='K'?'sk':'se',on=st[role]&&st[role].id===id&&st[role].pal===pal;
+    c.className='dc'+(on?' p'+role:'');c.querySelector('.pick').classList.toggle('on',!!on);
+    var real=c.querySelector('.real');real.innerHTML='';
+    ['wp-dark','wp-light'].forEach(function(wp){var r=el('div','ones '+wp);PTS.slice().reverse().forEach(function(pt){r.appendChild(fig(smImg(id,pal,pt,false),pt+''));});real.appendChild(r);});
+    var mg=c.querySelector('.magn');mg.innerHTML='';var r=el('div','mag');
+    [[16,1],[16,2],[20,1],[24,1],[32,1],[32,2]].forEach(function(e){var im=el('img','px');im.src=sm(id,pal,e[0],e[1],false);var z=e[1]===2?2:4;im.width=e[0]*4;im.height=e[0]*4;im.alt='';
+      r.appendChild(fig(im,e[0]+(e[1]===2?' at 2x':'')+' ×'+z));});
+    mg.appendChild(r);
+  });
+}
+
+/* the real places */
+SK.concat(SE).forEach(function(id){var b=el('button','chip',id+' '+SML[id].name);b.dataset.id=id;b.onclick=function(){st.show=id;save();render();};$('showSel').appendChild(b);});
+function renderPlaces(){
+  var id=st.show,pal=st.pal;
+  Array.prototype.forEach.call($('showSel').children,function(b){b.classList.toggle('on',b.dataset.id===id);});
+  [$('sdD'),$('sdL')].forEach(function(h){dock(h,sm(id,pal,32,1,true),sm(id,pal,32,1,true)+' 1x, '+sm(id,pal,32,2,true)+' 2x',32,true);});
+  var rows=[['Applications','#3D8BF2','--'],['AudioLab Pro','','412 MB'],['Demo song.alproj','#F6C944','18 MB'],['Stems','#3D8BF2','--'],['Mix notes.txt','#C9C2AE','4 KB']];
+  [$('fdD'),$('fdL')].forEach(function(h){h.innerHTML='<div class="hdr">Name<em style="margin-left:auto;font-style:normal">Size</em></div>';
+    rows.forEach(function(r,i){var row=el('div','r'+(i===1?' sel':''));
+      if(r[1]){var ic=el('i');ic.style.background=r[1];row.appendChild(ic);}else row.appendChild(smImg(id,pal,16,true));
+      row.appendChild(el('span','',r[0]));row.appendChild(el('em','',r[2]));h.appendChild(row);});});
+  [$('tbD'),$('tbL')].forEach(function(h){h.innerHTML='';
+    [['Inbox','#F0435F'],['AudioLab Pro',''],['Docs','#3D8BF2']].forEach(function(t,i){var tb=el('div','tb'+(i===1?' on':''));
+      if(t[1]){var ic=el('i');ic.style.background=t[1];tb.appendChild(ic);}else tb.appendChild(smImg(id,pal,16,false));
+      tb.appendChild(el('span','',t[0]));h.appendChild(tb);});});
+  [$('wD'),$('wL')].forEach(function(h){h.innerHTML='';
+    var t=el('div','title');t.appendChild(smImg(id,pal,16,false));t.appendChild(el('span','','AudioLab Pro'));t.appendChild(el('span','ctl','<span>&#x2012;</span><span>&#x25A1;</span><span>&#x2715;</span>'));h.appendChild(t);
+    var k=el('div','task');['#3D8BF2','#F6C944'].forEach(function(col){k.appendChild(el('i','','<b style="background:'+col+'"></b>'));});
+    var me=el('span','run');me.appendChild(smImg(id,pal,24,false));k.appendChild(me);
+    ['#F0435F','#8E929B'].forEach(function(col){k.appendChild(el('i','','<b style="background:'+col+'"></b>'));});h.appendChild(k);});
+  [$('mbD'),$('mbL')].forEach(function(h){h.innerHTML='<b>AudioLab Pro</b><span>File</span><span>Edit</span><span>View</span><span class="sp"></span>';
+    var im=el('img');im.src=IMG[id+'-tpl-16@1x'];im.srcset=IMG[id+'-tpl-16@1x']+' 1x, '+IMG[id+'-tpl-16@2x']+' 2x';im.alt='template glyph';h.appendChild(im);h.appendChild(el('span','','Sat 14:33'));});
+}
+
+/* families */
+function renderFam(){
+  var main=st.main||{id:'K6a',pal:st.pal},other=st.other||{id:famOf(main.id)==='K'?'E6b':'K6a',pal:st.pal};
+  function smFor(p){var f=famOf(p.id),s=f==='K'?st.sk:st.se;return {id:s?s.id:(f==='K'?'KS6':'ES5'),pal:p.pal};}
+  [['famD'],['famL']].forEach(function(h){var host=$(h[0]);host.innerHTML='';
+    [['MAIN',main],['OTHER',other]].forEach(function(e){
+      var row=el('div','fr'),p=e[1],s=smFor(p);row.appendChild(el('span','lbl',e[0]+'<br>'+p.id+' + '+s.id));
+      [128,64].forEach(function(px){var im=el('img');im.src=big(p.id,p.pal,px);im.width=px;im.height=px;im.alt='';row.appendChild(fig(im,px+''));});
+      [32,24,20,16].forEach(function(pt){row.appendChild(fig(smImg(s.id,s.pal,pt,false),pt+''));});
+      host.appendChild(row);
+    });});
+}
+
+/* recommendations */
+RECS.forEach(function(r){var li=el('li');var im=el('img');im.src=big(r.d,'P2',128);im.alt='';li.appendChild(im);
+  var d=el('div','','<b><i>★</i> '+(r.role==='main'?'Main ':'Other ')+r.d+' with '+r.s+'</b><span>'+r.why+'</span>');li.appendChild(d);$('recs').appendChild(li);});
+
+/* the picks bar */
+function renderBar(){
+  var S=$('slots');S.innerHTML='';
+  [['main','MAIN',st.main,function(p){return big(p.id,p.pal,64);}],['other','OTHER',st.other,function(p){return big(p.id,p.pal,64);}],
+   ['sk','SMALL, ATOM',st.sk,function(p){return sm(p.id,p.pal,32,2,false);}],['se','SMALL, EARTH',st.se,function(p){return sm(p.id,p.pal,32,2,false);}]].forEach(function(e){
+    var d=el('div','slot '+e[0]);
+    if(e[2]){var im=el('img');im.src=e[3](e[2]);im.alt='';d.appendChild(im);}
+    d.appendChild(el('span','','<span class="k">'+e[1]+'</span> '+(e[2]?label(e[2]):'<span style="color:var(--dim)">not picked</span>')));S.appendChild(d);});
+  var sm_=[st.sk,st.se].filter(Boolean);
+  /* the small icon of the main family first */
+  if(st.main&&famOf(st.main.id)==='E')sm_.reverse();
+  var line='Round 6 picks: main '+(label(st.main)||'?')+' | other '+(label(st.other)||'?')+' | small '+(sm_.length?sm_.map(label).join(' '):'?');
+  $('lineOut').textContent=line;
+}
+$('copy').onclick=function(){var t=$('lineOut').textContent,b=this;
+  function done(ok){b.textContent=ok?'Copied':'Select the line and copy it';setTimeout(function(){b.textContent='Copy the line';},1800);}
+  function sel(){var r=document.createRange();r.selectNodeContents($('lineOut'));var s=getSelection();s.removeAllRanges();s.addRange(r);done(false);}
+  try{navigator.clipboard.writeText(t).then(function(){done(true);},sel);}catch(e){sel();}};
+$('swap').onclick=function(){var t=st.main;st.main=st.other;st.other=t;save();render();};
+
+function render(){
+  Array.prototype.forEach.call($('pSeg').children,function(b){b.classList.toggle('on',b.dataset.p===st.pal);});
+  Array.prototype.forEach.call(document.querySelectorAll('.card'),function(c){var id=c.dataset.id;
+    c.querySelector('.art').src=big(id,st.pal,512);
+    var m=st.main&&st.main.id===id&&st.main.pal===st.pal,o=st.other&&st.other.id===id&&st.other.pal===st.pal;
+    c.className='card'+(DES[id].ref?' ref':'')+(st.sel===id?' sel':'')+(m?' main':'')+(o?' other':'');
+    var pm=c.querySelector('.pick.main'),po=c.querySelector('.pick.other');if(pm){pm.classList.toggle('on',!!m);po.classList.toggle('on',!!o);}});
+  renderBench();renderSmall();renderPlaces();renderFam();renderBar();renderCmp();
+}
+render();
+})();
+</script>
