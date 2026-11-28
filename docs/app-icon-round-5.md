@@ -95,3 +95,10 @@ A short pick page: K5a tapered in 3 to 4 taper styles (T1 ...: from today's ship
 ## The user, 01:14 Brussels: M5d as the Earth and the Moon
 
 The user: "How is this field called? And is it the earth or? Let's go with the second M5 logo. Let's pretend that the yellow is the earth and the blue is the moon. Maybe we can do some variations with that information and keep it scientific." Read as M5d (the second design picked at 01:13). Built as its own pick page by task IC8 (docs/app-icon-round-5c.md, tools/icon-lab/round5c/), next to round 5b.
+
+## The user, 01:20 Brussels: the small icons
+
+The user: "For the zoomed ones: let's try MS2. I want the lit one, not the flat one. And let's try an M5c, the actual one, the non-flat one, and let's do some research on how to make icons like this smaller. And how do you do it? Do you zoom in or whatever? I actually really don't know."
+- **MS2 (closer, lit nucleus)** is the small icon to develop; never the flat nucleus.
+- A small version of **M5c** (glowing core, not flat) to try next to it.
+- Research on how small icons are made. Built by task IC9 (docs/app-icon-small-sizes.md, tools/icon-lab/round5s/), next to rounds 5b and 5c.
