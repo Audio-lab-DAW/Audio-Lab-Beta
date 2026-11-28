@@ -6455,3 +6455,36 @@ Fired by a manual trigger from the scheduling chat at about 23:59 UTC 27 Nov (it
 - Checked on v0.294 meanwhile: `taskXT_DL3.py` applies cleanly (as v0.295); on the built file `taskXT_DL3` 50 of 50, `taskXT_DL1` 21 of 21, `taskXT_DL2` 24 of 24, `taskXT_DL12` 85 of 85; lint clean; Fractals Kick -9.75669 dB (0496bb147f6c), Bass -25.48699 dB (09e0415bec5e) beats 64 to 96 at master 0 dB (-19.05560 and -35.48685 dB at -10 dB); start-up smoke test in the desktop app (real, none, keyboard, push1-loop, iac-push, noise, 20 s each) all clean; load time to ready 1995 ms before, 1949 ms after; frame time playing Fractals 27.4 before, 25.8 ms/frame after; no console errors; the window's screenshot looked at.
 - `taskXT_DL3_release.py` fixed: it now replaces the "built, not yet released" note in 'Where it stands' (it stopped on the two XT lines before).
 - Next XT run, once `desktop/release-freeze.json` is gone from main: `python3 tools/edits/taskXT_DL3.py index.html`, `python3 tools/edits/taskXT_DL3_release.py <version>`, `node desktop/scripts/sync-app.js`, the checks, check the freeze again, push. Then DL4.
+
+## 28 November 2026: task NB-N3i (the Space reverb: Chromium's ConvolverNode and the app's impulse, bit for bit)
+
+Fired by the schedule at 09:11 UTC. The claim of N3i (f0f302d, 01:40 UTC) had no work pushed after it and no log entry, so this run took the stage over from that claim. Release freeze on (`desktop/release-freeze.json`, the gate's run): this stage needs no `index.html` change, so none was made; `desktop/` untouched. Commit rules from CLAUDE.md (identity Audio-lab-DAW, no attribution lines).
+
+### Built
+- `native/engine/core/convolver.h`: Chromium 158.0.8127.36's ConvolverNode, statement by statement: `Reverb` (the normalisation scale: RMS power from `Vsvesq`, floored at 0.000125, times `powf(10, -58 * 0.05)`, times 44100 / rate), the channel cases 2, 4 and 5 (mono input into both channels, stereo input per channel), `ReverbConvolver` (a direct convolver for the first 64 frames, then FFT stages of 128, 128, 256, ... 8,192 points, `kMaxFftSize` 8192 from `convolver_handler.cc`), `ReverbConvolverStage` (pre-delay from each stage's render phase, the second channel one quantum later, post-delay into the accumulation buffer), `ReverbAccumulationBuffer`, `FFTConvolver` (overlap-add on part 1's RustFFT `FFTFrame`), and the direct stage on waveshaper.h's `DirectConvolver`. Chromium 158 has no background thread for the convolver any more, so offline and live run the same code.
+- `Vsvesq` as each platform's Chromium computes it: on x86 split by the buffer's alignment into a scalar part, an SSE part (4 lanes), an AVX part (8 lanes, when the CPU has AVX) and the rest, each summed on its own; on the Mac `vDSP_svesq`; on other ARM NEON's order.
+- `native/engine/core/apprandom.h`: the app's `RND()` (`seedRng` over the string's UTF-16 units, then `sfc32`, 15 numbers dropped), in JavaScript's 32-bit integer arithmetic. `RenderContext.appRandom`: the generator the devices that draw random numbers when they are made use (null: a generator of their own, as Math.random).
+- `native/engine/core/dev_reverb.h`: the app's `reverb` graph node for node (in, dry, the pre-delay DelayNode of up to 1 s, the highpass, the convolver, wet, og), on the render-quantum grid (`GridDevice`, the convolver's direct stage takes exactly one quantum), and `irBuf` (the impulse) in JavaScript's doubles with the engine's copy of V8's `Math.exp`. The impulse is made again only when decay (to two decimals, `toFixed(2)` exactly) or damping (rounded) changes, as in the app.
+- `make_ref_core.py`: `reverb` with 6 extra settings (Fractals' plate: decay 1 s, pre-delay 15 ms, damping 7 kHz, low cut 500 Hz, 100 % wet; 0.3 s and 8 s, damping and low cut at their ends, dry, odd values) and chains `chain-reverb-eq`, `chain-reverb-mix`; each reverb gets the app's `RND()` seeded with its own string (posted as `seed`, given to the engine). `make_bus_ref.py`: the same seeding, scenes `reverbbus` and `reverbbus128` (Fractals' plate on a return fed by two sends, a reverb on a mono track, one on a group, the master's compressor and clipper). `alrender` and `albus` seed `appRandom` per device.
+
+### Measured first (in the browser)
+- Where the AudioBuffer's channel data starts decides the order of the sum of squares, so the scale's last bit. Measured with an impulse into a ConvolverNode (its first 64 output frames are the scaled kernel exactly): offset 0 (32-byte aligned) reproduces the scale of all five test impulses; offsets 1, 2, 3, 4 and 6 each miss at least one. Assumed for every buffer; every case below confirms it.
+
+### Proven (Linux, this machine, headless Chromium 158, app v0.294)
+- **43 of 43 reverb cases bit for bit** (every preset, the extras) at 7, 33, 128, 512 and 4,096 frames per call.
+- The export's quantum 512: **142 of 142** (reverb, EQ, chorus, limiter and the chains) at 512, 128 and 7 frames per call; at quantum 128 the same 142 of 142.
+- The convolver on its own (a 1 s impulse, 102,400 stereo frames): bit for bit.
+- Buses: **28 of 28 scenes identical** (new: reverbbus, reverbbus128).
+- Cost: Fractals' plate (1.2 s impulse, 21 stages) 46 µs per 128 stereo frames (1.7 % of one core at 48 kHz); the 8 s impulse 318 µs (12 %), the default 2.2 s 105 µs. Making the impulse: 4 ms (1 s) to 50 ms (8 s), once per change.
+- GitHub: **native-ci run 46131060184** (push, commit 0e36ea9): Linux green, every device case bit for bit in Release and under ASan+UBSan at 128 and 7 frames and at 33, every bus scene identical (with the two reverb scenes). **Apple Silicon: native-ci run 46131546146** (macos-15, same engine code): every device case and every bus scene bit for bit against the Mac's own Chromium, so `vDSP_svesq` gives the same scale there as Chromium's own call.
+
+### Left
+- Chromium stops a ConvolverNode once its input has been flagged silent for longer than its impulse, and its stages resume where they stopped, so their FFT blocks are cut elsewhere than in a node that never stopped. That needs the graph's silence flags (sources that end), which come with clips as sources; the tests and a clip-free bus never set them.
+- In a whole song the app draws the impulses from the export's one seeded generator, in the order it builds the graph (and the instruments' own space sends, `irFor`, draw from it too): the engine must make its devices in that order. For the bridge (N2c) and the song render.
+- While playing the app makes a new impulse 120 ms after a change; the engine makes it at once (offline behaviour).
+- Long impulses are dear (Chromium's own partition, kept for the bits); a cheaper partition would change the sound, so it is not for now.
+- With Fractals' plate native, every kind of device Fractals uses has a native port (EQ, compressor, sidechain pump, tempo delay, plate reverb, clipper). Next: the song's sources (clips and instruments) so Fractals can render wholly native and be compared with the web export.
+
+### Assumptions
+- The AudioBuffer's channel data is 32-byte aligned (measured, see above).
+- Taking over the 01:40 claim: no push or log entry came from it in seven and a half hours.
