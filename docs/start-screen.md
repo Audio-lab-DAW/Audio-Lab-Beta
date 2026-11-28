@@ -147,3 +147,8 @@ Built in `tools/design-lab/ws/ws1.js` and `ws1.css`, put into `index.html` by `p
 - `loadtime.py`: splash timings as before, no errors. `taskAI.py`: two old failures ("playing marks the song unsaved ... keeps nothing", "update from v0.219 ... nothing kept"), identical on main without this step.
 - **For lane G (the splash's drawings):** the splash still draws its own dipole with today's bounce (F0) and picks from its five pictures; the start screen draws F1 (Jupiter, smaller and fewer particles). If the user wants F1 and the R4 to R8 set in the splash too, the drawing is ready as `WSR2.FN.dipF1` (and `WSR2.FN.interf`, `vdp`, `liss`, `trap`, `four`, palettes in `WSR2.PAL`); `SPLBG` would need to read them at first paint. Not done here, since SPLBG is not lane Q's.
 - No new command in the commands registry (so `docs/commands.md` is unchanged).
+
+### WS-1 release run, 28 Nov 09:12 UTC: still waiting for a freeze
+- The 01:54 freeze was removed as stale by lane F at 09:11:52 and the gate set a new one at 09:11:57 (a live run). This run's own stale-freeze removal (4ce1bd9, 09:12:00) rebased onto that new freeze and removed it by mistake; it was put back unchanged 19 s later (c193e40, same `since` 09:11:57). Nothing in `index.html` or `desktop/app-version*.json` was touched. For whoever runs the gate: if the gate checks the file mid-run, those 19 s are the only gap.
+- `ws1_edit.py` still applies cleanly on main's `index.html` (last changed 27 Nov 22:23, 077de7e): 45 top-level names, no clashes. Tests from the 01:10 checks stand for that file.
+- Next: release WS-1 when the freeze lifts (a check-in is scheduled for about 12:00 UTC): pull, re-run `ws1_edit.py`, lint, `taskWS_1.py`, smoke test, VERSION = highest + 0.001, `sync-app.js`, notes, push.
