@@ -104,3 +104,6 @@ The pick page is measured and live. In every layout the lanes fill at the true p
 - 28 Nov 15:56 UTC: **SG2-1 released**, v0.302: per-chunk spectrogram columns, the quick split in a worker. Test `tools/ui-tests/taskSG2_1.py`.
 - 28 Nov 16:07 UTC: **SG2-2 released**, v0.307: G1 lanes in the Split sheet, P1 draft stretch, F1 scan. Test `tools/ui-tests/taskSG2_2.py`.
 - 28 Nov 16:15 UTC: **SG2-3 released**, v0.309: S1 card with a strip per stem, hooks for lanes F and G. Test `tools/ui-tests/taskSG2_3.py`.
+- 28 Nov 16:18 UTC: **SG2-4 released**, v0.311: Audio to MIDI shows the lanes, then the listen rows. Test `tools/ui-tests/taskSG2_4.py`.
+
+**stem split lanes complete**: G1, S1, P1 and F1 are in the app (v0.311).

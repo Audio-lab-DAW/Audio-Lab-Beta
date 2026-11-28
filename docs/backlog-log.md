@@ -6983,3 +6983,8 @@ Fired by the scheduler. Built on 28 Nov while the release gate's freeze (09:11:5
 ### What NB must port
 - The resampler, bit for bit: U/D = out rate / in rate reduced by their gcd; fc = min(1, out/in) * 0.96; W = ceil(32/fc), T = 2W; phase ph's taps t at d = ph/U + (W-1-t): sinc(fc*d) * I0(10*sqrt(1-(fc*d/32)^2)) / I0(10) when |fc*d| < 32, else 0 (sin from fdlibm as V8; I0 the plain series, at most 63 terms, stop when a term is under 1e-21 of the sum); each phase divided by its own sum (double). Output i reads input j = k-W+1+t (0 outside), sum in double in tap order without FMA, rounded to float once; k and ph advanced in integers (ph += D; k += floor(ph/U); ph -= floor(ph/U)*U). Output length ceil(n*U/D).
 - When: only in a Hi-Fi song (`sq` 'clean'), for a buffer played at another rate; exports convert every buffer first; Hi-Fi off plays the original buffer (Chromium's linear interpolation, already ported).
+
+## 28 November 2026, task SG2-4 (lane R): Audio to MIDI shows the lanes, then the listen rows, v0.311
+- Audio to MIDI: a small hook in `split(j)` (the `sgo` lines) calls `SG_HOOKS.a2m(m, job, engine, buffer)` (`sgA2M`): the lanes replace `a2dbar` while it splits (put back when the pop-up redraws its body), and when it is done each `.a2sr` listen row gets its stem's spectrogram next to the name (`.sgA2`, `.sgA2l`); ▶, Convert and the mode are unchanged.
+- Test `tools/ui-tests/taskSG2_4.py`.
+- **stem split lanes complete** (SG2-1 to SG2-4, the user's picks G1, S1, P1, F1).

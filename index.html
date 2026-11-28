@@ -1935,6 +1935,10 @@ body.lite .sgWork,body.lkm1 .sgWork,body.fxstill .sgWork,.sgL.still .sgWork{back
 #sgCard .sgCr{font-size:10.5px;min-height:15px}
 #sgCard .sgCa{display:flex;gap:6px;align-items:center}#sgCard .sgCa span{flex:1}
 #sgCard .sgCa button{background:#15161c;border:1px solid rgba(255,255,255,.13);border-radius:6px;padding:2px 10px;color:#e6e8ee;font:500 11.5px Inter,system-ui,sans-serif;cursor:pointer}#sgCard .sgCa button:hover{border-color:#8c8f9b}
+/* task SG2-4 (lane R): Audio to MIDI's split shows the lanes; done, each lane sits in its listen row */
+.sgA2h{margin:4px 0}.sgA2h .sgSub{display:none}
+.a2sr.sgA2{grid-template-columns:auto auto minmax(54px,auto) minmax(0,1fr) auto auto auto}
+.sgA2l{position:relative;height:26px;border-radius:3px;overflow:hidden;background:#05070b;min-width:60px}.sgA2l canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .a2dbar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.a2dbar i{display:block;height:100%;background:#4cc9f0;transition:width .2s}
 .a2sr{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);font-size:var(--fs2)}.a2sr>i{width:10px;height:10px;border-radius:50%}.a2sr em{font-style:normal;color:#8a8d99;font-size:var(--fs1)}.a2sr button{min-width:30px;min-height:28px}.a2sr select{min-height:26px}
 /* v0.218 (task AO): while AudioLab is in the background every CSS animation stands still (the class sits on the root element) */
@@ -5269,6 +5273,21 @@ SG_HOOKS.keep=j=>sgCard(j);SG_HOOKS.added=j=>sgAdded(j);
 /* for lane F (OV5's notify) and lane G (MD1's pill) */
 SG_HOOKS.card=j=>{const d=document.createElement('div');sgStrips(d,j);return d};
 SG_HOOKS.pill=key=>{if(key!=='stem')return null;const j=[...SG2.jobs].find(x=>x.bg&&x.phase!=='done');if(!j)return null;const d=document.createElement('span');d.className='sgPs';sgStrips(d,j,'sgSts sgPst');return d};
+/* ===================== stem split lanes, step 4 (v0.311, task SG2-4, lane R) =====================
+   Audio to MIDI's "Split into stems first": the lanes replace the 4 px bar (a2dbar) while it splits, and when it is done each lane
+   becomes its listen row (the row keeps ▶, Convert and the mode; the stem's spectrogram sits next to its name). A small hook in
+   the split(j) callback calls SG_HOOKS.a2m(m, clipJob, engine, buffer) -> {cols, ph(phase,p,mb), done(state), end()}; the rows
+   and the pop-up stay Audio to MIDI's. The pop-up redraws its body now and then, so the lanes are put back after each redraw. */
+function sgA2M(m,a,eng,src){const q=eng==='quick',M=q?null:NEUM[eng],names=q?['Drums','Bass','Vocals','Other']:M.stems,cols=q?['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e']:M.cols;
+  const j=sgJob({kind:eng,name:a.c.name||'Audio',len:src.length,sr:src.sampleRate,stems:names.map((n,i)=>({name:n,col:cols[i],k:i}))});j.a2m=true;SG2.a2mLast=j;let el=null,mo=null;
+  const place=()=>{if(!m.isConnected||j.phase==='stop'||j.phase==='err'){if(mo)mo.disconnect();sgDrop(j);SG2.jobs.delete(j);return}
+    if(j.phase!=='done'){const bar=m.querySelector('.a2dbar');if(bar&&!(el&&el.isConnected)){m.querySelectorAll('.sgA2h').forEach(x=>x.remove());const h=document.createElement('div');h.className='sgA2h';bar.before(h);bar.hidden=true;sgDrop(j);el=sgLanes(h,j,{sub:' '})}}
+    else m.querySelectorAll('.a2sr').forEach((r,i)=>{if(r.querySelector('.sgA2l')||!j.stems[i])return;r.classList.add('sgA2');const d=document.createElement('div');d.className='sgA2l';d.title=j.stems[i].name+': its spectrogram';d.innerHTML='<canvas></canvas>';const b=r.querySelector('b');if(b)b.after(d);else r.appendChild(d);sgView(j,d.firstChild,i)})};
+  mo=new MutationObserver(place);mo.observe(m,{childList:true,subtree:true});place();if(q)sgPhase(j,'run');
+  sgMixCols(src,j.cw).then(x=>{j.mix=x;sgDrop(j);for(const v of j.views)if(v.si<0)sgPaint(j,v,0,j.cw)}).catch(()=>{});
+  const oc=d=>sgJobCols(j,d);oc.cw=j.cw;
+  return{job:j,cols:oc,ph:(ph,p,mb)=>sgPhase(j,ph,{p,mb}),done:s=>{j.lv=(s.stems||[]).map(x=>x.db);sgEnd(j,'done');sgDrop(j);place();SG2.jobs.delete(j)},end:()=>{sgEnd(j,'err');if(mo)mo.disconnect();sgDrop(j)}}}
+SG_HOOKS.a2m=sgA2M;
 /* ===================== neural stem separation: HTDemucs v4 (Meta, MIT weights) running in the browser =====================
    onnxruntime-web (WASM) in a background worker, the model downloaded once from Hugging Face and kept in the browser cache.
    7.8 s chunks with 25% overlap and linear cross-fades (overlap-add), at 44.1 kHz. */
@@ -7147,7 +7166,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.310',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.311',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -19058,11 +19077,11 @@ function a2dAsk(Q){A2DOPEN=true;Q.same=true;Q.mode=null;Q.tidy=false;Q.phase='ch
   };
   const sliceOf=j=>{const R=a2dRegion(j.c),b=ctx.createBuffer(R.B.numberOfChannels,Math.max(1,R.n0),R.B.sampleRate);for(let ch=0;ch<b.numberOfChannels;ch++)b.copyToChannel(R.B.getChannelData(ch).subarray(R.s0,R.s0+R.n0),ch);return b};
   async function split(j){ensureCtx();const s=j.st={status:'run',p:0,msg:'',eng:Q.eng};render();const upd=()=>{const e=document.getElementById('a2dSb'),t=document.getElementById('a2dSp');if(e)e.style.width=Math.round(s.p*100)+'%';if(t)t.textContent=s.msg||''};
-    try{const src=sliceOf(j);let bufs,names,cols;
-      if(Q.eng==='quick'){names=['Drums','Bass','Vocals','Other'];cols=['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'];bufs=await stemSplit(src,p=>{s.p=p;s.msg=Math.round(p*100)+'%';upd()},{bass:140,vlo:140,vhi:9000,focus:1.5,smooth:8})}
-      else{const M=NEUM[Q.eng];names=M.stems;cols=M.cols;bufs=await neuSeparate(src,Q.eng,names.map(()=>true),(ph,p,mb)=>{if(ph==='dl'){s.p=p;s.msg='downloading the model, '+Math.round(p*100)+'% of '+M.mb+' MB (only the first time)'}else if(ph==='init'||ph==='cached'){s.msg='loading the model'}else if(ph==='run'){s.p=p;s.msg=Math.round(p*100)+'%'}upd()})}
-      s.stems=bufs.map((b,i)=>{let pk=0;for(let ch=0;ch<b.numberOfChannels;ch++){const d=b.getChannelData(ch);for(let k=0;k<d.length;k+=3){const v=Math.abs(d[k]);if(v>pk)pk=v}}const db=20*Math.log10(Math.max(pk,1e-6)),nm=names[i];return{name:nm,buf:b,col:cols[i],db,on:db>-45,mode:A2DDM[nm.toLowerCase()]||'harmony'}});if(Q.dead)return;s.status='done'}
-    catch(e){if(Q.dead)return;s.status='err';s.err='The split did not work: '+(e&&e.message||e)+(Q.eng==='quick'?'':'. The neural model needs an internet connection the first time. You can choose the quick split instead.')}
+    let sgo=null;/* lane R (SG2-4): the stem split lanes */try{const src=sliceOf(j);let bufs,names,cols;sgo=SG_HOOKS.a2m?SG_HOOKS.a2m(m,j,Q.eng,src):null;
+      if(Q.eng==='quick'){names=['Drums','Bass','Vocals','Other'];cols=['#f5c84c','#4c8dff','#ff6bb5','#3ecf8e'];bufs=await stemSplit(src,p=>{s.p=p;s.msg=Math.round(p*100)+'%';upd()},{bass:140,vlo:140,vhi:9000,focus:1.5,smooth:8},sgo&&sgo.cols)}
+      else{const M=NEUM[Q.eng];names=M.stems;cols=M.cols;bufs=await neuSeparate(src,Q.eng,names.map(()=>true),(ph,p,mb)=>{if(ph==='dl'){s.p=p;s.msg='downloading the model, '+Math.round(p*100)+'% of '+M.mb+' MB (only the first time)'}else if(ph==='init'||ph==='cached'){s.msg='loading the model'}else if(ph==='run'){s.p=p;s.msg=Math.round(p*100)+'%'}upd();if(sgo)sgo.ph(ph,p,mb)},sgo&&sgo.cols)}
+      s.stems=bufs.map((b,i)=>{let pk=0;for(let ch=0;ch<b.numberOfChannels;ch++){const d=b.getChannelData(ch);for(let k=0;k<d.length;k+=3){const v=Math.abs(d[k]);if(v>pk)pk=v}}const db=20*Math.log10(Math.max(pk,1e-6)),nm=names[i];return{name:nm,buf:b,col:cols[i],db,on:db>-45,mode:A2DDM[nm.toLowerCase()]||'harmony'}});if(Q.dead){if(sgo)sgo.end();return}s.status='done';if(sgo)sgo.done(s)}
+    catch(e){if(sgo)sgo.end();if(Q.dead)return;s.status='err';s.err='The split did not work: '+(e&&e.message||e)+(Q.eng==='quick'?'':'. The neural model needs an internet connection the first time. You can choose the quick split instead.')}
     if(Q.dead)return;if(document.getElementById('a2d')===m)render()}
   m.addEventListener('click',e=>{const t=e.target;if(t===m)return;/* a click beside the window is ignored, so nothing is lost by accident; Cancel and the X are the ways out */
     const cd=t.closest('[data-card]');if(cd&&Q.phase==='choose'){Q.same=true;Q.mode=cd.dataset.card;Q.picked=true;for(const j of Q.jobs)j.mode=Q.mode;render();return}
