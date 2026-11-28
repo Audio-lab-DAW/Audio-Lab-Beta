@@ -2683,6 +2683,8 @@ body.dvg #fxin:not(.pinb) .dev.dvf.dvdock>.devb>.dvdpre{background:rgba(34,36,46
 #fxin:not(.pinb) .dev.dvf.dvpic>.devb>.dvdrw .dspr select{max-width:150px}
 @media (prefers-reduced-motion:reduce){#fxin:not(.pinb) .dev.dvf.dvdock>.devb>*{transition:none!important}}
 #dsStat{position:absolute;left:50%;top:0;height:100%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;font:400 11px/1 Inter,system-ui,sans-serif;color:#8b8b97;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:1}#dsStat[hidden]{display:none}#dsStat>i{width:6px;height:6px;border-radius:50%;background:#5a5d68;flex:none}#dsStat[data-s=ok]>i{background:#3ecf8e}#dsStat[data-s=chg]>i{background:#f5c84c}
+/* task UV-1 (lane O): while a zoom holds the track headers, every row is its own layer, so moving it costs no painting */
+#hdrin.uvz>*{will-change:transform}
 .dacv{display:flex;flex-direction:column;gap:3px;padding:6px 6px 5px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .dacv .dvh{display:flex;align-items:center;justify-content:space-between;font:var(--fw6) var(--fs1) var(--ffu);letter-spacing:.05em;color:#9aa0ad}.dacv .dvh output{font:var(--fw6) var(--fs1) var(--ffu);color:#e6e8ee}
 .dacv input{width:100%;height:14px;margin:0;accent-color:#4cc9f0;cursor:pointer}.dacv small{font-size:var(--fs1);color:#7d8292;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5398,7 +5400,7 @@ function clampV(){
   if(arrW>0)V.ppb=clamp(V.ppb,Math.min(arrW/(L-MAPL())*.55,600),600);
   const vis=arrW/V.ppb,lo=-Math.max(8,vis*.4);V.x=clamp(V.x,lo,Math.max(lo,L-vis*.25));
   if(laneH>0){const mn=UI.collAll?12:Math.max(34,laneH/(RB-RT)*.55);V.th=clamp(V.th,Math.min(mn,laneH),Math.max(mn,laneH))}
-  const top=Math.min(RT*V.th,-laneH*.4),yy=clamp(V.y,top,Math.max(top,RB*V.th-laneH*.25,TOTH+MSY0+mshOf()+24-laneH));V.y=SZ.size?yy:Math.round(yy);
+  const top=Math.min(RT*V.th,-laneH*.4),yy=clamp(V.y,top,Math.max(top,RB*V.th-laneH*.25,TOTH+MSY0+mshOf()+24-laneH));V.y=SZ.size||(UV&&UV.hold)?yy:Math.round(yy);
 }
 /* unified view animator: every wheel / pinch / modifier-scroll input adds to a 'remaining' amount that is eased out
    with a frame-rate independent exponential (tau ~40ms), so zoom and scroll glide and react immediately. */
@@ -5406,7 +5408,7 @@ const MSY0=78,mshOf=()=>clamp(Math.round(V.th*.5*(UI.mS||1)),16,260);const SZ=ne
 function smoothAdd(key,amt,apply,add){let z=SZ.get(key);if(!z){z={rem:0};SZ.set(key,z)}z.rem+=amt;z.apply=apply;z.add=add;SZraf=1}
 const smoothZoom=(key,amt,apply)=>smoothAdd(key,amt,apply,0);
 const smoothPan=(key,amt,apply)=>smoothAdd(key,amt,apply,1);
-function szStep(t){SZraf=0;const dt=SZt?Math.min(64,t-SZt):16;SZt=t;const a=1-Math.exp(-dt/40);let more=false;
+function szStep(t){SZraf=0;const dt=SZt?Math.min(64,t-SZt):16;SZt=t;const tau=uvTau(),a=tau>0?1-Math.exp(-dt/tau):1;let more=false;
   for(const[k,z] of[...SZ]){const th=z.add?.4:.003,st=Math.abs(z.rem)<th?z.rem:z.rem*a;z.rem-=st;if(st)z.apply(z.add?st:Math.exp(st));if(Math.abs(z.rem)>(z.add?.02:1e-4))more=true;else SZ.delete(k)}
   if(more)SZraf=1;else{SZt=0;if(typeof clampV==='function'){clampV();dirty=true}}}
 const mouseLike=e=>e.deltaMode===1||(e.deltaX===0&&Math.abs(e.deltaY)>=40&&Math.abs(e.deltaY)%40===0);
@@ -5550,7 +5552,7 @@ function drawArr(phOnly){DPX=(window.devicePixelRatio||1)*ZOOM;
   if(SELR){const r0=Math.min(SELR.r0,SELR.r1),r1=Math.max(SELR.r0,SELR.r1),x1=X0+(SELR.b0-V.x)*V.ppb,x2=X0+(SELR.b1-V.x)*V.ppb,y1=AY+TRY[r0]-V.y,y2=AY+TRY[r1]+V.th-V.y;g.save();g.beginPath();g.rect(X0,AY,w-X0,h-AY);g.clip();g.fillStyle=lkSel(.12);g.fillRect(x1,y1,x2-x1,y2-y1);g.strokeStyle=lkSel(.95);g.lineWidth=1;g.setLineDash([5,3]);g.strokeRect(Math.round(x1)+.5,Math.round(y1)+.5,Math.round(x2-x1),Math.round(y2-y1));g.setLineDash([]);g.fillStyle=lkT().sel;g.font='600 10px Inter,sans-serif';g.fillText(`${+(SELR.b1-SELR.b0).toFixed(2)} beats · drag to move · Shift-drag to insert · ⌫ to delete`,x1+6,Math.max(y1,AY)+12);g.restore()}
   thUnder(g,w,h);if(play.on&&UI.follow&&(UI.followMode==='center'||UI.followMode==='stay'))ARRWH=null;else arrSnap();arrPH(g,w,h);tmFlag(X0+(curDisp()-V.x)*V.ppb+phCfg().w/2,w);clipCacheSweep();
   const hc=$('#hdrcol');hc.style.top=TY+'px';{const capH=18,top0=(AY-TY)-capH-V.y,ch=ascHcH(hc,h),nT=S.tracks.length,bot=(AY-TY)-V.y+ascAddY(),gt0=(AY-TY)-capH,gt=clamp(top0+capH,0,ch),gb=clamp(Math.min(bot,(AY-TY)-V.y+TOTH),0,Math.max(0,ch-(BY||0)))/* the header glass stops where the device panel begins: glass under glass means both are recalculated and each change in one drags the other along */,gl=$('#hglass'),cp=$('#hdrcol .cap');gl.style.top=gt+'px';gl.style.height=Math.max(0,gb-gt)+'px';gl.style.display=gb-gt>1?'':'none';HGR.t=TY+gt;HGR.b=TY+gb;HGR.on=gb-gt>1;try{if(GB.on)gbClip()}catch(e){}cp.style.top=top0+'px';const hid=top0+capH<=0;cp.style.display=hid?'none':'';cp.style.clipPath=top0<0?`inset(${-top0}px 0 0 0)`:''}
-  {const tp=(AY-TY)+'px';if(hdrin.style.top!==tp)hdrin.style.top=tp}  {const dp=(window.devicePixelRatio||1)*ZOOM;hdrin.style.transform=`translate3d(0,${(-Math.round(V.y*dp)/dp).toFixed(3)}px,0)`}hdrin.style.setProperty('--th',V.th+'px');{const m=mshOf();hdrin.style.setProperty('--msh',m+'px');{const mh=hdrin.querySelector('.mhdr');if(mh)mh.style.top=(TOTH+MSY0)+'px'}hdrin.classList.toggle('mcomp',m<64);hdrin.classList.toggle('mtiny',m<38)}hdrin.style.setProperty('--lh',LH+'px');hdrin.style.setProperty('--mh',Math.max(4,V.th-7)+'px');hdrin.classList.toggle('big',V.th>=92);hdrin.classList.toggle('small',V.th<70);hdrin.classList.toggle('noaut',V.th<88);hdrin.classList.toggle('tiny',V.th<46);hdrin.classList.toggle('micro',V.th<28);hdrin.classList.toggle('nano',V.th<21);if(UI.collAll&&Math.abs(V.th-(UI.collTh||0))>3)UI.collAll=false;{const b=document.getElementById('bColl');if(b){const c=!!UI.collAll;if(b.classList.contains('on')!==c)b.classList.toggle('on',c)}}
+  {const tp=(AY-TY)+'px';if(hdrin.style.top!==tp)hdrin.style.top=tp}  {const dp=(window.devicePixelRatio||1)*ZOOM;hdrin.style.transform=`translate3d(0,${(-Math.round(V.y*dp)/dp).toFixed(3)}px,0)`}if(!(UV&&UV.hold&&uvHdrPose())){/* UV-1 (S13): laid out at rest only */hdrin.style.setProperty('--th',V.th+'px');{const m=mshOf();hdrin.style.setProperty('--msh',m+'px');{const mh=hdrin.querySelector('.mhdr');if(mh)mh.style.top=(TOTH+MSY0)+'px'}hdrin.classList.toggle('mcomp',m<64);hdrin.classList.toggle('mtiny',m<38)}hdrin.style.setProperty('--lh',LH+'px');hdrin.style.setProperty('--mh',Math.max(4,V.th-7)+'px');hdrin.classList.toggle('big',V.th>=92);hdrin.classList.toggle('small',V.th<70);hdrin.classList.toggle('noaut',V.th<88);hdrin.classList.toggle('tiny',V.th<46);hdrin.classList.toggle('micro',V.th<28);hdrin.classList.toggle('nano',V.th<21);}if(UI.collAll&&Math.abs(V.th-(UI.collTh||0))>3)UI.collAll=false;{const b=document.getElementById('bColl');if(b){const c=!!UI.collAll;if(b.classList.contains('on')!==c)b.classList.toggle('on',c)}}
 }
 
 function mapSongEnd(){let e=0;for(const t of S.tracks)for(const c of t.clips)e=Math.max(e,c.start+c.len);return Math.ceil(e)}
@@ -7166,7 +7168,7 @@ async function sampFile(I,fl){ensureCtx();try{const buf=await ctx.decodeAudioDat
 fxin.addEventListener('dragover',e=>{if(e.target.closest('canvas.ivz[data-k=samp]'))e.preventDefault()});
 fxin.addEventListener('drop',e=>{const cv=e.target.closest('canvas.ivz[data-k=samp]');if(!cv)return;e.preventDefault();e.stopPropagation();const fl=e.dataTransfer.files[0];if(fl)sampFile(curT().inst,fl)});
 /* ====================== v0.26 ====================== */
-const VERSION='0.313',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
+const VERSION='0.314',BUILD='28 November 2026';{const n=document.getElementById('navVer');if(n)n.textContent='v'+VERSION}
 
 /* --- about splash --- */
 function showAbout(){showSplash(true)}
@@ -8029,8 +8031,8 @@ prc.addEventListener('pointerup',e=>{prevOff();PR.scrub=null;if(pd&&pd.k==='velh
   pd=null;dirty=true});
 prc.addEventListener('wheel',e=>{
   e.preventDefault();const{x,y}=prPt(e);
-  if(e.ctrlKey||e.metaKey){smoothZoom('pr',wz(e),f=>zoomPR(f,x,y));return}
-  else if(e.altKey){smoothZoom('prv',-clamp(e.deltaY,-60,60)*.005,f=>{PR.rh*=f;clampPR();dirty=true});return}
+  if(e.ctrlKey||e.metaKey){uvZoomBy('pr',wz(e),f=>zoomPR(f,x,y),e);return}
+  else if(e.altKey){uvZoomBy('prv',-clamp(e.deltaY,-60,60)*.005,f=>{PR.rh*=f;clampPR();dirty=true},e);return}
   else{const dxw=e.shiftKey?e.deltaY:e.deltaX,sm=e.shiftKey||mouseLike(e),ly=e.deltaMode===1?16:1;
     if(dxw){if(sm)smoothPan('prx',dxw*ly,s=>{PR.x+=s/PR.ppb;clampPR();dirty=true});else PR.x+=dxw/PR.ppb}
     if(!e.shiftKey&&e.deltaY){if(sm)smoothPan('pry',e.deltaY*ly,s=>{PR.y+=s;clampPR();dirty=true});else PR.y+=e.deltaY}}
@@ -11115,7 +11117,7 @@ function ovwEl(){let L=document.getElementById('ovwL');if(L)return L;L=document.
   arr.parentNode.appendChild(L);const pt=e=>arrPt(e),chip=L.firstChild;
   chip.addEventListener('pointerdown',e=>e.stopPropagation());chip.addEventListener('dblclick',e=>e.stopPropagation());chip.addEventListener('click',e=>{e.stopPropagation();ovwLeave(null)});
   L.addEventListener('wheel',e=>{e.preventDefault();if(!OVW.on)return;const p=pt(e);
-    if(e.ctrlKey||e.metaKey)smoothZoom('ovw',wz(e),f=>ovwZoom(f,p.x,p.y));
+    if(e.ctrlKey||e.metaKey)uvZoomBy('ovw',wz(e),f=>ovwZoom(f,p.x,p.y),e);
     else{const ly=e.deltaMode===1?16:1,dx=(e.shiftKey?(e.deltaX||e.deltaY):e.deltaX)*ly,dy=e.shiftKey?0:e.deltaY*ly,sm=e.shiftKey||mouseLike(e);
       if(dx){if(sm)smoothPan('ovwx',dx,s=>ovwPan(s,0));else ovwPan(dx,0)}if(dy){if(sm)smoothPan('ovwy',dy,s=>ovwPan(0,s));else ovwPan(0,dy)}}},{passive:false});
   let gs=1;L.addEventListener('gesturestart',e=>{e.preventDefault();gs=1});L.addEventListener('gesturechange',e=>{e.preventDefault();if(!OVW.on)return;const f=e.scale/gs;gs=e.scale;const p=pt(e);smoothZoom('ovw',Math.log(f),q=>ovwZoom(q,p.x,p.y))});
@@ -18925,13 +18927,14 @@ for(const ev of['pointermove','pointerdown','keydown'])addEventListener(ev,e=>{i
 function zsAct(e){const c=e.ctrlKey||e.metaKey;if(e.ctrlKey&&!e.metaKey&&!ZSK.c)return'pinch';const k=[c?'ctrl':'',e.altKey?'alt':'',e.shiftKey?'shift':''].filter(Boolean).join('+');if(!k)return'';const z=ZS();
   for(const f of ZSF)if(z[f]===k)return f;for(const m of k.split('+'))for(const f of ZSF)if(z[f]===m)return f;return''}
 function zsWheel(e,bt,rw,key){let act=zsAct(e);if(!act)return false;const z=ZS(),pin=act==='pinch';if(pin){if(!z.pinch)return true;act='zoom'}
-  const raw=e.deltaY||e.deltaX,ly=e.deltaMode===1?16:1;/* a held Shift turns a mouse wheel into a sideways scroll in most browsers, so either axis counts */
-  if(act==='side'){if(FLOCK()){WACC=(performance.now()-WACT>400?0:WACC)+raw;WACT=performance.now();if(Math.abs(WACC)>140){WACC=0;phFlash()}}else if(raw)smoothPan('arrx',raw*ly,s=>{V.x+=s/V.ppb;clampV();dirty=true});return true}
+  const raw=e.deltaY||e.deltaX,ly=e.deltaMode===1?16:1,ez=!pin&&uvEase(e);/* a held Shift turns a mouse wheel into a sideways scroll in most browsers, so either axis counts. UV-1 (S9): ez = a notched mouse wheel, eased; a pinch or a trackpad is applied in this frame */
+  if(act==='side'){if(FLOCK()){WACC=(performance.now()-WACT>400?0:WACC)+raw;WACT=performance.now();if(Math.abs(WACC)>140){WACC=0;phFlash()}}else if(raw){const ap=s=>{V.x+=s/V.ppb;clampV();dirty=true};if(ez)smoothPan('arrx',raw*ly,ap);else ap(raw*ly)}return true}
   const amt=-clamp(raw*ly,-60,60)*.0085*(z.speed/100)*(z.inv&&!pin?-1:1);if(!amt)return true;
   if(z.anchor==='play'){const pb=curBeat();if(pb>=V.x&&pb<=V.x+arrW/V.ppb)bt=pb}/* the playhead is the anchor while it is in view, else the pointer */
-  if(act==='zoom')smoothZoom(key,amt,f=>zoomAround(f,UI.mapZoom==='ableton'?1:f,bt,rw));
-  else if(act==='th')smoothZoom(key+'v',amt*.45,f=>zoomAround(1,f,bt,rw));
-  else smoothZoom(key+'h',amt,f=>zoomAround(f,1,bt,rw));
+  const go=(k,a,f)=>{if(ez)smoothZoom(k,a,f);else{SZ.delete(k);f(Math.exp(a))}};
+  if(act==='zoom')go(key,amt,f=>{if(UI.mapZoom!=='ableton')uvHold();zoomAround(f,UI.mapZoom==='ableton'?1:f,bt,rw)});
+  else if(act==='th')go(key+'v',amt*.45,f=>{uvHold();zoomAround(1,f,bt,rw)});
+  else go(key+'h',amt,f=>zoomAround(f,1,bt,rw));
   return true}
 /* over the track headers only the track height key has a job; everything else scrolls up and down as before */
 function zsHdrWheel(e){if(zsAct(e)!=='th')return false;const r=arr.getBoundingClientRect();return zsWheel(e,V.x,((e.clientY-r.top)/ZOOM-AY+V.y)/V.th,'arr')}
@@ -27467,6 +27470,55 @@ function sndDefFilter2(){
 {const _fl=fxLib;fxLib=function(){const r=_fl.apply(this,arguments);try{for(const k in FXPRE.afilt||{}){const v=FXPRE.afilt[k][1];if(v)delete v.q}}catch(e){}return r}}
 {const _rf=renderFx;renderFx=function(){const r=_rf.apply(this,arguments);try{sndTips()}catch(e){}return r}}
 /* ==SND1-js-end== */
+/* ---------- task UV-1 (lane O, view engine; the user's UX1 picks S9 and S13) ----------
+   S9 direct trackpad: a pinch (a wheel event with ctrlKey and no Control key down) and a trackpad scroll with a zoom key are applied in
+   the frame they arrive in (zoomAround at once, no second easing on top of the trackpad's own smoothing). Only notched mouse wheels
+   (and the zoom buttons) are eased, with tau 15 ms (was 40); with reduced motion nothing is eased. Speed, Zoom around (Anchor), Invert
+   and "Trackpad pinch zooms" work as before: zsWheel still computes the amount and the anchor, only the easing is skipped.
+   S13 zoom without page layout: while a zoom changes the track height, the track headers keep the layout they had (drawArr does not
+   write --th, --lh, --msh, --mh or the size classes); uvHdrPose moves every row with a transform to where the new heights put it and
+   clips it to its new height. The clip pictures are drawn from their cached picture scaled to the new size (uvClipStale) instead of
+   being drawn again at every step. 90 ms after the last zoom step (UV.rest) uvRest lets go: the header is laid out once and the
+   arrangement drawn in full, so at rest every pixel is what the drawing without UV-1 gives.
+   Hooks: UV_HOOKS.holding() tells other lanes a zoom is under way (their header code can skip work). */
+var UV={tau:15,rest:90,hold:false,tm:0,lf:0,th0:0,lh0:0,try0:null,toth0:0,rows:null,ver:0};
+const UV_HOOKS={holding:()=>!!(UV&&UV.hold)};
+let UVRM=null;
+function uvStill(){try{if(!UVRM)UVRM=matchMedia('(prefers-reduced-motion: reduce)');return UVRM.matches}catch(e){return false}}
+function uvTau(){return(typeof UV==='object'&&UV)?(uvStill()?0:UV.tau):40}
+/* a notched mouse wheel (eased) or a trackpad (direct). Lines (deltaMode 1), the 40 px steps mouseLike knows, or a whole 120 wheelDelta on one axis */
+function uvNotch(e){if(e.deltaMode)return true;if(mouseLike(e))return true;const wx=Math.abs(e.wheelDeltaX||0),wy=Math.abs(e.wheelDeltaY||0);return(wx===0)!==(wy===0)&&wx+wy>=120&&(wx+wy)%120===0}
+function uvEase(e){return uvNotch(e)&&uvTau()>0}
+/* zoom by exp(amt): at once for a pinch or a trackpad, eased for a notched wheel */
+function uvZoomBy(key,amt,apply,e){const pin=e&&e.ctrlKey&&!e.metaKey&&!ZSK.c;if(!pin&&e&&uvEase(e))smoothZoom(key,amt,apply);else{SZ.delete(key);if(amt)apply(Math.exp(amt))}}
+/* the header holds its layout from the first zoom step until UV.rest ms after the last one */
+function uvHold(){if(UV.tm)clearTimeout(UV.tm);UV.tm=setTimeout(uvRest,UV.rest);UV.lf=FRN;if(UV.hold||typeof hdrin==='undefined'||!hdrin||!S.tracks.length)return;
+  const th0=parseFloat(hdrin.style.getPropertyValue('--th'))||V.th,sv=V.th;V.th=th0;layoutRows();UV.th0=th0;UV.lh0=LH;UV.try0=TRY.slice();UV.toth0=TOTH;V.th=sv;layoutRows();
+  const ix=new Map(S.tracks.map((t,i)=>[t.id,i])),rows=[];let j=0;
+  for(const el of hdrin.children){const cl=el.classList,r={el,tr:el.style.transform,cp:el.style.clipPath};
+    if(cl.contains('hdr')){r.k='h';r.i=ix.get(el.dataset.id);j=0}else if(cl.contains('lhd')){r.k='l';r.i=ix.get(el.dataset.id);r.j=j++}else r.k='a';
+    if((r.k==='h'||r.k==='l')&&r.i==null)r.k='a';rows.push(r)}
+  UV.rows=rows;UV.n=hdrin.childElementCount;UV.hold=true;hdrin.classList.add('uvz')}
+/* called by drawArr in place of the header's CSS variables while the zoom holds; false = let go now (the header was rebuilt) */
+function uvHdrPose(){const R=UV.rows;if(!R||hdrin.childElementCount!==UV.n||(R.length&&!R[0].el.isConnected)||TRY.length!==UV.try0.length){uvRest(true);return false}
+  const T=TRY,T0=UV.try0,tail=TOTH-UV.toth0;
+  for(const r of R){let dy=tail,cut=0;
+    if(r.k==='h'){dy=T[r.i]-T0[r.i];cut=UV.th0-V.th}else if(r.k==='l'){dy=T[r.i]+V.th+r.j*LH-(T0[r.i]+UV.th0+r.j*UV.lh0);cut=UV.lh0-LH}
+    const tr=Math.abs(dy)>.004?(r.tr?r.tr+' ':'')+`translate3d(0,${dy.toFixed(2)}px,0)`:r.tr,cp=cut>.01?`inset(0 0 ${cut.toFixed(2)}px 0)`:r.cp;
+    if(r.el.style.transform!==tr)r.el.style.transform=tr;if(r.k!=='a'&&r.el.style.clipPath!==cp)r.el.style.clipPath=cp}
+  return true}
+function uvRest(now){if(UV.tm){clearTimeout(UV.tm);UV.tm=0}if(!UV.hold)return;
+  if(!now){if(FRN-UV.lf<2){UV.tm=setTimeout(uvRest,UV.rest);return}/* a slow screen: wait for two frames after the last step */for(const k of SZ.keys())if(/^(arr|map)/.test(k)){UV.tm=setTimeout(uvRest,UV.rest);return}}/* an eased zoom still running */
+  UV.hold=false;hdrin.classList.remove('uvz');for(const r of UV.rows||[]){if(r.el.style.transform!==r.tr)r.el.style.transform=r.tr;if(r.k!=='a'&&r.el.style.clipPath!==r.cp)r.el.style.clipPath=r.cp}UV.rows=null;clampV();dirty=true}
+/* E19 (UX2 wish, lane O): Follow "Page" turns at 90 % of the view and keeps the last fifth of the old page in view (the playhead lands at 10 %),
+   so a turn moves 80 % of the view instead of 95 %; a playhead outside the view (a jump) still lands at 5 %. No turn while a pointer edit
+   is held in the arrangement or the piano roll: the turn comes when it is let go. */
+function uvPageTurn(b,vis){return b>V.x+vis*.9&&b<V.x+vis?V.x+vis*.8:b-vis*.05}
+function uvEditing(){return!!(ad||md||pd)}
+/* clip pictures during the hold: the cached picture scaled to the clip's new size (lane A's drawClipC draws it again at rest) */
+{const _uvDc=drawClipC;drawClipC=function(g,t,c,G,w){const d=(window.devicePixelRatio||1)*ZOOM,W=Math.ceil(G.w),cached=!(G.x<X0+.5||(W+8)*d>4096||W<3);
+  if(UV.hold&&cached){const e=CLC.get(c.id);if(e&&e.uvw&&e.uvd===d){const sx=G.w/e.uvw,sy=G.h/e.uvh,P=4;e.u=FRN;g.drawImage(e.cv,G.x-P*sx,G.y-P*sy,e.cv.width/d*sx,e.cv.height/d*sy);return}}
+  const r=_uvDc.apply(this,arguments);if(cached){const e=CLC.get(c.id);if(e){e.uvw=G.w;e.uvh=G.h;e.uvd=d}}return r}}
 function askChoice(title,text,btns,icon){return new Promise(res=>{const m=$('#cdlg');$('#cdT').textContent=title;$('#cdP').textContent=text;$('#cdI').innerHTML=icon||'';$('#cdI').hidden=!icon;$('#cdI').classList.toggle('del',/M4 7h16/.test(icon||''));
   $('#cdB').innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${b.cls||''}">${esc(b.label)}</button>`).join('');m.hidden=false;
   const done=v=>{m.hidden=true;m.onclick=null;document.removeEventListener('keydown',kd,true);res(v)},kd=e=>{if(e.key==='Escape'){e.stopPropagation();e.preventDefault();done(null)}};document.addEventListener('keydown',kd,true);
@@ -29266,7 +29318,7 @@ function fpsHint(){const h=document.getElementById('fpsHint');if(!h)return;const
 let FRERR=0;function frame(now){requestAnimationFrame(frame);try{frame0(now)}catch(e){if(FRERR++<5){console.error('frame',e);try{wdLog('Screen update error: '+(e&&e.message||e))}catch(_){}}dirty=true}}
 function frame0(now){if(EXFZ){cpuFrame(0);return}fpsTrack(now);{const cap=+UI.fpsCap||0;if(cap&&now-LFR<1000/cap-1.5)return}LFR=now;FRN++;paTick(now);if(S.tracks.some(t=>t.mods&&t.mods.length))modTick(now);refSync(false);if(SZraf)szStep(now);clockTick(now);SUBPX=0;const _w0=performance.now();FPS.t0w=_w0;
   const dt=Math.min(.1,(now-lastT)/1000);lastT=now;
-  let phd=false;if(!play.on)FSTAYF=null;if(play.on){phd=true;const ox=V.x;if(UI.follow&&!(md&&md.k!=='move')&&!(ad&&ad.k!=='pan')){const b=curDisp(),vis=arrW/V.ppb;if(UI.followMode==='center'||UI.followMode==='lead'||UI.followMode==='stay'){if(UI.followMode==='stay'&&FSTAYF==null){const f0=(b-V.x)/vis;FSTAYF=f0>=.03&&f0<=.97?f0:.28}const d=(window.devicePixelRatio||1)*ZOOM,ex=b-vis*(UI.followMode==='lead'?.28:UI.followMode==='stay'?FSTAYF:.5);V.x=Math.round(ex*V.ppb*d)/(V.ppb*d);clampV();SUBPX=V.x===Math.round(ex*V.ppb*d)/(V.ppb*d)?(ex-V.x)*V.ppb:0}else if(UI.followMode==='edge'){if(b>V.x+vis*.8){V.x+=Math.min((b-(V.x+vis*.8)),vis*.02+ (b-(V.x+vis*.8))*.15);clampV()}else if(b<V.x){V.x=b-vis*.05;clampV()}}else if(b>V.x+vis*.95||b<V.x){V.x=b-vis*.05;clampV()}}if(V.x!==ox)dirty=true}
+  let phd=false;if(!play.on)FSTAYF=null;if(play.on){phd=true;const ox=V.x;if(UI.follow&&!(md&&md.k!=='move')&&!(ad&&ad.k!=='pan')){const b=curDisp(),vis=arrW/V.ppb;if(UI.followMode==='center'||UI.followMode==='lead'||UI.followMode==='stay'){if(UI.followMode==='stay'&&FSTAYF==null){const f0=(b-V.x)/vis;FSTAYF=f0>=.03&&f0<=.97?f0:.28}const d=(window.devicePixelRatio||1)*ZOOM,ex=b-vis*(UI.followMode==='lead'?.28:UI.followMode==='stay'?FSTAYF:.5);V.x=Math.round(ex*V.ppb*d)/(V.ppb*d);clampV();SUBPX=V.x===Math.round(ex*V.ppb*d)/(V.ppb*d)?(ex-V.x)*V.ppb:0}else if(UI.followMode==='edge'){if(b>V.x+vis*.8){V.x+=Math.min((b-(V.x+vis*.8)),vis*.02+ (b-(V.x+vis*.8))*.15);clampV()}else if(b<V.x){V.x=b-vis*.05;clampV()}}else if(!uvEditing()&&(b>V.x+vis*.9||b<V.x)){V.x=uvPageTurn(b,vis);clampV()}}if(V.x!==ox)dirty=true}
   if(FOLR&&UI.followResume!==false&&play.on&&!UI.follow&&performance.now()-Math.max(FOLR,LWH)>3500){FOLR=0;UI.follow=true;dirty=true}
   if(SUBPX!==SUBAP){SUBAP=SUBPX;arr.style.transform=SUBPX?`translate3d(${(-SUBPX).toFixed(3)}px,0,0)`:''}
   const g30=now-LG30>=33;if(g30)LG30=now;/* things inside glass panels (time display, meters, device pictures) update 30 times a second: every update makes the whole panel's glass recalculate. The playhead in the open arrangement keeps the full screen rate. */
