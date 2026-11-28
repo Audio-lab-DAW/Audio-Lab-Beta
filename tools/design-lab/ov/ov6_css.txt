@@ -1,0 +1,17 @@
+/* task OV6a (lane F, pick T3): the tooltip as a callout with a leader (an amber hairline with a dot), drawn with the LOOK tokens */
+#tip.ovt3{max-width:270px;padding:8px 10px;background:rgba(20,21,27,.985);border-radius:var(--ov-r-tip,8px);display:flex;flex-direction:column;gap:4px;transform:none;line-height:16px;transition:opacity calc(var(--ov-mo,1)*var(--ov-tip,80ms)) linear}
+#tip.ovt3.hov{pointer-events:auto}#tip.ovt3.still{transition:none}
+#tip.ovt3 .ovtn{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:var(--ov-lab);letter-spacing:var(--ov-labsp,.12em);text-transform:uppercase;color:var(--ov-mut,#8b8b97)}
+#tip.ovt3 .ovtn span{display:block;color:inherit;line-height:13px;white-space:normal}
+#tip.ovt3 .ovtn kbd{font:var(--ov-key);font-size:10px;letter-spacing:0;text-transform:none;color:#e8e9ee;border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:0 4px;white-space:nowrap;line-height:15px}
+#tip.ovt3 .ovtv{font:400 13px/1.2 "JetBrains Mono",ui-monospace,Menlo,monospace;color:#e8e9ee;font-variant-numeric:tabular-nums}
+#tip.ovt3 .ovtv u{text-decoration:none;color:var(--ov-amb,#ffb547);font-size:9px;letter-spacing:.06em;margin-left:3px;text-transform:uppercase}
+#tip.ovt3 .ovtx{font-size:11.5px;color:#a9acb8;line-height:16px}
+#tip.ovt3 .ovtd{font:400 10.5px/1.3 "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--ov-mut,#8b8b97);text-transform:uppercase;letter-spacing:.02em}
+#tip.ovt3 .tv{margin-top:2px}
+#ovLead{position:fixed;z-index:10049;width:0;border-left:1px solid var(--ov-amb,#ffb547);pointer-events:none;animation:ovFade calc(var(--ov-mo,1)*var(--ov-tip,80ms)) linear}
+#ovLead[hidden]{display:none}#ovLead.still{animation:none}
+#ovLead::after{content:"";position:absolute;left:-3px;bottom:-3px;width:5px;height:5px;border-radius:50%;background:var(--ov-amb,#ffb547)}
+#ovLead.up::after{bottom:auto;top:-3px}
+#ovLead.side{border-left:0;border-top:1px solid var(--ov-amb,#ffb547)}#ovLead.side::after{left:auto;bottom:auto;right:-3px;top:-3px}#ovLead.side.lf::after{right:auto;left:-3px}
+body.fxmin #ovLead{animation:none}
