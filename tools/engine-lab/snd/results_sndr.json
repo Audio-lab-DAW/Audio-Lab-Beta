@@ -1,0 +1,74 @@
+{
+ "after": {
+  "passed": 14,
+  "total": 14,
+  "res": {
+   "exact": 0,
+   "first": [
+    0.271549254655838,
+    0.5050635933876038,
+    0.17582030594348907
+   ],
+   "indep": true,
+   "distinct": true,
+   "rq": true,
+   "bs": true,
+   "key": true,
+   "crushIndep": true,
+   "crushMoves": true,
+   "crushRms": -10.96513902505998,
+   "repeat": true,
+   "crushBs": true,
+   "seedMatters": true,
+   "freeDiffers": true,
+   "ms8": 2475.5999999999767,
+   "pctCore": 1.5472499999999854
+  }
+ },
+ "before": {
+  "passed": 4,
+  "total": 14,
+  "res": {
+   "exact": 5120,
+   "first": [
+    0.2568569481372833,
+    0.10308538377285004,
+    0.8318847417831421
+   ],
+   "indep": false,
+   "distinct": true,
+   "rq": true,
+   "bs": false,
+   "key": false,
+   "crushIndep": false,
+   "crushMoves": true,
+   "crushRms": -10.958319403012595,
+   "repeat": true,
+   "crushBs": false,
+   "seedMatters": false,
+   "freeDiffers": false,
+   "ms8": 1699.4000000000233,
+   "pctCore": 1.0621250000000146
+  }
+ },
+ "renders": {
+  "before": {
+   "rms": -27.404,
+   "peak": -15.123
+  },
+  "after": {
+   "rms": -27.414,
+   "peak": -15.119
+  }
+ },
+ "cost": {
+  "before": {
+   "rand": 1673.9,
+   "plain": 1066.9
+  },
+  "after": {
+   "rand": 1555.5,
+   "plain": 910.3
+  }
+ }
+}
