@@ -11,7 +11,7 @@ One step per run; each run does the next step not yet logged as "task SQ<n>" in 
 |---|---|---|
 | SQ1 | The Quality switch (Q0a + Q0b), shown as one switch "Hi-Fi", and the DC blocker after biased shapers (Q10) | **done**, v0.296 (released 28 Nov, after the gate's freeze) |
 | SQ3 | Resample once (Q11): a windowed-sinc resampler in a worker; built-in sounds, bounces, stem results and export-rate buffers converted once and cached per rate, under the song's quality (Classic keeps the linear path bit for bit) | **done**, v0.310 |
-| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality | claimed 28 Nov 16:40 UTC (part a: the Sampler's Classic and One shot modes and the drum designers' key tracking; part b: the grain, emit and vgrain worklets) |
+| SQ3b | The sinc (or cubic) read for pitched samples (Q12), under the device's quality: part a, the Sampler's Classic and One shot modes and the drum designers with Key tracking (main-thread sources); part b, the grain, emit and vgrain worklets | part a **built and tested** 28 Nov (waits for the gate's freeze); part b next |
 | SQ4 | The Limiter style "True peak 4x" (Q13: BS.1770 detection with the meter's filter from lane E, 4x final clip); the export safety limiter replaced by it at -1 dBTP (Q14: only exports that would clip change); the export report (Q15: true peak, overs, clipped samples) through lane F's notification or dialog code. Then: sound quality complete | |
 
 (There is no SQ2: al-poly's Hi-Fi oscillators and Acid went to lane L with the picks.)
@@ -78,13 +78,44 @@ Other rates, Hi-Fi off / on: 48 to 96 kHz at 10 kHz -18.8 / -140.3 dB, at 20 kHz
 - The resampler (`sqRsBank`, `sqRsRun`): U/D = out rate / in rate reduced by their gcd; fc = min(1, out/in) * 0.96; W = ceil(32/fc); T = 2W taps; for each phase ph in 0..U-1 the taps t = 0..T-1 sit at d = ph/U + (W-1-t), value sinc(fc*d) * I0(10*sqrt(1-(fc*d/32)^2)) / I0(10) when |fc*d| < 32, else 0 (sinc(0) = 1, sin from fdlibm as V8 uses it, I0 the plain series to 1e-21 relative, at most 63 terms), each phase divided by its own sum. Output i reads input taps j = k-W+1+t (0 outside the buffer), k and ph advanced exactly in integers (ph += D; k += floor(ph/U); ph -= that * U); the sum in double in tap order (no FMA), rounded to float once. Output length ceil(n*U/D).
 - When: only in a Hi-Fi song, for a buffer played at another rate than its own; exports convert every buffer first. NB resamples on load the same way and keeps the copy per rate.
 
+## SQ3b part a: the pitched read for the Sampler and the drum designers (built 28 Nov)
+
+### What changes
+- With Hi-Fi on for the device (`sqOf(inst)==='clean'`), a note of the Sampler in its Classic or One shot mode, or of a drum designer with Key tracking on (the Tom designer by default), played at another pitch than the sample's own, plays a copy of the sample already read at that pitch with a windowed sinc, at the rate it plays at (so a 44.1 kHz built-in sound is pitched and rate-changed in one step). The note at the sample's own pitch only gets SQ3's rate change (SQ3's copy, now also for a Hi-Fi device in a Hi-Fi off song).
+- Hi-Fi off: today's path, untouched (Chromium's linear `playbackRate`), the very same nodes and values.
+- The Sampler and the Tom designer now show the Hi-Fi switch; its tooltip says "the notes it plays away from the sample's own pitch are read with a cleaner method, so high notes keep their top end without harsh extra tones (Classic and One shot modes)".
+
+### How (no other lane's code changed)
+- `sampPlay` and `pzPlay` are wrapped: while a Hi-Fi note is built, the context's `createBufferSource` hands out nodes whose buffer is held back until `start()`, where the pitch is known (a node takes one buffer only). At `start(when, offset, duration)` the node gets the copy for its pitch and rate 1; offset, duration and loop points (seconds of the sample) are divided by the pitch ratio. The helper that moves a start already in the past (it wraps `start` for a moment) still sees consistent values: it runs after the swap.
+- Live: a pitch without its copy yet plays as before and its copy is made in a worker for the next time; when the song starts (`warmSounds`, wrapped) the pitches of the notes of Hi-Fi Samplers and key-tracked drum designers are converted ahead (at most 64 at a time).
+- Renders that make files (`renderMix`, `renderMixChunked`, `bounceRender`, wrapped only to count) convert a missing pitch on the spot with the same function, so a file never depends on timing; other offline renders use a copy if there is one.
+- The cache: a WeakMap on the sample, one copy per output rate and pitch, at most 160 MB in all (the oldest dropped first); a copy over 24 MB, or a pitch ratio beyond 1/16 to 64, stays on the linear path.
+- Not covered yet: the Sampler's Grains mode (the `al-grain` worklet), Emit and Vector Grain (`al-emit`, `al-vgrain`): part b. The grain fallback on the main thread (`UI.poly===false`) reads each grain at a random pitch and stays linear.
+- Hooks: `SQ_HOOKS.pitched(buffer, rate, playbackRate)` (promise), `SQ_HOOKS.pitchedNow(...)`, `SQ_HOOKS.warmPitched(rate)`.
+
+### Measured (`tools/ui-tests/taskSQ3b.py`, 61 checks, the research doc's case: a 0.5 sine at 48 kHz played at 2^(7/12) in a 48 kHz render, the middle second, `alias_report`)
+
+| +7 semitones | 1 kHz | 5 kHz | 10 kHz |
+|---|---|---|---|
+| Hi-Fi off (linear, as in the research doc) | -63.9 dB | -35.5 dB | -22.2 dB |
+| Hi-Fi on (sinc copy) | -144.2 dB | -128.8 dB | -123.2 dB |
+| Level, off / on | -0.012 / 0.000 dB | -0.310 / 0.000 dB | -1.233 / 0.000 dB |
+
+Other cases, off / on: -12 st at 8 kHz -22.9 / -121.1 dB; +19 st at 3 kHz -44.7 / -140.3 dB; a 44.1 kHz sample at +7 st (10 kHz) in 48 kHz -20.4 / -124.2 dB; at -5 st (15 kHz) -11.1 / -127.3 dB; +12 st is exact on both (rate 2). A constant passes within 1e-6. A 20 s stereo sample at +5 st takes 3.2 s in the worker on the 2-core cloud machine, 1.8 s on the spot. Notes end to end (Sampler Classic with its loop at notes 79 and 48, One shot at 72, Tom designer key-tracked at 67): the level within 0.05 dB of Hi-Fi off, the same first sample, the end within 3 ms (the release tail crosses -80 dB a little earlier), two renders the same bits; Hi-Fi off and devices following a Hi-Fi off song bit-identical with and without the hook.
+
+### What NB must port
+- The kernel: K(u) = sinc(u) * I0(10*sqrt(1-(u/32)^2)) / I0(10) for |u| < 32, else 0 (I0 as SQ3's), tabulated at L = 2048 points per unit, index i at u = i/L, 32*2048+2 entries (the last ones 0).
+- R = playbackRate (as float32) * sample rate / output rate; fc = min(1, 1/R) * 0.96; W = ceil(32/fc). Output i: pos = i*R (a fresh double product), k = floor(pos), fr = pos - k; for t = -W+1..W: d = |t - fr| * fc * L, a = floor(d), skip when a >= 32*L, w = T[a] + (T[a+1]-T[a]) * (d - a); sum w*x[k+t] (0 outside the sample) and sum w, both in double in tap order without FMA; the output is the first sum divided by the second, rounded to float once. Length ceil(n/R).
+- When: a Hi-Fi device (Sampler Classic or One shot, a drum designer with Key tracking), a note at a pitch other than the sample's own; offset, duration and loop points divided by the pitch ratio; renders that make files convert on the spot; Hi-Fi off is Chromium's linear read.
+
 ## Decisions taken without asking (the user can change them)
 - New devices start with Hi-Fi on even in an older song (Q0a and the user's "new devices start with Hi-Fi on"), unless the song's Hi-Fi was turned off by hand; the song setting is the default for devices without their own choice (Q0b).
 - The switch shows only on devices whose Hi-Fi sound differs, so it never switches nothing.
 - The Soft Clipper's blocker runs only while Asymmetry is not 0: a symmetric shaper makes no DC (-98.5 dBFS), and the blocker would otherwise shift the phase of the lowest notes for nothing.
 - A device with Hi-Fi on takes later Hi-Fi improvements of that device when the app updates; Hi-Fi off never changes. If the user wants Clean frozen per version too, a version number next to the field can be added later (`SQ.LV` is reserved for it).
 - The demos made from the New project window ("demo", "beat") open with Hi-Fi off: they are the demos.
-- Resampling follows the song's Hi-Fi, not each device's: the same buffer can feed several devices, and a copy per device would double the memory. The pitched reads (SQ3b) will follow the device.
+- Resampling follows the song's Hi-Fi, not each device's: the same buffer can feed several devices, and a copy per device would double the memory. The pitched reads (SQ3b) follow the device; a Hi-Fi device in a Hi-Fi off song also gets SQ3's rate change for its root notes (the same single copy per rate).
+- SQ3b part a pitches by a copy per pitch rather than reading with a sinc in real time: no new audio node, the copy is made once and every later note costs nothing; the cost is the first note at a new pitch, which plays as before while its copy is made.
 - The switch sits in the rail rather than the title strip because the user wants its line next to it, and the side strip (28 px, vertical) has no room for a line.
 
 ## The user's decision R1 (28 November 2026, 14:36 Brussels): one sound, no v1 kept
