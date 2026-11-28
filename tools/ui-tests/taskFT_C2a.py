@@ -138,8 +138,15 @@ with sync_playwright() as p:
     pg.screenshot(path=os.path.join(OUT, 'c2a_page_light.png'))
     R("const c=$('#liteChk');c.checked=false;c.dispatchEvent(new Event('change'))")
     # idle: no timers from the Push
-    R("window.__to=0;{const o=setTimeout;window.setTimeout=function(){__to++;return o.apply(this,arguments)}}"); pg.wait_for_timeout(1500)
-    ok(J(R, "__to") < 5, 'nothing runs while the Push is still', J(R, "__to"))
+    # only the controller layer's own timers count (scheduled from a p1*/ctl* function, or from inside the callback of one): the glass copy
+    # (elSoon from gbCopy) and other lanes' timers run while idle too and made this check flaky (task RG, 28 Nov); all timers are listed for the detail
+    R("window.__to=0;window.__toAll=0;window.__toOther={};{const o=setTimeout,RX=/\\b(p1[A-Z]\\w*|P1|ctl[A-Z]\\w*|CTL)\\b/;let inP=0;window.setTimeout=function(fn){__toAll++;"
+      "const st=(new Error().stack||'').split('\\n').slice(2).join(' '),mine=inP||RX.test(st)||RX.test(typeof fn==='function'&&fn.name||'');if(mine)__to++;else{const k=(st.match(/at (\\S+)/)||[])[1]||'?';__toOther[k]=(__toOther[k]||0)+1}"
+      "const a=[].slice.call(arguments);if(mine&&typeof fn==='function')a[0]=function(){inP++;try{return fn.apply(this,arguments)}finally{inP--}};return o.apply(this,a)}}"); pg.wait_for_timeout(1500)
+    ok(J(R, "__to") < 2, 'nothing runs while the Push is still (its own timers)', [J(R, "__to"), J(R, "__toAll"), J(R, "__toOther")])
+    # the count is real: an edit (changed()) makes the Push repaint through its own timer (p1All), and that one is counted
+    n0 = J(R, "__to"); R("changed()"); pg.wait_for_timeout(200)
+    ok(J(R, "__to") > n0, 'a Push repaint after an edit is counted as the Push\'s own timer', [n0, J(R, "__to")])
     # goodbye: switched off on the page, and on page hide
     R("FAKEMIDI.sent.length=0")
     pg.locator('#ctlWin input[data-k2=dev][data-d="Ableton Push"]').uncheck(); pg.wait_for_timeout(100)
