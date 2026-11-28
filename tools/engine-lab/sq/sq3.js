@@ -86,4 +86,6 @@ function sqRsWrap(fn,rate){return function(){const sr=rate(arguments);if(SQRS.of
  const _sc=sqScan;sqScan=function(){const r=_sc.apply(this,arguments);try{const q=sqProj();if((q!==SQRS.q||S!==SQRS.S)){SQRS.q=q;SQRS.S=S;if(q==='clean'&&ctx&&ctx.sampleRate)setTimeout(()=>sqRsWarm(ctx.sampleRate).catch(()=>{}),0)}}catch(e){}return r};
  const RT=' With Hi-Fi on, sounds made at another sample rate (built-in sounds, bounces, stems, exports at another rate) are converted once with a cleaner method.';
  if(!SQROW.h.includes(RT))SQROW.h+=RT;const r=typeof STX==='object'&&STX.get&&STX.get('songHiFi');if(r&&!r.h.includes(RT))r.h+=RT}
+/* the Hi-Fi row's stable settings id (lane H's registry, docs/settings-ids.md), named once: project.songHiFi */
+setTimeout(()=>{try{if(typeof XT_SET_NS==='object'&&XT_SET_NS&&!XT_SET_NS.songHiFi)XT_SET_NS.songHiFi='project.songHiFi'}catch(e){}},0);
 /* ===== end of lane N SQ3 ===== */
