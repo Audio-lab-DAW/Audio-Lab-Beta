@@ -137,3 +137,7 @@ This overrides every "old projects must still load / keep their sound / render b
 - **The start screen** (lane Q) lists only projects the current format opens; a file it cannot open gets a short plain message, never a crash.
 - **Still kept:** a project saved by the current version reopens with everything; the mixer, timing and sync stay exact; stable ids.
 - From the first public release on, compatibility starts again (projects made by released versions must open); until then, none is needed.
+
+## R4 parked by the user (28 November 2026, 14:44 Brussels)
+
+The user will rework the bit-identical export rule (R4) personally later. Until then the gate keeps its current export checks, with R1's new reference numbers after each released sound step. Do not change the export comparison on your own.
