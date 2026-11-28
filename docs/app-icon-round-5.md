@@ -91,3 +91,7 @@ The user: "I like K5A, but when it comes to the Atom, I forgot to say that I wan
 
 ### Next: round 5b (IC7, second run)
 A short pick page: K5a tapered in 3 to 4 taper styles (T1 ...: from today's shipped taper to a full perspective band with occlusion), M5d flat and tapered, both in P2 and P8 at 1024 to 64 with the Dock mock-ups; their zoomed-in small versions (32 px and below) redrawn to match; the main/other choice; and the picker review again. Picks line for example 'Round 5b picks: main K5a-T3 | other M5d-T2 | small KS3 MS1 | remove: ...'.
+
+## The user, 01:14 Brussels: M5d as the Earth and the Moon
+
+The user: "How is this field called? And is it the earth or? Let's go with the second M5 logo. Let's pretend that the yellow is the earth and the blue is the moon. Maybe we can do some variations with that information and keep it scientific." Read as M5d (the second design picked at 01:13). Built as its own pick page by task IC8 (docs/app-icon-round-5c.md, tools/icon-lab/round5c/), next to round 5b.
