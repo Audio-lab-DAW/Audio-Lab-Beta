@@ -1093,3 +1093,14 @@ Readability fit: smallest CIEDE2000 over four visions 2.2 -> 17.4 (limits: light
 ### After the picks
 
 The build task (TM, its own new lane, prefix `tm`) takes the picked versions as theme files in the W3C Design Tokens format, with the round 2 tokens (`accentFill`, `okS`, `selFill`, `tip*`, the style tokens) and `tools/design-lab/th2/check.py --gate` as the release-gate step. If A0 is picked for A, nothing changes for today's look and its misses stay the gate's baseline. Picking E2 or J2 also brings "Follow the system's light or dark setting" for that theme.
+
+## The user's round 2 picks (28 November 2026, 18:31 Brussels)
+
+`Theme round 2 picks: A1 B1 C2 D2 E2 G2 H1 J2 | default A1`
+
+The user on C (Space Race): "With the space race version, so we are taking the 3 rings, I think a little bit darker, but I want it to be a little bit more NASA themed. And let's have the settings button match your theme. So with the space race, I want more like NASA things."
+- **C2, adjusted:** a little darker, and more NASA in feel (mission-control and NASA-era references through tokens: colours, hairlines, type accents, grid; never decoration that costs readability; no NASA logos or trademarks).
+- **The settings button matches the theme:** the Settings (gear) button, and by extension the theme's small UI marks, take the active theme's look (TM4 below).
+- Default **A1**. Icons follow theme: yes (round 1).
+
+Built by task **TM**, lane S (prefix `tm`, row in CLAUDE.md): TM1 the semantic tokens on top of LOOK, the eight theme files (A1 B1 C2 D2 E2 G2 H1 J2, C2 darker and more NASA), `tmApply` live switching with no reload and no per-frame cost, `TM_HOOKS` for other lanes; TM2 the contrast check (`check.py --gate` or a Node port) as a release-gate step, with A's known misses as the baseline; TM3 the app icon follows the theme (through the icon picker's hook); TM4 the Settings button and the theme's small marks drawn per theme; the Settings row (theme cards, Adjust, Follow system appearance, Icon follows theme) through lane B's hooks; token adoption by lanes A, E, F and I through their own steps (TM leaves the token names and a short guide). Ends 'themes complete'.
