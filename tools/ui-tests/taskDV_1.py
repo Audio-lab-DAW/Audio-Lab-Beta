@@ -81,7 +81,7 @@ with sync_playwright() as p:
     v2 = J("fxin.querySelector('.dev[data-id=\"%s\"] .dvval').textContent" % cid)
     ok(v2 != st['val'], 'the values line follows the change', v2[:40])
     # keyboard: focus a control inside reveals
-    R("fxin.querySelector('.dev[data-id=\"%s\"] .dfs button, .dev[data-id=\"%s\"] .dfs select').focus();1" % (cid, cid)); pg.wait_for_timeout(400)
+    R("fxin.querySelector('.dev[data-id=\"%s\"] .dfs button, .dev[data-id=\"%s\"] .dfs select, .dev[data-id=\"%s\"] .dvdpre button').focus();1" % (cid, cid, cid)); pg.wait_for_timeout(400)
     ok(J("getComputedStyle(fxin.querySelector('.dev[data-id=\"%s\"] .dfs')).opacity" % cid) == '1', 'keyboard: Tab into a control shows the controls')
     R("document.activeElement.blur();1"); pg.wait_for_timeout(400)
     # touch: a tap on the picture
@@ -95,11 +95,12 @@ with sync_playwright() as p:
     eye.click(button='right'); pg.wait_for_timeout(300)
     m = J("{shown:!ctxm.hidden,t:ctxm.innerText+' '+ctxm.textContent}")
     ok(m['shown'] and 'Open the glass rail' in m['t'] and 'Hover reveal' in m['t'] and 'On the picture' in m['t'], 'right-click on the eye: the menu', m['t'].replace('\n', ' | ')[:160])
-    ok('Not ready on this device yet' in m['t'], 'On the picture says when a device has no positions yet')
+    hasp = J("!!DVPIC[curT().fx.find(q=>q.id==='%s').type]" % cid)  # the Compressor has positions from DV-4
+    ok(('Not ready on this device yet' in m['t']) != hasp, 'On the picture says whether this device has positions yet', hasp)
     R("[...ctxm.querySelectorAll('button[data-i]')].find(b=>b.textContent.includes('On the picture')).click();1"); pg.wait_for_timeout(400)
     ok(J("curT().fx.find(q=>q.id==='%s').kMode" % cid) == 'picture', 'On the picture is kept on this device (kMode)')
     ok(J("curT().fx.filter(q=>q.id!=='%s').every(q=>q.kMode===undefined)" % cid), 'only on this instance')
-    ok(J("fxin.querySelector('.dev[data-id=\"%s\"]').dataset.dvm" % cid) == 'hover', 'without positions it shows hover reveal')
+    ok(J("fxin.querySelector('.dev[data-id=\"%s\"]').dataset.dvm" % cid) == ('picture' if hasp else 'hover'), 'it shows On the picture where the device has positions, otherwise hover reveal')
     # Shift+F10 on the focused eye
     R("fxin.querySelector('.dev[data-id=\"%s\"] .dveye').focus();1" % cid); pg.keyboard.press('Shift+F10'); pg.wait_for_timeout(300)
     ok(J("!ctxm.hidden&&ctxm.innerText.includes('Hover reveal')"), 'Shift+F10 on the eye opens the menu')
@@ -116,8 +117,8 @@ with sync_playwright() as p:
     ok(J("(()=>{const t=curT();return[t.inst.kOpen,t.fx[3].kOpen,JSON.parse(JSON.stringify(S)).tracks[0].fx[3].kOpen]})()") == [False, False, False], 'a render never leaves kOpen changed (instrument and effect)')
     ok(J("JSON.parse(JSON.stringify(S)).tracks[0].fx.find(q=>q.id==='%s').kMode" % cid) == 'picture', 'kMode is saved with the project')
     # no cost at rest: all closed, mouse away
-    # (from DV-3 the Pro EQ really shows On the picture, its default: its chips cover its graph; set to hover reveal here, DV-3's test covers the picture)
-    R("(()=>{const t=curT();t.inst.kOpen=false;t.fx.forEach(f=>{f.kOpen=false;if(f.type==='eq')f.kMode='hover'});renderFx();return 1})()"); pg.mouse.move(5, 5); pg.wait_for_timeout(1200)
+    # (from DV-3 the Pro EQ, from DV-4 the Compressor really show On the picture: their chips cover the picture; set to hover reveal here, DV-3's and DV-4's tests cover the picture)
+    R("(()=>{const t=curT();t.inst.kOpen=false;t.fx.forEach(f=>{f.kOpen=false;if(DVPIC[f.type])f.kMode='hover'});renderFx();return 1})()"); pg.mouse.move(5, 5); pg.wait_for_timeout(1200)
     a = J("{s:DVG.n.sync,f:DVG.n.flatDirty,d:DVG.g?DVG.g.stats.flatUploads:0,v:DV.n.vals}"); pg.wait_for_timeout(1500)
     b2 = J("{s:DVG.n.sync,f:DVG.n.flatDirty,d:DVG.g?DVG.g.stats.flatUploads:0,v:DV.n.vals}")
     ok(a == b2, 'rail closed, at rest: no page reads, no picture refreshes, no uploads, no value updates', (a, b2))
