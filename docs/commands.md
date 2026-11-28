@@ -108,7 +108,9 @@ macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15); docs/extensions
 | Id | Command | Default key | Old id | Since |
 |---|---|---|---|---|
 | `help.shortcuts` | Keyboard shortcuts | `Mod+/` | `keys` | 0.273 |
-| `help.assistant` | Assistant | `Mod+K` | `ai` | 0.273 |
+| `help.assistant` | Assistant (no default key from 0.300: `Mod+K` opens the palette, `Mod+K` again the Assistant; a key the user gave it is kept) |  | `ai` | 0.273 |
+| `help.palette` | Command palette (every command, and the Assistant) | `Mod+K` | `help.palette` | 0.300 |
+| `help.keySheet` | Key sheet (every shortcut at a glance) | `?` | `help.keySheet` | 0.300 |
 | `help.tour` | Guided tour | `F1` | `tour` | 0.273 |
 
 ## Controllers

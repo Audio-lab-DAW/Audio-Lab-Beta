@@ -296,7 +296,7 @@ All six share one visual grammar:
 | **OV5** | One notification centre (N1). `toast()`, `updCard`, `liteNotice` and job progress go through `notify({kind, text, action, keep})`. Adds the stack, the drain pause, the log behind a bell in the status bar, and a "Do not show again" option for notices. | OV1, MD1 |
 | **OV6** | Help line plus tags (T1). A window-wide help line fed by `TIPS` and the S4 settings table. Tags at 500 / 300 ms, Esc hides them, keyboard focus shows them, and the missing text is written for the 227 controls without it. | Settings S4 and S9 |
 | **OV7** | Drop targets and caliper (X1) on the arrangement, the mixer reference slot and the device racks, with the keyboard alternative. | MD1 (M3 caliper) |
-| **OV8** | Command palette (K1) over `SCA`, with Recent, the Assistant row and the ? key sheet. | user's answer on ⌘K vs ⌘P |
+| **OV8** (built as K1, on ⌘K with the Assistant inside) ✅ done v0.300 | Command palette (K1) over `SCA`, with Recent, the Assistant row and the ? key sheet. | user's answer on ⌘K vs ⌘P |
 
 OV2 and OV4 to OV7 can be done in any order after OV1; OV3 waits for the rules file. Each task checks:
 - Dark, Light and Solid levels;
