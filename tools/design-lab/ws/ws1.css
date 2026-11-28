@@ -58,3 +58,10 @@ body.lite .ws .wsCard{box-shadow:none}
 @media (prefers-reduced-motion:reduce){.ws,.ws .wsSw i::after{transition:none}}
 /* D3: no demo songs in the New project window */
 #np #npTpl [data-t="demo"],#np #npDemo,#np h4:has(+#npDemo){display:none!important}
+/* WS-1b: 'Start screen drawings…' under the start screen's row in Settings, General */
+.wsdr{margin:2px 0 6px 24px}.wsdr>summary{cursor:pointer;color:#a9aebb;font-size:12px;padding:3px 0;list-style:none}.wsdr>summary::-webkit-details-marker{display:none}
+.wsdr>summary:hover{color:#e6e8ee}.wsdr .wsdrN{color:#ffb547;font:11px/1 'JetBrains Mono',ui-monospace,monospace;margin-left:6px}
+.wsdr .wsdrL{display:grid;grid-template-columns:minmax(0,1fr);gap:0;max-width:380px;padding:6px 10px;border:1px solid rgba(255,255,255,.08);border-radius:6px;margin-top:4px}
+.wsdr .wsdrR{display:flex;align-items:center;justify-content:space-between;gap:8px}.wsdr .wsdrR .chk{margin:2px 0}.wsdr .wsdrR .chk{white-space:nowrap}.wsdr .mini{white-space:nowrap;flex:none}.wsdr .wsdrR .mini{opacity:.55}.wsdr .wsdrR:hover .mini,.wsdr .wsdrR .mini:focus-visible{opacity:1}
+.wsdr .wsdrF{display:flex;align-items:center;gap:10px;margin-top:6px}.wsdr .wsdrF small{color:#8d92a3}
+body.lite .wsdr>summary{color:#5b6070}body.lite .wsdr>summary:hover{color:#1d2030}body.lite .wsdr .wsdrN{color:#a85f00}body.lite .wsdr .wsdrL{border-color:rgba(0,0,0,.12)}body.lite .wsdr .wsdrF small{color:#6a6f7d}

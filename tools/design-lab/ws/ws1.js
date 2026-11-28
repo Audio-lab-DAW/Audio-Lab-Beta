@@ -58,9 +58,22 @@ function wsMini(cv,s){const w=72,h=28,d=Math.min(2,devicePixelRatio||1);cv.width
 /* ---- the drawing ---- */
 function wsPal(k){return(window.SPLBG&&SPLBG.PAL[k])||WSR2.PAL[k]||SPLBG.PAL.dipole}
 function wsFn(k){return k==='dipole'?WSR2.FN.dipF1:k==='moons'?SPLBG.FN.moons:WSR2.FN[k]}
+/* WS-1b: the drawings the user keeps on (UI.wsDraw, a list; missing means all on; never empty) */
+function wsDrawOn(){const a=UI.wsDraw;if(!Array.isArray(a))return WS.SET.slice();const L=WS.SET.filter(k=>a.includes(k));return L.length?L:WS.SET.slice()}
 function wsPick(){let f=null,last=null;try{f=localStorage.getItem('audiolab-ws-kind');last=localStorage.getItem('audiolab-ws-last')}catch(e){}
-  if(WS.SET.includes(f))return f;const sk=window.SPLBG&&SPLBG.kind?SPLBG.kind():null;let k=sk==='dipole'||sk==='moons'?sk:null;
-  if(!k){const L=WS.SET.filter(x=>x!==last);k=L[Math.floor(Math.random()*L.length)]}try{localStorage.setItem('audiolab-ws-last',k)}catch(e){}return k}
+  if(WS.SET.includes(f))return f;const on=wsDrawOn(),sk=window.SPLBG&&SPLBG.kind?SPLBG.kind():null;let k=(sk==='dipole'||sk==='moons')&&on.includes(sk)?sk:null;
+  if(!k){let L=on.filter(x=>x!==last);if(!L.length)L=on;k=L[Math.floor(Math.random()*L.length)]}try{localStorage.setItem('audiolab-ws-last',k)}catch(e){}return k}
+function wsDrawSet(L){L=WS.SET.filter(k=>(L||[]).includes(k));if(!L.length)return false;if(L.length===WS.SET.length)delete UI.wsDraw;else UI.wsDraw=L;try{saveUI()}catch(e){}
+  try{localStorage.setItem('audiolab-ws-draw',JSON.stringify(wsDrawOn()))}catch(e){}wsDrawSync();return true}
+function wsDrawSync(){const box=document.getElementById('wsDraw');if(!box)return;const on=wsDrawOn();
+  box.querySelectorAll('input[data-k]').forEach(c=>{const k=c.dataset.k;c.checked=on.includes(k);c.disabled=on.length===1&&c.checked;c.closest('label').title=c.disabled?'At least one drawing stays on':'Use '+WS.NAME[k]+' on the start screen'});
+  const n=box.querySelector('.wsdrN');if(n)n.textContent=on.length===WS.SET.length?'all '+on.length:on.length+' of '+WS.SET.length}
+function wsDrawUI(after){if(document.getElementById('wsDraw')||!after)return;const d=document.createElement('details');d.id='wsDraw';d.className='wsdr';
+  d.innerHTML='<summary title="Choose which drawings the start screen picks from">Start screen drawings… <span class="wsdrN"></span></summary><div class="wsdrL">'+
+    WS.SET.map(k=>'<div class="wsdrR"><label class="chk"><input type="checkbox" data-k="'+k+'"> '+WS.NAME[k]+'</label><button type="button" class="mini" data-only="'+k+'" title="Show only '+WS.NAME[k]+'">Only this one</button></div>').join('')+
+    '</div><div class="wsdrF"><button type="button" class="mini" data-all="1" title="Turn every drawing back on">All on</button><small>The start screen picks one of these at random each time. At least one stays on.</small></div>';
+  after.after(d);d.addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;const on=wsDrawOn();const L=c.checked?on.concat(c.dataset.k):on.filter(k=>k!==c.dataset.k);if(!wsDrawSet(L))c.checked=true});
+  d.addEventListener('click',e=>{const o=e.target.closest('[data-only]'),a=e.target.closest('[data-all]');if(o)wsDrawSet([o.dataset.only]);else if(a)wsDrawSet(WS.SET)});wsDrawSync()}
 function wsReduce(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
 function wsAmb(){try{return lkT().ambientOK()&&!wsReduce()}catch(e){return false}}
 function wsBg(P,x,y){return`radial-gradient(ellipse 75% 75% at ${x.toFixed(1)}% ${y.toFixed(1)}%,${P.g},${P.bg} 70%,${P.e})`}
@@ -200,5 +213,9 @@ Object.assign(WS_HOOKS,{
   row:{id:'wsStart',l:'Show the start screen at start-up',pg:'general',b:'Help while you work',sc:'app',k:'UI.wsShow',c:'#wsSet',t:'check',d:true,h:'Every time AudioLab starts: your recent projects, a new empty project, templates and Open a file. Off: AudioLab opens your last project.',w:'start screen recent projects templates start up launch open last'},
   settingsRow(){const r=WS_HOOKS.row;try{if(typeof STX==='object'&&!STX.has(r.id)){STT.push(r);STX.set(r.id,r)}}catch(e){}
     if(document.getElementById('wsSet'))return;const sp=document.getElementById('setSplash'),lb=sp&&sp.closest('label');if(!lb)return;const n=document.createElement('label');n.className='chk';n.title='Show the start screen every time AudioLab starts';
-    n.innerHTML='<input type="checkbox" id="wsSet"> Show the start screen at start-up';lb.after(n);const c=n.querySelector('input');c.checked=UI.wsShow!==false;c.onchange=()=>wsSetShow(c.checked)}});
+    n.innerHTML='<input type="checkbox" id="wsSet"> Show the start screen at start-up';lb.after(n);const c=n.querySelector('input');c.checked=UI.wsShow!==false;c.onchange=()=>wsSetShow(c.checked);wsDrawUI(n)},
+  /* WS-1b, for lane B: both start screen rows in the S4 shape; 'wsDraw' is a list (UI.wsDraw, missing = all on), shown as the
+     expanding 'Start screen drawings…' line under the start screen's row (a little hidden, as the user asked); not pushed into STT */
+  settingsRows:null,drawings:()=>wsDrawOn(),setDrawings:L=>wsDrawSet(L)});
+WS_HOOKS.settingsRows=[WS_HOOKS.row,{id:'wsDraw',l:'Start screen drawings',pg:'general',b:'Help while you work',sc:'app',k:'UI.wsDraw',c:'#wsDraw',t:'list',d:null,o:WS.SET.map(k=>[k,WS.NAME[k]]),h:'Which drawings the start screen picks from at random. At least one stays on. Default: all on.',w:'start screen drawings pictures dipole moons interference phase lissajous trappist fourier random'}];
 /* ===================== end of task WS-1 (lane Q) ===================== */
