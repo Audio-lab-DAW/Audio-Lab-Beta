@@ -102,3 +102,76 @@ The user: "For the zoomed ones: let's try MS2. I want the lit one, not the flat 
 - **MS2 (closer, lit nucleus)** is the small icon to develop; never the flat nucleus.
 - A small version of **M5c** (glowing core, not flat) to try next to it.
 - Research on how small icons are made. Built by task IC9 (docs/app-icon-small-sizes.md, tools/icon-lab/round5s/), next to rounds 5b and 5c.
+## Round 5b: tapered K5a and M5d (IC7, second run, 28 November 2026)
+
+Pick page: **AudioLab app icon, round 5b: tapered K5a and M5d**, https://claude.ai/artifact/HZRyiwMrb55yH6hy5H7kcW
+
+Picks line to paste, for example: `Round 5b picks: main K5a-T2 | other M5d-T2 | small KS4 MS4 | remove: ...` (the page's bar builds it; *Swap main and other* turns the two round).
+
+### How the taper is drawn (the 3D)
+- **The shipped taper** (Ocean Yellow, `desktop/icon-assets/source/icon-L.svg`, `tiers.py`): each ring is a flat crescent, an outline whose inner ellipse is offset, so the ring is widest at one end of its long axis and narrowest at the other, about 3:1, exaggerated to 4:1 at 24 to 64 px and dropped (even rings) at 16 and 20 px. It reads as "tapered", but it is not perspective: it is thick at a side of the ring, not where the ring comes toward you.
+- **A ring in 3D:** the drawn ellipse (rx 360, ry 150) is a circle of radius R = rx whose plane is tilted so that cos i = ry / rx (i = 65.4 degrees). The point at angle t sits at depth z = R sin i sin t, and is projected from a camera at 5 R: screen = centre + (x, y) * D / (D - z). The near half grows and the far half shrinks a little, so the ellipse becomes slightly egg-shaped, as a real ring would.
+- **A round tube** looks the same width from every side, so its seen width only follows the perspective scale. A true camera at 5 R gives only about 1.5:1; it is exaggerated to about 2.6:1 (width = w (1 + 0.45 dn), dn = sin t, the depth from -1 far to +1 near), as the shipped icon exaggerates its taper.
+- **A flat band** (a hoop of height h round the ring's axis) has a seen width of h times the sine of the angle between the line of sight and the band: widest where the ring comes toward you and where it goes away, edge-on at the ends of the long axis; its outer face shows on the near half, its inner face on the far half.
+- **Brightness:** the far half fades toward the background (up to 50 to 62 %), and it also lies under the nucleus glow (the glow is painted at the nucleus' depth).
+- **Occlusion:** every ring is cut into short pieces, grouped into chunks of about 30 degrees. Each chunk is drawn layer by layer and runs two pieces into the next chunk, where it draws the same pixels, so there are no seams. The chunks, the nucleus, its glow and the electron are painted back to front, so the rings pass over and under each other at their crossings like one object. With K5's geometry a ring never crosses the nucleus (the ring's short semi-axis, 129, is larger than the nucleus radius, 69), so its occlusion shows at the crossings. On the field orbits it shows at the nucleus.
+- **One object:** the two slanted rings tip their lower halves toward you and the upright ring its left half: one atom seen a little from above, the electron on the near side of ring 0 (t = 18 degrees).
+- **Field orbits (M5d):** each orbit r = L sin^2(theta) lies in a plane through the dipole axis. The plane is turned 26 degrees round the axis (all the orbits the same way, so the right side of the field comes toward you and the left goes away), and the axis is tipped 12 degrees toward you. The camera is at 2600. The bold orbits start on the nucleus surface, so their far feet go behind the nucleus and the near feet pass in front of it. The fine field lines behind stay flat.
+
+### The designs
+| Id | Name | What |
+|---|---|---|
+| K5a | as picked (reference) | flat even rings, 24 px at 80 % |
+| K5a-T1 | Shipped taper | the Ocean Yellow crescent, about 3:1, thick toward the bottom left; flat and see-through (crossings brighter) |
+| **K5a-T2** ★ main | Perspective tube | tube in perspective, about 2.6:1, far half fading under the glow, over and under at the crossings |
+| K5a-T3 ★ alt | Lit tube | T2 with darker tube edges and a highlight toward the light (from above); at 64 px only the highlight stays |
+| K5a-T4 | Perspective band | flat hoops, wide toward and away from you, edge-on at the sides, lit outer face near, darker inner face far, a light rim |
+| M5d | as picked (reference) | flat even orbits 18, 16, 13 px, five fine lines past the edge, tilt 12 degrees |
+| M5d-T1 | Shipped taper | flat; each half orbit widest at its outermost point, narrowing to a third into the poles |
+| **M5d-T2** ★ other | Perspective orbits | orbit planes turned 26 degrees, axis tipped 12: the right side near (thick, bright, in front of the nucleus), the left far (thin, dim, its feet behind the nucleus) |
+| M5d-T3 ★ alt | Lit perspective orbits | M5d-T2 lit as K5a-T3 |
+
+Small versions (32 px and below, zoomed in as before, now tapered and woven in the same 3D; the taper is about 2:1 at 32 px and gentle at 16, like the shipped tiers; the varying widths are no longer pixel-snapped, while the nucleus and electron still are):
+| Id | What |
+|---|---|
+| **KS4** ★ | S1's crop with K5a-T2's rings, lit nucleus and glow |
+| KS5 | KS2's closer crop (1.5 to 1.6 times), tapered and woven |
+| **MS4** ★ | MS1 (two orbits, zoomed) in perspective, the near ends in front of the nucleus |
+| MS5 | MS3's three orbits (two at 16 and 20) in perspective, a one-pixel light top edge from 24 px |
+| KS1, MS1 | round 5's flat versions, for comparison |
+
+Note: the user's small-icon picks of 01:20 (MS2 lit, a small M5c, the research on how small icons are made) are task IC9's (docs/app-icon-small-sizes.md); KS4 to MS5 here only show how the tapered 3D carries down to 32 px and below, so the two rounds can be compared. The Earth and Moon reading of M5d is task IC8's (docs/app-icon-round-5c.md).
+
+The picker review again lists the same 61 icons (nothing has been removed yet), each with a keep box.
+
+**Recommendation:** main **K5a-T2** (P2) with **KS4**, other **M5d-T2** with **MS4**. K5a-T2 is the closest to the icon people know (the shipped taper's look), made physically right, and calm with K5a's soft glass. If it should look most like a solid object: K5a-T3 and M5d-T3.
+
+Weak spots seen in the renders:
+- K5a-T4's bands almost vanish where they turn edge-on, and it is the least like the shipped icon.
+- K5a-T3's tube edges are lost below 128 px, so it reads as T2 in the Dock.
+- M5d-T2 and T3 are lopsided: the near side is larger than the far side.
+- In P8 the far halves turn grey, and in its Dark entry (P8N) the rings are light grey.
+- The tapered small versions are a touch softer than S1 at 16 px.
+- KS5 is busy at 32 px.
+- MS4 and MS5 at 16 px read as a nucleus with arcs.
+
+### Files (round 5b, `tools/icon-lab/round5/`)
+| File | What |
+|---|---|
+| `icons5b.js` | round 5's module with the 3D layer (`taperRings`, `taperOrbits`, depth-sorted chunks); K5a-T1..T4, M5d-T1..T3 (exports `AL5B`, its `T3D` helpers) |
+| `small5b.js` | KS4, KS5, MS4, MS5 (and KS1, MS1 for comparison), exports `AL5BS` |
+| `render5b.js`, `sheet5b.js`, `sheet_small5b.js`, `shrink5b.py` | PNGs into `renders5b/` (same layout as `renders/`: per design and palette 1024, 512, 128, 64, mac-1024, dock-dark, dock-light, styles; `small/` at 16 to 48 with 2x; overview sheets) |
+| `page5b.src.html`, `weak5b.txt`, `build_page5b.py`, `pick-page-5b.html` | the pick page (the self-contained build is what was published) |
+
+Regenerate: `node render5b.js && python3 shrink5b.py && python3 picker_data.py && python3 build_page5b.py`.
+
+### What the implementation task does after the 5b pick
+As in "What the implementation task does after the pick" above, with these designs:
+1. **Main** becomes the default icon, drawn from `icons5b.js`.
+2. The main's KS or MS replaces S1 at 32 px and below.
+3. **Other** and its small version go into the picker's Dipole field group.
+4. Unticked icons leave the picker list, but a user who has one chosen keeps it working.
+5. `icon.icns`, `icon.ico`, `Assets.car` and the favicons are regenerated on macos-latest, with Dark staying navy. The Dock shows the new icon with the next desktop build, through the release gate only.
+
+Point `ic6/ship6.py` and `svgs6.js` at `round5/icons5b.js` and `small5b.js`.
+In Icon Composer the tapered rings stay one layer: their depth shading is drawn, so the system's specular stays off for them or is kept faint.
