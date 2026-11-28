@@ -6488,3 +6488,9 @@ Fired by the schedule at 09:11 UTC. The claim of N3i (f0f302d, 01:40 UTC) had no
 ### Assumptions
 - The AudioBuffer's channel data is 32-byte aligned (measured, see above).
 - Taking over the 01:40 claim: no push or log entry came from it in seven and a half hours.
+
+## 28 November 2026, about 10:40 UTC: task XT-DL4 built and tested, held by the release freeze (lane H), no index.html change
+- DL3 is still held (the gate's freeze since 09:11:57 UTC), so this run built the next step whose dependency is logged, DL4 (safe mode, What is changed, reset with a backup; needs ST-S4), on v0.294 with DL3 applied, as edit scripts: `tools/edits/taskXT_DL4.py` with `taskXT_DL4_early.js`, `taskXT_DL4_block.js`, `taskXT_DL4_css.txt`, the test `taskXT_DL4_test.py` (43 of 43), the release half `taskXT_DL4_release.py` and its log entry `taskXT_DL4_log.md` (what was built and measured).
+- Checked with DL3 and DL4 applied: taskXT_DL1 21/21, taskXT_DL2 24/24, taskXT_DL3 50/50, taskXT_DL4 43/43, taskOV2b 26/26; lint clean; Fractals Kick -9.75669 dB, Bass -25.48699 dB (beats 64 to 96, master 0 dB) unchanged; start-up smoke test in the desktop app all clean; load and frame time the same within noise.
+- Next XT run, once `desktop/release-freeze.json` is gone: release DL3 (see the entry above), then DL4 in a second push (`taskXT_DL4.py`, `taskXT_DL4_release.py <version>`, sync, checks, freeze check, push).
+

@@ -1,0 +1,17 @@
+/* lane H (task XT-DL4): safe mode's bar and offer, the Workshop's What is changed tab */
+.xtsafe{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:2147480000;display:flex;align-items:center;gap:8px;max-width:min(860px,calc(100vw - 24px));padding:5px 6px 5px 6px;border-radius:10px;background:var(--pn2);border:1px solid rgba(255,190,80,.55);box-shadow:0 8px 28px rgba(0,0,0,.45);font-size:var(--fs2);color:var(--ink);line-height:1.35}
+.xtsafe>span{min-width:0}.xtsafe button{flex:none;padding:3px 10px;font-size:var(--fs1);white-space:nowrap}
+.xtsfb{flex:none;font:var(--fw6) 10px/1 var(--ffu);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#1c1200;background:#ffbe50;border:0;border-radius:6px;padding:5px 8px;cursor:help}
+button.xtsfb{cursor:pointer}.xtsafe.fold{padding:3px}.xtsafe.fold>:not(.xtsfb){display:none}
+.xtsafe.offer{border-color:rgba(181,131,255,.6)}.xtsafe.offer .xtsfb{background:#b583ff;color:#14002e}
+@media (max-width:720px){.xtsafe{flex-wrap:wrap}.xtsafe>span{flex:1 1 100%}}
+#xtWs .xtchg{display:none}#xtWs .xtwb.xtchgon>.xtfirst,#xtWs .xtwb.xtchgon>.xtbar,#xtWs .xtwb.xtchgon>.xtmain{display:none!important}
+#xtWs .xtwb.xtchgon>.xtchg{display:flex;flex:1;min-height:0;flex-direction:column}
+#xtWs .xtcbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.08);font-size:var(--fs2);color:var(--mut);line-height:1.4}
+#xtWs .xtcbar>span{flex:1 1 260px;min-width:0}#xtWs .xtcbar button{padding:4px 11px;font-size:var(--fs1)}
+#xtWs .xtcbk{margin:8px 12px 0;padding:7px 10px;border-radius:8px;border:1px solid rgba(var(--bl3),.4);background:rgba(var(--bl3),.08);font-size:var(--fs2)}#xtWs .xtcbk button{margin-left:6px;padding:2px 10px;font-size:var(--fs1)}
+#xtWs .xtcl{flex:1;min-height:0;overflow:auto;padding:2px 0 6px}
+#xtWs .xtcg{padding:10px 12px 4px;font:var(--fw6) var(--fs1) var(--ffu);color:var(--mut);text-transform:uppercase;letter-spacing:.05em}#xtWs .xtcg span{color:var(--ink)}
+#xtWs .xtcr{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:4px 10px;align-items:center;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+#xtWs .xtcr .xtid b{font-family:var(--ffu)}
+#xtWs .xtcfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.08);font-size:var(--fs1);color:var(--mut)}#xtWs .xtcfoot span{flex:1 1 200px}
