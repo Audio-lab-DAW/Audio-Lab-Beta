@@ -13,6 +13,7 @@ One step per run, in the order of section 7 of the research. A step that does no
 |---|---|---|---|
 | SND-0 | N5 (kit), groundwork for B12, B19, B28, B36 | shared DSP kit: ZDF ladder, diode ladder, SVF, Sallen-Key, comb, formant; ADAA tanh, fold, hard clip; halfband 2x and 4x; parameter smoothing; one worklet module; unit tests against the analog responses | **done**, v0.281 (27 Nov): 43 unit checks, worklet bits equal the main thread; no device uses it yet |
 | SND-1 | B37, N5 | Filter v2 on the shared set (new device), Auto Filter models (v2) | **done**, v0.313 (28 Nov): new device Filter (7 models, drive inside, 2x), the Auto Filter's Hi-Fi models; Classic bit for bit |
+| SND-R | (the user's D2) | one random stream per device (seeded generator per device instance, plain integer arithmetic for NB) | claimed 28 Nov (step claimed) |
 | SND-2 | B26 | Compressor v2 (Giannoulis design, styles, sidechain input through lane K's `mxScPick` when released, else `SND_HOOKS`, mix) | |
 | SND-3 | B27 | OTT and Multiband on the Compressor v2 core, real upward compression | |
 | SND-4 | B22, B23, Q7, Q8 | Pro EQ matched bands (Vicanek) and true Butterworth cuts, Clean mode | |
