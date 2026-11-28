@@ -23,5 +23,7 @@ s=s[:a]+'| MX-2 | X5, X6 | delay compensation for returns, sends and sidechain t
 PY
 node desktop/scripts/sync-app.js | tail -1
 git diff --quiet -- desktop/app-version.json || { echo "desktop/app-version.json changed: stop"; exit 4; }
+[ -d tools/release-gate/.deps/node_modules/acorn ] || npm install -s --prefix tools/release-gate/.deps acorn@8.14.0 >/dev/null
+[ -x desktop/node_modules/electron/dist/electron ] || (cd desktop && node node_modules/electron/install.js) || true   # the smoke test needs the binary
 node tools/release-gate/lint.js index.html | tail -1
 echo "now: python3 tools/ui-tests/taskMX_2.py index.html, the smoke test, fill @TESTS@ @SMOKE@, commit 'v$NEW: task MX-2 ...' and push"
