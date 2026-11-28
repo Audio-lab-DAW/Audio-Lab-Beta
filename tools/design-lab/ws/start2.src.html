@@ -1,0 +1,315 @@
+<meta charset="utf-8">
+<title>Start screen round 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/*CSS1*/
+/* ===== round 2 (task WS-0b) ===== */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.dc{border:1px solid var(--ln);border-radius:10px;background:var(--pn);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dc.picked{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.dc.inset{opacity:.92}
+.dv{position:relative;width:100%;aspect-ratio:577/427;border-radius:8px;overflow:hidden;background:#05070c}
+.dv.band{aspect-ratio:1020/172}
+.dv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dv .nm2{position:absolute;left:0;right:0;bottom:17%;display:flex;justify-content:center;align-items:center;gap:6px;font:600 clamp(14px,2.2vw,22px)/1 'Space Grotesk',Inter,sans-serif;color:var(--ink2,#eaf1ff);pointer-events:none}
+.dv .nm2 i{font-style:normal;-webkit-background-clip:text;background-clip:text;color:transparent}
+.dv .nm2 s{text-decoration:none;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;border:1px solid;border-radius:3px;padding:2px 4px 1px}
+.dv.band .nm2{left:3%;right:auto;bottom:12%;justify-content:flex-start;font-size:clamp(11px,1.4vw,17px)}
+.dv .bar3{position:absolute;left:30%;right:30%;bottom:10.5%;height:2px;background:rgba(255,255,255,.08)}
+.dv.band .bar3{display:none}
+.dh{display:flex;align-items:center;gap:8px}
+.dh h3,.dh>b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh .id{font:600 12px var(--fm);background:var(--pn2);border:1px solid var(--ln2);border-radius:6px;padding:1px 7px}
+.dh .star{color:var(--acc)}
+.dh .sp{flex:1}
+.dc p{font-size:12.5px;color:var(--mut)}
+.dc .sci{font-size:12px}
+.chk{font:500 12px var(--fm);color:var(--mut);display:inline-flex;gap:6px;align-items:center;cursor:pointer;border:1px solid var(--ln2);border-radius:7px;padding:3px 9px}
+.dc.picked .chk{color:var(--acc);border-color:var(--acc)}
+.ctl2{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;font-size:12px}
+.ctl2 label{display:inline-flex;gap:6px;align-items:center}
+.ctl2 input[type=range]{accent-color:var(--acc);width:180px}
+.ctl2 select{background:var(--pn2);color:var(--ink);border:1px solid var(--ln2);border-radius:7px;padding:3px 6px;font:12px var(--f)}
+.ro{font:500 12px var(--fm);color:var(--acc);min-width:64px;display:inline-block}
+.mv{border:1px solid var(--ln);border-radius:12px;background:var(--pn);padding:14px;display:flex;flex-direction:column;gap:12px}
+.mcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mcard{border:1px solid var(--ln);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;background:var(--pn2);text-align:left}
+.mcard.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.mcard b{font-weight:600}
+.mcard small{color:var(--mut);font-size:12px;line-height:1.4}
+/* the hand-over mock */
+.scr .hv{position:absolute;left:0;top:0;width:1254px;height:651px;pointer-events:none}
+.scr .hcard{position:absolute;border-radius:12px;background:var(--m-pn);border:1px solid transparent}
+.scr .hcont{position:absolute;overflow:hidden}
+.scr .hcont .in2{position:absolute;inset:0}
+.scr .hlogo{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.scr .hver{position:absolute;left:0;top:0;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--m-mut);text-transform:uppercase;white-space:nowrap}
+.scr .hbar{position:absolute;left:0;top:0;height:2px;background:rgba(255,255,255,.08)}
+.scr .hbar b{display:block;height:100%;width:0}
+.scr .rise{will-change:transform,opacity}
+.tl{display:flex;align-items:center;gap:10px;font-size:12px}
+.tl input{flex:1;accent-color:var(--acc)}
+.src{font-size:12.5px;display:flex;flex-direction:column;gap:4px;padding-left:18px;margin:0}
+@media (max-width:900px){.grid4,.mcards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid4,.mcards,.grid3{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+
+<header class="top">
+ <div class="eyebrow">AudioLab Pro · start screen · round 2 · task WS-0b · lane Q · 28 November 2026</div>
+ <h1>AudioLab start screen, round 2</h1>
+ <p class="lede">Your picks so far: <b>W1</b> card over the drawing, <b>T1</b> every start, <b>D3</b> no demo songs anywhere, <b>P1</b> the splash grows into the start screen, with the <b>dipole</b> and the <b>moons</b> picked at random each start. This round settles three things before WS-1 builds it: which new drawings join the random set, how the dipole's yellow particles should move, and the one fluid motion from the splash into the start screen.</p>
+ <div class="how"><span><b>1.</b> Tick the drawings you want in the random set (★ = recommended).</span><span><b>2.</b> Pick a dipole flow.</span><span><b>3.</b> Play the hand-over, set its length and easing, pick one.</span><span><b>4.</b> Copy the line at the bottom into the chat.</span></div>
+ <div class="bar2"><span class="lab">Page</span><div class="seg" id="theme"><button data-v="">Auto</button><button data-v="dark">Dark</button><button data-v="light">Light</button></div>
+  <span class="lab" style="margin-left:8px">Drawings shown</span><div class="seg" id="view"><button data-v="splash" class="on">In the splash card</button><button data-v="band">In the start screen band</button></div></div>
+</header>
+
+<section class="fam" id="fam-R">
+ <div class="famh"><span class="tag">R</span><h2>More drawings for the random set</h2><span class="mut sm">Eight new pictures, each a real piece of physics or maths, in the splash's look: hairlines, amber dots and labels, one palette each. Live here at Ambient motion; in the app they only move at Motion Ambient, never in Light mode (one still ink picture there), stop while the window is hidden, and stay still with Reduce motion.</span></div>
+ <div class="grid3" id="rset"></div>
+ <div class="grid4" id="rgrid"></div>
+</section>
+
+<section class="fam" id="fam-F">
+ <div class="famh"><span class="tag">F</span><h2>The dipole's particles</h2><span class="mut sm">Same field lines, same ball, four ways for the yellow dots to move.</span></div>
+ <div class="ctl2"><span class="lab">Which planet's direction</span><div class="seg" id="pdir"><button data-v="1" class="on">Jupiter: out of the north</button><button data-v="-1">Earth: out of the south</button></div><span class="mut sm">The splash's dipole is tilted 10 degrees as at Jupiter, whose field points the other way to Earth's.</span></div>
+ <div class="grid4" id="fgrid"></div>
+ <div class="two">
+  <div class="note"><b>Why today's dots go back and forth.</b> They copy charged particles trapped in a planet's radiation belts: each one slides along its field line and turns back at a <i>mirror point</i>, where the field is strong enough to reflect it, so it bounces between two points for ever (and drifts round the planet, out of the page). That is real physics, but in a flat drawing with no spiral it reads as a dot sliding to and fro. F3 shows that motion done properly.</div>
+  <div class="note"><b>What you described is the field's direction.</b> A field line has a direction: it leaves the magnet at one pole, follows the line, comes back in at the other pole, and closes through the inside of the magnet. Dots moving that way (F1, F2) show the field itself rather than a particle, like iron filings that flow. Inside a uniformly magnetised ball the field is straight and even, so each loop closes as a straight chord, which F1 shows faintly through the glass.</div>
+ </div>
+</section>
+
+<section class="fam" id="fam-M">
+ <div class="famh"><span class="tag">M</span><h2>The hand-over, as one motion</h2><span class="mut sm">At your window (1254 x 651 points). The splash picks its drawing, then the drawing moves up into the band, the name moves left with "Digital audio workstation" under it, the loading bar becomes the band's edge, and the recent projects rise from below.</span></div>
+ <div class="mcards" id="mcards"></div>
+ <div class="mv">
+  <div class="ctl2">
+   <label><span class="lab">Length</span><input type="range" id="dur" min="300" max="2000" step="50" value="900"><span class="ro" id="durv">900 ms</span></label>
+   <label><span class="lab">Easing</span><select id="eas"><option value="smooth">Smooth out (fast start, long settle)</option><option value="inout">Ease in and out</option><option value="emph">Emphasised (quick, very soft landing)</option><option value="spring">Gentle spring (a small overshoot)</option></select></label>
+   <label><span class="lab">Drawing</span><select id="mdraw"></select></label>
+   <label><input type="checkbox" id="wait" checked> Show the splash first (1.2 s)</label>
+   <div class="seg" id="mtheme"><button data-v="dark" class="on">Dark</button><button data-v="light">Light</button></div>
+   <button class="btn ok" id="replay">▶ Replay</button>
+  </div>
+  <div class="mkw" id="hmk"><div class="scr" id="hscr"></div></div>
+  <div class="tl"><span class="lab">Scrub</span><input type="range" id="scrub" min="0" max="1000" value="1000" aria-label="Scrub through the motion"><span class="ro" id="tlv">end</span></div>
+  <p class="mut sm">Drag the scrubber to stop at any moment and look. In the app: lane F's motion tokens stay for small things (0, 50, 80, 120 ms); this one long motion is the exception, played once per start. With Reduce motion it becomes a 120 ms fade, and the Enter key works from the first frame (pressing Enter during the motion opens the last project at once).</p>
+ </div>
+</section>
+
+<section class="fam" id="sources">
+ <div class="famh"><span class="tag">S</span><h2>Sources</h2></div>
+ <ul class="src">
+  <li>Dipole field lines r = L sin²θ and field strength √(1 + 3cos²θ)/r³: <a href="https://phys.libretexts.org/Bookshelves/Electricity_and_Magnetism/Electricity_and_Magnetism_(Tatum)/03%3A_Dipole_and_Quadrupole_Moments/3.10%3A_A_Geophysical_Example">LibreTexts, A geophysical example</a>; <a href="https://webarchive.library.unt.edu/web/20201218011644/https://ccmc.gsfc.nasa.gov/RoR_WWW/presentations/Dipole.pdf">NASA CCMC, the dipole field</a></li>
+  <li>Magnetic mirror, mirror points and bounce motion of trapped particles: <a href="https://farside.ph.utexas.edu/teaching/plasma/Plasma/node23.html">Fitzpatrick, Plasma Physics, magnetic mirrors</a>; <a href="https://www2.mps.mpg.de/solar-system-school/lectures/space_plasma_marsch/Lecture_3.pdf">Marsch, Max Planck lecture 3</a></li>
+  <li>Inside a uniformly magnetised sphere the field is uniform: <a href="https://farside.ph.utexas.edu/teaching/jk1/Electromagnetism/node61.html">Fitzpatrick, Electromagnetism</a>; <a href="https://www.goshen.edu/physix/303/gco/6.3.Magnetizedsphere.pdf">Goshen College, the magnetised sphere</a></li>
+  <li>Jupiter's field points opposite to Earth's, tilted about 10 degrees: <a href="https://wikiwand.com/EN/Magnetosphere_of_Jupiter">Magnetosphere of Jupiter</a>; <a href="https://pwg.gsfc.nasa.gov/stargaze/planetmg.htm">NASA, planetary magnetism</a></li>
+  <li>Chladni figures: <a href="https://paulbourke.net/geometry/chladni/">Paul Bourke, Chladni plate interference surfaces</a>; <a href="https://resources.wolframcloud.com/FunctionRepository/resources/ChladniFigure">Wolfram, ChladniFigure</a></li>
+  <li>Pendulum waves (51 to 65 swings in 60 s): <a href="https://sciencedemonstrations.fas.harvard.edu/presentations/pendulum-waves">Harvard Natural Sciences Lecture Demonstrations</a></li>
+  <li>Van der Pol limit cycle: <a href="https://web.uvic.ca/~tbazett/diffyqs/limitcycles_section.html">Lebl and Bazett, Differential equations, limit cycles</a></li>
+  <li>TRAPPIST-1 resonance chain: <a href="https://ar5iv.arxiv.org/html/1704.02957">Tamayo et al. 2017, Convergent migration renders TRAPPIST-1 long-lived</a></li>
+ </ul>
+</section>
+
+<section class="fam" id="builds">
+ <div class="famh"><span class="tag">WS-1</span><h2>What WS-1 builds after this pick</h2></div>
+ <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:96ch">
+  <li>W1 with T1 and D3: the start screen at every start, no demo songs anywhere in the app, no demo toast, a fresh install opens with no song; your projects listed as recent, Enter opens the last one.</li>
+  <li>The random set: the dipole and the moons plus the drawings you tick here, each in its own palette, never the same one twice in a row. The splash's own code stays as it is: the new drawings and the corrected dipole flow are added as WS's own functions beside it.</li>
+  <li>The hand-over you pick, at the length and easing you set, as one motion with no per-frame work once it ends (the band's drawing keeps its ambient motion only at Motion Ambient, in Dark, while the window is shown).</li>
+ </ul>
+</section>
+</div>
+
+<div class="pbar" role="region" aria-label="Your picks"><div class="in">
+ <div class="line" id="pline"></div>
+ <input id="pnote" type="text" placeholder="Add a note (optional)" aria-label="Note">
+ <button class="btn" id="rec">Use the ★ picks</button>
+ <button class="btn ok" id="copy">Copy line</button><span id="copied" class="mut sm" aria-live="polite"></span>
+</div></div>
+
+<script>
+/*SPLBG*/
+</script>
+<script>
+/*R2DRAW*/
+</script>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('ws0b-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ws0b-'+k,JSON.stringify(v))}catch(e){}}};
+let REDUCE=false;try{REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+function isLight(){const t=document.documentElement.dataset.theme;if(t)return t==='light';try{return matchMedia('(prefers-color-scheme: light)').matches}catch(e){return false}}
+function setTheme(v){if(v)document.documentElement.dataset.theme=v;else delete document.documentElement.dataset.theme;$$('#theme button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));store.set('theme',v);redrawAll()}
+$('#theme').onclick=e=>{const b=e.target.closest('button');if(b)setTheme(b.dataset.v)};
+
+/* ---------- palettes ---------- */
+const LPAL={L:'40,62,130',T:'29,127,176',O:'170,104,0',ink:'#16181d'};
+function palOf(k){return R2.PAL[k]||SPLBG.PAL[k]||SPLBG.PAL.dipole}
+function pal(k,light){const P=palOf(k);return light?Object.assign({},P,LPAL):P}
+function fnOf(k){if(k==='dipole')return dipFn();return R2.FN[k]||SPLBG.FN[k]}
+/* in the band (172 points high) each drawing is scaled so its main figure fits; the dipole's lines are meant to run off the edges */
+const BANDS={dipole:1,dipole0:1,dipF1:1,dipF2:1,dipF3:1,moons:.8,chladni:.58,pend:.6,twodip:.85,interf:.8,vdp:.58,liss:.56,trap:.78,four:.62};
+function palKey(k){return k.startsWith('dip')?'dipole':k}
+
+/* ---------- picks ---------- */
+const RKIND=[
+ ['R1','chladni','Chladni plate',true,'A square plate bowed at its edge: sand is thrown off where it shakes and gathers on the still lines. A new mode every 12 s, and the sand walks to the new lines.','Sound made visible: the oldest picture of a vibration (Chladni, 1787).'],
+ ['R2','pend','Pendulum wave',true,'Fifteen pendulums seen from above: the first swings 51 times in 60 s, each next one once more. They make travelling waves, scatter, and line up again every minute.','Beats and phase, the thing a producer hears when two sounds drift.'],
+ ['R3','twodip','Two magnets',false,'The field of two magnets side by side, found by stepping along the field; the dots leave each north pole and come back in at a south pole.','Pairs with the dipole: the same physics, a new shape.'],
+ ['R4','interf','Wave interference',false,'Two sources in step, like two speakers playing the same tone: where crest meets trough the air stays still, along the dark hyperbolas.','Why two speakers cancel at some seats.'],
+ ['R5','vdp','Phase portrait',false,'The Van der Pol oscillator, the circuit behind early electronic tones: every start, inside or outside, ends on the same loop, the limit cycle.','A plot of position against speed rather than time.'],
+ ['R6','liss','Lissajous figure',true,'An oscilloscope fed two tones in a simple ratio (3:2, 5:4 ...); a slow drift of phase turns the figure. A new ratio every 16 s.','The classic picture of an interval, as seen on a real scope.'],
+ ['R7','trap','TRAPPIST-1',false,'Seven Earth-sized planets in a chain of resonances (8:5, 5:3, 3:2, 3:2, 4:3, 3:2), orbits to scale. The cousin of the moons, with more bodies.','Close to the moons: pick it only if you want a second orbit picture.'],
+ ['R8','four','Fourier series',true,'Turning circles, one per harmonic, add up to a square, a sawtooth or a triangle wave: the shapes an oscillator makes. A new wave every 14 s.','How every synth sound is built: harmonics on top of each other.']];
+const FOPT=[
+ ['F0','dipole0','Today',false,'The trapped-particle bounce as it ships now: each dot slides to a point and back.'],
+ ['F1','dipF1','Field flow, closed loops',true,'Out of the north pole, along the line, back in at the south pole and up through the ball (faint, seen through it). Faster where the field is strong, near the ball; dots evenly spaced in time, so they spread out near the ball and close up far away, as a real flow does.'],
+ ['F2','dipF2','Field flow, even',false,'The same direction, at one even speed with even gaps, from the surface at one pole to the other. Nothing drawn inside the ball.'],
+ ['F3','dipF3','Trapped particles, done properly',false,'The real motion of a charge in the belts: it spirals round its line, slows as the field grows and turns back at its mirror point (marked), at the right place for its angle. Different charges mirror at different points.']];
+const MOPT=[
+ ['M1','Together',true,'Everything moves at once: the card grows, the drawing rises, the name glides left, and the rows follow a moment later, one after another.'],
+ ['M2','Three beats',false,'First the drawing rises into the band, then the name moves left, then the rows rise. Easier to follow, a little longer.'],
+ ['M3','Full window',false,'The card grows to fill the whole window; the band runs edge to edge and the name goes to the top left.'],
+ ['M4','Sheet from below',false,'The drawing fills the card and rises; the lower half comes up from the bottom of the window as one sheet carrying the lists.']];
+const REC={R:['R1','R2','R6','R8'],F:'F1',M:'M1',dur:900,eas:'smooth',dir:1};
+const PK=Object.assign({R:[],F:null,M:null,dur:900,eas:'smooth',dir:1},store.get('picks',{}));
+R2.dir=PK.dir;
+
+/* ---------- drawing cards ---------- */
+let VIEW=store.get('view','splash');
+const CARDS=[];
+function dipFn(){return PK.F==='F2'?R2.FN.dipF2:PK.F==='F3'?R2.FN.dipF3:PK.F==='F0'?SPLBG.FN.dipole:R2.FN.dipF1}
+function mkCard(host,o){const el=document.createElement('div');el.className='dc'+(o.inset?' inset':'');el.dataset.id=o.id;const P=palOf(palKey(o.k));
+ el.innerHTML=`<div class="dh"><span class="id">${esc(o.id)}</span>${o.star?'<span class="star" title="Recommended">★</span>':''}<h3 title="${esc(o.t)}">${esc(o.t)}</h3>${o.pick?`<label class="chk"><input type="${o.pick}" name="${o.grp}"> ${o.pick==='checkbox'?'In the set':'Pick'}</label>`:'<span class="chk" style="cursor:default">Already in</span>'}</div>
+  <div class="dv"><canvas></canvas><div class="nm2" style="color:${P.ink}">Audio<i style="background-image:linear-gradient(90deg,${P.a},${P.b})">Lab</i><s style="color:${P.p};border-color:${P.p}">PRO</s></div><div class="bar3"><b style="display:block;height:100%;width:62%;background:linear-gradient(90deg,${P.a},${P.b})"></b></div></div>
+  <p>${esc(o.p)}</p>${o.sci?`<p class="sci">${esc(o.sci)}</p>`:''}`;
+ host.appendChild(el);const st={el,k:o.k,id:o.id,cv:$('canvas',el),dv:$('.dv',el),d:{},t0:performance.now()-Math.random()*20000,vis:false,grp:o.grp};CARDS.push(st);
+ const inp=$('input',el);if(inp)inp.onchange=()=>{if(o.grp==='R'){PK.R=PK.R.filter(x=>x!==o.id);if(inp.checked)PK.R.push(o.id);PK.R.sort()}else{PK.F=o.id;for(const c of CARDS)if(c.k==='dipole'){c.d={}}}save()};
+ return st}
+function sizeCard(st){const w=st.cv.clientWidth,h=st.cv.clientHeight;if(!w)return false;const d=Math.min(2,devicePixelRatio||1);if(st.cv.width!==Math.round(w*d)||st.cv.height!==Math.round(h*d)){st.cv.width=Math.round(w*d);st.cv.height=Math.round(h*d)}st.w=w;st.h=h;st.dpr=d;return true}
+/* draw a 577 x 427 splash frame into a box: as the splash card, or as the start screen's band (1020 x 172) */
+function bgCss(P,x,y){return `radial-gradient(ellipse 75% 75% at ${x.toFixed(1)}% ${y.toFixed(1)}%,${P.g},${P.bg} 70%,${P.e})`}
+function bgFill(c,P,x,y,w,h,light,cx,cy){if(light){c.fillStyle='#f4f5f7';c.fillRect(x,y,w,h);return}const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.75);g.addColorStop(0,P.g);g.addColorStop(.7,P.bg);g.addColorStop(1,P.e);c.fillStyle=g;c.fillRect(x,y,w,h)}
+function drawCard(st,ts){if(!st.w&&!sizeCard(st))return;const c=st.cv.getContext('2d'),light=isLight(),k=palKey(st.k),P=pal(k,light),w=st.w,h=st.h;
+ c.setTransform(st.dpr,0,0,st.dpr,0,0);c.clearRect(0,0,w,h);
+ let s,ox,oy;if(VIEW==='band'){s=w/1020*1.05*(BANDS[st.k]||.7);ox=w/2-288.5*s;oy=h*.52-147*s}else{s=w/577;ox=0;oy=0}
+ const bgs=light?'#f4f5f7':bgCss(palOf(k),(ox+288.5*s)/w*100,(oy+147*s)/h*100);if(st.bgs!==bgs){st.bgs=bgs;st.dv.style.background=bgs}
+ c.save();c.translate(ox,oy);c.scale(s,s);const t=(light||REDUCE)?40:(ts-st.t0)/1000+20;const fn=st.k==='dipole0'?SPLBG.FN.dipole:st.k==='dipole'?dipFn():fnOf(st.k);fn(c,577,427,t,P,st.d);c.restore()}
+function redrawAll(){for(const st of CARDS){st.w=0;drawCard(st,performance.now())}const L=isLight();$$('.dv .nm2').forEach(n=>n.style.filter=L?'invert(1) hue-rotate(180deg)':'');hdRender()}
+function setView(v){VIEW=v;store.set('view',v);$$('#view button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('#fam-R .dv').forEach(d=>d.classList.toggle('band',v==='band'));for(const st of CARDS)if(st.grp!=='F')st.w=0;redrawAll()}
+$('#view').onclick=e=>{const b=e.target.closest('button');if(b)setView(b.dataset.v)};
+
+mkCard($('#rset'),{id:'S1',k:'dipole',t:'Dipole field (with your F pick)',p:'In the set (your pick). Its dots follow the dipole flow you pick in F below.',inset:true});
+mkCard($('#rset'),{id:'S2',k:'moons',t:'Moons in resonance',p:'In the set (your pick). Io, Europa and Ganymede: 4, 2 and 1 orbits in the same time.',inset:true});
+const rinfo=document.createElement('div');rinfo.className='dc';rinfo.style.justifyContent='center';rinfo.innerHTML='<h3>How the random set works</h3><p>Each start picks one drawing from the set at random, never the same one twice in a row, and the splash and the start screen share it (P1). Every drawing you tick here joins S1 and S2 with an equal chance. You can tick none, some, or all eight.</p>';$('#rset').appendChild(rinfo);
+for(const [id,k,t,star,p,sci] of RKIND)mkCard($('#rgrid'),{id,k,t,star,p,sci,pick:'checkbox',grp:'R'});
+for(const [id,k,t,star,p] of FOPT){const st=mkCard($('#fgrid'),{id,k,t,star,p,pick:'radio',grp:'F'});st.el.querySelector('.nm2').remove();st.el.querySelector('.bar3').remove()}
+$('#pdir').onclick=e=>{const b=e.target.closest('button');if(!b)return;PK.dir=+b.dataset.v;R2.dir=PK.dir;save()};
+
+/* ---------- the hand-over mock ---------- */
+const C8=['#4c8dff','#3ecf8e','#f5c84c','#ff6b6b','#ff9a3c','#b583ff','#4cc9f0','#ff7ac8'];
+const RECP=[
+ {n:'Night bus sketch',d:'Today, 23:12',bpm:124,k:['A','minor'],tr:[0,1,2,5,6]},
+ {n:'Shrine Legion edit',d:'Yesterday, 18:40',bpm:145,k:['F','minor'],tr:[3,4,2,0,6,5,1,7]},
+ {n:'Vocal comp, take 3',d:'25 Nov, 21:05',bpm:98,k:['D','major'],tr:[1,1,1,6]},
+ {n:'Kick and bass study',d:'24 Nov, 16:30',bpm:142,k:['F♯','minor'],tr:[3,0]},
+ {n:'Ambient pad ideas',d:'21 Nov, 09:48',bpm:80,k:['E♭','major'],tr:[5,6,7]},
+ {n:'Untitled 4',d:'19 Nov, 22:17',bpm:120,k:null,tr:[0]}];
+const TPL=[['Beat starter','Drums and a bassline, ready to build on.'],['Audio tracks','Vocals, guitar, bass and drums tracks.']],MY=[['My psy start','Kick, Psy Bass, 2 buses, Limiter.'],['Two mics','2 audio tracks, Gate, Compressor.']];
+const HV={scr:$('#hscr'),t0:0,tk:performance.now(),p:1,play:false,wait:true,light:false,kind:'dipole',d:{},cv:null,vis:true};
+function bez(x1,y1,x2,y2){return p=>{if(p<=0)return 0;if(p>=1)return 1;let lo=0,hi=1,t=p;for(let i=0;i<30;i++){t=(lo+hi)/2;const x=3*(1-t)*(1-t)*t*x1+3*(1-t)*t*t*x2+t*t*t;if(x<p)lo=t;else hi=t}return 3*(1-t)*(1-t)*t*y1+3*(1-t)*t*t*y2+t*t*t}}
+const EAS={smooth:bez(.2,.7,.2,1),inout:bez(.65,0,.35,1),emph:bez(.2,0,0,1),spring:p=>p<=0?0:p>=1?1:1+Math.exp(-7*p)*(-Math.cos(8.5*p)-(7/8.5)*Math.sin(8.5*p))};
+const EASN={smooth:'smooth',inout:'in-out',emph:'emphasised',spring:'spring'};
+const SPL={x:338.5,y:112,w:577,h:427};
+function finOf(m){return m==='M3'?{x:0,y:0,w:1254,h:651,r:0,band:190,s:1.12}:{x:117,y:22,w:1020,h:607,r:12,band:172,s:1}}
+/* each part's share of the motion, per variant: [start, end] */
+const TIM={M1:{geo:[0,1],logo:[0,1],ver:[.45,1],bar:[0,.8],rows:[.22,.03,.5]},M2:{geo:[0,.45],logo:[.3,.75],ver:[.55,.85],bar:[.2,.6],rows:[.55,.025,.35]},M3:{geo:[0,1],logo:[0,1],ver:[.45,1],bar:[0,.8],rows:[.22,.03,.5]},M4:{geo:[0,.7],logo:[.1,.8],ver:[.5,1],bar:[0,.6],sheet:[.25,1]}};
+const lerp=(a,b,q)=>a+(b-a)*q;
+function seg(p,r,E){return E(Math.max(0,Math.min(1,(p-r[0])/(r[1]-r[0]))))}
+function hexMix(a,b,q){const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=(s)=>Math.round(lerp((A>>s)&255,(B>>s)&255,q));return `rgb(${m(16)},${m(8)},${m(0)})`}
+function wave(cv,i,col){const w=cv.clientWidth||64,h=cv.clientHeight||26;cv.width=w*2;cv.height=h*2;const c=cv.getContext('2d');c.scale(2,2);let s=(i+1)*9301;const r=()=>((s=(s*48271)%2147483647)/2147483647);c.fillStyle=col;c.globalAlpha=.75;for(let x=6;x<w;x+=2){const env=.35+.65*Math.abs(Math.sin(Math.floor(x/w*8)*1.7+i)),a=(r()*.6+.4)*env*h*.42;c.fillRect(x,h/2-a,1,a*2)}}
+function hdBuild(){const s=HV.scr,m=PK.M||'M1',F=finOf(m),P=palOf(palKey(HV.kind)),L=HV.light;s.classList.toggle('light',L);
+ const inner=`<div style="position:absolute;left:0;top:${F.band}px;right:0;bottom:0">
+   <div class="rise" style="position:absolute;left:24px;top:16px;width:55%;display:flex;align-items:center;gap:10px"><span class="hd" style="flex:1">Recent projects</span><label class="q" style="width:220px">⌕<input placeholder="Type to search" tabindex="-1"></label></div>
+   <div style="position:absolute;left:14px;top:54px;width:calc(55% + 10px);display:flex;flex-direction:column">${RECP.map((p,i)=>`<div class="rr rise${i?'':' on'}" style="--rc:64px minmax(0,1fr) 110px 122px;--rh:42px"><div class="th"><canvas data-w="${i}"></canvas><div class="cs">${p.tr.map(t=>`<b style="background:${C8[t]}"></b>`).join('')}</div></div><span class="tn">${esc(p.n)}</span><span class="dt">${esc(p.d)}</span><span class="mt">${p.bpm}<span class="u"> BPM</span>${p.k?`&nbsp;&nbsp;${esc(p.k[0])}<span class="u"> ${p.k[1]}</span>`:''}</span></div>`).join('')}</div>
+   <div style="position:absolute;left:calc(55% + 48px);right:24px;top:16px;display:flex;flex-direction:column;gap:6px">
+    <span class="hd rise">Start something new</span>
+    <div class="tile pri rise"><span style="display:flex;gap:8px"><b>New empty project</b><kbd>⌘N</kbd></span><small>One audio and one instrument track, 120 BPM.</small></div>
+    <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${TPL.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+    <span class="sub rise">My templates</span><div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${MY.map(t=>`<div class="tile"><b>${t[0]}</b><small>${t[1]}</small></div>`).join('')}</div>
+    <div class="tile rise"><span style="display:flex;gap:8px"><b>Open a file…</b><kbd>⌘O</kbd></span><small>A .audiolab project, or audio files into a new project.</small></div></div>
+   <div class="rise" style="position:absolute;left:24px;right:24px;bottom:0;height:44px;border-top:1px solid var(--m-ln);display:flex;align-items:center;gap:16px"><div class="keys"><span><b>↵</b> opens Night bus sketch</span><span><b>↑ ↓</b> choose</span><span><b>type</b> to search</span><span><b>⌘N</b> empty</span><span><b>⌘O</b> open</span></div><span style="flex:1"></span><span class="sw on"><i></i>Show at start-up</span></div></div>`;
+ s.innerHTML=`<div class="gridbg"></div><div class="hcard"></div><div class="hglow" style="position:absolute;overflow:hidden"><div class="hpaper" style="position:absolute;inset:0;background:#f4f5f7;opacity:0"></div></div><canvas class="hv"></canvas><div class="hcont">${m==='M4'?'<div class="sheetbg" style="position:absolute;left:0;right:0;bottom:0;background:var(--m-pn);border-top:1px solid var(--m-ln2)"></div>':''}<div class="in2">${inner}</div></div>
+  <div class="hbar"><b style="background:linear-gradient(90deg,${P.a},${P.b})"></b></div>
+  <div class="hlogo"><div class="nm">Audio<i style="background-image:linear-gradient(90deg,${P.a},${P.b})">Lab</i><s style="color:${P.p};border-color:${P.p}">PRO</s></div></div>
+  <div class="hver">Digital audio workstation · v0.300</div>`;
+ HV.cv=$('canvas.hv',s);HV.d={};HV.rows=$$('.rise',s);HV.logoW=$('.hlogo .nm',s).offsetWidth;
+ $$('canvas[data-w]',s).forEach(cv=>{const i=+cv.dataset.w;wave(cv,i,L?'#4a5470':C8[RECP[i].tr[0]])});hdSize();hdFrame(performance.now())}
+function hdSize(){const w=$('#hmk').clientWidth,s=w/1254;HV.scr.style.setProperty('--s',s);const cv=HV.cv;if(!cv)return;const d=Math.min(2,(devicePixelRatio||1)*s,Math.sqrt(2.4e6/(1254*651)));HV.dpr=d;cv.width=Math.round(1254*d);cv.height=Math.round(651*d);cv.style.width='1254px';cv.style.height='651px'}
+function hdRender(){if(HV.cv)hdBuild()}
+function hdFrame(ts){const m=PK.M||'M1',F=finOf(m),T=TIM[m],E=EAS[PK.eas]||EAS.smooth,L=HV.light,s=HV.scr;
+ const WAIT=HV.wait?1200:0,el=ts-HV.t0;let p=HV.play?Math.max(0,Math.min(1,(el-WAIT)/PK.dur)):HV.p;const pre=HV.play&&el<WAIT;if(HV.play&&p>=1){HV.play=false;HV.p=1;$('#scrub').value=1000;$('#tlv').textContent='end'}
+ if(HV.play){$('#scrub').value=Math.round(p*1000);$('#tlv').textContent=pre?'splash':Math.round(p*PK.dur)+' ms'}
+ const g=seg(p,T.geo,E),band=m==='M4'?F.h:F.band;
+ const card={x:lerp(SPL.x,F.x,g),y:lerp(SPL.y,F.y,g),w:lerp(SPL.w,F.w,g),h:lerp(SPL.h,F.h,g),r:lerp(12,F.r,g)};
+ const glow={x:card.x,y:card.y,w:card.w,h:lerp(SPL.h,band,g)};
+ const hc=$('.hcard',s);Object.assign(hc.style,{left:card.x+'px',top:card.y+'px',width:card.w+'px',height:card.h+'px',borderRadius:card.r+'px',borderColor:`color-mix(in srgb,var(--m-ln2) ${Math.round(g*100)}%,transparent)`});
+ /* the drawing and its glow */
+ const cv=HV.cv,c=cv.getContext('2d'),d=HV.dpr,k=palKey(HV.kind),Pd=palOf(k),ql=L?g:0;c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,1254,651);c.save();c.beginPath();c.roundRect(glow.x,glow.y,glow.w,glow.h,[card.r,card.r,m==='M4'||g<.02?card.r:0,m==='M4'||g<.02?card.r:0]);c.clip();
+ const bsc=F.s*(BANDS[HV.kind]||.7),sc=lerp(1,bsc,g),ox=lerp(SPL.x,F.x+F.w/2-288.5*bsc,g),oy=lerp(SPL.y,F.y+F.band*(bsc<1?.5:.56)-147*bsc,g);
+ const gl=$('.hglow',s),rb=m==='M4'||g<.02?card.r:0;Object.assign(gl.style,{left:glow.x+'px',top:glow.y+'px',width:glow.w+'px',height:glow.h+'px',borderRadius:`${card.r}px ${card.r}px ${rb}px ${rb}px`,background:bgCss(Pd,(ox+288.5*sc-glow.x)/glow.w*100,(oy+147*sc-glow.y)/glow.h*100)});gl.firstChild.style.opacity=ql;
+ const still=REDUCE||(L&&p>=1&&!pre),t=still?40:(ts-HV.tk)/1000+20,fn=HV.kind==='dipole'?dipFn():fnOf(HV.kind);
+ c.translate(ox,oy);c.scale(sc,sc);if(ql<1){c.globalAlpha=1-ql;fn(c,577,427,t,Pd,HV.d)}if(ql>0){c.globalAlpha=ql;fn(c,577,427,t,Object.assign({},Pd,LPAL),HV.d2||(HV.d2={}))}c.restore();
+ /* lists */
+ const ct=$('.hcont',s);Object.assign(ct.style,{left:F.x+'px',top:F.y+'px',width:F.w+'px',height:F.h+'px',borderRadius:F.r+'px'});
+ if(m==='M4'){const q=seg(p,T.sheet,E),sb=$('.sheetbg',s);sb.style.top=F.band+'px';$('.in2',s).style.transform=sb.style.transform=`translateY(${(1-q)*(651-F.y-F.band+10)}px)`;for(const r of HV.rows){r.style.opacity=1;r.style.transform=''}}
+ else{const R=T.rows,n=HV.rows.length,stp=Math.min(R[1],(1-R[0]-R[2])/Math.max(1,n-1));HV.rows.forEach((r,j)=>{const q=seg(p,[R[0]+j*stp,R[0]+j*stp+R[2]],E);r.style.opacity=Math.max(0,Math.min(1,q*1.4));r.style.transform=`translateY(${(1-q)*120}px)`})}
+ /* the name, the line under it, the bar */
+ const lg=seg(p,T.logo,E),ls=lerp(26/30,1,lg),lw=HV.logoW||200,lx=lerp(SPL.x+SPL.w/2-lw*26/30/2,F.x+28,lg),ly=lerp(SPL.y+SPL.h-80-26,F.y+F.band-18-15-10-30,lg);
+ const lo=$('.hlogo',s);lo.style.transform=`translate(${lx}px,${ly}px) scale(${ls})`;lo.querySelector('.nm').style.color=hexMix(Pd.ink,L?'#16181d':Pd.ink,ql);
+ const vq=seg(p,T.ver,E),hv=$('.hver',s);hv.style.transform=`translate(${F.x+28}px,${F.y+F.band-18-13+(1-vq)*10}px)`;hv.style.opacity=vq;hv.style.color=L&&ql>.5?'#5c606b':'#8c8f9b';
+ const bq=seg(p,T.bar,E),hb=$('.hbar',s),fill=pre?Math.min(1,el/WAIT):1;Object.assign(hb.style,{left:lerp(SPL.x+SPL.w*.3,F.x,bq)+'px',top:lerp(SPL.y+SPL.h-46,F.y+F.band,bq)+'px',width:lerp(SPL.w*.4,F.w,bq)+'px',height:(bq>.5?1:2)+'px',background:L&&bq>.5?'rgba(20,24,40,.1)':'rgba(255,255,255,.08)',opacity:m==='M4'?1-bq:1});hb.firstChild.style.width=(fill*100)+'%';hb.firstChild.style.opacity=1-bq}
+function replay(){HV.t0=performance.now();HV.tk=HV.t0;HV.play=true;HV.d={};HV.d2={};HV.wait=$('#wait').checked;kick()}
+$('#replay').onclick=replay;
+$('#scrub').oninput=e=>{HV.play=false;HV.p=e.target.value/1000;$('#tlv').textContent=HV.p>=1?'end':Math.round(HV.p*PK.dur)+' ms';hdFrame(performance.now())};
+$('#dur').oninput=e=>{PK.dur=+e.target.value;$('#durv').textContent=PK.dur+' ms';save(true)};$('#dur').onchange=()=>replay();
+$('#eas').onchange=e=>{PK.eas=e.target.value;save(true);replay()};
+$('#wait').onchange=()=>replay();
+$('#mtheme').onclick=e=>{const b=e.target.closest('button');if(!b)return;HV.light=b.dataset.v==='light';$$('#mtheme button').forEach(x=>x.classList.toggle('on',x===b));hdBuild();replay()};
+const mdraw=$('#mdraw');function fillDraw(){const opts=[['dipole','S1 Dipole field'],['moons','S2 Moons']].concat(RKIND.map(r=>[r[1],r[0]+' '+r[2]]));mdraw.innerHTML=opts.map(o=>`<option value="${o[0]}">${esc(o[1])}</option>`).join('');mdraw.value=HV.kind}
+mdraw.onchange=()=>{HV.kind=mdraw.value;hdBuild();replay()};
+for(const [id,t,star,p] of MOPT){const b=document.createElement('button');b.className='mcard';b.dataset.id=id;b.innerHTML=`<span class="dh"><span class="id">${id}</span>${star?'<span class="star">★</span>':''}<b>${esc(t)}</b></span><small>${esc(p)}</small>`;b.onclick=()=>{PK.M=id;save(true);hdBuild();replay()};$('#mcards').appendChild(b)}
+
+/* ---------- one loop: cards at 30 a second when shown, the mock at 60 while it plays ---------- */
+let raf=0,last=0;
+function loop(ts){raf=0;if(document.hidden)return;let more=false;
+ if(ts-last>=32){last=ts;if(!isLight()&&!REDUCE)for(const st of CARDS)if(st.vis)drawCard(st,ts)}
+ if(HV.vis&&(HV.play||(!HV.light&&!REDUCE)))hdFrame(ts);
+ raf=requestAnimationFrame(loop)}
+function kick(){if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
+document.addEventListener('visibilitychange',kick);
+const io=new IntersectionObserver(es=>{for(const e of es){const st=CARDS.find(c=>c.dv===e.target);if(st)st.vis=e.isIntersecting;if(e.target.id==='hmk')HV.vis=e.isIntersecting}kick()});
+const ro=new ResizeObserver(es=>{for(const e of es){if(e.target.id==='hmk'){hdSize();hdFrame(performance.now());continue}const st=CARDS.find(c=>c.dv===e.target);if(st){st.w=0;drawCard(st,performance.now())}}});
+for(const st of CARDS){io.observe(st.dv);ro.observe(st.dv)}io.observe($('#hmk'));ro.observe($('#hmk'));
+
+/* ---------- picks line ---------- */
+function save(quiet){store.set('picks',PK);sync()}
+function sync(){const note=$('#pnote').value.trim(),R=PK.R.length?PK.R.join(' '):'no new drawings';
+ $('#pline').textContent=`Start screen round 2: ${R} | dipole ${PK.F||'F?'} ${PK.dir<0?'Earth':'Jupiter'} | motion ${PK.M||'M?'} ${PK.dur} ms ${EASN[PK.eas]}`+(note?' | note: '+note:'');
+ $$('#rgrid .dc').forEach(c=>{const on=PK.R.includes(c.dataset.id);c.classList.toggle('picked',on);$('input',c).checked=on});
+ $$('#fgrid .dc').forEach(c=>{const on=PK.F===c.dataset.id;c.classList.toggle('picked',on);$('input',c).checked=on});
+ $$('#mcards .mcard').forEach(b=>b.classList.toggle('on',(PK.M||'M1')===b.dataset.id));
+ $$('#pdir button').forEach(b=>b.classList.toggle('on',+b.dataset.v===PK.dir));$('#dur').value=PK.dur;$('#durv').textContent=PK.dur+' ms';$('#eas').value=PK.eas}
+$('#pnote').oninput=()=>sync();
+$('#rec').onclick=()=>{Object.assign(PK,JSON.parse(JSON.stringify(REC)));R2.dir=PK.dir;save();for(const c of CARDS)if(c.k==='dipole')c.d={};hdBuild();replay()};
+$('#copy').onclick=()=>{const t=$('#pline').textContent,m=$('#copied');const ok=()=>{m.textContent='Copied';setTimeout(()=>m.textContent='',1600)};
+ function sel(){const r=document.createRange();r.selectNodeContents($('#pline'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(e){}}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{sel();ok()});else{sel();ok()}};
+
+fillDraw();setView(VIEW);setTheme(store.get('theme',''));sync();hdBuild();
+setTimeout(replay,400);kick();
+</script>

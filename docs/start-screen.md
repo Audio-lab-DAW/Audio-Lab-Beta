@@ -74,4 +74,37 @@ Picks line format: `Start screen picks: W1 T1 D1 P1` (★ = W1 T1 D1 P1).
 3. **The hand-over animation:** 3 to 4 variants of the one fluid motion (drawing up, logo and text to the left, recent projects up from the bottom), each with a duration slider (for example 300 ms to 2 s) and an easing choice, played on a mock at the user's size, with a Replay button; the picks bar gives one line such as 'Start screen round 2: R2 R5 R7 | dipole F2 | motion M3 900 ms'.
 Then WS-1 builds W1 T1 D3 P1 with the round 2 picks.
 
-**task WS-0b step claimed** (28 November 2026, 00:57 Brussels): the round 2 pick page (drawings R, dipole flow F, hand-over motion M).
+## Round 2 (task WS-0b): drawings, the dipole's particles, the hand-over
+
+Pick page: **Start screen round 2**, https://claude.ai/artifact/Hu3XawkiQC1jAwXZCe2e7r (source `tools/design-lab/ws/start2.src.html` and `r2draw.js`, built by `build2.py` into `start2.html`; screenshots and console check by `shot2.py`). No `index.html` change. `r2draw.js` holds every new drawing in the splash's own function shape `fn(c,w,h,t,P,d)` with a palette like `SPLBG.PAL`, so WS-1 can add them beside `SPLBG` without changing it.
+
+### R, new drawings for the random set (S1 dipole and S2 moons are already in)
+Each is real physics or maths, drawn in the splash's look (hairlines, amber dots and mono labels, one palette each), live at Ambient motion only, one still ink picture in Light mode, still with Reduce motion. Shown on the page in the splash card and in the start screen's 172 point band (each drawing has its own band scale so its figure fits).
+- **R1 ★ Chladni plate:** nodal lines of a free square plate, cos(nπx)cos(mπy) ∓ cos(mπx)cos(nπy) (Ritz; [Paul Bourke](https://paulbourke.net/geometry/chladni/), [Wolfram](https://resources.wolframcloud.com/FunctionRepository/resources/ChladniFigure)); 1300 sand grains are thrown where the plate shakes and settle on the still lines; a new mode every 12 s and the sand walks to it.
+- **R2 ★ Pendulum wave:** 15 pendulums, 51 to 65 swings in 60 s, seen from above ([Harvard Natural Sciences Lecture Demonstrations](https://sciencedemonstrations.fas.harvard.edu/presentations/pendulum-waves)).
+- **R3 Two magnets:** field lines of two parallel dipoles, stepped along B = Σ(3(m·r̂)r̂ − m)/r³, dots flowing from each north pole to a south pole.
+- **R4 Wave interference:** two sources in step, each falling off as 1/√r; the still lines are hyperbolas (rendered at 200 points wide and scaled, like the splash's spectrogram).
+- **R5 Phase portrait:** the Van der Pol oscillator (μ 1.2), 34 tracers ending on the limit cycle, a faint direction field ([Lebl and Bazett](https://web.uvic.ca/~tbazett/diffyqs/limitcycles_section.html)).
+- **R6 ★ Lissajous figure:** an oscilloscope with two tones in a simple ratio (3:2, 5:4, 1:2, 3:4, 5:3, 2:3), the phase drifting; a new ratio every 16 s.
+- **R7 TRAPPIST-1:** seven planets, orbits to scale, periods 1.51 to 18.77 days in the 8:5 5:3 3:2 3:2 4:3 3:2 chain ([Tamayo et al. 2017](https://ar5iv.arxiv.org/html/1704.02957)); close to the moons.
+- **R8 ★ Fourier series:** six harmonics as turning circles building a square, a sawtooth or a triangle wave, a new wave every 14 s.
+
+### F, the dipole's particles
+Research. The splash's dipole draws field lines r = L sin²θ; the field's strength along them is ∝ √(1 + 3cos²θ)/r³, 2 at the pole's surface and 1 at the equator's ([LibreTexts](https://phys.libretexts.org/Bookshelves/Electricity_and_Magnetism/Electricity_and_Magnetism_(Tatum)/03%3A_Dipole_and_Quadrupole_Moments/3.10%3A_A_Geophysical_Example), [NASA CCMC](https://webarchive.library.unt.edu/web/20201218011644/https://ccmc.gsfc.nasa.gov/RoR_WWW/presentations/Dipole.pdf)). Today's dots copy trapped charges in a radiation belt: a charge spirals round its line and turns back at a mirror point where B = B_eq / sin²(pitch angle), with v_parallel = v √(1 − B/B_mirror) ([Fitzpatrick, magnetic mirrors](https://farside.ph.utexas.edu/teaching/plasma/Plasma/node23.html), [Marsch](https://www2.mps.mpg.de/solar-system-school/lectures/space_plasma_marsch/Lecture_3.pdf)); without the spiral, in a flat drawing, it reads as sliding to and fro. What the user describes is the field's direction: out of one pole, along the line, in at the other, closing through the magnet. Inside a uniformly magnetised ball the field is uniform, so each line closes as a straight chord ([Fitzpatrick, Electromagnetism](https://farside.ph.utexas.edu/teaching/jk1/Electromagnetism/node61.html), [Goshen College](https://www.goshen.edu/physix/303/gco/6.3.Magnetizedsphere.pdf)). Jupiter's dipole points opposite to Earth's, so at Jupiter (the splash's 10 degree tilt) the field leaves the north half ([Magnetosphere of Jupiter](https://wikiwand.com/EN/Magnetosphere_of_Jupiter), [NASA](https://pwg.gsfc.nasa.gov/stargaze/planetmg.htm)); the page has a Jupiter / Earth switch.
+- **F0 Today:** the bounce as it ships.
+- **F1 ★ Field flow, closed loops:** out of the north pole, along the line, in at the south pole and up through the ball (faint chords, dim dots, seen through it); speed V·(B/2)^0.2 (faster near the ball; the true ratio would freeze the outer lines), dots evenly spaced in travel time (1.1 s), so they spread near the ball and close up far out, as a real flow does.
+- **F2 Field flow, even:** the same direction at one speed with even gaps, surface to surface, nothing inside the ball.
+- **F3 Trapped particles, done properly:** ten charges on five lines with equatorial pitch angles 32 to 62 degrees, mirror points solved from the field and marked, spiral (gyration radius ∝ 1/√B) and the right slowing near the mirror points.
+
+### M, the hand-over as one motion (the user's description)
+Drawn at the user's window, 1254 x 651 points: the splash (577 x 427) shows its drawing for 1.2 s with the bar filling, then the card grows into W1's card (1020 x 607), the drawing rises into the 172 point band (one canvas, the drawing's frame moved and scaled, clipped to the band), the name glides from the splash's centre to the band's lower left with "Digital audio workstation · v0.300" rising under it, the loading bar becomes the band's lower edge, and the recent projects and the tiles rise from below. A length slider (300 to 2000 ms), four easings (smooth out cubic-bezier(.2,.7,.2,1), in-out (.65,0,.35,1), emphasised (.2,0,0,1), a gentle spring), Replay, a scrubber, Dark and Light (Light ends on the still ink picture).
+- **M1 ★ Together** (900 ms, smooth out): all at once, rows 220 ms in, 30 ms apart.
+- **M2 Three beats:** the drawing rises, then the name moves, then the rows.
+- **M3 Full window:** the card grows to the whole window, band edge to edge.
+- **M4 Sheet from below:** the drawing fills the card; the lower half comes up as one sheet carrying the lists.
+In the app: Reduce motion makes it a 120 ms fade; Enter works from the first frame (it opens the last project at once); no per-frame work once it ends except the band's ambient drawing (Motion Ambient, Dark, window shown).
+
+Round 2 picks line format: `Start screen round 2: R1 R2 R6 R8 | dipole F1 Jupiter | motion M1 900 ms smooth` (★).
+
+### Round 2 picks
+(waiting for the user's line; WS-1 builds W1 T1 D3 P1 with these picks)

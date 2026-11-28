@@ -6402,3 +6402,14 @@ The user (27 Nov, 23:04 Brussels), on "AudioLab app icon, round 4": "I like J3, 
 - Still open from the first run: `taskIN_L.py` flaky (lane E, since v0.259), `taskFT_C2a.py` flaky (lane C: it counts the glass copy timers `elSoon`/`gbCopy`, not the Push's own). Either one can fail a full gate run.
 - v0.270 (589fbf9, the build task IC4 put inside desktop release v0.270): it does not pass the full gate reliably. `taskIN_L.py` failed 1 run in 3 ("pop-up: the same against EBU R128 (-23) is 5 LU over: the line is red") and `taskFT_C2a.py` failed 2 in 3 ("nothing runs while the Push is still", 5 timers, all glass copies). `taskXT_DL2.py` did not exist yet. Those are the only problems I know of there. They are test flakes rather than user-visible bugs. v0.270 has the HF1 MIDI loop fix (v0.261). Lint, smoke and export were not re-run on it.
 - `desktop/app-version.json` and index.html untouched.
+
+## 28 November 2026, task WS-0b (lane Q): start screen round 2 pick page, no index.html change
+> The user's picks W1 T1 D3 P1, the dipole and the moons at random, "more drawings ... so we have some diversity", the dipole's "yellow particles need to come out of the center of the Earth ... and then they need to follow the line back in the correct manner", and the hand-over "as one single element".
+
+- Pick page "Start screen round 2": https://claude.ai/artifact/Hu3XawkiQC1jAwXZCe2e7r, source `tools/design-lab/ws/start2.src.html` and `tools/design-lab/ws/r2draw.js` (built by `build2.py`; SPLBG copied unchanged).
+- R: eight new live drawings in SPLBG's function shape and palette shape (Chladni plate, pendulum wave, two magnets, two-source interference, Van der Pol phase portrait, Lissajous on a scope, TRAPPIST-1, Fourier series), shown in the splash card and in the start screen's band, Light as still ink. ★ R1 R2 R6 R8.
+- F: research with sources in `docs/start-screen.md` (dipole field and strength, magnetic mirrors, uniformly magnetised sphere, Jupiter's polarity). F0 today's bounce, F1 ★ field flow out of the north pole, along the line, in at the south and through the ball (speed by field strength, compressed), F2 even flow, F3 trapped particles with spiral and solved mirror points. Jupiter / Earth direction switch.
+- M: the hand-over at 1254 x 651 points: card grows, drawing rises into the band, the name moves left with "Digital audio workstation" under it, the bar becomes the band's edge, rows rise. M1 together ★, M2 three beats, M3 full window, M4 sheet from below; length 300 to 2000 ms (★ 900), four easings (★ smooth out), scrubber, Replay, Dark and Light.
+- Checked headless (`shot2.py`): every section dark and Light, M1 to M4 at 0, 25, 50, 75 and 100 %, no console errors.
+- WS-1 waits for the round 2 line (the end of `docs/start-screen.md`).
+
