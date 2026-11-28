@@ -139,3 +139,4 @@ macros (DL8), toolbars, scripts (DL13) and the Assistant (DL15); docs/extensions
 | `ni.kickBass` | Kick and bass lab (is the kick in tune with the bass?) |  |  | 0.273 |
 | `ni.energyArc` | Energy arc on / off (loudness, tracks playing and brightness over the song) |  |  | 0.273 |
 | `ni.levelJourney` | Level journey of the selected track (level after each device) (lane D, task NI-7; listed by XT-DL12) |  |  | 0.279 |
+| `ni.monoLoss` | Mono loss map (what each track loses in mono, band by band) (lane D, task NI-8; listed by the scheduling chat after RG's report) |  |  | 0.292 |
