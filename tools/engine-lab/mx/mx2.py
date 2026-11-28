@@ -22,12 +22,12 @@ def func(head, nxt):
     b = s.index(nxt, a); return a, b
 
 # 1. pdcMap: one plan for the whole graph (mxSolve); same signature plus lane J's live flag, same result for tracks
-a, b = func('function pdcMap(sr){', '\n/* Level meter colours')
+a, b = func('function pdcMap(sr,live){' if 'function pdcMap(sr,live){' in s else 'function pdcMap(sr){', '\n/* Level meter colours')  # lane J's LT-2 (v0.305) added the live flag
 old = s[a:b]; assert old.count('function ') == 1 and 'grpAnc(t)' in old, old[:200]
 s = s[:a] + "function pdcMap(sr,live){const M=new Map();M.target=0;const X=mxSolve(sr,!!live);if(live)MXSOL=X;M.mx=X;if(UI.pdc===false)return M;M.target=X.T;for(const[id,d] of X.d)if(d>0)M.set(id,d);return M}" + s[b:]
 
 # 2. syncGraph: the live plan, the input delay (head) and the fading track delay
-rep("const solo=S.tracks.some(t=>t.solo),PDC=pdcMap(ctx.sampleRate);CPU.pdc=PDC.target/ctx.sampleRate;",
+rep("const solo=S.tracks.some(t=>t.solo),PDC=pdcMap(ctx.sampleRate%s);CPU.pdc=PDC.target/ctx.sampleRate;" % (',1' if 'PDC=pdcMap(ctx.sampleRate,1)' in s else ''),
     "const solo=S.tracks.some(t=>t.solo),PDC=pdcMap(ctx.sampleRate,true);CPU.pdc=PDC.target/ctx.sampleRate;")
 rep("    const sig=(t.fxByp?'B|':'')+t.fx.map(f=>f.id+(f.on?'1':'0')).join(',');\n    if(sig!==N.sig){",
     "    try{mxHead(N,t,ctx.sampleRate)}catch(e){console.error('AudioLab delay compensation',e)}\n    const sig=(N.mxh?'H|':'')+(t.fxByp?'B|':'')+t.fx.map(f=>f.id+(f.on?'1':'0')).join(',');\n    if(sig!==N.sig){")
@@ -60,7 +60,10 @@ s = s[:a] + r"""function abxWire(){if(!ctx)return;const K=MXSOL,sr=ctx.sampleRat
    const to=X.mxKE?X.mxKE.g:X.key;if(X.ksrc!==tap){if(X.ksrc){try{X.ksrc.disconnect(to)}catch(e){}}X.ksrc=tap;if(tap)tap.connect(to)}if(X.mxKE)mxDSet(X.mxKE.d,X.mxKE.g,e)}}}""" + s[b:]
 
 # 5. renderMix: the same plan offline (input delays, link delays), automation, merged stops
-rep("await wlLoad(oc);if(S.seed==null)S.seed=", "await wlLoad(oc);mxSuspWrap(oc);if(S.seed==null)S.seed=")
+if "await wlLoad(oc);SIDE_B0=b0;" in s:  # lane D's v0.299 sets SIDE_B0 again after the await
+    rep("await wlLoad(oc);SIDE_B0=b0;", "await wlLoad(oc);mxSuspWrap(oc);SIDE_B0=b0;")
+else:
+    rep("await wlLoad(oc);if(S.seed==null)S.seed=", "await wlLoad(oc);mxSuspWrap(oc);if(S.seed==null)S.seed=")
 rep("const ABK=only||fast?new Set():abxKeys(),ABD=[];", "const ABK=only||fast?new Set():abxKeys(),ABD=[],FXN=new Map(),PX=PDC.mx||null;")
 rep("pn.pan.value=t.pan;let prev=tin;", "pn.pan.value=t.pan;let prev=tin,hin=tin;{const cc=PX?PX.c.get(t.id)||0:0;if(cc>0){const dl=oc.createDelay(1);dl.delayTime.value=cc/sr;hin=oc.createGain();tin.connect(dl);dl.connect(hin);prev=hin}}")
 rep("for(const f of fast?[]:t.fx){if(!f.on)continue;const x=mkFxNode(oc,f.type);x.set(f.p);prev.connect(x.in);prev=x.out;if(f.type==='duck'&&x.key)ABD.push([x,f.p&&f.p.src,t.id])}",
