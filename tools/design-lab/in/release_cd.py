@@ -28,7 +28,7 @@ wr(p, s)
 
 p = 'docs/backlog-log.md'; s = rd(p)
 if 'task IN-C and IN-D, the CPU graph' not in s: s = s.rstrip('\n') + '\n\n' + ENTRY
-else: s = re.sub(r"## 27 November 2026, v[\d.]+: task IN-C and IN-D,", "## 27 November 2026, v%s: task IN-C and IN-D," % V, s)
+else: s = re.sub(r"## 28 November 2026, v[\d.]+: task IN-C and IN-D,", "## 28 November 2026, v%s: task IN-C and IN-D," % V, s)
 wr(p, s)
 
 p = 'docs/design-round-4-instruments.md'; s = rd(p)

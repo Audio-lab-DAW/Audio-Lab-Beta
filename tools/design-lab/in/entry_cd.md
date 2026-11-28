@@ -1,6 +1,6 @@
-## 27 November 2026, v@VER@: task IN-C and IN-D, the CPU graph and the scope preview in devices (lane E, instruments)
+## 28 November 2026, v@VER@: task IN-C and IN-D, the CPU graph and the scope preview in devices (lane E, instruments)
 
-The last step of the implementation order in `docs/design-round-4-instruments.md`: the user's picks **C1** (load against budget) and **D1** (scope preview). Edit script `tools/design-lab/in/in_cd.py` with `in_cd_block.js` (every anchor asserted unique), test `tools/ui-tests/taskIN_CD.py` (27 checks, all pass), cost probe `tools/design-lab/in/dev_cost_cd.py`. Built on v0.294 while the release gate's freeze was on (from 22:26 UTC); released after it lifted.
+The last step of the implementation order in `docs/design-round-4-instruments.md`: the user's picks **C1** (load against budget) and **D1** (scope preview). Edit script `tools/design-lab/in/in_cd.py` with `in_cd_block.js` (every anchor asserted unique), test `tools/ui-tests/taskIN_CD.py` (27 checks, all pass), cost probe `tools/design-lab/in/dev_cost_cd.py`. Built on v0.294 while the release gate's freeze was on (27 Nov from 22:26 UTC, again 28 Nov from 00:02 UTC); re-applied and re-tested on 28 Nov, released after the freeze lifted.
 
 ### Built (block "lane E (task IN-C and IN-D)" before `askChoice`, objects `INC` and `IND`; one CSS line before `.dacv`)
 - **C1 in the top bar's CPU button:** today's filled history of the last 120 frames, now green below the **budget at 75 %** and red only above it, with a thin amber budget tick across the graph. The button's red border and glow for dropouts, late notes and a wrong sample rate stay as they were (`cpuBad`), so a warning is not lost now that the graph is no longer painted red as a whole. The graph is still redrawn only when it changes (the glass top bar rule).
@@ -29,6 +29,9 @@ The last step of the implementation order in `docs/design-round-4-instruments.md
 | playmix (mixer open) | 8.16 (68.8), 9.06 (68.4), 8.23 (74.0), 9.70 (75.6) | 9.95 (81.5), 9.37 (75.6), 9.62 (77.0), 8.62 (72.2) |
 
   In these scenes no Soft Clipper is on screen (the selected track has a Compressor): counted, `IND` ran 0 times and `INC.btn` 18 times in 4 s (0.03 ms each), so the step adds about 0.001 ms a frame there; the spread between runs of the same file is larger than the difference (as in the IN-A entry).
+
+### Fixed with this release (for task RG): the loudness history missed a Reset
+- `INL` (IN-L, v0.259) cleared its history only when the new `LM.hist` was still empty at its 100 ms tick, but the master meter pushes a reading into `LM.hist` every 250 ms; when that push came first, the old history stayed after Reset (about 1 time in 3). That was the gate's `taskIN_L.py` flake (120 or 122 samples left after Reset; cyan left from before the reset in the EBU colour check). Now a new `LM.hist` always clears the history (`tools/design-lab/in/in_l_fix1.py`; `LM.hist` is only reassigned by the two Reset commands). The test now waits for states instead of fixed times (pushed on 28 Nov during the freeze).
 
 ### Found, not changed (for lane L)
 - The Soft Clipper's wet path is not symmetric even below its threshold: a −3 dBFS sine with threshold 0 dB comes out +0.759 and −0.657 (a mean of +0.05), with oversampling on or off; at mix 0 (dry) it is exact. D1 now shows this as it is.

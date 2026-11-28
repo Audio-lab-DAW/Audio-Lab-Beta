@@ -59,18 +59,24 @@ def play(name, wait=1500, fx=None):
     R("UI.limiter=false;routeMaster();stop();pos=0;toggle();0"); pg.wait_for_timeout(wait)
 R("UI.lufsP='spot';0")
 play('Sine', 500)
-R("if(LM.w)LM.w.cmd('reset');LM.tpMax=-90;LM.hist=[];0"); pg.wait_for_timeout(5000)
-L = json.loads(R("JSON.stringify({n:INL.n,S:INL.at(INL.S,INL.n-1,INL.n),M:INL.at(INL.M,INL.n-1,INL.n),LS:LM.S,LM:LM.M,I:LM.I})"))
+# deterministic (RG, 28 Nov): the count is checked against the time that really passed in the page (a fixed wait stretches under load)
+L = pg.evaluate("""()=>new Promise(res=>{const Q=c=>window.AudioLab.run(c);Q("if(LM.w)LM.w.cmd('reset');LM.tpMax=-90;LM.hist=[];INL.ref=LM.hist;INL.n=0;INL.i=0;0");/* the test's own setup reset is complete at once */const t0=performance.now();
+  setTimeout(()=>{const o=JSON.parse(Q("JSON.stringify({n:INL.n,S:INL.at(INL.S,INL.n-1,INL.n),M:INL.at(INL.M,INL.n-1,INL.n),LS:LM.S,LM:LM.M,I:LM.I})"));o.dt=performance.now()-t0;res(o)},5000)})""")
 print('   ', L)
-ck('live: the master history samples LM 10 times a second (about 50 in 5 s after a reset)', 40 <= L['n'] <= 56, L['n'])
+ck('live: the master history samples LM 10 times a second (about 50 in 5 s after a reset)', 0.6 * L['dt'] / 100 <= L['n'] <= L['dt'] / 100 + 2, (L['n'], round(L['dt'])))
 ck('live: the newest samples are the readings (a -18 dBFS sine in both channels: about -18 LUFS)', abs(L['S'] - L['LS']) < 0.3 and abs(L['M'] + 18) < 0.5, L)
-R("lmOpen();0"); pg.wait_for_timeout(700)
+# deterministic (RG, 28 Nov): the pop-up shows 30 s with now at the right; its right-hand strip read below must hold only settled
+# short-term readings (the first 3 s after a reset rise from silence and are under every target, so cyan). Wait for 15 s of history.
+for _ in range(400):
+    if R("INL.n") >= 150: break
+    pg.wait_for_timeout(100)
+R("lmOpen();0"); pg.wait_for_timeout(700); R("inlPop();0")
 P = json.loads(R(r"""(()=>{const cv=document.getElementById('lmC');const g=cv.getContext('2d'),d=Math.min(2,devicePixelRatio||1);const w=cv.width,h=cv.height;let c=0,y=0,r=0;const data=g.getImageData(Math.round(w*.75),0,Math.round(w*.2),h).data;
   for(let i=0;i<data.length;i+=4){const R=data[i],G=data[i+1],B=data[i+2];if(B>180&&G>150&&R<130)c++;if(R>200&&G>160&&B<110)y++;if(R>220&&G<130&&B<130)r++}return JSON.stringify({c,y,r})})()"""))
 ck('pop-up: -18 LUFS against Spotify (-14) is under the band: the line is cyan', P['c'] > 20 and P['r'] < 5, P)
 try: pg.locator('#lufsPop').screenshot(path=os.path.join(OUT, 'inL_popup_spot.png'))
 except Exception as e: print('   (shot)', e)
-R("UI.lufsP='ebu';lmPaint();0"); pg.wait_for_timeout(500)
+R("UI.lufsP='ebu';lmPaint();inlPop();0")
 P2 = json.loads(R(r"""(()=>{const cv=document.getElementById('lmC');const g=cv.getContext('2d'),w=cv.width,h=cv.height;let c=0,r=0;const data=g.getImageData(Math.round(w*.75),0,Math.round(w*.2),h).data;
   for(let i=0;i<data.length;i+=4){const R=data[i],G=data[i+1],B=data[i+2];if(B>180&&G>150&&R<130)c++;if(R>220&&G<130&&B<130)r++}return JSON.stringify({c,r})})()"""))
 ck('pop-up: the same against EBU R128 (-23) is 5 LU over: the line is red', P2['r'] > 20 and P2['c'] < 5, P2)
@@ -85,8 +91,10 @@ ck('pop-up redrawn about 10 times a second (plus lmPaint 4), half at the Light l
 if R("typeof AO==='object'"):
     fz = pg.evaluate("()=>new Promise(r=>{const Q=c=>window.AudioLab.run(c);Q('aoLevel(1);0');setTimeout(()=>{const n0=Q('__pc');setTimeout(()=>{const n1=Q('__pc');Q('aoFront(\\'test\\');0');r(n1-n0)},900)},300)})")
     ck('background freeze (aoLevel 1: the frame gate shut, screen timers off): the pop-up graph is not redrawn', fz == 0, fz)
-R("document.querySelector('#lufsPop [data-lm=\"reset\"]').click();0"); pg.wait_for_timeout(150)
-ck('Reset in the pop-up clears the history', R("INL.n") <= 2, R("INL.n"))
+# deterministic (RG, 28 Nov): wait until the 100 ms history tick has seen the reset, then allow only the samples since the click
+RS = pg.evaluate("""()=>new Promise(res=>{const Q=c=>window.AudioLab.run(c);Q('window.__oh=LM.hist;0');const t0=performance.now();document.querySelector('#lufsPop [data-lm="reset"]').click();
+  const lk=()=>{const seen=Q('LM.hist!==window.__oh&&INL.ref===LM.hist'),dt=performance.now()-t0;if(seen||dt>3000)res({seen,n:Q('INL.n'),dt});else setTimeout(lk,10)};lk()})""")
+ck('Reset in the pop-up clears the history', RS['seen'] and RS['n'] <= RS['dt'] / 100 + 2, RS)
 R("lmClose();__pc=0;0"); pg.wait_for_timeout(1000)
 ck('pop-up closed: its graph is not drawn', R("__pc") == 0, R("__pc"))
 R("inlPop=__op;0")
