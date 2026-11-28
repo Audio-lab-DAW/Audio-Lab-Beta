@@ -141,3 +141,10 @@ This overrides every "old projects must still load / keep their sound / render b
 ## R4 parked by the user (28 November 2026, 14:44 Brussels)
 
 The user will rework the bit-identical export rule (R4) personally later. Until then the gate keeps its current export checks, with R1's new reference numbers after each released sound step. Do not change the export comparison on your own.
+
+## R4 decided by the user (28 November 2026, 14:50 Brussels): bit for bit stays
+
+The user answered three questions (this replaces "R4 parked" above):
+1. **Between versions: bit for bit.** The gate keeps comparing exported test songs bit for bit with the reference. Any difference fails, unless the released step says it changes the sound on purpose (R1); then the gate takes new reference numbers for that step.
+2. **Same song exported twice in the same version: identical.** Two exports in one version must be byte-identical (the deterministic-render check; it catches hidden state, uninitialised buffers and random draws outside SND-R's per-device streams).
+3. **Tolerance about 0.5 dB.** Where a comparison is not bit for bit (a sound step that changes the sound on purpose, and web vs native renders per the 28 Nov device decision), the export must stay within about 0.5 dB in loudness of the previous reference, unless the step says it changes level; bigger jumps fail.
