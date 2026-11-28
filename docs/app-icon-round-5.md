@@ -80,3 +80,14 @@ Regenerate: `node render5.js && python3 shrink.py && python3 picker_data.py && p
 4. **Removed icons** leave `icons.json`'s list, but their pictures stay (or move to a hidden `retired` list the shell still resolves), so a user who has one chosen keeps it in the Dock, taskbar and tab; the stored choice is never reset.
 5. Regenerate `icon.icns`, `icon.ico`, `Assets.car`, `dock-icon.png`, `icon.png` and the favicons on the macOS runner (macos-latest); run the "Mac icon proof" job (Default and Dark both navy) and `tools/ui-tests/taskAH_electron.js`.
 6. One line in `desktop/update-notes.txt`; any `index.html` edit (the browser tab icon) waits while `desktop/release-freeze.json` is on main. Promotion to installed apps goes through the release gate only; the Dock shows the new icon with the next desktop build.
+
+## The user's picks (28 November 2026, 01:13 Brussels)
+
+The user: "I like K5A, but when it comes to the Atom, I forgot to say that I wanted the tapered version ... I don't want the flat version, and maybe you can improve the tapering so it looks like it's in 3D anatomically correct. And then I like M5D. And let's go pick those both."
+
+- **K5a (soft glass) and M5d (field to the edge)** are the two picked designs.
+- **Tapered rings, never flat:** the rings must be tapered like the shipped Ocean Yellow atom (thicker where the ring comes towards you, thinner where it goes away), improved so they read as real 3D: each ring drawn as a tilted circular band seen in perspective (width and brightness from the projection, the far half dimmer and thinner, the part behind the nucleus hidden by it, the near part passing in front), the three rings at consistent tilts like one object. Apply it to K5a, and also give a tapered version of M5d (its orbits) so both can be compared.
+- Not picked yet: which of the two is the main icon (the other goes in the picker), the small versions, and the picker removals: round 5b asks again.
+
+### Next: round 5b (IC7, second run)
+A short pick page: K5a tapered in 3 to 4 taper styles (T1 ...: from today's shipped taper to a full perspective band with occlusion), M5d flat and tapered, both in P2 and P8 at 1024 to 64 with the Dock mock-ups; their zoomed-in small versions (32 px and below) redrawn to match; the main/other choice; and the picker review again. Picks line for example 'Round 5b picks: main K5a-T3 | other M5d-T2 | small KS3 MS1 | remove: ...'.
