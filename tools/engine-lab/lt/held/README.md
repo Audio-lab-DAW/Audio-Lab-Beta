@@ -17,3 +17,5 @@ Fast MIDI notes in the desktop app (L5): `LT-3a_log.md`. The shell's side (`desk
 1. `git pull --rebase`; `python3 tools/engine-lab/lt/lt_3a.py` (asserts its anchors; LT-2 must be in).
 2. `git mv tools/engine-lab/lt/held/taskLT_3a_electron.js tools/ui-tests/`; `node desktop/scripts/sync-app.js`; `xvfb-run -a node tools/ui-tests/taskLT_3a_electron.js` (20 checks; while it sits in held/ pass the desktop folder as the first argument); `taskLT_1.py`, `taskLT_2.py` one at a time; lint; smoke test.
 3. `python3 tools/engine-lab/lt/held/lt3a_release.py <version> <rebased onto>`; `node desktop/scripts/sync-app.js`; commit, push; the project doc; the artifact; the notification.
+
+28 Nov, 12:21 to 12:35 UTC: the freeze lifted for 14 minutes; LT-2 was being smoke-tested (20 minutes) and missed the window before the gate froze main again (12:35:47). Both steps were then tested again on v0.297 (smoke 14 of 14, all four LT tests). At the next lift: rebase, re-run the edit scripts, lint, the step's own test, push LT-2 at once, then LT-3a the same way.

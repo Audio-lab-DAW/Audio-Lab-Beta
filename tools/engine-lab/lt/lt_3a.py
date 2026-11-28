@@ -32,6 +32,12 @@ assert 'task LT-2 (lane J)' in s,'LT-2 first'
 # the worklet bundle: lane J's piece goes first, so it can see the pooled voice engine being registered (empty outside the desktop app's need: it only wraps)
 s=rep(s,"})();\\n'+WLSRC+(typeof VWL==='string'?VWL:'')+'\\n'+(typeof RWL","})();\\n'+(window.LT_WL||'')+WLSRC+(typeof VWL==='string'?VWL:'')+'\\n'+(typeof RWL")
 
+# LT-1's switch between the playing and the mixing buffer restarts the engine; a context closed while its worklet module still loads
+# makes Chromium reject the load ("worklet failed AbortError", seen 2 of 5 runs of taskLT_1.py on v0.297): the switch now waits for the
+# load (at most about 6 s). Found in LT-3a's tests; LT-1 is lane J's own code.
+s=rep(s,"if(held||performance.now()-LT.evT<400){ltBufEval.t=setTimeout(ltBufEval,450);return}",
+  "if(held||performance.now()-LT.evT<400){ltBufEval.t=setTimeout(ltBufEval,450);return}\n if(ctx._wlp&&!ctx._wl&&(LT.wlW=(LT.wlW||0)+1)<20){ltBufEval.t=setTimeout(ltBufEval,300);return}LT.wlW=0;")
+
 JS=r"""/* ===== lane J, task LT-3a (lane J): fast MIDI notes in the desktop app (L5). docs/latency-build.md =====
    A note from a MIDI keyboard went Web MIDI, controller layer, noteOn, then a message to the instrument's worklet: all on this page's main
    thread, so a busy moment (drawing, a long task, a project loading) held the note back. In the desktop app the shell now reads notes in a
