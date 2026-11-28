@@ -23,6 +23,8 @@ Step 5 of the lane order (picks `... TM1 TC1 TS1 ...`): the meter **TM1**, the C
 
   v0.277's first play run ran while Electron was being downloaded (machine busy); the second is the fair one. Within this machine's noise; the app's own time per frame while playing 3.88 against 4.11 and 4.24 ms.
 
+- **Re-check (28 Nov, 09:20 to 09:50 UTC, held by the gate's freeze of 09:11:57)**: the edit script re-applied cleanly on v0.294; `taskDS_T2.py` 23/23, `taskMD1.py` 33/33, `taskIN_M.py` 26/26 (one earlier run missed its live 0.75 dB tap check once, a timing check; it also passes on v0.294 itself), lint clean (2,358 top-level functions, no duplicates), start-up smoke in Electron at 20 s clean for real, none, iac-push, push1-loop-on; Fractals levels the same four numbers as above. Frame time on v0.294 against v{V}, alternating (main ms per frame): idle 9.48 / 8.17 and 11.42 / 8.31, play 21.93 / 20.84 and 24.28 / 22.71.
+
 ### Notes
 - The "32-bit float" is the format the mix is computed in. The native engine (task NB) may send another format to the device; when it reports one, the status line can show it through `DS_HOOKS.status` or a small change here.
 
